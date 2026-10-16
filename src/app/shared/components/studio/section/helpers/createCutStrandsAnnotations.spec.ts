@@ -7,16 +7,10 @@
 import { describe, it, expect } from 'vitest';
 import type * as Plotly from 'plotly.js-dist-min';
 import { TranslocoService } from '@jsverse/transloco';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { createCutStrandsAnnotations, createCutStrandsShapes } from './createCutStrandsAnnotations';
-import {
-  CUT_STRANDS_COLOR,
-  CUT_STRANDS_DASH_GAP,
-  CUT_STRANDS_DASH_LENGTH,
-  CUT_STRANDS_ICON,
-  CUT_STRANDS_LINE_LENGTH,
-  CUT_STRANDS_OFFSET_Y
-} from './createCutStrandsAnnotations.constantes';
+import { getCutStrandsLineLength } from './createCutStrandsAnnotations.constantes';
 import { CreatePlotParams } from './createPlot';
 
 type Annotation = Partial<Plotly.Annotations> & { z?: number; hovertext?: string; data?: { type: string } };
@@ -209,14 +203,14 @@ describe('createCutStrandsAnnotations', () => {
   });
 
   describe('icon', () => {
-    it('should sit CUT_STRANDS_OFFSET_Y pixels above its anchor, in the marking color', () => {
+    it('should sit offsetY pixels above its anchor, in the marking color', () => {
       const icon = iconOf(createCutStrandsAnnotations(makePlotParams()) as Annotation[]);
 
       expect(icon.showarrow).toBe(false);
-      expect(icon.yshift).toBe(CUT_STRANDS_OFFSET_Y);
-      expect(icon.text).toBe(CUT_STRANDS_ICON);
-      expect(icon.bordercolor).toBe(CUT_STRANDS_COLOR);
-      expect(icon.font?.color).toBe(CUT_STRANDS_COLOR);
+      expect(icon.yshift).toBe(PlotlyDrawings.cutStrands.offsetY);
+      expect(icon.text).toBe(PlotlyDrawings.cutStrands.icon);
+      expect(icon.bordercolor).toBe(PlotlyDrawings.cutStrands.unselected.color);
+      expect(icon.font?.color).toBe(PlotlyDrawings.cutStrands.unselected.color);
     });
 
     it('should capture the click that opens the RRTS tool, whatever the hover label', () => {
@@ -225,15 +219,15 @@ describe('createCutStrandsAnnotations', () => {
       expect(icon.captureevents).toBe(true);
     });
 
-    it('should use the primary-600 color', () => {
-      expect(CUT_STRANDS_COLOR).toBe('#7D5A9F');
-    });
-
-    it('should show "Cut strands" on hover', () => {
+    it('should show "Cut strands" on hover, in the tooltip colors', () => {
       const icon = iconOf(createCutStrandsAnnotations(makePlotParams()) as Annotation[]);
 
       expect(icon.hovertext).toBe('Cut strands');
-      expect(icon.hoverlabel?.bgcolor).toBe(CUT_STRANDS_COLOR);
+      expect(icon.hoverlabel).toEqual({
+        bgcolor: PlotlyDrawings.cutStrands.tooltipText.backgroundColor,
+        bordercolor: PlotlyDrawings.cutStrands.tooltipText.backgroundColor,
+        font: { color: PlotlyDrawings.cutStrands.tooltipText.textColor }
+      });
     });
 
     it('should carry the payload that opens the RRTS tool when clicked', () => {
@@ -260,7 +254,7 @@ describe('createCutStrandsAnnotations', () => {
       dashes.forEach((dash) => {
         expect(dash.showarrow).toBe(true);
         expect(dash.arrowhead).toBe(0);
-        expect(dash.arrowcolor).toBe(CUT_STRANDS_COLOR);
+        expect(dash.arrowcolor).toBe(PlotlyDrawings.cutStrands.unselected.color);
         expect(dash.text).toBe('');
         expect(dash.captureevents).toBe(false);
       });
@@ -270,16 +264,15 @@ describe('createCutStrandsAnnotations', () => {
       const dashes = dashesOf(createCutStrandsAnnotations(makePlotParams()) as Annotation[]);
 
       expect(dashes[0].standoff).toBe(0);
-      expect(Math.max(...dashes.map((dash) => -dash.ay!))).toBe(CUT_STRANDS_LINE_LENGTH);
-      expect(CUT_STRANDS_LINE_LENGTH).toBeLessThan(CUT_STRANDS_OFFSET_Y);
+      expect(Math.max(...dashes.map((dash) => -dash.ay!))).toBe(getCutStrandsLineLength('3d'));
     });
 
     it('should draw dashes of the same length, spaced by the same gap', () => {
       const dashes = dashesOf(createCutStrandsAnnotations(makePlotParams()) as Annotation[]);
 
       dashes.slice(0, -1).forEach((dash, i) => {
-        expect(-dash.ay! - dash.standoff!).toBe(CUT_STRANDS_DASH_LENGTH);
-        expect(dashes[i + 1].standoff! - -dash.ay!).toBe(CUT_STRANDS_DASH_GAP);
+        expect(-dash.ay! - dash.standoff!).toBe(PlotlyDrawings.cutStrands.dashLength);
+        expect(dashes[i + 1].standoff! - -dash.ay!).toBe(PlotlyDrawings.cutStrands.dashGap);
       });
     });
 
@@ -288,7 +281,7 @@ describe('createCutStrandsAnnotations', () => {
       const last = dashes.at(-1)!;
 
       expect(-last.ay! - last.standoff!).toBeGreaterThan(0);
-      expect(-last.ay! - last.standoff!).toBeLessThanOrEqual(CUT_STRANDS_DASH_LENGTH);
+      expect(-last.ay! - last.standoff!).toBeLessThanOrEqual(PlotlyDrawings.cutStrands.dashLength);
     });
 
     it('should not react to clicks', () => {
@@ -315,7 +308,7 @@ describe('createCutStrandsAnnotations', () => {
       const annotations = createCutStrandsAnnotations(params2d()) as Annotation[];
 
       expect(annotations).toHaveLength(1);
-      expect(annotations[0].text).toBe(CUT_STRANDS_ICON);
+      expect(annotations[0].text).toBe(PlotlyDrawings.cutStrands.icon);
     });
 
     it('should be a single dashed shape in the marking color', () => {
@@ -324,9 +317,9 @@ describe('createCutStrandsAnnotations', () => {
       expect(shapes).toHaveLength(1);
       expect(shapes[0].type).toBe('line');
       expect(shapes[0].line).toEqual({
-        color: CUT_STRANDS_COLOR,
+        color: PlotlyDrawings.cutStrands.unselected.color,
         width: 1,
-        dash: `${CUT_STRANDS_DASH_LENGTH}px,${CUT_STRANDS_DASH_GAP}px`
+        dash: `${PlotlyDrawings.cutStrands.dashLength}px,${PlotlyDrawings.cutStrands.dashGap}px`
       });
     });
 
@@ -344,7 +337,7 @@ describe('createCutStrandsAnnotations', () => {
         x0: 0,
         x1: 0,
         y0: 0,
-        y1: CUT_STRANDS_LINE_LENGTH
+        y1: getCutStrandsLineLength('2d')
       });
     });
 
@@ -360,5 +353,17 @@ describe('createCutStrandsAnnotations', () => {
     ])('should not be drawn when %s', (_, overrides) => {
       expect(createCutStrandsShapes(params2d(overrides))).toEqual([]);
     });
+  });
+});
+
+describe('getCutStrandsLineLength', () => {
+  // The icon box is centered offsetY px above the anchor; it wraps the glyph (about iconSize tall), its padding and
+  // its 1 px border
+  it.each(['2d', '3d'] as const)('should stop the %s line at most 1 px below the icon box', (view) => {
+    const { offsetY, iconSize, borderPad } = PlotlyDrawings.cutStrands;
+    const boxBottom = offsetY - (iconSize[view] / 2 + borderPad[view] + 1);
+
+    expect(getCutStrandsLineLength(view)).toBeLessThan(boxBottom);
+    expect(getCutStrandsLineLength(view)).toBeGreaterThanOrEqual(boxBottom - 1);
   });
 });

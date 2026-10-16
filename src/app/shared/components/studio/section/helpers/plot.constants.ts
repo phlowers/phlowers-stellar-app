@@ -5,28 +5,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-/**
- * Color constants for plot traces
- */
-export const SPAN_COLOR = 'dodgerblue';
-export const SPAN_COLOR_RGB = '30,144,255'; // RGB values for dodgerblue
-export const SHADOW_OPACITY = 0.3;
-
-/**
- * Returns the shadow color.
- * For 2D: rgba() with opacity.
- * For 3D: base color (opacity is applied at trace level for scatter3d).
- */
-export const getShadowColor = (view: '2d' | '3d'): string => {
-  return view === '3d' ? SPAN_COLOR : `rgba(${SPAN_COLOR_RGB},${SHADOW_OPACITY})`;
-};
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
 /** Debounce delay in ms for studio plot refresh operations. */
 export const STUDIO_PLOT_DEBOUNCE_DELAY = 300;
 
 /** Shared Plotly axis background configuration used across all plot views. */
 export const PLOT_AXIS_CONFIG = {
-  backgroundcolor: 'gainsboro',
-  gridcolor: 'dimgray',
+  backgroundcolor: PlotlyDrawings.plot.axisBackground,
+  gridcolor: PlotlyDrawings.plot.axisGrid,
   showbackground: true
 };

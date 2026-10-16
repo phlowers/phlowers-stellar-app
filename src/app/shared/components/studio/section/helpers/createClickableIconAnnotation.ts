@@ -1,4 +1,5 @@
 import * as Plotly from 'plotly.js-dist-min';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { ClickableIconAnnotationParams } from './createClickableIconAnnotation.interfaces';
 
 /**
@@ -33,13 +34,13 @@ export const buildClickableIconAnnotation = (params: ClickableIconAnnotationPara
           yshift: params.yShift // icon position — vertical pixel shift from the anchor (positive = above)
         }
       : {
-          ax: params.arrowXOffset ?? 0, // icon position — horizontal pixel offset from tip
+          ax: 0, // icon position — straight above the tip
           ay: params.arrowYOffset, // icon position — vertical pixel offset from tip (negative = above)
           showarrow: true,
-          arrowhead: 0,
-          startarrowhead: 6,
+          arrowhead: PlotlyDrawings.clickableIconAnnotation.arrowHead,
           arrowcolor: params.color,
-          arrowwidth: 1
+          // Explicit: Plotly defaults it to twice the border width
+          arrowwidth: params.arrowWidth
         }),
     text: params.icon,
     // Explicit: by default, Plotly only captures the events of an annotation that has a hover label
@@ -47,18 +48,17 @@ export const buildClickableIconAnnotation = (params: ClickableIconAnnotationPara
     ...(params.hover && {
       hovertext: params.hover.text,
       hoverlabel: {
-        bgcolor: params.color,
-        bordercolor: params.color,
+        bgcolor: params.hover.backgroundColor,
+        bordercolor: params.hover.backgroundColor,
         font: { color: params.hover.textColor }
       }
     }),
     bordercolor: params.color,
-    borderpad: params.borderPad ?? 6,
-    bgcolor: 'rgba(0,0,0,0)',
+    borderpad: params.borderPad,
     font: {
-      family: 'FontAwesome',
+      family: PlotlyDrawings.clickableIconAnnotation.fontFamily,
       color: params.color,
-      size: params.iconSize ?? 8
+      size: params.iconSize
     },
     data: params.data
   }) as unknown as Partial<Plotly.Annotations>;

@@ -8,19 +8,7 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Floor } from '@shared/domain/models/floor.model';
 import { Support } from '@shared/domain/models/support.model';
 import { Side, View } from '@shared/types/plot.types';
-import {
-  FLOOR_COLOR,
-  FLOOR_LABEL_FONT_SIZE,
-  FLOOR_LABEL_Y_SHIFT,
-  FLOOR_LINE_WIDTH_2D,
-  FLOOR_LINE_WIDTH_3D,
-  FLOOR_POINT_FONT_SIZE,
-  FLOOR_POINT_SYMBOL,
-  FLOOR_RIBBON_HALF_WIDTH,
-  FLOOR_RIBBON_OPACITY,
-  FLOOR_SELECTED_COLOR,
-  FLOOR_SELECTED_SYMBOL
-} from './createFloorTraces.constantes';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import type { FloorAnnotationData } from './createFloorTraces.interfaces';
 import { DataObject } from './createPlotDataObject';
 import { Coord3 } from './distance.types';
@@ -98,7 +86,7 @@ const createFloorLineTrace = (points: Coord3[], view: View, side: Side): DataObj
     z: is3d ? mapped.map((m) => m.z) : undefined,
     type: is3d ? 'scatter3d' : 'scatter',
     mode: 'lines',
-    line: { color: FLOOR_COLOR, width: is3d ? FLOOR_LINE_WIDTH_3D : FLOOR_LINE_WIDTH_2D },
+    line: { color: PlotlyDrawings.floor.line.color, width: PlotlyDrawings.floor.line.width[view] },
     hoverinfo: 'skip',
     showlegend: false,
     name: 'floor',
@@ -126,8 +114,8 @@ const createFloorRibbonTrace = (points: Coord3[], view: View): DataObject | null
   // Degenerate (all points stacked vertically): any horizontal direction works, keep Y.
   const [offX, offY] =
     len === 0
-      ? [0, FLOOR_RIBBON_HALF_WIDTH]
-      : [(-dy / len) * FLOOR_RIBBON_HALF_WIDTH, (dx / len) * FLOOR_RIBBON_HALF_WIDTH];
+      ? [0, PlotlyDrawings.floor.ribbon.halfWidth]
+      : [(-dy / len) * PlotlyDrawings.floor.ribbon.halfWidth, (dx / len) * PlotlyDrawings.floor.ribbon.halfWidth];
 
   const xs: number[] = [];
   const ys: number[] = [];
@@ -160,8 +148,8 @@ const createFloorRibbonTrace = (points: Coord3[], view: View): DataObject | null
     i: iIdx,
     j: jIdx,
     k: kIdx,
-    color: FLOOR_COLOR,
-    opacity: FLOOR_RIBBON_OPACITY,
+    color: PlotlyDrawings.floor.ribbon.color,
+    opacity: PlotlyDrawings.floor.ribbon.opacity,
     hoverinfo: 'skip',
     showlegend: false,
     name: 'floor-ribbon',
@@ -171,7 +159,7 @@ const createFloorRibbonTrace = (points: Coord3[], view: View): DataObject | null
 
 /**
  * Builds Plotly traces for every floor whose span is inside the visible support window.
- * Each floor renders as a `#f6ab4d` line linking its points (like a cable), plus a 3D ribbon
+ * Each floor renders as a line in the floor color linking its points (like a cable), plus a 3D ribbon
  * for depth. Neither is interactive: the points themselves come from {@link createFloorAnnotations}.
  */
 export const createFloorTraces = (params: CreateFloorTracesParams): DataObject[] =>
@@ -181,11 +169,17 @@ export const createFloorTraces = (params: CreateFloorTracesParams): DataObject[]
     return ribbon ? [line, ribbon] : [line];
   });
 
+const getPointLook = (isFloorSelected: boolean, isActive: boolean) => {
+  if (isActive) return PlotlyDrawings.floor.selected;
+  return isFloorSelected ? PlotlyDrawings.floor.inactivePoint : PlotlyDrawings.floor.unselected;
+};
+
 /**
  * Creates the clickable floor point annotations, the way obstacle points are drawn.
  * Annotations are SVG laid over the plot, so in 3D they stay clickable (with a pointer cursor)
  * even behind the floor ribbon, which a WebGL marker cannot: the ribbon occludes it in the pick buffer.
- * The point active in the floor form is a red diamond with its name shown above it.
+ * The point active in the floor form is drawn in the `selected` look, with its name shown above it; the other
+ * points of that floor in the `inactivePoint` look, and the points of the other floors in the `unselected` one.
  * @category Studio
  */
 export const createFloorAnnotations = (params: CreateFloorTracesParams): Partial<Plotly.Annotations>[] => {
@@ -194,7 +188,9 @@ export const createFloorAnnotations = (params: CreateFloorTracesParams): Partial
   return getVisibleFloors(params).flatMap(({ floor, points }) =>
     points.flatMap((point, pointIndex) => {
       const { x, y, z } = mapCoord(point, view, side);
-      const isActive = floor.uuid === selectedFloorUuid && pointIndex === selectedPointIndex;
+      const isFloorSelected = floor.uuid === selectedFloorUuid;
+      const isActive = isFloorSelected && pointIndex === selectedPointIndex;
+      const look = getPointLook(isFloorSelected, isActive);
       const name = floorPointName(floor, pointIndex, pointLabel);
       const data: FloorAnnotationData = { type: 'floor', floorUuid: floor.uuid, pointIndex };
       // z and data are non-standard Plotly properties for 3D and click handling
@@ -203,8 +199,8 @@ export const createFloorAnnotations = (params: CreateFloorTracesParams): Partial
         y,
         z,
         showarrow: false,
-        text: isActive ? FLOOR_SELECTED_SYMBOL : FLOOR_POINT_SYMBOL,
-        font: { color: isActive ? FLOOR_SELECTED_COLOR : FLOOR_COLOR, size: FLOOR_POINT_FONT_SIZE },
+        text: look.symbol,
+        font: { color: look.color, size: look.size[view] },
         hovertext: name,
         captureevents: true,
         data
@@ -218,8 +214,8 @@ export const createFloorAnnotations = (params: CreateFloorTracesParams): Partial
         z,
         showarrow: false,
         text: name,
-        yshift: FLOOR_LABEL_Y_SHIFT,
-        font: { color: FLOOR_SELECTED_COLOR, size: FLOOR_LABEL_FONT_SIZE },
+        yshift: PlotlyDrawings.floor.label.yShift[view],
+        font: { color: PlotlyDrawings.floor.selected.color, size: PlotlyDrawings.floor.label.size[view] },
         captureevents: false,
         data
       } as Partial<Plotly.Annotations>;

@@ -10,6 +10,7 @@ import { CreatePlotParams } from './createPlot';
 import { DataObject } from './createPlotDataObject';
 
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
 type ObstacleAnnotation = Partial<Plotly.Annotations> & { z?: number; data?: ObstacleAnnotationData };
 
@@ -168,6 +169,7 @@ describe('createObstaclesAnnotations', () => {
     }) as unknown as DataObject;
 
   const basePlotParams = (overrides: Partial<CreatePlotParams> = {}): CreatePlotParams => ({
+    documentRef: globalThis.document,
     plotId: 'plot-1',
     data: [],
     litData: {} as CreatePlotParams['litData'],
@@ -224,7 +226,7 @@ describe('createObstaclesAnnotations', () => {
     expect(annotations.every((a) => a.x === 4)).toBe(true);
   });
 
-  it('should render all obstacles in black when no obstacle is selected', () => {
+  it('should render all obstacles in the unselected look when no obstacle is selected', () => {
     const obstacle = makeObstacle({ supportUuid: 'sup-1' });
     const params = basePlotParams({
       currentObstacleUuid: null,
@@ -233,11 +235,11 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => a.text === '●') as ObstacleAnnotation;
-    expect(marker.font!.color).toBe('black');
+    const marker = annotations.find((a) => a.text === PlotlyDrawings.obstacle.unselected.symbol) as ObstacleAnnotation;
+    expect(marker.font!.color).toBe(PlotlyDrawings.obstacle.unselected.color);
   });
 
-  it('should show all obstacles and highlight selected in red, others in black', () => {
+  it('should show all obstacles, the selected one in the selected look and the others in the unselected look', () => {
     const obstacleA = makeObstacle({ uuid: 'obs-A', supportUuid: 'sup-1', name: 'A' });
     const obstacleB = makeObstacle({ uuid: 'obs-B', supportUuid: 'sup-1', name: 'B' });
     const params = basePlotParams({
@@ -251,10 +253,14 @@ describe('createObstaclesAnnotations', () => {
     const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
     // 2 obstacles × 1 point × 2 annotations = 4
     expect(annotations).toHaveLength(4);
-    const markerA = annotations.find((a) => a.text === '◆' && a.data?.obstacleUuid === 'obs-A') as ObstacleAnnotation;
-    const markerB = annotations.find((a) => a.text === '●' && a.data?.obstacleUuid === 'obs-B') as ObstacleAnnotation;
-    expect(markerA.font!.color).toBe('red');
-    expect(markerB.font!.color).toBe('black');
+    const markerA = annotations.find(
+      (a) => a.text === PlotlyDrawings.obstacle.selected.symbol && a.data?.obstacleUuid === 'obs-A'
+    ) as ObstacleAnnotation;
+    const markerB = annotations.find(
+      (a) => a.text === PlotlyDrawings.obstacle.unselected.symbol && a.data?.obstacleUuid === 'obs-B'
+    ) as ObstacleAnnotation;
+    expect(markerA.font!.color).toBe(PlotlyDrawings.obstacle.selected.color);
+    expect(markerB.font!.color).toBe(PlotlyDrawings.obstacle.unselected.color);
   });
 
   it('should return empty array when obstacle support is outside visible span', () => {
@@ -288,9 +294,9 @@ describe('createObstaclesAnnotations', () => {
     // Only obs-visible is within [startSupport, endSupport]: 1 obstacle × 1 point × 2 annotations = 2
     expect(annotations).toHaveLength(2);
     const markerVisible = annotations.find(
-      (a) => a.text === '◆' && a.data?.obstacleUuid === 'obs-visible'
+      (a) => a.text === PlotlyDrawings.obstacle.selected.symbol && a.data?.obstacleUuid === 'obs-visible'
     ) as ObstacleAnnotation;
-    expect(markerVisible.font!.color).toBe('red');
+    expect(markerVisible.font!.color).toBe(PlotlyDrawings.obstacle.selected.color);
     expect(annotations.some((a) => a.data?.obstacleUuid === 'obs-hidden')).toBe(false);
   });
 
@@ -343,7 +349,9 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     const label = annotations.find((a) => (a as ObstacleAnnotation).text === 'Obstacle 1') as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 11, y: 22, z: 3 });
     expect(label).toMatchObject({ x: 11, y: 22, z: 3, text: 'Obstacle 1' });
@@ -379,7 +387,9 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 11, y: 22, z: 33 });
   });
 
@@ -402,7 +412,7 @@ describe('createObstaclesAnnotations', () => {
     expect(annotations).toHaveLength(2);
   });
 
-  it('should use diamond for non-active selected points and open circle for the active point', () => {
+  it('should use the inactive point look for non-active selected points and the selected look for the active point', () => {
     const obstacle = makeObstacle({
       supportUuid: 'sup-1',
       positions: [
@@ -427,17 +437,19 @@ describe('createObstaclesAnnotations', () => {
     const annotations = createObstaclesAnnotations(params);
     // 2 points => 4 annotations (marker + label for each)
     expect(annotations).toHaveLength(4);
-    // point 0 is non-active — should use open circle
+    // point 0 is non-active — inactive point look
     const marker0 = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '○' && a.data?.obstaclePositionIndex === 0
+      (a: ObstacleAnnotation) =>
+        a.text === PlotlyDrawings.obstacle.inactivePoint.symbol && a.data?.obstaclePositionIndex === 0
     ) as ObstacleAnnotation;
-    // point 1 is the active point — should use diamond
+    // point 1 is the active point — selected look
     const marker1 = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '◆' && a.data?.obstaclePositionIndex === 1
+      (a: ObstacleAnnotation) =>
+        a.text === PlotlyDrawings.obstacle.selected.symbol && a.data?.obstaclePositionIndex === 1
     ) as ObstacleAnnotation;
     // Non-active point uses inactive color, active point uses active color
-    expect(marker0.font!.color).toBe('#922911');
-    expect(marker1.font!.color).toBe('red');
+    expect(marker0.font!.color).toBe(PlotlyDrawings.obstacle.inactivePoint.color);
+    expect(marker1.font!.color).toBe(PlotlyDrawings.obstacle.selected.color);
   });
 
   it('should use z-based y coordinate in 2d face view', () => {
@@ -454,7 +466,9 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 12, y: 3, z: 3 });
   });
 
@@ -474,7 +488,9 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 12, y: 33, z: 33 });
   });
 
@@ -491,7 +507,9 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker.z).toBe(105);
   });
 
@@ -508,7 +526,9 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker.z).toBe(170);
   });
 
@@ -526,7 +546,9 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker.z).toBe(125);
   });
 
@@ -543,7 +565,9 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker.z).toBe(205);
   });
 
@@ -560,7 +584,9 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker.z).toBe(205);
   });
 
@@ -578,7 +604,9 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker.z).toBe(185);
   });
 
@@ -592,7 +620,9 @@ describe('createObstaclesAnnotations', () => {
       litData: makeLitData([{ uuid: 'obs-1', points: [[1, 2, 3]] }])
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     const label = annotations.find((a) => (a as ObstacleAnnotation).text === 'Obstacle 1') as ObstacleAnnotation;
     expect(marker.data).toEqual({ obstacleUuid: 'obs-1', obstaclePositionIndex: 0, type: 'obstacle' });
     expect(label.data).toEqual({ obstacleUuid: 'obs-1', obstaclePositionIndex: 0, type: 'obstacle' });
@@ -610,7 +640,7 @@ describe('createObstaclesAnnotations', () => {
     });
 
     const annotations = createObstaclesAnnotations(params) as ObstacleAnnotation[];
-    const marker = annotations.find((a) => a.text === '◆');
+    const marker = annotations.find((a) => a.text === PlotlyDrawings.obstacle.selected.symbol);
     const label = annotations.find((a) => a.text === 'Obstacle 1');
 
     expect(marker!.captureevents).toBe(true);
@@ -618,7 +648,19 @@ describe('createObstaclesAnnotations', () => {
 
     expect(label!.captureevents).toBe(false);
     expect(label!.hovertext).toBeUndefined();
-    expect(label!.yshift).toBe(12);
+    expect(label!.yshift).toBe(PlotlyDrawings.obstacle.label.yShift['3d']);
+  });
+
+  it.each(['2d', '3d'] as const)('should shift the label above the %s marker by its view offset', (view) => {
+    const params = basePlotParams({
+      obstacles: [makeObstacle({ supportUuid: 'sup-1', positions: [{ x: 1, y: 2, z: 3 }] })],
+      litData: makeLitData([{ uuid: 'obs-1', points: [[11, 22, 3]] }]),
+      view
+    });
+
+    const label = (createObstaclesAnnotations(params) as ObstacleAnnotation[]).find((a) => a.text === 'Obstacle 1');
+
+    expect(label!.yshift).toBe(PlotlyDrawings.obstacle.label.yShift[view]);
   });
 
   it('should use right support altitude for RIGHT-referenced obstacle with relative altitude in 3d', () => {
@@ -636,7 +678,9 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 48, y: 43, z: 85 });
   });
 
@@ -657,7 +701,9 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 48, y: 85, z: 85 });
   });
 
@@ -675,7 +721,9 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker.x).toBe(95);
   });
 
@@ -695,7 +743,9 @@ describe('createObstaclesAnnotations', () => {
       side: 'face'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 52, y: 7, z: 7 });
   });
 
@@ -714,7 +764,9 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 49, z: 83 });
   });
 
@@ -738,7 +790,9 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 195, y: 83, z: 100 });
   });
 
@@ -759,7 +813,9 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 197, y: 41, z: 84 });
   });
 
@@ -795,16 +851,18 @@ describe('createObstaclesAnnotations', () => {
     expect(annotations).toHaveLength(4);
 
     const leftMarker = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '◆' && a.data?.obstacleUuid === 'obs-left'
+      (a: ObstacleAnnotation) =>
+        a.text === PlotlyDrawings.obstacle.selected.symbol && a.data?.obstacleUuid === 'obs-left'
     ) as ObstacleAnnotation;
     const rightMarker = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '●' && a.data?.obstacleUuid === 'obs-right'
+      (a: ObstacleAnnotation) =>
+        a.text === PlotlyDrawings.obstacle.unselected.symbol && a.data?.obstacleUuid === 'obs-right'
     ) as ObstacleAnnotation;
 
     expect(leftMarker).toMatchObject({ x: 5, y: 2, z: 40 });
-    expect(leftMarker.font!.color).toBe('red');
+    expect(leftMarker.font!.color).toBe(PlotlyDrawings.obstacle.selected.color);
     expect(rightMarker).toMatchObject({ x: 95, y: 2, z: 80 });
-    expect(rightMarker.font!.color).toBe('black');
+    expect(rightMarker.font!.color).toBe(PlotlyDrawings.obstacle.unselected.color);
   });
 
   it('should use right support altitude for RIGHT reference with relative altitude in 2d face view', () => {
@@ -824,7 +882,9 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(2);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 52, y: 85, z: 85 });
   });
 
@@ -844,11 +904,13 @@ describe('createObstaclesAnnotations', () => {
       side: 'profile'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker).toMatchObject({ x: 92, y: 15, z: 15 });
   });
 
-  it('should highlight all RIGHT-referenced obstacle points in red when selected', () => {
+  it('should highlight all RIGHT-referenced obstacle points when selected', () => {
     const obstacle = makeObstacle({
       uuid: 'obs-right',
       referenceSupport: ReferenceSupport.RIGHT,
@@ -874,17 +936,19 @@ describe('createObstaclesAnnotations', () => {
     });
     const annotations = createObstaclesAnnotations(params);
     expect(annotations).toHaveLength(4);
-    // point 0 is the active point — diamond
+    // point 0 is the active point — selected look
     const marker0 = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '◆' && a.data?.obstaclePositionIndex === 0
+      (a: ObstacleAnnotation) =>
+        a.text === PlotlyDrawings.obstacle.selected.symbol && a.data?.obstaclePositionIndex === 0
     ) as ObstacleAnnotation;
-    // point 1 is a non-active point of the selected obstacle — open circle
+    // point 1 is a non-active point of the selected obstacle — inactive point look
     const marker1 = annotations.find(
-      (a: ObstacleAnnotation) => a.text === '○' && a.data?.obstaclePositionIndex === 1
+      (a: ObstacleAnnotation) =>
+        a.text === PlotlyDrawings.obstacle.inactivePoint.symbol && a.data?.obstaclePositionIndex === 1
     ) as ObstacleAnnotation;
     // Active point uses active color, non-active uses inactive color
-    expect(marker0.font!.color).toBe('red');
-    expect(marker1.font!.color).toBe('#922911');
+    expect(marker0.font!.color).toBe(PlotlyDrawings.obstacle.selected.color);
+    expect(marker1.font!.color).toBe(PlotlyDrawings.obstacle.inactivePoint.color);
   });
 
   it('should place obstacle at right support when position.x is 0', () => {
@@ -901,7 +965,9 @@ describe('createObstaclesAnnotations', () => {
       view: '3d'
     });
     const annotations = createObstaclesAnnotations(params);
-    const marker = annotations.find((a) => (a as ObstacleAnnotation).text === '◆') as ObstacleAnnotation;
+    const marker = annotations.find(
+      (a) => (a as ObstacleAnnotation).text === PlotlyDrawings.obstacle.selected.symbol
+    ) as ObstacleAnnotation;
     expect(marker.x).toBe(100);
   });
 

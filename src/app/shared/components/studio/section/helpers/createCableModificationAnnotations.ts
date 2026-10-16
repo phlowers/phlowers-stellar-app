@@ -7,14 +7,8 @@
 import * as Plotly from 'plotly.js-dist-min';
 import { CableModification } from '@shared/domain';
 import { CreatePlotParams } from './createPlot';
-import {
-  CABLE_MOD_ARROW_X_OFFSET,
-  CABLE_MOD_ARROW_Y_OFFSET,
-  CABLE_MOD_COLOR,
-  CABLE_MOD_ICON,
-  CABLE_MOD_LABEL_Y_SHIFT,
-  getCableModificationLabel
-} from './createCableModificationAnnotations.constantes';
+import { getCableModificationLabel } from './createCableModificationAnnotations.constantes';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
 import { mapAnchorToAxes, resolveAnchorCoord } from './spanAnchor.helpers';
 
@@ -34,10 +28,12 @@ const buildIconAnnotation = (
     arrowTipX: mapped.x,
     arrowTipY: mapped.y,
     arrowTipZ: mapped.z,
-    icon: CABLE_MOD_ICON,
-    color: CABLE_MOD_COLOR,
-    arrowYOffset: CABLE_MOD_ARROW_Y_OFFSET,
-    arrowXOffset: CABLE_MOD_ARROW_X_OFFSET,
+    icon: PlotlyDrawings.cableModification.icon,
+    iconSize: PlotlyDrawings.cableModification.iconSize[view],
+    borderPad: PlotlyDrawings.cableModification.borderPad[view],
+    arrowWidth: PlotlyDrawings.cableModification.arrowWidth[view],
+    color: PlotlyDrawings.cableModification.unselected.color,
+    arrowYOffset: PlotlyDrawings.cableModification.arrowYOffset,
     data: {
       type: 'cableModification',
       spanUuid: modification.spanUuid,
@@ -68,15 +64,12 @@ const buildLabelAnnotation = (
     // z is a non-standard Plotly annotation property used for 3D rendering
     z: mapped.z,
     showarrow: false,
-    xshift: CABLE_MOD_ARROW_X_OFFSET,
-    yshift: CABLE_MOD_LABEL_Y_SHIFT,
+    yshift: PlotlyDrawings.cableModification.label.yShift,
     text: getCableModificationLabel(modification.modificationType, translocoService),
     captureevents: false,
-    bgcolor: 'rgba(0,0,0,0)',
     font: {
-      family: 'Arial, sans-serif',
-      color: CABLE_MOD_COLOR,
-      size: 11
+      color: PlotlyDrawings.cableModification.unselected.color,
+      size: PlotlyDrawings.cableModification.label.size[view]
     }
   } as Partial<Plotly.Annotations>;
 };
@@ -93,10 +86,10 @@ const buildLabelAnnotation = (
  * approximates the engine's load placement, so the connecting line moves whenever
  * those values change.
  *
- * The icon uses the same visual style as the load annotation (solid arrow,
- * no head, `arrowwidth: 1`, same color/border/font). The only difference is
- * `ay: -90` instead of `ay: -50`, guaranteeing a 40 px gap so the two icons
- * never overlap when both anchor on the same data point.
+ * The icon is drawn like the load icons (solid arrow line without head, FontAwesome
+ * glyph in a border), in its own `PlotlyDrawings.cableModification` look. It sits
+ * higher (`arrowYOffset` -90 instead of -50), guaranteeing a 40 px gap so the two
+ * icons never overlap when both anchor on the same data point.
  *
  * For each modification two annotations are emitted: the icon (clickable)
  * and a non-clickable text label ("Raccourcissement" / "Allongement") sitting

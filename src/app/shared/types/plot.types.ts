@@ -6,10 +6,10 @@
  */
 
 /**
- * Union type representing the different plot object categories (singular and plural forms).
+ * Union type representing the different plot object categories.
  * @category Studio
  */
-export type PlotObjectsType = 'supports' | 'insulators' | 'spans' | 'span' | 'support' | 'insulator';
+export type PlotObjectsType = 'supports' | 'insulators' | 'spans';
 
 /**
  * Represents the rendering dimension of the plot.

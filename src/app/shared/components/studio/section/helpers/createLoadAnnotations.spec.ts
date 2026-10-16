@@ -3,7 +3,7 @@ import type * as Plotly from 'plotly.js-dist-min';
 import { createLoadAnnotations, LoadType, SpanLoadAnnotationData } from './createLoadAnnotations';
 import { CreatePlotParams } from './createPlot';
 import { SpanLoad } from '@shared/domain';
-import { LOAD_COLOR, LOAD_ICON, MARKING_ICON } from './createLoadAnnotations.constantes';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
 type AnnotationWithExtras = Partial<Plotly.Annotations> & {
   z?: number;
@@ -71,18 +71,18 @@ describe('createLoadAnnotations', () => {
   });
 
   describe('icon selection by LoadType', () => {
-    it('should use LOAD_ICON for LoadType.PUNCTUAL', () => {
+    it('should use the punctual load icon for LoadType.PUNCTUAL', () => {
       const result = createLoadAnnotations(
         makePlotParams({ spanLoads: [makeSpanLoad({ type: LoadType.PUNCTUAL })] })
       ) as AnnotationWithExtras[];
-      expect(result[0].text).toBe(LOAD_ICON);
+      expect(result[0].text).toBe(PlotlyDrawings.loadPunctual.icon);
     });
 
-    it('should use MARKING_ICON for LoadType.MARKING', () => {
+    it('should use the marking icon for LoadType.MARKING', () => {
       const result = createLoadAnnotations(
         makePlotParams({ spanLoads: [makeSpanLoad({ type: LoadType.MARKING })] })
       ) as AnnotationWithExtras[];
-      expect(result[0].text).toBe(MARKING_ICON);
+      expect(result[0].text).toBe(PlotlyDrawings.loadMarking.icon);
     });
   });
 
@@ -149,9 +149,9 @@ describe('createLoadAnnotations', () => {
       expect(result[0].arrowhead).toBe(0);
     });
 
-    it('should set arrowwidth to 1', () => {
-      const result = createLoadAnnotations(makePlotParams({ spanLoads: [makeSpanLoad()] }));
-      expect(result[0].arrowwidth).toBe(1);
+    it.each(['2d', '3d'] as const)('should set the %s arrow width of the load icon', (view) => {
+      const result = createLoadAnnotations(makePlotParams({ view, spanLoads: [makeSpanLoad()] }));
+      expect(result[0].arrowwidth).toBe(PlotlyDrawings.loadPunctual.arrowWidth[view]);
     });
 
     it('should set ay to -50', () => {
@@ -164,11 +164,11 @@ describe('createLoadAnnotations', () => {
       expect(result[0].ax).toBe(0);
     });
 
-    it('should apply LOAD_COLOR to arrowcolor, bordercolor and font.color', () => {
+    it('should apply the load color to arrowcolor, bordercolor and font.color', () => {
       const result = createLoadAnnotations(makePlotParams({ spanLoads: [makeSpanLoad()] }));
-      expect(result[0].arrowcolor).toBe(LOAD_COLOR);
-      expect(result[0].bordercolor).toBe(LOAD_COLOR);
-      expect(result[0].font?.color).toBe(LOAD_COLOR);
+      expect(result[0].arrowcolor).toBe(PlotlyDrawings.loadPunctual.unselected.color);
+      expect(result[0].bordercolor).toBe(PlotlyDrawings.loadPunctual.unselected.color);
+      expect(result[0].font?.color).toBe(PlotlyDrawings.loadPunctual.unselected.color);
     });
   });
 

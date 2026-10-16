@@ -4,8 +4,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+import { PlotData } from 'plotly.js-dist-min';
 import { createDistanceMeasuringPointsTraces } from './createDistanceMeasuringPointsTraces';
 import { ObstacleOutput } from '@services/worker_python/tasks/types';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+
+const DISTANCE_MEASURING_POINT_COLOR = PlotlyDrawings.distanceMeasuringPoint.color;
+
+// DataObject spans the whole plotly Data union; these traces are all scatter/scatter3d
+const buildTraces = (...args: Parameters<typeof createDistanceMeasuringPointsTraces>) =>
+  createDistanceMeasuringPointsTraces(...args) as Partial<PlotData>[];
 
 describe('createDistanceMeasuringPointsTraces', () => {
   const twoPointGroup: ObstacleOutput['obstacles'] = [
@@ -38,7 +46,7 @@ describe('createDistanceMeasuringPointsTraces', () => {
   });
 
   it('should build one marker trace per point and one line trace per segment for a 2-point group', () => {
-    const traces = createDistanceMeasuringPointsTraces(twoPointGroup, '3d', 'profile');
+    const traces = buildTraces(twoPointGroup, '3d', 'profile');
 
     const markers = traces.filter((t) => t.mode === 'markers');
     const lines = traces.filter((t) => t.mode === 'lines');
@@ -47,7 +55,7 @@ describe('createDistanceMeasuringPointsTraces', () => {
   });
 
   it('should build 3 marker traces and 2 line traces for a 3-point group', () => {
-    const traces = createDistanceMeasuringPointsTraces(threePointGroup, '3d', 'profile');
+    const traces = buildTraces(threePointGroup, '3d', 'profile');
 
     const markers = traces.filter((t) => t.mode === 'markers');
     const lines = traces.filter((t) => t.mode === 'lines');
@@ -56,7 +64,7 @@ describe('createDistanceMeasuringPointsTraces', () => {
   });
 
   it('should map coordinates to x/y/z with scatter3d type in 3D view', () => {
-    const [marker] = createDistanceMeasuringPointsTraces(twoPointGroup, '3d', 'profile');
+    const [marker] = buildTraces(twoPointGroup, '3d', 'profile');
 
     expect(marker.type).toBe('scatter3d');
     expect(marker.x).toEqual([1]);
@@ -65,7 +73,7 @@ describe('createDistanceMeasuringPointsTraces', () => {
   });
 
   it('should map x/z to x/y with scatter type in 2D profile view', () => {
-    const [marker] = createDistanceMeasuringPointsTraces(twoPointGroup, '2d', 'profile');
+    const [marker] = buildTraces(twoPointGroup, '2d', 'profile');
 
     expect(marker.type).toBe('scatter');
     expect(marker.x).toEqual([1]);
@@ -74,7 +82,7 @@ describe('createDistanceMeasuringPointsTraces', () => {
   });
 
   it('should map y/z to x/y with scatter type in 2D face view', () => {
-    const [marker] = createDistanceMeasuringPointsTraces(twoPointGroup, '2d', 'face');
+    const [marker] = buildTraces(twoPointGroup, '2d', 'face');
 
     expect(marker.type).toBe('scatter');
     expect(marker.x).toEqual([2]);
@@ -82,7 +90,7 @@ describe('createDistanceMeasuringPointsTraces', () => {
   });
 
   it('should connect consecutive points with a line trace using dashed styling', () => {
-    const traces = createDistanceMeasuringPointsTraces(twoPointGroup, '3d', 'profile');
+    const traces = buildTraces(twoPointGroup, '3d', 'profile');
     const line = traces.find((t) => t.mode === 'lines');
 
     expect(line?.x).toEqual([1, 4]);
@@ -91,8 +99,25 @@ describe('createDistanceMeasuringPointsTraces', () => {
     expect(line?.line).toMatchObject({ dash: 'dash' });
   });
 
+  it.each([
+    { view: '2d', markerSize: 5, lineWidth: 4 },
+    { view: '3d', markerSize: 3, lineWidth: 2 }
+  ] as const)(
+    'should use the shared color, marker size $markerSize and line width $lineWidth in $view view',
+    ({ view, markerSize, lineWidth }) => {
+      const traces = buildTraces(twoPointGroup, view, 'profile');
+      const markers = traces.filter((t) => t.mode === 'markers');
+      const line = traces.find((t) => t.mode === 'lines');
+
+      markers.forEach((marker) =>
+        expect(marker.marker).toMatchObject({ color: DISTANCE_MEASURING_POINT_COLOR, size: markerSize })
+      );
+      expect(line?.line).toMatchObject({ color: DISTANCE_MEASURING_POINT_COLOR, width: lineWidth });
+    }
+  );
+
   it('should mark all traces as non-legend and non-hoverable', () => {
-    const traces = createDistanceMeasuringPointsTraces(twoPointGroup, '3d', 'profile');
+    const traces = buildTraces(twoPointGroup, '3d', 'profile');
 
     traces.forEach((trace) => {
       expect(trace.showlegend).toBe(false);
@@ -101,7 +126,7 @@ describe('createDistanceMeasuringPointsTraces', () => {
   });
 
   it('should build traces for multiple groups independently', () => {
-    const traces = createDistanceMeasuringPointsTraces([...twoPointGroup, ...threePointGroup], '3d', 'profile');
+    const traces = buildTraces([...twoPointGroup, ...threePointGroup], '3d', 'profile');
 
     // 2 markers + 1 line for group 1, 3 markers + 2 lines for group 2
     expect(traces).toHaveLength(8);

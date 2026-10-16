@@ -10,6 +10,7 @@ import Plotly, { Data, Layout } from 'plotly.js-dist-min';
 import { createConformityPlot, CONFORMITY_PLOT_ID, purgeConformityPlot } from './createConformityPlot';
 import { ConformityPlotResponse } from '../conformity-plot.model';
 import { ObstacleConformityType } from '@infrastructure/database/entities/catalog-obstacle-configuration.entity';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 
 vi.mock('plotly.js-dist-min', () => ({
   __esModule: true,
@@ -167,7 +168,7 @@ describe('createConformityPlot', () => {
 
       const traces = (Plotly.react as Mock).mock.calls[0][1] as Data[];
       const pointsTrace = traces[2] as { marker: { color: string } };
-      expect(pointsTrace.marker.color).toBe('#017aa3');
+      expect(pointsTrace.marker.color).toBe(PlotlyDrawings.conformity.cablePoint.color);
     });
 
     it('should stack the first rule key on top by drawing zones in reverse key order', () => {
@@ -233,7 +234,7 @@ describe('createConformityPlot', () => {
       const traces = (Plotly.react as Mock).mock.calls[0][1] as Data[];
       const centersTrace = traces[0] as { marker: { color: string } };
       // RULE_2's catalog color is '#ff0000', but disk centers always use the shared cable point color.
-      expect(centersTrace.marker.color).toBe('#017aa3');
+      expect(centersTrace.marker.color).toBe(PlotlyDrawings.conformity.cablePoint.color);
     });
   });
 

@@ -6,21 +6,11 @@
  */
 import * as Plotly from 'plotly.js-dist-min';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { CreatePlotParams } from './createPlot';
 import { CutStrandsAnnotationData } from './createCutStrandsAnnotations.interfaces';
-import {
-  CUT_STRANDS_COLOR,
-  CUT_STRANDS_DASH_GAP,
-  CUT_STRANDS_DASH_LENGTH,
-  CUT_STRANDS_HOVER_TEXT_COLOR,
-  CUT_STRANDS_ICON,
-  CUT_STRANDS_ICON_PADDING,
-  CUT_STRANDS_ICON_SIZE,
-  CUT_STRANDS_LINE_LENGTH,
-  CUT_STRANDS_OFFSET_Y,
-  getCutStrandsLabel
-} from './createCutStrandsAnnotations.constantes';
+import { getCutStrandsLabel, getCutStrandsLineLength } from './createCutStrandsAnnotations.constantes';
 import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
 import { mapAnchorToAxes, resolveAnchorCoord } from './spanAnchor.helpers';
 
@@ -63,8 +53,13 @@ const atAnchor = ({ x, y, z }: MappedAnchor) => ({ xref: 'x' as const, yref: 'y'
  */
 const buildDashedLine = (anchor: MappedAnchor): Partial<Plotly.Annotations>[] => {
   const dashes: Partial<Plotly.Annotations>[] = [];
-  for (let start = 0; start < CUT_STRANDS_LINE_LENGTH; start += CUT_STRANDS_DASH_LENGTH + CUT_STRANDS_DASH_GAP) {
-    const end = Math.min(start + CUT_STRANDS_DASH_LENGTH, CUT_STRANDS_LINE_LENGTH);
+  const lineLength = getCutStrandsLineLength('3d');
+  for (
+    let start = 0;
+    start < lineLength;
+    start += PlotlyDrawings.cutStrands.dashLength + PlotlyDrawings.cutStrands.dashGap
+  ) {
+    const end = Math.min(start + PlotlyDrawings.cutStrands.dashLength, lineLength);
     dashes.push({
       ...atAnchor(anchor),
       ax: 0,
@@ -72,9 +67,10 @@ const buildDashedLine = (anchor: MappedAnchor): Partial<Plotly.Annotations>[] =>
       standoff: start,
       text: '',
       showarrow: true,
+      // A dash, not an arrow: never a head
       arrowhead: 0,
-      arrowcolor: CUT_STRANDS_COLOR,
-      arrowwidth: 1,
+      arrowcolor: PlotlyDrawings.cutStrands.unselected.color,
+      arrowwidth: PlotlyDrawings.cutStrands.lineWidth['3d'],
       captureevents: false
     } as Partial<Plotly.Annotations>);
   }
@@ -99,18 +95,19 @@ const buildDashedLineShape = ({ x, y }: MappedAnchor): Partial<Plotly.Shape> => 
   x0: 0,
   x1: 0,
   y0: 0,
-  y1: CUT_STRANDS_LINE_LENGTH,
+  y1: getCutStrandsLineLength('2d'),
   line: {
-    color: CUT_STRANDS_COLOR,
-    width: 1,
+    color: PlotlyDrawings.cutStrands.unselected.color,
+    width: PlotlyDrawings.cutStrands.lineWidth['2d'],
     // Plotly takes a dash pattern in pixels, which its typings do not list
-    dash: `${CUT_STRANDS_DASH_LENGTH}px,${CUT_STRANDS_DASH_GAP}px` as Plotly.Dash
+    dash: `${PlotlyDrawings.cutStrands.dashLength}px,${PlotlyDrawings.cutStrands.dashGap}px` as Plotly.Dash
   }
 });
 
 // Clicking the icon opens the RRTS tool. The dashed line is drawn apart, so the icon stands on its own
 const buildIcon = (
   { x, y, z }: MappedAnchor,
+  view: CreatePlotParams['view'],
   translocoService?: CreatePlotParams['translocoService']
 ): Partial<Plotly.Annotations> =>
   buildClickableIconAnnotation({
@@ -118,12 +115,16 @@ const buildIcon = (
     arrowTipX: x,
     arrowTipY: y,
     arrowTipZ: z,
-    yShift: CUT_STRANDS_OFFSET_Y,
-    icon: CUT_STRANDS_ICON,
-    iconSize: CUT_STRANDS_ICON_SIZE,
-    borderPad: CUT_STRANDS_ICON_PADDING,
-    color: CUT_STRANDS_COLOR,
-    hover: { text: getCutStrandsLabel(translocoService), textColor: CUT_STRANDS_HOVER_TEXT_COLOR },
+    yShift: PlotlyDrawings.cutStrands.offsetY,
+    icon: PlotlyDrawings.cutStrands.icon,
+    iconSize: PlotlyDrawings.cutStrands.iconSize[view],
+    borderPad: PlotlyDrawings.cutStrands.borderPad[view],
+    color: PlotlyDrawings.cutStrands.unselected.color,
+    hover: {
+      text: getCutStrandsLabel(translocoService),
+      backgroundColor: PlotlyDrawings.cutStrands.tooltipText.backgroundColor,
+      textColor: PlotlyDrawings.cutStrands.tooltipText.textColor
+    },
     data: { type: 'cutStrands' } satisfies CutStrandsAnnotationData
   });
 
@@ -147,7 +148,7 @@ const resolveMarkingAnchor = (plotParams: CreatePlotParams): MappedAnchor | null
 
 /**
  * Creates the Plotly annotations of the RRTS cut strands marking on the section plot: a scissors icon,
- * {@link CUT_STRANDS_OFFSET_Y} px above its anchor point and joined to it by a dashed line.
+ * `PlotlyDrawings.cutStrands.offsetY` px above its anchor point and joined to it by a dashed line.
  *
  * @remarks
  * Pure function (no DI, no side effects) so it can be unit-tested in isolation.
@@ -163,7 +164,7 @@ export const createCutStrandsAnnotations = (plotParams: CreatePlotParams): Parti
   const anchor = resolveMarkingAnchor(plotParams);
   if (!anchor) return [];
 
-  const icon = buildIcon(anchor, plotParams.translocoService);
+  const icon = buildIcon(anchor, plotParams.view, plotParams.translocoService);
   return plotParams.view === '3d' ? [...buildDashedLine(anchor), icon] : [icon];
 };
 

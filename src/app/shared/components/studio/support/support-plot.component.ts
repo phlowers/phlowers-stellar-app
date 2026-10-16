@@ -1,12 +1,16 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { KeyFilterModule } from 'primeng/keyfilter';
 import { MessageModule } from 'primeng/message';
-import plotly, { Data } from 'plotly.js-dist-min';
+import plotly, { Camera, Data, Layout } from 'plotly.js-dist-min';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { getLiveCamera } from '@services/plot/plot-options.utils';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
 
 /**
  * Formatted text data for plot annotations.
@@ -48,24 +52,6 @@ interface PlotData {
  */
 export class SupportPlotComponent {
   private static readonly PLOT_ELEMENT_ID = 'plotly-output-support';
-  private static readonly PLOT_LAYOUT = {
-    autosize: true,
-    showlegend: false,
-    margin: { l: 0, r: 0, t: 0, b: 0 },
-    width: 550
-  } as const;
-  private static readonly SHAPE_LINE_CONFIG = {
-    color: 'blue',
-    width: 2
-  } as const;
-  private static readonly SELECTED_MARKER_CONFIG = {
-    color: 'red',
-    opacity: 0.5,
-    size: 10
-  } as const;
-  private static readonly TEXT_FONT_CONFIG = {
-    size: 15
-  } as const;
 
   /** 2D array of coordinate tuples describing the support geometry. */
   coordinates = input<(number | undefined)[][]>();
@@ -76,6 +62,10 @@ export class SupportPlotComponent {
 
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly logger = inject(LoggerService);
+  private readonly document = inject(DOCUMENT);
+
+  // Last user view, carried over every redraw (support or attachment-set change, clear in between)
+  private camera: Camera | null = null;
 
   constructor() {
     effect(() => {
@@ -92,6 +82,7 @@ export class SupportPlotComponent {
 
   /** Removes the current Plotly chart from the DOM element. */
   clearPlot(): void {
+    this.saveCamera();
     plotly.purge(SupportPlotComponent.PLOT_ELEMENT_ID);
   }
 
@@ -182,7 +173,23 @@ export class SupportPlotComponent {
       plotData.push(selectedMarkerData);
     }
 
-    void plotly.newPlot(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, SupportPlotComponent.PLOT_LAYOUT);
+    this.saveCamera();
+    void plotly.newPlot(SupportPlotComponent.PLOT_ELEMENT_ID, plotData, this.createLayout());
+  }
+
+  private saveCamera(): void {
+    this.camera = getLiveCamera(this.document, SupportPlotComponent.PLOT_ELEMENT_ID) ?? this.camera;
+  }
+
+  // Built anew on every draw: Plotly writes the user's camera and aspect ratio back into the layout it is given,
+  // and an aspect ratio carried over from another support would distort this one. Only the camera is kept.
+  private createLayout(): Partial<Layout> {
+    return {
+      ...getPlotlyBaseLayout(),
+      margin: { l: 0, r: 0, t: 0, b: 0 },
+      width: 550,
+      ...(this.camera ? { scene: { camera: this.camera } } : {})
+    };
   }
 
   private createShapeData(shapePoints: number[][]): Data {
@@ -192,7 +199,7 @@ export class SupportPlotComponent {
       z: shapePoints.map((point) => point[2]),
       type: 'scatter3d',
       mode: 'lines',
-      line: SupportPlotComponent.SHAPE_LINE_CONFIG
+      line: PlotlyDrawings.supportPlot.shapeLine
     };
   }
 
@@ -204,7 +211,7 @@ export class SupportPlotComponent {
       type: 'scatter3d',
       mode: 'text',
       text: textToDisplay,
-      textfont: SupportPlotComponent.TEXT_FONT_CONFIG,
+      textfont: { size: PlotlyDrawings.supportPlot.textFontSize },
       insidetextanchor: 'start',
       textposition: 'middle center'
     };
@@ -217,7 +224,7 @@ export class SupportPlotComponent {
       z: [attachmentSetPoints[2]],
       type: 'scatter3d',
       mode: 'markers',
-      marker: SupportPlotComponent.SELECTED_MARKER_CONFIG
+      marker: PlotlyDrawings.supportPlot.selectedMarker
     };
   }
 }
