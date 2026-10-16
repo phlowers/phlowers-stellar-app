@@ -19,7 +19,7 @@ describe('initializeApp', () => {
   let mockStorageService: { setPersistentStorage: vi.Mock; createDatabase: vi.Mock };
   let mockAuthService: { initialize: vi.Mock };
   let mockAppUpdateService: { start: vi.Mock };
-  let mockLoggerService: { error: vi.Mock; warn: vi.Mock };
+  let mockLoggerService: { error: vi.Mock; warn: vi.Mock; info: vi.Mock };
   let mockTranslocoService: { setActiveLang: vi.Mock; load: vi.Mock };
   let mockAppConfigService: { loadDefaultLang: vi.Mock };
   let translationLoad$: Subject<unknown>;
@@ -33,7 +33,7 @@ describe('initializeApp', () => {
     };
     mockAuthService = { initialize: vi.fn().mockResolvedValue(undefined) };
     mockAppUpdateService = { start: vi.fn().mockResolvedValue(undefined) };
-    mockLoggerService = { error: vi.fn(), warn: vi.fn() };
+    mockLoggerService = { error: vi.fn(), warn: vi.fn(), info: vi.fn() };
     mockTranslocoService = {
       setActiveLang: vi.fn(),
       load: vi.fn().mockReturnValue(translationLoad$)
@@ -98,6 +98,12 @@ describe('initializeApp', () => {
       'AppConfig: translations failed to load in the background',
       expect.any(Error)
     );
+  });
+
+  it('should log a welcome message with the app name, version and hash', async () => {
+    await TestBed.runInInjectionContext(() => initializeApp());
+
+    expect(mockLoggerService.info).toHaveBeenCalledWith(expect.stringMatching(/^Welcome to .+ v.+ hash .+/));
   });
 
   it('should start AppUpdateService without awaiting it', async () => {

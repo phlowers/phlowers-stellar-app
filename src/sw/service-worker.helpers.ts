@@ -1,6 +1,7 @@
 import type { PrecacheEntry } from 'workbox-precaching';
 import type { RouteHandler, RouteHandlerCallback, WorkboxPlugin } from 'workbox-core/types';
 import { NavigationRoute } from 'workbox-routing';
+import { BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS } from '@services/app-update/network-rule.constantes';
 import { evaluateBackgroundDownload } from '@services/app-update/network-rule.helpers';
 import { USER_DATA_STORAGE_RESERVE_BYTES } from '@services/app-update/storage-rule.constantes';
 import { computeMissingBytes, evaluateStorageForInstall } from '@services/app-update/storage-rule.helpers';
@@ -48,6 +49,20 @@ export function createSwLogger(clients: SwClients): SwLogger {
     info: (message) => send('info', message),
     warn: (message) => send('warn', message),
     error: (message) => send('error', message)
+  };
+}
+
+/** Logs each file fetched by the precache (install download, or a runtime miss); never alters the request. */
+export function createDownloadLogPlugin(logger: SwLogger): WorkboxPlugin {
+  return {
+    requestWillFetch: ({ request }) => {
+      logger.info(`Downloading ${request.url}`);
+      return Promise.resolve(request);
+    },
+    fetchDidFail: ({ request, error }) => {
+      logger.error(`Download failed for ${request.url}: ${error.message}`);
+      return Promise.resolve();
+    }
   };
 }
 
@@ -122,7 +137,12 @@ async function refuse(deps: GuardedInstallDeps, message: Omit<SwInstallRefusedMe
  * On a quota error despite the check, the entries written by this attempt are removed to give the space back.
  */
 export async function runGuardedInstall(deps: GuardedInstallDeps): Promise<void> {
+  deps.logger.info('New version detected: installation started');
   const network = evaluateBackgroundDownload(deps.connection);
+  deps.logger.info(
+    `Network downlink is ${network.downlinkMbps ?? 'unknown'} Mbps (minimum ${BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS} Mbps): ` +
+      (network.allowed ? 'download allowed' : `download blocked (${network.reason})`)
+  );
   if (!network.allowed) {
     await refuse(deps, {
       reason: network.reason as InstallRefusalReason,
@@ -133,10 +153,18 @@ export async function runGuardedInstall(deps: GuardedInstallDeps): Promise<void>
   }
 
   const cache = await deps.caches.open(deps.controller.strategy.cacheName);
+  const missingUrls: string[] = [];
   const missingBytes = await computeMissingBytes(deps.entries, async (entry) => {
     const cacheKey = deps.controller.getCacheKeyForURL(entry.url);
-    return cacheKey !== undefined && (await cache.match(cacheKey)) !== undefined;
+    const cached = cacheKey !== undefined && (await cache.match(cacheKey)) !== undefined;
+    if (!cached) {
+      missingUrls.push(entry.url);
+    }
+    return cached;
   });
+  deps.logger.info(
+    `Packages to download: ${missingUrls.length} files, ${missingBytes} bytes [${[...missingUrls].sort().join(', ')}]`
+  );
   const estimate = await deps.storage?.estimate().catch(() => undefined);
   const storage = evaluateStorageForInstall({
     missingBytes,
@@ -144,6 +172,10 @@ export async function runGuardedInstall(deps: GuardedInstallDeps): Promise<void>
     quotaBytes: estimate?.quota,
     reserveBytes: USER_DATA_STORAGE_RESERVE_BYTES
   });
+  deps.logger.info(
+    `Storage check: ${storage.freeBytes ?? 'unknown'} bytes free, ${storage.requiredBytes} required: ` +
+      (storage.allowed ? 'download allowed' : 'download blocked')
+  );
   if (!storage.allowed) {
     await refuse(deps, {
       reason: 'storage-insufficient',
@@ -154,6 +186,7 @@ export async function runGuardedInstall(deps: GuardedInstallDeps): Promise<void>
   }
 
   const urlsBefore = new Set((await cache.keys()).map((request) => request.url));
+  deps.logger.info('Download started');
   try {
     await deps.controller.install(deps.event);
     deps.logger.info(`Installation complete (${missingBytes} bytes downloaded)`);
@@ -175,11 +208,18 @@ export async function runGuardedInstall(deps: GuardedInstallDeps): Promise<void>
 
 /** Activates the new version: drops outdated precache entries and legacy caches, then controls open pages. */
 export async function runActivation(deps: ActivationDeps): Promise<void> {
-  await deps.controller.activate(deps.event);
-  const deleted = await deleteLegacyCaches(deps.caches);
-  if (deleted.length > 0) {
-    deps.logger.info(`Legacy caches deleted: ${deleted.join(', ')}`);
+  deps.logger.info('Activation started: update in progress');
+  try {
+    await deps.controller.activate(deps.event);
+    const deleted = await deleteLegacyCaches(deps.caches);
+    if (deleted.length > 0) {
+      deps.logger.info(`Legacy caches deleted: ${deleted.join(', ')}`);
+    }
+    // Only effective on the first installation: an update activates once no page is left open.
+    await deps.clients.claim();
+  } catch (error) {
+    deps.logger.error(`Activation failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw error;
   }
-  // Only effective on the first installation: an update activates once no page is left open.
-  await deps.clients.claim();
+  deps.logger.info('Activation succeeded');
 }
