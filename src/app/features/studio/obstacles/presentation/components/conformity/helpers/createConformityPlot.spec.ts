@@ -146,7 +146,7 @@ describe('createConformityPlot', () => {
 
       const traces = (Plotly.react as Mock).mock.calls[0][1] as Data[];
       const fillTrace = traces[0] as { fillcolor: string };
-      expect(fillTrace.fillcolor).toBe('rgba(1, 122, 163, 0.2)');
+      expect(fillTrace.fillcolor).toBe('rgba(1, 122, 163, 1)');
     });
 
     it('should trace the zone border along the provided zoneBorder polyline in the rule color', () => {
@@ -178,8 +178,8 @@ describe('createConformityPlot', () => {
       // RULE_2's fill is pushed first (bottom), RULE_1's fill is pushed after it (on top).
       const firstFill = traces[0] as { fillcolor: string };
       const secondFill = traces[2] as { fillcolor: string };
-      expect(firstFill.fillcolor).toBe('rgba(255, 0, 0, 0.2)'); // RULE_2
-      expect(secondFill.fillcolor).toBe('rgba(1, 122, 163, 0.2)'); // RULE_1
+      expect(firstFill.fillcolor).toBe('rgba(255, 0, 0, 1)'); // RULE_2
+      expect(secondFill.fillcolor).toBe('rgba(1, 122, 163, 1)'); // RULE_1
     });
 
     it('should not add any shapes for overhang / vegetation styling', () => {
