@@ -8,6 +8,7 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { AttachmentSetModalComponent } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/attachmentSetModal/attachmentSetModal.component';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { Task } from '@services/worker_python/tasks/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { createEmptyChain } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/helpers';
@@ -65,8 +66,6 @@ const mockWorkerPythonService = {
 };
 
 const mockSectionWithCoordinates = {
-  start_latitude: 48.8566,
-  start_longitude: 2.3522,
   start_azimuth: 90
 } as unknown as Section;
 
@@ -971,11 +970,20 @@ describe('SupportsTableComponent', () => {
     beforeEach(() => {
       (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
       (component.section as unknown as () => Section) = () => mockSectionWithCoordinates;
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockLocalizationResult,
-        error: null,
-        diagnostics: []
-      });
+      (component.supports as unknown as () => Support[]) = () => [
+        { ...mockSupports[0], footLatitude: 48.8566, footLongitude: 2.3522 },
+        ...mockSupports.slice(1)
+      ];
+      mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+        Promise.resolve({
+          result:
+            task === Task.convertCoordinates
+              ? { x: mockLocalizationResult.lambert_x, y: mockLocalizationResult.lambert_y }
+              : mockLocalizationResult,
+          error: null,
+          diagnostics: []
+        })
+      );
     });
 
     it('should set localization and clear loading flag when worker becomes ready', async () => {
@@ -985,10 +993,9 @@ describe('SupportsTableComponent', () => {
 
       workerReadySubject.next(true);
       fixture.detectChanges();
-      await fixture.whenStable();
 
+      await vi.waitFor(() => expect(component.localization()).toEqual(mockLocalizationResult));
       expect(component.localizationLoading()).toBe(false);
-      expect(component.localization()).toEqual(mockLocalizationResult);
     });
 
     it('should clear localizationLoading when runTask rejects', async () => {
@@ -996,9 +1003,8 @@ describe('SupportsTableComponent', () => {
       workerReadySubject.next(true);
       fixture.detectChanges();
       component.ngOnInit();
-      await fixture.whenStable();
-
-      expect(component.localizationLoading()).toBe(false);
+      await vi.waitFor(() => expect(mockWorkerPythonService.runTask).toHaveBeenCalled());
+      await vi.waitFor(() => expect(component.localizationLoading()).toBe(false));
     });
 
     it('should not set localization when runTask returns an error', async () => {
@@ -1010,27 +1016,26 @@ describe('SupportsTableComponent', () => {
       workerReadySubject.next(true);
       fixture.detectChanges();
       component.ngOnInit();
-      await fixture.whenStable();
-
+      await vi.waitFor(() => expect(mockWorkerPythonService.runTask).toHaveBeenCalled());
+      await vi.waitFor(() => expect(component.localizationLoading()).toBe(false));
       expect(component.localization()).toBeNull();
-      expect(component.localizationLoading()).toBe(false);
     });
 
     it('should call runTask with correct localization parameters', async () => {
       workerReadySubject.next(true);
       fixture.detectChanges();
       component.ngOnInit();
-      await fixture.whenStable();
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          startLatitude: 48.8566,
-          startLongitude: 2.3522,
-          startAzimuth: 90,
-          spanLength: [50, 60, Number.NaN],
-          lineAngle: [90, 85, 0]
-        })
+      await vi.waitFor(() =>
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+          Task.computeLocalization,
+          expect.objectContaining({
+            startLatitude: 48.8566,
+            startLongitude: 2.3522,
+            startAzimuth: 90,
+            spanLength: [50, 60, Number.NaN],
+            lineAngle: [90, 85, 0]
+          })
+        )
       );
     });
   });

@@ -3,7 +3,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { TabsModule } from 'primeng/tabs';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { createTestMeasureData } from '../../helpers';
@@ -1013,6 +1013,34 @@ describe('FieldMeasuringComponent', () => {
       // Verify that data from section was populated
       expect(measureData.voltage).toBeDefined();
       expect(measureData.link).toBeDefined();
+    });
+
+    it('should revive date and time stored as ISO strings (imported study)', async () => {
+      const spanService = TestBed.inject(PlotSpanService) as unknown as { section: WritableSignal<Section | null> };
+      const measureDate = new Date(2026, 6, 14, 10, 30);
+      const importedMeasure = {
+        ...createTestMeasureData({ uuid: 'imported-uuid', season: 'winter' }),
+        date: measureDate.toISOString(),
+        time: measureDate.toISOString()
+      } as unknown as FieldMeasure;
+      spanService.section.set({
+        ...spanService.section()!,
+        field_measures: [importedMeasure],
+        selected_field_measure_uuid: 'imported-uuid'
+      });
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const measureData = component.measureData();
+      expect(measureData.date).toBeInstanceOf(Date);
+      expect(measureData.date?.getTime()).toBe(measureDate.getTime());
+      expect(measureData.time).toBeInstanceOf(Date);
+      expect(measureData.time?.getTime()).toBe(measureDate.getTime());
+      expect(measureData.season).toBe('winter');
     });
   });
 

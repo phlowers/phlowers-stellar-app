@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, from, switchMap } from 'rxjs';
 import { StudyHeaderComponent } from '@features/study/presentation/components/study-header/study-header.component';
 import { StudiesService } from '@services/studies/studies.service';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
 import { SectionService } from '@services/section/section.service';
 import {
   DuplicateInitialConditionFunctionsInput,
@@ -55,6 +56,7 @@ export class StudyComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly studiesService = inject(StudiesService);
   private readonly sectionService = inject(SectionService);
+  private readonly geopositioning = inject(GeopositioningService);
   private readonly initialConditionService = inject(InitialConditionService);
   private readonly router = inject(Router);
   private readonly notificationService = inject(NotificationService);
@@ -138,7 +140,8 @@ export class StudyComponent implements OnInit {
 
     const existingSection = studyWithSections.sections.some((s) => s?.uuid === section?.uuid);
 
-    const { removedGeometryBoundObjects } = await this.sectionService.createOrUpdateSection(studyWithSections, section);
+    const previous = studyWithSections.sections.find((s) => s?.uuid === section?.uuid);
+    const { removedGeometryBoundObjects } = await this.geopositioning.save(studyWithSections, previous, section);
 
     this.notificationService.success(
       existingSection

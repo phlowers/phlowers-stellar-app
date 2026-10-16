@@ -260,4 +260,33 @@ export function applyStellarDbVersions(db: Dexie): void {
         }
       });
   });
+
+  // V11 moves the section start GPS (start_latitude/start_longitude) onto the foot GPS of the first
+  // support, which is now the stored source of truth. Data-only migration (sections are stored as a
+  // JSON blob on the studies table), no schema/index change, so no `.stores()` call is needed.
+  db.version(11).upgrade(async (tx) => {
+    await tx
+      .table('studies')
+      .toCollection()
+      .modify((study: Study) => {
+        for (const section of study.sections ?? []) {
+          const rawSection = section as unknown as Record<string, unknown>;
+          const startLatitude = rawSection['start_latitude'];
+          const startLongitude = rawSection['start_longitude'];
+          const firstSupport = section.supports?.[0];
+          if (
+            firstSupport &&
+            firstSupport.footLatitude == null &&
+            firstSupport.footLongitude == null &&
+            typeof startLatitude === 'number' &&
+            typeof startLongitude === 'number'
+          ) {
+            firstSupport.footLatitude = startLatitude;
+            firstSupport.footLongitude = startLongitude;
+          }
+          delete rawSection['start_latitude'];
+          delete rawSection['start_longitude'];
+        }
+      });
+  });
 }

@@ -60,7 +60,7 @@ describe('RteCustomAdapter', () => {
     expect(payload.coordinates?.crs).toBe('LAMBERT93');
     expect(payload.coordinates?.x).toHaveLength(payload.section.supports.length);
     expect(payload.coordinates?.y).toHaveLength(payload.section.supports.length);
-    expect(payload.section.start_latitude).toBeNull();
+    expect(payload.section.supports[0].footLatitude).toBeNull();
     expect(payload.applyCatalogCorrections).toBe(true);
     expect(payload.notices).toBeUndefined();
   });

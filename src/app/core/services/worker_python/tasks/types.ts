@@ -75,6 +75,8 @@ export enum Task {
   computeLocalization = 'computeLocalization',
   // compute gps coordinates using imported lambert data
   importLambert = 'importLambert',
+  // convert coordinates between two CRS (EPSG codes)
+  convertCoordinates = 'convertCoordinates',
   // lambert to gps and compare to gps coordinates using section data
   importLambertAndValidate = 'importLambertAndValidate',
   // get equivalent span/ruling span value
@@ -458,6 +460,12 @@ export interface TaskInputs {
     spanLength: number[];
     lineAngle: number[];
   };
+  [Task.convertCoordinates]: {
+    sourceCrs: string;
+    targetCrs: string;
+    x: number[];
+    y: number[];
+  };
   [Task.importLambert]: {
     lambert_x: number[];
     lambert_y: number[];
@@ -803,10 +811,13 @@ export interface TaskOutputs {
     windIncidence: number;
   };
   [Task.computeLocalization]: Localization;
+  [Task.convertCoordinates]: { x: number[]; y: number[] };
   [Task.importLambert]: Localization;
   [Task.importLambertAndValidate]: {
     localization: Localization;
     meanGpsDiffMeter: number;
+    /** Azimuth (deg) before the deflection at the first support: `azimuth[0] - spanAngle[0]`. */
+    startAzimuth: number;
   };
   [Task.getEquivalentSpan]: { equivalentSpan: number };
   [Task.getPoseTable]: PoseResults;

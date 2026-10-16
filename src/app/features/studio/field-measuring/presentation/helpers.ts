@@ -1,10 +1,11 @@
 import { Section, Support } from '@shared/domain';
-import { Localization, Task, TaskInputs } from '@services/worker_python/tasks/types';
+import { FootLocalization } from '@shared/domain/helpers/geopositioning.interfaces';
 import { FieldMeasure, FieldMeasureOutputs, TangentAimingSupportResult } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { TranslocoService } from '@jsverse/transloco';
+import { isDaylightSavingTime } from '@shared/domain/helpers/field-measure.helpers';
 import {
   SelectOption,
   TranslatableSelectOption,
@@ -104,46 +105,16 @@ const normalizeAzimuth = (azimuth: number): number => {
 };
 
 /**
- * Builds the `computeLocalization` task inputs from the section start point and span geometry
- * (same computation as the "view section data" supports table).
- * @param section - The current section
- * @returns The task inputs, or `null` when the section has no start localization or incomplete span geometry
- */
-export const buildSectionLocalizationPayload = (
-  section: Section | null
-): TaskInputs[Task.computeLocalization] | null => {
-  const supports = section?.supports ?? [];
-  const lastIndex = supports.length - 1;
-  if (
-    !section ||
-    supports.length === 0 ||
-    section.start_latitude == null ||
-    section.start_longitude == null ||
-    section.start_azimuth == null ||
-    supports.slice(0, -1).some((support) => support.spanLength == null || support.spanAngle == null)
-  ) {
-    return null;
-  }
-  return {
-    startLatitude: section.start_latitude,
-    startLongitude: section.start_longitude,
-    startAzimuth: section.start_azimuth,
-    spanLength: supports.map((support, i) => (i === lastIndex ? Number.NaN : support.spanLength!)),
-    lineAngle: supports.map((support, i) => (i === lastIndex ? 0 : support.spanAngle!))
-  };
-};
-
-/**
  * Picks the localization of the reference support of a span from the computed section localization.
  * Uses the span's left support when no support of the span matches `referenceSupport`.
- * @param localization - The computed section localization (one entry per support)
+ * @param localization - The resolved section localization (one entry per support)
  * @param section - The current section, used to resolve support labels
  * @param span - The `[leftIndex, rightIndex]` support indices of the span (or `null`)
  * @param referenceSupport - The stored support index, or a legacy support label (or `null`)
  * @returns The support localization, or `null` when it is not available
  */
 export const getSpanLocalization = (
-  localization: Localization,
+  localization: FootLocalization,
   section: Section | null,
   span: number[] | null,
   referenceSupport: string | null
@@ -207,19 +178,6 @@ export const buildFieldMeasureExportFilename = (
     sanitizeFilename(sectionName || ''),
     formatGenerationDate(generationDate)
   ].join('_');
-
-/**
- * Determines if the current date is in Daylight Saving Time (DST)
- * Compares current timezone offset with standard time offset
- * @param date - The date to check (defaults to current date)
- * @returns true if in DST (summer), false otherwise (winter)
- */
-function isDaylightSavingTime(date: Date = new Date()): boolean {
-  const january = new Date(date.getFullYear(), 0, 1);
-  const july = new Date(date.getFullYear(), 6, 1);
-  const stdTimezoneOffset = Math.max(january.getTimezoneOffset(), july.getTimezoneOffset());
-  return date.getTimezoneOffset() < stdTimezoneOffset;
-}
 
 /** Default values of the papoto calculation inputs. */
 export const PAPOTO_INPUT_DEFAULTS = {

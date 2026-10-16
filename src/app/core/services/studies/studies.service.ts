@@ -17,6 +17,8 @@ import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
 import { MessageService } from 'primeng/api';
 import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
+import { StudyExportFormat } from '@services/studies/studies.interfaces';
+import { DEFAULT_STUDY_EXPORT_FORMAT } from '@services/studies/studies.constantes';
 
 /**
  * Field validation limits for support data imported from CSV.
@@ -218,20 +220,22 @@ export class StudiesService {
   /**
    * Export a study
    * @param uuid The uuid of the study to export
+   * @param filename The filename without extension
+   * @param format `clst` (base64-encoded JSON, default) or `stsd` (plain JSON)
    */
-  async downloadStudy(uuid: string, filename: string) {
+  async downloadStudy(uuid: string, filename: string, format: StudyExportFormat = DEFAULT_STUDY_EXPORT_FORMAT) {
     const study = await this.getStudy(uuid);
     if (!study) {
       return;
     }
-    const studyBase64 = btoa(JSON.stringify(study));
-    const blob = new Blob([studyBase64], {
-      type: 'application/octet-stream'
-    });
+    const blob =
+      format === 'stsd'
+        ? new Blob([JSON.stringify(study, null, 2)], { type: 'application/json' })
+        : new Blob([btoa(JSON.stringify(study))], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${filename}.clst`;
+    a.download = `${filename}.${format}`;
     a.click();
     URL.revokeObjectURL(url);
     return;

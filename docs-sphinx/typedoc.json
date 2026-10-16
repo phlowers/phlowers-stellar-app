@@ -1,0 +1,7 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "exclude": ["**/*.spec.ts", "**/*.worker.ts", "**/test-setup.ts"],
+  "validation": {
+    "notExported": false
+  }
+}

@@ -225,11 +225,12 @@ describe('SectionImportService', () => {
           localization: {
             latitude: lambertX.map((_, i) => 45 + i),
             longitude: lambertX.map((_, i) => 3 + i),
-            azimuth: lambertX.map(() => 0),
+            azimuth: lambertX.slice(1).map(() => 0),
             lambert_x: lambertX,
             lambert_y: inputs['lambert_y']
           },
-          meanGpsDiffMeter: 0.0001
+          meanGpsDiffMeter: 0.0001,
+          startAzimuth: 12
         },
         error: null,
         pythonErrorCode: null
@@ -804,7 +805,8 @@ describe('SectionImportService', () => {
 
       const firstSupport = result?.supports[0];
       expect(firstSupport?.spanLength).toBe(565.49);
-      expect(firstSupport?.spanAzimut).toBe(180.5);
+      // The computed azimuth (mocked reprojection) replaces the file value
+      expect(firstSupport?.spanAzimut).toBe(0);
       expect(firstSupport?.attachmentHeight).toBe(25.0);
       // footLatitude/footLongitude come from the mocked Task.importLambertAndValidate result,
       // not from the raw PIED_X_LAMBERT93/PIED_Y_LAMBERT93 values anymore.
@@ -1246,7 +1248,8 @@ describe('SectionImportService', () => {
       supports.forEach((support, i) => {
         const { uuid: supportUuid, ...supportRest } = support;
         expect(typeof supportUuid).toBe('string');
-        expect(supportRest).toEqual(expectedSupports[i]);
+        // spanAzimut is overwritten by the computed azimuth: one per span, none for the last support
+        expect(supportRest).toEqual({ ...expectedSupports[i], spanAzimut: i < expectedSupports.length - 1 ? 0 : null });
       });
 
       const {
@@ -1279,9 +1282,7 @@ describe('SectionImportService', () => {
         regional_team_id: 'GMR_ID_01',
         initial_conditions: [],
         selected_initial_condition_uuid: undefined,
-        start_latitude: 45,
-        start_longitude: 3,
-        start_azimuth: 0,
+        start_azimuth: 12,
         mean_reprojection_diff_meters: 0.0001
       });
     });
@@ -1364,7 +1365,8 @@ describe('SectionImportService', () => {
       result?.supports.forEach((support, i) => {
         const { uuid: supportUuid, ...supportRest } = support;
         expect(typeof supportUuid).toBe('string');
-        expect(supportRest).toEqual(expectedSupports[i]);
+        // spanAzimut is overwritten by the computed azimuth: one per span, none for the last support
+        expect(supportRest).toEqual({ ...expectedSupports[i], spanAzimut: i < expectedSupports.length - 1 ? 0 : null });
       });
     });
 
@@ -1470,14 +1472,13 @@ describe('SectionImportService', () => {
       result?.supports.forEach((support, i) => {
         const { uuid: supportUuid, ...supportRest } = support;
         expect(typeof supportUuid).toBe('string');
-        expect(supportRest).toEqual(expectedSupports[i]);
+        // spanAzimut is overwritten by the computed azimuth: one per span, none for the last support
+        expect(supportRest).toEqual({ ...expectedSupports[i], spanAzimut: i < expectedSupports.length - 1 ? 0 : null });
       });
 
       expect(result?.mean_reprojection_diff_meters).toBeCloseTo(0.0001, 6);
 
-      expect(result?.start_latitude).toBe(45);
-      expect(result?.start_longitude).toBe(3);
-      expect(result?.start_azimuth).toBe(0);
+      expect(result?.start_azimuth).toBe(12);
     });
   });
 
@@ -1501,13 +1502,13 @@ describe('SectionImportService', () => {
       expect(result?.mean_reprojection_diff_meters).toBeCloseTo(0.0001, 6);
     });
 
-    it('should persist the first validated localization point as the section start location', async () => {
+    it('should persist the first validated localization point as the first support foot GPS', async () => {
       const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.start_latitude).toBe(45);
-      expect(result?.start_longitude).toBe(3);
-      expect(result?.start_azimuth).toBe(0);
+      expect(result?.supports[0].footLatitude).toBe(45);
+      expect(result?.supports[0].footLongitude).toBe(3);
+      expect(result?.start_azimuth).toBe(12);
     });
 
     it('should throw an ImportError and abort the import when a reprojection task fails', async () => {

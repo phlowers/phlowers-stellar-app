@@ -96,7 +96,7 @@ describe('RTE custom canton file → Section (integration)', () => {
     const localization = {
       latitude: expectedSection.supports.map((s) => s.footLatitude),
       longitude: expectedSection.supports.map((s) => s.footLongitude),
-      azimuth: expectedSection.supports.map(() => expectedSection.start_azimuth),
+      azimuth: expectedSection.supports.slice(0, -1).map((s) => s.spanAzimut),
       lambert_x: EXPECTED_LAMBERT_X,
       lambert_y: EXPECTED_LAMBERT_Y
     };
@@ -104,7 +104,11 @@ describe('RTE custom canton file → Section (integration)', () => {
       return Promise.resolve({ result: localization, error: null, pythonErrorCode: null });
     }
     return Promise.resolve({
-      result: { localization, meanGpsDiffMeter: expectedSection.mean_reprojection_diff_meters },
+      result: {
+        localization,
+        meanGpsDiffMeter: expectedSection.mean_reprojection_diff_meters,
+        startAzimuth: expectedSection.start_azimuth
+      },
       error: null,
       pythonErrorCode: null
     });

@@ -6,10 +6,12 @@
 
 
 import numpy as np
+import pytest
 
 from stellar_engine.data.geography import (
     compute_errors,
     compute_localization,
+    convert_coordinates,
     import_lambert,
     import_lambert_and_validate,
 )
@@ -38,14 +40,28 @@ def test_compute_localization():
 
     np.testing.assert_allclose(
         result["latitude"],
-        [48.8566, 48.856636683993784, 48.855891713451356, 48.855146365504844],
+        [48.8566, 48.856636683993784, 48.855969209897765, 48.855301356314676],
         rtol=1e-6,
     )
     np.testing.assert_allclose(
         result["longitude"],
-        [2.3522, 2.3590134705562726, 2.3657329387442005, 2.372452211109954],
+        [2.3522, 2.3590134705562726, 2.365751623583987, 2.3724896006661265],
         rtol=1e-6,
     )
+
+
+def test_compute_localization_converts_line_angle_from_grad_to_deg():
+    inputs = {
+        "startLatitude": 48.8566,
+        "startLongitude": 2.3522,
+        "startAzimuth": 45,
+        "spanLength": [500, 500, np.nan],
+        "lineAngle": [50, 100, 0],
+    }
+    result = compute_localization(inputs)
+
+    # 50 gr = 45 deg, 100 gr = 90 deg
+    np.testing.assert_allclose(result["azimuth"], [90, 180])
 
 
 def test_import_lambert():
@@ -118,9 +134,62 @@ def test_import_lambert_and_validate():
     expected_keys = {
         "localization",
         "meanGpsDiffMeter",
+        "startAzimuth",
     }
     assert expected_keys == set(result.keys())
     assert result["meanGpsDiffMeter"] < 1.0  # 1 meter
+
+
+def test_import_lambert_and_validate_start_azimuth_removes_first_line_angle():
+    inputs = {
+        "lambert_x": [652469.02270914, 652471.48385573],
+        "lambert_y": [6862035.25942008, 6862335.24992367],
+        "startAzimuth": 0,
+        "spanLength": [300.0, np.nan],
+        "lineAngle": [50.0, 0.0],  # 50 grad = 45 deg
+    }
+    result = import_lambert_and_validate(inputs)
+
+    np.testing.assert_allclose(
+        result["startAzimuth"],
+        result["localization"]["azimuth"][0] - 45.0,
+    )
+
+
+@pytest.mark.parametrize("first_line_angle_grad", [0.0, 50.0, -30.0])
+def test_import_then_compute_localization_round_trip(first_line_angle_grad):
+    """Recomputing from the imported start azimuth must not rotate the section."""
+    inputs = {
+        "lambert_x": [
+            652469.02270914,
+            652471.48385573,
+            652405.05557107,
+        ],
+        "lambert_y": [
+            6862035.25942008,
+            6862335.24992367,
+            6862729.73314491,
+        ],
+        "startAzimuth": 0,
+        "spanLength": [300.0, 400.0, np.nan],
+        "lineAngle": [first_line_angle_grad, 10.0, 0.0],
+    }
+    imported = import_lambert_and_validate(inputs)
+    localization = imported["localization"]
+
+    recomputed = compute_localization(
+        {
+            "startLatitude": localization["latitude"][0],
+            "startLongitude": localization["longitude"][0],
+            "startAzimuth": imported["startAzimuth"],
+            "spanLength": inputs["spanLength"],
+            "lineAngle": inputs["lineAngle"],
+        }
+    )
+
+    np.testing.assert_allclose(
+        recomputed["azimuth"][0], localization["azimuth"][0], atol=1e-9
+    )
 
 
 def test_import_lambert_and_validate_true_value():
@@ -147,6 +216,7 @@ def test_import_lambert_and_validate_true_value():
     expected_keys = {
         "localization",
         "meanGpsDiffMeter",
+        "startAzimuth",
     }
     assert expected_keys == set(result.keys())
     print(result["meanGpsDiffMeter"])
@@ -228,3 +298,43 @@ def test_compute_errors_multi_points():
         rtol=1e-6,
     )
     np.testing.assert_allclose(mean_gps_diff, 166.979236, rtol=1e-6)
+
+
+def test_convert_coordinates_round_trip():
+    lon = [2.3522, 5.3698]
+    lat = [48.8566, 43.2965]
+    projected = convert_coordinates(
+        {"sourceCrs": "EPSG:4326", "targetCrs": "EPSG:2154", "x": lon, "y": lat}
+    )
+    assert 600_000 < projected["x"][0] < 700_000
+    back = convert_coordinates(
+        {
+            "sourceCrs": "EPSG:2154",
+            "targetCrs": "EPSG:4326",
+            "x": projected["x"],
+            "y": projected["y"],
+        }
+    )
+    np.testing.assert_allclose(back["x"], lon, atol=1e-8)
+    np.testing.assert_allclose(back["y"], lat, atol=1e-8)
+
+
+def test_convert_coordinates_nan_passthrough():
+    result = convert_coordinates(
+        {
+            "sourceCrs": "EPSG:4326",
+            "targetCrs": "EPSG:2154",
+            "x": [2.3522, float("nan")],
+            "y": [48.8566, float("nan")],
+        }
+    )
+    assert np.isfinite(result["x"][0])
+    assert np.isnan(result["x"][1])
+    assert np.isnan(result["y"][1])
+
+
+def test_convert_coordinates_empty():
+    result = convert_coordinates(
+        {"sourceCrs": "EPSG:4326", "targetCrs": "EPSG:2154", "x": [], "y": []}
+    )
+    assert result == {"x": [], "y": []}
