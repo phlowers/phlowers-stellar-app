@@ -1,5 +1,5 @@
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
-import { applyTangentAimingSupportDefaults } from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
+import { TANGENT_AIMING_SUPPORT_FIELD_RULES as RULES } from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.constantes';
 import { PAPOTO_INPUT_DEFAULTS, PEP_INPUT_DEFAULTS } from './helpers';
 import { CalculusModeResetContext } from './calculus-mode-reset.interfaces';
 
@@ -15,21 +15,17 @@ export const CALCULUS_MODE_RESETTERS: Record<
     ...PAPOTO_INPUT_DEFAULTS,
     outputs: { ...data.outputs, papoto: null }
   }),
-  'tangente-aiming': (data, context) =>
-    applyTangentAimingSupportDefaults(
-      {
-        ...data,
-        tangentLeftSupport: null,
-        tangentSpanLength: null,
-        cableHAccDistance: null,
-        cableVerticalAccAngle: null,
-        cableParameter: null,
-        cableTangentAngle: null,
-        calculationType: 'parametre',
-        outputs: { ...data.outputs, tangentAimingSupport: null }
-      },
-      context.defaultTangentLeftSupport
-    ),
+  'tangente-aiming': (data, context) => ({
+    ...data,
+    tangentLeftSupport: context.defaultTangentLeftSupport,
+    tangentSpanLength: RULES.tangentSpanLength.default,
+    cableHAccDistance: RULES.cableHAccDistance.default,
+    cableVerticalAccAngle: RULES.cableVerticalAccAngle.default,
+    cableParameter: RULES.cableParameter.default,
+    cableTangentAngle: RULES.cableTangentAngle.default,
+    calculationType: 'parametre',
+    outputs: { ...data.outputs, tangentAimingSupport: null }
+  }),
   pep: (data) => ({ ...data, ...PEP_INPUT_DEFAULTS })
 };
 
