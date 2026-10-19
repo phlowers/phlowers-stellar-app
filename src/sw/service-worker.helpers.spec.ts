@@ -309,6 +309,8 @@ describe('service worker helpers', () => {
 
       expect(probe).toHaveBeenCalledTimes(1);
       expect(deps.controller.install).toHaveBeenCalledWith(deps.event);
+      expect(deps.logger.info).toHaveBeenCalledWith(expect.stringContaining('Throughput measurement started'));
+      expect(deps.logger.info).toHaveBeenCalledWith('Throughput measured: 40.0 Mbps (minimum 5 Mbps)');
       expect(deps.logger.info).toHaveBeenCalledWith(expect.stringContaining('Network throughput is 40 Mbps'));
     });
 

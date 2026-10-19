@@ -108,16 +108,25 @@ export async function measureThroughputMbps(options: ThroughputProbeOptions): Pr
 
 /**
  * Runs the probe only when the browser estimate alone would not allow the download (and `saveData` is not set),
- * so a fast, well-estimated connection never pays for a measurement.
+ * so a fast, well-estimated connection never pays for a measurement. Each measurement is reported through `log`.
  */
 export async function measureIfNeeded(
   connection: NetworkConnectionLike | undefined | null,
   probe: ThroughputProbe,
-  thresholdMbps: number = BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS
+  thresholdMbps: number = BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS,
+  log?: (message: string) => void
 ): Promise<number | null> {
   const estimated = evaluateBackgroundDownload(connection, thresholdMbps);
   if (estimated.allowed || estimated.reason === 'save-data') {
     return null;
   }
-  return probe().catch(() => null);
+  const estimateText = typeof connection?.downlink === 'number' ? `${connection.downlink} Mbps` : 'unknown';
+  log?.(`Throughput measurement started (browser downlink estimate: ${estimateText}, ${estimated.reason})`);
+  const measured = await probe().catch(() => null);
+  log?.(
+    measured === null
+      ? 'Throughput measurement failed: no usable result'
+      : `Throughput measured: ${measured.toFixed(1)} Mbps (minimum ${thresholdMbps} Mbps)`
+  );
+  return measured;
 }

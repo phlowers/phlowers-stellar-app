@@ -192,6 +192,36 @@ describe('measureIfNeeded', () => {
     expect(await measureIfNeeded(connection, probe, 5)).toBe(20);
   });
 
+  it('logs the start and the result of a measurement', async () => {
+    const log = vi.fn();
+
+    await measureIfNeeded({ downlink: 1 }, async () => 12.34, 5, log);
+
+    expect(log).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining('measurement started (browser downlink estimate: 1 Mbps')
+    );
+    expect(log).toHaveBeenNthCalledWith(2, 'Throughput measured: 12.3 Mbps (minimum 5 Mbps)');
+  });
+
+  it('logs a failed measurement', async () => {
+    const log = vi.fn();
+
+    await measureIfNeeded(undefined, async () => null, 5, log);
+
+    expect(log).toHaveBeenNthCalledWith(1, expect.stringContaining('estimate: unknown'));
+    expect(log).toHaveBeenNthCalledWith(2, 'Throughput measurement failed: no usable result');
+  });
+
+  it('logs nothing when no measurement is needed', async () => {
+    const log = vi.fn();
+
+    await measureIfNeeded({ downlink: 8 }, async () => 20, 5, log);
+    await measureIfNeeded({ downlink: 1, saveData: true }, async () => 20, 5, log);
+
+    expect(log).not.toHaveBeenCalled();
+  });
+
   it('returns null when the probe rejects', async () => {
     expect(await measureIfNeeded({ downlink: 1 }, () => Promise.reject(new Error('x')), 5)).toBeNull();
   });
