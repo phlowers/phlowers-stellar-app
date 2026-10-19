@@ -223,10 +223,13 @@ describe('HomeComponent', () => {
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(false);
       fixture.detectChanges();
       expect(component.offlineStatus()).toBe('offline');
+      expect(getByTestId('offline-card')?.textContent).toContain('No connection. Offline mode ready.');
+      expect(getByTestId('offline-card')?.textContent).not.toContain('Online.');
 
       (onlineServiceMock.online$ as BehaviorSubject<boolean>).next(true);
       fixture.detectChanges();
       expect(component.offlineStatus()).toBe('success');
+      expect(getByTestId('offline-card')?.textContent).toContain('Online. Offline mode ready.');
     });
 
     it('should render the card title and text', () => {
