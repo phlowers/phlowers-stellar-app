@@ -16,9 +16,10 @@ import { SwInstallRefusedMessage, SwLogMessage } from './sw-messages.interfaces'
  */
 export function evaluateUpdateCheck(
   connection: NetworkConnectionLike | undefined,
-  estimate: { usage?: number; quota?: number } | undefined
+  estimate: { usage?: number; quota?: number } | undefined,
+  measuredMbps: number | null = null
 ): UpdateCheckDecision {
-  if (!evaluateBackgroundDownload(connection).allowed) {
+  if (!evaluateBackgroundDownload(connection, undefined, measuredMbps).allowed) {
     return { allowed: false, reason: 'deferred-network' };
   }
   const storage = evaluateStorageForInstall({

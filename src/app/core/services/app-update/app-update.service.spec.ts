@@ -281,6 +281,30 @@ describe('AppUpdateService', () => {
       expect(workbox().update).toHaveBeenCalledTimes(1);
     });
 
+    it('checks despite a low downlink estimate when the active probe measures enough', async () => {
+      connection.downlink = 1;
+      registration.active = {};
+      const stream = (): Response => {
+        const queue = [new Uint8Array(1000), new Uint8Array(500_000)];
+        const reader = {
+          read: async () => (queue.length > 0 ? { done: false, value: queue.shift() } : { done: true }),
+          cancel: async () => undefined
+        };
+        return { ok: true, body: { getReader: () => reader } } as unknown as Response;
+      };
+      fetchSpy.mockImplementation(async () => stream());
+      const times = [0, 10, 20];
+      const nowSpy = vi.spyOn(performance, 'now').mockImplementation(() => times.shift() ?? 20);
+
+      await service.start();
+      await flush();
+      nowSpy.mockRestore();
+
+      expect(fetchSpy).toHaveBeenCalledWith('/service-worker.js', expect.objectContaining({ cache: 'no-store' }));
+      expect(workbox().update).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('measured 400.0 Mbps'));
+    });
+
     it('checks when the browser comes back online', async () => {
       registration.active = {};
       await service.start();

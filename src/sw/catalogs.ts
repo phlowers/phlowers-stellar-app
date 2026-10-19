@@ -1,7 +1,7 @@
 import { ExpirationPlugin } from 'workbox-expiration';
 import { Route } from 'workbox-routing';
 import { CacheFirst } from 'workbox-strategies';
-import { evaluateBackgroundDownload } from '@services/app-update/network-rule.helpers';
+import { evaluateBackgroundDownload, measureIfNeeded } from '@services/app-update/network-rule.helpers';
 import { USER_DATA_STORAGE_RESERVE_BYTES } from '@services/app-update/storage-rule.constantes';
 import { evaluateStorageForInstall } from '@services/app-update/storage-rule.helpers';
 import {
@@ -74,7 +74,8 @@ export async function prefetchCatalogs(deps: PrefetchCatalogsDeps): Promise<Pref
   ];
 
   if (!deps.message.force) {
-    const network = evaluateBackgroundDownload(deps.connection);
+    const measuredMbps = await measureIfNeeded(deps.connection, deps.probe ?? (() => Promise.resolve(null)));
+    const network = evaluateBackgroundDownload(deps.connection, undefined, measuredMbps);
     if (!network.allowed) {
       deps.logger.info(`Catalog prefetch deferred (${network.reason})`);
       return refusal(network.reason as InstallRefusalReason);

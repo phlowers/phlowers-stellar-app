@@ -1,5 +1,5 @@
 import type { PrecacheController } from 'workbox-precaching';
-import type { NetworkConnectionLike } from '@services/app-update/network-rule.interfaces';
+import type { NetworkConnectionLike, ThroughputProbe } from '@services/app-update/network-rule.interfaces';
 import type { SizedManifestEntry } from '@services/app-update/storage-rule.interfaces';
 import type { PrefetchCatalogsMessage } from '@services/app-update/sw-messages.interfaces';
 
@@ -40,6 +40,8 @@ export interface GuardedInstallDeps {
   controller: PrecacheControllerLike;
   entries: readonly SizedManifestEntry[];
   connection: NetworkConnectionLike | undefined;
+  /** Active throughput measurement, used when the browser estimate alone refuses the download. */
+  probe?: ThroughputProbe;
   storage: StorageEstimator | undefined;
   caches: CacheStorage;
   clients: SwClients;
@@ -72,6 +74,7 @@ export interface PrefetchCatalogsDeps {
   origin: string;
   strategy: CatalogStrategyLike;
   connection: NetworkConnectionLike | undefined;
+  probe?: ThroughputProbe;
   storage: StorageEstimator | undefined;
   logger: SwLogger;
 }

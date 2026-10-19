@@ -31,6 +31,7 @@ import {
   VersionFile
 } from './app-update.interfaces';
 import { BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS } from './network-rule.constantes';
+import { measureIfNeeded, measureThroughputMbps } from './network-rule.helpers';
 import { NetworkConnectionLike } from './network-rule.interfaces';
 import { SwInstallRefusedMessage } from './sw-messages.interfaces';
 
@@ -106,10 +107,12 @@ export class AppUpdateService {
    * @returns the decision; the update itself is downloaded and verified in the background by the service worker.
    */
   async checkForUpdate(): Promise<UpdateCheckDecision> {
-    const decision = evaluateUpdateCheck(this.connection(), await this.estimateStorage());
+    const measuredMbps = await measureIfNeeded(this.connection(), () => this.measureThroughput());
+    const decision = evaluateUpdateCheck(this.connection(), await this.estimateStorage(), measuredMbps);
     const downlink = this.connection()?.downlink;
     this.logger.info(
-      `${APP_UPDATE_LOG_PREFIX} network downlink is ${typeof downlink === 'number' ? downlink : 'unknown'} Mbps ` +
+      `${APP_UPDATE_LOG_PREFIX} network downlink is ${typeof downlink === 'number' ? downlink : 'unknown'} Mbps, ` +
+        `measured ${measuredMbps === null ? 'not measured' : `${measuredMbps.toFixed(1)} Mbps`} ` +
         `(minimum ${BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS} Mbps)`
     );
     if (!decision.allowed) {
@@ -286,6 +289,11 @@ export class AppUpdateService {
   private describeRunningVersion(): string {
     const { version, gitHash, buildDateUtc } = this.runningVersion();
     return `v${version} hash ${gitHash} built ${buildDateUtc ?? 'unknown'}`;
+  }
+
+  /** Active throughput probe on the service worker script (the file the browser downloads to check for an update). */
+  private measureThroughput(): Promise<number | null> {
+    return measureThroughputMbps({ fetchFn: (url, init) => fetch(url, init), url: SERVICE_WORKER_URL });
   }
 
   private connection(): NetworkConnectionLike | undefined {

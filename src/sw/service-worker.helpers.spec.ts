@@ -301,6 +301,44 @@ describe('service worker helpers', () => {
       );
     });
 
+    it('starts the precache when the probe measures enough despite a low downlink estimate', async () => {
+      const probe = vi.fn(async () => 40);
+      const deps = createDeps({ connection: { downlink: 1 }, probe });
+
+      await runGuardedInstall(deps);
+
+      expect(probe).toHaveBeenCalledTimes(1);
+      expect(deps.controller.install).toHaveBeenCalledWith(deps.event);
+      expect(deps.logger.info).toHaveBeenCalledWith(expect.stringContaining('Network throughput is 40 Mbps'));
+    });
+
+    it('refuses with the measured value when the probe is also below the threshold', async () => {
+      const deps = createDeps({ connection: { downlink: 1 }, probe: async () => 2 });
+
+      await expect(runGuardedInstall(deps)).rejects.toMatchObject({ reason: 'downlink-below-threshold' });
+      expect((deps.clients as ReturnType<typeof createFakeClients>).postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ reason: 'downlink-below-threshold', downlinkMbps: 2 })
+      );
+      expect(deps.controller.install).not.toHaveBeenCalled();
+    });
+
+    it('does not run the probe when the downlink estimate already allows the download', async () => {
+      const probe = vi.fn(async () => 1);
+      const deps = createDeps({ connection: { downlink: 8 }, probe });
+
+      await runGuardedInstall(deps);
+
+      expect(probe).not.toHaveBeenCalled();
+    });
+
+    it('does not run the probe with saveData', async () => {
+      const probe = vi.fn(async () => 50);
+      const deps = createDeps({ connection: { downlink: 1, saveData: true }, probe });
+
+      await expect(runGuardedInstall(deps)).rejects.toMatchObject({ reason: 'save-data' });
+      expect(probe).not.toHaveBeenCalled();
+    });
+
     it.each([
       [undefined, 'api-unavailable'],
       [{ downlink: 50, saveData: true }, 'save-data']

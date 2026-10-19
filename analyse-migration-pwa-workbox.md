@@ -165,7 +165,8 @@ Chrome et Edge exposent `navigator.connection.downlink` : le **débit effectif e
 > **Limites connues de l'approximation**
 >
 > - Une 4G rapide peut dépasser le seuil (téléchargement autorisé) ; un wifi saturé peut passer en dessous (téléchargement reporté, sans gravité).
-> - L'estimation dépend du trafic récent : sa fiabilité **dans le service worker** (sans page active) est à confirmer au prototype ; repli possible : la page transmet sa mesure.
+> - L'estimation dépend du trafic récent (et ignore les connexions vers des adresses privées) : elle sous-estime souvent un réseau inactif ou interne, surtout **dans le service worker** (sans page active).
+> - **Mesure active (implémentée)** : quand `downlink` seul refuserait (et hors `saveData`), la page et le service worker mesurent le débit en lisant au plus 1 Mio d'un fichier de même origine (page : `/service-worker.js` ; service worker : le plus gros fichier du précache), chronométré depuis le premier octet reçu, 4 s maximum. La décision utilise `max(downlink, mesure)`. Une connexion bien estimée ne déclenche aucune mesure. Code partagé : `measureThroughputMbps` / `measureIfNeeded` dans `network-rule.helpers.ts`. La requête porte l'en-tête `X-Throughput-Probe` ; le serveur de simulation e2e bride ces requêtes au débit simulé.
 > - **Premier usage sans catalogues** (hypothèse H4) : si IndexedDB ne contient encore aucun catalogue, l'application est inutilisable ; proposition : télécharger les catalogues absents quel que soit le réseau.
 
 ### Règle d'espace de stockage (contrôle avant téléchargement)

@@ -155,6 +155,29 @@ describe('service worker catalogs', () => {
       expect(deps.strategy.handle).not.toHaveBeenCalled();
     });
 
+    it('downloads when the probe measures enough despite a low downlink estimate', async () => {
+      const probe = vi.fn(async () => 30);
+      const deps = createDeps({ connection: { downlink: 1 }, probe });
+
+      const result = await prefetchCatalogs(deps);
+
+      expect(probe).toHaveBeenCalledTimes(1);
+      expect(result.refused).toBeNull();
+    });
+
+    it('does not probe when force is true', async () => {
+      const probe = vi.fn(async () => 30);
+      const deps = createDeps({
+        connection: { downlink: 1 },
+        probe,
+        message: { type: 'PREFETCH_CATALOGS', urls: [CABLES], force: true }
+      });
+
+      await prefetchCatalogs(deps);
+
+      expect(probe).not.toHaveBeenCalled();
+    });
+
     it('downloads the URLs one at a time when force is true, whatever the network', async () => {
       const order: string[] = [];
       const strategy: CatalogStrategyLike = {
