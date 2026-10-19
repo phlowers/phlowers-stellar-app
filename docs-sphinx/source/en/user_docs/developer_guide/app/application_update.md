@@ -91,6 +91,12 @@ the space back. The page shows "Not enough storage space" once per start.
   network, not enough storage, unavailable. A waiting update keeps "ready offline": the active version still works
   offline.
 - Home page "News" card: shows the "applied at the next start" message while a version waits.
+- Home page "Application status" card: connectivity is independent of offline-mode readiness.
+  `OnlineService` verifies reachability with an uncached `HEAD /version.json` at startup, on window focus and
+  every 30 seconds while the browser reports a connection. This URL is never served by the service worker.
+  A network failure or a 5-second timeout switches the card to "No connection"; a browser `offline` event does so
+  immediately. Any HTTP response, including an authentication or server error, proves network reachability:
+  API health is tracked separately. Cached offline-mode readiness is preserved.
 - Admin page: running version and its build date (read from `/version.json`, network only), offline state, measured
   downlink and threshold, storage usage and quota, last refusal, "Check for updates" button. "Reset application"
   unregisters the service worker and deletes the application caches; IndexedDB is kept.

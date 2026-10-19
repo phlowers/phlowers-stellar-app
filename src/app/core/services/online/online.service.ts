@@ -6,31 +6,38 @@
  */
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, distinctUntilChanged, fromEvent, map, merge, startWith } from 'rxjs';
-import { timeout } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  BehaviorSubject,
+  Observable,
+  catchError,
+  distinctUntilChanged,
+  fromEvent,
+  map,
+  merge,
+  of,
+  shareReplay,
+  startWith,
+  switchMap,
+  timeout,
+  timer
+} from 'rxjs';
+import { fromFetch } from 'rxjs/fetch';
+import { VERSION_FILE_TIMEOUT_MS, VERSION_FILE_URL } from '@services/app-update/app-update.constantes';
+import { LoggerService } from '@services/logger/logger.service';
+import { CONNECTIVITY_CHECK_INTERVAL_MS } from '@services/online/online.constantes';
+import { ServerStatus } from '@services/online/online.interfaces';
 import { environment } from '@src/environments/environment';
 
-/**
- * Enumeration of possible server connection states.
- *
- * @category Types
- */
-export enum ServerStatus {
-  /** Server status is being determined */
-  LOADING = 'LOADING',
-  /** Server is reachable and responding */
-  ONLINE = 'ONLINE',
-  /** Server is not reachable */
-  OFFLINE = 'OFFLINE'
-}
+export { ServerStatus } from '@services/online/online.interfaces';
 
 /**
  * Service for monitoring network connectivity and server availability.
  *
  * @remarks
- * The OnlineService tracks both browser online/offline status and server
- * reachability. It combines window online/offline events with periodic
- * server health checks to provide accurate connectivity information.
+ * Browser offline events take effect immediately. While the browser reports a
+ * connection, an uncached request verifies reachability at startup, on window
+ * focus and every 30 seconds. API availability is tracked separately.
  *
  * @example
  * ```typescript
@@ -56,40 +63,66 @@ export class OnlineService {
   public serverOnline$ = new BehaviorSubject<ServerStatus>(ServerStatus.LOADING);
 
   private readonly httpClient = inject(HttpClient);
+  private readonly logger = inject(LoggerService);
 
   constructor() {
-    this.online$.subscribe((online) => {
-      if (online) {
-        this.httpClient
-          .get(environment.apiUrl, { observe: 'response' })
-          .pipe(timeout(2000))
-          .subscribe({
-            next: () => {
-              this.serverOnline$.next(ServerStatus.ONLINE);
-            },
-            error: () => {
-              this.serverOnline$.next(ServerStatus.OFFLINE);
-            }
-          });
-      }
-    });
+    this.online$
+      .pipe(
+        switchMap((online) => {
+          if (!online) {
+            return of(ServerStatus.OFFLINE);
+          }
+          this.serverOnline$.next(ServerStatus.LOADING);
+          return this.httpClient.get(environment.apiUrl, { observe: 'response' }).pipe(
+            timeout(2000),
+            map(() => ServerStatus.ONLINE),
+            catchError(() => of(ServerStatus.OFFLINE))
+          );
+        }),
+        takeUntilDestroyed()
+      )
+      .subscribe((status) => this.serverOnline$.next(status));
   }
 
   /**
-   * Internal observable that merges browser online/offline events.
+   * Shared connectivity checks; version.json is excluded from the service worker cache.
    * @internal
    */
-  private readonly _online = merge(fromEvent(globalThis, 'online'), fromEvent(globalThis, 'offline')).pipe(
-    startWith(undefined),
-    map(() => globalThis.navigator.onLine)
+  private readonly _online = merge(
+    fromEvent(globalThis, 'online').pipe(map(() => true)),
+    fromEvent(globalThis, 'offline').pipe(map(() => false))
+  ).pipe(
+    startWith(globalThis.navigator.onLine),
+    distinctUntilChanged(),
+    switchMap((online) =>
+      online
+        ? merge(timer(0, CONNECTIVITY_CHECK_INTERVAL_MS), fromEvent(globalThis, 'focus')).pipe(
+            switchMap(() =>
+              fromFetch(VERSION_FILE_URL, { method: 'HEAD', cache: 'no-store', redirect: 'manual' }).pipe(
+                timeout(VERSION_FILE_TIMEOUT_MS),
+                // Any HTTP response proves connectivity, including an expired session or a server error.
+                map(() => true),
+                catchError(() => {
+                  this.logger.info('[Online] Network reachability check failed');
+                  return of(false);
+                })
+              )
+            )
+          )
+        : of(false)
+    ),
+    startWith(false),
+    distinctUntilChanged(),
+    takeUntilDestroyed(),
+    shareReplay({ bufferSize: 1, refCount: true })
   );
 
   /**
-   * Observable that emits the browser's online/offline status.
+   * Observable that emits verified network connectivity, independently of API health.
    *
    * @returns Observable emitting true when online, false when offline
    */
   get online$(): Observable<boolean> {
-    return this._online.pipe(distinctUntilChanged());
+    return this._online;
   }
 }

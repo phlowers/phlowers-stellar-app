@@ -97,6 +97,13 @@ pour rendre l'espace. La page affiche « Espace de stockage insuffisant » une f
   ligne » : la version active fonctionne toujours hors ligne.
 - Carte « Actualités » de l'accueil : affiche le message « appliquée au prochain démarrage » tant qu'une version
   attend.
+- Carte « État de l'application » de l'accueil : la connexion est indépendante de la disponibilité du mode hors ligne.
+  `OnlineService` vérifie l'accès réseau par un `HEAD /version.json` sans cache au démarrage, au retour du focus
+  et toutes les 30 secondes tant que le navigateur indique une connexion. Cette URL n'est jamais servie par le
+  service worker. Un échec réseau ou un délai de 5 secondes fait passer la carte à « Pas de connexion » ; un événement
+  navigateur `offline` le fait immédiatement. Toute réponse HTTP, y compris une erreur d'authentification ou du
+  serveur, confirme l'accès réseau : la disponibilité de l'API est suivie séparément.
+  La disponibilité du mode hors ligne en cache est conservée.
 - Page admin : version en cours et sa date de build (lue dans `/version.json`, réseau uniquement), état hors ligne,
   débit mesuré et seuil, usage et quota de stockage, dernier refus, bouton « Vérifier les mises à jour ».
   « Réinitialiser l'application » désenregistre le service worker et supprime les caches de l'application ;
@@ -251,4 +258,3 @@ Tests automatisés (lancez d'abord `npm run build`) :
 - `npm run e2e:update` : cycle de vie, première installation, catalogues, règle réseau, hors ligne, session expirée,
   espace de stockage, transition depuis l'ancien système, kill-switch et retour arrière ;
 - `npm run e2e:update-faults` : 502 passagère, données du site effacées.
-
