@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { InstructionManualService } from './instruction-manual.service';
-import { MANUAL_PDF_FILE_NAME } from './instruction-manual.constantes';
+import { MANUAL_PDF_URL_FILE_NAME } from './instruction-manual.constantes';
 
 describe('InstructionManualService', () => {
   let service: InstructionManualService;
@@ -17,7 +17,7 @@ describe('InstructionManualService', () => {
   afterEach(() => httpMock.verify());
 
   it('should build the PDF url from the language', () => {
-    expect(service.getPdfUrl('fr')).toBe(`/docs/fr/${MANUAL_PDF_FILE_NAME}`);
+    expect(service.getPdfUrl('fr')).toBe(`/docs/fr/${MANUAL_PDF_URL_FILE_NAME}`);
   });
 
   it('should read size and update date from the response headers', () => {
@@ -26,6 +26,7 @@ describe('InstructionManualService', () => {
 
     const request = httpMock.expectOne('/docs/en/manual.pdf');
     expect(request.request.method).toBe('HEAD');
+    expect(request.request.headers.get('Cache-Control')).toBe('no-cache');
     request.flush(null, {
       headers: {
         'Content-Type': 'application/pdf',

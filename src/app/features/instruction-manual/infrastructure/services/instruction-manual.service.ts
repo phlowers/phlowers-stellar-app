@@ -7,7 +7,7 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, map, Observable, of } from 'rxjs';
-import { MANUAL_PDF_FILE_NAME, UNKNOWN_PDF_INFO } from './instruction-manual.constantes';
+import { MANUAL_PDF_URL_FILE_NAME, UNKNOWN_PDF_INFO } from './instruction-manual.constantes';
 import { ManualPdfInfo } from './instruction-manual.model';
 
 @Injectable({
@@ -22,7 +22,7 @@ export class InstructionManualService {
    * @param lang - Language code of the app (e.g. `en`, `fr`).
    */
   getPdfUrl(lang: string): string {
-    return `/docs/${lang}/${MANUAL_PDF_FILE_NAME}`;
+    return `/docs/${lang}/${MANUAL_PDF_URL_FILE_NAME}`;
   }
 
   /**
@@ -31,7 +31,8 @@ export class InstructionManualService {
    * @param pdfUrl - URL returned by {@link getPdfUrl}.
    */
   getPdfInfo(pdfUrl: string): Observable<ManualPdfInfo> {
-    return this.http.head(pdfUrl, { observe: 'response' }).pipe(
+    // no-cache makes the browser revalidate, so a new release never shows the size and date of the previous PDF
+    return this.http.head(pdfUrl, { observe: 'response', headers: { 'Cache-Control': 'no-cache' } }).pipe(
       map((response) => this.toPdfInfo(response)),
       catchError(() => of(UNKNOWN_PDF_INFO))
     );

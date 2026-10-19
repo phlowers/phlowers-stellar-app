@@ -40,10 +40,10 @@ extensions = [
 ]
 
 # Sphinx-SimplePDF configuration
-# The app builds the same name from its own appName and version
-# (see features/instruction-manual), so keep both slug rules identical.
+# The app builds the same name from its own appName (see features/instruction-manual), so keep both slug rules
+# identical. The version is left out on purpose: an app installed before a release keeps linking to this file.
 app_name_slug = re.sub(r"[^a-z0-9]+", "_", app_name.lower()).strip("_")
-simplepdf_file_name = f"{app_name_slug}_documentation_{app_version}.pdf"
+simplepdf_file_name = f"{app_name_slug}_documentation.pdf"
 simplepdf_vars = {
     "primary": "#1F4E79",
     "links": "#1F4E79",

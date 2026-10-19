@@ -38,7 +38,7 @@ html-rtd:
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)/$(SPHINX_LANGUAGE)" "$(BUILDDIR)" -c "$(SOURCEDIR)" $(SPHINXOPTS) $(O)
 
 # Build a PDF from the Sphinx sources using sphinx-simplepdf (English).
-# The file is named <app>_documentation_<version>.pdf (see simplepdf_file_name in conf.py).
+# The file is named <app>_documentation.pdf (see simplepdf_file_name in conf.py).
 simplepdf:
 	@SPHINX_LANGUAGE=en $(SPHINXBUILD) -M simplepdf "$(SOURCEDIR)/en" "$(BUILDDIR)" -c "$(SOURCEDIR)" $(SPHINXOPTS) $(O)
 
@@ -57,7 +57,7 @@ epub-rtd:
 	@$(SPHINXBUILD) -M epub "$(SOURCEDIR)/$(SPHINX_LANGUAGE)" "$(BUILDDIR)" -c "$(SOURCEDIR)" $(SPHINXOPTS) $(O)
 
 # Build both language PDFs and copy them where the app links to them
-# (/docs/<lang>/<app>_documentation_<version>.pdf, see features/instruction-manual).
+# (/docs/<lang>/<app>_documentation.pdf, see features/instruction-manual).
 # Set SPHINX_APP_NAME to the app's APP_NAME so both sides compute the same file name.
 publish-pdf: simplepdf simplepdf-fr
 	mkdir -p "$(PUBLISH_DIR)/en" "$(PUBLISH_DIR)/fr"

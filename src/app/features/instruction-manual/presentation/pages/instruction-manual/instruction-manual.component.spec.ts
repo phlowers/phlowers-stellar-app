@@ -3,7 +3,10 @@ import { of } from 'rxjs';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { InstructionManualComponent } from './instruction-manual.component';
 import { InstructionManualService } from '@features/instruction-manual/infrastructure/services/instruction-manual.service';
-import { MANUAL_PDF_FILE_NAME } from '@features/instruction-manual/infrastructure/services/instruction-manual.constantes';
+import {
+  MANUAL_PDF_DOWNLOAD_FILE_NAME,
+  MANUAL_PDF_URL_FILE_NAME
+} from '@features/instruction-manual/infrastructure/services/instruction-manual.constantes';
 import { ManualPdfInfo } from '@features/instruction-manual/infrastructure/services/instruction-manual.model';
 
 describe('InstructionManualComponent', () => {
@@ -20,7 +23,7 @@ describe('InstructionManualComponent', () => {
 
   beforeEach(async () => {
     serviceMock = {
-      getPdfUrl: vi.fn((lang: string) => `/docs/${lang}/${MANUAL_PDF_FILE_NAME}`),
+      getPdfUrl: vi.fn((lang: string) => `/docs/${lang}/${MANUAL_PDF_URL_FILE_NAME}`),
       getPdfInfo: vi.fn()
     };
 
@@ -54,14 +57,14 @@ describe('InstructionManualComponent', () => {
     const element = await render({ sizeBytes: null, lastModified: null });
     const button = element.querySelector<HTMLAnchorElement>('[data-testid="pdf-download-btn"]');
 
-    expect(button?.getAttribute('href')).toBe(`/docs/en/${MANUAL_PDF_FILE_NAME}`);
-    expect(button?.getAttribute('download')).toBe(MANUAL_PDF_FILE_NAME);
+    expect(button?.getAttribute('href')).toBe(`/docs/en/${MANUAL_PDF_URL_FILE_NAME}`);
+    expect(button?.getAttribute('download')).toBe(MANUAL_PDF_DOWNLOAD_FILE_NAME);
   });
 
   it('should display the file name, size and update date of the PDF', async () => {
     const element = await render({ sizeBytes: 2.5 * 1024 * 1024, lastModified: new Date(2026, 9, 14) });
 
-    expect(element.querySelector('[data-testid="pdf-file-name"]')?.textContent).toBe(MANUAL_PDF_FILE_NAME);
+    expect(element.querySelector('[data-testid="pdf-file-name"]')?.textContent).toBe(MANUAL_PDF_DOWNLOAD_FILE_NAME);
     expect(element.querySelector('[data-testid="pdf-size"]')?.textContent).toMatch(/2[.,]5/);
     expect(element.querySelector('[data-testid="pdf-update-date"]')?.textContent).toBe('14/10/2026');
   });

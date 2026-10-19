@@ -4,7 +4,7 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { switchMap } from 'rxjs';
 import {
-  MANUAL_PDF_FILE_NAME,
+  MANUAL_PDF_DOWNLOAD_FILE_NAME,
   ONLINE_MANUAL_URL,
   UNKNOWN_PDF_INFO
 } from '@features/instruction-manual/infrastructure/services/instruction-manual.constantes';
@@ -30,7 +30,7 @@ export class InstructionManualComponent {
     initialValue: this.transloco.getActiveLang()
   });
 
-  readonly pdfFileName = MANUAL_PDF_FILE_NAME;
+  readonly pdfFileName = MANUAL_PDF_DOWNLOAD_FILE_NAME;
   readonly onlineManualUrl = ONLINE_MANUAL_URL;
   readonly pdfUrl = computed(() => this.instructionManualService.getPdfUrl(this.activeLang()));
 

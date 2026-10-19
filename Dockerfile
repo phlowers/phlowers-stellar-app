@@ -27,7 +27,7 @@ RUN npm run build
 RUN apk add --no-cache make pango fontconfig ttf-dejavu
 
 # The PDFs are copied after the build so they stay out of the service worker
-# precache list. Served as /docs/<lang>/<app>_documentation_<version>.pdf.
+# precache list. Served as /docs/<lang>/<app>_documentation.pdf.
 RUN cd docs-sphinx \
     && uv venv --clear --python 3.13 \
     && uv pip install -r requirements.txt \
