@@ -27,9 +27,28 @@ export function buildCantonSupportOptions(supports: { number: string | null }[])
   return supports.map((support, index) => ({ label: formatSupportNumber(support.number), value: index.toString() }));
 }
 
-/** Default left support: the first support of the current span, as a support index. */
+/** Options of the left support selector limited to the two supports of the span (RG.VIS-SUP.SUP.1/2), value = support index. */
+export function buildSpanSupportOptions(
+  supports: { number: string | null }[],
+  span: number[] | null | undefined
+): { label: string; value: string }[] {
+  if (span?.length !== 2) return [];
+  return span.map((index) => ({
+    label: formatSupportNumber(supports[index]?.number ?? null),
+    value: index.toString()
+  }));
+}
+
+/** Default left support: the first (departure) support of the current span, as a support index (RG.VIS-SUP.SUP.3). */
 export function getDefaultLeftSupport(span: number[] | null): string | null {
   return span?.length ? span[0].toString() : null;
+}
+
+/** Keeps the current left support when it belongs to the span, otherwise falls back to the default one. */
+export function resolveLeftSupport(current: string | null, span: number[] | null): string | null {
+  return current !== null && span?.some((index) => index.toString() === current)
+    ? current
+    : getDefaultLeftSupport(span);
 }
 
 /** Inputs displayed for the given calculation type. */

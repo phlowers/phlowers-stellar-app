@@ -11,6 +11,7 @@ import {
   applyTangentAimingSupportDefaults,
   getDefaultLeftSupport
 } from './tangent-aiming-support/tangent-aiming-support.helpers';
+import { applyTangentAimingExteriorDefaults } from './tangent-aiming-exterior/tangent-aiming-exterior.helpers';
 import { CALCULUS_TYPE_BY_METHOD } from './calculus-setting.constantes';
 
 @Component({
@@ -48,6 +49,11 @@ export class CalculusSettingComponent {
       this.measureData.update((d) => ({
         ...applyTangentAimingSupportDefaults(d, getDefaultLeftSupport(d.span)),
         calculationMethod: 'tangente-aiming'
+      }));
+    } else if (type === 'TANGENT_AIMING_EXTERIOR') {
+      this.measureData.update((d) => ({
+        ...applyTangentAimingExteriorDefaults(d, getDefaultLeftSupport(d.span)),
+        calculationMethod: 'tangente-aiming-exterior'
       }));
     }
   }

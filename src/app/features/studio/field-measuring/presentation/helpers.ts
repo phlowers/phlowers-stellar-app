@@ -295,6 +295,14 @@ export const createInitialMeasureData = (
     cableParameter: null,
     tangentLeftSupport: null,
     tangentSpanLength: null,
+    exteriorLeftSupport: null,
+    exteriorSpanLength: null,
+    exteriorHAccDistance: null,
+    exteriorVerticalAccAngleLeft: null,
+    exteriorVerticalAccAngleRight: null,
+    exteriorCalculationType: 'parametre',
+    exteriorParameter: null,
+    exteriorTangentAngle: null,
     ...PEP_INPUT_DEFAULTS,
     transit: null,
     windIncidence: null,
@@ -348,7 +356,8 @@ export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
   papoto: null,
   cableTemperature: null,
   parameter15C: null,
-  tangentAimingSupport: null
+  tangentAimingSupport: null,
+  tangentAimingExterior: null
 };
 
 /**
@@ -360,9 +369,12 @@ export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
 export const getActiveParameterOutput = (
   measureData: Pick<FieldMeasure, 'calculationMethod' | 'outputs'>
 ): Pick<TangentAimingSupportResult, 'parameter' | 'uncertainty'> | null => {
+  const { calculationMethod, outputs } = measureData;
   const source =
-    measureData.calculationMethod === 'tangente-aiming'
-      ? measureData.outputs.tangentAimingSupport
-      : measureData.outputs.papoto;
+    calculationMethod === 'tangente-aiming'
+      ? outputs.tangentAimingSupport
+      : calculationMethod === 'tangente-aiming-exterior'
+        ? outputs.tangentAimingExterior
+        : outputs.papoto;
   return source ? { parameter: source.parameter, uncertainty: source.uncertainty } : null;
 };

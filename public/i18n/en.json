@@ -696,7 +696,7 @@
       "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)"
     },
     "tangent-aiming-support": {
-      "mandatory-msg": "All fields are mandatory for calculus setting",
+      "mandatory-msg": "All data are mandatory for the parameter calculation.",
       "h-acc-distance-label": "Vertical dist. from the device to the cable attach. of the left support",
       "vertical-acc-angle-label": "Vertical angle from the device to the cable attach. of the right support",
       "calculation-failed": "Failed to calculate the parameter by tangent aiming"
@@ -705,7 +705,8 @@
       "mandatory-msg": "All data are mandatory for the parameter calculation.",
       "h-acc-distance-label": "Horizontal dist. from the device to the cable attach. of the left support",
       "vertical-acc-angle-left-label": "Vertical angle from the device to the cable attach. of the left support",
-      "vertical-acc-angle-right-label": "Vertical angle from the device to the cable attach. of the right support"
+      "vertical-acc-angle-right-label": "Vertical angle from the device to the cable attach. of the right support",
+      "calculation-failed": "Failed to calculate the parameter by tangent aiming (exterior)"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",

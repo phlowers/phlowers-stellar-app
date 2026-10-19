@@ -3,17 +3,30 @@ import { ComponentRef, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
+import { vi } from 'vitest';
 
 import { TangentAimingExteriorComponent } from './tangent-aiming-exterior.component';
+import * as helpers from './tangent-aiming-exterior.helpers';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@core/services/notification/notification.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
+
+const validMeasure = (overrides?: Partial<FieldMeasure>): FieldMeasure =>
+  helpers.applyTangentAimingExteriorDefaults(
+    createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior', span: [0, 1], ...overrides }),
+    '0'
+  );
 
 describe('TangentAimingExterior component', () => {
   let component: TangentAimingExteriorComponent;
   let fixture: ComponentFixture<TangentAimingExteriorComponent>;
   let componentRef: ComponentRef<TangentAimingExteriorComponent>;
   const litData = signal<unknown>(null);
+  const logger = { error: vi.fn(), warn: vi.fn(), info: vi.fn(), log: vi.fn() };
+  const notification = { error: vi.fn() };
 
   const getByTestId = (id: string): HTMLElement | null => fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
   const setInput = (id: string, value: string) => {
@@ -32,11 +45,12 @@ describe('TangentAimingExterior component', () => {
   };
 
   beforeEach(async () => {
+    vi.clearAllMocks();
     litData.set(null);
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: { 'common.meter': 'm', 'common.grade-unit': 'gr' } },
+          langs: { en: { 'common.meter': 'm', 'common.grade-unit': 'gr', 'common.yes': 'Yes', 'common.no': 'No' } },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
         }),
@@ -45,6 +59,8 @@ describe('TangentAimingExterior component', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        { provide: LoggerService, useValue: logger },
+        { provide: NotificationService, useValue: notification },
         {
           provide: PlotSpanService,
           useValue: { section: signal({ supports: [{ number: 'ABCDEFG' }, { number: 'S2' }] }) }
@@ -56,7 +72,7 @@ describe('TangentAimingExterior component', () => {
     fixture = TestBed.createComponent(TangentAimingExteriorComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-    componentRef.setInput('measureData', createTestMeasureData({ span: [0, 1] }));
+    componentRef.setInput('measureData', createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior', span: [0, 1] }));
     fixture.detectChanges();
   });
 
@@ -71,7 +87,9 @@ describe('TangentAimingExterior component', () => {
     ]);
   });
 
-  it('should default the left support to the first support of the span', () => {
+  it('should display the left support of the measure', () => {
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
     expect(component.form.controls.leftSupport.value).toBe('0');
   });
 
@@ -142,30 +160,83 @@ describe('TangentAimingExterior component', () => {
     expect(getByTestId('tangent-aiming-exterior-parameter')).toBeNull();
   });
 
-  it('should render the results with the respected criterion', () => {
-    component.result.set({ parameter: 1000, uncertainty: 2, criterion: 1, checkValidity: true });
+  it('should calculate and render the results with the respected criterion', async () => {
+    componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
-    expect(getByTestId('tangent-aiming-exterior-parameter')?.textContent).toContain('1000');
-    expect(getByTestId('tangent-aiming-exterior-uncertainty')?.textContent).toContain('2');
-    expect(getByTestId('tangent-aiming-exterior-criterion')?.textContent).toContain('1 %');
+    await component.calculate();
+    fixture.detectChanges();
+    expect(component.measureData().outputs.tangentAimingExterior).toEqual({
+      parameter: 1000,
+      uncertainty: 1.5,
+      criterion: 1,
+      checkValidity: true
+    });
+    expect(getByTestId('tangent-aiming-exterior-parameter')?.textContent?.trim()).toBe('1000 m');
+    expect(getByTestId('tangent-aiming-exterior-uncertainty')?.textContent?.trim()).toBe('1.5 m');
+    expect(getByTestId('tangent-aiming-exterior-criterion')?.textContent).toContain('Yes');
     expect(getByTestId('tangent-aiming-exterior-criterion-ok')).toBeTruthy();
   });
 
-  it('should render the not respected icon when the criterion fails', () => {
-    component.result.set({ parameter: 10, uncertainty: 2, criterion: 5, checkValidity: false });
+  it('should render the not respected icon when the criterion fails', async () => {
+    vi.spyOn(helpers, 'calculateTangentAimingExteriorMock').mockResolvedValueOnce({
+      result: { parameter: 10, uncertainty: 2, criterion: 5, checkValidity: false },
+      error: null
+    });
+    componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
+    await component.calculate();
+    fixture.detectChanges();
+    expect(getByTestId('tangent-aiming-exterior-criterion')?.textContent).toContain('No');
     expect(getByTestId('tangent-aiming-exterior-criterion-ko')).toBeTruthy();
   });
 
-  it('should clear the result when an input changes', () => {
-    component.result.set({ parameter: 10, uncertainty: 2, criterion: 5, checkValidity: false });
+  it('should clear the result when an input changes', async () => {
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    await component.calculate();
     setInput('h-acc-distance-input', '12');
-    expect(component.result()).toBeNull();
+    expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
+    expect(component.measureData().exteriorHAccDistance).toBe(12);
   });
 
-  it('should clear the result when the calculation type changes', () => {
-    component.result.set({ parameter: 10, uncertainty: 2, criterion: 5, checkValidity: false });
+  it('should clear the result when the calculation type changes', async () => {
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    await component.calculate();
     component.updateCalculationType('tangente');
-    expect(component.result()).toBeNull();
+    expect(component.measureData().exteriorCalculationType).toBe('tangente');
+    expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
+  });
+
+  it('should not calculate when the form is invalid', async () => {
+    const spy = vi.spyOn(helpers, 'calculateTangentAimingExteriorMock');
+    await component.calculate();
+    expect(spy).not.toHaveBeenCalled();
+    expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
+  });
+
+  it('should log and notify when the calculation fails', async () => {
+    vi.spyOn(helpers, 'calculateTangentAimingExteriorMock').mockResolvedValueOnce({ result: null, error: 'boom' });
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    await component.calculate();
+    fixture.detectChanges();
+    expect(logger.error).toHaveBeenCalled();
+    expect(notification.error).toHaveBeenCalled();
+    expect(component.hasError()).toBe(true);
+    expect(getByTestId('calculation-error')).toBeTruthy();
+    expect(component.isCalculating()).toBe(false);
+  });
+
+  it('should not alter the support fields nor its result', () => {
+    const support = { parameter: 5, uncertainty: 1, criterion: 1, checkValidity: true };
+    componentRef.setInput(
+      'measureData',
+      validMeasure({ cableHAccDistance: 7, outputs: { ...createTestMeasureData().outputs, tangentAimingSupport: support } })
+    );
+    fixture.detectChanges();
+    setInput('h-acc-distance-input', '12');
+    expect(component.measureData().cableHAccDistance).toBe(7);
+    expect(component.measureData().outputs.tangentAimingSupport).toBe(support);
   });
 });

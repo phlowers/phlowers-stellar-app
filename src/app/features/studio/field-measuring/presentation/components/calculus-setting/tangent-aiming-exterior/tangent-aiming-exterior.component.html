@@ -139,7 +139,7 @@
     </p>
     <p-selectbutton
       [options]="calculationTypeOptions()"
-      [ngModel]="calculationType()"
+      [ngModel]="measureData().exteriorCalculationType"
       (onChange)="updateCalculationType($event.value)"
       optionLabel="label"
       optionValue="value"
@@ -174,7 +174,8 @@
   <button
     app-btn
     type="button"
-    [disabled]="!isFormValid()"
+    [disabled]="!isFormValid() || isCalculating()"
+    [btnLoading]="isCalculating()"
     (click)="calculate()"
     data-testid="calculate-tangent-aiming-exterior-btn"
   >
@@ -183,8 +184,14 @@
   </button>
 </div>
 
-<output class="block">
-  @if (result(); as result) {
+<output class="block" [attr.aria-busy]="isCalculating()">
+  @if (hasError()) {
+    <p-message severity="error" size="small" role="alert" aria-live="assertive" data-testid="calculation-error">
+      {{ 'field-measuring.tangent-aiming-exterior.calculation-failed' | transloco }}
+    </p-message>
+  }
+
+  @if (measureData().outputs.tangentAimingExterior; as result) {
     <div class="tangent-aiming-exterior__results">
       <h2 class="tangent-aiming-exterior__results__title">{{ 'common.results' | transloco }}</h2>
 
@@ -199,14 +206,14 @@
         <div class="incertainParam">
           <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
           <dd data-testid="tangent-aiming-exterior-uncertainty">
-            {{ result.uncertainty.toFixed(0) }} {{ 'common.meter' | transloco }}
+            {{ result.uncertainty | number: '1.1-1' }} {{ 'common.meter' | transloco }}
           </dd>
         </div>
 
         <div class="crit">
           <dt>{{ 'common.criterion-label' | transloco }}</dt>
           <dd class="crit__result" data-testid="tangent-aiming-exterior-criterion">
-            {{ result.criterion.toFixed(0) }} %
+            {{ (result.checkValidity ? 'common.yes' : 'common.no') | transloco }}
             @if (result.checkValidity) {
               <app-icon
                 icon="check"

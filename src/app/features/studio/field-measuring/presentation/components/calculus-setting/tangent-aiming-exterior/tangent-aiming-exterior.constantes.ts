@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import {
   TangentAimingSupportFieldRule,
   TangentAimingSupportNumberFieldView,
@@ -111,4 +112,15 @@ export const TANGENT_AIMING_EXTERIOR_TYPE_FIELD: Record<
 > = {
   parametre: 'parameter',
   tangente: 'tangentAngle'
+};
+
+/** `FieldMeasure` field persisting each input of the form. */
+export const TANGENT_AIMING_EXTERIOR_MODEL_FIELDS: Record<TangentAimingExteriorInputField, keyof FieldMeasure> = {
+  leftSupport: 'exteriorLeftSupport',
+  spanLength: 'exteriorSpanLength',
+  hAccDistance: 'exteriorHAccDistance',
+  verticalAccAngleLeft: 'exteriorVerticalAccAngleLeft',
+  verticalAccAngleRight: 'exteriorVerticalAccAngleRight',
+  parameter: 'exteriorParameter',
+  tangentAngle: 'exteriorTangentAngle'
 };

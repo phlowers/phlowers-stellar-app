@@ -58,7 +58,7 @@
   <app-tangent-aiming-support [(measureData)]="measureData" />
 }
 @if (selectedCalculusType() === 'TANGENT_AIMING_EXTERIOR') {
-  <app-tangent-aiming-exterior [measureData]="measureData()" />
+  <app-tangent-aiming-exterior [(measureData)]="measureData" />
 }
 @if (selectedCalculusType() === 'PEP') {
   <app-pep />

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, model, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
@@ -10,20 +10,26 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@core/services/notification/notification.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
-import { FieldMeasure, TangentAimingSupportResult } from '@features/studio/field-measuring/domain/types';
-import {
-  buildCantonSupportOptions,
-  getDefaultLeftSupport
-} from '../tangent-aiming-support/tangent-aiming-support.helpers';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
+import { buildCantonSupportOptions } from '../tangent-aiming-support/tangent-aiming-support.helpers';
 import {
   TANGENT_AIMING_EXTERIOR_FIELD_RULES,
+  TANGENT_AIMING_EXTERIOR_MODEL_FIELDS,
   TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS
 } from './tangent-aiming-exterior.constantes';
-import { createTangentAimingExteriorForm, syncDisplayedControls } from './tangent-aiming-exterior.helpers';
+import {
+  calculateTangentAimingExteriorMock,
+  createTangentAimingExteriorForm,
+  getDisplayedInputFields,
+  syncDisplayedControls,
+  toTangentAimingExteriorInputs
+} from './tangent-aiming-exterior.helpers';
 import { TangentAimingExteriorCalculationType } from './tangent-aiming-exterior.interfaces';
 
 @Component({
@@ -47,13 +53,15 @@ import { TangentAimingExteriorCalculationType } from './tangent-aiming-exterior.
   styleUrl: './tangent-aiming-exterior.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-/** Form for the tangent aiming (exterior) parameter calculation (inputs only, calculation not implemented yet). */
+/** Form for the tangent aiming (exterior) parameter calculation. */
 export class TangentAimingExteriorComponent {
-  /** Field measure, read-only: provides the current span (default left support, calculated span length). */
-  measureData = input.required<FieldMeasure>();
+  /** Field measure data model bound two-way. */
+  measureData = model.required<FieldMeasure>();
 
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly logger = inject(LoggerService);
+  private readonly notificationService = inject(NotificationService);
   private readonly translocoService = inject(TranslocoService);
   private readonly activeLang = toSignal(this.translocoService.langChanges$, {
     initialValue: this.translocoService.getActiveLang()
@@ -62,15 +70,14 @@ export class TangentAimingExteriorComponent {
   readonly fields = TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS;
   readonly rules = TANGENT_AIMING_EXTERIOR_FIELD_RULES;
   readonly form = createTangentAimingExteriorForm();
-  readonly calculationType = signal<TangentAimingExteriorCalculationType>('parametre');
   readonly isFormValid = signal(false);
-  /** Calculation result; stays empty until the calculation is implemented. */
-  readonly result = signal<TangentAimingSupportResult | null>(null);
+  readonly isCalculating = signal(false);
+  readonly hasError = signal(false);
 
   /** Every support of the section. */
   readonly supportOptions = computed(() => buildCantonSupportOptions(this.spanService.section()?.supports ?? []));
-  readonly showParameterField = computed(() => this.calculationType() === 'parametre');
-  readonly showTangentAngleField = computed(() => this.calculationType() === 'tangente');
+  readonly showParameterField = computed(() => this.measureData().exteriorCalculationType === 'parametre');
+  readonly showTangentAngleField = computed(() => this.measureData().exteriorCalculationType === 'tangente');
 
   /** Span length computed by the engine for the selected span, or null when unavailable. */
   readonly calculatedSpanLength = computed(() => {
@@ -88,28 +95,42 @@ export class TangentAimingExteriorComponent {
   });
 
   constructor() {
+    // Model -> form: only differing values are written, so a value being typed is never overwritten.
     effect(() => {
-      const defaultLeftSupport = getDefaultLeftSupport(this.measureData().span);
-      if (this.form.controls.leftSupport.value === null && defaultLeftSupport !== null) {
-        this.form.controls.leftSupport.setValue(defaultLeftSupport);
+      const data = this.measureData();
+      syncDisplayedControls(this.form, data.exteriorCalculationType);
+      for (const field of getDisplayedInputFields(data.exteriorCalculationType)) {
+        const value = data[TANGENT_AIMING_EXTERIOR_MODEL_FIELDS[field]] ?? null;
+        if (this.form.controls[field].value !== value) {
+          this.form.controls[field].setValue(value as never, { emitEvent: false });
+        }
       }
-    });
-
-    effect(() => {
-      syncDisplayedControls(this.form, this.calculationType());
       this.isFormValid.set(this.form.valid);
     });
 
-    // A change of input invalidates the previous result.
+    // Form -> model: a change of input invalidates the previous result.
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       this.isFormValid.set(this.form.valid);
-      this.result.set(null);
+      const values = this.form.getRawValue();
+      this.measureData.update((d) => ({
+        ...d,
+        ...Object.fromEntries(
+          getDisplayedInputFields(d.exteriorCalculationType).map((field) => [
+            TANGENT_AIMING_EXTERIOR_MODEL_FIELDS[field],
+            values[field]
+          ])
+        ),
+        outputs: { ...d.outputs, tangentAimingExterior: null }
+      }));
     });
   }
 
-  updateCalculationType(calculationType: TangentAimingExteriorCalculationType): void {
-    this.calculationType.set(calculationType);
-    this.result.set(null);
+  updateCalculationType(exteriorCalculationType: TangentAimingExteriorCalculationType): void {
+    this.measureData.update((d) => ({
+      ...d,
+      exteriorCalculationType,
+      outputs: { ...d.outputs, tangentAimingExterior: null }
+    }));
   }
 
   /** Message of the active error of a control, once it has been touched. */
@@ -120,8 +141,26 @@ export class TangentAimingExteriorComponent {
     return numberError ? this.translocoService.translate(numberError.key, numberError.params) : '';
   }
 
-  /** Calculation is out of scope for now: only reveals the validation errors. */
-  calculate(): void {
+  async calculate(): Promise<void> {
     this.form.markAllAsTouched();
+    if (!this.isFormValid() || this.isCalculating()) return;
+
+    this.isCalculating.set(true);
+    this.hasError.set(false);
+    try {
+      const { result, error } = await calculateTangentAimingExteriorMock(
+        toTangentAimingExteriorInputs(this.measureData())
+      );
+      if (error || !result) throw new Error(error ?? 'Empty tangent aiming result');
+      this.measureData.update((d) => ({ ...d, outputs: { ...d.outputs, tangentAimingExterior: result } }));
+    } catch (error) {
+      this.logger.error('Failed to calculate the tangent aiming (exterior) parameter', error);
+      this.hasError.set(true);
+      this.notificationService.error(
+        this.translocoService.translate('field-measuring.tangent-aiming-exterior.calculation-failed')
+      );
+    } finally {
+      this.isCalculating.set(false);
+    }
   }
 }

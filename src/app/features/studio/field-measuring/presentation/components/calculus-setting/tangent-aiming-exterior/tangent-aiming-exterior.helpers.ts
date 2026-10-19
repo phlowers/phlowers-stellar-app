@@ -6,9 +6,13 @@
  */
 
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { createNumberControl } from '../tangent-aiming-support/tangent-aiming-support.helpers';
+import { TangentAimingSupportCalculation } from '../tangent-aiming-support/tangent-aiming-support.interfaces';
 import {
   TANGENT_AIMING_EXTERIOR_COMMON_FIELDS,
+  TANGENT_AIMING_EXTERIOR_FIELD_RULES,
+  TANGENT_AIMING_EXTERIOR_MODEL_FIELDS,
   TANGENT_AIMING_EXTERIOR_RULE_FIELDS,
   TANGENT_AIMING_EXTERIOR_TYPE_FIELD
 } from './tangent-aiming-exterior.constantes';
@@ -16,6 +20,7 @@ import {
   TangentAimingExteriorCalculationType,
   TangentAimingExteriorForm,
   TangentAimingExteriorInputField,
+  TangentAimingExteriorInputs,
   TangentAimingExteriorNumericField
 } from './tangent-aiming-exterior.interfaces';
 
@@ -57,4 +62,65 @@ export function syncDisplayedControls(
       control.disable({ emitEvent: false });
     }
   }
+}
+
+const INPUT_FIELDS = Object.keys(TANGENT_AIMING_EXTERIOR_MODEL_FIELDS) as TangentAimingExteriorInputField[];
+const NUMERIC_FIELDS = INPUT_FIELDS.filter(
+  (field): field is TangentAimingExteriorNumericField => field !== 'leftSupport'
+);
+
+/** Whether every displayed input of `data` satisfies its rules (single source of truth: the form validators). */
+export function isTangentAimingExteriorDataValid(data: FieldMeasure): boolean {
+  const form = createTangentAimingExteriorForm();
+  form.patchValue(
+    Object.fromEntries(INPUT_FIELDS.map((field) => [field, data[TANGENT_AIMING_EXTERIOR_MODEL_FIELDS[field]] ?? null])),
+    { emitEvent: false }
+  );
+  syncDisplayedControls(form, data.exteriorCalculationType);
+  return form.valid;
+}
+
+/** Fills the empty (`null`/`undefined`) tangent aiming (exterior) inputs with their default. */
+export function applyTangentAimingExteriorDefaults(data: FieldMeasure, defaultLeftSupport: string | null): FieldMeasure {
+  const next: FieldMeasure = {
+    ...data,
+    exteriorCalculationType: data.exteriorCalculationType ?? 'parametre',
+    exteriorLeftSupport: data.exteriorLeftSupport ?? defaultLeftSupport
+  };
+  for (const field of NUMERIC_FIELDS) {
+    const key = TANGENT_AIMING_EXTERIOR_MODEL_FIELDS[field] as 'exteriorSpanLength';
+    next[key] ??= TANGENT_AIMING_EXTERIOR_FIELD_RULES[field].default;
+  }
+  return next;
+}
+
+/** Resets the numeric input hidden by the calculation type switch. */
+export function resetNonDisplayedExteriorFields(data: FieldMeasure): FieldMeasure {
+  return data.exteriorCalculationType === 'parametre'
+    ? { ...data, exteriorTangentAngle: null }
+    : { ...data, exteriorParameter: null };
+}
+
+/** Builds the calculation inputs from the measure. */
+export function toTangentAimingExteriorInputs(data: FieldMeasure): TangentAimingExteriorInputs {
+  return {
+    leftSupport: data.exteriorLeftSupport,
+    spanLength: data.exteriorSpanLength,
+    hAccDistance: data.exteriorHAccDistance,
+    verticalAccAngleLeft: data.exteriorVerticalAccAngleLeft,
+    verticalAccAngleRight: data.exteriorVerticalAccAngleRight,
+    calculationType: data.exteriorCalculationType,
+    parameter: data.exteriorParameter,
+    tangentAngle: data.exteriorTangentAngle
+  };
+}
+
+/**
+ * Temporary mock: the engine has no tangent aiming Task yet, constant value on purpose.
+ * TODO: replace with workerPythonService.runTask(Task.<tangent aiming>) once the Task exists.
+ */
+export async function calculateTangentAimingExteriorMock(
+  _inputs: TangentAimingExteriorInputs
+): Promise<TangentAimingSupportCalculation> {
+  return { result: { parameter: 1000, uncertainty: 1.5, criterion: 1, checkValidity: true }, error: null };
 }

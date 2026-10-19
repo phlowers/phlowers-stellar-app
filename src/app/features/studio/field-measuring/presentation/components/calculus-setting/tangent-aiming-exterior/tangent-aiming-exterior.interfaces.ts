@@ -21,4 +21,16 @@ export type TangentAimingExteriorForm = FormGroup<
 >;
 
 /** Calculation type of the tangent aiming (exterior) form. */
-export type TangentAimingExteriorCalculationType = FieldMeasure['calculationType'];
+export type TangentAimingExteriorCalculationType = FieldMeasure['exteriorCalculationType'];
+
+/** Inputs sent to the tangent aiming (exterior) calculation. */
+export interface TangentAimingExteriorInputs {
+  leftSupport: string | null;
+  spanLength: number | null;
+  hAccDistance: number | null;
+  verticalAccAngleLeft: number | null;
+  verticalAccAngleRight: number | null;
+  calculationType: TangentAimingExteriorCalculationType;
+  parameter: number | null;
+  tangentAngle: number | null;
+}

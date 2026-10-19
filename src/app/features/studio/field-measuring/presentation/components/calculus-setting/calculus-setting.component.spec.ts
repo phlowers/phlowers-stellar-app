@@ -56,13 +56,13 @@ describe('CalculusSetting component', () => {
     expect(labels[3].nativeElement.textContent.trim()).toBe('PEP');
   });
 
-  it('should display the tangent aiming exterior component when selected, without persisting it', () => {
+  it('should display the tangent aiming exterior component when selected and persist the method', () => {
     component.onCalculusTypeChange('TANGENT_AIMING_EXTERIOR');
     fixture.detectChanges();
 
     expect(fixture.debugElement.query(By.css('app-tangent-aiming-exterior'))).toBeTruthy();
     expect(fixture.debugElement.query(By.css('app-papoto'))).toBeFalsy();
-    expect(component.measureData().calculationMethod).toBe('papoto');
+    expect(component.measureData().calculationMethod).toBe('tangente-aiming-exterior');
   });
 
   it('should keep the exterior selection when the measure is edited', () => {
@@ -147,6 +147,27 @@ describe('CalculusSetting component', () => {
       component.onCalculusTypeChange('TANGENT_AIMING_SUPPORT');
       expect(component.measureData().leftSupport).toBe(before.leftSupport);
       expect(component.measureData().outputs.papoto).toBe(before.outputs.papoto);
+    });
+
+    it('should persist the exterior method and apply its defaults without touching the other modes', () => {
+      const before = component.measureData();
+      component.onCalculusTypeChange('TANGENT_AIMING_EXTERIOR');
+      const data = component.measureData();
+      expect(data.calculationMethod).toBe('tangente-aiming-exterior');
+      expect(data.exteriorParameter).toBe(20);
+      expect(data.exteriorSpanLength).toBe(0);
+      expect(data.exteriorCalculationType).toBe('parametre');
+      expect(data.cableParameter).toBe(before.cableParameter);
+      expect(data.leftSupport).toBe(before.leftSupport);
+      expect(component.selectedCalculusType()).toBe('TANGENT_AIMING_EXTERIOR');
+    });
+
+    it('should keep the values of the exterior mode when switching away and back', () => {
+      component.onCalculusTypeChange('TANGENT_AIMING_EXTERIOR');
+      component.measureData.update((d) => ({ ...d, exteriorHAccDistance: 7 }));
+      component.onCalculusTypeChange('TANGENT_AIMING_SUPPORT');
+      component.onCalculusTypeChange('TANGENT_AIMING_EXTERIOR');
+      expect(component.measureData().exteriorHAccDistance).toBe(7);
     });
 
     it('should switch back to PAPOTO', () => {

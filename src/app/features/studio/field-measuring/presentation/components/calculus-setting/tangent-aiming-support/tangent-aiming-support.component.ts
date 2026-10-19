@@ -22,10 +22,11 @@ import {
   TANGENT_AIMING_SUPPORT_NUMBER_FIELDS
 } from './tangent-aiming-support.constantes';
 import {
-  buildCantonSupportOptions,
+  buildSpanSupportOptions,
   calculateTangentAimingSupportMock,
   createTangentAimingSupportForm,
   getDisplayedInputFields,
+  resolveLeftSupport,
   syncDisplayedControls,
   toTangentAimingSupportInputs
 } from './tangent-aiming-support.helpers';
@@ -72,8 +73,10 @@ export class TangentAimingSupportComponent {
   readonly isCalculating = signal(false);
   readonly hasError = signal(false);
 
-  /** Every support of the section (RG.SUP.1). */
-  readonly supportOptions = computed(() => buildCantonSupportOptions(this.spanService.section()?.supports ?? []));
+  /** Both supports of the selected span, empty without span (RG.VIS-SUP.SUP.1/2). */
+  readonly supportOptions = computed(() =>
+    buildSpanSupportOptions(this.spanService.section()?.supports ?? [], this.measureData().span)
+  );
   readonly showParameterField = computed(() => this.measureData().calculationType === 'parametre');
   readonly showTangentAngleField = computed(() => this.measureData().calculationType === 'tangente');
 
@@ -99,6 +102,19 @@ export class TangentAimingSupportComponent {
   });
 
   constructor() {
+    // A span change must not leave a left support outside the span (RG.VIS-SUP.SUP.3).
+    effect(() => {
+      const { tangentLeftSupport, span } = this.measureData();
+      const resolved = resolveLeftSupport(tangentLeftSupport, span);
+      if (resolved !== tangentLeftSupport) {
+        this.measureData.update((d) => ({
+          ...d,
+          tangentLeftSupport: resolved,
+          outputs: { ...d.outputs, tangentAimingSupport: null }
+        }));
+      }
+    });
+
     // Model -> form: only differing values are written, so a value being typed is never overwritten.
     effect(() => {
       const data = this.measureData();
