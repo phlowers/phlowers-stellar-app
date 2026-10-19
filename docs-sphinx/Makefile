@@ -33,6 +33,7 @@ html-rtd:
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)/$(SPHINX_LANGUAGE)" "$(BUILDDIR)" -c "$(SOURCEDIR)" $(SPHINXOPTS) $(O)
 
 # Build a PDF from the Sphinx sources using sphinx-simplepdf (English).
+# The file is named <app>_documentation_<version>.pdf (see simplepdf_file_name in conf.py).
 simplepdf:
 	@SPHINX_LANGUAGE=en $(SPHINXBUILD) -M simplepdf "$(SOURCEDIR)/en" "$(BUILDDIR)" -c "$(SOURCEDIR)" $(SPHINXOPTS) $(O)
 
@@ -53,13 +54,13 @@ epub-rtd:
 # Convert the SimplePDF output into an editable PowerPoint deck (English).
 pptx: simplepdf
 	uv run python scripts/build_pptx_from_pdf.py \
-		--pdf "build/simplepdf/stellar_documentation.pdf" \
+		--pdf "$$(ls build/simplepdf/*.pdf)" \
 		--output "build/pptx/stellar_documentation.pptx"
 
 # Convert the SimplePDF output into an editable PowerPoint deck (French).
 pptx-fr: simplepdf-fr
 	uv run python scripts/build_pptx_from_pdf.py \
-		--pdf "build/fr/simplepdf/stellar_documentation.pdf" \
+		--pdf "$$(ls build/fr/simplepdf/*.pdf)" \
 		--output "build/fr/pptx/stellar_documentation.pptx"
 
 # Catch-all target: route all unknown targets to Sphinx using the new

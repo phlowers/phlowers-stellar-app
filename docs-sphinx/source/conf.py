@@ -5,6 +5,7 @@
 
 import json
 import os
+import re
 from pathlib import Path
 
 # -- Project information -----------------------------------------------------
@@ -39,7 +40,10 @@ extensions = [
 ]
 
 # Sphinx-SimplePDF configuration
-simplepdf_file_name = "stellar_documentation.pdf"
+# The app builds the same name from its own appName and version
+# (see features/instruction-manual), so keep both slug rules identical.
+app_name_slug = re.sub(r"[^a-z0-9]+", "_", app_name.lower()).strip("_")
+simplepdf_file_name = f"{app_name_slug}_documentation_{app_version}.pdf"
 simplepdf_vars = {
     "primary": "#1F4E79",
     "links": "#1F4E79",
