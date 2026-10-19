@@ -302,6 +302,7 @@ describe('AppUpdateService', () => {
 
       expect(fetchSpy).toHaveBeenCalledWith('/service-worker.js', expect.objectContaining({ cache: 'no-store' }));
       expect(workbox().update).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('[AppUpdate] Throughput measured: 400.0 Mbps'));
       expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('measured 400.0 Mbps'));
     });
 

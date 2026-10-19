@@ -74,7 +74,12 @@ export async function prefetchCatalogs(deps: PrefetchCatalogsDeps): Promise<Pref
   ];
 
   if (!deps.message.force) {
-    const measuredMbps = await measureIfNeeded(deps.connection, deps.probe ?? (() => Promise.resolve(null)));
+    const measuredMbps = await measureIfNeeded(
+      deps.connection,
+      deps.probe ?? (() => Promise.resolve(null)),
+      undefined,
+      (message) => deps.logger.info(message)
+    );
     const network = evaluateBackgroundDownload(deps.connection, undefined, measuredMbps);
     if (!network.allowed) {
       deps.logger.info(`Catalog prefetch deferred (${network.reason})`);

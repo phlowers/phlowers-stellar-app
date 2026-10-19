@@ -138,7 +138,12 @@ async function refuse(deps: GuardedInstallDeps, message: Omit<SwInstallRefusedMe
  */
 export async function runGuardedInstall(deps: GuardedInstallDeps): Promise<void> {
   deps.logger.info('New version detected: installation started');
-  const measuredMbps = await measureIfNeeded(deps.connection, deps.probe ?? (() => Promise.resolve(null)));
+  const measuredMbps = await measureIfNeeded(
+    deps.connection,
+    deps.probe ?? (() => Promise.resolve(null)),
+    undefined,
+    (message) => deps.logger.info(message)
+  );
   const network = evaluateBackgroundDownload(deps.connection, undefined, measuredMbps);
   deps.logger.info(
     `Network throughput is ${network.downlinkMbps ?? 'unknown'} Mbps (minimum ${BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS} Mbps): ` +

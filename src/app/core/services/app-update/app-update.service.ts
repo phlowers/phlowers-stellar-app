@@ -107,7 +107,12 @@ export class AppUpdateService {
    * @returns the decision; the update itself is downloaded and verified in the background by the service worker.
    */
   async checkForUpdate(): Promise<UpdateCheckDecision> {
-    const measuredMbps = await measureIfNeeded(this.connection(), () => this.measureThroughput());
+    const measuredMbps = await measureIfNeeded(
+      this.connection(),
+      () => this.measureThroughput(),
+      undefined,
+      (message) => this.logger.info(`${APP_UPDATE_LOG_PREFIX} ${message}`)
+    );
     const decision = evaluateUpdateCheck(this.connection(), await this.estimateStorage(), measuredMbps);
     const downlink = this.connection()?.downlink;
     this.logger.info(
