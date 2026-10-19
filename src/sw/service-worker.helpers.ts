@@ -2,7 +2,7 @@ import type { PrecacheEntry } from 'workbox-precaching';
 import type { RouteHandler, RouteHandlerCallback, WorkboxPlugin } from 'workbox-core/types';
 import { NavigationRoute } from 'workbox-routing';
 import { BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS } from '@services/app-update/network-rule.constantes';
-import { evaluateBackgroundDownload } from '@services/app-update/network-rule.helpers';
+import { evaluateBackgroundDownload, measureIfNeeded } from '@services/app-update/network-rule.helpers';
 import { USER_DATA_STORAGE_RESERVE_BYTES } from '@services/app-update/storage-rule.constantes';
 import { computeMissingBytes, evaluateStorageForInstall } from '@services/app-update/storage-rule.helpers';
 import type { SizedManifestEntry } from '@services/app-update/storage-rule.interfaces';
@@ -138,9 +138,10 @@ async function refuse(deps: GuardedInstallDeps, message: Omit<SwInstallRefusedMe
  */
 export async function runGuardedInstall(deps: GuardedInstallDeps): Promise<void> {
   deps.logger.info('New version detected: installation started');
-  const network = evaluateBackgroundDownload(deps.connection);
+  const measuredMbps = await measureIfNeeded(deps.connection, deps.probe ?? (() => Promise.resolve(null)));
+  const network = evaluateBackgroundDownload(deps.connection, undefined, measuredMbps);
   deps.logger.info(
-    `Network downlink is ${network.downlinkMbps ?? 'unknown'} Mbps (minimum ${BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS} Mbps): ` +
+    `Network throughput is ${network.downlinkMbps ?? 'unknown'} Mbps (minimum ${BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS} Mbps): ` +
       (network.allowed ? 'download allowed' : `download blocked (${network.reason})`)
   );
   if (!network.allowed) {

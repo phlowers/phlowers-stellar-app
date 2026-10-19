@@ -29,6 +29,14 @@ describe('app-update helpers', () => {
       expect(evaluateUpdateCheck({ downlink: 10, saveData: true }, undefined).reason).toBe('deferred-network');
     });
 
+    it('allows a low downlink estimate when the measured throughput reaches the threshold', () => {
+      expect(evaluateUpdateCheck({ downlink: 1 }, { usage: 0, quota: GB }, 20)).toEqual({
+        allowed: true,
+        reason: null
+      });
+      expect(evaluateUpdateCheck({ downlink: 10, saveData: true }, undefined, 20).reason).toBe('deferred-network');
+    });
+
     it('refuses when the user data reserve is not free', () => {
       expect(evaluateUpdateCheck({ downlink: 8 }, { usage: 0, quota: 1024 })).toEqual({
         allowed: false,

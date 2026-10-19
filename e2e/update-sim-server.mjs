@@ -262,6 +262,24 @@ function send(response, statusCode, body, contentType = 'text/plain; charset=utf
   response.end(body);
 }
 
+/** Streams `body` at `mbps` so the application throughput probe measures the simulated downlink. */
+function sendThrottled(response, resolved, mbps) {
+  const CHUNK_BYTES = 16 * 1024;
+  const intervalMs = (CHUNK_BYTES * 8) / (Math.max(mbps, 0.05) * 1000);
+  response.writeHead(resolved.status, { 'content-type': resolved.contentType, 'cache-control': 'no-store' });
+  let offset = 0;
+  const timer = setInterval(() => {
+    if (offset >= resolved.body.length || response.destroyed) {
+      clearInterval(timer);
+      response.end();
+      return;
+    }
+    response.write(resolved.body.subarray(offset, offset + CHUNK_BYTES));
+    offset += CHUNK_BYTES;
+  }, intervalMs);
+  response.on('close', () => clearInterval(timer));
+}
+
 function sendJson(response, body) {
   send(response, 200, JSON.stringify(body), 'application/json; charset=utf-8');
 }
@@ -507,6 +525,10 @@ function handleRequest(request, response, requestUrl) {
   }
 
   const resolved = resolveScenarioBody(pathname);
+  if (resolved && request.headers['x-throughput-probe']) {
+    sendThrottled(response, resolved, state.downlinkMbps);
+    return;
+  }
   if (resolved) {
     send(response, resolved.status, resolved.body, resolved.contentType);
     return;
