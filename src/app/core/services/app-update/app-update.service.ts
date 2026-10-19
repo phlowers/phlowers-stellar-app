@@ -30,8 +30,8 @@ import {
   UpdateDiagnostics,
   VersionFile
 } from './app-update.interfaces';
-import { BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS } from './network-rule.constantes';
-import { measureIfNeeded, measureThroughputMbps } from './network-rule.helpers';
+import { BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS, THROUGHPUT_MEASUREMENT_REUSE_MS } from './network-rule.constantes';
+import { evaluateBackgroundDownload, measureIfNeeded, measureThroughputMbps } from './network-rule.helpers';
 import { NetworkConnectionLike } from './network-rule.interfaces';
 import { SwInstallRefusedMessage } from './sw-messages.interfaces';
 
@@ -63,6 +63,7 @@ export class AppUpdateService {
 
   private workbox: Workbox | null = null;
   private reRegistration: Promise<void> | null = null;
+  private lastMeasurement: { mbps: number; at: number } | null = null;
   private started = false;
   private waitingNotified = false;
   private storageNotified = false;
@@ -107,12 +108,7 @@ export class AppUpdateService {
    * @returns the decision; the update itself is downloaded and verified in the background by the service worker.
    */
   async checkForUpdate(): Promise<UpdateCheckDecision> {
-    const measuredMbps = await measureIfNeeded(
-      this.connection(),
-      () => this.measureThroughput(),
-      undefined,
-      (message) => this.logger.info(`${APP_UPDATE_LOG_PREFIX} ${message}`)
-    );
+    const measuredMbps = await this.measureNetwork(false);
     const decision = evaluateUpdateCheck(this.connection(), await this.estimateStorage(), measuredMbps);
     const downlink = this.connection()?.downlink;
     this.logger.info(
@@ -142,12 +138,19 @@ export class AppUpdateService {
     return decision;
   }
 
-  /** Current network and storage measurements (admin page). */
+  /**
+   * Current network and storage measurements (admin page).
+   *
+   * @remarks
+   * The network value is the one the update rule uses (best of the browser estimate and the measured throughput),
+   * not the raw browser estimate. A measurement taken moments ago by an update check is reused.
+   */
   async readDiagnostics(): Promise<UpdateDiagnostics> {
-    const downlink = this.connection()?.downlink;
+    const measuredMbps = await this.measureNetwork(true);
+    const { downlinkMbps } = evaluateBackgroundDownload(this.connection(), undefined, measuredMbps);
     const estimate = await this.estimateStorage();
     return {
-      downlinkMbps: typeof downlink === 'number' ? downlink : null,
+      downlinkMbps: downlinkMbps === null ? null : Math.round(downlinkMbps * 10) / 10,
       thresholdMbps: BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS,
       usageBytes: estimate?.usage ?? null,
       quotaBytes: estimate?.quota ?? null
@@ -294,6 +297,27 @@ export class AppUpdateService {
   private describeRunningVersion(): string {
     const { version, gitHash, buildDateUtc } = this.runningVersion();
     return `v${version} hash ${gitHash} built ${buildDateUtc ?? 'unknown'}`;
+  }
+
+  /**
+   * Measures the throughput when the browser estimate alone would refuse the download, and remembers the result.
+   *
+   * @param reuseRecent - reuse a measurement younger than `THROUGHPUT_MEASUREMENT_REUSE_MS` (display only: an
+   * update check always measures again, the network may have changed).
+   */
+  private async measureNetwork(reuseRecent: boolean): Promise<number | null> {
+    const recent = this.lastMeasurement;
+    if (reuseRecent && recent && Date.now() - recent.at < THROUGHPUT_MEASUREMENT_REUSE_MS) {
+      return recent.mbps;
+    }
+    const mbps = await measureIfNeeded(
+      this.connection(),
+      () => this.measureThroughput(),
+      undefined,
+      (message) => this.logger.info(`${APP_UPDATE_LOG_PREFIX} ${message}`)
+    );
+    this.lastMeasurement = mbps === null ? null : { mbps, at: Date.now() };
+    return mbps;
   }
 
   /** Active throughput probe on the service worker script (the file the browser downloads to check for an update). */

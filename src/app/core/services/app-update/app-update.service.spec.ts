@@ -504,12 +504,81 @@ describe('AppUpdateService', () => {
       });
 
       connection.downlink = undefined;
+      fetchSpy.mockRejectedValue(new TypeError('offline'));
       delete (navigator as unknown as Record<string, unknown>)['storage'];
       expect(await service.readDiagnostics()).toEqual({
         downlinkMbps: null,
         thresholdMbps: 5,
         usageBytes: null,
         quotaBytes: null
+      });
+    });
+
+    describe('diagnostics with the active measurement', () => {
+      const probeResponse = (): Response => {
+        const queue = [new Uint8Array(1000), new Uint8Array(125_000)];
+        const reader = {
+          read: async () => (queue.length > 0 ? { done: false, value: queue.shift() } : { done: true }),
+          cancel: async () => undefined
+        };
+        return { ok: true, body: { getReader: () => reader } } as unknown as Response;
+      };
+      const mockProbe = (durationMs: number): ReturnType<typeof vi.spyOn> => {
+        fetchSpy.mockImplementation(async () => probeResponse());
+        const times = [0, 0, durationMs];
+        return vi.spyOn(performance, 'now').mockImplementation(() => times.shift() ?? durationMs);
+      };
+
+      it('shows the measured throughput, rounded, when the browser estimate is too low', async () => {
+        connection.downlink = 1;
+        const nowSpy = mockProbe(97);
+
+        const diagnostics = await service.readDiagnostics();
+        nowSpy.mockRestore();
+
+        expect(diagnostics.downlinkMbps).toBe(10.3);
+      });
+
+      it('keeps the browser estimate when it already reaches the threshold, without measuring', async () => {
+        connection.downlink = 8;
+
+        expect((await service.readDiagnostics()).downlinkMbps).toBe(8);
+        expect(fetchSpy).not.toHaveBeenCalledWith('/service-worker.js', expect.anything());
+      });
+
+      it('reuses a recent measurement, and measures again once it is too old', async () => {
+        connection.downlink = 1;
+        vi.useFakeTimers({ toFake: ['Date'] });
+        const nowSpy = mockProbe(100);
+
+        await service.readDiagnostics();
+        await service.readDiagnostics();
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+        vi.advanceTimersByTime(61_000);
+        fetchSpy.mockClear();
+        nowSpy.mockRestore();
+        mockProbe(100);
+        await service.readDiagnostics();
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        vi.useRealTimers();
+      });
+
+      it('reuses the measurement of an update check', async () => {
+        connection.downlink = 1;
+        registration.active = {};
+        const nowSpy = mockProbe(100);
+        await service.start();
+        await flush();
+        const probeCalls = fetchSpy.mock.calls.filter((call: unknown[]) => call[0] === '/service-worker.js').length;
+
+        const diagnostics = await service.readDiagnostics();
+        nowSpy.mockRestore();
+
+        expect(diagnostics.downlinkMbps).toBe(10);
+        expect(fetchSpy.mock.calls.filter((call: unknown[]) => call[0] === '/service-worker.js')).toHaveLength(
+          probeCalls
+        );
       });
     });
 

@@ -20,3 +20,6 @@ export const THROUGHPUT_PROBE_TIMEOUT_MS = 4000;
 
 /** Header set on the probe request so that a server (or the e2e simulation) can recognise it. */
 export const THROUGHPUT_PROBE_HEADER = 'X-Throughput-Probe';
+
+/** A measurement younger than this is reused by the admin diagnostics instead of downloading the probe again. */
+export const THROUGHPUT_MEASUREMENT_REUSE_MS = 60 * 1000;
