@@ -1,0 +1,232 @@
+<div class="tangent-aiming-exterior__header">
+  <button
+    app-btn
+    disabled
+    [attr.aria-label]="'common.tangent-aiming-help-aria-label' | transloco"
+    data-testid="help-btn"
+  >
+    <app-icon icon="help" aria-hidden="true" />
+  </button>
+
+  <p id="mandatory-tangent-aiming-exterior" class="tangent-aiming-exterior__mandatory-msg">
+    <app-icon icon="info" aria-hidden="true" />
+    <span>{{ 'field-measuring.tangent-aiming-exterior.mandatory-msg' | transloco }}</span>
+  </p>
+</div>
+
+<ng-template #numberField let-field>
+  @let control = field.control;
+  @let error = getError(control);
+  <div [class]="field.view.area">
+    <label [for]="field.view.id">{{ field.view.labelKey | transloco }}</label>
+    <p-inputgroup>
+      <input
+        [id]="field.view.id"
+        type="number"
+        pInputText
+        [formControl]="control"
+        [attr.min]="field.rule.min"
+        [attr.max]="field.rule.max"
+        [attr.step]="field.view.step"
+        [attr.aria-describedby]="
+          'mandatory-tangent-aiming-exterior' + (field.describedBy ? ' ' + field.describedBy : '')
+        "
+        [attr.aria-invalid]="error ? 'true' : null"
+        [attr.aria-errormessage]="error ? field.view.id + '-error' : null"
+        required
+        [attr.data-testid]="field.view.testId"
+      />
+      <p-inputgroup-addon>{{ field.view.unitKey | transloco }}</p-inputgroup-addon>
+    </p-inputgroup>
+    @if (error) {
+      <p-message [id]="field.view.id + '-error'" severity="error" size="small" variant="simple" role="alert">
+        {{ error }}
+      </p-message>
+    }
+  </div>
+</ng-template>
+
+<div class="tangent-aiming-exterior__form">
+  <div class="leftSupport">
+    @let leftSupportError = getError(form.controls.leftSupport);
+    <label for="taeLeftSupport">{{ 'common.left-support-label' | transloco }}</label>
+    <p-select
+      inputId="taeLeftSupport"
+      [options]="supportOptions()"
+      [formControl]="form.controls.leftSupport"
+      optionLabel="label"
+      optionValue="value"
+      [filter]="true"
+      [fluid]="true"
+      appendTo="body"
+      aria-describedby="mandatory-tangent-aiming-exterior"
+      [attr.aria-invalid]="leftSupportError ? 'true' : null"
+      [attr.aria-errormessage]="leftSupportError ? 'taeLeftSupport-error' : null"
+      [required]="true"
+      (onHide)="form.controls.leftSupport.markAsTouched()"
+      data-testid="left-support-select"
+    />
+    @if (leftSupportError) {
+      <p-message id="taeLeftSupport-error" severity="error" size="small" variant="simple" role="alert">
+        {{ leftSupportError }}
+      </p-message>
+    }
+  </div>
+
+  <ng-container
+    *ngTemplateOutlet="
+      numberField;
+      context: {
+        $implicit: {
+          control: form.controls.spanLength,
+          view: fields.spanLength,
+          rule: rules.spanLength,
+          describedBy: 'taeSpanLength-calculated'
+        }
+      }
+    "
+  />
+
+  <div class="spanLengthDesc">
+    <p id="taeSpanLength-calculated" class="spanLength__desc">
+      {{ 'common.calculated-value-label' | transloco }}
+      @if (calculatedSpanLength() !== null) {
+        {{ calculatedSpanLength() | number: '1.0-2' }} {{ 'common.meter' | transloco }}
+      } @else {
+        -
+      }
+    </p>
+  </div>
+
+  <ng-container
+    *ngTemplateOutlet="
+      numberField;
+      context: {
+        $implicit: { control: form.controls.hAccDistance, view: fields.hAccDistance, rule: rules.hAccDistance }
+      }
+    "
+  />
+
+  <ng-container
+    *ngTemplateOutlet="
+      numberField;
+      context: {
+        $implicit: {
+          control: form.controls.verticalAccAngleLeft,
+          view: fields.verticalAccAngleLeft,
+          rule: rules.verticalAccAngleLeft
+        }
+      }
+    "
+  />
+
+  <ng-container
+    *ngTemplateOutlet="
+      numberField;
+      context: {
+        $implicit: {
+          control: form.controls.verticalAccAngleRight,
+          view: fields.verticalAccAngleRight,
+          rule: rules.verticalAccAngleRight
+        }
+      }
+    "
+  />
+
+  <div class="calculationType">
+    <p id="taeCalculationTypeLabel" class="mb-0 font-bold">
+      {{ 'common.calculation-type-label' | transloco }}
+    </p>
+    <p-selectbutton
+      [options]="calculationTypeOptions()"
+      [ngModel]="calculationType()"
+      (onChange)="updateCalculationType($event.value)"
+      optionLabel="label"
+      optionValue="value"
+      allowEmpty="false"
+      ariaLabelledBy="taeCalculationTypeLabel"
+      data-testid="calculation-type-selector"
+    />
+  </div>
+
+  @if (showParameterField()) {
+    <ng-container
+      *ngTemplateOutlet="
+        numberField;
+        context: { $implicit: { control: form.controls.parameter, view: fields.parameter, rule: rules.parameter } }
+      "
+    />
+  }
+
+  @if (showTangentAngleField()) {
+    <ng-container
+      *ngTemplateOutlet="
+        numberField;
+        context: {
+          $implicit: { control: form.controls.tangentAngle, view: fields.tangentAngle, rule: rules.tangentAngle }
+        }
+      "
+    />
+  }
+</div>
+
+<div class="text-right">
+  <button
+    app-btn
+    type="button"
+    [disabled]="!isFormValid()"
+    (click)="calculate()"
+    data-testid="calculate-tangent-aiming-exterior-btn"
+  >
+    <app-icon icon="rocket_launch" aria-hidden="true" />
+    <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
+  </button>
+</div>
+
+<output class="block">
+  @if (result(); as result) {
+    <div class="tangent-aiming-exterior__results">
+      <h2 class="tangent-aiming-exterior__results__title">{{ 'common.results' | transloco }}</h2>
+
+      <dl class="tangent-aiming-exterior__results__list">
+        <div class="param">
+          <dt>{{ 'common.parameter-label' | transloco }}</dt>
+          <dd data-testid="tangent-aiming-exterior-parameter">
+            {{ result.parameter.toFixed(0) }} {{ 'common.meter' | transloco }}
+          </dd>
+        </div>
+
+        <div class="incertainParam">
+          <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
+          <dd data-testid="tangent-aiming-exterior-uncertainty">
+            {{ result.uncertainty.toFixed(0) }} {{ 'common.meter' | transloco }}
+          </dd>
+        </div>
+
+        <div class="crit">
+          <dt>{{ 'common.criterion-label' | transloco }}</dt>
+          <dd class="crit__result" data-testid="tangent-aiming-exterior-criterion">
+            {{ result.criterion.toFixed(0) }} %
+            @if (result.checkValidity) {
+              <app-icon
+                icon="check"
+                class="criterion-ok"
+                role="img"
+                [attr.aria-label]="'common.criterion-respected' | transloco"
+                data-testid="tangent-aiming-exterior-criterion-ok"
+              />
+            } @else {
+              <app-icon
+                icon="close"
+                class="criterion-ko"
+                role="img"
+                [attr.aria-label]="'common.criterion-not-respected' | transloco"
+                data-testid="tangent-aiming-exterior-criterion-ko"
+              />
+            }
+          </dd>
+        </div>
+      </dl>
+    </div>
+  }
+</output>

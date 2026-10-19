@@ -39,7 +39,8 @@ export function getDisplayedInputFields(
   return [...TANGENT_AIMING_SUPPORT_COMMON_FIELDS, TANGENT_AIMING_SUPPORT_TYPE_FIELD[calculationType]];
 }
 
-function createNumberControl(field: TangentAimingSupportNumericField): FormControl<number | null> {
+/** Creates a required numeric control bound to the rules of the given field. */
+export function createNumberControl(field: TangentAimingSupportNumericField): FormControl<number | null> {
   const { min, max, decimals } = TANGENT_AIMING_SUPPORT_FIELD_RULES[field];
   return new FormControl<number | null>(null, [
     Validators.required,

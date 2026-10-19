@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
 import { TangentAimingSupportComponent } from './tangent-aiming-support/tangent-aiming-support.component';
+import { TangentAimingExteriorComponent } from './tangent-aiming-exterior/tangent-aiming-exterior.component';
 import { PepComponent } from './pep/pep.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TranslocoModule } from '@jsverse/transloco';
@@ -14,7 +15,15 @@ import { CALCULUS_TYPE_BY_METHOD } from './calculus-setting.constantes';
 
 @Component({
   selector: 'app-calculus-setting',
-  imports: [FormsModule, RadioButton, PapotoComponent, PepComponent, TangentAimingSupportComponent, TranslocoModule],
+  imports: [
+    FormsModule,
+    RadioButton,
+    PapotoComponent,
+    PepComponent,
+    TangentAimingSupportComponent,
+    TangentAimingExteriorComponent,
+    TranslocoModule
+  ],
   templateUrl: './calculus-setting.component.html',
   styleUrl: './calculus-setting.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -23,9 +32,12 @@ import { CALCULUS_TYPE_BY_METHOD } from './calculus-setting.constantes';
 export class CalculusSettingComponent {
   /** Field measure data model bound two-way. */
   measureData = model.required<FieldMeasure>();
-  readonly selectedCalculusType = linkedSignal(
-    () => CALCULUS_TYPE_BY_METHOD[this.measureData().calculationMethod] ?? 'PAPOTO'
-  );
+  /** Memoized so that editing other fields of the measure does not reset the selected calculus type. */
+  private readonly calculationMethod = computed(() => this.measureData().calculationMethod);
+  readonly selectedCalculusType = linkedSignal({
+    source: this.calculationMethod,
+    computation: (method) => CALCULUS_TYPE_BY_METHOD[method] ?? 'PAPOTO'
+  });
 
   /** Selects a method and persists it in the measure (PEP is not selectable yet). */
   onCalculusTypeChange(type: string): void {

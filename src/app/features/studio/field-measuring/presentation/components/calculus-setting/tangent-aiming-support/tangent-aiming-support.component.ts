@@ -92,7 +92,7 @@ export class TangentAimingSupportComponent {
         value: 'parametre'
       },
       {
-        label: this.translocoService.translate('field-measuring.tangent-aiming-support.calculation-type-tangent'),
+        label: this.translocoService.translate('common.calculation-type-tangent'),
         value: 'tangente'
       }
     ];

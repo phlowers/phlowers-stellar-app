@@ -164,7 +164,14 @@
     "support-name-full-label": "Support name",
     "left-support-label": "Left support",
     "measured-span-length-label": "Measured span length",
-    "calculated-value-label": "Calculated value:"
+    "calculated-value-label": "Calculated value:",
+    "tangent-aiming-help-aria-label": "open tangent aiming help",
+    "calculation-type-label": "Calculation type:",
+    "calculation-type-tangent": "Tangent",
+    "tangent-angle-label": "Cable tangent angle",
+    "criterion-label": "Criterion",
+    "criterion-respected": "Criterion respected",
+    "criterion-not-respected": "Criterion not respected"
   },
   "app": {
     "update": "Update",
@@ -685,20 +692,20 @@
       "success-detail": "Data saved successfully"
     },
     "calculus-setting": {
-      "tangent-aiming-radio-label": "Tangent aiming (Support)"
+      "tangent-aiming-radio-label": "Tangent aiming (Support)",
+      "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)"
     },
     "tangent-aiming-support": {
-      "open-help-aria-label": "open tangent aiming help",
       "mandatory-msg": "All fields are mandatory for calculus setting",
       "h-acc-distance-label": "Vertical dist. from the device to the cable attach. of the left support",
       "vertical-acc-angle-label": "Vertical angle from the device to the cable attach. of the right support",
-      "calculation-type-label": "Calculation type:",
-      "calculation-type-tangent": "Tangent",
-      "tangent-angle-label": "Cable tangent angle",
-      "criterion-label": "Criterion",
-      "criterion-respected": "Criterion respected",
-      "criterion-not-respected": "Criterion not respected",
       "calculation-failed": "Failed to calculate the parameter by tangent aiming"
+    },
+    "tangent-aiming-exterior": {
+      "mandatory-msg": "All data are mandatory for the parameter calculation.",
+      "h-acc-distance-label": "Horizontal dist. from the device to the cable attach. of the left support",
+      "vertical-acc-angle-left-label": "Vertical angle from the device to the cable attach. of the left support",
+      "vertical-acc-angle-right-label": "Vertical angle from the device to the cable attach. of the right support"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",
