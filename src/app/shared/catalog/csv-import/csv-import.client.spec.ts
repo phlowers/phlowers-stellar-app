@@ -7,6 +7,7 @@
 import { TestBed } from '@angular/core/testing';
 import { CsvImportClientService } from './csv-import.client';
 import type { CsvImportWorkerResponse } from './csv-import.worker.interfaces';
+import { CatalogIntegrityError } from './csv-import.errors';
 
 class FakeWorker {
   static instances: FakeWorker[] = [];
@@ -136,6 +137,18 @@ describe('CsvImportClientService', () => {
     worker.emit({ type: 'error', csvKey: 'cables', message: 'boom' });
     await expect(promise).rejects.toThrow('boom');
     expect(worker.terminate).toHaveBeenCalled();
+  });
+
+  it('rejects with a CatalogIntegrityError when the worker reports an integrity failure', async () => {
+    const promise = service.importCsv('cables');
+    FakeWorker.instances[0].emit({ type: 'error', csvKey: 'cables', message: 'mismatch', code: 'integrity' });
+    await expect(promise).rejects.toBeInstanceOf(CatalogIntegrityError);
+  });
+
+  it('rejects with a plain Error when the worker error has no integrity code', async () => {
+    const promise = service.importCsv('cables');
+    FakeWorker.instances[0].emit({ type: 'error', csvKey: 'cables', message: 'boom' });
+    await expect(promise).rejects.not.toBeInstanceOf(CatalogIntegrityError);
   });
 
   it('rejects and terminates worker when worker crashes', async () => {

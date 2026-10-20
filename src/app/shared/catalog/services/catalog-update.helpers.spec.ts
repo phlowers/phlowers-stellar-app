@@ -1,4 +1,4 @@
-import { fetchCatalogHashes } from './catalog-update.helpers';
+import { fetchCatalogHashes, fetchCatalogManifest } from './catalog-update.helpers';
 
 describe('fetchCatalogHashes', () => {
   it('returns the data_hashes map, fetched without cache', async () => {
@@ -31,5 +31,23 @@ describe('fetchCatalogHashes', () => {
 
     expect(await result).toBeNull();
     vi.useRealTimers();
+  });
+});
+
+describe('fetchCatalogManifest', () => {
+  it('returns the hashes and the valid sizes', async () => {
+    const body = { data_hashes: { 'a.csv': 'h' }, data_sizes: { 'a.csv': 10, 'b.csv': -1 } };
+    const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify(body)));
+
+    expect(await fetchCatalogManifest('/m', 1000, fetcher)).toEqual({
+      hashes: { 'a.csv': 'h' },
+      sizes: { 'a.csv': 10 }
+    });
+  });
+
+  it('returns no sizes for a manifest built before they existed', async () => {
+    const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify({ data_hashes: { 'a.csv': 'h' } })));
+
+    expect((await fetchCatalogManifest('/m', 1000, fetcher))?.sizes).toEqual({});
   });
 });

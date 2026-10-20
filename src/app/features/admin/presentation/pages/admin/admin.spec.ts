@@ -17,7 +17,7 @@ import { StorageService } from '@services/storage/storage.service';
 import { ConfirmationService } from 'primeng/api';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ToastModule } from 'primeng/toast';
-import { CardModule } from 'primeng/card';
+import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
@@ -100,7 +100,7 @@ describe('AdminComponent', () => {
         }),
         AdminComponent,
         ToastModule,
-        CardModule,
+        CardComponent,
         TableModule,
         ButtonModule,
         FormsModule,

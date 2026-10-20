@@ -12,7 +12,7 @@ import { AppUpdateService } from '@services/app-update/app-update.service';
 import { isAppCacheName, offlineStatusKind } from '@services/app-update/app-update.helpers';
 import { APP_UPDATE_I18N, OFFLINE_STATUS_I18N_PREFIX } from '@services/app-update/app-update.constantes';
 import { UpdateDiagnostics } from '@services/app-update/app-update.interfaces';
-import { CardModule } from 'primeng/card';
+import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { StudiesService } from '@services/studies/studies.service';
@@ -45,7 +45,7 @@ import { checkResultKey, refusalReasonKey, toMegabytes } from './admin.helpers';
     CommonModule,
     FormsModule,
     TableModule,
-    CardModule,
+    CardComponent,
     ToastModule,
     ConfirmDialogModule,
     ButtonComponent,

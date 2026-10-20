@@ -31,6 +31,8 @@ export interface PrefetchCatalogsMessage {
   type: 'PREFETCH_CATALOGS';
   urls: string[];
   force: boolean;
+  /** Size in bytes of each URL when known (from the catalog manifest): checked against the user data reserve. */
+  sizes?: Record<string, number>;
 }
 
 export interface PrefetchCatalogsResult {

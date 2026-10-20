@@ -68,6 +68,12 @@ export interface ShellNavigationDeps {
   origin: string;
 }
 
+/** Catalog cache subset used to skip cached URLs and evict a download that exceeds the storage reserve. */
+export interface CatalogCacheLike {
+  has(url: string): Promise<boolean>;
+  delete(url: string): Promise<boolean>;
+}
+
 export interface PrefetchCatalogsDeps {
   message: PrefetchCatalogsMessage;
   event: ExtendableEvent;
@@ -76,5 +82,6 @@ export interface PrefetchCatalogsDeps {
   connection: NetworkConnectionLike | undefined;
   probe?: ThroughputProbe;
   storage: StorageEstimator | undefined;
+  cache?: CatalogCacheLike;
   logger: SwLogger;
 }

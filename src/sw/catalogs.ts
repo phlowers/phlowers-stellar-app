@@ -55,13 +55,25 @@ function refusal(reason: InstallRefusalReason): PrefetchCatalogsResult {
   return { refused: reason, cached: [], failed: [] };
 }
 
+/** True when `extraBytes` more can be stored while the user data reserve stays free (allowed if the estimate is unavailable). */
+async function hasReserveAfter(deps: PrefetchCatalogsDeps, extraBytes: number): Promise<boolean> {
+  const estimate = await deps.storage?.estimate().catch(() => undefined);
+  return evaluateStorageForInstall({
+    missingBytes: extraBytes,
+    usageBytes: estimate?.usage,
+    quotaBytes: estimate?.quota,
+    reserveBytes: USER_DATA_STORAGE_RESERVE_BYTES
+  }).allowed;
+}
+
 /**
  * Downloads the requested catalog versions one at a time through the catalog strategy (already cached URLs are
  * served from the cache without any request).
  *
  * @remarks
- * Only same-origin versioned catalog URLs are accepted. The storage rule keeps the user data reserve free
- * (catalog sizes are unknown before download).
+ * Only same-origin versioned catalog URLs are accepted. The user data reserve must stay free: the size of the
+ * uncached catalogs (when announced by the page) is checked up front, the estimate is checked again before every
+ * download, and a download that eats into the reserve is evicted from the cache and stops the prefetch.
  */
 export async function prefetchCatalogs(deps: PrefetchCatalogsDeps): Promise<PrefetchCatalogsResult> {
   const urls = [
@@ -86,24 +98,39 @@ export async function prefetchCatalogs(deps: PrefetchCatalogsDeps): Promise<Pref
       return refusal(network.reason as InstallRefusalReason);
     }
   }
-  const estimate = await deps.storage?.estimate().catch(() => undefined);
-  const storage = evaluateStorageForInstall({
-    missingBytes: 0,
-    usageBytes: estimate?.usage,
-    quotaBytes: estimate?.quota,
-    reserveBytes: USER_DATA_STORAGE_RESERVE_BYTES
-  });
-  if (!storage.allowed) {
+  const sizes = deps.message.sizes ?? {};
+  const wasCached = new Map<string, boolean>();
+  for (const url of urls) {
+    wasCached.set(url, (await deps.cache?.has(url)) ?? false); //NOSONAR — a handful of catalogs
+  }
+  const missingBytes = urls.reduce((total, url) => total + (wasCached.get(url) ? 0 : (sizes[url] ?? 0)), 0);
+  if (!(await hasReserveAfter(deps, missingBytes))) {
     deps.logger.warn('Catalog prefetch refused (storage-insufficient)');
     return refusal('storage-insufficient');
   }
 
   const result: PrefetchCatalogsResult = { refused: null, cached: [], failed: [] };
-  for (const url of urls) {
+  for (const [index, url] of urls.entries()) {
+    const alreadyCached = wasCached.get(url) === true;
+    if (!alreadyCached && !(await hasReserveAfter(deps, sizes[url] ?? 0))) {
+      deps.logger.warn('Catalog prefetch stopped (storage-insufficient)');
+      result.failed.push(...urls.slice(index));
+      break;
+    }
     try {
       const request = new Request(url, { redirect: 'error', credentials: 'same-origin' });
       const response = await deps.strategy.handle({ request, event: deps.event }); //NOSONAR — one download at a time
-      (response.ok && !response.redirected ? result.cached : result.failed).push(url);
+      if (!response.ok || response.redirected) {
+        result.failed.push(url);
+        continue;
+      }
+      if (!alreadyCached && !(await hasReserveAfter(deps, 0))) {
+        await deps.cache?.delete(url);
+        deps.logger.warn('Catalog prefetch stopped: download exceeded the user data reserve');
+        result.failed.push(...urls.slice(index));
+        break;
+      }
+      result.cached.push(url);
     } catch {
       result.failed.push(url);
     }

@@ -19,6 +19,9 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { User } from '@shared/domain';
+import { CatalogIntegrityError } from '@shared/catalog/csv-import/csv-import.errors';
+import { CATALOG_LOCK_MANAGER } from './catalog-update.constantes';
+import { FakeLockHub } from './fake-lock-hub.mock';
 
 describe('CatalogUpdateService', () => {
   const ORIGIN = globalThis.location.origin;
@@ -85,6 +88,8 @@ describe('CatalogUpdateService', () => {
     TestBed.configureTestingModule({
       providers: [
         CatalogUpdateService,
+        // Fresh lock state per test: a real navigator.locks would keep the working-session lock across tests.
+        { provide: CATALOG_LOCK_MANAGER, useFactory: () => new FakeLockHub().managerFor('window') },
         { provide: AuthService, useValue: { currentUser } },
         { provide: StorageService, useValue: { db: { metadata: { get: metadataGet } } } },
         { provide: LoggerService, useValue: logger },
@@ -205,7 +210,9 @@ describe('CatalogUpdateService', () => {
   it('evicts a cached copy that fails verification and retries once from the network', async () => {
     serveManifest({ ...ALL_HASHES, 'cables.csv': 'NEW' });
     cachedUrls.add(versioned('cables.csv', 'NEW'));
-    importers['cables.csv'].mockRejectedValueOnce(new Error('hash mismatch')).mockResolvedValueOnce(undefined);
+    importers['cables.csv']
+      .mockRejectedValueOnce(new CatalogIntegrityError('hash mismatch'))
+      .mockResolvedValueOnce(undefined);
 
     await service.updateCatalogsIfNeeded();
 
@@ -214,10 +221,23 @@ describe('CatalogUpdateService', () => {
     expect(notificationService.warning).not.toHaveBeenCalled();
   });
 
+  it('keeps the cached copy and does not retry when the failure is not an integrity error', async () => {
+    serveManifest({ ...ALL_HASHES, 'cables.csv': 'NEW' });
+    cachedUrls.add(versioned('cables.csv', 'NEW'));
+    importers['cables.csv'].mockRejectedValue(new DOMException('quota', 'QuotaExceededError'));
+
+    await service.updateCatalogsIfNeeded();
+
+    expect(cache.delete).not.toHaveBeenCalled();
+    expect(cachedUrls.has(versioned('cables.csv', 'NEW'))).toBe(true);
+    expect(importers['cables.csv']).toHaveBeenCalledTimes(1);
+    expect(notificationService.warning).toHaveBeenCalledWith(expect.stringContaining('cables.csv'));
+  });
+
   it('reports the catalog as failed when the retry fails too', async () => {
     serveManifest({ ...ALL_HASHES, 'cables.csv': 'NEW' });
     cachedUrls.add(versioned('cables.csv', 'NEW'));
-    importers['cables.csv'].mockRejectedValue(new Error('hash mismatch'));
+    importers['cables.csv'].mockRejectedValue(new CatalogIntegrityError('hash mismatch'));
 
     await service.updateCatalogsIfNeeded();
 
@@ -252,5 +272,49 @@ describe('CatalogUpdateService', () => {
 
     expect(importers['lines.csv']).toHaveBeenCalledWith('h2');
     expect(logger.warn).toHaveBeenCalledWith('Catalog cache unavailable', expect.any(Error));
+  });
+
+  describe('shared startup run', () => {
+    it('shares one run between concurrent callers and does not rerun once settled', async () => {
+      delete storedHashes['lines.csv'];
+
+      await Promise.all([service.updateCatalogsIfNeeded(), service.updateCatalogsIfNeeded()]);
+      await service.updateCatalogsIfNeeded();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(importers['lines.csv']).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays pending while a delayed import is running and settles once it completes', async () => {
+      delete storedHashes['cables.csv'];
+      let finishImport!: () => void;
+      importers['cables.csv'].mockReturnValue(new Promise<void>((resolve) => (finishImport = resolve)));
+
+      let settled = false;
+      const run = service.updateCatalogsIfNeeded().then(() => (settled = true));
+      const secondCaller = service.updateCatalogsIfNeeded();
+      await vi.waitFor(() => expect(importers['cables.csv']).toHaveBeenCalled());
+      await Promise.resolve();
+
+      expect(settled).toBe(false);
+
+      finishImport();
+      await Promise.all([run, secondCaller]);
+
+      expect(settled).toBe(true);
+    });
+
+    it('lets a later call retry after the run rejected', async () => {
+      delete storedHashes['lines.csv'];
+      // A Response body can only be read once: serve a fresh manifest to each run.
+      fetchSpy.mockImplementation(async () => new Response(JSON.stringify({ data_hashes: ALL_HASHES })));
+      const metadataGet = TestBed.inject(StorageService).db!.metadata.get as unknown as ReturnType<typeof vi.fn>;
+      metadataGet.mockRejectedValueOnce(new Error('db down'));
+
+      await expect(service.updateCatalogsIfNeeded()).rejects.toThrow('db down');
+      await expect(service.updateCatalogsIfNeeded()).resolves.toBeUndefined();
+
+      expect(importers['lines.csv']).toHaveBeenCalledTimes(1);
+    });
   });
 });

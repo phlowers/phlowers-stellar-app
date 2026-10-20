@@ -86,6 +86,17 @@ def collect_data_file_hashes(directory):
     return hashes
 
 
+def collect_data_file_sizes(directory):
+    """Return a mapping of data CSV/JSON basename to its size in bytes."""
+    data_dir = Path(directory) / "data"
+    if not data_dir.is_dir():
+        return {}
+    return {
+        path.name: path.stat().st_size
+        for path in sorted(list(data_dir.glob("*.csv")) + list(data_dir.glob("*.json")))
+    }
+
+
 def main():
     target_dir = "dist"
 
@@ -148,7 +159,11 @@ def main():
         json.dump(res, f, indent=2)
 
     # Read by the Workbox-based app: catalog hashes only (the precache manifest lives in service-worker.js).
-    catalog_manifest = {"app_version": app_version, "data_hashes": csv_hashes}
+    catalog_manifest = {
+        "app_version": app_version,
+        "data_hashes": csv_hashes,
+        "data_sizes": collect_data_file_sizes(target_dir),
+    }
     with open(os.path.join(target_dir, "catalog-manifest.json"), "w") as f:
         json.dump(catalog_manifest, f, indent=2)
 

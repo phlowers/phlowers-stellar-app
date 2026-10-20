@@ -254,6 +254,81 @@ describe('service worker catalogs', () => {
       expect(deps.strategy.handle).not.toHaveBeenCalled();
     });
 
+    describe('storage reserve', () => {
+      const MB = 1024 * 1024;
+      const RESERVE = 100 * MB;
+      const message = (sizes?: Record<string, number>) => ({
+        type: 'PREFETCH_CATALOGS' as const,
+        urls: [CABLES, LINES],
+        force: false,
+        sizes
+      });
+      const cacheOf = (cached: string[] = []) => ({
+        has: vi.fn(async (url: string) => cached.includes(url)),
+        delete: vi.fn(async () => true)
+      });
+
+      it('refuses when the uncached catalogs would eat into the reserve', async () => {
+        const deps = createDeps({
+          storage: { estimate: async () => ({ usage: 0, quota: RESERVE + 5 * MB }) },
+          message: message({ [CABLES]: 3 * MB, [LINES]: 3 * MB }),
+          cache: cacheOf()
+        });
+
+        expect((await prefetchCatalogs(deps)).refused).toBe('storage-insufficient');
+        expect(deps.strategy.handle).not.toHaveBeenCalled();
+      });
+
+      it('ignores the size of catalogs that are already cached', async () => {
+        const deps = createDeps({
+          storage: { estimate: async () => ({ usage: 0, quota: RESERVE + 5 * MB }) },
+          message: message({ [CABLES]: 3 * MB, [LINES]: 3 * MB }),
+          cache: cacheOf([CABLES])
+        });
+
+        expect((await prefetchCatalogs(deps)).cached).toEqual([CABLES, LINES]);
+      });
+
+      it('stops before a download that no longer fits and reports the remaining catalogs as failed', async () => {
+        const estimate = vi
+          .fn()
+          .mockResolvedValueOnce({ usage: 0, quota: RESERVE + 10 * MB })
+          .mockResolvedValueOnce({ usage: 0, quota: RESERVE + 10 * MB })
+          .mockResolvedValueOnce({ usage: 0, quota: RESERVE + 10 * MB })
+          .mockResolvedValue({ usage: 8 * MB, quota: RESERVE + 10 * MB });
+        const deps = createDeps({ storage: { estimate }, message: message({ [CABLES]: 4 * MB, [LINES]: 4 * MB }) });
+
+        expect(await prefetchCatalogs(deps)).toEqual({ refused: null, cached: [CABLES], failed: [LINES] });
+        expect(deps.strategy.handle).toHaveBeenCalledTimes(1);
+      });
+
+      it('evicts a download that consumed the reserve and stops', async () => {
+        const estimate = vi
+          .fn()
+          .mockResolvedValueOnce({ usage: 0, quota: RESERVE + MB })
+          .mockResolvedValueOnce({ usage: 0, quota: RESERVE + MB })
+          .mockResolvedValue({ usage: 2 * MB, quota: RESERVE + MB });
+        const cache = cacheOf();
+        const deps = createDeps({ storage: { estimate }, cache });
+
+        expect(await prefetchCatalogs(deps)).toEqual({ refused: null, cached: [], failed: [CABLES, LINES] });
+        expect(cache.delete).toHaveBeenCalledWith(CABLES);
+        expect(deps.strategy.handle).toHaveBeenCalledTimes(1);
+      });
+
+      it('never evicts a catalog that was already cached', async () => {
+        const cache = cacheOf([CABLES]);
+        const deps = createDeps({
+          storage: { estimate: async () => ({ usage: 0, quota: RESERVE - 1 }) },
+          message: { type: 'PREFETCH_CATALOGS', urls: [CABLES], force: false },
+          cache
+        });
+
+        expect((await prefetchCatalogs(deps)).refused).toBe('storage-insufficient');
+        expect(cache.delete).not.toHaveBeenCalled();
+      });
+    });
+
     it('prefetches when the storage estimate is unavailable', async () => {
       const deps = createDeps({ storage: undefined });
 

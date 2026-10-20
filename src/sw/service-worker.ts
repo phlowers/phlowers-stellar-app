@@ -3,7 +3,8 @@ import { registerRoute } from 'workbox-routing';
 import { measureThroughputMbps } from '@services/app-update/network-rule.helpers';
 import type { NetworkConnectionLike } from '@services/app-update/network-rule.interfaces';
 import type { SizedManifestEntry } from '@services/app-update/storage-rule.interfaces';
-import { SHELL_URL } from './service-worker.constantes';
+import { CATALOG_CACHE_NAME, SHELL_URL } from './service-worker.constantes';
+import type { CatalogCacheLike } from './service-worker.interfaces';
 import { createCatalogRoute, createCatalogStrategy, isPrefetchCatalogsMessage, prefetchCatalogs } from './catalogs';
 import {
   createSafeResponsePlugin,
@@ -21,6 +22,10 @@ const sw = self as unknown as ServiceWorkerGlobalScope;
 // Replaced at build time by workbox-build injectManifest (entries carry url, revision, integrity and sizeBytes).
 const manifest: SizedManifestEntry[] = (self as unknown as { __WB_MANIFEST: SizedManifestEntry[] }).__WB_MANIFEST;
 
+const catalogCache: CatalogCacheLike = {
+  has: async (url) => (await (await sw.caches.open(CATALOG_CACHE_NAME)).match(url)) !== undefined,
+  delete: async (url) => (await sw.caches.open(CATALOG_CACHE_NAME)).delete(url)
+};
 const logger = createSwLogger(sw.clients);
 const connectionOf = (): NetworkConnectionLike | undefined =>
   (sw.navigator as WorkerNavigator & { connection?: NetworkConnectionLike }).connection;
@@ -71,6 +76,7 @@ sw.addEventListener('message', (event) => {
       connection: connectionOf(),
       probe,
       storage: sw.navigator.storage,
+      cache: catalogCache,
       logger
     }).then((result) => event.ports[0]?.postMessage(result))
   );

@@ -19,8 +19,10 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { catalogDataUrl } from '@shared/catalog/csv-import/csv-import.client.helpers';
+import { CatalogIntegrityError } from '@shared/catalog/csv-import/csv-import.errors';
 import { CATALOG_MANIFEST_TIMEOUT_MS, CATALOG_MANIFEST_URL } from './catalog-update.constantes';
-import { fetchCatalogHashes } from './catalog-update.helpers';
+import { fetchCatalogManifest } from './catalog-update.helpers';
+import { CatalogLockService } from './catalog-lock.service';
 import { CatalogImporter, StaleCatalog, StaleCatalogsOutcome } from './catalog-update.interfaces';
 
 /**
@@ -33,6 +35,11 @@ import { CatalogImporter, StaleCatalog, StaleCatalogsOutcome } from './catalog-u
  * the background (subject to the network rule) and imported at the next start, so catalogs never change while the
  * user is working. A catalog never imported yet is downloaded and imported right away whatever the network: the
  * application is unusable without it. Only a changed catalog is ever fetched.
+ *
+ * The live tables are shared by every Stellar window and read on each call, so a new version of an already imported
+ * catalog is only promoted when no other window is working (see `CatalogLockService`): otherwise it is left in the
+ * cache (or prefetched) and promoted at the first start with no other window open. First imports are never deferred.
+ * Once its update has settled, every window declares itself as working until it closes.
  *
  * Each catalog service's `importFromFile(expectedHash)` propagates failures: the Web Worker verifies the SHA-256
  * hash and atomically promotes staging to live only on success, so a rejection always leaves the stored hash
@@ -54,6 +61,7 @@ export class CatalogUpdateService {
   private readonly chainsService = inject(ChainsService);
   private readonly attachmentService = inject(AttachmentService);
   private readonly obstaclesService = inject(ObstaclesService);
+  private readonly catalogLocks = inject(CatalogLockService);
 
   private readonly importers: Record<string, CatalogImporter>;
 
@@ -68,37 +76,77 @@ export class CatalogUpdateService {
     };
   }
 
+  /** Shared in-flight/settled startup run: every caller (app component, route guard) awaits the same imports. */
+  private startupUpdate: Promise<void> | null = null;
+
   /**
-   * Updates every catalog whose hash differs from what is currently stored.
+   * Updates every catalog whose hash differs from what is currently stored, once per start.
    *
    * @remarks
+   * The run is shared: concurrent and later callers get the same promise, so the route guard can wait for the
+   * imports triggered by the app component. A rejection clears the shared run so a later call can retry.
+   * Background prefetch is only requested here, never awaited.
    * No-ops entirely when the user is not authenticated (no network call, no import) or when
    * `/catalog-manifest.json` is unreachable (the catalogs already imported keep working offline).
    */
-  async updateCatalogsIfNeeded(): Promise<void> {
+  updateCatalogsIfNeeded(): Promise<void> {
     if (!this.authService.currentUser()) {
-      return;
+      return Promise.resolve();
     }
+    this.startupUpdate ??= this.runStartupUpdate().catch((error: unknown) => {
+      this.startupUpdate = null;
+      throw error;
+    });
+    return this.startupUpdate;
+  }
 
-    const dataHashes = await fetchCatalogHashes(CATALOG_MANIFEST_URL, CATALOG_MANIFEST_TIMEOUT_MS);
-    if (!dataHashes) {
+  private async runStartupUpdate(): Promise<void> {
+    try {
+      await this.updateCatalogs();
+    } finally {
+      // Whatever the outcome (offline, failure), this window now works with the catalogs it has.
+      await this.catalogLocks.joinWorkingSession();
+    }
+  }
+
+  private async updateCatalogs(): Promise<void> {
+    const manifest = await fetchCatalogManifest(CATALOG_MANIFEST_URL, CATALOG_MANIFEST_TIMEOUT_MS);
+    if (!manifest) {
       this.logger.warn('Catalog manifest unavailable: catalogs are left as they are');
       return;
     }
 
-    const staleCatalogs = await this.findStaleCatalogs(dataHashes);
-    if (staleCatalogs.length === 0) {
+    const dataHashes = manifest.hashes;
+
+    // Serialized across windows; the stale list is read inside so an import done meanwhile by another window is seen.
+    const outcome = await this.catalogLocks.runSerialized(async () => {
+      const staleCatalogs = await this.findStaleCatalogs(dataHashes);
+      if (staleCatalogs.length === 0) {
+        return null;
+      }
+      const promotion = await this.catalogLocks.runIfNoWorkingSession(() =>
+        this.processStaleCatalogs(staleCatalogs, true)
+      );
+      return promotion.granted ? promotion.value : this.processStaleCatalogs(staleCatalogs, false);
+    });
+    if (!outcome) {
       return;
     }
-    const { failedCatalogs, toPrefetch } = await this.processStaleCatalogs(staleCatalogs);
-    this.notifyCatalogFailures(failedCatalogs);
-    if (toPrefetch.length > 0) {
-      this.requestPrefetch(toPrefetch);
+    this.notifyCatalogFailures(outcome.failedCatalogs);
+    if (outcome.toPrefetch.length > 0) {
+      this.requestPrefetch(outcome.toPrefetch, this.sizesByUrl(outcome.toPrefetch, manifest.hashes, manifest.sizes));
     }
   }
 
-  /** Imports what can be imported right now and lists the catalogs to prefetch in the background. */
-  private async processStaleCatalogs(staleCatalogs: StaleCatalog[]): Promise<StaleCatalogsOutcome> {
+  /**
+   * Imports what can be imported right now and lists the catalogs to prefetch in the background.
+   *
+   * @param mayReplaceLive - false when another window works: a catalog already imported is then left untouched.
+   */
+  private async processStaleCatalogs(
+    staleCatalogs: StaleCatalog[],
+    mayReplaceLive: boolean
+  ): Promise<StaleCatalogsOutcome> {
     const cache = await this.openCatalogCache();
     const prefetchAvailable = Boolean(navigator.serviceWorker?.controller);
     const failedCatalogs: string[] = [];
@@ -106,6 +154,13 @@ export class CatalogUpdateService {
     for (const catalog of staleCatalogs) {
       const url = catalogDataUrl(globalThis.location.origin, catalog.fileName, catalog.latestHash);
       const cached = cache ? (await cache.match(url)) !== undefined : false; //NOSONAR — one catalog at a time
+      if (!mayReplaceLive && catalog.storedHash !== undefined) {
+        this.logger.info(`Catalog '${catalog.fileName}' update deferred: another window is working`);
+        if (!cached && prefetchAvailable) {
+          toPrefetch.push(url);
+        }
+        continue;
+      }
       if (cached || catalog.storedHash === undefined || !prefetchAvailable) {
         const imported = await this.importCatalog(catalog, cached ? cache : null, url); //NOSONAR — one at a time
         if (!imported) {
@@ -133,19 +188,23 @@ export class CatalogUpdateService {
   }
 
   /**
-   * Imports one catalog; a cached copy that fails verification is evicted and downloaded once more from the
-   * network (the immutable URL would otherwise keep serving the corrupted entry).
+   * Imports one catalog; a cached copy that fails its integrity check is evicted and downloaded once more from
+   * the network (the immutable URL would otherwise keep serving the corrupted entry).
+   *
+   * @remarks
+   * Any other failure (worker, parsing, IndexedDB quota, ...) is not fixed by a new download, so the cached
+   * response is kept for a later start.
    */
   private async importCatalog(catalog: StaleCatalog, cache: Cache | null, url: string): Promise<boolean> {
     try {
       await catalog.importFn(catalog.latestHash);
       return true;
     } catch (error) {
-      if (!cache) {
+      if (!cache || !(error instanceof CatalogIntegrityError)) {
         this.logger.error(`Error updating catalog '${catalog.fileName}'`, error);
         return false;
       }
-      this.logger.warn(`Cached catalog '${catalog.fileName}' rejected, downloading it again`, error);
+      this.logger.warn(`Cached catalog '${catalog.fileName}' failed its integrity check, downloading it again`, error);
     }
     try {
       await cache.delete(url);
@@ -166,8 +225,22 @@ export class CatalogUpdateService {
     }
   }
 
+  /** Known manifest sizes of the given versioned URLs, for the service worker storage reserve check. */
+  private sizesByUrl(
+    urls: string[],
+    hashes: Record<string, string>,
+    sizes: Record<string, number>
+  ): Record<string, number> {
+    const sizeOfUrl = new Map(
+      Object.entries(sizes).flatMap(([fileName, size]) =>
+        hashes[fileName] ? [[catalogDataUrl(globalThis.location.origin, fileName, hashes[fileName]), size] as const] : []
+      )
+    );
+    return Object.fromEntries(urls.flatMap((url) => (sizeOfUrl.has(url) ? [[url, sizeOfUrl.get(url)!]] : [])));
+  }
+
   /** Background download for the next start; the service worker applies the network rule. */
-  private requestPrefetch(urls: string[]): void {
+  private requestPrefetch(urls: string[], sizes: Record<string, number>): void {
     const controller = navigator.serviceWorker?.controller;
     if (!controller) {
       return;
@@ -177,7 +250,12 @@ export class CatalogUpdateService {
       this.logger.info('Catalog prefetch result', data);
       channel.port1.close();
     };
-    const message: PrefetchCatalogsMessage = { type: PREFETCH_CATALOGS_MESSAGE_TYPE, urls, force: false };
+    const message: PrefetchCatalogsMessage = {
+      type: PREFETCH_CATALOGS_MESSAGE_TYPE,
+      urls,
+      force: false,
+      ...(Object.keys(sizes).length > 0 && { sizes })
+    };
     controller.postMessage(message, [channel.port2]);
   }
 

@@ -7,6 +7,7 @@
 /// <reference lib="webworker" />
 
 import { runWorkerImport } from './internal/run-worker-import.helpers';
+import { toWorkerErrorMessage } from './csv-import.worker.helpers';
 import type { CsvImportWorkerRequest, CsvImportWorkerResponse } from './csv-import.worker.interfaces';
 
 export { runWorkerImport } from './internal/run-worker-import.helpers';
@@ -26,11 +27,7 @@ if (isWorkerContext) {
     try {
       await runWorkerImport(data, (msg) => postMessage(msg));
     } catch (e) {
-      postMessage({
-        type: 'error',
-        csvKey: data?.csvKey,
-        message: e instanceof Error ? e.message : String(e)
-      } satisfies CsvImportWorkerResponse);
+      postMessage(toWorkerErrorMessage(data?.csvKey, e) satisfies CsvImportWorkerResponse);
     }
   });
 }

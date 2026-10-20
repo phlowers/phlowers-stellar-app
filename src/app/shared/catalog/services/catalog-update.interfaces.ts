@@ -4,6 +4,8 @@ export type CatalogImporter = (expectedHash?: string) => Promise<void>;
 /** `dist/catalog-manifest.json`. */
 export interface CatalogManifest {
   data_hashes: Record<string, string>;
+  /** Size in bytes of each catalog file; absent in manifests built before the storage reserve check. */
+  data_sizes?: Record<string, number>;
 }
 
 export interface StaleCatalog {
@@ -20,3 +22,6 @@ export interface StaleCatalogsOutcome {
   /** URLs of the catalogs to download in the background for the next start. */
   toPrefetch: string[];
 }
+
+/** Result of a task that needs every other window to be idle (see `CatalogLockService.runIfNoWorkingSession`). */
+export type CatalogPromotion<T> = { granted: true; value: T } | { granted: false };
