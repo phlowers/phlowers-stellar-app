@@ -79,7 +79,7 @@ export const PlotlyDrawings = {
     borderPad: { '2d': 6, '3d': 6 },
     // pixels, never data units: the gap stays the same at any zoom level. The dashed line stops at the bottom edge of
     // the icon box, worked out from iconSize and borderPad (see getCutStrandsLineLength)
-    offsetY: 90,
+    offsetY: 130,
     lineWidth: { '2d': 1, '3d': 1 },
     dashLength: 6,
     dashGap: 4,
