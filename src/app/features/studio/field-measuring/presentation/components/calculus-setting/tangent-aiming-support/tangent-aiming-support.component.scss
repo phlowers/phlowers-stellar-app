@@ -20,12 +20,22 @@
       'calculationType calculationType . . .'
       'tangentAngle . . . .';
 
+    > div:not(.calculationType, .spanLengthDesc, .leftSupport, .spanLength) {
+      @extend %tools-grid-floating-error-field;
+    }
+
     .leftSupport {
       grid-area: leftSupport;
+      align-self: start;
+
+      p-message {
+        @apply absolute;
+      }
     }
 
     .spanLength {
       grid-area: spanLength;
+      align-self: start;
     }
 
     .hDistance {

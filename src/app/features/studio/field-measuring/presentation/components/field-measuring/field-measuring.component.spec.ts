@@ -577,7 +577,13 @@ describe('FieldMeasuringComponent', () => {
       component.measureData.set(
         createFullyValidMeasureData({
           updateMode15C: 'auto',
-          outputs: { papoto: null, cableTemperature: null, parameter15C: null, tangentAimingSupport: null, tangentAimingExterior: null }
+          outputs: {
+            papoto: null,
+            cableTemperature: null,
+            parameter15C: null,
+            tangentAimingSupport: null,
+            tangentAimingExterior: null
+          }
         })
       );
       const messageService = TestBed.inject(MessageService);

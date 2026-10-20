@@ -72,7 +72,10 @@ describe('TangentAimingExterior component', () => {
     fixture = TestBed.createComponent(TangentAimingExteriorComponent);
     component = fixture.componentInstance;
     componentRef = fixture.componentRef;
-    componentRef.setInput('measureData', createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior', span: [0, 1] }));
+    componentRef.setInput(
+      'measureData',
+      createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior', span: [0, 1] })
+    );
     fixture.detectChanges();
   });
 
@@ -232,7 +235,10 @@ describe('TangentAimingExterior component', () => {
     const support = { parameter: 5, uncertainty: 1, criterion: 1, checkValidity: true };
     componentRef.setInput(
       'measureData',
-      validMeasure({ cableHAccDistance: 7, outputs: { ...createTestMeasureData().outputs, tangentAimingSupport: support } })
+      validMeasure({
+        cableHAccDistance: 7,
+        outputs: { ...createTestMeasureData().outputs, tangentAimingSupport: support }
+      })
     );
     fixture.detectChanges();
     setInput('h-acc-distance-input', '12');

@@ -81,7 +81,10 @@ export function isTangentAimingExteriorDataValid(data: FieldMeasure): boolean {
 }
 
 /** Fills the empty (`null`/`undefined`) tangent aiming (exterior) inputs with their default. */
-export function applyTangentAimingExteriorDefaults(data: FieldMeasure, defaultLeftSupport: string | null): FieldMeasure {
+export function applyTangentAimingExteriorDefaults(
+  data: FieldMeasure,
+  defaultLeftSupport: string | null
+): FieldMeasure {
   const next: FieldMeasure = {
     ...data,
     exteriorCalculationType: data.exteriorCalculationType ?? 'parametre',

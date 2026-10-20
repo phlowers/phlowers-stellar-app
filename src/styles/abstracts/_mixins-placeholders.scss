@@ -78,6 +78,17 @@
   ); // force grids cell width to 5 cols minus a quarter of gaps (5 columns, 4 gaps)
 }
 
+// Grid field whose error message floats under the input instead of growing the cell,
+// so showing/hiding the error never shifts sibling inputs of the same row.
+%tools-grid-floating-error-field {
+  @apply relative;
+  margin-bottom: 0.5rem;
+
+  p-message {
+    @apply absolute left-0 top-full;
+  }
+}
+
 // For texts that need same typo and alignment with input fields. Mostly used in definition lists.
 %read-only-info {
   @extend %text-m-400;
