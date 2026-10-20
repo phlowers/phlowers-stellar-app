@@ -55,7 +55,15 @@ export class StellarJsonAdapter implements SectionImportAdapter {
     return extractStellarUuid(source.json);
   }
 
-  async import(source: SectionImportSource): Promise<SectionImportPayload> {
+  import(source: SectionImportSource): Promise<SectionImportPayload> {
+    try {
+      return Promise.resolve(this.importSync(source));
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
+  private importSync(source: SectionImportSource): SectionImportPayload {
     const json = source.json;
 
     if (isStellarEnvelopeJson(json)) {

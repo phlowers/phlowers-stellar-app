@@ -114,7 +114,7 @@ describe('runCsvImport (engine)', () => {
       expect(recorder.bulkPutCalls).toHaveLength(1);
       // Fixture has 4 rows, 1 has empty name → 3 entities
       const entities = recorder.bulkPutCalls[0] as { name: string }[];
-      expect(entities.map((e) => e.name).sort()).toEqual(['FAKE_ALPHA', 'FAKE_BRAVO', 'FAKE_DELTA']);
+      expect(entities.map((e) => e.name).sort((a, b) => a.localeCompare(b))).toEqual(['FAKE_ALPHA', 'FAKE_BRAVO', 'FAKE_DELTA']);
       expect(result.totalRows).toBe(rows.length);
       expect(result.totalKeys).toBe(3);
       expect(messages.filter((m) => m.type === 'progress')).toHaveLength(1);
@@ -169,7 +169,7 @@ describe('runCsvImport (engine)', () => {
         () => undefined
       );
       const groups = recorder.bulkPutCalls[0] as { support_name: string; attachments: unknown[] }[];
-      const names = groups.map((g) => g.support_name).sort();
+      const names = groups.map((g) => g.support_name).sort((a, b) => a.localeCompare(b));
       // SUP-A, SUP-B from idr; "Support Charlie" from adr fallback
       expect(names).toEqual(['SUP-A', 'SUP-B', 'Support Charlie']);
       const alpha = groups.find((g) => g.support_name === 'SUP-A');

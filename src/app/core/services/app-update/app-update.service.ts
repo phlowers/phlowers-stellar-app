@@ -111,9 +111,10 @@ export class AppUpdateService {
     const measuredMbps = await this.measureNetwork(false);
     const decision = evaluateUpdateCheck(this.connection(), await this.estimateStorage(), measuredMbps);
     const downlink = this.connection()?.downlink;
+    const measuredLabel = measuredMbps === null ? 'not measured' : `${measuredMbps.toFixed(1)} Mbps`;
     this.logger.info(
       `${APP_UPDATE_LOG_PREFIX} network downlink is ${typeof downlink === 'number' ? downlink : 'unknown'} Mbps, ` +
-        `measured ${measuredMbps === null ? 'not measured' : `${measuredMbps.toFixed(1)} Mbps`} ` +
+        `measured ${measuredLabel} ` +
         `(minimum ${BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS} Mbps)`
     );
     if (!decision.allowed) {

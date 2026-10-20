@@ -94,7 +94,7 @@ describe('service worker entry point', () => {
   });
 
   it('only listens to install, activate and message (fetch is handled by the Workbox router)', () => {
-    expect([...listeners.keys()].sort()).toEqual(['activate', 'install', 'message']);
+    expect([...listeners.keys()].sort((a, b) => a.localeCompare(b))).toEqual(['activate', 'install', 'message']);
   });
 
   it('ignores messages that are not catalog prefetch requests', () => {

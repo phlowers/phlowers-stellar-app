@@ -169,7 +169,7 @@ export async function runGuardedInstall(deps: GuardedInstallDeps): Promise<void>
     return cached;
   });
   deps.logger.info(
-    `Packages to download: ${missingUrls.length} files, ${missingBytes} bytes [${[...missingUrls].sort().join(', ')}]`
+    `Packages to download: ${missingUrls.length} files, ${missingBytes} bytes [${[...missingUrls].sort((a, b) => a.localeCompare(b)).join(', ')}]`
   );
   const estimate = await deps.storage?.estimate().catch(() => undefined);
   const storage = evaluateStorageForInstall({
