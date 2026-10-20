@@ -24,19 +24,10 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
-
-/** Row data for the L0 summary table. */
-interface L0Row {
-  /** Span label (e.g. "1-2"). */
-  span: string;
-  /** Natural cable length L0 value. */
-  l0: number;
-  /** Zero-based span index. */
-  index: number;
-}
+import { L0Row } from './l0-sum.interfaces';
 
 @Component({
-  selector: 'app-l0-sum-tool',
+  selector: 'app-l0-sum-table',
   imports: [
     CommonModule,
     DialogModule,
@@ -61,8 +52,6 @@ export class L0SumComponent {
   private readonly logger = inject(LoggerService);
 
   readonly l0Rows = signal<L0Row[]>([]);
-
-  readonly totalL0 = computed(() => this.l0Rows().reduce((sum, row) => sum + row.l0, 0));
 
   readonly loading = computed(() => this.plotService.loading() || !this.plotService.litData());
 
@@ -89,14 +78,20 @@ export class L0SumComponent {
       }
 
       const supports = this.spanService.section()?.supports ?? [];
+      const spanLengths = litData.output_parameters.span_length ?? [];
+      let cumulatedL0 = 0;
       const spans: L0Row[] = litData.output_parameters.L0.map((value, index) => {
         const leftNum = supports[index]?.number;
         const rightNum = supports[index + 1]?.number;
         const left = leftNum ? formatSupportNumber(leftNum) : String(index + 1);
         const right = rightNum ? formatSupportNumber(rightNum) : String(index + 2);
+        // rounding drops the floating point noise of the running sum (e.g. 300.29999999999995)
+        cumulatedL0 = Number((cumulatedL0 + value).toFixed(10));
         return {
           span: `${left}-${right}`,
+          spanLength: spanLengths[index],
           l0: value,
+          cumulatedL0,
           index
         };
       });
@@ -113,8 +108,7 @@ export class L0SumComponent {
   onExport() {
     // TODO: Implement export functionality
     this.logger.log('Export L0 sum', {
-      rows: this.l0Rows(),
-      total: this.totalL0()
+      rows: this.l0Rows()
     });
   }
 

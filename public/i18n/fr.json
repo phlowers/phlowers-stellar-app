@@ -1008,10 +1008,12 @@
       "min-vertical-position-label": "Dist. supp. réf."
     },
     "l0-sum": {
-      "natural-lengths-title": "Longueurs naturelles L0",
-      "l0-column-label": "L0",
-      "sum-l0-label": "Somme L0",
-      "loading-data-text": "Chargement des données L0…"
+      "naturals-lengths-title": "Longueurs naturelles L0",
+      "span-length-column-label": "L. portée",
+      "l0-column-label": "L0 naturelle",
+      "cumulated-l0-column-label": "L0 cumulée",
+      "loading-data-text": "Chargement des données L0…",
+      "current-page-report": "{currentPage} sur {totalPages}"
     },
     "loads-table": {
       "description-length-label": "Description {{count}}/240",
