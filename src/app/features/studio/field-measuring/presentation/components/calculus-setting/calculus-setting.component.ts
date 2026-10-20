@@ -12,6 +12,7 @@ import {
   getDefaultLeftSupport
 } from './tangent-aiming-support/tangent-aiming-support.helpers';
 import { applyTangentAimingExteriorDefaults } from './tangent-aiming-exterior/tangent-aiming-exterior.helpers';
+import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
 import { CALCULUS_TYPE_BY_METHOD } from './calculus-setting.constantes';
 
 @Component({
@@ -40,21 +41,25 @@ export class CalculusSettingComponent {
     computation: (method) => CALCULUS_TYPE_BY_METHOD[method] ?? 'PAPOTO'
   });
 
-  /** Selects a method and persists it in the measure (PEP is not selectable yet). */
+  /** Selects a method and persists it in the measure (PEP is not selectable yet); the auto 15°C result of the previous method is stale. */
   onCalculusTypeChange(type: string): void {
     this.selectedCalculusType.set(type);
     if (type === 'PAPOTO') {
-      this.measureData.update((d) => ({ ...d, calculationMethod: 'papoto' }));
+      this.measureData.update((d) => clearAutoParameter15C({ ...d, calculationMethod: 'papoto' }));
     } else if (type === 'TANGENT_AIMING_SUPPORT') {
-      this.measureData.update((d) => ({
-        ...applyTangentAimingSupportDefaults(d, getDefaultLeftSupport(d.span)),
-        calculationMethod: 'tangente-aiming'
-      }));
+      this.measureData.update((d) =>
+        clearAutoParameter15C({
+          ...applyTangentAimingSupportDefaults(d, getDefaultLeftSupport(d.span)),
+          calculationMethod: 'tangente-aiming'
+        })
+      );
     } else if (type === 'TANGENT_AIMING_EXTERIOR') {
-      this.measureData.update((d) => ({
-        ...applyTangentAimingExteriorDefaults(d, getDefaultLeftSupport(d.span)),
-        calculationMethod: 'tangente-aiming-exterior'
-      }));
+      this.measureData.update((d) =>
+        clearAutoParameter15C({
+          ...applyTangentAimingExteriorDefaults(d, getDefaultLeftSupport(d.span)),
+          calculationMethod: 'tangente-aiming-exterior'
+        })
+      );
     }
   }
   leftSupportOption = computed(() => {

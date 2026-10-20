@@ -231,6 +231,72 @@ describe('TangentAimingExterior component', () => {
     expect(component.isCalculating()).toBe(false);
   });
 
+  describe('15°C result derived from the exterior result', () => {
+    const parameter15C = { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 };
+    const withParameter15C = (updateMode15C: 'auto' | 'manual') => {
+      const measure = validMeasure({ updateMode15C });
+      return {
+        ...measure,
+        outputs: { ...measure.outputs, parameter15C }
+      };
+    };
+
+    it('should clear it in auto mode when an input changes', () => {
+      componentRef.setInput('measureData', withParameter15C('auto'));
+      fixture.detectChanges();
+      setInput('h-acc-distance-input', '12');
+      expect(component.measureData().outputs.parameter15C).toBeNull();
+    });
+
+    it('should clear it in auto mode when the calculation type changes', () => {
+      componentRef.setInput('measureData', withParameter15C('auto'));
+      fixture.detectChanges();
+      component.updateCalculationType('tangente');
+      expect(component.measureData().outputs.parameter15C).toBeNull();
+    });
+
+    it('should preserve it in manual mode', () => {
+      componentRef.setInput('measureData', withParameter15C('manual'));
+      fixture.detectChanges();
+      setInput('h-acc-distance-input', '12');
+      component.updateCalculationType('tangente');
+      expect(component.measureData().outputs.parameter15C).toEqual(parameter15C);
+    });
+  });
+
+  it('should only offer the two supports of the selected span', () => {
+    componentRef.setInput('measureData', validMeasure({ span: [1, 2] }));
+    fixture.detectChanges();
+    expect(component.supportOptions().map((option) => option.value)).toEqual(['1', '2']);
+  });
+
+  it('should fall back to the departure support and invalidate the results when the span changes', async () => {
+    componentRef.setInput('measureData', validMeasure({ updateMode15C: 'auto' }));
+    fixture.detectChanges();
+    await component.calculate();
+    component.measureData.update((d) => ({
+      ...d,
+      outputs: {
+        ...d.outputs,
+        parameter15C: { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 }
+      }
+    }));
+    componentRef.setInput('measureData', { ...component.measureData(), span: [1, 2] });
+    fixture.detectChanges();
+    expect(component.measureData().exteriorLeftSupport).toBe('1');
+    expect(component.form.controls.leftSupport.value).toBe('1');
+    expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
+    expect(component.measureData().outputs.parameter15C).toBeNull();
+  });
+
+  it('should keep the left support and the result when it still belongs to the span', async () => {
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    await component.calculate();
+    expect(component.measureData().exteriorLeftSupport).toBe('0');
+    expect(component.measureData().outputs.tangentAimingExterior).not.toBeNull();
+  });
+
   it('should not alter the support fields nor its result', () => {
     const support = { parameter: 5, uncertainty: 1, criterion: 1, checkValidity: true };
     componentRef.setInput(

@@ -176,6 +176,31 @@ describe('CalculusSetting component', () => {
       expect(component.measureData().calculationMethod).toBe('papoto');
     });
 
+    describe('15°C result of the previous method', () => {
+      const parameter15C = { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 };
+      const withParameter15C = (updateMode15C: 'auto' | 'manual') => {
+        const base = createTestMeasureData({ updateMode15C });
+        return { ...base, outputs: { ...base.outputs, parameter15C } };
+      };
+
+      it.each(['PAPOTO', 'TANGENT_AIMING_SUPPORT', 'TANGENT_AIMING_EXTERIOR'])(
+        'should clear it in auto mode when selecting %s',
+        (type) => {
+          componentRef.setInput('measureData', withParameter15C('auto'));
+          fixture.detectChanges();
+          component.onCalculusTypeChange(type);
+          expect(component.measureData().outputs.parameter15C).toBeNull();
+        }
+      );
+
+      it('should preserve it in manual mode', () => {
+        componentRef.setInput('measureData', withParameter15C('manual'));
+        fixture.detectChanges();
+        component.onCalculusTypeChange('TANGENT_AIMING_EXTERIOR');
+        expect(component.measureData().outputs.parameter15C).toEqual(parameter15C);
+      });
+    });
+
     it('should not persist PEP', () => {
       component.onCalculusTypeChange('PEP');
       expect(component.measureData().calculationMethod).toBe('papoto');

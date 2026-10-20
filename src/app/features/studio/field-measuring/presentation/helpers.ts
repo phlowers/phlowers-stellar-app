@@ -378,3 +378,12 @@ export const getActiveParameterOutput = (
         : outputs.papoto;
   return source ? { parameter: source.parameter, uncertainty: source.uncertainty } : null;
 };
+
+/**
+ * Clears the 15°C result when it is derived from the active parameter output (auto mode); a manual result
+ * is built from user-entered values and stays valid.
+ * @param data - The field measure
+ * @returns The measure without a stale automatic 15°C result
+ */
+export const clearAutoParameter15C = (data: FieldMeasure): FieldMeasure =>
+  data.updateMode15C === 'manual' ? data : { ...data, outputs: { ...data.outputs, parameter15C: null } };

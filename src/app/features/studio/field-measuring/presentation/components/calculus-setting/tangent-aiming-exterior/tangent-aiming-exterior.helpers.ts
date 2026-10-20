@@ -7,6 +7,7 @@
 
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
+import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
 import { createNumberControl } from '../tangent-aiming-support/tangent-aiming-support.helpers';
 import { TangentAimingSupportCalculation } from '../tangent-aiming-support/tangent-aiming-support.interfaces';
 import {
@@ -95,6 +96,11 @@ export function applyTangentAimingExteriorDefaults(
     next[key] ??= TANGENT_AIMING_EXTERIOR_FIELD_RULES[field].default;
   }
   return next;
+}
+
+/** Clears the exterior result and the automatic 15°C result derived from it. */
+export function invalidateTangentAimingExteriorResult(data: FieldMeasure): FieldMeasure {
+  return clearAutoParameter15C({ ...data, outputs: { ...data.outputs, tangentAimingExterior: null } });
 }
 
 /** Resets the numeric input hidden by the calculation type switch. */

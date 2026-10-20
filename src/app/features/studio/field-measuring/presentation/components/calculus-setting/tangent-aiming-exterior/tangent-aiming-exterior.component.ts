@@ -17,7 +17,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
-import { buildCantonSupportOptions } from '../tangent-aiming-support/tangent-aiming-support.helpers';
+import { buildSpanSupportOptions, resolveLeftSupport } from '../tangent-aiming-support/tangent-aiming-support.helpers';
 import {
   TANGENT_AIMING_EXTERIOR_FIELD_RULES,
   TANGENT_AIMING_EXTERIOR_MODEL_FIELDS,
@@ -27,6 +27,7 @@ import {
   calculateTangentAimingExteriorMock,
   createTangentAimingExteriorForm,
   getDisplayedInputFields,
+  invalidateTangentAimingExteriorResult,
   syncDisplayedControls,
   toTangentAimingExteriorInputs
 } from './tangent-aiming-exterior.helpers';
@@ -74,8 +75,10 @@ export class TangentAimingExteriorComponent {
   readonly isCalculating = signal(false);
   readonly hasError = signal(false);
 
-  /** Every support of the section. */
-  readonly supportOptions = computed(() => buildCantonSupportOptions(this.spanService.section()?.supports ?? []));
+  /** Both supports of the selected span, empty without span. */
+  readonly supportOptions = computed(() =>
+    buildSpanSupportOptions(this.spanService.section()?.supports ?? [], this.measureData().span)
+  );
   readonly showParameterField = computed(() => this.measureData().exteriorCalculationType === 'parametre');
   readonly showTangentAngleField = computed(() => this.measureData().exteriorCalculationType === 'tangente');
 
@@ -95,6 +98,14 @@ export class TangentAimingExteriorComponent {
   });
 
   constructor() {
+    // A span change must not leave a left support outside the span.
+    effect(() => {
+      const { exteriorLeftSupport, span } = this.measureData();
+      const resolved = resolveLeftSupport(exteriorLeftSupport, span);
+      if (resolved !== exteriorLeftSupport) {
+        this.measureData.update((d) => invalidateTangentAimingExteriorResult({ ...d, exteriorLeftSupport: resolved }));
+      }
+    });
     // Model -> form: only differing values are written, so a value being typed is never overwritten.
     effect(() => {
       const data = this.measureData();
@@ -112,25 +123,22 @@ export class TangentAimingExteriorComponent {
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       this.isFormValid.set(this.form.valid);
       const values = this.form.getRawValue();
-      this.measureData.update((d) => ({
-        ...d,
-        ...Object.fromEntries(
-          getDisplayedInputFields(d.exteriorCalculationType).map((field) => [
-            TANGENT_AIMING_EXTERIOR_MODEL_FIELDS[field],
-            values[field]
-          ])
-        ),
-        outputs: { ...d.outputs, tangentAimingExterior: null }
-      }));
+      this.measureData.update((d) =>
+        invalidateTangentAimingExteriorResult({
+          ...d,
+          ...Object.fromEntries(
+            getDisplayedInputFields(d.exteriorCalculationType).map((field) => [
+              TANGENT_AIMING_EXTERIOR_MODEL_FIELDS[field],
+              values[field]
+            ])
+          )
+        })
+      );
     });
   }
 
   updateCalculationType(exteriorCalculationType: TangentAimingExteriorCalculationType): void {
-    this.measureData.update((d) => ({
-      ...d,
-      exteriorCalculationType,
-      outputs: { ...d.outputs, tangentAimingExterior: null }
-    }));
+    this.measureData.update((d) => invalidateTangentAimingExteriorResult({ ...d, exteriorCalculationType }));
   }
 
   /** Message of the active error of a control, once it has been touched. */
