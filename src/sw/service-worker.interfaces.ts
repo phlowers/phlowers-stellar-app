@@ -56,9 +56,15 @@ export interface ActivationDeps {
   logger: SwLogger;
 }
 
-/** Workbox strategy subset used to prefetch through the same cache and plugins as the catalog route. */
+/**
+ * Workbox strategy subset used to prefetch through the same cache and plugins as the catalog route.
+ *
+ * @remarks
+ * `handleAll` returns the response (resolved once headers are available) and a completion promise that settles
+ * after the streamed body and the cache write are done (rejected when either fails).
+ */
 export interface CatalogStrategyLike {
-  handle(options: { request: Request; event: ExtendableEvent }): Promise<Response>;
+  handleAll(options: { request: Request; event: ExtendableEvent }): [Promise<Response>, Promise<void>];
 }
 
 export interface ShellNavigationDeps {

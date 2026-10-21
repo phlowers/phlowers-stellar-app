@@ -83,7 +83,8 @@ sw.addEventListener('message', (event) => {
 });
 
 registerRoute(createCatalogRoute(sw.location.origin, catalogStrategy));
-registerRoute(new PrecacheRoute(controller));
+// The navigation route must come first: PrecacheRoute also matches `/` and `/index.html` (default index mapping)
+// and would bypass the 401/403 → /auth/relogin recovery when the cached shell is missing.
 registerRoute(
   createShellNavigationRoute(
     createShellNavigationHandler({
@@ -93,3 +94,4 @@ registerRoute(
     })
   )
 );
+registerRoute(new PrecacheRoute(controller));

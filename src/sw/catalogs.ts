@@ -119,8 +119,15 @@ export async function prefetchCatalogs(deps: PrefetchCatalogsDeps): Promise<Pref
     }
     try {
       const request = new Request(url, { redirect: 'error', credentials: 'same-origin' });
-      const response = await deps.strategy.handle({ request, event: deps.event }); //NOSONAR — one download at a time
-      if (!response.ok || response.redirected) {
+      const [responsePromise, done] = deps.strategy.handleAll({ request, event: deps.event });
+      // Wait for the body and the cache write too, so downloads never overlap and `cached` means stored.
+      const [response, completion] = await Promise.allSettled([responsePromise, done]); //NOSONAR — one download at a time
+      if (
+        response.status === 'rejected' ||
+        completion.status === 'rejected' ||
+        !response.value.ok ||
+        response.value.redirected
+      ) {
         result.failed.push(url);
         continue;
       }

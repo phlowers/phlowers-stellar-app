@@ -153,7 +153,7 @@ export class CatalogUpdateService {
     const toPrefetch: string[] = [];
     for (const catalog of staleCatalogs) {
       const url = catalogDataUrl(globalThis.location.origin, catalog.fileName, catalog.latestHash);
-      const cached = cache ? (await cache.match(url)) !== undefined : false; //NOSONAR — one catalog at a time
+      const cached = await this.isCached(cache, url); //NOSONAR — one catalog at a time
       if (!mayReplaceLive && catalog.storedHash !== undefined) {
         this.logger.info(`Catalog '${catalog.fileName}' update deferred: another window is working`);
         if (!cached && prefetchAvailable) {
@@ -216,6 +216,19 @@ export class CatalogUpdateService {
     }
   }
 
+  /** A cache read failure is treated as a miss: the catalog is then imported from the network or prefetched. */
+  private async isCached(cache: Cache | null, url: string): Promise<boolean> {
+    if (!cache) {
+      return false;
+    }
+    try {
+      return (await cache.match(url)) !== undefined;
+    } catch (error) {
+      this.logger.warn(`Catalog cache read failed for '${url}'`, error);
+      return false;
+    }
+  }
+
   private async openCatalogCache(): Promise<Cache | null> {
     try {
       return typeof caches === 'undefined' ? null : await caches.open(CATALOG_CACHE_NAME);
@@ -233,7 +246,9 @@ export class CatalogUpdateService {
   ): Record<string, number> {
     const sizeOfUrl = new Map(
       Object.entries(sizes).flatMap(([fileName, size]) =>
-        hashes[fileName] ? [[catalogDataUrl(globalThis.location.origin, fileName, hashes[fileName]), size] as const] : []
+        hashes[fileName]
+          ? [[catalogDataUrl(globalThis.location.origin, fileName, hashes[fileName]), size] as const]
+          : []
       )
     );
     return Object.fromEntries(urls.flatMap((url) => (sizeOfUrl.has(url) ? [[url, sizeOfUrl.get(url)!]] : [])));

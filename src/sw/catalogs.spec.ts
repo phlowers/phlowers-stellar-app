@@ -25,12 +25,28 @@ class FakeExtendableEvent extends Event {
   }
 }
 
+interface StrategyStep {
+  response?: () => Promise<Response> | Response;
+  done?: () => Promise<void>;
+}
+
+/** Mocks `handleAll`: the response resolves on headers, `done` settles after the body and the cache write. */
+function createStrategy(step: (request: Request) => Response | StrategyStep): CatalogStrategyLike {
+  return {
+    handleAll: vi.fn(({ request }) => {
+      const resolved = step(request);
+      const { response, done }: StrategyStep = resolved instanceof Response ? { response: () => resolved } : resolved;
+      return [Promise.resolve(response?.() ?? new Response('csv')), Promise.resolve(done?.())];
+    })
+  };
+}
+
 function createDeps(overrides: Partial<PrefetchCatalogsDeps> = {}): PrefetchCatalogsDeps {
   return {
     message: { type: 'PREFETCH_CATALOGS', urls: [CABLES, LINES], force: false },
     event: new FakeExtendableEvent('message') as unknown as ExtendableEvent,
     origin: ORIGIN,
-    strategy: { handle: vi.fn(async () => new Response('csv')) },
+    strategy: createStrategy(() => new Response('csv')),
     connection: { downlink: 8 },
     storage: { estimate: async () => ({ usage: 0, quota: 10_000 * 1024 * 1024 }) },
     logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
@@ -39,7 +55,7 @@ function createDeps(overrides: Partial<PrefetchCatalogsDeps> = {}): PrefetchCata
 }
 
 const requestedUrls = (strategy: CatalogStrategyLike): string[] =>
-  vi.mocked(strategy.handle).mock.calls.map(([options]) => options.request.url);
+  vi.mocked(strategy.handleAll).mock.calls.map(([options]) => options.request.url);
 
 describe('service worker catalogs', () => {
   beforeAll(() => {
@@ -152,7 +168,7 @@ describe('service worker catalogs', () => {
       const deps = createDeps({ connection: { downlink: 1 } });
 
       expect(await prefetchCatalogs(deps)).toEqual({ refused: 'downlink-below-threshold', cached: [], failed: [] });
-      expect(deps.strategy.handle).not.toHaveBeenCalled();
+      expect(deps.strategy.handleAll).not.toHaveBeenCalled();
     });
 
     it('downloads when the probe measures enough despite a low downlink estimate', async () => {
@@ -180,14 +196,16 @@ describe('service worker catalogs', () => {
 
     it('downloads the URLs one at a time when force is true, whatever the network', async () => {
       const order: string[] = [];
-      const strategy: CatalogStrategyLike = {
-        handle: vi.fn(async ({ request }) => {
-          order.push(`start ${request.url}`);
-          await new Promise((resolve) => setTimeout(resolve, 5));
-          order.push(`end ${request.url}`);
+      const strategy = createStrategy((request) => ({
+        response: () => {
+          order.push(`headers ${request.url}`);
           return new Response('csv');
-        })
-      };
+        },
+        done: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 5));
+          order.push(`done ${request.url}`);
+        }
+      }));
       const deps = createDeps({
         connection: { downlink: 1 },
         strategy,
@@ -196,7 +214,7 @@ describe('service worker catalogs', () => {
 
       const result = await prefetchCatalogs(deps);
 
-      expect(order).toEqual([`start ${CABLES}`, `end ${CABLES}`, `start ${LINES}`, `end ${LINES}`]);
+      expect(order).toEqual([`headers ${CABLES}`, `done ${CABLES}`, `headers ${LINES}`, `done ${LINES}`]);
       expect(result).toEqual({ refused: null, cached: [CABLES, LINES], failed: [] });
     });
 
@@ -205,7 +223,7 @@ describe('service worker catalogs', () => {
 
       await prefetchCatalogs(deps);
 
-      const [options] = vi.mocked(deps.strategy.handle).mock.calls[0];
+      const [options] = vi.mocked(deps.strategy.handleAll).mock.calls[0];
       expect(options.request.redirect).toBe('error');
       expect(options.request.credentials).toBe('same-origin');
       expect(options.event).toBe(deps.event);
@@ -233,14 +251,62 @@ describe('service worker catalogs', () => {
 
     it('reports failed downloads without stopping the others', async () => {
       const strategy: CatalogStrategyLike = {
-        handle: vi
+        handleAll: vi
           .fn()
-          .mockRejectedValueOnce(new TypeError('redirect'))
-          .mockResolvedValueOnce(new Response('', { status: 404 }))
+          .mockReturnValueOnce([Promise.reject(new TypeError('redirect')), Promise.resolve()])
+          .mockReturnValueOnce([Promise.resolve(new Response('', { status: 404 })), Promise.resolve()])
       };
       const deps = createDeps({ strategy });
 
       expect(await prefetchCatalogs(deps)).toEqual({ refused: null, cached: [], failed: [CABLES, LINES] });
+      expect(deps.logger.warn).toHaveBeenCalled();
+    });
+
+    it('does not report a catalog as cached before its body and cache write complete', async () => {
+      let finishBody = (): void => undefined;
+      const deps = createDeps({
+        message: { type: 'PREFETCH_CATALOGS', urls: [CABLES], force: true },
+        strategy: createStrategy(() => ({
+          done: () => new Promise<void>((resolve) => (finishBody = resolve))
+        }))
+      });
+      let settled = false;
+
+      const pending = prefetchCatalogs(deps).then((result) => {
+        settled = true;
+        return result;
+      });
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      expect(settled).toBe(false);
+
+      finishBody();
+      expect((await pending).cached).toEqual([CABLES]);
+    });
+
+    it('does not start the next download while the previous body is still streaming', async () => {
+      let finishBody = (): void => undefined;
+      const strategy = createStrategy((request) =>
+        request.url === CABLES ? { done: () => new Promise<void>((resolve) => (finishBody = resolve)) } : {}
+      );
+      const deps = createDeps({ strategy });
+
+      const pending = prefetchCatalogs(deps);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      expect(requestedUrls(strategy)).toEqual([CABLES]);
+
+      finishBody();
+      expect(await pending).toEqual({ refused: null, cached: [CABLES, LINES], failed: [] });
+      expect(requestedUrls(strategy)).toEqual([CABLES, LINES]);
+    });
+
+    it.each([
+      ['a failed cache write', { done: async () => Promise.reject(new Error('quota')) }],
+      ['a body transfer that fails', { done: async () => Promise.reject(new TypeError('network')) }]
+    ])('reports a catalog as failed after %s, and still downloads the next one', async (_label, firstStep) => {
+      const strategy = createStrategy((request) => (request.url === CABLES ? firstStep : {}));
+      const deps = createDeps({ strategy });
+
+      expect(await prefetchCatalogs(deps)).toEqual({ refused: null, cached: [LINES], failed: [CABLES] });
       expect(deps.logger.warn).toHaveBeenCalled();
     });
 
@@ -251,7 +317,7 @@ describe('service worker catalogs', () => {
       });
 
       expect((await prefetchCatalogs(deps)).refused).toBe('storage-insufficient');
-      expect(deps.strategy.handle).not.toHaveBeenCalled();
+      expect(deps.strategy.handleAll).not.toHaveBeenCalled();
     });
 
     describe('storage reserve', () => {
@@ -276,7 +342,7 @@ describe('service worker catalogs', () => {
         });
 
         expect((await prefetchCatalogs(deps)).refused).toBe('storage-insufficient');
-        expect(deps.strategy.handle).not.toHaveBeenCalled();
+        expect(deps.strategy.handleAll).not.toHaveBeenCalled();
       });
 
       it('ignores the size of catalogs that are already cached', async () => {
@@ -299,7 +365,7 @@ describe('service worker catalogs', () => {
         const deps = createDeps({ storage: { estimate }, message: message({ [CABLES]: 4 * MB, [LINES]: 4 * MB }) });
 
         expect(await prefetchCatalogs(deps)).toEqual({ refused: null, cached: [CABLES], failed: [LINES] });
-        expect(deps.strategy.handle).toHaveBeenCalledTimes(1);
+        expect(deps.strategy.handleAll).toHaveBeenCalledTimes(1);
       });
 
       it('evicts a download that consumed the reserve and stops', async () => {
@@ -313,7 +379,7 @@ describe('service worker catalogs', () => {
 
         expect(await prefetchCatalogs(deps)).toEqual({ refused: null, cached: [], failed: [CABLES, LINES] });
         expect(cache.delete).toHaveBeenCalledWith(CABLES);
-        expect(deps.strategy.handle).toHaveBeenCalledTimes(1);
+        expect(deps.strategy.handleAll).toHaveBeenCalledTimes(1);
       });
 
       it('never evicts a catalog that was already cached', async () => {

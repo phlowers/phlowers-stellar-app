@@ -173,6 +173,27 @@ describe('CatalogUpdateService', () => {
     );
   });
 
+  it('sends the manifest size of the catalogs to prefetch so the service worker can protect the reserve', async () => {
+    serveManifest({ ...ALL_HASHES, 'cables.csv': 'NEW' });
+    fetchSpy.mockResolvedValue(
+      new Response(
+        JSON.stringify({ data_hashes: { ...ALL_HASHES, 'cables.csv': 'NEW' }, data_sizes: { 'cables.csv': 1234 } })
+      )
+    );
+
+    await service.updateCatalogsIfNeeded();
+
+    expect(controller!.postMessage).toHaveBeenCalledWith(
+      {
+        type: 'PREFETCH_CATALOGS',
+        urls: [versioned('cables.csv', 'NEW')],
+        force: false,
+        sizes: { [versioned('cables.csv', 'NEW')]: 1234 }
+      },
+      [expect.any(MessagePort)]
+    );
+  });
+
   it('logs the prefetch result posted back by the service worker', async () => {
     serveManifest({ ...ALL_HASHES, 'cables.csv': 'NEW' });
     await service.updateCatalogsIfNeeded();

@@ -1,4 +1,5 @@
 import { InjectionToken, isDevMode } from '@angular/core';
+import { AppUpdateState, OfflineStatusKind } from './app-update.interfaces';
 
 /** Same URL as the previous service worker: browsers treat the Workbox one as an update of the same registration. */
 export const SERVICE_WORKER_URL = '/service-worker.js';
@@ -22,6 +23,17 @@ export const APP_CACHE_NAME_PREFIXES: readonly string[] = ['workbox-precache', '
 
 /** i18n key prefix of the five offline status labels (`<prefix>.<OfflineStatusKind>`). */
 export const OFFLINE_STATUS_I18N_PREFIX = 'shared.app-update-service.offline-status';
+
+/** A waiting update does not change offline readiness: the active version still works offline. */
+export const OFFLINE_STATUS_KIND_BY_STATE: Record<AppUpdateState, OfflineStatusKind> = {
+  'ready-offline': 'ready',
+  'update-waiting': 'ready',
+  installing: 'preparing',
+  'deferred-network': 'waiting-network',
+  'storage-insufficient': 'storage-insufficient',
+  unsupported: 'not-prepared',
+  'not-installed': 'not-prepared'
+};
 
 export const APP_UPDATE_I18N = {
   updateWaitingSummary: 'shared.app-update-service.update-waiting-summary',

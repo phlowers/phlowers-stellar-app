@@ -72,14 +72,14 @@ describe('service worker entry point', () => {
     ]);
   });
 
-  it('registers the catalog route, the precache route and a shell navigation route serving /index.html', async () => {
+  it('registers the catalog route, the shell navigation route (serving /index.html) then the precache route', async () => {
     expect(routing.registerRoute).toHaveBeenCalledTimes(3);
     const catalogRoute = routing.registerRoute.mock.calls[0][0] as Route;
     expect(catalogRoute).toBeInstanceOf(Route);
     expect(catalogRoute.handler).toBeInstanceOf(CacheFirst);
-    expect(routing.registerRoute.mock.calls[1][0]).toMatchObject({ kind: 'precache-route' });
-    const navigationRoute = routing.registerRoute.mock.calls[2][0] as NavigationRoute;
+    const navigationRoute = routing.registerRoute.mock.calls[1][0] as NavigationRoute;
     expect(navigationRoute).toBeInstanceOf(NavigationRoute);
+    expect(routing.registerRoute.mock.calls[2][0]).toMatchObject({ kind: 'precache-route' });
 
     const shell = new Response('shell');
     precaching.controller.matchPrecache.mockResolvedValueOnce(shell);
@@ -92,6 +92,34 @@ describe('service worker entry point', () => {
     expect(precaching.controller.matchPrecache).toHaveBeenCalledWith('/index.html');
     expect(response).toBe(shell);
   });
+
+  it.each(['/', '/index.html'])(
+    'registers the navigation route before the precache route so a %s navigation reaches the relogin recovery',
+    async (path) => {
+      const calls = routing.registerRoute.mock.calls.map(([route]) => route as unknown);
+      const navigationRoute = calls.find((route) => route instanceof NavigationRoute) as NavigationRoute;
+      const precacheIndex = calls.findIndex((route) => (route as { kind?: string }).kind === 'precache-route');
+      expect(calls.indexOf(navigationRoute)).toBeLessThan(precacheIndex);
+
+      const url = new URL(path, self.location.origin);
+      const navigationRequest = { mode: 'navigate', url: url.href } as Request;
+      expect(
+        navigationRoute.match({ request: navigationRequest, url, event: {} as ExtendableEvent, sameOrigin: true })
+      ).toBeTruthy();
+
+      precaching.controller.matchPrecache.mockResolvedValueOnce(undefined);
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response('denied', { status: 401 }));
+      const response = (await navigationRoute.handler.handle({
+        request: new Request(url),
+        url,
+        event: {} as ExtendableEvent
+      })) as Response;
+      fetchSpy.mockRestore();
+
+      expect(response.status).toBe(302);
+      expect(response.headers.get('Location')).toBe(new URL('/auth/relogin', self.location.origin).href);
+    }
+  );
 
   it('only listens to install, activate and message (fetch is handled by the Workbox router)', () => {
     expect([...listeners.keys()].sort((a, b) => a.localeCompare(b))).toEqual(['activate', 'install', 'message']);

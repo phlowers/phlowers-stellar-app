@@ -1,5 +1,5 @@
 import { AppUpdateState, OfflineStatusKind, UpdateCheckDecision, VersionFile } from './app-update.interfaces';
-import { APP_CACHE_NAME_PREFIXES } from './app-update.constantes';
+import { APP_CACHE_NAME_PREFIXES, OFFLINE_STATUS_KIND_BY_STATE } from './app-update.constantes';
 import { evaluateBackgroundDownload } from './network-rule.helpers';
 import { NetworkConnectionLike } from './network-rule.interfaces';
 import { USER_DATA_STORAGE_RESERVE_BYTES } from './storage-rule.constantes';
@@ -73,21 +73,8 @@ export function buildDateForRunningVersion(file: VersionFile | null, runningGitH
   return file.build_datetime_utc;
 }
 
-/** A waiting update does not change offline readiness: the active version still works offline. */
 export function offlineStatusKind(state: AppUpdateState): OfflineStatusKind {
-  switch (state) {
-    case 'ready-offline':
-    case 'update-waiting':
-      return 'ready';
-    case 'installing':
-      return 'preparing';
-    case 'deferred-network':
-      return 'waiting-network';
-    case 'storage-insufficient':
-      return 'storage-insufficient';
-    default:
-      return 'not-prepared';
-  }
+  return OFFLINE_STATUS_KIND_BY_STATE[state];
 }
 
 /** Cache Storage entries owned by the application (precache, catalogs, previous update system). */
