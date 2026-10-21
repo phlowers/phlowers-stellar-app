@@ -91,3 +91,6 @@ export interface PrefetchCatalogsDeps {
   cache?: CatalogCacheLike;
   logger: SwLogger;
 }
+
+// 'stopped': the user data reserve is exhausted, so this catalog and the following ones are not prefetched.
+export type CatalogPrefetchOutcome = 'cached' | 'failed' | 'stopped';

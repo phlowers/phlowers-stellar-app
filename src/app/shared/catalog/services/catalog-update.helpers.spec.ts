@@ -1,4 +1,4 @@
-import { fetchCatalogHashes, fetchCatalogManifest } from './catalog-update.helpers';
+import { fetchCatalogHashes, fetchCatalogManifest, planStaleCatalog } from './catalog-update.helpers';
 
 describe('fetchCatalogHashes', () => {
   it('returns the data_hashes map, fetched without cache', async () => {
@@ -49,5 +49,61 @@ describe('fetchCatalogManifest', () => {
     const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify({ data_hashes: { 'a.csv': 'h' } })));
 
     expect((await fetchCatalogManifest('/m', 1000, fetcher))?.sizes).toEqual({});
+  });
+});
+
+describe('planStaleCatalog', () => {
+  const imported = { storedHash: 'old' };
+  const neverImported = { storedHash: undefined };
+  const free = { cached: false, mayReplaceLive: true, prefetchAvailable: true };
+
+  it('imports a cached new version when no other window works', () => {
+    expect(planStaleCatalog(imported, { ...free, cached: true })).toEqual({
+      deferred: false,
+      importNow: true,
+      prefetch: false
+    });
+  });
+
+  it('prefetches a new version that is not cached yet instead of importing it', () => {
+    expect(planStaleCatalog(imported, free)).toEqual({ deferred: false, importNow: false, prefetch: true });
+  });
+
+  it('imports an uncached new version when no service worker could prefetch it', () => {
+    expect(planStaleCatalog(imported, { ...free, prefetchAvailable: false })).toEqual({
+      deferred: false,
+      importNow: true,
+      prefetch: false
+    });
+  });
+
+  it('defers an imported catalog while another window works, prefetching it only when it is not cached', () => {
+    const busy = { ...free, mayReplaceLive: false };
+
+    expect(planStaleCatalog(imported, busy)).toEqual({ deferred: true, importNow: false, prefetch: true });
+    expect(planStaleCatalog(imported, { ...busy, cached: true })).toEqual({
+      deferred: true,
+      importNow: false,
+      prefetch: false
+    });
+    expect(planStaleCatalog(imported, { ...busy, prefetchAvailable: false })).toEqual({
+      deferred: true,
+      importNow: false,
+      prefetch: false
+    });
+  });
+
+  it('imports a never imported catalog right away, whatever the other windows, the cache or the network', () => {
+    for (const cached of [true, false]) {
+      for (const mayReplaceLive of [true, false]) {
+        for (const prefetchAvailable of [true, false]) {
+          expect(planStaleCatalog(neverImported, { cached, mayReplaceLive, prefetchAvailable })).toEqual({
+            deferred: false,
+            importNow: true,
+            prefetch: false
+          });
+        }
+      }
+    }
   });
 });
