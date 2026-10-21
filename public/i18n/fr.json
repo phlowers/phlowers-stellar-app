@@ -704,8 +704,8 @@
     "tangent-aiming-exterior": {
       "mandatory-msg": "Toutes les données sont obligatoires pour le calcul de paramètre.",
       "h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
-      "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support gauche",
-      "vertical-acc-angle-right-label": "Angle vertical de l'appareil à l'accr. câble du support droite",
+      "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
+      "vertical-acc-angle-right-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
       "calculation-failed": "Échec du calcul du paramètre par visées tangentes (extérieur)"
     },
     "papoto": {

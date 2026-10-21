@@ -289,6 +289,24 @@ describe('TangentAimingExterior component', () => {
     expect(component.measureData().outputs.parameter15C).toBeNull();
   });
 
+  it('should restore the left support of a span when it is selected again, else use its departure support', () => {
+    const changeSpan = (span: number[]) => {
+      componentRef.setInput('measureData', { ...component.measureData(), span });
+      fixture.detectChanges();
+    };
+    componentRef.setInput('measureData', validMeasure({ span: [3, 4], exteriorLeftSupport: '4' }));
+    fixture.detectChanges();
+    changeSpan([4, 5]);
+    expect(component.measureData().exteriorLeftSupport).toBe('4');
+    changeSpan([2, 3]);
+    expect(component.measureData().exteriorLeftSupport).toBe('2');
+    changeSpan([3, 4]);
+    expect(component.measureData().exteriorLeftSupport).toBe('4');
+    expect(component.form.controls.leftSupport.value).toBe('4');
+    changeSpan([4, 5]);
+    expect(component.measureData().exteriorLeftSupport).toBe('4');
+  });
+
   it('should keep the left support and the result when it still belongs to the span', async () => {
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();

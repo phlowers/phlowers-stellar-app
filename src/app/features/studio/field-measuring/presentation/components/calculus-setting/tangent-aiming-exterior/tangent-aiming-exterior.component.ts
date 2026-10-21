@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, model, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
@@ -17,7 +17,12 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
-import { buildSpanSupportOptions, resolveLeftSupport } from '../tangent-aiming-support/tangent-aiming-support.helpers';
+import {
+  buildSpanSupportOptions,
+  getSpanKey,
+  LeftSupportSnapshot,
+  resolveSpanLeftSupport
+} from '../tangent-aiming-support/tangent-aiming-support.helpers';
 import {
   TANGENT_AIMING_EXTERIOR_FIELD_RULES,
   TANGENT_AIMING_EXTERIOR_MODEL_FIELDS,
@@ -74,6 +79,9 @@ export class TangentAimingExteriorComponent {
   readonly isFormValid = signal(false);
   readonly isCalculating = signal(false);
   readonly hasError = signal(false);
+  /** Left support chosen by the user for each span (by span key), restored when the span is selected again. */
+  private readonly leftSupportMemory = signal<Record<string, string>>({});
+  private readonly lastLeftSupport = signal<LeftSupportSnapshot | null>(null);
 
   /** Both supports of the selected span, empty without span. */
   readonly supportOptions = computed(() =>
@@ -101,7 +109,19 @@ export class TangentAimingExteriorComponent {
     // A span change must not leave a left support outside the span.
     effect(() => {
       const { exteriorLeftSupport, span } = this.measureData();
-      const resolved = resolveLeftSupport(exteriorLeftSupport, span);
+      const { spanKey, previous, memory } = untracked(() => ({
+        spanKey: getSpanKey(span),
+        previous: this.lastLeftSupport(),
+        memory: this.leftSupportMemory()
+      }));
+      const resolved = resolveSpanLeftSupport(exteriorLeftSupport, span, previous, memory);
+      untracked(() => {
+        // The left support kept for a span is the one the user will find again when selecting it back.
+        if (resolved === exteriorLeftSupport && resolved !== null) {
+          this.leftSupportMemory.update((m) => ({ ...m, [spanKey]: resolved }));
+        }
+        this.lastLeftSupport.set({ spanKey, leftSupport: resolved });
+      });
       if (resolved !== exteriorLeftSupport) {
         this.measureData.update((d) => invalidateTangentAimingExteriorResult({ ...d, exteriorLeftSupport: resolved }));
       }

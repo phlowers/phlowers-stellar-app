@@ -51,6 +51,35 @@ export function resolveLeftSupport(current: string | null, span: number[] | null
     : getDefaultLeftSupport(span);
 }
 
+/** Identifies a span, empty without span. */
+export function getSpanKey(span: number[] | null | undefined): string {
+  return span?.join('-') ?? '';
+}
+
+/** Left support seen at the last resolution, with the span it was resolved for. */
+export interface LeftSupportSnapshot {
+  spanKey: string;
+  leftSupport: string | null;
+}
+
+/**
+ * Left support to apply: on a span change (the left support is still the one of the previous span), the support
+ * the user had chosen for that span, else its departure support; otherwise the current one if it belongs to the span.
+ */
+export function resolveSpanLeftSupport(
+  current: string | null,
+  span: number[] | null,
+  previous: LeftSupportSnapshot | null,
+  memory: Record<string, string>
+): string | null {
+  const key = getSpanKey(span);
+  if (previous && previous.spanKey !== key && previous.leftSupport === current) {
+    const remembered = memory[key];
+    return resolveLeftSupport(remembered ?? null, span);
+  }
+  return resolveLeftSupport(current, span);
+}
+
 /** Inputs displayed for the given calculation type. */
 export function getDisplayedInputFields(
   calculationType: FieldMeasure['calculationType']

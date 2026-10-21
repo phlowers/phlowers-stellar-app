@@ -20,6 +20,14 @@
 - **Detected on**: 2026-10-13.
 - **Status**: PENDING REVIEW; deletion requires user validation.
 
+### `buildCantonSupportOptions()`
+
+- **Source**: `src/app/features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers.ts`.
+- **Evidence**: Replaced by `buildSpanSupportOptions()` (selector limited to the span supports); no caller and no spec in `src` (PR #1299 review).
+- **Removal impact**: Remove the function; `formatSupportNumber` stays used by `buildSpanSupportOptions`.
+- **Detected on**: 2026-10-21.
+- **Status**: PENDING REVIEW; deletion requires user validation.
+
 ## Legend
 - **📍 Source**: file and line number
 - **🔍 Evidence**: why it is considered dead
