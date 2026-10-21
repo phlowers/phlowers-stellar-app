@@ -1,9 +1,20 @@
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TANGENT_AIMING_SUPPORT_FIELD_RULES as RULES } from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.constantes';
+import { TANGENT_AIMING_EXTERIOR_FIELD_RULES as EXTERIOR_RULES } from './components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.constantes';
 import { PAPOTO_INPUT_DEFAULTS, PEP_INPUT_DEFAULTS } from './helpers';
 import { CalculusModeResetContext } from './calculus-mode-reset.interfaces';
 
 type CalculationMethod = FieldMeasure['calculationMethod'];
+
+const EXTERIOR_DEFAULTS = {
+  exteriorSpanLength: EXTERIOR_RULES.spanLength.default,
+  exteriorHAccDistance: EXTERIOR_RULES.hAccDistance.default,
+  exteriorVerticalAccAngleLeft: EXTERIOR_RULES.verticalAccAngleLeft.default,
+  exteriorVerticalAccAngleRight: EXTERIOR_RULES.verticalAccAngleRight.default,
+  exteriorParameter: EXTERIOR_RULES.parameter.default,
+  exteriorTangentAngle: EXTERIOR_RULES.tangentAngle.default,
+  exteriorCalculationType: 'parametre' as const
+};
 
 /** Resets each calculus mode (inputs and outputs) to its defaults. Typed on every method so a new one requires a resetter. */
 export const CALCULUS_MODE_RESETTERS: Record<
@@ -25,6 +36,12 @@ export const CALCULUS_MODE_RESETTERS: Record<
     cableTangentAngle: RULES.cableTangentAngle.default,
     calculationType: 'parametre',
     outputs: { ...data.outputs, tangentAimingSupport: null }
+  }),
+  'tangente-aiming-exterior': (data, context) => ({
+    ...data,
+    ...EXTERIOR_DEFAULTS,
+    exteriorLeftSupport: context.defaultTangentLeftSupport,
+    outputs: { ...data.outputs, tangentAimingExterior: null }
   }),
   pep: (data) => ({ ...data, ...PEP_INPUT_DEFAULTS })
 };
