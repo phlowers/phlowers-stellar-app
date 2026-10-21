@@ -10,6 +10,7 @@ import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { NotificationService } from '@core/services/notification/notification.service';
 
 @Component({
   selector: 'app-button',
@@ -31,6 +32,7 @@ describe('L0SumComponent', () => {
   let component: L0SumComponent;
   let fixture: ComponentFixture<L0SumComponent>;
   let toolbarDialogService: ToolbarDialogService;
+  let notificationService: { error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     const mockLitData = {
@@ -49,9 +51,12 @@ describe('L0SumComponent', () => {
       section: vi.fn().mockReturnValue(null)
     } as unknown as PlotSpanService;
 
+    notificationService = { error: vi.fn() };
+
     await TestBed.configureTestingModule({
       providers: [
         ToolbarDialogService,
+        { provide: NotificationService, useValue: notificationService },
         provideHttpClientTesting(),
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockPlotSpanService }
@@ -140,11 +145,103 @@ describe('L0SumComponent', () => {
   });
 
   describe('onExport', () => {
-    it('should log export data', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    let createdLink: HTMLAnchorElement | undefined;
+    let clickSpy: ReturnType<typeof vi.fn>;
+    let blobs: Blob[];
+    let revokeSpy: ReturnType<typeof vi.fn>;
+
+    // happy-dom does not implement Blob.prototype.text
+    const readBlobAsText = (blob: Blob): Promise<string> =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsText(blob);
+      });
+
+    beforeEach(() => {
+      blobs = [];
+      createdLink = undefined;
+      clickSpy = vi.fn();
+      revokeSpy = vi.fn();
+
+      vi.stubGlobal('URL', {
+        createObjectURL: vi.fn((blob: Blob) => {
+          blobs.push(blob);
+          return 'blob:l0';
+        }),
+        revokeObjectURL: revokeSpy
+      });
+      const realCreateElement = document.createElement.bind(document);
+      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+        const element = realCreateElement(tag);
+        if (tag === 'a') {
+          createdLink = element as HTMLAnchorElement;
+          createdLink.click = clickSpy as unknown as () => void;
+        }
+        return element;
+      });
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it('should download the table as export_natural_lengths.csv', () => {
       component.onExport();
-      expect(consoleSpy).toHaveBeenCalledWith('Export L0 sum', expect.objectContaining({ rows: expect.any(Array) }));
-      consoleSpy.mockRestore();
+
+      expect(createdLink?.download).toBe('export_natural_lengths.csv');
+      expect(createdLink?.href).toContain('blob:l0');
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      expect(revokeSpy).toHaveBeenCalledWith('blob:l0');
+      expect(notificationService.error).not.toHaveBeenCalled();
+    });
+
+    it('should declare the CSV content as UTF-8', () => {
+      component.onExport();
+
+      expect(blobs[0].type).toBe('text/csv;charset=utf-8');
+    });
+
+    it('should export the translated heading then one line per span', async () => {
+      component.onExport();
+
+      const lines = (await readBlobAsText(blobs[0])).split('\r\n');
+      expect(lines[0]).toBe(
+        'COMMON.SPAN-LABEL;STUDIO.L0-SUM.CSV-SPAN-LENGTH-LABEL;STUDIO.L0-SUM.CSV-L0-LABEL;STUDIO.L0-SUM.CSV-CUMULATED-L0-LABEL'
+      );
+      expect(lines.slice(1, 3)).toEqual(['1-2;101.25;100;100', '2-3;201;200.5;300.5']);
+      expect(lines).toHaveLength(7);
+    });
+
+    it('should keep the dialog open', () => {
+      const closeSpy = vi.spyOn(toolbarDialogService, 'closeTool');
+
+      component.onExport();
+
+      expect(closeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should notify an error and not download when the table is empty', () => {
+      component.l0Rows.set([]);
+
+      component.onExport();
+
+      expect(notificationService.error).toHaveBeenCalledWith('studio.l0-sum.export-invalid-table');
+      expect(clickSpy).not.toHaveBeenCalled();
+    });
+
+    it('should notify an error and not download when a value is not a finite number', () => {
+      component.l0Rows.update((rows) => [
+        ...rows,
+        { span: '6-7', spanLength: Number.NaN, l0: 1, cumulatedL0: 1, index: 5 }
+      ]);
+
+      component.onExport();
+
+      expect(notificationService.error).toHaveBeenCalledWith('studio.l0-sum.export-invalid-table');
+      expect(clickSpy).not.toHaveBeenCalled();
     });
   });
 
