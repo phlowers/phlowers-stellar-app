@@ -6,7 +6,8 @@
     "news": "Actualités",
     "changelog": "Changelog",
     "studio": "Studio",
-    "tools": "Outils"
+    "tools": "Outils",
+    "instruction-manual": "Manuel d'utilisation"
   },
   "common": {
     "actions-label": "Actions",
@@ -227,6 +228,23 @@
   "news": {
     "empty": "Aucune actualité"
   },
+  "instruction-manual": {
+    "intro-title": "Bienvenue sur l'espace d'aide et de documentation",
+    "intro-text": "Retrouvez ici toutes les ressources indispensables pour prendre en main l'application Céleste, configurer vos études, gérer vos cantons et exporter vos résultats en toute simplicité. Choisissez le format qui vous convient le mieux.",
+    "pdf-title": "Télécharger le manuel PDF",
+    "pdf-file-name-label": "Nom du fichier",
+    "pdf-size-label": "Taille estimée",
+    "pdf-update-date-label": "Date de mise à jour",
+    "pdf-download-button": "Télécharger le PDF",
+    "online-title": "Consulter le manuel en ligne",
+    "online-format-label": "Format",
+    "online-format-value": "Web interactif (HTML)",
+    "online-features-label": "Fonctionnalités",
+    "online-features-value": "Recherche globale, index",
+    "online-availability-label": "Disponibilité",
+    "online-availability-value": "Instantanée",
+    "online-open-button": "Ouvrir le manuel en ligne"
+  },
   "admin": {
     "app-version": "Version de l'application",
     "check-app-version": "Vérifier les mises à jour",
@@ -288,7 +306,8 @@
       "home": "Accueil",
       "studies": "Études",
       "tools": "Outils",
-      "documentation": "Documentation",
+      "instruction-manual": "Manuel d'utilisation",
+      "manual": "Manuel",
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"
     },

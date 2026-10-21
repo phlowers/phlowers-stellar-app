@@ -6,7 +6,8 @@
     "news": "News",
     "changelog": "Changelog",
     "studio": "Studio",
-    "tools": "Tools"
+    "tools": "Tools",
+    "instruction-manual": "Instruction manual"
   },
   "common": {
     "actions-label": "Actions",
@@ -227,6 +228,23 @@
   "news": {
     "empty": "No news found"
   },
+  "instruction-manual": {
+    "intro-title": "Welcome to the help and documentation area",
+    "intro-text": "Find here all the essential resources to get started with the Celeste application, configure your studies, manage your sections and export your results with ease. Choose the format that suits you best.",
+    "pdf-title": "Download the PDF manual",
+    "pdf-file-name-label": "File name",
+    "pdf-size-label": "Estimated size",
+    "pdf-update-date-label": "Update date",
+    "pdf-download-button": "Download the PDF",
+    "online-title": "Browse the online manual",
+    "online-format-label": "Format",
+    "online-format-value": "Interactive web (HTML)",
+    "online-features-label": "Features",
+    "online-features-value": "Global search, index",
+    "online-availability-label": "Availability",
+    "online-availability-value": "Instant",
+    "online-open-button": "Open the online manual"
+  },
   "admin": {
     "app-version": "App version",
     "check-app-version": "Check for updates",
@@ -288,7 +306,8 @@
       "home": "Home",
       "studies": "Studies",
       "tools": "Tools",
-      "documentation": "Documentation",
+      "instruction-manual": "Instruction manual",
+      "manual": "Manual",
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"
     },

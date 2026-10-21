@@ -62,6 +62,14 @@ export const appRoutes: Routes = [
         loadChildren: () => import('@features/changelog/presentation/changelog.routes').then((m) => m.changelogRoutes)
       },
       {
+        path: 'instruction-manual',
+        title: 'routes.instruction-manual',
+        loadChildren: () =>
+          import('@features/instruction-manual/presentation/instruction-manual.routes').then(
+            (m) => m.instructionManualRoutes
+          )
+      },
+      {
         path: 'studio',
         title: 'routes.studio',
         loadComponent: () =>

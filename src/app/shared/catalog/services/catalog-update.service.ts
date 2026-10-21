@@ -21,7 +21,7 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { catalogDataUrl } from '@shared/catalog/csv-import/csv-import.client.helpers';
 import { CatalogIntegrityError } from '@shared/catalog/csv-import/csv-import.errors';
 import { CATALOG_MANIFEST_TIMEOUT_MS, CATALOG_MANIFEST_URL } from './catalog-update.constantes';
-import { fetchCatalogManifest } from './catalog-update.helpers';
+import { fetchCatalogManifest, planStaleCatalog } from './catalog-update.helpers';
 import { CatalogLockService } from './catalog-lock.service';
 import { CatalogImporter, StaleCatalog, StaleCatalogsOutcome } from './catalog-update.interfaces';
 
@@ -154,19 +154,16 @@ export class CatalogUpdateService {
     for (const catalog of staleCatalogs) {
       const url = catalogDataUrl(globalThis.location.origin, catalog.fileName, catalog.latestHash);
       const cached = await this.isCached(cache, url); //NOSONAR — one catalog at a time
-      if (!mayReplaceLive && catalog.storedHash !== undefined) {
+      const plan = planStaleCatalog(catalog, { cached, mayReplaceLive, prefetchAvailable });
+      if (plan.deferred) {
         this.logger.info(`Catalog '${catalog.fileName}' update deferred: another window is working`);
-        if (!cached && prefetchAvailable) {
-          toPrefetch.push(url);
-        }
-        continue;
       }
-      if (cached || catalog.storedHash === undefined || !prefetchAvailable) {
+      if (plan.importNow) {
         const imported = await this.importCatalog(catalog, cached ? cache : null, url); //NOSONAR — one at a time
         if (!imported) {
           failedCatalogs.push(catalog.fileName);
         }
-      } else {
+      } else if (plan.prefetch) {
         toPrefetch.push(url);
       }
     }
