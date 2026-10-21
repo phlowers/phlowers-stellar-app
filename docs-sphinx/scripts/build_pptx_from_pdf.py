@@ -31,12 +31,12 @@ def _to_rgb(color_int: int) -> tuple[int, int, int]:
 
 def _is_bold(flags: int) -> bool:
     """Check the bold bit set by PyMuPDF."""
-    return bool(flags & 2 ** 4)
+    return bool(flags & 2**4)
 
 
 def _is_italic(flags: int) -> bool:
     """Check the italic bit set by PyMuPDF."""
-    return bool(flags & 2 ** 1)
+    return bool(flags & 2**1)
 
 
 def add_text_line(
@@ -92,13 +92,17 @@ class TextLine(tuple):
         bold: bool,
         italic: bool,
     ):
-        return super().__new__(cls, (text, x, y, width, height, font_size, color, bold, italic))
+        return super().__new__(
+            cls, (text, x, y, width, height, font_size, color, bold, italic)
+        )
+
 
 TextLines = list[TextLine]
 
+
 def add_text_block(
     slide,
-    lines: TextLines #list[tuple[str, float, float, float, float, float, tuple[int, int, int], bool, bool]],
+    lines: TextLines,  # list[tuple[str, float, float, float, float, float, tuple[int, int, int], bool, bool]],
 ) -> None:
     """Add a grouped block of text lines as one wrapping text box."""
     if not lines:
@@ -125,7 +129,17 @@ def add_text_block(
     tf = textbox.text_frame
     tf.word_wrap = True
 
-    for idx, (text, _, _, _, _, line_size, line_color, line_bold, line_italic) in enumerate(lines):
+    for idx, (
+        text,
+        _,
+        _,
+        _,
+        _,
+        line_size,
+        line_color,
+        line_bold,
+        line_italic,
+    ) in enumerate(lines):
         if idx == 0:
             p = tf.paragraphs[0]
         else:
@@ -141,19 +155,29 @@ def add_text_block(
         p.space_after = Pt(0)
 
 
-def add_image(slide, image_bytes: bytes, x: float, y: float, width: float, height: float) -> None:
+def add_image(
+    slide, image_bytes: bytes, x: float, y: float, width: float, height: float
+) -> None:
     """Add an image to a slide from raw bytes."""
     try:
         stream = io.BytesIO(image_bytes)
-        slide.shapes.add_picture(stream, Inches(x), Inches(y), Inches(width), Inches(height))
+        slide.shapes.add_picture(
+            stream, Inches(x), Inches(y), Inches(width), Inches(height)
+        )
     except Exception as exc:  # pragma: no cover - defensive
         print(f"Warning: could not add image at ({x}, {y}): {exc}", file=sys.stderr)
 
 
 def _group_lines(
-    lines: list[tuple[str, float, float, float, float, float, tuple[int, int, int], bool, bool]],
+    lines: list[
+        tuple[str, float, float, float, float, float, tuple[int, int, int], bool, bool]
+    ],
     y_threshold_pt: float = 2.0,
-) -> list[list[tuple[str, float, float, float, float, float, tuple[int, int, int], bool, bool]]]:
+) -> list[
+    list[
+        tuple[str, float, float, float, float, float, tuple[int, int, int], bool, bool]
+    ]
+]:
     """Group lines that share the same baseline and similar font size."""
     if not lines:
         return []
@@ -195,14 +219,23 @@ def convert_page(page: fitz.Page, slide) -> None:
                 else:
                     continue
 
-            x, y, w, h = rect[0] / 72, rect[1] / 72, (rect[2] - rect[0]) / 72, (rect[3] - rect[1]) / 72
+            x, y, w, h = (
+                rect[0] / 72,
+                rect[1] / 72,
+                (rect[2] - rect[0]) / 72,
+                (rect[3] - rect[1]) / 72,
+            )
             add_image(slide, image_bytes, x, y, w, h)
             continue
 
         if block["type"] != 0:
             continue
 
-        raw_lines: list[tuple[str, float, float, float, float, float, tuple[int, int, int], bool, bool]] = []
+        raw_lines: list[
+            tuple[
+                str, float, float, float, float, float, tuple[int, int, int], bool, bool
+            ]
+        ] = []
 
         for line in block["lines"]:
             if not line["spans"]:
@@ -224,7 +257,19 @@ def convert_page(page: fitz.Page, slide) -> None:
             width = max((bbox[2] - bbox[0]) / 72, 0.1)
             height = max((bbox[3] - bbox[1]) / 72, 0.1)
 
-            raw_lines.append((text, x, y, width, height, font_size, color, _is_bold(flags), _is_italic(flags)))
+            raw_lines.append(
+                (
+                    text,
+                    x,
+                    y,
+                    width,
+                    height,
+                    font_size,
+                    color,
+                    _is_bold(flags),
+                    _is_italic(flags),
+                )
+            )
 
         for group in _group_lines(raw_lines):
             if len(group) == 1:
