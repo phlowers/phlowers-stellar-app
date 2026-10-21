@@ -21,13 +21,14 @@ Step 1: BUILD STELLAR-ENGINE
   └─ uv build --wheel (optionally patch mechaphlowers version for local wheel)
 
 Step 2: DOWNLOAD PYODIDE RUNTIME
-  └─ Fetch Pyodide runtime from NPM registry
+  └─ Fetch Pyodide runtime from NPM registry, verified against the integrity in package-lock.json
 
 Step 3: DOWNLOAD PACKAGES
-  └─ Extract deps from built wheel → pip download with constraints.in
+  └─ Extract deps from built wheel → pip download --require-hashes with constraints.txt
 
 Step 4: CDN REPLACEMENT
-  └─ Replace pip wheels with wasm32 versions from CDN (or local CDN directory)
+  └─ Replace pip wheels with wasm32 versions from CDN (or local CDN directory),
+     each checked against the sha256 of the pyodide-lock.json shipped in the NPM tarball
 
 Step 5: COMPILE & CONFIG
   └─ Deduplicate, compile to .pyc, generate python-packages.json
@@ -66,6 +67,15 @@ All transitive dependencies (thermohl, numpy, pandas, pandera, etc.) are resolve
 |------|---------|
 | `stellar-engine/pyproject.toml` | stellar-engine package definition |
 | `scripts/constraints.in` | Version constraints for Pyodide CDN compatibility |
+| `scripts/constraints.txt` | Generated from `constraints.in` with hashes (`npm run lock-python-constraints`); enforced by `pip download --require-hashes` |
+
+### Integrity checks
+
+- **Pyodide tarball**: its SHA-512 is compared with the `integrity` field of `package-lock.json`. Bump `pyodide` with `npm install`, never by editing the script.
+- **PyPI wheels**: `pip download --require-hashes --only-binary=:all:` accepts only the hashes listed in `scripts/constraints.txt`. After changing `constraints.in` or the `stellar-engine` dependencies, run `npm run lock-python-constraints` and commit the result.
+- **CDN wheels**: the SHA-256 of each wheel must match `pyodide-lock.json` from the verified tarball (also applies with `--local-cdn-dir`).
+- With `--local-mechaphlowers`, the local wheel is hashed on the fly; its dependencies must still be in `constraints.txt`.
+- Any mismatch stops the script with a non-zero exit code.
 
 ---
 
