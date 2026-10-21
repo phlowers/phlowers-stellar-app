@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -96,8 +96,10 @@ export class HomeComponent {
       const isOnline = this.isOnline();
       const kind = offlineStatusKind(this.appUpdateService.state());
       const refusal = this.appUpdateService.lastRefusal();
-      this.offlineStatus.set(this.getOfflineStatus(isOnline, kind, refusal));
-      this.updateText('offlineText', this.buildOfflineText(isOnline, kind, refusal));
+      untracked(() => {
+        this.offlineStatus.set(this.getOfflineStatus(isOnline, kind, refusal));
+        this.updateText('offlineText', this.buildOfflineText(isOnline, kind, refusal));
+      });
     });
 
     effect(() => {
