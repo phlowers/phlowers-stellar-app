@@ -26,6 +26,20 @@
   <div class="cac-set-select__item">
     <p-radiobutton
       name="calculusType"
+      value="TANGENT_AIMING_EXTERIOR"
+      [ngModel]="selectedCalculusType()"
+      (ngModelChange)="onCalculusTypeChange($event)"
+      inputId="tangentAimingExterior"
+      data-testid="tangent-aiming-exterior-radio"
+    />
+    <label for="tangentAimingExterior">{{
+      'field-measuring.calculus-setting.tangent-aiming-exterior-radio-label' | transloco
+    }}</label>
+  </div>
+
+  <div class="cac-set-select__item">
+    <p-radiobutton
+      name="calculusType"
       value="PEP"
       [ngModel]="selectedCalculusType()"
       (ngModelChange)="selectedCalculusType.set($event)"
@@ -42,6 +56,9 @@
 }
 @if (selectedCalculusType() === 'TANGENT_AIMING_SUPPORT') {
   <app-tangent-aiming-support [(measureData)]="measureData" />
+}
+@if (selectedCalculusType() === 'TANGENT_AIMING_EXTERIOR') {
+  <app-tangent-aiming-exterior [(measureData)]="measureData" />
 }
 @if (selectedCalculusType() === 'PEP') {
   <app-pep />

@@ -35,7 +35,8 @@ describe('resetInactiveCalculusModes', () => {
         papoto: { parameter: 1 } as never,
         cableTemperature: null,
         parameter15C: null,
-        tangentAimingSupport: null
+        tangentAimingSupport: null,
+        tangentAimingExterior: null
       }
     });
     const result = resetInactiveCalculusModes(data, 'tangente-aiming', context);
@@ -51,10 +52,51 @@ describe('resetInactiveCalculusModes', () => {
         papoto: null,
         cableTemperature: null,
         parameter15C: null,
-        tangentAimingSupport: { parameter: 1 } as never
+        tangentAimingSupport: { parameter: 1 } as never,
+        tangentAimingExterior: null
       }
     });
     const result = resetInactiveCalculusModes(data, 'papoto', context);
     expect(result.outputs.tangentAimingSupport).toBeNull();
+  });
+
+  it('resets the exterior inputs and output when inactive, leaving the support mode untouched', () => {
+    const data = createTestMeasureData({
+      calculationMethod: 'tangente-aiming',
+      cableHAccDistance: 9,
+      exteriorSpanLength: 400,
+      exteriorTangentAngle: 3,
+      exteriorCalculationType: 'tangente',
+      exteriorLeftSupport: '5',
+      outputs: {
+        papoto: null,
+        cableTemperature: null,
+        parameter15C: null,
+        tangentAimingSupport: { parameter: 2 } as never,
+        tangentAimingExterior: { parameter: 1 } as never
+      }
+    });
+    const result = resetInactiveCalculusModes(data, 'tangente-aiming', context);
+    expect(result).toMatchObject({
+      exteriorLeftSupport: '11',
+      exteriorSpanLength: 0,
+      exteriorTangentAngle: 0,
+      exteriorParameter: 20,
+      exteriorCalculationType: 'parametre',
+      cableHAccDistance: 9
+    });
+    expect(result.outputs.tangentAimingExterior).toBeNull();
+    expect(result.outputs.tangentAimingSupport).toEqual({ parameter: 2 });
+  });
+
+  it('keeps the exterior mode when active and does not alter its fields when support is reset', () => {
+    const data = createTestMeasureData({
+      calculationMethod: 'tangente-aiming-exterior',
+      exteriorSpanLength: 400,
+      cableParameter: 55
+    });
+    const result = resetInactiveCalculusModes(data, 'tangente-aiming-exterior', context);
+    expect(result.exteriorSpanLength).toBe(400);
+    expect(result.cableParameter).not.toBe(55);
   });
 });

@@ -53,7 +53,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
   },
   cableTangentAngle: {
     id: 'tasTangentAngle',
-    labelKey: `${I18N}.tangent-angle-label`,
+    labelKey: 'common.tangent-angle-label',
     unitKey: 'common.grade-unit',
     testId: 'tangent-angle-input',
     step: 0.01,

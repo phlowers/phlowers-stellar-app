@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, model, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
@@ -22,10 +22,13 @@ import {
   TANGENT_AIMING_SUPPORT_NUMBER_FIELDS
 } from './tangent-aiming-support.constantes';
 import {
-  buildCantonSupportOptions,
+  buildSpanSupportOptions,
   calculateTangentAimingSupportMock,
   createTangentAimingSupportForm,
   getDisplayedInputFields,
+  getSpanKey,
+  resolveSpanLeftSupport,
+  LeftSupportSnapshot,
   syncDisplayedControls,
   toTangentAimingSupportInputs
 } from './tangent-aiming-support.helpers';
@@ -71,9 +74,14 @@ export class TangentAimingSupportComponent {
   readonly isFormValid = signal(false);
   readonly isCalculating = signal(false);
   readonly hasError = signal(false);
+  /** Left support chosen by the user for each span (by span key), restored when the span is selected again. */
+  private readonly leftSupportMemory = signal<Record<string, string>>({});
+  private readonly lastLeftSupport = signal<LeftSupportSnapshot | null>(null);
 
-  /** Every support of the section (RG.SUP.1). */
-  readonly supportOptions = computed(() => buildCantonSupportOptions(this.spanService.section()?.supports ?? []));
+  /** Both supports of the selected span, empty without span (RG.VIS-SUP.SUP.1/2). */
+  readonly supportOptions = computed(() =>
+    buildSpanSupportOptions(this.spanService.section()?.supports ?? [], this.measureData().span)
+  );
   readonly showParameterField = computed(() => this.measureData().calculationType === 'parametre');
   readonly showTangentAngleField = computed(() => this.measureData().calculationType === 'tangente');
 
@@ -92,13 +100,38 @@ export class TangentAimingSupportComponent {
         value: 'parametre'
       },
       {
-        label: this.translocoService.translate('field-measuring.tangent-aiming-support.calculation-type-tangent'),
+        label: this.translocoService.translate('common.calculation-type-tangent'),
         value: 'tangente'
       }
     ];
   });
 
   constructor() {
+    // A span change must not leave a left support outside the span (RG.VIS-SUP.SUP.3).
+    effect(() => {
+      const { tangentLeftSupport, span } = this.measureData();
+      const { spanKey, previous, memory } = untracked(() => ({
+        spanKey: getSpanKey(span),
+        previous: this.lastLeftSupport(),
+        memory: this.leftSupportMemory()
+      }));
+      const resolved = resolveSpanLeftSupport(tangentLeftSupport, span, previous, memory);
+      untracked(() => {
+        // The left support kept for a span is the one the user will find again when selecting it back.
+        if (resolved === tangentLeftSupport && resolved !== null) {
+          this.leftSupportMemory.update((m) => ({ ...m, [spanKey]: resolved }));
+        }
+        this.lastLeftSupport.set({ spanKey, leftSupport: resolved });
+      });
+      if (resolved !== tangentLeftSupport) {
+        this.measureData.update((d) => ({
+          ...d,
+          tangentLeftSupport: resolved,
+          outputs: { ...d.outputs, tangentAimingSupport: null }
+        }));
+      }
+    });
+
     // Model -> form: only differing values are written, so a value being typed is never overwritten.
     effect(() => {
       const data = this.measureData();

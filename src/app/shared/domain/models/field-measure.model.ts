@@ -44,7 +44,7 @@ export interface FieldMeasure {
   windDirection: string | null;
   skyCover: SkyCover | null;
   // Parameter calculation fields
-  calculationMethod: 'papoto' | 'tangente-aiming' | 'pep';
+  calculationMethod: 'papoto' | 'tangente-aiming' | 'tangente-aiming-exterior' | 'pep';
   // Papoto fields
   leftSupport: string | null;
   spanLength: number | null;
@@ -67,6 +67,15 @@ export interface FieldMeasure {
   cableParameter: number | null;
   tangentLeftSupport: string | null;
   tangentSpanLength: number | null;
+  // Visées tangentes (extérieur) fields
+  exteriorLeftSupport: string | null;
+  exteriorSpanLength: number | null;
+  exteriorHAccDistance: number | null;
+  exteriorVerticalAccAngleLeft: number | null;
+  exteriorVerticalAccAngleRight: number | null;
+  exteriorCalculationType: 'parametre' | 'tangente';
+  exteriorParameter: number | null;
+  exteriorTangentAngle: number | null;
   // PEP fields
   lengthBetweenSightGD: number | null;
   elevationDifferenceBetweenSightGD: number | null;
@@ -108,6 +117,8 @@ export interface FieldMeasureOutputs {
   parameter15C: Parameter15CResult | null;
   /** Tangent aiming (support) calculation result, if computed. */
   tangentAimingSupport: TangentAimingSupportResult | null;
+  /** Tangent aiming (exterior) calculation result, if computed. */
+  tangentAimingExterior: TangentAimingSupportResult | null;
 }
 
 /** Result of the tangent aiming (support) parameter calculation. */

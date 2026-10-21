@@ -71,11 +71,30 @@ describe('TangentAimingSupport component', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should expose every support of the section, truncated to 5 characters', () => {
+  it('should expose only the two supports of the span, truncated to 5 characters', () => {
     expect(component.supportOptions()).toEqual([
       { label: 'ABCDE', value: '0' },
       { label: 'S2', value: '1' }
     ]);
+  });
+
+  it('should expose no support when no span is selected', () => {
+    componentRef.setInput('measureData', validMeasure({ span: null }));
+    fixture.detectChanges();
+    expect(component.supportOptions()).toEqual([]);
+  });
+
+  it('should select the departure support of the new span when the current one is outside it', () => {
+    componentRef.setInput('measureData', validMeasure({ span: [1, 2] }));
+    fixture.detectChanges();
+    expect(component.measureData().tangentLeftSupport).toBe('1');
+    expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
+  });
+
+  it('should keep the selected left support while it belongs to the span', () => {
+    componentRef.setInput('measureData', validMeasure({ span: [0, 1], tangentLeftSupport: '1' }));
+    fixture.detectChanges();
+    expect(component.measureData().tangentLeftSupport).toBe('1');
   });
 
   it('should render the parameter field and hide the tangent angle by default', () => {

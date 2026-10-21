@@ -165,7 +165,14 @@
     "support-name-full-label": "Nom du support",
     "left-support-label": "Support de gauche",
     "measured-span-length-label": "Longueur de portée mesurée",
-    "calculated-value-label": "Valeur calculée :"
+    "calculated-value-label": "Valeur calculée :",
+    "tangent-aiming-help-aria-label": "ouvrir l'aide des visées tangentes",
+    "calculation-type-label": "Type de calcul :",
+    "calculation-type-tangent": "Tangente",
+    "tangent-angle-label": "Angle tangent au câble",
+    "criterion-label": "Critère",
+    "criterion-respected": "Critère respecté",
+    "criterion-not-respected": "Critère non respecté"
   },
   "auth": {
     "login-page": {
@@ -715,20 +722,21 @@
       "success-detail": "Données enregistrées avec succès"
     },
     "calculus-setting": {
-      "tangent-aiming-radio-label": "Visées tangentes (Support)"
+      "tangent-aiming-radio-label": "Visées tangentes (Support)",
+      "tangent-aiming-exterior-radio-label": "Visées tangentes (Extérieur)"
     },
     "tangent-aiming-support": {
-      "open-help-aria-label": "ouvrir l'aide des visées tangentes",
-      "mandatory-msg": "Tous les champs sont obligatoires pour le paramétrage du calcul",
+      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
       "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",
       "vertical-acc-angle-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
-      "calculation-type-label": "Type de calcul :",
-      "calculation-type-tangent": "Tangente",
-      "tangent-angle-label": "Angle tangent au câble",
-      "criterion-label": "Critère",
-      "criterion-respected": "Critère respecté",
-      "criterion-not-respected": "Critère non respecté",
       "calculation-failed": "Échec du calcul du paramètre par visées tangentes"
+    },
+    "tangent-aiming-exterior": {
+      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul de paramètre.",
+      "h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
+      "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
+      "vertical-acc-angle-right-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
+      "calculation-failed": "Échec du calcul du paramètre par visées tangentes (extérieur)"
     },
     "papoto": {
       "open-help-aria-label": "ouvrir l'aide de PAPOTO",

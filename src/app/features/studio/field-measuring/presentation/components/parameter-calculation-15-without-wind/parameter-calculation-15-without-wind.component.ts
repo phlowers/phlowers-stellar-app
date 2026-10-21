@@ -121,6 +121,7 @@ export class ParameterCalculation15WithoutWindComponent {
 
   updateMeasureData<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     if (field === 'updateMode15C') {
+      const activeOutput = this.activeParameterOutput();
       this.measureData.update((d) => ({
         ...d,
         [field]: value,
@@ -132,12 +133,10 @@ export class ParameterCalculation15WithoutWindComponent {
             ? {
                 parameterPapoto:
                   d.manualParameterCalculation15CWithoutWind?.parameterPapoto ??
-                  (d.outputs.papoto?.parameter != null ? truncateNumberToOneDecimal(d.outputs.papoto.parameter) : null),
+                  (activeOutput?.parameter != null ? truncateNumberToOneDecimal(activeOutput.parameter) : null),
                 parameterUncertaintyPapoto:
                   d.manualParameterCalculation15CWithoutWind?.parameterUncertaintyPapoto ??
-                  (d.outputs.papoto?.uncertainty != null
-                    ? truncateNumberToOneDecimal(d.outputs.papoto.uncertainty)
-                    : null),
+                  (activeOutput?.uncertainty != null ? truncateNumberToOneDecimal(activeOutput.uncertainty) : null),
                 cableTemperatureCalibration:
                   d.manualParameterCalculation15CWithoutWind?.cableTemperatureCalibration ??
                   (d.outputs.cableTemperature?.cableTemperature != null
