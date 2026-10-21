@@ -1008,10 +1008,12 @@
       "min-vertical-position-label": "Ref. supp. dist."
     },
     "l0-sum": {
-      "natural-lengths-title": "Natural lengths L0",
-      "l0-column-label": "L0",
-      "sum-l0-label": "Sum L0",
-      "loading-data-text": "Loading L0 data…"
+      "naturals-lengths-title": "Naturals lengths L0",
+      "span-length-column-label": "Span l.",
+      "l0-column-label": "Natural L0",
+      "cumulated-l0-column-label": "Cumulated L0",
+      "loading-data-text": "Loading L0 data…",
+      "current-page-report": "{currentPage} of {totalPages}"
     },
     "loads-table": {
       "description-length-label": "Description {{count}}/240",
