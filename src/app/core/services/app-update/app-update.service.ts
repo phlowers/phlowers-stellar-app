@@ -112,7 +112,7 @@ export class AppUpdateService {
     const decision = evaluateUpdateCheck(this.connection(), await this.estimateStorage(), measuredMbps);
     const downlink = this.connection()?.downlink;
     const measuredLabel = measuredMbps === null ? 'not measured' : `${measuredMbps.toFixed(1)} Mbps`;
-    const isdownlinkSufficient = (downlink! >= BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS) ? 'sufficient' : 'insufficient' ;
+    const isdownlinkSufficient = downlink! >= BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS ? 'sufficient' : 'insufficient';
     this.logger.info(
       `${APP_UPDATE_LOG_PREFIX} network downlink is ${isdownlinkSufficient}, ` +
         `measured ${measuredLabel} ` +
