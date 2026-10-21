@@ -1,13 +1,7 @@
 {
   "routes": {
     "login": "Identifiant",
-    "admin": "Admin",
-    "study": "Étude",
-    "news": "Actualités",
-    "changelog": "Changelog",
-    "studio": "Studio",
-    "tools": "Outils",
-    "instruction-manual": "Manuel d'utilisation"
+    "admin": "Admin"
   },
   "common": {
     "actions-label": "Actions",
@@ -41,6 +35,7 @@
     "delete": "Supprimer",
     "description-label": "Description",
     "dis-symmetric": "Dissymétrique",
+    "distance-label": "Distance",
     "duplicate": "Dupliquer",
     "edit": "Modifier",
     "eel-label": "EEL",
@@ -56,14 +51,20 @@
     "ice-thickness-after-support-frontier": "Épaisseur du givre après le support frontière",
     "ice-thickness-before-support-frontier": "Épaisseur du givre avant le support frontière",
     "initial-condition-label": "Condition initiale",
+    "instruction-manual-label": "Manuel d'utilisation",
     "latitude-label": "Latitude",
     "line-angle-label": "Angle en ligne",
     "line-axis-dist-label": "Dist. axe ligne.",
+    "lit-label": "LIT",
+    "lit-idr-label": "LIT - IDR",
+    "lit-adr-label": "LIT - ADR",
     "link-label": "Liaison",
     "load-description-label": "Description du cas de charge",
     "load-name-label": "Cas de charge",
     "loading": "Chargement",
+    "loads-label": "Charges",
     "longitude-label": "Longitude",
+    "manual-label": "Manuel",
     "marking-label": "Marquage",
     "max-decimals-error": "Décimales max : {{ maxDecimals }}",
     "max-value-error": "Valeur max : {{ max }}",
@@ -71,10 +72,14 @@
     "grade-unit": "gr",
     "min-value-error": "Valeur min : {{ min }}",
     "my-last-studies-label": "Mes dernières études",
+    "network-speed-unknown-label": "Débit réseau inconnu du navigateur",
+    "network-too-slow-label": "Réseau trop lent",
     "news-label": "Actualités",
     "next": "Suivant",
     "no": "Non",
     "number-of-points-per-range": "Nombre de points par portée",
+    "obstacle-type-label": "Type d'obstacle",
+    "obstacles-label": "Obstacles",
     "out-of-bound-error": "La valeur doit être comprise entre {{ min }} et {{ max }}",
     "page-label": "Page",
     "papoto-label": "PAPOTO",
@@ -104,16 +109,21 @@
     "select-point-label": "Sélectionner le point",
     "sign-in-label": "Se connecter",
     "span-label": "Portée",
+    "span-length-short-label": "L. portée",
+    "storage-insufficient-label": "Espace de stockage insuffisant",
     "studies-label": "Études",
     "studio": "Studio",
     "study-and-section-label": "Étude et canton",
     "study-label": "Étude",
     "success": "Succès",
+    "support-label": "Support",
     "support-name-label": "Nom de supp.",
     "support-no-label": "N° de support",
     "symmetric": "Symétrique",
+    "tools-label": "Outils",
     "uncertainty-cable-temperature-label": "Incertitude température du câble",
     "validate": "Valider",
+    "vertical-angle-right-support-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
     "view": "Voir",
     "yes": "Oui",
     "you-are-offline-label": "Vous êtes hors ligne",
@@ -270,11 +280,7 @@
     "storage-value": "{{ usage }} Mo utilisés sur {{ quota }} Mo",
     "not-available": "Non disponible",
     "refusal": {
-      "api-unavailable": "Débit réseau inconnu du navigateur",
-      "downlink-unknown": "Débit réseau inconnu du navigateur",
-      "downlink-below-threshold": "Réseau trop lent",
-      "save-data": "Économiseur de données activé",
-      "storage-insufficient": "Espace de stockage insuffisant"
+      "save-data": "Économiseur de données activé"
     },
     "activate-python-logs": "Activer les logs Python",
     "danger-zone": "Zone Danger",
@@ -310,11 +316,6 @@
       "menu": "Menu"
     },
     "logged-layout": {
-      "home": "Accueil",
-      "studies": "Études",
-      "tools": "Outils",
-      "instruction-manual": "Manuel d'utilisation",
-      "manual": "Manuel",
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"
     },
@@ -329,9 +330,7 @@
     },
     "app-update-service": {
       "offline-status": {
-        "ready": "Prêt",
         "preparing": "Préparation en cours",
-        "waiting-network": "Réseau trop lent",
         "storage-insufficient": "Espace insuffisant",
         "not-prepared": "Indisponible"
       },
@@ -339,7 +338,6 @@
       "check-started": "Vérification des mises à jour : une nouvelle version sera téléchargée en arrière-plan.",
       "update-waiting-summary": "Mise à jour téléchargée",
       "update-waiting-detail": "Elle sera appliquée au prochain démarrage de l'application (fermez toutes les fenêtres de Stellar, puis rouvrez-la).",
-      "storage-insufficient-summary": "Espace de stockage insuffisant",
       "storage-insufficient-detail": "Espace de stockage insuffisant pour télécharger la mise à jour : libérez de l'espace sur l'appareil."
     },
     "obstacle-form-service": {
@@ -352,7 +350,6 @@
     "free-positioning-data": {
       "floor-point": "Sol #{{ index }}",
       "distance-point": "Distance #{{ index }}",
-      "punctual-load": "Charge ponctuelle",
       "marking-load": "Charge de balisage"
     },
     "floor-form-service": {
@@ -485,7 +482,6 @@
     "table": {
       "col-title": "Titre",
       "col-modification-date": "Date de modification",
-      "col-lit": "LIT IDR",
       "col-description": "Description/commentaire",
       "study-actions-menu": "Menu des actions d'étude",
       "pagination-report": "Étude {first} à {last} sur {totalRecords}",
@@ -529,7 +525,6 @@
     "no-section": "Aucun canton existant",
     "select-btn": "sélectionner le canton d'étude",
     "aria-select-section": "sélectionner ce canton de l'étude",
-    "col-lit": "LIT ADR",
     "col-last-modified": "Dernière modification",
     "add-initial-condition": "Ajouter une condition initiale",
     "aria-select-ic": "Sélectionner les conditions initiales",
@@ -542,7 +537,6 @@
   },
   "section-modal": {
     "choose-type": "Choisir un type de création",
-    "type-manual": "Manuel",
     "type-local-ref": "Depuis le référentiel local",
     "type-distant-ref": "Depuis le référentiel distant",
     "type-file": "Depuis un fichier",
@@ -562,8 +556,6 @@
     "label-etl": "Niveau de tension électrique",
     "label-link-idr": "Liaison - IDR",
     "label-link-adr": "Liaison - ADR",
-    "label-lit-idr": "LIT - IDR",
-    "label-lit-adr": "LIT - ADR",
     "current-page-report": "Support {first} à {last} sur {totalRecords}",
     "name-unique": "Le nom du canton doit être unique.",
     "no-voltage": "HORS TENSION",
@@ -574,7 +566,6 @@
   "supports-table": {
     "localization-status": "En attente du chargement du moteur pour afficher les résultats de calcul",
     "col-number": "N° supp.",
-    "col-span-length": "L. portée",
     "col-attachment-alt": "Alt. accr. câble (NGF)",
     "col-attachment-position": "Pos. d'accroche",
     "col-angle": "Angle",
@@ -642,7 +633,6 @@
       "longitudinal-distance-label": "Dist. longitudinale",
       "lateral-distance-label": "Dist. latérale",
       "dist-calc-between-points-label": "Calcul distance entre points",
-      "distance-label": "Distance",
       "anchoring-label": "Accrochage",
       "chain-surface-label": "Surface de chaîne",
       "sling-length-label": "Longueur de l'élingue",
@@ -728,14 +718,12 @@
     "tangent-aiming-support": {
       "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
       "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",
-      "vertical-acc-angle-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
       "calculation-failed": "Échec du calcul du paramètre par visées tangentes"
     },
     "tangent-aiming-exterior": {
       "mandatory-msg": "Toutes les données sont obligatoires pour le calcul de paramètre.",
       "h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
       "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
-      "vertical-acc-angle-right-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
       "calculation-failed": "Échec du calcul du paramètre par visées tangentes (extérieur)"
     },
     "papoto": {
@@ -771,9 +759,6 @@
       "span-type-label": "Type de canton",
       "phase-number-label": "Numéro de phase électrique",
       "degree-addon": "°",
-      "latitude-label": "Latitude",
-      "altitude-label": "Altitude",
-      "meter-addon": "m",
       "azimuth-label": "Azimut (sens horaire - 0° Nord/Sud)",
       "localization-not-available": "Localisation non disponible dans l'étude"
     },
@@ -875,7 +860,6 @@
       "display-label": "Affichage",
       "display-info-text": "Sélectionnez les éléments à afficher dans le studio.",
       "tables-label": "Tableau",
-      "tools-label": "Outils",
       "edit-shortcuts-aria-label": "Modifier les raccourcis des outils sélectionnés",
       "export-section-aria-label": "Exporter le canton dans un fichier canton Stellar",
       "inset-title": "Insertion",
@@ -887,7 +871,6 @@
       "grounds-table-label": "Tableau de sols",
       "profile-option": "Profil",
       "face-option": "Ligne",
-      "loads-option": "Charges",
       "base-option": "Base",
       "transparent-background-option": "Fond transparent",
       "measurement-points-option": "Points de mesure",
@@ -930,10 +913,7 @@
       "x-label": "x :",
       "z-label": "z :",
       "y-label": "y :",
-      "obstacle": "Obstacles",
-      "floor": "Terrain",
-      "distance": "Distance",
-      "loads": "Charges"
+      "floor": "Terrain"
     },
     "studio-page": {
       "working-load-label": "Taux de travail",
@@ -955,7 +935,6 @@
       "all-option": "Toutes",
       "max-section-option": "Max canton",
       "charges-label": "Charges",
-      "obstacles-label": "Obstacles",
       "distances-label": "Distances",
       "floor-sidetab-label": "Sol",
       "no-load-case-message": "Pour ajouter des charges, vous devez créer un cas de charge."
@@ -968,18 +947,10 @@
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Créer un nouvel obstacle",
-      "obstacle-type-label": "Type d'obstacle",
       "obstacle-name-label": "Nom de l'obstacle",
       "obstacle-altitude-type-label": "Type d'altitude d'obstacle",
-      "free-positioning-label": "Positionnement libre",
       "free-positioning-forced-frame-warning": "Le mode de positionnement libre n'est disponible qu'avec un support de référence gauche, un type d'altitude absolue et une distance latérale selon l'axe de la portée. Les réglages actuels de l'obstacle diffèrent, les résultats peuvent donc être incorrects.",
-      "add-point-btn": "Ajouter un point",
-      "select-point-label": "Sélectionner le point",
-      "point-label": "Point",
       "delete-point-aria-label": "Supprimer un point",
-      "point-alt-label": "Alt. point",
-      "ref-support-dist-label": "Dist. supp. réf.",
-      "line-axis-dist-label": "Dist. axe ligne.",
       "delete-obstacle-aria-label": "Supprimer l'obstacle",
       "conformity-dialog-title": "Respect conformité",
       "obstacle-must-be-saved-warning": "L'obstacle doit être enregistré",
@@ -1041,13 +1012,10 @@
       "point-alt-label": "Alt. point",
       "delete-floor-aria-label": "supprimer le sol",
       "min-vertical-distance-label": "Distance verticale minimum",
-      "floor-altitude-label": "Alt. point",
-      "cable-altitude-label": "Alt. câble",
-      "min-vertical-position-label": "Dist. supp. réf."
+      "cable-altitude-label": "Alt. câble"
     },
     "l0-sum": {
       "naturals-lengths-title": "Longueurs naturelles L0",
-      "span-length-column-label": "L. portée",
       "l0-column-label": "L0 naturelle",
       "cumulated-l0-column-label": "L0 cumulée",
       "loading-data-text": "Chargement des données L0…",
@@ -1062,16 +1030,11 @@
       "distance-to-ref-support-label": "Distance au support de réf."
     },
     "obstacles-table": {
-      "initial-condition-label": "Condition initiale",
       "charge-case-label": "Cas de charge",
       "all-spans-option": "Toutes les portées",
       "number-column-label": "N°",
       "obstacle-name-column-label": "Nom d'obstacle",
-      "obstacle-type-column-label": "Type d'obstacle",
       "altitude-type-column-label": "Type d'altitude",
-      "point-column-label": "Point",
-      "altitude-column-label": "Altitude",
-      "ref-support-distance-column-label": "Dist. supp. réf.",
       "line-axis-distance-column-label": "Dist. axe ligne",
       "no-obstacles-message": "Aucun obstacle défini pour cette portée.",
       "current-page-report": "{first} à {last} sur {totalRecords}"
@@ -1151,14 +1114,12 @@
     },
     "loads-report": {
       "title": "Rapport Tableau des charges",
-      "modified-length-label": "Longueur modifiée",
-      "support-label": "Support"
+      "modified-length-label": "Longueur modifiée"
     },
     "section-report": {
       "title": "Rapport Données du canton",
       "supports-title": "Liste des supports",
       "maintenance-center-label": "CM",
-      "lit-label": "LIT",
       "supports-count-label": "Nombre de supports",
       "cables-amount-label": "Nombre de câbles",
       "max-frost-width-label": "Épaisseur du givre max.",
@@ -1184,12 +1145,10 @@
       "integer-error": "La valeur doit être un nombre entier"
     },
     "cable-adjustment": {
-      "span-length-label": "Longueur de portée",
       "left-horizontal-angle-label": "Angle HG horizontal au support G",
       "right-horizontal-angle-label": "Angle HD horizontal au support D",
       "left-vertical-angle-label": "Angle VG vertical au support G",
       "right-vertical-angle-label": "Angle VD vertical au support D",
-      "support-label": "Support",
       "tacheometer-horizontal-distance-label": "Distance horizontale du tachéomètre",
       "adjustment-parameter-label": "Paramètre de réglage",
       "calculate-sight-angles": "Calculer les angles de visée sur la flèche médiane",
@@ -1209,7 +1168,6 @@
     },
     "rrts-cut-strands": {
       "layers-detail": "Détail des couches",
-      "cable-name-label": "Nom du câble",
       "current-work-load-label": "Taux de travail max actuel",
       "staff-presence-label": "Présence du personnel",
       "distance-support-ref-label": "Distance au support de référence",

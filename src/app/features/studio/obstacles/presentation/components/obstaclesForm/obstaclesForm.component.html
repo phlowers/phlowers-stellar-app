@@ -45,7 +45,7 @@
       data-testid="span-select"
     />
 
-    <label for="obstacleType" class="type-label">{{ 'studio.obstacles-form.obstacle-type-label' | transloco }}</label>
+    <label for="obstacleType" class="type-label">{{ 'common.obstacle-type-label' }}</label>
 
     <p-select
       inputId="obstacleType"
@@ -119,7 +119,7 @@
         source="obstacle"
         [disabled]="!obstacleFormService.form.get('supportUuid')?.value || !obstacleFormService.hasEditablePoints()"
         [spanIndex]="selectedSpanIndex()"
-        labelKey="studio.obstacles-form.free-positioning-label"
+        labelKey="common.free-positioning-label"
       />
     </div>
 

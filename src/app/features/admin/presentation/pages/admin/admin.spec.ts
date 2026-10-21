@@ -351,7 +351,7 @@ describe('AdminComponent', () => {
 
       expect(fixture.nativeElement.textContent).toContain('abc1234');
       expect(getByTestId('admin-offline-status')?.textContent).toContain(
-        'shared.app-update-service.offline-status.ready'
+        'common.ready'
       );
       expect(getByTestId('admin-pending-version')?.textContent).toContain('admin.no-pending-version');
       expect(getByTestId('admin-last-refusal')).toBeNull();
@@ -397,7 +397,7 @@ describe('AdminComponent', () => {
       fixture.detectChanges();
       await fixture.whenStable();
 
-      expect(getByTestId('admin-last-refusal')?.textContent).toContain('admin.refusal.downlink-below-threshold');
+      expect(getByTestId('admin-last-refusal')?.textContent).toContain('common.network-too-slow-label');
     });
 
     it('the check button asks the service for an update check and reports the outcome', async () => {

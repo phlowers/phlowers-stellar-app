@@ -37,7 +37,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
   },
   cableVerticalAccAngle: {
     id: 'tasVerticalAccAngle',
-    labelKey: `${I18N}.vertical-acc-angle-label`,
+    labelKey: 'common.vertical-angle-right-support-label',
     unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-input',
     step: 0.01,

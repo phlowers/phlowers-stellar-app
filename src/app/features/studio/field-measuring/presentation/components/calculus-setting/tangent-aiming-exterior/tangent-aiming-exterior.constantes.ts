@@ -51,7 +51,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   },
   verticalAccAngleRight: {
     id: 'taeVerticalAccAngleRight',
-    labelKey: `${I18N}.vertical-acc-angle-right-label`,
+    labelKey: 'common.vertical-angle-right-support-label',
     unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-right-input',
     step: 0.01,
