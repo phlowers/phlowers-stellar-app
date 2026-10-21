@@ -312,9 +312,7 @@ def import_lambert_and_validate(js_inputs):
 def set_cut_strands(js_inputs):
     global study
     python_inputs = js_to_python(js_inputs)
-    return cut_strands_module.set_cut_strands(
-        study, python_inputs["cutStrands"]
-    )
+    return cut_strands_module.set_cut_strands(study, python_inputs["cutStrands"])
 
 
 @debug_log
@@ -339,9 +337,7 @@ def get_utilization_rate():
 def set_high_safety(js_inputs):
     global study
     python_inputs = js_to_python(js_inputs)
-    return cut_strands_module.set_high_safety(
-        study, python_inputs["highSafety"]
-    )
+    return cut_strands_module.set_high_safety(study, python_inputs["highSafety"])
 
 
 # ---------------------------conformity----------------
@@ -377,3 +373,9 @@ def set_resolution(js_inputs):
 def shorten_lengthen_cable(js_inputs):
     global study
     return manipulations.modify_cable(js_to_python(js_inputs), study)
+
+
+@debug_log
+def apply_manipulations(js_inputs):
+    global study
+    return manipulations.apply_manipulations(js_to_python(js_inputs), study)

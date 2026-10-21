@@ -96,6 +96,10 @@ const tasks: Record<
     function: 'shorten_lengthen_cable',
     externalPackages: []
   },
+  [Task.applyManipulations]: {
+    function: 'apply_manipulations',
+    externalPackages: []
+  },
   [Task.getAspectRatio]: {
     function: 'get_aspect_ratio',
     externalPackages: []

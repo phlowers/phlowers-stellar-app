@@ -8,6 +8,8 @@
 import {
   CableAdjustmentInputs,
   CableAdjustmentResult,
+  CableSpanManipulation,
+  CableSupportManipItem,
   CatalogCable,
   ClimateCharge,
   PapotoResult,
@@ -65,8 +67,10 @@ export enum Task {
   deleteObstacle = 'deleteObstacle',
   // Clear all obstacles from the middleware state
   clearObstacles = 'clearObstacles',
-  /** Apply a cable length modification (lengthen or shorten) on a span */
+  // Apply a cable length modification (lengthen or shorten) on a span
   shortenLengthenCable = 'shortenLengthenCable',
+  // Apply all manipulations
+  applyManipulations = 'applyManipulations',
   // get aspect ratio for plotting scale
   getAspectRatio = 'getAspectRatio',
   // get wind incidence angle for cable temperature calculation
@@ -432,12 +436,11 @@ export interface TaskInputs {
   // Inputs for clearObstacles task: no inputs
   [Task.clearObstacles]: undefined;
   // Inputs for shortenLengthenCable task
-  [Task.shortenLengthenCable]: {
-    spanIndex: number;
-    modificationType: 'lengthening' | 'shortening';
-    modifiedLengthCable: number;
-    distanceSupportRef: number;
-    supportRef: 'LEFT' | 'RIGHT';
+  [Task.shortenLengthenCable]: LengthCableInputs;
+  [Task.applyManipulations]: {
+    cableModifParams: LengthCableInputs[];
+    supportManipParams: SupportManipInputs[];
+    spanManipParams: SpanManipInputs[];
   };
   [Task.getWindIncidence]: {
     azimuth: number;
@@ -532,6 +535,28 @@ export interface TaskInputs {
  *
  * @category Worker Types
  */
+
+export interface LengthCableInputs {
+  spanIndex: number;
+  modificationType: 'lengthening' | 'shortening';
+  modifiedLengthCable: number;
+  distanceSupportRef: number;
+  supportRef: 'LEFT' | 'RIGHT';
+}
+
+export interface SupportManipInputs {
+  supportIndex: number;
+  manip1: CableSupportManipItem;
+  manip2: CableSupportManipItem;
+}
+
+export interface SpanManipInputs extends Omit<
+  CableSpanManipulation,
+  'uuid' | 'spanUuid' | 'chargeUuid' | 'chainName' | 'chainLength' | 'chainWeight' | 'chainSurface' | 'counterWeight'
+> {
+  spanIndex: number;
+}
+
 export interface ObstacleOutput {
   // Rendered 3D coordinates for each registered obstacle
   obstacles: {
@@ -783,6 +808,7 @@ export interface TaskOutputs {
   [Task.clearObstacles]: { success: boolean };
   // Output from shortenLengthenCable task: registration acknowledgement
   [Task.shortenLengthenCable]: { success: boolean };
+  [Task.applyManipulations]: { success: boolean };
   [Task.getAspectRatio]: {
     x: number;
     y: number;
