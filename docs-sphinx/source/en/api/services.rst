@@ -130,12 +130,12 @@ Python worker implementation.
 
 .. js:automodule:: worker-python
 
-worker_update.service
-^^^^^^^^^^^^^^^^^^^^^
+app-update.service
+^^^^^^^^^^^^^^^^^^
 
-Service for managing service worker updates.
+Service for the application update life cycle (Workbox service worker).
 
-.. js:automodule:: worker_update.service
+.. js:automodule:: app-update.service
 
 UI Services
 -----------

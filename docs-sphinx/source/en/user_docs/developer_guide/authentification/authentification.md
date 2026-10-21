@@ -35,9 +35,9 @@ The application **does not embed any client-side OIDC library** (no `angular-aut
 - Apache exposes three relevant endpoints:
   - `/auth/userinfo` — returns the current session state and OIDC claims as JSON. Always responds with `200 OK` (even when unauthenticated) to avoid noisy console errors and to advertise the server-side mode.
   - `/auth/login` — dedicated entry point that triggers the auth-serv prompt and 302-redirects to `/` once authenticated.
-  - `/auth/relogin` — last-resort recovery endpoint: clears the local `mod_auth_openidc` session cookie, then chains to `/auth/login`. Invoked only by the Service Worker (401/403 navigation with no cached shell) and by `reconnecting.html`.
+  - `/auth/relogin` — last-resort recovery endpoint: clears the local `mod_auth_openidc` session cookie, then chains to `/auth/login`. Invoked only by the service worker (401/403 navigation with no cached shell) and by `reconnecting.html`.
 - Angular reads `/auth/userinfo`, persists the user in IndexedDB (Dexie) and exposes a `signal<User | null>`.
-- A same-origin HTTP interceptor (`authSessionInterceptor`) and the Service Worker both detect proven `401`/`403` session mismatches on live requests/navigations and trigger an automatic redirect to `/auth/login` (via `AuthResyncService`, rate-limited) — see §4.6.
+- A same-origin HTTP interceptor (`authSessionInterceptor`) detects proven `401`/`403` session mismatches on live requests and triggers an automatic redirect to `/auth/login` (via `AuthResyncService`, rate-limited); the service worker redirects to `/auth/relogin` a navigation answered with a raw `401`/`403` when no shell is cached — see §4.6.
 
 ---
 
@@ -56,7 +56,7 @@ The application **does not embed any client-side OIDC library** (no `angular-aut
 | Bootstrap | [src/app/app.config.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/app.config.ts) |
 | Protected routes | [src/app/app.routes.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/app.routes.ts) |
 | User display | [src/app/shared/components/layout/topbar/topbar.component.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/shared/components/layout/topbar/topbar.component.ts) |
-| Service worker bypass | [src/app/core/services/worker_update/service-worker.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/core/services/worker_update/service-worker.ts) |
+| Service worker bypass (`/auth/**` never intercepted) | [src/sw/service-worker.constantes.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/sw/service-worker.constantes.ts) (`NAVIGATION_DENYLIST`) |
 | Dev mock | [dev-mock/oidc-middleware.mjs](https://github.com/phlowers/phlowers-stellar-app/blob/main/dev-mock/oidc-middleware.mjs) · [dev-mock/oidc-claims.example.json](https://github.com/phlowers/phlowers-stellar-app/blob/main/dev-mock/oidc-claims.example.json) |
 
 ---
@@ -83,7 +83,7 @@ Defence in depth: a user document cached in fallback mode (no `sub` claim) is **
 1. Storage + auth branch (sequential): `storageService.setPersistentStorage()` → `storageService.createDatabase()` → **`authService.initialize()`** ← the auth entry point.
 2. Language branch (sequential): `appConfigService.loadDefaultLang()` → `translocoService.setActiveLang()`, with `translocoService.load()` fired but **not awaited** (translations render reactively through the `transloco` pipe/directive once they arrive).
 
-After both branches settle, `updateService.checkForUpdateOnce()` is started **without** being awaited — the update prompt must never delay first render.
+After both branches settle, `appUpdateService.start()` is started **without** being awaited, in production builds only — registering the service worker must never delay first render. It only reads `AuthService.currentUser()`: the first download waits for an authenticated user.
 
 ### 4.2 `AuthService.initialize()` — cache-first, with a probe-first fallback
 
@@ -128,14 +128,14 @@ All children of `LoggedLayoutComponent` carry `canActivate: [authGuard]` ([app.r
 
 ### 4.6 Session-mismatch detection & automatic resync
 
-Two independent detectors feed the same recovery path, because a stale session can surface either as an in-page HTTP failure or as a failed navigation:
+Two independent detectors cover the two ways a stale session can surface, as an in-page HTTP failure or as a failed navigation:
 
 | Detector | Where | Triggers on |
 |---|---|---|
 | `authSessionInterceptor` | HTTP interceptor ([auth-session.interceptor.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/core/services/auth/auth-session.interceptor.ts)), registered via `provideHttpClient(withInterceptors([authSessionInterceptor]))` | Any same-origin request failing with `401`/`403` |
-| Service Worker navigation handler | [service-worker.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/app/core/services/worker_update/service-worker.ts) `handleFetch()` | A navigation request answered with a raw `401`/`403` **and** no installed shell cached — redirects to `/auth/relogin` (302) instead of leaking Apache's raw error body |
+| Service worker navigation handler | [service-worker.helpers.ts](https://github.com/phlowers/phlowers-stellar-app/blob/main/src/sw/service-worker.helpers.ts) `createShellNavigationHandler()` | A navigation answered with a raw `401`/`403` **and** no shell cached — redirects to `/auth/relogin` (302) instead of showing Apache's raw error body. With a cached shell, the shell is served without any network request: the app starts and probes `/auth/userinfo` |
 
-- Both call `AuthService.markServerMismatchFromStatus(status)`, which sets `serverSessionInvalid = true` only for `401`/`403` (other statuses, e.g. transient `5xx`, are a no-op).
+- The interceptor calls `AuthService.markServerMismatchFromStatus(status)`, which sets `serverSessionInvalid = true` only for `401`/`403` (other statuses, e.g. transient `5xx`, are a no-op).
 - `shouldForceServerResync()` is `true` when `serverSessionInvalid()` is set **and** the browser is online — it forces `initialize()`/`tryRestoreFromCache()` to distrust the IndexedDB cache and re-resolve from the network.
 - `AuthResyncService.triggerImmediateRedirect()` performs the actual recovery: a top-level navigation to `/auth/login` (forcing the auth-serv prompt again). Guarded by:
   - a **15 s cooldown** (`AUTH_RESYNC_REDIRECT_COOLDOWN_MS`), persisted in `sessionStorage` (`auth_resync:last_redirect_at`) so concurrent failing requests only trigger one redirect;
@@ -175,7 +175,7 @@ Dexie schema: `users: '&email, sub'` (primary key = `email`, secondary index = `
 |---|---|
 | Access / refresh tokens | **Apache only**, in HTTP-only cookies — JS has no access |
 | Access-token refresh | **Deliberately none.** `OIDCRefreshAccessTokenBeforeExpiry` is intentionally NOT set (see §7.1) — the app never consumes the access_token upstream, and proactive refresh caused session-killing incidents with auth-serv's rotating refresh tokens. Session validity is the Apache cookie alone. |
-| Expiration detection | `/auth/userinfo` → `{ authenticated: false }` (or HTTP `401` for legacy servers); a live request/navigation returning `401`/`403` is also caught by `authSessionInterceptor` / the Service Worker (§4.6) |
+| Expiration detection | `/auth/userinfo` → `{ authenticated: false }` (or HTTP `401` for legacy servers); a live request returning `401`/`403` is also caught by `authSessionInterceptor` (§4.6) |
 | `Authorization` header | **No HTTP interceptor injects a Bearer token** — everything flows through cookies. `authSessionInterceptor` exists, but only to *detect* `401`/`403` session mismatches and trigger a resync (§4.6) |
 | Logout | **No Angular method, no UI button** — by design. Session lifetime is enforced by Apache (`OIDCSessionInactivityTimeout 604800` = 7 days, `OIDCSessionMaxDuration 2592000` = 30 days). |
 
@@ -199,7 +199,7 @@ The OIDC directives live in `httpd-oidc.conf.template` (repo root, resolved by `
 ### 7.1 Deliberate absences (incident-driven — do not re-add without reading the source comment)
 
 - **No `OIDCRefreshAccessTokenBeforeExpiry`.** Proactive access-token refresh was removed after two 2026-08-10 incidents: this app never consumes the access_token upstream, and auth-serv's single-use rotating refresh tokens combined with `client-cookie` sessions caused concurrent browser requests to race the same refresh token, killing the whole token family (`invalid_grant`, cascading 502s). Combined with `logout_on_error` it caused an instant login lockout on the first failed refresh.
-- **No `ErrorDocument 401`.** A 401 `ErrorDocument` pointing at a relogin endpoint means any stray `401` (e.g. a `favicon.ico` request racing a session refresh) tears down a live session. 401 navigations are instead recovered client-side by the Service Worker and `reconnecting.js` (§4.6, §8) — non-navigation `401`s stay plain `401`s.
+- **No `ErrorDocument 401`.** A 401 `ErrorDocument` pointing at a relogin endpoint means any stray `401` (e.g. a `favicon.ico` request racing a session refresh) tears down a live session. 401 navigations are instead recovered client-side by the service worker (§4.6) and `reconnecting.js` (§8) — non-navigation `401`s stay plain `401`s.
 - **`ErrorDocument 400` → `/__access-denied.html`** and **`ErrorDocument 502/503/504` → `/__reconnecting.html`** are the only server-side error redirects, both served from public, OIDC-bypassed `<Location>` blocks (`httpd.conf.patch`) so the internal error subrequest is not itself caught by the OIDC catch-all.
 
 ### 7.2 CGI scripts
@@ -236,4 +236,4 @@ npm start
 
 ## 10. One-sentence summary
 
-> Apache handles all of OIDC (PKCE, tokens, cookies, redirects — deliberately no proactive refresh). Angular **probes `/auth/userinfo`** to discover the server-side mode, **caches OIDC claims in IndexedDB** for offline use, exposes `currentUser` / `oidcEnabled` / `modeResolved` signals, **detects proven session mismatches** (HTTP interceptor + Service Worker) to auto-redirect to **`/auth/login`** (rate-limited via `/auth/relogin`), and offers a **degraded email login** only when the server reports `oidcEnabled: false`.
+> Apache handles all of OIDC (PKCE, tokens, cookies, redirects — deliberately no proactive refresh). Angular **probes `/auth/userinfo`** to discover the server-side mode, **caches OIDC claims in IndexedDB** for offline use, exposes `currentUser` / `oidcEnabled` / `modeResolved` signals, **detects proven session mismatches** (HTTP interceptor + service worker) to auto-redirect to **`/auth/login`** (rate-limited via `/auth/relogin`), and offers a **degraded email login** only when the server reports `oidcEnabled: false`.

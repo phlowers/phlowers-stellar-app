@@ -1,217 +1,246 @@
 # Application Update Process
 
-The application has to function offline. Therefore, all assets should be downloaded and cached on the user's device. It also has to be able to update itself when a new version is available.
+The application has to work offline: every application file is downloaded and cached on the user's device by a
+service worker built with [Workbox](https://developer.chrome.com/docs/workbox). The application also updates itself
+when a new version is deployed.
 
 Catalog reference data (CSV/JSON files) is refreshed by a separate, independent
 mechanism — see [Catalog Update Process](catalog_update.md).
 
-## Service Worker Overview
+## Principles
 
-Our application uses a service worker to enable offline capabilities and manage updates. The service worker:
+| Rule | Behaviour |
+|---|---|
+| No update during work | A downloaded version waits. It only becomes active once **every window** of the application has been closed and the application reopened. A reload (F5) keeps the running version. |
+| Background download on a fast enough network only | A download only starts when `navigator.connection.downlink` reaches 5 Mbit/s. Below the threshold, or when the value is unknown, nothing is downloaded and the check is retried later. |
+| Integrity of every file | Every precached file carries a SHA-256 `integrity` computed on the final bytes of `dist/`. A file that does not match, a redirect (expired session) or a non-OK response fails the installation; the active version is untouched. |
+| User told about the next start | A toast says the update will be applied the next time the application starts. No dialog, no button. |
+| Authentication untouched | The service worker never intercepts `/auth/**` and `AuthService` is unchanged. The first download only starts for an authenticated user. |
 
-1. Caches application assets during installation
-2. Checks for new versions when the application loads
-3. Manages the update process when a new version is available
-4. Serves cached assets when the user is offline
+## Life cycle
 
-Catalog files (`/data/*.csv`, `/data/obstacle_configuration.json`) are **excluded**
-from the application asset manifest (`files`) — the service worker never
-downloads or caches them. Only their SHA-256 hashes are listed, under
-`data_hashes`, for the catalog update mechanism to consume.
+```mermaid
+sequenceDiagram
+    participant Page as Page (AppUpdateService)
+    participant Browser
+    participant SW as New service worker
+    Page->>Browser: register /service-worker.js (after authentication)
+    Browser->>SW: install (new bytes at the same URL)
+    SW->>SW: network rule, then storage rule
+    SW->>SW: download the missing files (SRI)
+    SW-->>Page: waiting: "applied at the next start" toast
+    Note over Page,SW: F5 keeps the running version
+    Page->>Browser: every window closed
+    Browser->>SW: activate (outdated entries and app-assets* caches deleted)
+```
 
-## Update Mechanism
+1. `initializeApp` (`src/app/app.config.ts`) starts `AppUpdateService.start()` without awaiting it, in production
+   builds only (`APP_UPDATE_ENABLED` token, `!isDevMode()`): the service worker is never registered by `ng serve`.
+2. Without an existing registration, the service waits for an authenticated user (`AuthService.currentUser()`, read
+   only) before registering `/service-worker.js` with `workbox-window`. Otherwise the existing registration is reused.
+3. The browser looks for a new `/service-worker.js` on navigations. `AppUpdateService.checkForUpdate()` also asks for
+   a check when `navigator.connection` changes, when the browser comes back online and every 30 minutes
+   (`UPDATE_CHECK_INTERVAL_MS`), provided the network and storage rules allow it. The admin page has a
+   "Check for updates" button.
+4. A new version is identified by its bytes: the service worker embeds the precache manifest (URL, revision,
+   integrity, size). Two builds of the same commit produce identical files (see Build below): redeploying the same
+   commit, e.g. the daily dev deployment, downloads nothing and shows nothing.
+5. On `install`, the service worker applies the network rule, then the storage rule, then downloads only the files
+   whose revision changed. A refusal happens before any download and is sent to the pages (`SW_INSTALL_REFUSED`).
+6. The installed version waits: `skipWaiting()` is never called. `AppUpdateService` moves to `update-waiting` and
+   shows the toast once per start, including when a version was already waiting at startup.
+7. Once every window is closed, the browser activates the new version: outdated precache entries are deleted, as
+   well as the caches of the previous update system (`app-assets*`). `clients.claim()` only matters for the first
+   installation (no page is controlled yet).
 
-### How Updates Work
+## Rules checked before any download
 
-1. When a user navigates to the application, `UpdateService` fetches `/assets_list.json` and compares the `git_hash` (commit SHA) of the running build (baked into the JS at build time) with the `git_hash` of the server manifest. The build timestamp and `version` are display-only: rebuilding and redeploying the same commit (e.g. the daily dev deployment) does not trigger an update. A server manifest without a valid `git_hash` is ignored (no popup).
+### Network rule
 
-2. If the two differ, the application shows the update popup (`pendingAction === 'update-available'`).
+`evaluateBackgroundDownload()` (`src/app/core/services/app-update/network-rule.helpers.ts`) is shared by the page
+and the service worker:
 
-3. The user accepts the popup, or clicks the "Update" button of the /admin page, to download the new version.
+| `navigator.connection` | Result (`reason`) |
+|---|---|
+| API unavailable (e.g. Firefox, Safari) | refused (`api-unavailable`) |
+| `saveData: true` | refused (`save-data`) |
+| `downlink` unknown | refused (`downlink-unknown`) |
+| `downlink` below the threshold | refused (`downlink-below-threshold`) |
+| `downlink` at or above the threshold | allowed |
 
-4. During the update process, the service worker:
-   - Downloads the new assets into their own cache (the active version is never touched)
-   - Writes `/app_version` last, which marks the cache as complete
-   - Switches the activation pointer, keeps the previous version for rollback and deletes older caches
-   - Sends `update_complete` to every open tab (for a first install, `install_complete` is only sent to the requesting tab)
+The threshold is `BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS` (5 Mbit/s) in `network-rule.constantes.ts`. Chrome and Edge
+cap `downlink` at 10 Mbit/s: keep the threshold at or below 10.
 
-### Authorization and entry points
+### Storage rule
 
-`WorkerUpdateService` (`stellar/src/app/core/services/worker_update/worker_update.service.ts`)
-is the only class allowed to send `install`/`update` commands to the service
-worker, through three explicit, authenticated-only intents:
+`evaluateStorageForInstall()` (`storage-rule.helpers.ts`) allows the installation when
+`quota - usage >= missing bytes + reserve`:
 
-- `confirmUpdate()` — the user accepts the update popup (`pendingAction` must be
-  `'first-install'` or `'update-available'`).
-- `forceUpdateFromAdmin()` — an explicit click on the `/admin` page (requires
-  `pendingAction === 'update-available'`).
-- `installFirstLaunch()` — the only action allowed to run automatically, and only
-  when the service worker cache is confirmed empty (`pendingAction === 'first-install'`)
-  **and** the user is authenticated.
+- the missing bytes are the sum of the `sizeBytes` of the manifest entries absent from the precache (only the delta,
+  including versions already waiting);
+- the reserve, `USER_DATA_STORAGE_RESERVE_BYTES` (100 MB, `storage-rule.constantes.ts`), protects the user data:
+  the quota is shared with IndexedDB (studies, catalogs);
+- when `navigator.storage.estimate()` is unavailable, the installation is allowed.
 
-All three read `AuthService.currentUser()` (read-only) and return `false` without
-posting any message if the user is not authenticated or the pending action does
-not match.
+If the quota is exceeded anyway (`QuotaExceededError`), the entries written during the attempt are deleted to give
+the space back. The page shows "Not enough storage space" once per start.
 
-### Versioned, atomic activation
+## User interface
 
-Application versions are activated atomically to avoid any offline window with a
-partially-populated cache:
+- Top bar indicator (`data-testid="offline-status-indicator"`): ready offline, preparing, waiting for a fast enough
+  network, not enough storage, unavailable. A waiting update keeps "ready offline": the active version still works
+  offline.
+- Home page "News" card: shows the "applied at the next start" message while a version waits.
+- Home page "Application status" card: connectivity is independent of offline-mode readiness.
+  `OnlineService` verifies reachability with an uncached `HEAD /version.json` at startup, on window focus and
+  every 30 seconds while the browser reports a connection. This URL is never served by the service worker.
+  A network failure or a 5-second timeout switches the card to "No connection"; a browser `offline` event does so
+  immediately. Any HTTP response, including an authentication or server error, proves network reachability:
+  API health is tracked separately. Cached offline-mode readiness is preserved.
+- Admin page: running version and its build date (read from `/version.json`, network only), offline state, measured
+  downlink and threshold, storage usage and quota, last refusal, "Check for updates" button. "Reset application"
+  unregisters the service worker and deletes the application caches; IndexedDB is kept.
 
-- Each version is cached under its own `app-assets-v-<git_hash>` name; a small control
-  cache (`app-assets-control`) stores the pointer to the currently `active`
-  cache and keeps the `previous` one for rollback.
-- A candidate version is only fully prepared (including a check that
-  `/index.html` and every manifest asset are present) **before** the control
-  pointer is switched — a single write, done only on full success.
-- A cache is never written twice: a single install/update runs at a time, including across two Service Worker instances (Web Lock `app-assets-precache`); an already complete cache (`/app_version` marker) is reused without any download, or reported as already active; a file listed twice in the manifest is downloaded once. A download into an incomplete active cache is refused (`Refusing to precache into the active cache`), and a manifest without a valid `git_hash` is refused too. If the active cache no longer exists (deleted while `/control` still points to it), the version is reinstalled normally instead of being refused. An incomplete `previous` cache is deleted and rebuilt, never completed in place.
-- On failure before activation, only the incomplete candidate is discarded; the
-  active version keeps serving the app unaffected.
-- Fetch handling resolves a single, consistent version per request (active, or
-  previous as fallback) — it never mixes assets from two versions. The only exception is a
-  content-hashed Angular file (`chunk-XXXXXXXX.js`, `*.css`) missing from the active cache:
-  it is looked up in the `previous` cache before the network, so a tab still running the old
-  version can load its lazy chunks.
+## What the service worker serves
 
-### Download robustness (service worker)
+| Request | Handling |
+|---|---|
+| Precached file | From the precache (`workbox-precache-v2-*`) |
+| Navigation (root and deep links) | The cached `/index.html` shell, without waiting for the network. Without a cached shell: the network, and a raw `401`/`403` is redirected to `/auth/relogin` (see the authentication page) |
+| Navigation to `/auth/**`, `/docs/**`, `/data/**`, `/assets/config/**`, `/assets_list.json`, `/catalog-manifest.json`, `/version.json` | Not intercepted (`NAVIGATION_DENYLIST`) |
+| Versioned catalog `/data/<file>?v=<sha>` | Cache first, `stellar-catalogs-v1` cache (see [Catalog Update Process](catalog_update.md)) |
+| Anything else (API, `/auth/**`, `/version.json`, `/catalog-manifest.json`...) | Not intercepted: network |
 
-- One install/update at a time: a request received during a run joins it. Every handler is
-  passed to `event.waitUntil()` so the browser does not stop the service worker mid-download.
-- The manifest (`/assets_list.json`) is fetched without following redirects and must answer
-  within 13 s (headers and body); otherwise the update fails at once instead of staying at 0 %.
-- 5 files are downloaded in parallel. A file fails when **no byte** (headers or body) arrives for
-  30 s; a stalled file is not retried and the error names it.
-- Network errors and 5xx are retried 3 times (1 s, 2 s, 4 s). 401, 403, redirects (expired OIDC
-  session) and other 4xx are never retried: the error contains "authentication required" and the
-  page asks the user to sign in again. A full storage quota (`QuotaExceededError`) is not retried
-  either.
-- Resume: a cache without the `/app_version` marker is a partial earlier attempt (e.g. the service
-  worker was stopped); the files it already holds are not downloaded again.
+Source files:
 
-### Page-side monitoring
+| File | Role |
+|---|---|
+| `src/sw/service-worker.ts` | Wiring of the service worker |
+| `src/sw/service-worker.helpers.ts` | Installation guard, activation, refusal of redirected or non-OK responses, navigation handler, logger |
+| `src/sw/catalogs.ts` | Catalog route and prefetch |
+| `src/app/core/services/app-update/` | `AppUpdateService`, network and storage rules, service worker message contract |
+| `scripts/build-service-worker.mjs`, `scripts/check-sw-manifest.mjs` | Generation and check of the service worker |
+| `ops/kill-switch/service-worker.js` | Emergency kill-switch (not part of `dist/`) |
 
-While an update runs, `UpdateService`:
+## Build
 
-- Sends a `keepalive` message every 10 s. The service worker answers with a `progress` message
-  (`run: null` when it has no update in progress, e.g. it was stopped and restarted by the browser).
-  `progress` is also sent to every page each time the whole percentage of cached files changes; it
-  feeds the progress bar (`updateProgress`, 0-100).
-- Leaves the loading state at once on `run: null`, and after 45 s without any message from the
-  service worker (`UPDATE_WATCHDOG_TIMEOUT_MS`, kept above the 30 s per-file timeout so the
-  service worker reports its own error first). It then logs the error and shows "Update interrupted".
-  The dialog shows its "Later" / "Update now" buttons again: it can be closed, or the update retried
-  (the partial cache is resumed).
-- Also leaves the loading state when the service worker keeps answering but no file is cached for
-  180 s (`UPDATE_NO_PROGRESS_TIMEOUT_MS`, above the worst case of one file: 4 attempts x 30 s +
-  retry delays). Keepalive answers restart the 45 s countdown, not this one.
-- Gives up after 10 s when `navigator.serviceWorker.ready` never settles
-  (`UPDATE_SW_READY_TIMEOUT_MS`), for an update as well as for the automatic first install.
-- Notifies the user when the "Update now" button of the popup could not start the update
-  (`AppComponent.onConfirmUpdate()`).
+`npm run build` runs, in this order:
 
-### Other open tabs
+1. `ng build --configuration=production`;
+2. `npm run set-env-variables`: injects the version and the `git_hash` into the JS and writes `dist/version.json`
+   (`git_hash`, `version`, `build_datetime_utc`). The build date is **not** injected into the JS, so two builds of
+   the same commit produce identical files. The build fails when the git hash is not a commit SHA: the pipeline must
+   provide `CI_COMMIT_SHA` or build from a git checkout;
+3. `npm run build:sw` (`scripts/build-service-worker.mjs`): bundles `src/sw/service-worker.ts` with esbuild, then
+   `workbox-build` (`injectManifest`) lists every file of `dist/` with its revision, `integrity` (SHA-256) and
+   `sizeBytes`, computed on the final bytes. Excluded: `version.json`, `assets_list.json`, `catalog-manifest.json`,
+   `assets/config/**`, `data/**`, `docs/**`, `*.map`. The size limit is raised to 100 MB so that Pyodide is never
+   silently left out;
+4. `npm run create-assets-list-for-service-worker`: writes `catalog-manifest.json` (`app_version`, `data_hashes`)
+   and `assets_list.json`, kept for the workstations still on the previous update system.
 
-`update_complete` is sent to every open tab, once. The tab that started the update goes to `/`;
-the other tabs reload in place, since they still run the old code. `install_complete` and errors
-are only sent to the page that asked for them.
+`npm run check:sw-manifest` recomputes the integrity and size of every entry independently, and checks that
+Pyodide and every Python wheel are listed and that no excluded file is.
 
-### Build identity
+Pyodide and the Python wheels (`public/pyodide/`) are prepared by `npm run set-up-mechaphlowers` before the build;
+they are precached like any other file.
 
-`scripts/set-env-variables.py` is the only generator of the build identity: the `git_hash`
-(commit SHA, the version identity) and the UTC build time (display only). It injects them into the
-JS and writes `dist/version.json`; `create_assets_list_for_service_worker.py` copies that file into
-`assets_list.json`. The build fails when the git hash is not a commit SHA (`unknown`, empty...):
-the build pipeline must provide `CI_COMMIT_SHA` with the built commit SHA, or build from a git
-checkout.
+## Logs and diagnostics
 
-### Logs
+- Page console (`LoggerService`): `[AppUpdate] ...`. The service worker messages are relayed to the page as
+  `[AppUpdate][sw] ...`: `Installation refused (<reason>)`, `Installation complete (<n> bytes downloaded)`,
+  `Installation failed: ...`, `Storage quota exceeded during installation, <n> entries removed`,
+  `Legacy caches deleted: ...`, `Catalog prefetch ...`.
+- `chrome://serviceworker-internals`, or DevTools > Application > Service workers: active and waiting versions,
+  "Update" and "Unregister" buttons, console of the service worker.
+- DevTools > Application > Cache storage: `workbox-precache-v2-<origin>` and `stellar-catalogs-v1`. A remaining
+  `app-assets*` cache means the Workbox version has not been activated yet on this workstation.
+- DevTools > Application > Storage: usage and quota.
+- Admin page: see User interface above.
 
-Every step of an update is logged, in the console only:
+## Operations
 
-- `[UPDATE <runId>] <step> +<ms>ms` — emitted by the service worker (manifest, precache start,
-  `progress` every 10 %, `file-retry` / `file-failed` with path, HTTP status, attempt and duration,
-  activation, cleanup, `done` / `failed`) and relayed to the page console. All the lines of one
-  update share the same `runId`.
-- `[UPDATE page] ...` — emitted by the page (version check, refused actions, messages received,
-  timeouts, interruptions).
+### Transition from the previous update system
 
-Filter the page console on `[UPDATE`. The service worker's own console is available in
-`chrome://serviceworker-internals` (or DevTools > Application > Service Workers > inspect). To find
-where and why an update stopped, read the last `[UPDATE <runId>]` line: `file-failed` names the
-file and the cause, a missing `done` / `failed` after `precache-start` means the service worker
-stopped, and `[UPDATE page] update interrupted` gives the reason seen by the page.
+On a workstation still running the previous system:
 
-### Testing locally
+1. its `UpdateService` detects the new version through `assets_list.json` and shows its dialog (previous mechanism,
+   it cannot be changed on deployed workstations);
+2. after the click, the new code runs under the previous service worker;
+3. the browser installs the Workbox service worker (same URL; one more full download, subject to the network rule),
+   which waits;
+4. once every window is closed, it activates and deletes the `app-assets*` caches. IndexedDB is kept.
 
-The service worker is disabled under `ng serve` (`!isDevMode()` in `src/main.ts`), so updates are
-tested on a production build served by a simulation server:
+`assets_list.json` must stay deployed until no workstation requests it any more.
+
+### Kill-switch
+
+In an emergency, deploy `ops/kill-switch/service-worker.js` in place of `dist/service-worker.js`. At the next update
+check of each workstation (navigation, or within 30 minutes), it activates at once, deletes every Cache Storage entry
+and unregisters itself. Open pages are **not** reloaded and IndexedDB (studies, catalogs) is untouched: no work is
+lost. The application then works online only. To leave this state, deploy a normal build again: the service worker
+is registered at the next start and the application downloaded again.
+
+### Rollback by redeployment
+
+Redeploy the `dist/` of the previous commit. It is installed like any other version: downloaded in the background
+(network rule) and applied at the next start. Use the kill-switch when the faulty version must stop at once.
+Rolling back to the previous update system (before Workbox): its service worker takes over at once (`skipWaiting`);
+the Workbox precache stays on disk, unused, and is reused if Workbox is deployed again.
+
+```{warning}
+A rollback is impossible when the rolled-back version upgraded the Dexie schema
+(`src/app/infrastructure/database/app-database.versions.ts`): the older code cannot open a newer database
+(`VersionError`). Ship a fix forward instead, and review every schema migration with this risk in mind.
+```
+
+### Changing the threshold or the reserve
+
+Edit `BACKGROUND_DOWNLOAD_MIN_DOWNLINK_MBPS` (`network-rule.constantes.ts`) or `USER_DATA_STORAGE_RESERVE_BYTES`
+(`storage-rule.constantes.ts`), then build and deploy: the page and the service worker share these constants.
+
+## Known differences with the previous system
+
+- No per-file timeout: a file that never answers keeps the installation pending until the browser gives up. The
+  active version stays intact and the next check retries.
+- Deleting the caches alone, without unregistering the service worker, does not rebuild the whole precache: files
+  are only cached again when requested. Clearing the site data (or "Reset application" on the admin page) reinstalls
+  everything at the next start.
+- No previous version is kept locally for a rollback, and there is no button to force an update.
+
+## Testing locally
+
+The service worker is not registered under `ng serve`: test on a production build served by the simulation server.
 
 ```bash
 npm run build
 npm run update:sim   # serves dist/ on http://localhost:4310 (E2E_PORT to change it)
 ```
 
-Open `http://localhost:4310`, then publish another version and reload the page:
+Control endpoints (`POST`, query string):
 
-```bash
-curl -X POST "localhost:4310/__e2e/scenario?v=v2"
-```
-
-Scenarios: `v1`, `v2`, `v3`, `v2-broken` (one asset 404s), `v2-badhash` (wrong catalog hash),
-`v1-rebuild` (same commit as `v1` rebuilt: same `git_hash`, new build date), `v2-slow` (300 ms per
-file) and `v2-big` (30 MB file). Fault injection (`/__e2e/faults`, query string):
-
-| Parameter | Effect |
+| Endpoint | Effect |
 |---|---|
-| `latencyMs=N` | delay every app file by N ms |
-| `stall=/path` | the file never answers (connection left open) |
-| `stallManifest=true` | `/assets_list.json` never answers |
-| `fail=/path&status=502&count=2` | the next `count` requests of the file fail with `status` |
-| `redirectAfter=N` | answer 302 to `/auth/login` once more than N app files were requested |
-| `reset=true` | remove every fault and clear the request log |
+| `/__e2e/scenario?v=v2` | Publishes another version: `v1`, `v2`, `v3`, `v2-broken` (one file answers 404), `v2-badhash` (wrong catalog hash), `v1-rebuild` (same commit rebuilt), `v2-slow` (300 ms per file), `v2-big` (30 MB file) |
+| `/__e2e/network?downlink=1` | Downlink seen by the service worker, in Mbit/s |
+| `/__e2e/auth?authenticated=false` | Simulates an expired session |
+| `/__e2e/service-worker?mode=legacy` | Script served at `/service-worker.js`: `workbox` (default), `legacy` (stand-in for the previous system), `kill-switch` |
+| `/__e2e/faults?...` | Fault injection, see below |
 
-`GET /__e2e/requests` returns the app files requested since the last reset (to count re-downloads
-on a retry), `POST /__e2e/auth?authenticated=false` simulates an expired session. To simulate the
-service worker being stopped, click "Stop" in `chrome://serviceworker-internals` during the
-update.
+| Fault parameter | Effect |
+|---|---|
+| `latencyMs=N` | Delays every application file by N ms |
+| `stall=/path` | The file never answers (connection left open) |
+| `fail=/path&status=502&count=2` | The next `count` requests of the file fail with `status` |
+| `redirectAfter=N` | Answers 302 to `/auth/login` once more than N application files were requested |
+| `tamper=/path` | Answers 200 with other bytes than the manifest (integrity check) |
+| `navigationStatus=401` | Answers every page navigation outside `/auth/` with this status (stale session) |
+| `reset=true` | Removes every fault and clears the request log |
 
-Automated tests (run `npm run build` first, the service worker is recompiled):
+`GET /__e2e/requests` returns the application files requested since the last reset.
 
-- `npm run e2e:update` — the update flow (first install, popup, rollback, catalogs, offline).
-- `npm run e2e:update-faults` — the failures: service worker stopped mid-download, stalled file,
-  transient 502, rebuild of the same commit (no popup), manifest that never answers, other tab
-  reloaded, resume after a retry.
+Automated tests (run `npm run build` first):
 
-### Asset List Generation
-
-The service worker relies on a pre-generated list of assets to cache in order to download the correct assets when an update is available. This list is created during the build process using the `create_assets_list_for_service_worker.py` script.
-
-#### Python Package Management
-
-Python packages (mechaphlowers and dependencies) are managed by the `set_up_mechaphlowers.py` script, which:
-- Automatically detects all dependencies (26 packages)
-- Prefers CDN versions when available (14/26 from Pyodide CDN)
-- Downloads remaining packages via pip (12/26)
-- Optimizes wheels with Brotli/Gzip compression
-- Stores packages locally in `public/pyodide/`
-
-Run the setup script before building:
-```bash
-npm run set-up-mechaphlowers
-```
-
-#### Asset List Commands
-
-`npm run build` runs it automatically after `ng build`. It can also be run manually:
-
-- `npm run create-assets-list-for-service-worker` - Generates the asset list for the single Transloco build output in `dist/`
-
-This command runs the Python script that:
-1. Recursively scans the `dist/` build directory
-2. Creates a list of all files (excluding blacklisted items like the service worker itself)
-3. Includes Python packages from `public/pyodide/` (managed by `set_up_mechaphlowers.py`)
-4. Generates version information, read from `dist/version.json` (written by `set-env-variables.py`), including:
-   - Git commit hash (`git_hash`, the version identity)
-   - Build timestamp
-   - Application version from package.json
-5. Writes the complete asset list to `assets_list.json`
+- `npm run e2e:update`: life cycle, first installation, catalogs, network rule, offline, expired session, storage,
+  transition from the previous system, kill-switch and rollback;
+- `npm run e2e:update-faults`: transient 502, cleared site data.

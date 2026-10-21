@@ -45,6 +45,8 @@ export interface CsvImportErrorMessage {
   type: 'error';
   csvKey: CsvKey;
   message: string;
+  /** `'integrity'` when the downloaded content failed its SHA-256 check; absent for any other failure. */
+  code?: 'integrity';
 }
 
 export type CsvImportWorkerResponse = CsvImportProgressMessage | CsvImportDoneMessage | CsvImportErrorMessage;

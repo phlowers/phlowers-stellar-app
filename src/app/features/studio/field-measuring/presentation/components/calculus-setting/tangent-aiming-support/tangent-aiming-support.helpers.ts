@@ -129,8 +129,11 @@ export function toTangentAimingSupportInputs(data: FieldMeasure): TangentAimingS
  * Temporary mock: the engine has no tangent aiming Task yet, constant value on purpose.
  * TODO: replace with workerPythonService.runTask(Task.<tangent aiming>) once the Task exists.
  */
-export async function calculateTangentAimingSupportMock(
+export function calculateTangentAimingSupportMock(
   _inputs: TangentAimingSupportInputs
 ): Promise<TangentAimingSupportCalculation> {
-  return { result: { parameter: 1000, uncertainty: 1.5, criterion: 1, checkValidity: true }, error: null };
+  return Promise.resolve({
+    result: { parameter: 1000, uncertainty: 1.5, criterion: 1, checkValidity: true },
+    error: null
+  });
 }

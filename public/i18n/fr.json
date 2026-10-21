@@ -166,18 +166,6 @@
     "measured-span-length-label": "Longueur de portée mesurée",
     "calculated-value-label": "Valeur calculée :"
   },
-  "app": {
-    "update": "Mise à jour",
-    "new-version-available": "La nouvelle version de votre application est disponible !",
-    "version": "Version :",
-    "hash": "Hash :",
-    "update-in-progress": "La mise à jour de votre application est en cours",
-    "update-warning": "Merci de ne pas fermer l'application pendant la mise à jour.",
-    "later": "Plus tard",
-    "update-now": "Mettre à jour",
-    "update-start-failed": "La mise à jour n'a pas pu démarrer. Veuillez réessayer.",
-    "install-failed": "L'installation initiale de l'application n'a pas pu démarrer. Veuillez recharger la page pour réessayer."
-  },
   "auth": {
     "login-page": {
       "logo-alt": "Stellar",
@@ -201,15 +189,20 @@
     "update-text": "Voir les dernières mises à jour.",
     "update-link-text": "En savoir plus",
     "update-link-explicit-text": "En savoir plus sur les dernières mises à jour",
-    "server-title": "État du serveur",
-    "server-text-default": "Tentative de connexion au serveur !",
     "update-available": "Mise à jour disponible",
     "update-new-available": "Une nouvelle mise à jour de l'application est disponible !",
-    "server-offline": "Application en mode déconnecté.",
-    "server-unknown": "Impossible de récupérer les données. Veuillez vérifier votre connexion internet.",
-    "server-warning": "Tentative de connexion au serveur.",
-    "server-error": "Une erreur est survenue lors de la tentative de connexion au serveur.",
-    "server-success": "Connexion au serveur réussie !",
+    "offline-card": {
+      "title": "État de l'application",
+      "connection-online": "Connecté.",
+      "connection-offline": "Pas de connexion.",
+      "status-ready": "Mode hors ligne prêt.",
+      "status-preparing": "Préparation du mode hors ligne en cours.",
+      "status-waiting-network": "Réseau trop lent : préparation du mode hors ligne en attente.",
+      "status-storage-insufficient": "Espace insuffisant : mode hors ligne impossible.",
+      "status-not-prepared": "Mode hors ligne indisponible.",
+      "update-postponed-network": "Mise à jour reportée : réseau trop lent.",
+      "update-blocked-storage": "Mise à jour impossible : espace insuffisant."
+    },
     "no-recent-studies": "Aucune étude récente",
     "go-to-studies": "Aller à mes études"
   },
@@ -236,13 +229,28 @@
   },
   "admin": {
     "app-version": "Version de l'application",
-    "check-app-version": "Vérifier la version de l'application",
-    "current-version": "Version actuelle",
-    "latest-version": "Version la plus récente",
+    "check-app-version": "Vérifier les mises à jour",
+    "col-property": "Propriété",
+    "col-value": "Valeur",
     "build-hash": "Hash du build",
     "build-datetime": "Date et heure du build",
     "build-version": "Version du build",
-    "update-to-latest": "Mettre à jour vers la version la plus récente",
+    "offline-status": "Mode hors ligne",
+    "pending-version": "Version en attente",
+    "no-pending-version": "Aucune",
+    "last-refusal": "Dernière mise à jour reportée",
+    "network": "Débit réseau estimé",
+    "downlink-value": "{{ downlink }} Mbit/s (téléchargements en arrière-plan à partir de {{ threshold }} Mbit/s)",
+    "storage": "Stockage",
+    "storage-value": "{{ usage }} Mo utilisés sur {{ quota }} Mo",
+    "not-available": "Non disponible",
+    "refusal": {
+      "api-unavailable": "Débit réseau inconnu du navigateur",
+      "downlink-unknown": "Débit réseau inconnu du navigateur",
+      "downlink-below-threshold": "Réseau trop lent",
+      "save-data": "Économiseur de données activé",
+      "storage-insufficient": "Espace de stockage insuffisant"
+    },
     "activate-python-logs": "Activer les logs Python",
     "danger-zone": "Zone Danger",
     "delete-all-studies": "Supprimer toutes les études",
@@ -293,17 +301,20 @@
       "unauthorized-summary": "Non autorisé",
       "imported-from-protov4": "Étude importée depuis le protoV4"
     },
-    "update-service": {
-      "update-success-summary": "Mise à jour réussie",
-      "update-success-detail": "L'application a été mise à jour vers la dernière version",
-      "install-success-summary": "Installation réussie",
-      "install-success-detail": "L'application a été installée",
-      "update-failed-summary": "Échec de la mise à jour",
-      "update-failed-detail": "Une erreur inconnue s'est produite lors de la mise à jour",
-      "update-failed-auth-detail": "La mise à jour n'a pas pu être téléchargée car votre session a expiré. Veuillez vous reconnecter, puis relancer la mise à jour",
-      "update-interrupted-summary": "Mise à jour interrompue",
-      "update-interrupted-detail": "La mise à jour n'a pas abouti. Veuillez réessayer.",
-      "version-checked-detail": "Version de l'application vérifiée"
+    "app-update-service": {
+      "offline-status": {
+        "ready": "Prêt",
+        "preparing": "Préparation en cours",
+        "waiting-network": "Réseau trop lent",
+        "storage-insufficient": "Espace insuffisant",
+        "not-prepared": "Indisponible"
+      },
+      "update-deferred-network": "Mise à jour reportée : la connexion ne permet pas de la télécharger maintenant (réseau lent ou non mesurable, ou économiseur de données activé), elle sera téléchargée plus tard.",
+      "check-started": "Vérification des mises à jour : une nouvelle version sera téléchargée en arrière-plan.",
+      "update-waiting-summary": "Mise à jour téléchargée",
+      "update-waiting-detail": "Elle sera appliquée au prochain démarrage de l'application (fermez toutes les fenêtres de Stellar, puis rouvrez-la).",
+      "storage-insufficient-summary": "Espace de stockage insuffisant",
+      "storage-insufficient-detail": "Espace de stockage insuffisant pour télécharger la mise à jour : libérez de l'espace sur l'appareil."
     },
     "obstacle-form-service": {
       "delete-detail": "Obstacle supprimé",
