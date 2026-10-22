@@ -2,9 +2,6 @@
   "routes": {
     "login": "Identifiant",
     "admin": "Admin",
-    "study": "Étude",
-    "news": "Actualités",
-    "changelog": "Changelog",
     "studio": "Studio",
     "tools": "Outils",
     "instruction-manual": "Manuel d'utilisation"
@@ -105,7 +102,6 @@
     "sign-in-label": "Se connecter",
     "span-label": "Portée",
     "studies-label": "Études",
-    "studio": "Studio",
     "study-and-section-label": "Étude et canton",
     "study-label": "Étude",
     "success": "Succès",
@@ -293,9 +289,7 @@
     "python-logs-activated-summary": "Les logs Python sont activés",
     "python-logs-deactivated-summary": "Les logs Python sont désactivés",
     "python-logs-activated-detail": "Les logs Python sont activés",
-    "python-logs-deactivated-detail": "Les logs Python sont désactivés",
-    "debug-logs-on": "Activé",
-    "debug-logs-off": "Désactivé"
+    "python-logs-deactivated-detail": "Les logs Python sont désactivés"
   },
   "shared": {
     "catalog-update-service": {
@@ -313,8 +307,6 @@
       "no-user": "Aucun utilisateur"
     },
     "logged-layout": {
-      "home": "Accueil",
-      "studies": "Études",
       "tools": "Outils",
       "instruction-manual": "Manuel d'utilisation",
       "manual": "Manuel",
@@ -395,7 +387,6 @@
       "cables-amount": "Nombre de câbles",
       "ic-name-label": "Nom de la condition initiale",
       "ic-name-unique-error": "Le nom de la condition initiale doit être unique.",
-      "whole-number-required": "Nombre entier requis.",
       "extreme-historical": "Conditions historiques extrêmes subies par le câble",
       "max-frost-width": "Épaisseur du givre max",
       "base-temperature-unit": "Température de base (°C)",
@@ -465,8 +456,7 @@
     "from-file": {
       "file-format": "Formats de fichier : {{ formats }}",
       "description": "Vous pouvez importer un canton à partir d'un fichier JSON. Il sera ajouté à l'étude en cours.",
-      "upload-prompt": "Importer un fichier JSON",
-      "import-error": "Le canton importé est introuvable. Veuillez réessayer."
+      "upload-prompt": "Importer un fichier JSON"
     }
   },
   "studies": {
@@ -621,7 +611,6 @@
     },
     "climate": {
       "wind-pressure-label": "Pression du vent",
-      "whole-number-required": "Nombre entier requis",
       "cable-temperature-label": "Température du câble",
       "ice-thickness-label": "Épaisseur du givre",
       "frontier-support-label": "Support frontière"
@@ -774,9 +763,6 @@
       "span-type-label": "Type de canton",
       "phase-number-label": "Numéro de phase électrique",
       "degree-addon": "°",
-      "latitude-label": "Latitude",
-      "altitude-label": "Altitude",
-      "meter-addon": "m",
       "azimuth-label": "Azimut (sens horaire - 0° Nord/Sud)",
       "localization-not-available": "Localisation non disponible dans l'étude"
     },
@@ -934,9 +920,7 @@
       "z-label": "z :",
       "y-label": "y :",
       "obstacle": "Obstacles",
-      "floor": "Terrain",
-      "distance": "Distance",
-      "loads": "Charges"
+      "floor": "Terrain"
     },
     "studio-page": {
       "working-load-label": "Taux de travail",
@@ -976,13 +960,6 @@
       "obstacle-altitude-type-label": "Type d'altitude d'obstacle",
       "free-positioning-label": "Positionnement libre",
       "free-positioning-forced-frame-warning": "Le mode de positionnement libre n'est disponible qu'avec un support de référence gauche, un type d'altitude absolue et une distance latérale selon l'axe de la portée. Les réglages actuels de l'obstacle diffèrent, les résultats peuvent donc être incorrects.",
-      "add-point-btn": "Ajouter un point",
-      "select-point-label": "Sélectionner le point",
-      "point-label": "Point",
-      "delete-point-aria-label": "Supprimer un point",
-      "point-alt-label": "Alt. point",
-      "ref-support-dist-label": "Dist. supp. réf.",
-      "line-axis-dist-label": "Dist. axe ligne.",
       "delete-obstacle-aria-label": "Supprimer l'obstacle",
       "conformity-dialog-title": "Respect conformité",
       "obstacle-must-be-saved-warning": "L'obstacle doit être enregistré",
@@ -1187,9 +1164,7 @@
       "failed-to-compute-equivalent-span": "Échec du calcul de la portée équivalente",
       "failed-to-compute-hanging-table": "Échec du calcul du tableau de pose",
       "hanging-table-saved": "Tableau de pose sauvegardé",
-      "failed-to-save-hanging-table": "Échec de la sauvegarde du tableau de pose",
-      "max-two-decimals-error": "Valeur à 2 décimales maximum",
-      "integer-error": "La valeur doit être un nombre entier"
+      "failed-to-save-hanging-table": "Échec de la sauvegarde du tableau de pose"
     },
     "cable-adjustment": {
       "span-length-label": "Longueur de portée",
