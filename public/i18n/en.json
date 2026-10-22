@@ -202,14 +202,14 @@
     "offline-card": {
       "title": "Application status",
       "connection-online": "Online.",
-      "connection-offline": "No connection.",
-      "status-ready": "Offline mode ready.",
-      "status-preparing": "Preparing offline mode.",
-      "status-waiting-network": "Network too slow: offline mode setup on hold.",
-      "status-storage-insufficient": "Not enough storage: offline mode impossible.",
+      "connection-offline": "Offline.",
+      "status-ready": "Offline mode available.",
+      "status-preparing": "Update in progress.",
+      "status-waiting-network": "Network too slow: update on hold.",
+      "status-storage-insufficient": "Not enough storage: update impossible.",
       "status-not-prepared": "Offline mode unavailable.",
-      "update-postponed-network": "Update postponed: network too slow.",
-      "update-blocked-storage": "Update blocked: not enough storage."
+      "update-postponed-network": "Network too slow: update postponed.",
+      "update-blocked-storage": "Not enough storage: update impossible."
     },
     "no-recent-studies": "No recent studies",
     "go-to-studies": "Go to my studies"
@@ -308,6 +308,9 @@
     "sidebar": {
       "shrink-menu": "Shrink menu",
       "menu": "Menu"
+    },
+    "topbar": {
+      "no-user": "No user"
     },
     "logged-layout": {
       "home": "Home",

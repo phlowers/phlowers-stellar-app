@@ -202,14 +202,14 @@
     "offline-card": {
       "title": "État de l'application",
       "connection-online": "Connecté.",
-      "connection-offline": "Pas de connexion.",
-      "status-ready": "Mode hors ligne prêt.",
-      "status-preparing": "Préparation du mode hors ligne en cours.",
-      "status-waiting-network": "Réseau trop lent : préparation du mode hors ligne en attente.",
-      "status-storage-insufficient": "Espace insuffisant : mode hors ligne impossible.",
+      "connection-offline": "Déconnecté.",
+      "status-ready": "Mode hors ligne disponible.",
+      "status-preparing": "Mise à jour en cours.",
+      "status-waiting-network": "Réseau trop lent : mise à jour en attente.",
+      "status-storage-insufficient": "Espace insuffisant : mise à jour impossible.",
       "status-not-prepared": "Mode hors ligne indisponible.",
-      "update-postponed-network": "Mise à jour reportée : réseau trop lent.",
-      "update-blocked-storage": "Mise à jour impossible : espace insuffisant."
+      "update-postponed-network": "Réseau trop lent : mise à jour reportée.",
+      "update-blocked-storage": "Espace insuffisant : mise à jour impossible."
     },
     "no-recent-studies": "Aucune étude récente",
     "go-to-studies": "Aller à mes études"
@@ -308,6 +308,9 @@
     "sidebar": {
       "shrink-menu": "Réduire le menu",
       "menu": "Menu"
+    },
+    "topbar": {
+      "no-user": "Aucun utilisateur"
     },
     "logged-layout": {
       "home": "Accueil",
