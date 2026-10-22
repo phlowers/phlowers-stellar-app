@@ -29,8 +29,7 @@ import {
   generatePdfReport,
   loadFileAsBase64,
   loadImageAsBase64,
-  registerNunitoFont,
-  sanitizeFilenamePart
+  registerNunitoFont
 } from './pdf-primitives.helpers';
 import {
   APP_NAME,
@@ -435,16 +434,6 @@ describe('pdf-primitives helpers', () => {
 
       expect(doc.text).toHaveBeenCalledWith('Two columns', PAGE_MARGIN.left, 40);
       expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + LINE_HEIGHT + SEPARATOR_HEIGHT);
-    });
-  });
-
-  describe('sanitizeFilenamePart', () => {
-    it('should replace illegal filesystem characters with a dash', () => {
-      expect(sanitizeFilenamePart('a/b\\c:d*e?f"g<h>i|j')).toBe('a-b-c-d-e-f-g-h-i-j');
-    });
-
-    it('should leave a value without illegal characters unchanged', () => {
-      expect(sanitizeFilenamePart('canton-42_2026-05-20')).toBe('canton-42_2026-05-20');
     });
   });
 

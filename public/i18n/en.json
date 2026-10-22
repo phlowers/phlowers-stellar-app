@@ -165,7 +165,14 @@
     "support-name-full-label": "Support name",
     "left-support-label": "Left support",
     "measured-span-length-label": "Measured span length",
-    "calculated-value-label": "Calculated value:"
+    "calculated-value-label": "Calculated value:",
+    "tangent-aiming-help-aria-label": "open tangent aiming help",
+    "calculation-type-label": "Calculation type:",
+    "calculation-type-tangent": "Tangent",
+    "tangent-angle-label": "Cable tangent angle",
+    "criterion-label": "Criterion",
+    "criterion-respected": "Criterion respected",
+    "criterion-not-respected": "Criterion not respected"
   },
   "auth": {
     "login-page": {
@@ -715,20 +722,21 @@
       "success-detail": "Data saved successfully"
     },
     "calculus-setting": {
-      "tangent-aiming-radio-label": "Tangent aiming (Support)"
+      "tangent-aiming-radio-label": "Tangent aiming (Support)",
+      "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)"
     },
     "tangent-aiming-support": {
-      "open-help-aria-label": "open tangent aiming help",
-      "mandatory-msg": "All fields are mandatory for calculus setting",
-      "h-acc-distance-label": "Vertical dist. from the device to the cable attach. of the left support",
-      "vertical-acc-angle-label": "Vertical angle from the device to the cable attach. of the right support",
-      "calculation-type-label": "Calculation type:",
-      "calculation-type-tangent": "Tangent",
-      "tangent-angle-label": "Cable tangent angle",
-      "criterion-label": "Criterion",
-      "criterion-respected": "Criterion respected",
-      "criterion-not-respected": "Criterion not respected",
-      "calculation-failed": "Failed to calculate the parameter by tangent aiming"
+      "mandatory-msg": "All data are mandatory for parameter calculation.",
+      "h-acc-distance-label": "Vertical dist. from device to cable attach. of left support",
+      "vertical-acc-angle-label": "Vertical angle from device to cable attach. of right support",
+      "calculation-failed": "Failed to calculate parameter by tangent aiming"
+    },
+    "tangent-aiming-exterior": {
+      "mandatory-msg": "All data are mandatory for parameter calculation.",
+      "h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
+      "vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support",
+      "vertical-acc-angle-right-label": "Vertical angle from device to cable attach. of right support",
+      "calculation-failed": "Failed to calculate parameter by tangent aiming (exterior)"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",
@@ -1042,6 +1050,11 @@
       "span-length-column-label": "Span l.",
       "l0-column-label": "Natural L0",
       "cumulated-l0-column-label": "Cumulated L0",
+      "csv-filename-prefix": "L0 Lengths Export",
+      "csv-span-length-label": "Span_length",
+      "csv-l0-label": "L0_span_length",
+      "csv-cumulated-l0-label": "Cumulated_L0_span_length",
+      "export-invalid-table": "Export failed: the L0 table is empty or contains invalid values",
       "loading-data-text": "Loading L0 data…",
       "current-page-report": "{currentPage} of {totalPages}"
     },

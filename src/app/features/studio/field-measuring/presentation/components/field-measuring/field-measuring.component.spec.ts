@@ -333,7 +333,8 @@ describe('FieldMeasuringComponent', () => {
           },
           cableTemperature: null,
           parameter15C: null,
-          tangentAimingSupport: null
+          tangentAimingSupport: null,
+          tangentAimingExterior: null
         }
       });
       component.measureData.set(measureDataWithOutput);
@@ -363,7 +364,8 @@ describe('FieldMeasuringComponent', () => {
           },
           cableTemperature: null,
           parameter15C: null,
-          tangentAimingSupport: null
+          tangentAimingSupport: null,
+          tangentAimingExterior: null
         }
       });
       component.measureData.set(measureDataWithOutput);
@@ -408,7 +410,8 @@ describe('FieldMeasuringComponent', () => {
             },
             cableTemperature: null,
             parameter15C: null,
-            tangentAimingSupport: null
+            tangentAimingSupport: null,
+            tangentAimingExterior: null
           }
         });
         component.measureData.set(measureDataWithOutput);
@@ -475,7 +478,8 @@ describe('FieldMeasuringComponent', () => {
             parameter15CMinusUncertainty: 470,
             parameter15CPlusUncertainty: 490
           },
-          tangentAimingSupport: null
+          tangentAimingSupport: null,
+          tangentAimingExterior: null
         },
         ...overrides
       });
@@ -573,7 +577,13 @@ describe('FieldMeasuringComponent', () => {
       component.measureData.set(
         createFullyValidMeasureData({
           updateMode15C: 'auto',
-          outputs: { papoto: null, cableTemperature: null, parameter15C: null, tangentAimingSupport: null }
+          outputs: {
+            papoto: null,
+            cableTemperature: null,
+            parameter15C: null,
+            tangentAimingSupport: null,
+            tangentAimingExterior: null
+          }
         })
       );
       const messageService = TestBed.inject(MessageService);
@@ -638,7 +648,8 @@ describe('FieldMeasuringComponent', () => {
             },
             cableTemperature: null,
             parameter15C: null,
-            tangentAimingSupport: null
+            tangentAimingSupport: null,
+            tangentAimingExterior: null
           }
         })
       );
@@ -802,6 +813,62 @@ describe('FieldMeasuringComponent', () => {
         outputs: {
           ...base.outputs,
           tangentAimingSupport: { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true }
+        }
+      });
+      expect(component.hasComputedOutputs()).toBe(true);
+    });
+  });
+
+  describe('onSave - tangent aiming (exterior)', () => {
+    it('should reset the non displayed field and the other modes, keeping the displayed ones', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming-exterior',
+          exteriorCalculationType: 'parametre',
+          exteriorParameter: 100,
+          exteriorTangentAngle: 5,
+          HL: 5
+        })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.exteriorParameter).toBe(100);
+      expect(saved?.exteriorTangentAngle).toBeNull();
+      expect(saved?.HL).toBeNull();
+      expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('should validate the tab through the exterior rules and gate the report/export buttons', () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior' }));
+      expect(component.isTangentAimingMethod()).toBe(true);
+      expect(component.isParameterCalculationValid()).toBe(false);
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming-exterior',
+          exteriorLeftSupport: '0',
+          exteriorSpanLength: 10,
+          exteriorHAccDistance: 1,
+          exteriorVerticalAccAngleLeft: 1,
+          exteriorVerticalAccAngleRight: 1,
+          exteriorParameter: 100
+        })
+      );
+      expect(component.isParameterCalculationValid()).toBe(true);
+    });
+
+    it('should take the exterior result into account for computed outputs', () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior' }));
+      expect(component.hasComputedOutputs()).toBe(false);
+      const base = component.measureData();
+      component.measureData.set({
+        ...base,
+        outputs: {
+          ...base.outputs,
+          tangentAimingExterior: { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true }
         }
       });
       expect(component.hasComputedOutputs()).toBe(true);

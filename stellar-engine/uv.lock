@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = "==3.13.*"
 
 [manifest]
@@ -66,7 +66,7 @@ name = "cffi"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pycparser", marker = "implementation_name != 'PyPy'" },
+    { name = "pycparser" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/eb/56/b1ba7935a17738ae8453301356628e8147c79dbb825bcbc73dc7401f9846/cffi-2.0.0.tar.gz", hash = "sha256:44d1b5909021139fe36001ae048dbdde8214afa20200eda0f64c068cac5d5529", size = 523588, upload-time = "2025-09-08T23:24:04.541Z" }
 wheels = [
@@ -378,7 +378,7 @@ wheels = [
 
 [[package]]
 name = "mechaphlowers"
-version = "0.12.0"
+version = "0.13.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
@@ -392,9 +392,9 @@ dependencies = [
     { name = "thermohl" },
     { name = "xxhash" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1a/ff/25eec2e3bd4a1b1f1eaf1098d4a27fade977817c83d92ee7cd463ad76b16/mechaphlowers-0.12.0.tar.gz", hash = "sha256:5abef88c40819f90ffa3442d81f2a1059f1a1b81b3d7efdd427c0655f42743d7", size = 174774, upload-time = "2026-09-03T13:34:45.659Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5e/19/2d5992e92e32c09f1f0c58b4cb8b6706b1124a35af7c9b5bd49af6387bde/mechaphlowers-0.13.1.tar.gz", hash = "sha256:32b78359d1ff36ce48ac220d7b7642c314959a7518173122c0eaa1dc7feb3392", size = 187853, upload-time = "2026-10-21T15:28:42.71Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/28/c5/d5a8615ae8e8c2400eb832a09f06ce0353e17732822ca34f6b849cf6104a/mechaphlowers-0.12.0-py3-none-any.whl", hash = "sha256:4657ee016a72468a0371296bc155dd82b419b23900286e8b4ab6cdba04d404d0", size = 210279, upload-time = "2026-09-03T13:34:43.949Z" },
+    { url = "https://files.pythonhosted.org/packages/5d/00/8a209d32b420ea61b6063b40b71259127a6f7738dd1ea5634253105ddec9/mechaphlowers-0.13.1-py3-none-any.whl", hash = "sha256:32ee0353fb957a3e55a7d479b4ff01270aadb746618753c3a7782adcaec256ea", size = 226565, upload-time = "2026-10-21T15:28:41.18Z" },
 ]
 
 [[package]]
@@ -956,7 +956,7 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "mechaphlowers", specifier = "==0.12.0" }]
+requires-dist = [{ name = "mechaphlowers", specifier = "==0.13.1" }]
 
 [package.metadata.requires-dev]
 dev = [
