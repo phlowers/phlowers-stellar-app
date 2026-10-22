@@ -26,6 +26,9 @@ keywords = ["stellar", "phlowers", "mechaphlowers"]
 
 dependencies = [
     "mechaphlowers==0.13.1",
+    # Temporary certifi minimum for the eMudhra/emSign CA incident.
+    # See https://github.com/phlowers/phlowers-stellar-app/security/dependabot/249
+    "certifi>=2026.10.19",
 ]
 
 [project.urls]
