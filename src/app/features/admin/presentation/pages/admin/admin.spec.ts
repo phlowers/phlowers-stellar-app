@@ -350,9 +350,7 @@ describe('AdminComponent', () => {
       fixture.detectChanges();
 
       expect(fixture.nativeElement.textContent).toContain('abc1234');
-      expect(getByTestId('admin-offline-status')?.textContent).toContain(
-        'common.ready'
-      );
+      expect(getByTestId('admin-offline-status')?.textContent).toContain('common.ready');
       expect(getByTestId('admin-pending-version')?.textContent).toContain('admin.no-pending-version');
       expect(getByTestId('admin-last-refusal')).toBeNull();
     });
