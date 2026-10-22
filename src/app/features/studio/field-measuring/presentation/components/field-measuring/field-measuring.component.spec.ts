@@ -332,7 +332,9 @@ describe('FieldMeasuringComponent', () => {
             uncertainty: 0.1
           },
           cableTemperature: null,
-          parameter15C: null
+          parameter15C: null,
+          tangentAimingSupport: null,
+          tangentAimingExterior: null
         }
       });
       component.measureData.set(measureDataWithOutput);
@@ -361,7 +363,9 @@ describe('FieldMeasuringComponent', () => {
             uncertainty: 0.1
           },
           cableTemperature: null,
-          parameter15C: null
+          parameter15C: null,
+          tangentAimingSupport: null,
+          tangentAimingExterior: null
         }
       });
       component.measureData.set(measureDataWithOutput);
@@ -405,7 +409,9 @@ describe('FieldMeasuringComponent', () => {
               uncertainty: 0.1
             },
             cableTemperature: null,
-            parameter15C: null
+            parameter15C: null,
+            tangentAimingSupport: null,
+            tangentAimingExterior: null
           }
         });
         component.measureData.set(measureDataWithOutput);
@@ -471,7 +477,9 @@ describe('FieldMeasuringComponent', () => {
             parameter15C: 480,
             parameter15CMinusUncertainty: 470,
             parameter15CPlusUncertainty: 490
-          }
+          },
+          tangentAimingSupport: null,
+          tangentAimingExterior: null
         },
         ...overrides
       });
@@ -510,7 +518,7 @@ describe('FieldMeasuringComponent', () => {
 
       const anchor = createElementSpy.mock.results.find((result) => result.value.tagName === 'A')
         ?.value as HTMLAnchorElement;
-      expect(anchor.download).toMatch(/^Export Mesure de terrain_MT-1_.*\.json$/);
+      expect(anchor.download).toMatch(/^Export Mesure de terrain_MT 1_.*\.json$/);
       expect(anchor.href).toBe('blob:test');
       expect(clickSpy).toHaveBeenCalledTimes(1);
       expect(revokeObjectUrlSpy).toHaveBeenCalledWith('blob:test');
@@ -569,7 +577,13 @@ describe('FieldMeasuringComponent', () => {
       component.measureData.set(
         createFullyValidMeasureData({
           updateMode15C: 'auto',
-          outputs: { papoto: null, cableTemperature: null, parameter15C: null }
+          outputs: {
+            papoto: null,
+            cableTemperature: null,
+            parameter15C: null,
+            tangentAimingSupport: null,
+            tangentAimingExterior: null
+          }
         })
       );
       const messageService = TestBed.inject(MessageService);
@@ -633,7 +647,9 @@ describe('FieldMeasuringComponent', () => {
               uncertainty: 0.1
             },
             cableTemperature: null,
-            parameter15C: null
+            parameter15C: null,
+            tangentAimingSupport: null,
+            tangentAimingExterior: null
           }
         })
       );
@@ -679,13 +695,12 @@ describe('FieldMeasuringComponent', () => {
       toolbarDialogService.proceedToMainComponent();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const measureData = component.measureData();
       const section = spanService.section();
 
       await component.onSave();
 
       expect(modifySectionSpy).toHaveBeenCalledWith({
-        field_measures: [...(section?.field_measures || []), measureData]
+        field_measures: [...(section?.field_measures || []), component.measureData()]
       });
     });
 
@@ -717,6 +732,146 @@ describe('FieldMeasuringComponent', () => {
 
       // onSave no longer closes the tool - it shows a success message instead
       expect(closeToolSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onSave - tangent aiming (support)', () => {
+    it('should reset the non displayed field and persist the displayed ones', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming',
+          calculationType: 'parametre',
+          cableParameter: 100,
+          cableTangentAngle: 5
+        })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.cableParameter).toBe(100);
+      expect(saved?.cableTangentAngle).toBeNull();
+      expect(component.measureData().cableTangentAngle).toBeNull();
+      expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('should reset the papoto inputs when tangent aiming is active', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({ calculationMethod: 'tangente-aiming', HL: 5, leftSupport: '1', cableParameter: 100 })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.HL).toBeNull();
+      expect(saved?.leftSupport).toBeNull();
+      expect(saved?.cableParameter).toBe(100);
+    });
+
+    it('should reset tangent aiming to defaults when papoto is active', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({ calculationMethod: 'papoto', HL: 5, tangentSpanLength: 12, cableTangentAngle: 5 })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.HL).toBe(5);
+      expect(saved?.tangentSpanLength).not.toBe(12);
+      expect(saved?.cableTangentAngle).not.toBe(5);
+      expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('should validate the tab through the tangent aiming rules', () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming' }));
+      expect(component.isParameterCalculationValid()).toBe(false);
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming',
+          tangentLeftSupport: '0',
+          tangentSpanLength: 10,
+          cableHAccDistance: 1,
+          cableVerticalAccAngle: 1,
+          cableParameter: 100
+        })
+      );
+      expect(component.isParameterCalculationValid()).toBe(true);
+    });
+
+    it('should take the tangent aiming result into account for computed outputs', () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming' }));
+      expect(component.hasComputedOutputs()).toBe(false);
+      const base = component.measureData();
+      component.measureData.set({
+        ...base,
+        outputs: {
+          ...base.outputs,
+          tangentAimingSupport: { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true }
+        }
+      });
+      expect(component.hasComputedOutputs()).toBe(true);
+    });
+  });
+
+  describe('onSave - tangent aiming (exterior)', () => {
+    it('should reset the non displayed field and the other modes, keeping the displayed ones', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming-exterior',
+          exteriorCalculationType: 'parametre',
+          exteriorParameter: 100,
+          exteriorTangentAngle: 5,
+          HL: 5
+        })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.exteriorParameter).toBe(100);
+      expect(saved?.exteriorTangentAngle).toBeNull();
+      expect(saved?.HL).toBeNull();
+      expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('should validate the tab through the exterior rules and gate the report/export buttons', () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior' }));
+      expect(component.isTangentAimingMethod()).toBe(true);
+      expect(component.isParameterCalculationValid()).toBe(false);
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming-exterior',
+          exteriorLeftSupport: '0',
+          exteriorSpanLength: 10,
+          exteriorHAccDistance: 1,
+          exteriorVerticalAccAngleLeft: 1,
+          exteriorVerticalAccAngleRight: 1,
+          exteriorParameter: 100
+        })
+      );
+      expect(component.isParameterCalculationValid()).toBe(true);
+    });
+
+    it('should take the exterior result into account for computed outputs', () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior' }));
+      expect(component.hasComputedOutputs()).toBe(false);
+      const base = component.measureData();
+      component.measureData.set({
+        ...base,
+        outputs: {
+          ...base.outputs,
+          tangentAimingExterior: { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true }
+        }
+      });
+      expect(component.hasComputedOutputs()).toBe(true);
     });
   });
 
@@ -965,7 +1120,7 @@ describe('FieldMeasuringComponent', () => {
       await component.onSave();
 
       expect(modifySpy).toHaveBeenCalledWith({
-        field_measures: [existingMeasure, newMeasure]
+        field_measures: [existingMeasure, component.measureData()]
       });
     });
 

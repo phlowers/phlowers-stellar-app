@@ -20,7 +20,12 @@ import {
 } from '@shared/pdf/pdf-primitives.helpers';
 import { buildTables, computeLabelColWidth, drawResultTablesSection } from '@shared/pdf/pdf-table.helpers';
 
-import { PDF_LABEL_KEYS, SPAN_METRICS, SUPPORT_METRICS } from './section-state-report.constantes';
+import {
+  CUT_STRANDS_LAYER_LABEL_KEY,
+  PDF_LABEL_KEYS,
+  SPAN_METRICS,
+  SUPPORT_METRICS
+} from './section-state-report.constantes';
 import { drawCartoucheSection, drawSectionStateSection } from './section-state-report.helpers';
 import { SectionReportLabels, SectionStateReportData } from './section-state-report.interfaces';
 
@@ -48,7 +53,13 @@ export class SectionStateReportService extends PdfBaseService {
         // Page 1 — portrait: header, cartouche, section state
         let y = drawHeader(doc, data.date || '-', labels.reportTitle);
         y = drawCartoucheSection(doc, data, labels, y);
-        drawSectionStateSection(doc, data, labels, y);
+        drawSectionStateSection(
+          doc,
+          data,
+          labels,
+          (layer) => this.translocoService.translate(CUT_STRANDS_LAYER_LABEL_KEY, { layer }),
+          y
+        );
 
         // Following pages — landscape: span then support result tables, sharing one label column width
         const spanTables = buildTables(data.spans, SPAN_METRICS, translate);

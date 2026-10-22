@@ -5,6 +5,10 @@ FROM node:22-alpine AS build
 # The build fails when empty: git is not available in this image.
 ARG CI_COMMIT_SHA
 
+# Read by `npm run build` (frontend) and by the Sphinx PDF build, so the manual
+# link in the app and the published PDF file name always match.
+ARG APP_NAME=Stellar
+
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /usr/src/app
@@ -18,6 +22,16 @@ RUN uv python install 3.13
 RUN npm run set-up-mechaphlowers
 
 RUN npm run build
+
+# make drives the docs build; WeasyPrint (sphinx-simplepdf) needs pango and fonts to render the PDFs.
+RUN apk add --no-cache make pango fontconfig ttf-dejavu
+
+# The PDFs are copied after the build so they stay out of the service worker
+# precache list. Served as /docs/<lang>/<app>_documentation.pdf.
+RUN cd docs-sphinx \
+    && uv venv --clear --python 3.13 \
+    && uv pip install -r requirements.txt \
+    && SPHINX_APP_NAME="${APP_NAME}" make publish-pdf
 
 FROM nginx:latest
 

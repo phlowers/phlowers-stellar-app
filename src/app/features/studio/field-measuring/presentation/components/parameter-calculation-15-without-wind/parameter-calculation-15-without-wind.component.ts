@@ -26,6 +26,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { getActiveParameterOutput } from '@features/studio/field-measuring/presentation/helpers';
 
 /** Component for computing the cable parameter at 15°C without wind, supporting auto and manual modes. */
 @Component({
@@ -89,6 +90,9 @@ export class ParameterCalculation15WithoutWindComponent {
   private readonly messageService = inject(MessageService);
   private readonly logger = inject(LoggerService);
 
+  /** Parameter and uncertainty of the calculation method currently selected (PAPOTO or tangent aiming). */
+  readonly activeParameterOutput = computed(() => getActiveParameterOutput(this.measureData()));
+
   isFormValid = computed(() => {
     const isManual = this.measureData().updateMode15C === 'manual';
     if (isManual) {
@@ -103,8 +107,8 @@ export class ParameterCalculation15WithoutWindComponent {
       );
     }
     return (
-      isNumber(this.measureData().outputs.papoto?.parameter) &&
-      isNumber(this.measureData().outputs.papoto?.uncertainty) &&
+      isNumber(this.activeParameterOutput()?.parameter) &&
+      isNumber(this.activeParameterOutput()?.uncertainty) &&
       isNumber(this.measureData().outputs.cableTemperature?.cableTemperature) &&
       isNumber(this.measureData().outputs.cableTemperature?.cableTemperatureUncertainty)
     );
@@ -117,21 +121,22 @@ export class ParameterCalculation15WithoutWindComponent {
 
   updateMeasureData<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     if (field === 'updateMode15C') {
+      const activeOutput = this.activeParameterOutput();
       this.measureData.update((d) => ({
         ...d,
         [field]: value,
+        // A result computed in the previous mode is stale.
+        outputs: { ...d.outputs, parameter15C: null },
         // On switch to manual, fill only fields still unset from Auto; never overwrite existing manual values.
         manualParameterCalculation15CWithoutWind:
           value === 'manual'
             ? {
                 parameterPapoto:
                   d.manualParameterCalculation15CWithoutWind?.parameterPapoto ??
-                  (d.outputs.papoto?.parameter != null ? truncateNumberToOneDecimal(d.outputs.papoto.parameter) : null),
+                  (activeOutput?.parameter != null ? truncateNumberToOneDecimal(activeOutput.parameter) : null),
                 parameterUncertaintyPapoto:
                   d.manualParameterCalculation15CWithoutWind?.parameterUncertaintyPapoto ??
-                  (d.outputs.papoto?.uncertainty != null
-                    ? truncateNumberToOneDecimal(d.outputs.papoto.uncertainty)
-                    : null),
+                  (activeOutput?.uncertainty != null ? truncateNumberToOneDecimal(activeOutput.uncertainty) : null),
                 cableTemperatureCalibration:
                   d.manualParameterCalculation15CWithoutWind?.cableTemperatureCalibration ??
                   (d.outputs.cableTemperature?.cableTemperature != null
@@ -183,9 +188,10 @@ export class ParameterCalculation15WithoutWindComponent {
       cableTemperatureCalibration: manualData?.cableTemperatureCalibration ?? null,
       cableTemperatureCalibrationUncertainty: manualData?.cableTemperatureCalibrationUncertainty ?? null
     };
+    const activeParameterOutput = this.activeParameterOutput();
     const autoDataToSend = {
-      parameterPapoto: data.outputs.papoto?.parameter ?? null,
-      parameterUncertaintyPapoto: data.outputs.papoto?.uncertainty ?? null,
+      parameterPapoto: activeParameterOutput?.parameter ?? null,
+      parameterUncertaintyPapoto: activeParameterOutput?.uncertainty ?? null,
       cableTemperatureCalibration: data.outputs.cableTemperature?.cableTemperature ?? null,
       cableTemperatureCalibrationUncertainty: data.outputs.cableTemperature?.cableTemperatureUncertainty ?? null
     };

@@ -101,7 +101,10 @@ describe('alignSectionSpanLoadsToSupports', () => {
     const result = alignSectionSpanLoadsToSupports(section);
 
     expect(result.charges[0].data.spanLoads).toHaveLength(2);
-    expect(result.charges[1].data.spanLoads.map((l) => l.supportUuid).sort()).toEqual(['sup-1', 'sup-2']);
+    expect(result.charges[1].data.spanLoads.map((l) => l.supportUuid).sort((a, b) => a.localeCompare(b))).toEqual([
+      'sup-1',
+      'sup-2'
+    ]);
   });
 
   it('should not mutate the original section', () => {

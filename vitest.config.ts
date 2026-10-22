@@ -96,7 +96,8 @@ export default defineConfig(() => ({
       '@services': '/src/app/core/services',
       '@features': '/src/app/features',
       '@shared': '/src/app/shared',
-      '@infrastructure': '/src/app/infrastructure'
+      '@infrastructure': '/src/app/infrastructure',
+      '@adapters': '/src/adapters'
     }
   },
   test: {
@@ -110,7 +111,7 @@ export default defineConfig(() => ({
     hookTimeout: 15000,
     teardownTimeout: 15000,
     setupFiles: ['src/test-setup.ts'],
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', 'ops/**/*.spec.ts'],
     exclude: ['e2e/**'],
     reporters: ['default'],
     coverage: {

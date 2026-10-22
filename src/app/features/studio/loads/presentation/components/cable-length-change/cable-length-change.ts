@@ -116,6 +116,7 @@ export class CableLengthChangeComponent {
   });
 
   private previousSectionUuid: string | null = null;
+  private previousChargeUuid: string | null | undefined = undefined;
 
   private readonly cableModificationControlSignals: Record<CableModificationControlName, Signal<unknown>> = {
     supportRef: toSignal(this.form.controls.supportRef.valueChanges, {
@@ -202,6 +203,14 @@ export class CableLengthChangeComponent {
       });
     });
 
+    // Re-populate the form for the current span when the active load case changes
+    effect(() => {
+      const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
+      if (chargeUuid === this.previousChargeUuid) return;
+      this.previousChargeUuid = chargeUuid;
+      untracked(() => this.onScopeChange(this.form.controls.spanUuid.value));
+    });
+
     // React to a span pre-selection triggered by clicking the cable modification
     // annotation on the section plot. Patches the scope control and re-runs the
     // existing pre-fill flow, then clears the signal so it can fire again.
@@ -272,19 +281,16 @@ export class CableLengthChangeComponent {
 
   resetForm(): void {
     this.cableModificationsService.clearPreview();
-    const currentScope = this.form.controls.spanUuid.value;
-    this.form.patchValue(
-      {
-        supportRef: 'LEFT',
-        modificationType: 'lengthening',
-        modifiedLengthCable: null,
-        distanceSupportRef: null
-      },
-      { emitEvent: false }
-    );
-    // If there is an active span, keep it selected and its support options
-    if (currentScope) {
-      this.form.controls.spanUuid.setValue(currentScope, { emitEvent: false });
+    const defaults = {
+      supportRef: 'LEFT' as const,
+      modificationType: 'lengthening' as const,
+      modifiedLengthCable: CABLE_LENGTH_CHANGE_FORM_DEFAULTS.modifiedLengthCable,
+      distanceSupportRef: CABLE_LENGTH_CHANGE_FORM_DEFAULTS.distanceSupportRef
+    };
+    this.form.patchValue(defaults, { emitEvent: false });
+    const cableModification = this.findSelectedCableModification();
+    if (cableModification) {
+      Object.assign(cableModification, defaults);
     }
     this.statesFormControls();
     this.isDirtySinceLastSave.set(false);

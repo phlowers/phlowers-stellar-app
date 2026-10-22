@@ -83,7 +83,7 @@ const validPayload: ObstacleConfigurationJsonDto = {
     }
   ],
   repartitionTemperatureFields: { defaultValue: 75 },
-  lateralTemperatureFields: { ruleType: 'CCG-LA', message: 'msg' },
+  lateralTemperatureFields: { defaultValue: 65, ruleType: 'CCG-LA', message: 'msg' },
   windZone: {
     default: 'ZVN',
     values: [
@@ -182,6 +182,7 @@ describe('obstacles.config - pure helpers', () => {
       const config = buildConformityConfig(validPayload);
       expect(config.key).toBe(OBSTACLE_CONFORMITY_CONFIG_KEY);
       expect(config.repartition_temperature_default).toBe(75);
+      expect(config.lateral_temperature_default).toBe(65);
       expect(config.lateral_temperature_rule_type).toBe('CCG-LA');
       expect(config.lateral_temperature_message).toBe('msg');
       expect(config.wind_zone_default).toBe('ZVN');
@@ -222,7 +223,7 @@ describe('obstacles.config - pure helpers', () => {
           rules: [],
           windZone: { values: [] },
           repartitionTemperatureFields: {},
-          lateralTemperatureFields: {}
+          lateralTemperatureFields: { defaultValue: 65 }
         },
         '`intermediatePointPositions` must be an array'
       ]

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  signal,
+  untracked
+} from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -116,7 +125,7 @@ export class ClimateComponent {
   private readonly chargesService = inject(ChargesService);
   private readonly loadFormsService = inject(LoadFormsService);
 
-  async initForm() {
+  async initForm(isCancelled: () => boolean = () => false) {
     const supports = this.spanService.section()?.supports;
     const frontierSupportOptions =
       supports?.map((support, index) => {
@@ -130,22 +139,24 @@ export class ClimateComponent {
     frontierSupportOptions.pop();
     this.frontierSupportOptions.set(frontierSupportOptions);
     const defaultFrontierSupportNumber = frontierSupportOptions[0]?.value ?? null;
-    this.form.patchValue({ frontierSupportNumber: defaultFrontierSupportNumber });
+    const baseClimate = getBaseClimate(this.spanService.section());
+    // Start from defaults so no value from the previous load case survives
+    this.form.reset({ ...baseClimate, frontierSupportNumber: defaultFrontierSupportNumber }, { emitEvent: false });
     const studyUuid = this.plotService.study()?.uuid;
     const sectionUuid = this.spanService.section()?.uuid;
     if (!studyUuid || !sectionUuid) {
       return;
     }
     const charge = await this.chargesService.getCharge(studyUuid, sectionUuid, this.chargeUuid());
-    if (!charge?.data) {
+    if (isCancelled() || !charge?.data) {
       return;
     }
     const climate = charge.data.climate;
-    this.form.patchValue({
+    this.form.reset({
+      ...baseClimate,
       ...climate,
       frontierSupportNumber: climate.frontierSupportNumber ?? defaultFrontierSupportNumber
     });
-    this.form.updateValueAndValidity();
   }
 
   constructor() {
@@ -163,22 +174,12 @@ export class ClimateComponent {
       } as ChargeData;
     });
     effect((onCleanup) => {
-      const currentChargeUuid = this.chargeUuid(); // Capture current value
+      const currentChargeUuid = this.chargeUuid();
       let isCancelled = false;
-
       onCleanup(() => {
-        isCancelled = true; // Mark as cancelled if effect reruns
+        isCancelled = true;
       });
-
-      // Wrap the async call
-      void (async () => {
-        await this.initForm();
-
-        // Before patching, verify we haven't been superseded
-        if (!isCancelled && this.chargeUuid() === currentChargeUuid) {
-          // Safe to update form
-        }
-      })();
+      untracked(() => void this.initForm(() => isCancelled || this.chargeUuid() !== currentChargeUuid));
     });
   }
 

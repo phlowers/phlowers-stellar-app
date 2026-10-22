@@ -266,6 +266,16 @@ describe('section-data-report.helpers', () => {
       expect(cableNameCall?.[2]).toBe(cablesAmountCall?.[2]);
     });
 
+    it('draws the branch in the left column, on the row right below the supports description', () => {
+      const doc = createMockDoc();
+      drawCantonSection(doc as unknown as jsPDF, createData(), LABELS, 20);
+      const calls = (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+      const descriptionCall = calls.find((c) => String(c[0]).includes('Supports description'));
+      const branchCall = calls.find((c) => String(c[0]).includes('Branch'));
+      expect(branchCall?.[1]).toBe(descriptionCall?.[1]);
+      expect(Number(branchCall?.[2])).toBeGreaterThan(Number(descriptionCall?.[2]));
+    });
+
     it('shows the phase number as "0" (not blank/hidden) when the section is a phase with an unset phase number', () => {
       const doc = createMockDoc();
       drawCantonSection(doc as unknown as jsPDF, createData({ isPhase: true, phaseNumber: 0 }), LABELS, 20);

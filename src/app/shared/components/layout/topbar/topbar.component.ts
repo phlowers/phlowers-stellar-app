@@ -20,7 +20,7 @@ import { TranslocoModule } from '@jsverse/transloco';
   styleUrl: './topbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-/** Top navigation bar displaying the current page title, user info, and Python worker status. */
+/** Top navigation bar displaying the current page title, user info and Python worker status. */
 export class TopbarComponent {
   private readonly pageTitleService = inject(PageTitleService);
   private readonly authService = inject(AuthService);

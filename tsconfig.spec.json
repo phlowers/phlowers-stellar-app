@@ -39,6 +39,9 @@
       ],
       "@infrastructure/*": [
         "./src/app/infrastructure/*"
+      ],
+      "@adapters/*": [
+        "./src/adapters/*"
       ]
     },
   },

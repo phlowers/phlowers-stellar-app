@@ -6,7 +6,11 @@
  */
 import { PlotData } from 'plotly.js-dist-min';
 import { createShadowDataObject } from './createShadowDataObject';
-import { PlotObjectsType } from '@shared/types/plot.types';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+
+// The 3d shadow color without its alpha, e.g. 'rgba(37, 99, 235, 0.3)' → 'rgb(37, 99, 235)'
+const shadow3dColor = (): string =>
+  PlotlyDrawings.span.shadow.color3d.replace('rgba(', 'rgb(').replace(/,\s*[\d.]+\)$/, ')');
 
 describe('createShadowDataObject', () => {
   const testData: number[][][] = [
@@ -21,51 +25,24 @@ describe('createShadowDataObject', () => {
   ];
 
   describe('getShadowLine function', () => {
-    it('should return rgba color with opacity for spans type in 2d', () => {
-      const result = createShadowDataObject(testData, 0, 1, 'spans', '2d', 'profile');
+    it.each(['spans', 'supports', 'insulators'] as const)(
+      'should return the 2d shadow color for %s type in 2d',
+      (type) => {
+        const result = createShadowDataObject(testData, 0, 1, type, '2d', 'profile');
 
-      expect((result[0] as Partial<PlotData>).line).toEqual({
-        color: 'rgba(30,144,255,0.3)',
-        dash: 'solid',
-        width: 4
-      });
-    });
+        expect((result[0] as Partial<PlotData>).line).toEqual({
+          color: PlotlyDrawings.span.shadow.color2d,
+          dash: 'solid',
+          width: 4
+        });
+      }
+    );
 
-    it('should return rgba color with opacity for supports type in 2d', () => {
-      const result = createShadowDataObject(testData, 0, 1, 'supports', '2d', 'profile');
-
-      expect((result[0] as Partial<PlotData>).line).toEqual({
-        color: 'rgba(30,144,255,0.3)',
-        dash: 'solid',
-        width: 4
-      });
-    });
-
-    it('should return rgba color with opacity for insulators type in 2d', () => {
-      const result = createShadowDataObject(testData, 0, 1, 'insulators', '2d', 'profile');
-
-      expect((result[0] as Partial<PlotData>).line).toEqual({
-        color: 'rgba(30,144,255,0.3)',
-        dash: 'solid',
-        width: 4
-      });
-    });
-
-    it('should return rgba color with opacity for unknown type in 2d', () => {
-      const result = createShadowDataObject(testData, 0, 1, 'unknown' as PlotObjectsType, '2d', 'profile');
-
-      expect((result[0] as Partial<PlotData>).line).toEqual({
-        color: 'rgba(30,144,255,0.3)',
-        dash: 'solid',
-        width: 4
-      });
-    });
-
-    it('should return dodgerblue color for 3d view (opacity at trace level)', () => {
+    it('should return the opaque 3d shadow color for 3d view', () => {
       const result = createShadowDataObject(testData, 0, 1, 'spans', '3d', 'profile');
 
       expect((result[0] as Partial<PlotData>).line).toEqual({
-        color: 'dodgerblue',
+        color: shadow3dColor(),
         dash: 'solid',
         width: 8
       });
@@ -73,33 +50,39 @@ describe('createShadowDataObject', () => {
   });
 
   describe('getShadowMarker function', () => {
-    it('should return marker with rgba color for spans type in 2d', () => {
+    it('should return marker with the 2d shadow color for spans type in 2d', () => {
       const result = createShadowDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
       expect((result[0] as Partial<PlotData>).marker).toEqual({
         size: 5,
-        opacity: 0.3,
-        color: 'rgba(30,144,255,0.3)'
+        color: PlotlyDrawings.span.shadow.color2d
       });
     });
 
-    it('should return marker with dodgerblue color for 3d view', () => {
+    it('should return marker with the opaque 3d shadow color, without marker opacity, for 3d view', () => {
       const result = createShadowDataObject(testData, 0, 1, 'spans', '3d', 'profile');
 
       expect((result[0] as Partial<PlotData>).marker).toEqual({
         size: 3,
-        opacity: 0.3,
-        color: 'dodgerblue'
+        color: shadow3dColor()
       });
     });
+  });
 
-    it('should set trace-level opacity for 3d view', () => {
-      const result = createShadowDataObject(testData, 0, 1, 'spans', '3d', 'profile');
+  describe('shadow transparency', () => {
+    // WebGL only blends the trace opacity correctly, not the alpha of a color
+    it('should draw the 3d shadow color as an opaque color with its alpha as trace opacity', () => {
+      const result = createShadowDataObject(testData, 0, 1, 'spans', '3d', 'profile') as Partial<PlotData>[];
+      const color = result[0].line!.color as string;
+      const opacity = result[0].opacity!;
 
-      expect((result[0] as Partial<PlotData>).opacity).toBe(0.3);
+      expect(color).toMatch(/^rgb\(/);
+      expect(`${color.replace('rgb(', 'rgba(').replace(')', '')}, ${opacity})`).toBe(
+        PlotlyDrawings.span.shadow.color3d
+      );
     });
 
-    it('should not set trace-level opacity for 2d view', () => {
+    it('should not set trace-level opacity for 2d view (SVG applies the alpha of the color)', () => {
       const result = createShadowDataObject(testData, 0, 1, 'spans', '2d', 'profile');
 
       expect((result[0] as Partial<PlotData>).opacity).toBeUndefined();
@@ -177,19 +160,19 @@ describe('createShadowDataObject', () => {
     it('should slice data correctly for spans based on start and end support', () => {
       const result = createShadowDataObject(sliceData, 1, 3, 'spans', '2d', 'profile');
 
-      expect(result.length).toBe(2); // endSupport - startSupport for spans
+      expect(result).toHaveLength(2); // endSupport - startSupport for spans
     });
 
     it('should slice data correctly for supports (includes endSupport + 1)', () => {
       const result = createShadowDataObject(sliceData, 1, 3, 'supports', '2d', 'profile');
 
-      expect(result.length).toBe(3); // endSupport - startSupport + 1 for supports
+      expect(result).toHaveLength(3); // endSupport - startSupport + 1 for supports
     });
 
     it('should slice data correctly for insulators (includes endSupport + 1)', () => {
       const result = createShadowDataObject(sliceData, 1, 3, 'insulators', '2d', 'profile');
 
-      expect(result.length).toBe(3);
+      expect(result).toHaveLength(3);
     });
   });
 

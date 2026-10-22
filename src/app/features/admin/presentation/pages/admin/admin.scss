@@ -4,3 +4,7 @@ table th {
   border-collapse: collapse;
   padding: 0.5rem;
 }
+
+table tr:nth-child(even) {
+  background-color: var(--star-dust-50);
+}

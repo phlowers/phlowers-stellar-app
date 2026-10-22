@@ -8,9 +8,8 @@
 import { ConformityPlotResponse } from './conformity-plot.model';
 
 /**
- * Fixed mock of the python task's graph response, used until the real conformity calculation
- * exists. It intentionally mirrors the exact response contract (`ConformityPlotResponse`) so
- * swapping in the task output is a drop-in.
+ * Fixed mock of the python task's graph response, used by the specs. It mirrors the exact
+ * response contract (`ConformityPlotResponse`).
  */
 export const CONFORMITY_PLOT_MOCK: ConformityPlotResponse = {
   obstacle: {

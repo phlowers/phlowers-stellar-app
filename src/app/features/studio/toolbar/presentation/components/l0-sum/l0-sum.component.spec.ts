@@ -35,7 +35,8 @@ describe('L0SumComponent', () => {
   beforeEach(async () => {
     const mockLitData = {
       output_parameters: {
-        L0: [100, 200, 150, 300, 250]
+        L0: [100, 200.5, 150, 300, 250],
+        span_length: [101.25, 201, 150.5, 301, 250.75]
       }
     };
 
@@ -86,9 +87,38 @@ describe('L0SumComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize rows and totalL0', () => {
-    expect(component.l0Rows().length).toBeGreaterThan(0);
-    expect(component.totalL0()).toBeGreaterThan(0);
+  it('should initialize one row per span', () => {
+    expect(component.l0Rows().length).toBe(5);
+  });
+
+  it('should expose the span length of each span', () => {
+    expect(component.l0Rows().map((row) => row.spanLength)).toEqual([101.25, 201, 150.5, 301, 250.75]);
+  });
+
+  it('should accumulate the L0 of the previous spans', () => {
+    expect(component.l0Rows().map((row) => row.cumulatedL0)).toEqual([100, 300.5, 450.5, 750.5, 1000.5]);
+  });
+
+  it('should not leak floating point noise in the cumulated L0', () => {
+    const litData = {
+      output_parameters: { L0: [0.1, 0.2], span_length: [1, 2] }
+    };
+    (TestBed.inject(PlotService).litData as ReturnType<typeof vi.fn>).mockReturnValue(litData);
+    const noisyFixture = TestBed.createComponent(L0SumComponent);
+    noisyFixture.detectChanges();
+    expect(noisyFixture.componentInstance.l0Rows().map((row) => row.cumulatedL0)).toEqual([0.1, 0.3]);
+  });
+
+  it('should render the paginator above the table', () => {
+    const table = fixture.nativeElement.querySelector('[data-testid="l0-table"]');
+    const paginator = table.querySelector('.p-paginator');
+    const content = table.querySelector('.p-datatable-table-container');
+    expect(paginator.compareDocumentPosition(content) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('should translate the current page report', () => {
+    const report = fixture.nativeElement.querySelector('[data-testid="l0-table"] .p-paginator-current');
+    expect(report.textContent).toContain('studio.l0-sum.current-page-report');
   });
 
   it('should inject ToolbarDialogService', () => {
@@ -113,10 +143,7 @@ describe('L0SumComponent', () => {
     it('should log export data', () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
       component.onExport();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Export L0 sum',
-        expect.objectContaining({ rows: expect.any(Array), total: expect.any(Number) })
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Export L0 sum', expect.objectContaining({ rows: expect.any(Array) }));
       consoleSpy.mockRestore();
     });
   });
@@ -157,9 +184,9 @@ describe('L0SumComponent', () => {
 
     it('should sort span data ascending by index', () => {
       const data = [
-        { span: '2-3', l0: 150, index: 1 },
-        { span: '1-2', l0: 100, index: 0 },
-        { span: '3-4', l0: 200, index: 2 }
+        { span: '2-3', spanLength: 0, l0: 150, cumulatedL0: 0, index: 1 },
+        { span: '1-2', spanLength: 0, l0: 100, cumulatedL0: 0, index: 0 },
+        { span: '3-4', spanLength: 0, l0: 200, cumulatedL0: 0, index: 2 }
       ];
       const event = { field: 'span', order: 1, data };
       component.customSort(event);
@@ -170,9 +197,9 @@ describe('L0SumComponent', () => {
 
     it('should sort span data descending by index', () => {
       const data = [
-        { span: '1-2', l0: 100, index: 0 },
-        { span: '2-3', l0: 150, index: 1 },
-        { span: '3-4', l0: 200, index: 2 }
+        { span: '1-2', spanLength: 0, l0: 100, cumulatedL0: 0, index: 0 },
+        { span: '2-3', spanLength: 0, l0: 150, cumulatedL0: 0, index: 1 },
+        { span: '3-4', spanLength: 0, l0: 200, cumulatedL0: 0, index: 2 }
       ];
       const event = { field: 'span', order: -1, data };
       component.customSort(event);
@@ -183,9 +210,9 @@ describe('L0SumComponent', () => {
 
     it('should sort l0 data ascending', () => {
       const data = [
-        { span: '2-3', l0: 200, index: 1 },
-        { span: '1-2', l0: 100, index: 0 },
-        { span: '3-4', l0: 150, index: 2 }
+        { span: '2-3', spanLength: 0, l0: 200, cumulatedL0: 0, index: 1 },
+        { span: '1-2', spanLength: 0, l0: 100, cumulatedL0: 0, index: 0 },
+        { span: '3-4', spanLength: 0, l0: 150, cumulatedL0: 0, index: 2 }
       ];
       const event = { field: 'l0', order: 1, data };
       component.customSort(event);
@@ -196,9 +223,9 @@ describe('L0SumComponent', () => {
 
     it('should sort l0 data descending', () => {
       const data = [
-        { span: '1-2', l0: 100, index: 0 },
-        { span: '2-3', l0: 200, index: 1 },
-        { span: '3-4', l0: 150, index: 2 }
+        { span: '1-2', spanLength: 0, l0: 100, cumulatedL0: 0, index: 0 },
+        { span: '2-3', spanLength: 0, l0: 200, cumulatedL0: 0, index: 1 },
+        { span: '3-4', spanLength: 0, l0: 150, cumulatedL0: 0, index: 2 }
       ];
       const event = { field: 'l0', order: -1, data };
       component.customSort(event);
@@ -209,8 +236,8 @@ describe('L0SumComponent', () => {
 
     it('should handle null order gracefully', () => {
       const data = [
-        { span: '2-3', l0: 150, index: 1 },
-        { span: '1-2', l0: 100, index: 0 }
+        { span: '2-3', spanLength: 0, l0: 150, cumulatedL0: 0, index: 1 },
+        { span: '1-2', spanLength: 0, l0: 100, cumulatedL0: 0, index: 0 }
       ];
       const event = { field: 'span', order: null, data };
       expect(() => component.customSort(event as unknown as SortEvent)).not.toThrow();

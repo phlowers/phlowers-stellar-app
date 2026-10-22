@@ -1,0 +1,45 @@
+<section class="instruction-manual">
+  <app-card class="instruction-manual__card instruction-manual__card--intro" role="article">
+    <h1>{{ 'instruction-manual.intro-title' | transloco }}</h1>
+    <p>{{ 'instruction-manual.intro-text' | transloco }}</p>
+  </app-card>
+
+  <app-card class="instruction-manual__card instruction-manual__card--item" role="article" data-testid="pdf-card">
+    <h2>{{ 'instruction-manual.pdf-title' | transloco }}</h2>
+    <dl class="instruction-manual__details">
+      <dt>{{ 'instruction-manual.pdf-file-name-label' | transloco }}</dt>
+      <dd data-testid="pdf-file-name">{{ pdfFileName }}</dd>
+      <dt>{{ 'instruction-manual.pdf-size-label' | transloco }}</dt>
+      <dd data-testid="pdf-size">{{ pdfSize() ?? '—' }}</dd>
+      <dt>{{ 'instruction-manual.pdf-update-date-label' | transloco }}</dt>
+      <dd data-testid="pdf-update-date">{{ (pdfInfo().lastModified | date: 'dd/MM/yyyy') ?? '—' }}</dd>
+    </dl>
+    <a [href]="pdfUrl()" [attr.download]="pdfFileName" app-btn data-testid="pdf-download-btn">
+      <app-icon icon="download" />
+      {{ 'instruction-manual.pdf-download-button' | transloco }}
+    </a>
+  </app-card>
+
+  <app-card class="instruction-manual__card instruction-manual__card--item" role="article" data-testid="online-card">
+    <h2>{{ 'instruction-manual.online-title' | transloco }}</h2>
+    <dl class="instruction-manual__details">
+      <dt>{{ 'instruction-manual.online-format-label' | transloco }}</dt>
+      <dd>{{ 'instruction-manual.online-format-value' | transloco }}</dd>
+      <dt>{{ 'instruction-manual.online-features-label' | transloco }}</dt>
+      <dd>{{ 'instruction-manual.online-features-value' | transloco }}</dd>
+      <dt>{{ 'instruction-manual.online-availability-label' | transloco }}</dt>
+      <dd>{{ 'instruction-manual.online-availability-value' | transloco }}</dd>
+    </dl>
+    <a
+      [href]="onlineManualUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+      app-btn
+      btnStyle="outlined"
+      data-testid="online-manual-btn"
+    >
+      <app-icon icon="open_in_new" />
+      {{ 'instruction-manual.online-open-button' | transloco }}
+    </a>
+  </app-card>
+</section>

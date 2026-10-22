@@ -40,6 +40,7 @@ export type {
   FieldMeasure,
   FieldMeasureOutputs,
   PapotoResult,
+  TangentAimingSupportResult,
   TemperatureCalculationResult,
   Parameter15CResult,
   ManualParameterCalculation15CWithoutWind

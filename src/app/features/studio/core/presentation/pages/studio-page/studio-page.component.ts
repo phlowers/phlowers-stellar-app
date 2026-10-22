@@ -65,8 +65,10 @@ import { StudioViewPersistenceService } from '@services/plot/studio-view-persist
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { Section, Study } from '@shared/domain';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { CablesService } from '@shared/catalog/services/cables.service';
 import { SectionStateReportService } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.service';
 import {
+  buildCutStrandsRows,
   buildSpanRows,
   buildSupportRows
 } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.helpers';
@@ -216,6 +218,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
   private readonly persistenceService = inject(StudioViewPersistenceService);
   private readonly notificationService = inject(NotificationService);
   private readonly sectionStateReportService = inject(SectionStateReportService);
+  private readonly cablesService = inject(CablesService);
 
   previousSectionUuid = signal<string | null>(null);
   private readonly activeSectionUuid = signal<string | null>(null);
@@ -479,6 +482,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       (ic) => ic.uuid === section.selected_initial_condition_uuid
     );
     const charge = section.charges.find((c) => c.uuid === section.selected_charge_uuid);
+    const cable = section.cable_name ? await this.cablesService.getCable(section.cable_name) : undefined;
 
     const data: SectionStateReportData = {
       author: study?.author_email ?? '-',
@@ -492,6 +496,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
       chargeDescription: charge?.description ?? '',
       maxParameter: maxOf(params.parameter),
       maxStressRate: maxOf(params.utilization_rate),
+      cutStrands: buildCutStrandsRows(cable, section.rrts_cut_strands),
       spans: buildSpanRows(params, supports, startSupport, endSupport),
       supports: buildSupportRows(params, supports, startSupport, endSupport)
     };

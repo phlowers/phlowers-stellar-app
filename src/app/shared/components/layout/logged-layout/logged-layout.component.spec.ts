@@ -41,7 +41,8 @@ describe('LoggedLayoutComponent', () => {
               'shared.logged-layout.tools': 'Tools',
               'common.home-label': 'Home',
               'common.studies-label': 'Studies',
-              'shared.logged-layout.documentation': 'Documentation',
+              'shared.logged-layout.instruction-manual': 'Instruction manual',
+              'shared.logged-layout.manual': 'Manual',
               'shared.logged-layout.ver-maj': 'Ver.MAJ',
               'shared.logged-layout.version-maj': 'Version / MAJ'
             }
@@ -122,12 +123,14 @@ describe('LoggedLayoutComponent', () => {
     expect(toolsItem?.icon).toBe('build');
   });
 
-  it('should include a documentation entry opening the static Sphinx docs in a new tab', () => {
-    const documentationItem = component.sideBarNav().main.find((item) => item.id === 'sideB-documentation');
+  it('should put the instruction manual in the footer as an internal link, not in the main links', () => {
+    const { main, footer } = component.sideBarNav();
+    const manualItem = footer.find((item) => item.id === 'sideB-instruction-manual');
 
-    expect(documentationItem).toBeTruthy();
-    expect(documentationItem?.externalUrl).toBe('/docs/index.html');
-    expect(documentationItem?.target).toBe('_blank');
-    expect(documentationItem?.route).toBeUndefined();
+    expect(main.some((item) => item.id === 'sideB-instruction-manual')).toBe(false);
+    expect(manualItem?.label).toBe('Instruction manual');
+    expect(manualItem?.shortLabel).toBe('Manual');
+    expect(manualItem?.route).toBe('/instruction-manual');
+    expect(manualItem?.externalUrl).toBeUndefined();
   });
 });

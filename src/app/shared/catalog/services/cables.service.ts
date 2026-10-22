@@ -22,7 +22,7 @@ import { CsvImportClientService } from '@shared/catalog/csv-import';
  * @example
  * ```typescript
  * // Get a specific cable by name
- * const cable = await this.cablesService.getCable('ASTER_570');
+ * const cable = await this.cablesService.getCable('ASTER600');
  * ```
  *
  * @category Services

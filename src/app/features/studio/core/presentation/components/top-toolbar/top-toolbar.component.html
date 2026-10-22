@@ -37,7 +37,7 @@
     <p-toggleswitch
       inputId="invert"
       data-testid="invert-toggle"
-      [disabled]="toolbarDisabled()"
+      [disabled]="true"
       [(ngModel)]="plotOptionsService.plotOptions().invert"
       (onChange)="plotService.plotOptionsChange({ invert: $event.checked })"
     />
@@ -147,6 +147,16 @@
       }
     }
   </div>
+
+  <button
+    class="toolbar__specifbtn toolbar__specifbtn--icon"
+    [disabled]="toolbarDisabled() || !hasSection()"
+    [attr.aria-label]="'studio.top-toolbar.export-section-aria-label' | transloco"
+    (click)="onExportSection()"
+    data-testid="export-section-btn"
+  >
+    <app-icon icon="download" aria-hidden="true" />
+  </button>
 
   <button
     class="toolbar__specifbtn toolbar__specifbtn--icon"

@@ -39,7 +39,7 @@ import { applyStellarDbVersions } from './app-database.versions';
  * ```typescript
  * const db = new AppDatabase();
  * const studies = await db.studies.toArray();
- * const cable = await db.catCables.where('name').equals('ASTER_570').first();
+ * const cable = await db.catCables.where('name').equals('ASTER600').first();
  * ```
  *
  * @category Infrastructure

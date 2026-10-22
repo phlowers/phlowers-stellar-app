@@ -1,6 +1,6 @@
 import { Section, Support } from '@shared/domain';
 import { Localization, Task, TaskInputs } from '@services/worker_python/tasks/types';
-import { FieldMeasure, FieldMeasureOutputs } from '../domain/types';
+import { FieldMeasure, FieldMeasureOutputs, TangentAimingSupportResult } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
@@ -173,8 +173,8 @@ export const getSpanLocalization = (
 const sanitizeFilename = (name: string): string =>
   name
     .trim()
-    .replace(/[^a-zA-Z0-9 _-]/g, '')
-    .replace(/\s+/g, '-') || 'field-measure';
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\\/:*?"<>|\x00-\x1f]/g, '') || 'field-measure';
 
 /**
  * Formats a generation date as `YYYY-MM-DD` in local time.
@@ -221,6 +221,35 @@ function isDaylightSavingTime(date: Date = new Date()): boolean {
   return date.getTimezoneOffset() < stdTimezoneOffset;
 }
 
+/** Default values of the papoto calculation inputs. */
+export const PAPOTO_INPUT_DEFAULTS = {
+  leftSupport: null,
+  spanLength: null,
+  measuredElevationDifference: null,
+  HL: null,
+  H1: null,
+  H2: null,
+  H3: null,
+  HR: null,
+  VL: null,
+  V1: null,
+  V2: null,
+  V3: null,
+  VR: null
+} satisfies Partial<FieldMeasure>;
+
+/** Default values of the PEP calculation inputs. */
+export const PEP_INPUT_DEFAULTS = {
+  lengthBetweenSightGD: null,
+  elevationDifferenceBetweenSightGD: null,
+  xSight1: null,
+  xSight2: null,
+  xSight3: null,
+  ySight1: null,
+  ySight2: null,
+  ySight3: null
+} satisfies Partial<FieldMeasure>;
+
 /**
  * Creates the initial field measure data for a new measurement session.
  * @param section - The current section, used to pre-populate cable/link metadata.
@@ -258,31 +287,23 @@ export const createInitialMeasureData = (
     windDirection: null,
     skyCover: null,
     calculationMethod: 'papoto',
-    leftSupport: null,
-    spanLength: null,
-    measuredElevationDifference: null,
-    HL: null,
-    H1: null,
-    H2: null,
-    H3: null,
-    HR: null,
-    VL: null,
-    V1: null,
-    V2: null,
-    V3: null,
-    VR: null,
+    ...PAPOTO_INPUT_DEFAULTS,
     cableHAccDistance: null,
     cableVerticalAccAngle: null,
     calculationType: 'parametre',
     cableTangentAngle: null,
-    lengthBetweenSightGD: null,
-    elevationDifferenceBetweenSightGD: null,
-    xSight1: null,
-    xSight2: null,
-    xSight3: null,
-    ySight1: null,
-    ySight2: null,
-    ySight3: null,
+    cableParameter: null,
+    tangentLeftSupport: null,
+    tangentSpanLength: null,
+    exteriorLeftSupport: null,
+    exteriorSpanLength: null,
+    exteriorHAccDistance: null,
+    exteriorVerticalAccAngleLeft: null,
+    exteriorVerticalAccAngleRight: null,
+    exteriorCalculationType: 'parametre',
+    exteriorParameter: null,
+    exteriorTangentAngle: null,
+    ...PEP_INPUT_DEFAULTS,
     transit: null,
     windIncidence: null,
     windIncidenceMode: 'auto',
@@ -321,7 +342,7 @@ export const createTestMeasureData = (overrides?: Partial<FieldMeasure>): FieldM
     type: 'phase',
     electric_phase_number: 3,
     cables_amount: 3,
-    cable_name: 'ASTER570'
+    cable_name: 'ASTER600'
   };
 
   return {
@@ -334,5 +355,35 @@ export const createTestMeasureData = (overrides?: Partial<FieldMeasure>): FieldM
 export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
   papoto: null,
   cableTemperature: null,
-  parameter15C: null
+  parameter15C: null,
+  tangentAimingSupport: null,
+  tangentAimingExterior: null
 };
+
+/**
+ * Returns the parameter and uncertainty produced by the calculation method currently selected for the field measure:
+ * the tangent aiming (support) result for the `tangente-aiming` method, the PAPOTO result otherwise.
+ * @param measureData - The field measure, providing the calculation method and its outputs
+ * @returns The active `parameter` and `uncertainty`, or `null` when the selected method has no result yet
+ */
+export const getActiveParameterOutput = (
+  measureData: Pick<FieldMeasure, 'calculationMethod' | 'outputs'>
+): Pick<TangentAimingSupportResult, 'parameter' | 'uncertainty'> | null => {
+  const { calculationMethod, outputs } = measureData;
+  const source =
+    calculationMethod === 'tangente-aiming'
+      ? outputs.tangentAimingSupport
+      : calculationMethod === 'tangente-aiming-exterior'
+        ? outputs.tangentAimingExterior
+        : outputs.papoto;
+  return source ? { parameter: source.parameter, uncertainty: source.uncertainty } : null;
+};
+
+/**
+ * Clears the 15°C result when it is derived from the active parameter output (auto mode); a manual result
+ * is built from user-entered values and stays valid.
+ * @param data - The field measure
+ * @returns The measure without a stale automatic 15°C result
+ */
+export const clearAutoParameter15C = (data: FieldMeasure): FieldMeasure =>
+  data.updateMode15C === 'manual' ? data : { ...data, outputs: { ...data.outputs, parameter15C: null } };

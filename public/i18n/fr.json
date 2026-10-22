@@ -6,7 +6,8 @@
     "news": "Actualités",
     "changelog": "Changelog",
     "studio": "Studio",
-    "tools": "Outils"
+    "tools": "Outils",
+    "instruction-manual": "Manuel d'utilisation"
   },
   "common": {
     "actions-label": "Actions",
@@ -35,6 +36,7 @@
     "counter-weight-label": "Contrepoids",
     "create-a-new-study": "Créer une nouvelle étude",
     "create-a-section-label": "Créer un canton",
+    "cut-strands-layer-label": "Brins coupés couche {{ layer }}",
     "date-label": "Date",
     "delete": "Supprimer",
     "description-label": "Description",
@@ -66,6 +68,7 @@
     "max-decimals-error": "Décimales max : {{ maxDecimals }}",
     "max-value-error": "Valeur max : {{ max }}",
     "meter": "m",
+    "grade-unit": "gr",
     "min-value-error": "Valeur min : {{ min }}",
     "my-last-studies-label": "Mes dernières études",
     "news-label": "Actualités",
@@ -159,19 +162,17 @@
     "x-label": "X :",
     "y-label": "Y :",
     "z-label": "Z :",
-    "support-name-full-label": "Nom du support"
-  },
-  "app": {
-    "update": "Mise à jour",
-    "new-version-available": "La nouvelle version de votre application est disponible !",
-    "version": "Version :",
-    "hash": "Hash :",
-    "update-in-progress": "La mise à jour de votre application est en cours",
-    "update-warning": "Merci de ne pas fermer l'application pendant la mise à jour.",
-    "later": "Plus tard",
-    "update-now": "Mettre à jour",
-    "update-start-failed": "La mise à jour n'a pas pu démarrer. Veuillez réessayer.",
-    "install-failed": "L'installation initiale de l'application n'a pas pu démarrer. Veuillez recharger la page pour réessayer."
+    "support-name-full-label": "Nom du support",
+    "left-support-label": "Support de gauche",
+    "measured-span-length-label": "Longueur de portée mesurée",
+    "calculated-value-label": "Valeur calculée :",
+    "tangent-aiming-help-aria-label": "ouvrir l'aide des visées tangentes",
+    "calculation-type-label": "Type de calcul :",
+    "calculation-type-tangent": "Tangente",
+    "tangent-angle-label": "Angle tangent au câble",
+    "criterion-label": "Critère",
+    "criterion-respected": "Critère respecté",
+    "criterion-not-respected": "Critère non respecté"
   },
   "auth": {
     "login-page": {
@@ -196,15 +197,20 @@
     "update-text": "Voir les dernières mises à jour.",
     "update-link-text": "En savoir plus",
     "update-link-explicit-text": "En savoir plus sur les dernières mises à jour",
-    "server-title": "État du serveur",
-    "server-text-default": "Tentative de connexion au serveur !",
     "update-available": "Mise à jour disponible",
     "update-new-available": "Une nouvelle mise à jour de l'application est disponible !",
-    "server-offline": "Application en mode déconnecté.",
-    "server-unknown": "Impossible de récupérer les données. Veuillez vérifier votre connexion internet.",
-    "server-warning": "Tentative de connexion au serveur.",
-    "server-error": "Une erreur est survenue lors de la tentative de connexion au serveur.",
-    "server-success": "Connexion au serveur réussie !",
+    "offline-card": {
+      "title": "État de l'application",
+      "connection-online": "Connecté.",
+      "connection-offline": "Pas de connexion.",
+      "status-ready": "Mode hors ligne prêt.",
+      "status-preparing": "Préparation du mode hors ligne en cours.",
+      "status-waiting-network": "Réseau trop lent : préparation du mode hors ligne en attente.",
+      "status-storage-insufficient": "Espace insuffisant : mode hors ligne impossible.",
+      "status-not-prepared": "Mode hors ligne indisponible.",
+      "update-postponed-network": "Mise à jour reportée : réseau trop lent.",
+      "update-blocked-storage": "Mise à jour impossible : espace insuffisant."
+    },
     "no-recent-studies": "Aucune étude récente",
     "go-to-studies": "Aller à mes études"
   },
@@ -229,15 +235,47 @@
   "news": {
     "empty": "Aucune actualité"
   },
+  "instruction-manual": {
+    "intro-title": "Bienvenue sur l'espace d'aide et de documentation",
+    "intro-text": "Retrouvez ici toutes les ressources indispensables pour prendre en main l'application Céleste, configurer vos études, gérer vos cantons et exporter vos résultats en toute simplicité. Choisissez le format qui vous convient le mieux.",
+    "pdf-title": "Télécharger le manuel PDF",
+    "pdf-file-name-label": "Nom du fichier",
+    "pdf-size-label": "Taille estimée",
+    "pdf-update-date-label": "Date de mise à jour",
+    "pdf-download-button": "Télécharger le PDF",
+    "online-title": "Consulter le manuel en ligne",
+    "online-format-label": "Format",
+    "online-format-value": "Web interactif (HTML)",
+    "online-features-label": "Fonctionnalités",
+    "online-features-value": "Recherche globale, index",
+    "online-availability-label": "Disponibilité",
+    "online-availability-value": "Instantanée",
+    "online-open-button": "Ouvrir le manuel en ligne"
+  },
   "admin": {
     "app-version": "Version de l'application",
-    "check-app-version": "Vérifier la version de l'application",
-    "current-version": "Version actuelle",
-    "latest-version": "Version la plus récente",
+    "check-app-version": "Vérifier les mises à jour",
+    "col-property": "Propriété",
+    "col-value": "Valeur",
     "build-hash": "Hash du build",
     "build-datetime": "Date et heure du build",
     "build-version": "Version du build",
-    "update-to-latest": "Mettre à jour vers la version la plus récente",
+    "offline-status": "Mode hors ligne",
+    "pending-version": "Version en attente",
+    "no-pending-version": "Aucune",
+    "last-refusal": "Dernière mise à jour reportée",
+    "network": "Débit réseau estimé",
+    "downlink-value": "{{ downlink }} Mbit/s (téléchargements en arrière-plan à partir de {{ threshold }} Mbit/s)",
+    "storage": "Stockage",
+    "storage-value": "{{ usage }} Mo utilisés sur {{ quota }} Mo",
+    "not-available": "Non disponible",
+    "refusal": {
+      "api-unavailable": "Débit réseau inconnu du navigateur",
+      "downlink-unknown": "Débit réseau inconnu du navigateur",
+      "downlink-below-threshold": "Réseau trop lent",
+      "save-data": "Économiseur de données activé",
+      "storage-insufficient": "Espace de stockage insuffisant"
+    },
     "activate-python-logs": "Activer les logs Python",
     "danger-zone": "Zone Danger",
     "delete-all-studies": "Supprimer toutes les études",
@@ -275,7 +313,8 @@
       "home": "Accueil",
       "studies": "Études",
       "tools": "Outils",
-      "documentation": "Documentation",
+      "instruction-manual": "Manuel d'utilisation",
+      "manual": "Manuel",
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"
     },
@@ -288,17 +327,20 @@
       "unauthorized-summary": "Non autorisé",
       "imported-from-protov4": "Étude importée depuis le protoV4"
     },
-    "update-service": {
-      "update-success-summary": "Mise à jour réussie",
-      "update-success-detail": "L'application a été mise à jour vers la dernière version",
-      "install-success-summary": "Installation réussie",
-      "install-success-detail": "L'application a été installée",
-      "update-failed-summary": "Échec de la mise à jour",
-      "update-failed-detail": "Une erreur inconnue s'est produite lors de la mise à jour",
-      "update-failed-auth-detail": "La mise à jour n'a pas pu être téléchargée car votre session a expiré. Veuillez vous reconnecter, puis relancer la mise à jour",
-      "update-interrupted-summary": "Mise à jour interrompue",
-      "update-interrupted-detail": "La mise à jour n'a pas abouti. Veuillez réessayer.",
-      "version-checked-detail": "Version de l'application vérifiée"
+    "app-update-service": {
+      "offline-status": {
+        "ready": "Prêt",
+        "preparing": "Préparation en cours",
+        "waiting-network": "Réseau trop lent",
+        "storage-insufficient": "Espace insuffisant",
+        "not-prepared": "Indisponible"
+      },
+      "update-deferred-network": "Mise à jour reportée : la connexion ne permet pas de la télécharger maintenant (réseau lent ou non mesurable, ou économiseur de données activé), elle sera téléchargée plus tard.",
+      "check-started": "Vérification des mises à jour : une nouvelle version sera téléchargée en arrière-plan.",
+      "update-waiting-summary": "Mise à jour téléchargée",
+      "update-waiting-detail": "Elle sera appliquée au prochain démarrage de l'application (fermez toutes les fenêtres de Stellar, puis rouvrez-la).",
+      "storage-insufficient-summary": "Espace de stockage insuffisant",
+      "storage-insufficient-detail": "Espace de stockage insuffisant pour télécharger la mise à jour : libérez de l'espace sur l'appareil."
     },
     "obstacle-form-service": {
       "delete-detail": "Obstacle supprimé",
@@ -407,13 +449,18 @@
     "validation-supports-bounds": "Le canton contient des supports avec des valeurs hors limites",
     "import-error": "Erreur lors de l'importation du canton",
     "delete-error": "Erreur lors de la suppression du canton",
-    "section-format-error": "Fichier de canton à importer non conforme.",
     "lambert-reprojection-error": "Erreur lors du calcul des coordonnées GPS à partir des données Lambert93",
-    "catalog-missing-warning": "Le support d'accrochage du fichier de canton n'est pas présent au catalogue des supports de l'application",
     "import-success": "Canton importé avec succès",
+    "no-matching-adapter": "Ce format de fichier n'est pas pris en charge pour l'importation de canton.",
+    "catalog-missing-warning": "Le support d'accrochage du fichier de canton n'est pas présent au catalogue des supports de l'application",
+    "stellar-json": {
+      "format-label": "Canton Stellar (.stsec, .json)",
+      "invalid-envelope": "Le fichier de canton Stellar est invalide.",
+      "unsupported-version": "Version {{ version }} du fichier de canton Stellar non prise en charge (maximum pris en charge : {{ maxVersion }})."
+    },
     "reprojection-info": "La reprojection sur le modèle de données {{ appName }} semble ajouter une erreur absolue moyenne de {{ error }} m",
     "from-file": {
-      "file-format": "Format de fichier : .json",
+      "file-format": "Formats de fichier : {{ formats }}",
       "description": "Vous pouvez importer un canton à partir d'un fichier JSON. Il sera ajouté à l'étude en cours.",
       "upload-prompt": "Importer un fichier JSON",
       "import-error": "Le canton importé est introuvable. Veuillez réessayer."
@@ -675,16 +722,27 @@
       "success-detail": "Données enregistrées avec succès"
     },
     "calculus-setting": {
-      "tangent-aiming-radio-label": "Visées tangentes"
+      "tangent-aiming-radio-label": "Visées tangentes (Support)",
+      "tangent-aiming-exterior-radio-label": "Visées tangentes (Extérieur)"
+    },
+    "tangent-aiming-support": {
+      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
+      "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",
+      "vertical-acc-angle-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
+      "calculation-failed": "Échec du calcul du paramètre par visées tangentes"
+    },
+    "tangent-aiming-exterior": {
+      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul de paramètre.",
+      "h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
+      "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
+      "vertical-acc-angle-right-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
+      "calculation-failed": "Échec du calcul du paramètre par visées tangentes (extérieur)"
     },
     "papoto": {
       "open-help-aria-label": "ouvrir l'aide de PAPOTO",
       "close-aria-label": "fermer l'aide de PAPOTO",
       "import-station-data": "Importer les données de la station",
       "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
-      "left-support-label": "Support de gauche",
-      "span-length-label": "Longueur de portée mesurée",
-      "calculated-value-label": "Valeur calculée :",
       "elevation-diff-label": "Dénivelé des accr. mesuré",
       "hl-label": "HG",
       "h1-label": "H1",
@@ -819,6 +877,7 @@
       "tables-label": "Tableau",
       "tools-label": "Outils",
       "edit-shortcuts-aria-label": "Modifier les raccourcis des outils sélectionnés",
+      "export-section-aria-label": "Exporter le canton dans un fichier canton Stellar",
       "inset-title": "Insertion",
       "organize-tools-info-text": "Sélectionnez et organisez les outils avec un accès rapide (maximum 5).",
       "loads-table-label": "Tableau de charges",
@@ -987,10 +1046,12 @@
       "min-vertical-position-label": "Dist. supp. réf."
     },
     "l0-sum": {
-      "natural-lengths-title": "Longueurs naturelles L0",
-      "l0-column-label": "L0",
-      "sum-l0-label": "Somme L0",
-      "loading-data-text": "Chargement des données L0…"
+      "naturals-lengths-title": "Longueurs naturelles L0",
+      "span-length-column-label": "L. portée",
+      "l0-column-label": "L0 naturelle",
+      "cumulated-l0-column-label": "L0 cumulée",
+      "loading-data-text": "Chargement des données L0…",
+      "current-page-report": "{currentPage} sur {totalPages}"
     },
     "loads-table": {
       "description-length-label": "Description {{count}}/240",
@@ -1134,7 +1195,6 @@
       "calculate-sight-angles": "Calculer les angles de visée sur la flèche médiane",
       "horizontal-sight-angle-label": "Angle H horizontal de visée à la flèche médiane",
       "vertical-sight-angle-label": "Angle V vertical de visée à la flèche médiane",
-      "grade-unit": "gr",
       "aria-help": "Aide sur le réglage d'un câble",
       "calculation-failed": "Échec du calcul de réglage du câble"
     },
@@ -1153,7 +1213,6 @@
       "current-work-load-label": "Taux de travail max actuel",
       "staff-presence-label": "Présence du personnel",
       "distance-support-ref-label": "Distance au support de référence",
-      "cut-strands-layer-label": "Brins coupés couche {{ layer }}",
       "add-marking-label": "Ajouter une indication \"brins coupés\"",
       "result-cable-rrts-label": "CRR du câble",
       "result-new-working-load-label": "Nouveau taux de travail max",

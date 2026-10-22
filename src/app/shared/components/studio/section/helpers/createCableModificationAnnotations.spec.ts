@@ -8,13 +8,8 @@ import { describe, it, expect } from 'vitest';
 import type * as Plotly from 'plotly.js-dist-min';
 import { CableModification } from '@shared/domain';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
-import {
-  CABLE_MOD_ARROW_X_OFFSET,
-  CABLE_MOD_ARROW_Y_OFFSET,
-  CABLE_MOD_ICON,
-  CABLE_MOD_LABEL_Y_SHIFT,
-  getCableModificationLabel
-} from './createCableModificationAnnotations.constantes';
+import { getCableModificationLabel } from './createCableModificationAnnotations.constantes';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { CreatePlotParams } from './createPlot';
 
 type AnnotationWithData = Partial<Plotly.Annotations> & {
@@ -240,7 +235,7 @@ describe('createCableModificationAnnotations', () => {
   });
 
   describe('icon annotation (load-like display)', () => {
-    it('should use the same arrow style as the load annotation (showarrow, no head, arrowwidth 1)', () => {
+    it('should use the same arrow style as the load annotation (showarrow, no head, thin line, icon straight above)', () => {
       const [icon] = createCableModificationAnnotations(
         makePlotParams(),
         [makeModification()],
@@ -248,9 +243,9 @@ describe('createCableModificationAnnotations', () => {
       ) as AnnotationWithData[];
       expect(icon.showarrow).toBe(true);
       expect(icon.arrowhead).toBe(0);
-      expect(icon.arrowwidth).toBe(1);
-      expect(icon.ax).toBe(CABLE_MOD_ARROW_X_OFFSET);
-      expect(icon.ay).toBe(CABLE_MOD_ARROW_Y_OFFSET);
+      expect(icon.arrowwidth).toBe(PlotlyDrawings.cableModification.arrowWidth['3d']);
+      expect(icon.ax).toBe(0);
+      expect(icon.ay).toBe(PlotlyDrawings.cableModification.arrowYOffset);
       expect(icon.captureevents).toBe(true);
     });
 
@@ -260,7 +255,7 @@ describe('createCableModificationAnnotations', () => {
         [makeModification()],
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
-      expect(icon.text).toBe(CABLE_MOD_ICON);
+      expect(icon.text).toBe(PlotlyDrawings.cableModification.icon);
     });
 
     it('should attach the click discriminator with span and modification uuids', () => {
@@ -303,9 +298,9 @@ describe('createCableModificationAnnotations', () => {
       ) as AnnotationWithData[];
       expect(label.showarrow).toBe(false);
       expect(label.captureevents).toBe(false);
-      expect(label.yshift).toBe(CABLE_MOD_LABEL_Y_SHIFT);
+      expect(label.yshift).toBe(PlotlyDrawings.cableModification.label.yShift);
       // |ay| = 90, label yshift = 110 → label sits above the icon.
-      expect((label.yshift as number) > Math.abs(CABLE_MOD_ARROW_Y_OFFSET)).toBe(true);
+      expect((label.yshift as number) > Math.abs(PlotlyDrawings.cableModification.arrowYOffset)).toBe(true);
     });
 
     it('should anchor the label on the same data point as the icon', () => {

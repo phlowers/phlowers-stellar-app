@@ -37,6 +37,8 @@ export interface AggregatePointsParams {
   loadType?: 'punctual' | 'marking' | null;
   loadSpanSupportUuid?: string | null;
   loadReferenceSupport?: 'LEFT' | 'RIGHT' | null;
+  /** Load abscissa (from the left support) clicked on the plot but not yet calculated. */
+  pendingLoadAlongSpan?: number | null;
 }
 
 export type { FreePositioningCategory };

@@ -1,4 +1,6 @@
 import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons, ModeBarButton, Icon } from 'plotly.js-dist-min';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
 import { AspectRatio, ScalingFactors, Side, SelectedDisplayOptions, View } from '@shared/types/plot.types';
 import { Distance, GetSectionOutput, ObstacleOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
@@ -157,7 +159,7 @@ const createScene = (
   }
 
   const axisConfig = plotParams.selectedDisplayOptions?.transparentBackground
-    ? { ...PLOT_AXIS_CONFIG, backgroundcolor: 'transparent', showbackground: false }
+    ? { ...PLOT_AXIS_CONFIG, backgroundcolor: PlotlyDrawings.plot.backgroundTransparent, showbackground: false }
     : PLOT_AXIS_CONFIG;
 
   return {
@@ -343,8 +345,7 @@ const layout3d = (
   plotParams: CreatePlotParams,
   distanceAnnotations: Partial<Plotly.Annotations>[]
 ): Partial<Layout> => ({
-  autosize: true,
-  showlegend: false,
+  ...getPlotlyBaseLayout(),
   // When pendingRestore is true (first render after a back-navigation with a saved camera),
   // use a different uirevision value so Plotly detects a change and resets to the layout
   // camera instantly — no smooth 3D fly-animation.
@@ -378,16 +379,17 @@ const layout2d = (
     scaleratio = 1;
   }
 
-  const xAutorange: 'reversed' | true = plotParams.side === 'face' || plotParams.invert ? 'reversed' : true;
+  const xAutorange: 'reversed' | true = plotParams.invert ? 'reversed' : true;
 
   return {
-    autosize: true,
-    showlegend: false,
+    ...getPlotlyBaseLayout(),
     // Keep uirevision constant so Plotly never resets user-driven zoom/pan state.
     // On subsequent Plotly.react() calls (e.g. after a selection change in the cards),
     // the same uirevision tells Plotly to preserve the interactive viewport.
     uirevision: 'stable',
-    plot_bgcolor: plotParams.selectedDisplayOptions?.transparentBackground ? 'transparent' : 'gainsboro',
+    plot_bgcolor: plotParams.selectedDisplayOptions?.transparentBackground
+      ? PlotlyDrawings.plot.backgroundTransparent
+      : PlotlyDrawings.plot.background,
     margin: {
       l: 50,
       r: 0,
@@ -443,10 +445,22 @@ export const createPlot = (plotParams: CreatePlotParams) => {
   // This prevents Plotly's internal setViewport() from resetting the camera to a
   // stale value when the user interacts with the modebar (e.g. switches dragmode).
   // The DOM camera is the source of truth after the first render.
-  const resolvedParams =
-    plotParams.view === '3d'
-      ? { ...plotParams, camera: getLiveCamera(plotParams.documentRef, plotParams.plotId) ?? plotParams.camera }
-      : plotParams;
+  const floorUuids = new Set((plotParams.floors ?? []).map((floor) => floor.uuid));
+  const resolvedParams = {
+    ...plotParams,
+    camera:
+      plotParams.view === '3d'
+        ? (getLiveCamera(plotParams.documentRef, plotParams.plotId) ?? plotParams.camera)
+        : plotParams.camera,
+    litData: {
+      ...plotParams.litData,
+      obstacles: plotParams.litData.obstacles?.filter((obstacle) =>
+        floorUuids.has(obstacle.uuid)
+          ? (plotParams.selectedDisplayOptions?.floor ?? true)
+          : (plotParams.selectedDisplayOptions?.obstacles ?? true)
+      )
+    }
+  };
   const { traces: distanceTraces, annotations: distanceAnnotations } = createDistanceVisuals(resolvedParams);
   const distanceMeasuringPointsTraces =
     (resolvedParams.selectedDisplayOptions?.measurePoints ?? true)

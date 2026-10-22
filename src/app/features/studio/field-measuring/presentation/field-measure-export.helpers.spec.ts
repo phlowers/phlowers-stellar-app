@@ -19,6 +19,7 @@ import {
   buildTemperatureCalculationExport,
   buildZeroWindCalculationExport,
   formatExportDate,
+  formatExportDateTimeWithOffset,
   formatExportTime
 } from './field-measure-export.helpers';
 
@@ -71,12 +72,26 @@ describe('field-measure-export.helpers', () => {
     });
   });
 
+  describe('formatExportDateTimeWithOffset', () => {
+    it('should return null for a missing or invalid value', () => {
+      expect(formatExportDateTimeWithOffset(null)).toBeNull();
+      expect(formatExportDateTimeWithOffset('')).toBeNull();
+      expect(formatExportDateTimeWithOffset('not-a-date')).toBeNull();
+    });
+
+    it('should format the local date-time with its offset and keep the same instant', () => {
+      const result = formatExportDateTimeWithOffset('2026-09-30T09:11:10.819Z');
+      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}[+-]\d{2}:\d{2}$/);
+      expect(Date.parse(result!)).toBe(Date.parse('2026-09-30T09:11:10.819Z'));
+    });
+  });
+
   describe('buildGeneralExport', () => {
     it('should map section/study fields when both are present', () => {
       const result = buildGeneralExport(mockSection, mockStudy);
       expect(result).toEqual({
         author: 'user@example.com',
-        date: '2026-01-27T10:00:00Z',
+        date: formatExportDateTimeWithOffset('2026-01-27T10:00:00Z'),
         study: 'Test Study',
         litCode: 'LIT-1',
         litName: 'LIT ADR 1',
@@ -108,16 +123,18 @@ describe('field-measure-export.helpers', () => {
         time: new Date(2026, 0, 5, 10, 0, 0),
         voltage: '225 kV',
         spanType: 'phase',
-        cableName: 'ASTER570',
+        cableName: 'ASTER600',
         numberOfConductors: 2,
-        phaseNumber: 3
+        phaseNumber: 3,
+        season: 'winter'
       });
       const result = buildMeasureExport(measureData, mockTranslocoService);
       expect(result).toMatchObject({
         name: 'MT 1',
+        season: 'winter',
         voltage: { value: '225 kV', unit: 'KV' },
         sectionType: 'common.section-type.phase',
-        cable: 'ASTER570',
+        cable: 'ASTER600',
         cablesNumber: 2,
         phaseNumber: 3
       });
@@ -130,14 +147,16 @@ describe('field-measure-export.helpers', () => {
         span: [0, 1],
         longitude: 1.5,
         latitude: 2.5,
-        azimuth: 90
+        azimuth: 90,
+        altitude: 150
       });
       const result = buildSpanExport(measureData, mockSection);
       expect(result).toEqual({
         name: '1 - 2',
         longitude: { value: 1.5, unit: '°' },
         latitude: { value: 2.5, unit: '°' },
-        azimuth: { value: 90, unit: '°' }
+        azimuth: { value: 90, unit: '°' },
+        altitude: { value: 150, unit: 'm' }
       });
     });
   });
@@ -173,12 +192,20 @@ describe('field-measure-export.helpers', () => {
       expect(result.calculatedTemperature).toBeUndefined();
     });
 
+    it('should export 90° as incidence when the wind incidence mode is perpendicular', () => {
+      const measureData = createTestMeasureData({ windIncidenceMode: 'perpendicular', windIncidence: 10 });
+      const result = buildTemperatureCalculationExport(measureData, mockTranslocoService);
+      expect(result.wind.incidence).toEqual({ value: 90, unit: '°' });
+    });
+
     it('should map calculatedTemperature when outputs.cableTemperature is present', () => {
       const measureData = createTestMeasureData({
         outputs: {
           papoto: null,
           cableTemperature: { cableSolarFlux: 40, cableTemperature: 35, cableTemperatureUncertainty: 2 },
-          parameter15C: null
+          parameter15C: null,
+          tangentAimingSupport: null,
+          tangentAimingExterior: null
         }
       });
       const result = buildTemperatureCalculationExport(measureData, mockTranslocoService);
@@ -217,7 +244,9 @@ describe('field-measure-export.helpers', () => {
             uncertainty: 0.5
           },
           cableTemperature: null,
-          parameter15C: null
+          parameter15C: null,
+          tangentAimingSupport: null,
+          tangentAimingExterior: null
         }
       });
       const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
@@ -243,6 +272,13 @@ describe('field-measure-export.helpers', () => {
       expect(result.method.papoto).toBeUndefined();
       expect(result.method.pep).toBeUndefined();
       expect(result.method.tangentialSights?.calculatedParameter).toBeUndefined();
+    });
+
+    it('should leave the method block empty for the tangente-aiming-exterior calculation method', () => {
+      const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior' });
+      const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
+      expect(result.methodName).toBe('VISEES_TANGENTES');
+      expect(result.method).toEqual({});
     });
 
     it('should populate only the pep method block for the pep calculation method', () => {
@@ -292,7 +328,9 @@ describe('field-measure-export.helpers', () => {
             uncertainty: 0.5
           },
           cableTemperature: { cableSolarFlux: 40, cableTemperature: 30, cableTemperatureUncertainty: 1.5 },
-          parameter15C: { parameter15C: 480, parameter15CMinusUncertainty: 470, parameter15CPlusUncertainty: 490 }
+          parameter15C: { parameter15C: 480, parameter15CMinusUncertainty: 470, parameter15CPlusUncertainty: 490 },
+          tangentAimingSupport: null,
+          tangentAimingExterior: null
         }
       });
       const result = buildZeroWindCalculationExport(measureData, mockTranslocoService);
@@ -317,7 +355,9 @@ describe('field-measure-export.helpers', () => {
             parameter15C: -1.414,
             parameter15CMinusUncertainty: null as unknown as number,
             parameter15CPlusUncertainty: null as unknown as number
-          }
+          },
+          tangentAimingSupport: null,
+          tangentAimingExterior: null
         }
       });
       const result = buildZeroWindCalculationExport(measureData, mockTranslocoService);

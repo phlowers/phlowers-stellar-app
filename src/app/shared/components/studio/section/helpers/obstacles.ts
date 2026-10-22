@@ -1,4 +1,5 @@
 import { Obstacle } from '@shared/domain/models/obstacle.model';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { CreatePlotParams } from './createPlot';
 
 /**
@@ -49,10 +50,6 @@ export const getObstacleClickPayload = (
 
 const BASE_ANNOTATION: Partial<Plotly.Annotations> = {
   showarrow: false,
-  font: {
-    color: 'black',
-    size: 10
-  },
   captureevents: true
 };
 
@@ -80,26 +77,24 @@ export const appendExistingObstaclesWithFormObstacle = (
   return [...remaining, formObstacle];
 };
 
-const OBSTACLE_COLOR_UNSELECTED = 'black';
-const OBSTACLE_COLOR_ACTIVE_POINT = 'red';
-const OBSTACLE_COLOR_INACTIVE_POINT = '#922911';
-
-const getHighlightColor = (obstacleUuid: string, currentObstacleUuid: string | null): string =>
-  obstacleUuid === currentObstacleUuid ? OBSTACLE_COLOR_ACTIVE_POINT : OBSTACLE_COLOR_UNSELECTED;
+const getLabelColor = (obstacleUuid: string, currentObstacleUuid: string | null): string =>
+  obstacleUuid === currentObstacleUuid
+    ? PlotlyDrawings.obstacle.selected.color
+    : PlotlyDrawings.obstacle.unselected.color;
 
 const getMarkerAppearance = (
   obstacleUuid: string,
   pointIndex: number,
   currentObstacleUuid: string | null,
   currentObstaclePointIndex: number
-): { symbol: string; color: string } => {
+): { symbol: string; color: string; size: { '2d': number; '3d': number } } => {
   if (obstacleUuid !== currentObstacleUuid) {
-    return { symbol: '\u25cf', color: OBSTACLE_COLOR_UNSELECTED }; // ● filled circle
+    return PlotlyDrawings.obstacle.unselected;
   }
   if (pointIndex === currentObstaclePointIndex) {
-    return { symbol: '\u25c6', color: OBSTACLE_COLOR_ACTIVE_POINT }; // ◆ diamond
+    return PlotlyDrawings.obstacle.selected;
   }
-  return { symbol: '\u25cb', color: OBSTACLE_COLOR_INACTIVE_POINT }; // ○ open circle
+  return PlotlyDrawings.obstacle.inactivePoint;
 };
 
 /**
@@ -160,13 +155,12 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
       const py = is2d ? cz : cy;
       const pz = cz;
 
-      const color = getHighlightColor(obstacleUuid, currentObstacleUuid);
-      const { symbol, color: markerColor } = getMarkerAppearance(
-        obstacleUuid,
-        pointIndex,
-        currentObstacleUuid,
-        currentObstaclePointIndex
-      );
+      const color = getLabelColor(obstacleUuid, currentObstacleUuid);
+      const {
+        symbol,
+        color: markerColor,
+        size: markerSize
+      } = getMarkerAppearance(obstacleUuid, pointIndex, currentObstacleUuid, currentObstaclePointIndex);
       const annotationData = {
         obstacleUuid,
         obstaclePositionIndex: pointIndex,
@@ -181,7 +175,7 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
         y: py,
         z: pz,
         text: symbol,
-        font: { ...BASE_ANNOTATION.font, color: markerColor, size: 14 },
+        font: { color: markerColor, size: markerSize[view] },
         hovertext,
         data: annotationData
       } as Partial<Plotly.Annotations>;
@@ -193,8 +187,8 @@ export const createObstaclesAnnotations = (plotParams: CreatePlotParams): Partia
         y: py,
         z: pz,
         text: obstacleName,
-        yshift: 12,
-        font: { ...BASE_ANNOTATION.font, color },
+        yshift: PlotlyDrawings.obstacle.label.yShift[view],
+        font: { color, size: PlotlyDrawings.obstacle.label.size[view] },
         captureevents: false,
         data: annotationData
       } as Partial<Plotly.Annotations>;

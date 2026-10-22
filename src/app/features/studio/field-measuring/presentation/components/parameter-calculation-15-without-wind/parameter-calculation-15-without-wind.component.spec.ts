@@ -144,6 +144,17 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     expect(component.measureData().updateMode15C).toBe('auto');
   });
 
+  it('should clear the 15°C output when the update mode changes', () => {
+    component.measureData.update((d) => ({
+      ...d,
+      outputs: { ...d.outputs, parameter15C: { parameter: 1, minusParameter: 0, plusParameter: 2 } as never }
+    }));
+
+    component.updateMeasureData('updateMode15C', 'manual');
+
+    expect(component.measureData().outputs.parameter15C).toBeNull();
+  });
+
   it('should pre-fill manual fields from Auto values on first switch to manual', () => {
     component.measureData.update((d) => ({
       ...d,
@@ -169,6 +180,56 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
       cableTemperatureCalibration: 45.9,
       cableTemperatureCalibrationUncertainty: 3.9
     });
+  });
+
+  it('should pre-fill manual fields from the exterior result when the exterior method is active', () => {
+    component.measureData.update((d) => ({
+      ...d,
+      calculationMethod: 'tangente-aiming-exterior',
+      outputs: {
+        ...d.outputs,
+        papoto: {
+          parameter: 111.11,
+          parameter_1_2: 0,
+          parameter_2_3: 0,
+          parameter_1_3: 0,
+          checkValidity: true,
+          uncertainty: 9.99
+        },
+        tangentAimingExterior: { parameter: 1000.99, uncertainty: 1.59, criterion: 1, checkValidity: true }
+      }
+    }));
+
+    component.updateMeasureData('updateMode15C', 'manual');
+
+    const manual = component.measureData().manualParameterCalculation15CWithoutWind;
+    expect(manual?.parameterPapoto).toBe(1000.9);
+    expect(manual?.parameterUncertaintyPapoto).toBe(1.5);
+  });
+
+  it('should not pre-fill manual parameter fields without an active result', () => {
+    component.measureData.update((d) => ({
+      ...d,
+      calculationMethod: 'tangente-aiming-exterior',
+      outputs: {
+        ...d.outputs,
+        papoto: {
+          parameter: 111.11,
+          parameter_1_2: 0,
+          parameter_2_3: 0,
+          parameter_1_3: 0,
+          checkValidity: true,
+          uncertainty: 9.99
+        },
+        tangentAimingExterior: null
+      }
+    }));
+
+    component.updateMeasureData('updateMode15C', 'manual');
+
+    const manual = component.measureData().manualParameterCalculation15CWithoutWind;
+    expect(manual?.parameterPapoto).toBeNull();
+    expect(manual?.parameterUncertaintyPapoto).toBeNull();
   });
 
   it('should not reset manual values when switching to Auto and back to Manual', () => {

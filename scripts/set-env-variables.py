@@ -16,6 +16,8 @@ with open("package.json", "r") as file:
 # This script is the single source of the build identity: the JS placeholders and
 # dist/version.json (read back by create_assets_list_for_service_worker.py) share it.
 # git_hash identifies the version: rebuilding the same commit must not trigger an app update.
+# The build date is only written to dist/version.json: injecting it into the JS would change
+# the bytes (hence the service worker precache revisions) on every rebuild of the same commit.
 build_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 GIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,40}$")
@@ -60,13 +62,11 @@ def replace_in_file(file_path):
             placeholder in content
             for placeholder in [
                 "{BUILD_VERSION}",
-                "{BUILD_TIME}",
                 "{GIT_HASH}",
                 *env_variables,
             ]
         ):
             content = content.replace("{BUILD_VERSION}", version)
-            content = content.replace("{BUILD_TIME}", build_time)
             content = content.replace("{GIT_HASH}", git_hash)
             for env_variable in env_variables:
                 variable_key = env_variable.replace("{", "").replace("}", "")

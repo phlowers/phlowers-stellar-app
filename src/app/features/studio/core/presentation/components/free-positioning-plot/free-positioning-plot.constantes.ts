@@ -6,16 +6,12 @@
  */
 import Plotly, { ModeBarButtonAny } from 'plotly.js-dist-min';
 import { PLOT_AXIS_CONFIG } from '@shared/components/studio/section/helpers/plot.constants';
+import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
 import { FreePositioningCategory } from './free-positioning-plot.interfaces';
 
 export {
-  CATEGORY_COLORS,
-  CATEGORY_SYMBOLS,
-  DEFAULT_POINT_SIZE,
   DEBOUNCED_REFRESH_STUDIO_DELAY,
   DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY,
-  EDITABLE_POINT_COLOR,
-  EDITABLE_POINT_SIZE,
   FREE_POSITIONING_CATEGORIES,
   POINT_SELECTION_PIXEL_RADIUS
 } from '../free-positioning/free-positioning.constantes';
@@ -55,8 +51,7 @@ export const getFreePositioningPlotConfig = (): Partial<Plotly.Config> => ({
 });
 
 export const getFreePositioningPlotLayout = (sharedRange: [number, number] | null): Partial<Plotly.Layout> => ({
-  autosize: true,
-  showlegend: false,
+  ...getPlotlyBaseLayout(),
   dragmode: 'pan',
   margin: {
     l: FREE_POSITIONING_PLOT_CONFIG.MARGIN_LEFT,

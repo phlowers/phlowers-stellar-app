@@ -63,6 +63,7 @@ export interface RepartitionTemperatureFieldsJsonDto {
 
 /** Lateral temperature field configuration as serialized in JSON. */
 export interface LateralTemperatureFieldsJsonDto {
+  defaultValue: number;
   ruleType: string;
   message: string;
 }

@@ -6,7 +6,8 @@
     "news": "News",
     "changelog": "Changelog",
     "studio": "Studio",
-    "tools": "Tools"
+    "tools": "Tools",
+    "instruction-manual": "Instruction manual"
   },
   "common": {
     "actions-label": "Actions",
@@ -35,6 +36,7 @@
     "counter-weight-label": "Counter weight",
     "create-a-new-study": "Create a new study",
     "create-a-section-label": "Create a section",
+    "cut-strands-layer-label": "Cut strands layer {{ layer }}",
     "date-label": "Date",
     "delete": "Delete",
     "description-label": "Description",
@@ -66,6 +68,7 @@
     "max-decimals-error": "Max decimals: {{ maxDecimals }}",
     "max-value-error": "Max. value: {{ max }}",
     "meter": "m",
+    "grade-unit": "gr",
     "min-value-error": "Min. value: {{ min }}",
     "my-last-studies-label": "My last studies",
     "news-label": "News",
@@ -159,19 +162,17 @@
     "x-label": "X:",
     "y-label": "Y:",
     "z-label": "Z:",
-    "support-name-full-label": "Support name"
-  },
-  "app": {
-    "update": "Update",
-    "new-version-available": "The new version of your application is available!",
-    "version": "Version:",
-    "hash": "Hash:",
-    "update-in-progress": "The update of your application is in progress",
-    "update-warning": "Thank you for not closing the app when the update is in progress.",
-    "later": "Later",
-    "update-now": "Update now",
-    "update-start-failed": "The update could not be started. Please try again.",
-    "install-failed": "Initial application installation could not start. Please reload the page to try again."
+    "support-name-full-label": "Support name",
+    "left-support-label": "Left support",
+    "measured-span-length-label": "Measured span length",
+    "calculated-value-label": "Calculated value:",
+    "tangent-aiming-help-aria-label": "open tangent aiming help",
+    "calculation-type-label": "Calculation type:",
+    "calculation-type-tangent": "Tangent",
+    "tangent-angle-label": "Cable tangent angle",
+    "criterion-label": "Criterion",
+    "criterion-respected": "Criterion respected",
+    "criterion-not-respected": "Criterion not respected"
   },
   "auth": {
     "login-page": {
@@ -196,15 +197,20 @@
     "update-text": "View latest updates.",
     "update-link-text": "Learn more",
     "update-link-explicit-text": "Learn more about latest updates",
-    "server-title": "Server state",
-    "server-text-default": "Trying to reach the servers!",
     "update-available": "Update available",
     "update-new-available": "A new application update is available!",
-    "server-offline": "Application in offline mode.",
-    "server-unknown": "Cannot reach data. Please check your internet connectivity.",
-    "server-warning": "Trying to reach the servers.",
-    "server-error": "An error occured while trying to reach servers.",
-    "server-success": "Server connexion success!",
+    "offline-card": {
+      "title": "Application status",
+      "connection-online": "Online.",
+      "connection-offline": "No connection.",
+      "status-ready": "Offline mode ready.",
+      "status-preparing": "Preparing offline mode.",
+      "status-waiting-network": "Network too slow: offline mode setup on hold.",
+      "status-storage-insufficient": "Not enough storage: offline mode impossible.",
+      "status-not-prepared": "Offline mode unavailable.",
+      "update-postponed-network": "Update postponed: network too slow.",
+      "update-blocked-storage": "Update blocked: not enough storage."
+    },
     "no-recent-studies": "No recent studies",
     "go-to-studies": "Go to my studies"
   },
@@ -229,15 +235,47 @@
   "news": {
     "empty": "No news found"
   },
+  "instruction-manual": {
+    "intro-title": "Welcome to the help and documentation area",
+    "intro-text": "Find here all the essential resources to get started with the Celeste application, configure your studies, manage your sections and export your results with ease. Choose the format that suits you best.",
+    "pdf-title": "Download the PDF manual",
+    "pdf-file-name-label": "File name",
+    "pdf-size-label": "Estimated size",
+    "pdf-update-date-label": "Update date",
+    "pdf-download-button": "Download the PDF",
+    "online-title": "Browse the online manual",
+    "online-format-label": "Format",
+    "online-format-value": "Interactive web (HTML)",
+    "online-features-label": "Features",
+    "online-features-value": "Global search, index",
+    "online-availability-label": "Availability",
+    "online-availability-value": "Instant",
+    "online-open-button": "Open the online manual"
+  },
   "admin": {
     "app-version": "App version",
-    "check-app-version": "Check app version",
-    "current-version": "Current version",
-    "latest-version": "Latest version",
+    "check-app-version": "Check for updates",
+    "col-property": "Property",
+    "col-value": "Value",
     "build-hash": "Build Hash",
     "build-datetime": "Build datetime",
     "build-version": "Build version",
-    "update-to-latest": "Update to latest version",
+    "offline-status": "Offline mode",
+    "pending-version": "Pending version",
+    "no-pending-version": "None",
+    "last-refusal": "Last postponed update",
+    "network": "Estimated network speed",
+    "downlink-value": "{{ downlink }} Mbit/s (background downloads from {{ threshold }} Mbit/s)",
+    "storage": "Storage",
+    "storage-value": "{{ usage }} MB used out of {{ quota }} MB",
+    "not-available": "Not available",
+    "refusal": {
+      "api-unavailable": "Network speed unknown to the browser",
+      "downlink-unknown": "Network speed unknown to the browser",
+      "downlink-below-threshold": "Network too slow",
+      "save-data": "Data saver enabled",
+      "storage-insufficient": "Not enough storage space"
+    },
     "activate-python-logs": "Activate Python logs",
     "danger-zone": "Danger zone",
     "delete-all-studies": "Delete all studies",
@@ -275,7 +313,8 @@
       "home": "Home",
       "studies": "Studies",
       "tools": "Tools",
-      "documentation": "Documentation",
+      "instruction-manual": "Instruction manual",
+      "manual": "Manual",
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"
     },
@@ -288,17 +327,20 @@
       "unauthorized-summary": "Unauthorized",
       "imported-from-protov4": "Study imported from protoV4"
     },
-    "update-service": {
-      "update-success-summary": "Update successful",
-      "update-success-detail": "The application has been updated to the latest version",
-      "install-success-summary": "Install successful",
-      "install-success-detail": "The application has been installed",
-      "update-failed-summary": "Update failed",
-      "update-failed-detail": "An unknown error occurred during the update",
-      "update-failed-auth-detail": "The update could not be downloaded because your session has expired. Please sign in again, then retry the update",
-      "update-interrupted-summary": "Update interrupted",
-      "update-interrupted-detail": "The update did not finish. Please try again.",
-      "version-checked-detail": "App version checked"
+    "app-update-service": {
+      "offline-status": {
+        "ready": "Ready",
+        "preparing": "Preparing",
+        "waiting-network": "Network too slow",
+        "storage-insufficient": "Not enough storage",
+        "not-prepared": "Unavailable"
+      },
+      "update-deferred-network": "Update postponed: the connection does not allow downloading it now (slow or unmeasurable network, or data saver enabled), it will be downloaded later.",
+      "check-started": "Checking for updates: a new version will be downloaded in the background.",
+      "update-waiting-summary": "Update downloaded",
+      "update-waiting-detail": "It will be applied the next time the application starts (close every Stellar window, then reopen it).",
+      "storage-insufficient-summary": "Not enough storage space",
+      "storage-insufficient-detail": "Not enough storage space to download the update: free up space on this device."
     },
     "obstacle-form-service": {
       "delete-detail": "Obstacle deleted",
@@ -407,13 +449,18 @@
     "validation-supports-bounds": "Section has supports with values out of bounds",
     "import-error": "Error importing section",
     "delete-error": "Error deleting section",
-    "section-format-error": "The section file to import is invalid.",
     "lambert-reprojection-error": "Error computing GPS coordinates from Lambert93 data",
-    "catalog-missing-warning": "The attachment support from the section file is not present in the application support catalog",
     "import-success": "Section imported successfully",
+    "no-matching-adapter": "This file format is not supported for section import.",
+    "catalog-missing-warning": "The attachment support from the section file is not present in the application support catalog",
+    "stellar-json": {
+      "format-label": "Stellar section (.stsec, .json)",
+      "invalid-envelope": "The Stellar section file is invalid.",
+      "unsupported-version": "Unsupported Stellar section file version {{ version }} (maximum supported: {{ maxVersion }})."
+    },
     "reprojection-info": "Reprojection using {{ appName }} data model seems to add a mean absolute error of {{ error }} m",
     "from-file": {
-      "file-format": "File format: .json",
+      "file-format": "File formats: {{ formats }}",
       "description": "You can import a section from a JSON file. It will be added to the current study.",
       "upload-prompt": "Upload a JSON file",
       "import-error": "The imported section could not be found. Please try again."
@@ -675,16 +722,27 @@
       "success-detail": "Data saved successfully"
     },
     "calculus-setting": {
-      "tangent-aiming-radio-label": "Tangent aiming"
+      "tangent-aiming-radio-label": "Tangent aiming (Support)",
+      "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)"
+    },
+    "tangent-aiming-support": {
+      "mandatory-msg": "All data are mandatory for parameter calculation.",
+      "h-acc-distance-label": "Vertical dist. from device to cable attach. of left support",
+      "vertical-acc-angle-label": "Vertical angle from device to cable attach. of right support",
+      "calculation-failed": "Failed to calculate parameter by tangent aiming"
+    },
+    "tangent-aiming-exterior": {
+      "mandatory-msg": "All data are mandatory for parameter calculation.",
+      "h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
+      "vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support",
+      "vertical-acc-angle-right-label": "Vertical angle from device to cable attach. of right support",
+      "calculation-failed": "Failed to calculate parameter by tangent aiming (exterior)"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",
       "close-aria-label": "close PAPOTO help",
       "import-station-data": "Import station's datas",
       "mandatory-msg": "All fields are mandatory for calculus setting",
-      "left-support-label": "Left support",
-      "span-length-label": "Measured span length",
-      "calculated-value-label": "Calculated value:",
       "elevation-diff-label": "Elevation diff. of measured attach.",
       "hl-label": "HL",
       "h1-label": "H1",
@@ -819,6 +877,7 @@
       "tables-label": "Tables",
       "tools-label": "Tools",
       "edit-shortcuts-aria-label": "Edit your selected tools shortcuts",
+      "export-section-aria-label": "Export the section as a Stellar section file",
       "inset-title": "Inset",
       "organize-tools-info-text": "Select and organise the tools with quick access (maximum 5).",
       "loads-table-label": "Loads table",
@@ -987,10 +1046,12 @@
       "min-vertical-position-label": "Ref. supp. dist."
     },
     "l0-sum": {
-      "natural-lengths-title": "Natural lengths L0",
-      "l0-column-label": "L0",
-      "sum-l0-label": "Sum L0",
-      "loading-data-text": "Loading L0 data…"
+      "naturals-lengths-title": "Naturals lengths L0",
+      "span-length-column-label": "Span l.",
+      "l0-column-label": "Natural L0",
+      "cumulated-l0-column-label": "Cumulated L0",
+      "loading-data-text": "Loading L0 data…",
+      "current-page-report": "{currentPage} of {totalPages}"
     },
     "loads-table": {
       "description-length-label": "Description {{count}}/240",
@@ -1134,7 +1195,6 @@
       "calculate-sight-angles": "Calculate the sighting angles at mid-span sag",
       "horizontal-sight-angle-label": "H horizontal sighting angle at mid-span sag",
       "vertical-sight-angle-label": "V vertical sighting angle at mid-span sag",
-      "grade-unit": "gr",
       "aria-help": "Cable adjustment help",
       "calculation-failed": "Failed to calculate the cable adjustment"
     },
@@ -1153,7 +1213,6 @@
       "current-work-load-label": "Current max working load",
       "staff-presence-label": "Staff presence",
       "distance-support-ref-label": "Distance to reference support",
-      "cut-strands-layer-label": "Cut strands layer {{ layer }}",
       "add-marking-label": "Add an indication \"cut strands\"",
       "result-cable-rrts-label": "Cable's RRTS",
       "result-new-working-load-label": "New max working load",

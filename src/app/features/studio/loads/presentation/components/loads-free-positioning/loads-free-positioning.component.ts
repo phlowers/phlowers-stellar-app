@@ -38,7 +38,11 @@ export class LoadsFreePositioningComponent implements OnDestroy {
   /** Span frozen when free positioning was switched on; constant for the whole session. */
   readonly frozenSpan = this.plotOptionsService.frozenSpan;
 
-  readonly points = computed(() => this.dataService.getPoints(this.frozenSpan(), 'loads'));
+  readonly points = computed(() =>
+    this.dataService.getPoints(this.frozenSpan(), 'loads', {
+      pendingLoadAlongSpan: this.loadFormsService.pendingLoadAlongSpan()
+    })
+  );
 
   onPlacement(placement: FreePositioningPlacement): void {
     this.loadFormsService.setLoadPosition(placement.alongSpan);

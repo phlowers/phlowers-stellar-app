@@ -7,13 +7,19 @@
 
 import { TranslocoService } from '@jsverse/transloco';
 import { ImportContextConfig } from '@shared/import/domain/import-contracts.interfaces';
+import { SectionImportAdapter } from '@shared/import/section-adapter/section-import-adapter';
 
-/** Accepted file specification and UI texts for section JSON imports. */
-export const createSectionImportConfig = (transloco: TranslocoService): ImportContextConfig => ({
+/** Accepted file specification and UI texts for section imports, derived from the enabled adapters. */
+export const createSectionImportConfig = (
+  transloco: TranslocoService,
+  adapters: readonly SectionImportAdapter[]
+): ImportContextConfig => ({
   acceptedFiles: {
-    extensions: ['.json'],
-    mimeTypes: ['application/json'],
-    hint: transloco.translate('section-import.from-file.file-format')
+    extensions: [...new Set(adapters.flatMap((adapter) => adapter.extensions))],
+    mimeTypes: [...new Set(adapters.flatMap((adapter) => adapter.mimeTypes ?? []))],
+    hint: transloco.translate('section-import.from-file.file-format', {
+      formats: adapters.map((adapter) => adapter.formatLabel).join(', ')
+    })
   },
   entityLabel: transloco.translate('importSection.entityLabel'),
   texts: {

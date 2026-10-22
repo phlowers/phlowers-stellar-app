@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
+import { extractManifestSpan } from '../scripts/sw-manifest.mjs';
 
 const PORT = Number(process.env.E2E_PORT || 4310);
 // A single build output (no per-locale dist/en, dist/fr): translations are
@@ -46,7 +47,11 @@ function emptyFaults() {
     redirectAfter: null,
     appFileRequestCount: 0,
     // `/assets_list.json` never answers (connection left open).
-    stallManifest: false
+    stallManifest: false,
+    // Paths answered 200 with bytes that differ from the manifest (integrity must reject them).
+    tamperedPaths: new Set(),
+    // Status answered to every page navigation outside /auth/ (e.g. 401: Apache refusing a stale session).
+    navigationStatus: null
   };
 }
 
@@ -57,7 +62,11 @@ const state = {
   authenticated: true,
   faults: emptyFaults(),
   // Every app file path requested since the last reset (used to count re-downloads).
-  requestLog: []
+  requestLog: [],
+  // Downlink (Mbit/s) seen by the service worker network rule, see SW_NETWORK_PRELUDE.
+  downlinkMbps: 10,
+  // Script served at /service-worker.js: 'workbox' (built), 'legacy' (previous system stand-in) or 'kill-switch'.
+  serviceWorkerMode: 'workbox'
 };
 
 const csvVersions = {
@@ -253,6 +262,24 @@ function send(response, statusCode, body, contentType = 'text/plain; charset=utf
   response.end(body);
 }
 
+/** Streams `body` at `mbps` so the application throughput probe measures the simulated downlink. */
+function sendThrottled(response, resolved, mbps) {
+  const CHUNK_BYTES = 16 * 1024;
+  const intervalMs = (CHUNK_BYTES * 8) / (Math.max(mbps, 0.05) * 1000);
+  response.writeHead(resolved.status, { 'content-type': resolved.contentType, 'cache-control': 'no-store' });
+  let offset = 0;
+  const timer = setInterval(() => {
+    if (offset >= resolved.body.length || response.destroyed) {
+      clearInterval(timer);
+      response.end();
+      return;
+    }
+    response.write(resolved.body.subarray(offset, offset + CHUNK_BYTES));
+    offset += CHUNK_BYTES;
+  }, intervalMs);
+  response.on('close', () => clearInterval(timer));
+}
+
 function sendJson(response, body) {
   send(response, 200, JSON.stringify(body), 'application/json; charset=utf-8');
 }
@@ -265,13 +292,18 @@ function describeFaults() {
     failures: Object.fromEntries(faults.failures),
     redirectAfter: faults.redirectAfter,
     appFileRequestCount: faults.appFileRequestCount,
-    stallManifest: faults.stallManifest
+    stallManifest: faults.stallManifest,
+    tamperedPaths: [...faults.tamperedPaths],
+    navigationStatus: faults.navigationStatus
   };
 }
 
 /** Only precached app files are subject to faults; manifest, auth and control routes never are. */
 function isFaultTarget(request, pathname) {
-  return request.method === 'GET' && currentManifest().files.includes(pathname);
+  return (
+    request.method === 'GET' &&
+    (currentManifest().files.includes(pathname) || scenarioServiceWorker().urls.has(pathname))
+  );
 }
 
 /** Applies injected faults to an app file request; calls `proceed` (possibly delayed) when none applies. */
@@ -293,6 +325,10 @@ function applyFaults(request, response, pathname, proceed) {
   if (failure && failure.remaining > 0) {
     failure.remaining -= 1;
     send(response, failure.status, `Injected failure ${failure.status} for ${pathname}`);
+    return;
+  }
+  if (faults.tamperedPaths.has(pathname)) {
+    send(response, 200, `/* tampered ${pathname} */`, contentTypeFor(pathname));
     return;
   }
   const latencyMs = faults.latencyMs || SCENARIO_VERSIONS[state.scenario].latencyMs || 0;
@@ -333,6 +369,12 @@ function handleFaultsRoute(request, response, requestUrl) {
   if (params.has('stallManifest')) {
     state.faults.stallManifest = params.get('stallManifest') === 'true';
   }
+  if (params.has('tamper')) {
+    state.faults.tamperedPaths.add(params.get('tamper'));
+  }
+  if (params.has('navigationStatus')) {
+    state.faults.navigationStatus = Number(params.get('navigationStatus'));
+  }
   sendJson(response, describeFaults());
 }
 
@@ -349,6 +391,54 @@ const server = http.createServer((request, response) => {
   if (pathname === '/__e2e/requests') {
     sendJson(response, state.requestLog);
     return;
+  }
+
+  if (pathname === '/__e2e/network') {
+    if (request.method === 'POST') {
+      const downlink = Number(requestUrl.searchParams.get('downlink'));
+      if (!Number.isFinite(downlink) || downlink < 0) {
+        send(response, 400, 'Invalid downlink, expected a number of Mbit/s');
+        return;
+      }
+      state.downlinkMbps = downlink;
+    }
+    sendJson(response, { downlinkMbps: state.downlinkMbps });
+    return;
+  }
+
+  if (pathname === '/__e2e/service-worker') {
+    if (request.method === 'POST') {
+      const mode = requestUrl.searchParams.get('mode');
+      if (!SERVICE_WORKER_MODES.has(mode)) {
+        send(response, 400, `Invalid mode, expected one of: ${[...SERVICE_WORKER_MODES].join(', ')}`);
+        return;
+      }
+      state.serviceWorkerMode = mode;
+    }
+    sendJson(response, { mode: state.serviceWorkerMode });
+    return;
+  }
+
+  if (pathname === '/service-worker.js') {
+    send(response, 200, servedServiceWorkerCode(), 'application/javascript; charset=utf-8');
+    return;
+  }
+
+  const isNavigation = request.headers['sec-fetch-mode'] === 'navigate';
+  if (state.faults.navigationStatus !== null && isNavigation && !pathname.startsWith('/auth/')) {
+    send(response, state.faults.navigationStatus, `Injected ${state.faults.navigationStatus} for ${pathname}`);
+    return;
+  }
+
+  // Stand-in for Apache's recovery endpoint (clears the OIDC session, then signs in again).
+  if (pathname === '/auth/relogin') {
+    send(response, 200, 'E2E relogin');
+    return;
+  }
+
+  // Catalog downloads are logged (with their ?v= version) but never subject to faults.
+  if (pathname.startsWith('/data/')) {
+    state.requestLog.push(pathname + requestUrl.search);
   }
 
   if (isFaultTarget(request, pathname)) {
@@ -422,37 +512,58 @@ function handleRequest(request, response, requestUrl) {
     return;
   }
 
-  if (pathname === '/e2e-app-v1.js') {
-    send(response, 200, 'window.__E2E_APP_ASSET_VERSION = "v1";\n', 'application/javascript; charset=utf-8');
+  if (pathname === '/catalog-manifest.json') {
+    const { app_version, data_hashes } = currentManifest();
+    sendJson(response, { app_version, data_hashes });
     return;
   }
 
-  if (pathname === '/e2e-app-v2.js') {
-    send(response, 200, 'window.__E2E_APP_ASSET_VERSION = "v2";\n', 'application/javascript; charset=utf-8');
+  if (pathname === '/version.json') {
+    const { git_hash, version, build_datetime_utc } = SCENARIO_VERSIONS[state.scenario];
+    sendJson(response, { git_hash, version, build_datetime_utc });
     return;
   }
 
-  if (pathname === '/e2e-app-v3.js') {
-    send(response, 200, 'window.__E2E_APP_ASSET_VERSION = "v3";\n', 'application/javascript; charset=utf-8');
+  const resolved = resolveScenarioBody(pathname);
+  if (resolved && request.headers['x-throughput-probe']) {
+    sendThrottled(response, resolved, state.downlinkMbps);
     return;
+  }
+  if (resolved) {
+    send(response, resolved.status, resolved.body, resolved.contentType);
+    return;
+  }
+
+  const indexPath = path.join(DIST_DIR, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    send(response, 200, fs.readFileSync(indexPath), 'text/html; charset=utf-8');
+    return;
+  }
+
+  send(response, 404, 'Not found');
+}
+
+/** Bytes served for `pathname` under the current scenario (null for an unknown path: SPA fallback). */
+function resolveScenarioBody(pathname) {
+  const scenarioAssets = { '/e2e-app-v1.js': 'v1', '/e2e-app-v2.js': 'v2', '/e2e-app-v3.js': 'v3' };
+  if (scenarioAssets[pathname]) {
+    const body = `window.__E2E_APP_ASSET_VERSION = "${scenarioAssets[pathname]}";\n`;
+    return { status: 200, body: Buffer.from(body), contentType: 'application/javascript; charset=utf-8' };
   }
 
   if (pathname === BIG_FILE_PATH) {
-    send(response, 200, Buffer.alloc(BIG_FILE_SIZE_BYTES, 1), 'application/octet-stream');
-    return;
+    return { status: 200, body: Buffer.alloc(BIG_FILE_SIZE_BYTES, 1), contentType: 'application/octet-stream' };
   }
 
   // Always 404s: simulates a candidate asset failing to precache (e.g. a 502
-  // during a rolling redeploy), listed in `files` only for the 'v2-broken' scenario.
+  // during a rolling redeploy), listed only for the 'v2-broken' scenario.
   if (pathname === '/e2e-app-v2-broken.js') {
-    send(response, 404, 'Not found (intentionally broken for e2e)');
-    return;
+    return { status: 404, body: Buffer.from('Not found (intentionally broken for e2e)'), contentType: 'text/plain' };
   }
 
   if (pathname === '/data/cables.csv') {
     const csv = csvVersions[state.scenario].cables;
-    send(response, 200, csv, 'text/csv; charset=utf-8');
-    return;
+    return { status: 200, body: Buffer.from(csv), contentType: 'text/csv; charset=utf-8' };
   }
 
   const requestedPath = pathname === '/' ? '/index.html' : pathname;
@@ -464,18 +575,100 @@ function handleRequest(request, response, requestUrl) {
   const filePath = path.join(DIST_DIR, normalized);
 
   if (filePath.startsWith(DIST_DIR) && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-    const body = stampBuildIdentity(fs.readFileSync(filePath), filePath);
-    send(response, 200, body, contentTypeFor(filePath));
-    return;
+    return {
+      status: 200,
+      body: stampBuildIdentity(fs.readFileSync(filePath), filePath),
+      contentType: contentTypeFor(filePath)
+    };
   }
+  return null;
+}
 
-  const indexPath = path.join(DIST_DIR, 'index.html');
-  if (fs.existsSync(indexPath)) {
-    send(response, 200, fs.readFileSync(indexPath), 'text/html; charset=utf-8');
-    return;
+const BUILT_SW_PATH = path.join(DIST_DIR, 'service-worker.js');
+const BUILT_SW_CODE = fs.existsSync(BUILT_SW_PATH) ? fs.readFileSync(BUILT_SW_PATH, 'utf8') : null;
+const BUILT_SW_SPAN = BUILT_SW_CODE ? extractManifestSpan(BUILT_SW_CODE) : null;
+
+// E2E only: navigator.connection.downlink of the worker comes from /__e2e/network, read before each install and
+// message event (the network rule reads it synchronously at the start of these handlers).
+const SW_NETWORK_PRELUDE = `(() => {
+  const network = { downlink: 10 };
+  Object.defineProperty(self.navigator, 'connection', { configurable: true, get: () => ({ downlink: network.downlink }) });
+  const refresh = () => fetch('/__e2e/network', { cache: 'no-store' }).then((r) => r.json()).then((v) => { network.downlink = v.downlinkMbps; }).catch(() => undefined);
+  const addEventListener = self.addEventListener.bind(self);
+  self.addEventListener = (type, listener, options) => {
+    if (type !== 'install' && type !== 'message') return addEventListener(type, listener, options);
+    return addEventListener(type, (event) => event.waitUntil(refresh().then(() => listener(event))), options);
+  };
+})();
+`;
+
+const scenarioServiceWorkers = new Map();
+
+/**
+ * The built service worker with its precache manifest recomputed on the bytes served for the current scenario
+ * (JS is stamped per scenario, so the build-time integrity would not match), plus the scenario-specific assets.
+ */
+function scenarioServiceWorker() {
+  const cached = scenarioServiceWorkers.get(state.scenario);
+  if (cached) {
+    return cached;
   }
+  if (!BUILT_SW_SPAN) {
+    return { code: '', urls: new Set() };
+  }
+  const versionInfo = SCENARIO_VERSIONS[state.scenario];
+  const urls = [...BUILT_SW_SPAN.manifest.map((entry) => entry.url), versionInfo.asset];
+  if (versionInfo.extraFile) {
+    urls.push(versionInfo.extraFile);
+  }
+  const manifest = [...new Set(urls)].sort().map((url) => {
+    const body = resolveScenarioBody(url)?.body ?? Buffer.alloc(0);
+    return {
+      integrity: `sha256-${crypto.createHash('sha256').update(body).digest('base64')}`,
+      revision: crypto.createHash('md5').update(body).digest('hex'),
+      sizeBytes: body.length,
+      url
+    };
+  });
+  const code =
+    SW_NETWORK_PRELUDE +
+    BUILT_SW_CODE.slice(0, BUILT_SW_SPAN.start) +
+    JSON.stringify(manifest) +
+    BUILT_SW_CODE.slice(BUILT_SW_SPAN.end);
+  const result = { code, urls: new Set(manifest.map((entry) => entry.url)) };
+  scenarioServiceWorkers.set(state.scenario, result);
+  return result;
+}
 
-  send(response, 404, 'Not found');
+const KILL_SWITCH_CODE = fs.readFileSync(path.resolve(process.cwd(), 'ops/kill-switch/service-worker.js'), 'utf8');
+
+// Stand-in for the previous update system's worker, with the traits that matter for the transition: skipWaiting at
+// install, clients.claim at activation, app-assets-* cache names, navigations served from its cached shell.
+const LEGACY_SERVICE_WORKER_CODE = `const VERSION_CACHE = 'app-assets-v-e2e0001';
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+  event.waitUntil((async () => {
+    await (await caches.open('app-assets-control')).put('/__control', new Response('{}'));
+    await (await caches.open(VERSION_CACHE)).add('/index.html');
+  })());
+});
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', (event) => {
+  if (event.request.mode !== 'navigate') return;
+  event.respondWith(caches.match('/index.html', { cacheName: VERSION_CACHE }).then((cached) => cached || fetch(event.request)));
+});
+`;
+
+const SERVICE_WORKER_MODES = new Set(['workbox', 'legacy', 'kill-switch']);
+
+function servedServiceWorkerCode() {
+  if (state.serviceWorkerMode === 'legacy') {
+    return LEGACY_SERVICE_WORKER_CODE;
+  }
+  if (state.serviceWorkerMode === 'kill-switch') {
+    return KILL_SWITCH_CODE;
+  }
+  return scenarioServiceWorker().code;
 }
 
 server.listen(PORT, '127.0.0.1', () => {

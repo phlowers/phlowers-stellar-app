@@ -181,6 +181,9 @@ export function assertObstacleConfigurationJson(value: unknown): asserts value i
   if (!isObject(value['lateralTemperatureFields'])) {
     throw new Error('Obstacle configuration: `lateralTemperatureFields` must be an object');
   }
+  if (!isFiniteNumber(value['lateralTemperatureFields']['defaultValue'])) {
+    throw new Error('Obstacle configuration: `lateralTemperatureFields.defaultValue` must be a finite number');
+  }
   if (!Array.isArray(value['intermediatePointPositions'])) {
     throw new TypeError('Obstacle configuration: `intermediatePointPositions` must be an array');
   }
@@ -270,6 +273,7 @@ export function buildConformityConfig(payload: ObstacleConfigurationJsonDto): Ca
   return {
     key: OBSTACLE_CONFORMITY_CONFIG_KEY,
     repartition_temperature_default: payload.repartitionTemperatureFields.defaultValue,
+    lateral_temperature_default: payload.lateralTemperatureFields.defaultValue,
     lateral_temperature_rule_type: payload.lateralTemperatureFields.ruleType,
     lateral_temperature_message: payload.lateralTemperatureFields.message,
     wind_zone_default: payload.windZone.default,

@@ -142,7 +142,7 @@ describe('TemperatureCalculationComponent', () => {
 
   it('should initialize form fields from measureData', () => {
     const data = component.measureData();
-    expect(data.cableName).toBe('ASTER570');
+    expect(data.cableName).toBe('ASTER600');
     expect(data.transit).toBeNull();
     expect(data.windIncidenceMode).toBe('auto');
   });
@@ -219,7 +219,7 @@ describe('TemperatureCalculationComponent', () => {
 
   describe('isFormValid', () => {
     beforeEach(() => {
-      component.updateField('cableName', 'ASTER570');
+      component.updateField('cableName', 'ASTER600');
       component.updateField('skyCover', SkyCover.N5);
       component.updateField('transit', 1000);
     });
@@ -326,7 +326,7 @@ describe('TemperatureCalculationComponent', () => {
         })
       );
 
-      component.updateField('cableName', 'ASTER570');
+      component.updateField('cableName', 'ASTER600');
       component.updateField('transit', 1000);
       component.updateField('skyCover', SkyCover.N5);
 
@@ -346,7 +346,7 @@ describe('TemperatureCalculationComponent', () => {
     it('should reset to false even when calculation throws', async () => {
       workerPythonServiceMock.runTask.mockRejectedValue(new Error('unexpected'));
 
-      component.updateField('cableName', 'ASTER570');
+      component.updateField('cableName', 'ASTER600');
       component.updateField('transit', 1000);
       component.updateField('skyCover', SkyCover.N5);
 
@@ -423,7 +423,7 @@ describe('TemperatureCalculationComponent', () => {
     });
 
     // Set all required fields
-    component.updateField('cableName', 'ASTER570');
+    component.updateField('cableName', 'ASTER600');
     component.updateField('ambientTemperature', 20);
     component.updateField('longitude', 2.3522);
     component.updateField('latitude', 48.8566);

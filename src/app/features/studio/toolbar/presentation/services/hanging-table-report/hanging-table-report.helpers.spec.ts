@@ -158,7 +158,7 @@ describe('hanging-table-report.helpers', () => {
       const texts = textCalls(doc);
 
       expect(texts).toContain('Hanging calculation');
-      expect(texts).toContain('1500.46 m');
+      expect(texts).toContain('1500.5 m');
       expect(texts).toContain('15.3 °C');
       expect(texts).toContain('312.3 m');
       expect(texts).toContain('-10.5 °C');

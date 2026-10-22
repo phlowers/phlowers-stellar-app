@@ -25,6 +25,7 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { createPlotData } from '@shared/components/studio/section/helpers/createPlotData';
 import { formatStudioError } from '@shared/components/studio/helpers/errors';
 import { Side } from '@shared/types/plot.types';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -36,7 +37,6 @@ import {
   findNearestPointAtPixel
 } from '../free-positioning/free-positioning-traces.helpers';
 import {
-  CATEGORY_COLORS,
   CORE_PLOT_IDS,
   DEBOUNCED_REFRESH_STUDIO_DELAY,
   DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY,
@@ -95,7 +95,7 @@ export class FreePositioningPlotComponent implements OnDestroy {
 
   // Constants exposed to template
   readonly categories = FREE_POSITIONING_CATEGORIES;
-  readonly categoryColors = CATEGORY_COLORS;
+  readonly categoryDrawings = PlotlyDrawings.freePositioning.category;
   readonly plotIds = CORE_PLOT_IDS;
 
   // State signals

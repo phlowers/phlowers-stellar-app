@@ -2,6 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { SupportPlotComponent } from '@shared/components/studio/support/support-plot.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
 
 const plotlyMocks = vi.hoisted(() => ({
   newPlot: vi.fn(),
@@ -89,8 +91,7 @@ describe('SupportPlotComponent', () => {
     const [plotId, plotData, layout] = plotlyMocks.newPlot.mock.calls[0];
     expect(plotId).toBe('plotly-output-support');
     expect(layout).toEqual({
-      autosize: true,
-      showlegend: false,
+      ...getPlotlyBaseLayout(),
       margin: { l: 0, r: 0, t: 0, b: 0 },
       width: 550
     });
@@ -101,7 +102,7 @@ describe('SupportPlotComponent', () => {
       z: [0, 1],
       type: 'scatter3d',
       mode: 'lines',
-      line: { color: 'blue', width: 2 }
+      line: { color: PlotlyDrawings.supportPlot.shapeLine.color, width: 2 }
     });
     expect(plotData[1]).toEqual({
       x: [10, 40],
@@ -120,7 +121,7 @@ describe('SupportPlotComponent', () => {
       z: [30],
       type: 'scatter3d',
       mode: 'markers',
-      marker: { color: 'red', opacity: 0.5, size: 10 }
+      marker: { color: PlotlyDrawings.supportPlot.selectedMarker.color, opacity: 0.5, size: 10 }
     });
   });
 
@@ -163,6 +164,37 @@ describe('SupportPlotComponent', () => {
 
     const [, plotData] = plotlyMocks.newPlot.mock.calls[0];
     expect(plotData).toHaveLength(2);
+  });
+
+  it('should give every draw its own layout', async () => {
+    workerPythonServiceMock.runTask.mockResolvedValue({
+      result: { shape_points: [[0, 0, 0]], text_display_points: [[10, 20, 30]], text_to_display: [1] }
+    });
+
+    await component.refreshPlot([[0, 0, 0]], [1], 1);
+    await component.refreshPlot([[0, 0, 0]], [1], 1);
+
+    const [firstLayout, secondLayout] = plotlyMocks.newPlot.mock.calls.map(([, , layout]) => layout);
+    expect(secondLayout).not.toBe(firstLayout);
+    expect(secondLayout.font).not.toBe(firstLayout.font);
+    expect(secondLayout.hoverlabel).not.toBe(firstLayout.hoverlabel);
+  });
+
+  it('should keep the user camera across redraws, even after a clear', async () => {
+    workerPythonServiceMock.runTask.mockResolvedValue({
+      result: { shape_points: [[0, 0, 0]], text_display_points: [[10, 20, 30]], text_to_display: [1] }
+    });
+    fixture.detectChanges();
+    const plotElement = fixture.nativeElement.querySelector('#plotly-output-support');
+    const camera = { eye: { x: 2, y: 0, z: 1 }, up: { x: 0, y: 0, z: 1 }, center: { x: 0, y: 0, z: 0 } };
+    Object.assign(plotElement, { _fullLayout: { scene: { _scene: { getCamera: () => camera } } } });
+    plotlyMocks.purge.mockImplementation(() => delete plotElement._fullLayout);
+
+    component.clearPlot();
+    await component.refreshPlot([[0, 0, 0]], [1], 1);
+
+    const [, , layout] = plotlyMocks.newPlot.mock.calls[0];
+    expect(layout.scene).toEqual({ camera });
   });
 
   it('should clear plot when worker throws an error', async () => {

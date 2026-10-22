@@ -130,12 +130,12 @@ Implémentation du worker Python.
 
 .. js:automodule:: worker-python
 
-worker_update.service
-^^^^^^^^^^^^^^^^^^^^^
+app-update.service
+^^^^^^^^^^^^^^^^^^
 
-Service de gestion des mises à jour du service worker.
+Service du cycle de mise à jour de l'application (service worker Workbox).
 
-.. js:automodule:: worker_update.service
+.. js:automodule:: app-update.service
 
 Services d'interface utilisateur
 --------------------------------
