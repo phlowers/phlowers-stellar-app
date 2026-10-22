@@ -1042,6 +1042,7 @@
       "span-length-column-label": "Span l.",
       "l0-column-label": "Natural L0",
       "cumulated-l0-column-label": "Cumulated L0",
+      "csv-filename-prefix": "L0 Lengths Export",
       "csv-span-length-label": "Span_length",
       "csv-l0-label": "L0_span_length",
       "csv-cumulated-l0-label": "Cumulated_L0_span_length",

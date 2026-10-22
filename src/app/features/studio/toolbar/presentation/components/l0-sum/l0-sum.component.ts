@@ -24,7 +24,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
-import { buildL0Csv, isL0TableExportable, L0_EXPORT_FILENAME, L0_EXPORT_MIME_TYPE } from './l0-sum.helpers';
+import { buildL0Csv, buildL0ExportFilename, isL0TableExportable, L0_EXPORT_MIME_TYPE } from './l0-sum.helpers';
 import { L0Row } from './l0-sum.interfaces';
 
 @Component({
@@ -130,7 +130,11 @@ export class L0SumComponent {
     const url = URL.createObjectURL(new Blob([csv], { type: L0_EXPORT_MIME_TYPE }));
     const link = document.createElement('a');
     link.href = url;
-    link.download = L0_EXPORT_FILENAME;
+    link.download = buildL0ExportFilename(
+      translate('studio.l0-sum.csv-filename-prefix'),
+      this.plotService.study()?.title ?? '-',
+      this.spanService.section()?.name ?? '-'
+    );
     link.click();
     URL.revokeObjectURL(url);
   }

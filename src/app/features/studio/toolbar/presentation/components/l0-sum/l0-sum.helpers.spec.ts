@@ -1,4 +1,4 @@
-import { buildL0Csv, isL0TableExportable } from './l0-sum.helpers';
+import { buildL0Csv, buildL0ExportFilename, isL0TableExportable } from './l0-sum.helpers';
 import { L0Row } from './l0-sum.interfaces';
 
 const row = (overrides: Partial<L0Row> = {}): L0Row => ({
@@ -16,6 +16,44 @@ const frLabels = {
   l0: 'Longueur naturelle L0',
   cumulatedL0: 'Longueur naturelle L0 cumulée'
 };
+
+describe('buildL0ExportFilename', () => {
+  const date = new Date(2026, 8, 30, 14, 5, 9);
+
+  it('should join the english prefix, study, section and generation timestamp', () => {
+    expect(buildL0ExportFilename('L0 Lengths Export', 'Study A', 'Section 1', date)).toBe(
+      'L0 Lengths Export_Study A_Section 1_2026-09-30_14-05-09.csv'
+    );
+  });
+
+  it('should join the french prefix, study, section and generation timestamp', () => {
+    expect(buildL0ExportFilename('Export Longueurs L0', 'Étude démo', 'Canton démo 3', date)).toBe(
+      'Export Longueurs L0_Étude démo_Canton démo 3_2026-09-30_14-05-09.csv'
+    );
+  });
+
+  it('should zero pad the month, the day and the time', () => {
+    expect(buildL0ExportFilename('Export', 'study', 'section', new Date(2026, 0, 2, 3, 4, 5))).toBe(
+      'Export_study_section_2026-01-02_03-04-05.csv'
+    );
+  });
+
+  it('should replace the characters that are illegal in a file name', () => {
+    expect(buildL0ExportFilename('Export', 'a/b:c*d?e"f<g>h|i\\j', 'x:y', date)).toBe(
+      'Export_a-b-c-d-e-f-g-h-i-j_x-y_2026-09-30_14-05-09.csv'
+    );
+  });
+
+  it('should use the current time when no generation date is given', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(date);
+    try {
+      expect(buildL0ExportFilename('Export', 'study', 'section')).toBe('Export_study_section_2026-09-30_14-05-09.csv');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
 
 describe('isL0TableExportable', () => {
   it('should accept a table whose lengths are all finite numbers', () => {

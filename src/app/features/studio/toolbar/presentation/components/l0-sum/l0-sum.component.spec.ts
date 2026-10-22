@@ -38,7 +38,8 @@ describe('L0SumComponent', () => {
 
     const mockPlotService = {
       loading: vi.fn().mockReturnValue(false),
-      litData: vi.fn().mockReturnValue(mockLitData)
+      litData: vi.fn().mockReturnValue(mockLitData),
+      study: vi.fn().mockReturnValue({ title: 'Study A' })
     } as unknown as PlotService;
 
     const mockPlotSpanService = {
@@ -87,7 +88,7 @@ describe('L0SumComponent', () => {
   });
 
   it('should initialize one row per span', () => {
-    expect(component.l0Rows().length).toBe(5);
+    expect(component.l0Rows()).toHaveLength(5);
   });
 
   it('should expose the span length of each span', () => {
@@ -102,7 +103,7 @@ describe('L0SumComponent', () => {
     const litData = {
       output_parameters: { L0: [0.1, 0.2], span_length: [1, 2] }
     };
-    (TestBed.inject(PlotService).litData as ReturnType<typeof vi.fn>).mockReturnValue(litData);
+    (TestBed.inject(PlotService).litData as unknown as ReturnType<typeof vi.fn>).mockReturnValue(litData);
     const noisyFixture = TestBed.createComponent(L0SumComponent);
     noisyFixture.detectChanges();
     expect(noisyFixture.componentInstance.l0Rows().map((row) => row.cumulatedL0)).toEqual([0.1, 0.3]);
@@ -182,10 +183,66 @@ describe('L0SumComponent', () => {
       vi.restoreAllMocks();
     });
 
-    it('should download the table as export_natural_lengths.csv', () => {
+    describe('file name', () => {
+      beforeEach(() => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(new Date(2026, 8, 30, 14, 5, 9));
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('should name the file after the translated prefix, the study, the section and the generation time', () => {
+        (TestBed.inject(PlotSpanService).section as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+          name: 'Section 1',
+          supports: []
+        });
+
+        component.onExport();
+
+        expect(createdLink?.download).toBe(
+          'studio.l0-sum.csv-filename-prefix_Study A_Section 1_2026-09-30_14-05-09.csv'
+        );
+      });
+
+      it('should use the generation time of each export', () => {
+        component.onExport();
+        vi.setSystemTime(new Date(2026, 8, 30, 14, 6, 10));
+        component.onExport();
+
+        expect(createdLink?.download).toContain('_2026-09-30_14-06-10.csv');
+      });
+
+      it('should replace the characters that are illegal in a file name', () => {
+        (TestBed.inject(PlotService).study as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+          title: 'Study: A/B'
+        });
+        (TestBed.inject(PlotSpanService).section as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+          name: 'Section "1"?',
+          supports: []
+        });
+
+        component.onExport();
+
+        expect(createdLink?.download).toBe(
+          'studio.l0-sum.csv-filename-prefix_Study- A-B_Section -1--_2026-09-30_14-05-09.csv'
+        );
+      });
+
+      it('should fall back to a dash when the study or the section is not available', () => {
+        (TestBed.inject(PlotService).study as unknown as ReturnType<typeof vi.fn>).mockReturnValue(null);
+
+        component.onExport();
+
+        expect(createdLink?.download).toBe('studio.l0-sum.csv-filename-prefix_-_-_2026-09-30_14-05-09.csv');
+      });
+    });
+
+    it('should download the table through a temporary blob link', () => {
       component.onExport();
 
-      expect(createdLink?.download).toBe('export_natural_lengths.csv');
+      expect(createdLink?.download).toMatch(/\.csv$/);
       expect(createdLink?.href).toContain('blob:l0');
       expect(clickSpy).toHaveBeenCalledTimes(1);
       expect(revokeSpy).toHaveBeenCalledWith('blob:l0');

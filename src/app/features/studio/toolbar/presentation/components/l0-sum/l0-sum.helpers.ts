@@ -1,6 +1,6 @@
 import { L0Row } from './l0-sum.interfaces';
 
-export const L0_EXPORT_FILENAME = 'export_natural_lengths.csv';
+const L0_EXPORT_EXTENSION = '.csv';
 
 // Declaring the charset and prefixing a BOM forces UTF-8, otherwise Excel decodes accented labels as ANSI
 export const L0_EXPORT_MIME_TYPE = 'text/csv;charset=utf-8';
@@ -16,6 +16,30 @@ export interface L0CsvLabels {
   spanLength: string;
   l0: string;
   cumulatedL0: string;
+}
+
+// Replaces the characters that are illegal in a file name on common filesystems
+function sanitizeFilenamePart(value: string): string {
+  return value.replace(/[/\\:*?"<>|]/g, '-');
+}
+
+// Local time as YYYY-MM-DD_HH-mm-ss, the ":" of a time being illegal in a file name
+function formatGenerationTimestamp(date: Date): string {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  const time = `${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
+  return `${day}_${time}`;
+}
+
+// Builds "<translated prefix>_<study name>_<section name>_<generation timestamp>.csv"
+export function buildL0ExportFilename(
+  prefix: string,
+  studyName: string,
+  sectionName: string,
+  generationDate: Date = new Date()
+): string {
+  const parts = [prefix, studyName, sectionName, formatGenerationTimestamp(generationDate)];
+  return parts.map(sanitizeFilenamePart).join('_') + L0_EXPORT_EXTENSION;
 }
 
 // A table can be exported when it has rows and every length is a finite number
