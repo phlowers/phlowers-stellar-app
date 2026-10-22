@@ -1050,6 +1050,11 @@
       "span-length-column-label": "L. portée",
       "l0-column-label": "L0 naturelle",
       "cumulated-l0-column-label": "L0 cumulée",
+      "csv-filename-prefix": "Export Longueurs L0",
+      "csv-span-length-label": "Longueur_portée",
+      "csv-l0-label": "Longueur_L0_portée",
+      "csv-cumulated-l0-label": "Longueur_L0_cumulée_portée",
+      "export-invalid-table": "Export impossible : le tableau L0 est vide ou contient des valeurs invalides",
       "loading-data-text": "Chargement des données L0…",
       "current-page-report": "{currentPage} sur {totalPages}"
     },
