@@ -143,6 +143,11 @@ describe('CableAdjustmentComponent', () => {
       expect(spanSelect.options?.map((option) => option.label)).toEqual(['ABCDE - FGHIJ', 'FGHIJ - KLMNO']);
     });
 
+    it('does not allow clearing the selected span', () => {
+      const [spanSelect] = selects();
+      expect(spanSelect.showClear).toBeFalsy();
+    });
+
     it('selects the span currently displayed in the studio by default', () => {
       expect(component.form.controls.span.value).toEqual({ index: 0, uuid: 'support-a' });
 
@@ -445,6 +450,8 @@ describe('CableAdjustmentComponent', () => {
       const helpBtn = getByTestId('help-btn') as HTMLButtonElement;
       expect(helpBtn.disabled).toBe(true);
       expect(helpBtn.getAttribute('aria-label')).toBe('Cable adjustment help');
+      const helpIcon = helpBtn.querySelector('app-icon');
+      expect(helpIcon?.getAttribute('aria-hidden')).toBe('true');
     });
   });
 });
