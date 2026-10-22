@@ -26,7 +26,9 @@ h2 {
     row-gap: 0.75rem;
 
     &--measure {
-      grid-template-columns: repeat(3, 1fr);
+      // the middle column fits its label on one line
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      column-gap: 1.5rem;
     }
   }
 
@@ -35,6 +37,10 @@ h2 {
     flex-direction: column;
     gap: 0.25rem;
     margin: 0;
+
+    &--single-line label {
+      white-space: nowrap;
+    }
   }
 
   &__separator {
