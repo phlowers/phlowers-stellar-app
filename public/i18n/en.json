@@ -2,9 +2,6 @@
   "routes": {
     "login": "Login",
     "admin": "Admin",
-    "study": "Study",
-    "news": "News",
-    "changelog": "Changelog",
     "studio": "Studio",
     "tools": "Tools",
     "instruction-manual": "Instruction manual"
@@ -105,7 +102,6 @@
     "sign-in-label": "Sign in",
     "span-label": "Span",
     "studies-label": "Studies",
-    "studio": "Studio",
     "study-and-section-label": "Study and section",
     "study-label": "Study",
     "success": "Success",
@@ -202,14 +198,14 @@
     "offline-card": {
       "title": "Application status",
       "connection-online": "Online.",
-      "connection-offline": "No connection.",
-      "status-ready": "Offline mode ready.",
-      "status-preparing": "Preparing offline mode.",
-      "status-waiting-network": "Network too slow: offline mode setup on hold.",
-      "status-storage-insufficient": "Not enough storage: offline mode impossible.",
+      "connection-offline": "Offline.",
+      "status-ready": "Offline mode available.",
+      "status-preparing": "Update in progress.",
+      "status-waiting-network": "Network too slow: update on hold.",
+      "status-storage-insufficient": "Not enough storage: update impossible.",
       "status-not-prepared": "Offline mode unavailable.",
-      "update-postponed-network": "Update postponed: network too slow.",
-      "update-blocked-storage": "Update blocked: not enough storage."
+      "update-postponed-network": "Network too slow: update postponed.",
+      "update-blocked-storage": "Not enough storage: update impossible."
     },
     "no-recent-studies": "No recent studies",
     "go-to-studies": "Go to my studies"
@@ -293,9 +289,7 @@
     "python-logs-activated-summary": "Python logs activated",
     "python-logs-deactivated-summary": "Python logs deactivated",
     "python-logs-activated-detail": "The python logs have been activated",
-    "python-logs-deactivated-detail": "The python logs have been deactivated",
-    "debug-logs-on": "Enabled",
-    "debug-logs-off": "Disabled"
+    "python-logs-deactivated-detail": "The python logs have been deactivated"
   },
   "shared": {
     "catalog-update-service": {
@@ -309,9 +303,10 @@
       "shrink-menu": "Shrink menu",
       "menu": "Menu"
     },
+    "topbar": {
+      "no-user": "No user"
+    },
     "logged-layout": {
-      "home": "Home",
-      "studies": "Studies",
       "tools": "Tools",
       "instruction-manual": "Instruction manual",
       "manual": "Manual",
@@ -392,7 +387,6 @@
       "cables-amount": "Cables amount",
       "ic-name-label": "Initial condition name",
       "ic-name-unique-error": "Initial condition name must be unique.",
-      "whole-number-required": "Whole number required.",
       "extreme-historical": "Extreme historical conditions incurred by the cable",
       "max-frost-width": "Max ice thickness",
       "base-temperature-unit": "Base temperature (°C)",
@@ -462,8 +456,7 @@
     "from-file": {
       "file-format": "File formats: {{ formats }}",
       "description": "You can import a section from a JSON file. It will be added to the current study.",
-      "upload-prompt": "Upload a JSON file",
-      "import-error": "The imported section could not be found. Please try again."
+      "upload-prompt": "Upload a JSON file"
     }
   },
   "studies": {
@@ -618,7 +611,6 @@
     },
     "climate": {
       "wind-pressure-label": "Wind Pressure",
-      "whole-number-required": "Whole number required",
       "cable-temperature-label": "Cable Temperature",
       "ice-thickness-label": "Ice thickness",
       "frontier-support-label": "Frontier support"
@@ -771,9 +763,6 @@
       "span-type-label": "Span type",
       "phase-number-label": "Phase number",
       "degree-addon": "°",
-      "latitude-label": "Latitude",
-      "altitude-label": "Altitude",
-      "meter-addon": "m",
       "azimuth-label": "Azimuth (clockwise — 0° North/South)",
       "localization-not-available": "Localization not available in study"
     },
@@ -931,9 +920,7 @@
       "z-label": "z:",
       "y-label": "y:",
       "obstacle": "Obstacles",
-      "floor": "Floor",
-      "distance": "Distance",
-      "loads": "Loads"
+      "floor": "Floor"
     },
     "studio-page": {
       "working-load-label": "Working load",
@@ -973,13 +960,6 @@
       "obstacle-altitude-type-label": "Obstacle altitude type",
       "free-positioning-label": "Free positioning",
       "free-positioning-forced-frame-warning": "Free positioning mode is only available with a left reference support, an absolute altitude type and a span-axis lateral distance type. The current obstacle settings differ, so the results may be inaccurate.",
-      "add-point-btn": "Add point",
-      "select-point-label": "Select point",
-      "point-label": "Point",
-      "delete-point-aria-label": "delete point",
-      "point-alt-label": "Point alt.",
-      "ref-support-dist-label": "Ref. support dist.",
-      "line-axis-dist-label": "Line axis dist.",
       "delete-obstacle-aria-label": "delete obstacle",
       "conformity-dialog-title": "Conformity verifications",
       "obstacle-must-be-saved-warning": "obstacle must be saved",
@@ -1184,9 +1164,7 @@
       "failed-to-compute-equivalent-span": "Failed to compute equivalent span",
       "failed-to-compute-hanging-table": "Failed to compute hanging table",
       "hanging-table-saved": "Hanging table saved",
-      "failed-to-save-hanging-table": "Failed to save hanging table",
-      "max-two-decimals-error": "Maximum 2 decimal places",
-      "integer-error": "Value must be a whole number"
+      "failed-to-save-hanging-table": "Failed to save hanging table"
     },
     "cable-adjustment": {
       "span-length-label": "Span length",

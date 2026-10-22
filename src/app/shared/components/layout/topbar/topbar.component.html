@@ -40,5 +40,5 @@
     <span class="calculation__txt" [class.show]="workerError()">{{ 'common.error' | transloco }}</span>
   </p>
 
-  <p class="user" data-testid="user-info">{{ user()?.email ?? 'No user' }}</p>
+  <p class="user" data-testid="user-info">{{ user()?.email ?? ('shared.topbar.no-user' | transloco) }}</p>
 </header>

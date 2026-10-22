@@ -36,8 +36,6 @@ describe('LoggedLayoutComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'shared.logged-layout.home': 'Home',
-              'shared.logged-layout.studies': 'Studies',
               'shared.logged-layout.tools': 'Tools',
               'common.home-label': 'Home',
               'common.studies-label': 'Studies',

@@ -44,7 +44,7 @@ describe('TopbarComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {} },
+          langs: { en: { shared: { topbar: { 'no-user': 'No user' } } } },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
         }),
