@@ -35,7 +35,7 @@
               class="free-positioning-plot__category-dot"
               [style.backgroundColor]="categoryDrawings[cat].unselected.color"
             ></span>
-            {{ 'studio.free-positioning.' + cat | transloco }}
+            {{ categoryLabelKeys[cat] | transloco }}
           </button>
         }
       </div>
