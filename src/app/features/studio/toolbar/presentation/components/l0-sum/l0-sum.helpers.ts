@@ -1,3 +1,5 @@
+import { sanitizeFilenamePart } from '@shared/helpers/filename.helpers';
+
 import { L0Row } from './l0-sum.interfaces';
 
 const L0_EXPORT_EXTENSION = '.csv';
@@ -16,11 +18,6 @@ export interface L0CsvLabels {
   spanLength: string;
   l0: string;
   cumulatedL0: string;
-}
-
-// Replaces the characters that are illegal in a file name on common filesystems
-function sanitizeFilenamePart(value: string): string {
-  return value.replace(/[/\\:*?"<>|]/g, '-');
 }
 
 // Local time as YYYY-MM-DD_HH-mm-ss, the ":" of a time being illegal in a file name
