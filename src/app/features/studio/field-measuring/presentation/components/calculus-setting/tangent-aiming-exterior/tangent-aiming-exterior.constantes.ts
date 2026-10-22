@@ -11,14 +11,15 @@ import {
   TangentAimingSupportNumberFieldView,
   TangentAimingSupportNumericField
 } from '../tangent-aiming-support/tangent-aiming-support.interfaces';
-import { TANGENT_AIMING_SUPPORT_FIELD_RULES } from '../tangent-aiming-support/tangent-aiming-support.constantes';
+import {
+  TANGENT_AIMING_SHARED_I18N,
+  TANGENT_AIMING_SUPPORT_FIELD_RULES
+} from '../tangent-aiming-support/tangent-aiming-support.constantes';
 import {
   TangentAimingExteriorCalculationType,
   TangentAimingExteriorInputField,
   TangentAimingExteriorNumericField
 } from './tangent-aiming-exterior.interfaces';
-
-const I18N = 'field-measuring.tangent-aiming-exterior';
 
 /** Display description of each numeric input. */
 export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
@@ -35,7 +36,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   },
   hAccDistance: {
     id: 'taeHAccDistance',
-    labelKey: `${I18N}.h-acc-distance-label`,
+    labelKey: `${TANGENT_AIMING_SHARED_I18N}.h-acc-distance-label`,
     unitKey: 'common.meter',
     testId: 'h-acc-distance-input',
     step: 0.01,
@@ -43,7 +44,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   },
   verticalAccAngleLeft: {
     id: 'taeVerticalAccAngleLeft',
-    labelKey: `${I18N}.vertical-acc-angle-left-label`,
+    labelKey: `${TANGENT_AIMING_SHARED_I18N}.vertical-acc-angle-left-label`,
     unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-left-input',
     step: 0.01,

@@ -713,18 +713,23 @@
     },
     "calculus-setting": {
       "tangent-aiming-radio-label": "Tangent aiming (Support)",
-      "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)"
+      "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)",
+      "tangent-aiming-interior-radio-label": "Tangent aiming (Interior)"
+    },
+    "tangent-aiming": {
+      "mandatory-msg": "All data are mandatory for parameter calculation.",
+      "h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
+      "vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support"
     },
     "tangent-aiming-support": {
-      "mandatory-msg": "All data are mandatory for parameter calculation.",
       "h-acc-distance-label": "Vertical dist. from device to cable attach. of left support",
       "calculation-failed": "Failed to calculate parameter by tangent aiming"
     },
     "tangent-aiming-exterior": {
-      "mandatory-msg": "All data are mandatory for parameter calculation.",
-      "h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
-      "vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support",
       "calculation-failed": "Failed to calculate parameter by tangent aiming (exterior)"
+    },
+    "tangent-aiming-interior": {
+      "calculation-failed": "Failed to calculate parameter by tangent aiming (interior)"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",

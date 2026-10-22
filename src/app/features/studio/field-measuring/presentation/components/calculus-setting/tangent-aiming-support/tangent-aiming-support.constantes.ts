@@ -12,6 +12,9 @@ import {
   TangentAimingSupportNumericField
 } from './tangent-aiming-support.interfaces';
 
+/** Transloco prefix of the keys shared by the tangent aiming (support, exterior, interior) forms. */
+export const TANGENT_AIMING_SHARED_I18N = 'field-measuring.tangent-aiming';
+
 const I18N = 'field-measuring.tangent-aiming-support';
 
 /** Display description of each numeric input. */

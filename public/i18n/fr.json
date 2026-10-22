@@ -713,18 +713,23 @@
     },
     "calculus-setting": {
       "tangent-aiming-radio-label": "Visées tangentes (Support)",
-      "tangent-aiming-exterior-radio-label": "Visées tangentes (Extérieur)"
+      "tangent-aiming-exterior-radio-label": "Visées tangentes (Extérieur)",
+      "tangent-aiming-interior-radio-label": "Visées tangentes (Intérieur)"
+    },
+    "tangent-aiming": {
+      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
+      "h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support de gauche",
+      "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche"
     },
     "tangent-aiming-support": {
-      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
       "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",
       "calculation-failed": "Échec du calcul du paramètre par visées tangentes"
     },
     "tangent-aiming-exterior": {
-      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul de paramètre.",
-      "h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
-      "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
       "calculation-failed": "Échec du calcul du paramètre par visées tangentes (extérieur)"
+    },
+    "tangent-aiming-interior": {
+      "calculation-failed": "Échec du calcul du paramètre par visées tangentes (intérieur)"
     },
     "papoto": {
       "open-help-aria-label": "ouvrir l'aide de PAPOTO",
