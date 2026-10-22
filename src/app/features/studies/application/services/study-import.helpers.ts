@@ -65,3 +65,16 @@ export const formatProtoV4Parameters = (rawParameters: string[], fileName: strin
     project_name: fileName.replace('.csv', '')
   };
 };
+
+/**
+ * Returns `true` if the filename is a plain-JSON `.stsd` study export.
+ * @param fileName - The file name to check
+ */
+export const isStsdFile = (fileName: string): boolean => fileName.toLowerCase().endsWith('.stsd');
+
+/**
+ * Returns `true` if the filename is an app study export (`.clst` base64 JSON or `.stsd` plain JSON).
+ * @param fileName - The file name to check
+ */
+export const isAppStudyFile = (fileName: string): boolean =>
+  fileName.toLowerCase().endsWith('.clst') || isStsdFile(fileName);

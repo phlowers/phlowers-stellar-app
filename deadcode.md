@@ -4,6 +4,11 @@
 
 ## Pending review
 
+### Unused `StartLocation` interface
+
+- **Source**: `src/app/features/study/application/services/section-import.interfaces.ts` (whole file).
+- **Evidence**: the Lambert93 reprojection moved to `GeopositioningService`, which no longer needs a start location object; no consumer of `StartLocation` remains in `src`.
+
 ### Unused `truncate1Decimal` display methods
 
 - **Sources**: `src/app/features/studio/field-measuring/presentation/components/calculus-setting/papoto/papoto.component.ts`, `src/app/features/studio/field-measuring/presentation/components/temperature-calculation/temperature-calculation.component.ts`, `src/app/features/studio/field-measuring/presentation/components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component.ts`.

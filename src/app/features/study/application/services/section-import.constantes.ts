@@ -26,3 +26,6 @@ export const IMPORT_SUCCESS_KEY = 'section-import.import-success';
 
 /** Transloco translation key for the warning shown when a support is absent from the attachment catalog. */
 export const CATALOG_MISSING_WARNING_KEY = 'section-import.catalog-missing-warning';
+
+/** Transloco translation key for the warning shown when the computed span azimuths differ from the file ones. */
+export const AZIMUTH_REPROJECTION_WARNING_KEY = 'section-import.azimuth-reprojection-warning';

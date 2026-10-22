@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NewSectionModalComponent } from './newSectionModal.component';
+import { createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { Section, Study, Support } from '@shared/domain';
 import { By } from '@angular/platform-browser';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
@@ -108,8 +109,6 @@ describe('NewSectionModalComponent', () => {
     selected_cable_modification_uuid: null,
     cable_span_manipulations: [],
     selected_cable_span_manipulation_uuid: null,
-    start_latitude: null,
-    start_longitude: null,
     start_azimuth: null,
     mean_reprojection_diff_meters: null
   };
@@ -216,9 +215,15 @@ describe('NewSectionModalComponent', () => {
   });
 
   describe('onValidate', () => {
+    const sectionWithSupports: Section = {
+      ...mockSection,
+      supports: [createEmptySupport(), createEmptySupport()]
+    };
+
     it('should persist location defaults when the section has null coordinates and the user never interacted with the location inputs', async () => {
       const { LOCATION_CONFIG } =
         await import('@features/study/presentation/components/sections-tab/newSectionModal/manualSection/location/location.constantes');
+      fixture.componentRef.setInput('section', sectionWithSupports);
       fixture.componentRef.setInput('mode', 'edit');
       fixture.detectChanges();
       const spyOutput = vi.spyOn(component.outputSection, 'emit');
@@ -226,34 +231,35 @@ describe('NewSectionModalComponent', () => {
 
       component.onValidate();
 
-      expect(spyOutput).toHaveBeenCalledWith({
-        ...mockSection,
-        start_latitude: LOCATION_CONFIG.latitude.default,
-        start_longitude: LOCATION_CONFIG.longitude.default,
-        start_azimuth: LOCATION_CONFIG.azimuth.default
-      });
+      const emitted = spyOutput.mock.calls[0][0];
+      expect(emitted.supports[0].footLatitude).toBe(LOCATION_CONFIG.latitude.default);
+      expect(emitted.supports[0].footLongitude).toBe(LOCATION_CONFIG.longitude.default);
+      expect(emitted.start_azimuth).toBe(LOCATION_CONFIG.azimuth.default);
       expect(spyOpen).toHaveBeenCalledWith(false);
     });
 
     it('should merge locationData into section when locationData is set', () => {
+      fixture.componentRef.setInput('section', sectionWithSupports);
+      fixture.detectChanges();
       component.onLocationChange({ latitude: 48.5, longitude: 2.3, azimuth: 90, isValid: true });
       const spyOutput = vi.spyOn(component.outputSection, 'emit');
 
       component.onValidate();
 
-      expect(spyOutput).toHaveBeenCalledWith({
-        ...mockSection,
-        start_latitude: 48.5,
-        start_longitude: 2.3,
-        start_azimuth: 90
-      });
+      const emitted = spyOutput.mock.calls[0][0];
+      expect(emitted.supports[0].footLatitude).toBe(48.5);
+      expect(emitted.supports[0].footLongitude).toBe(2.3);
+      expect(emitted.supports[1]).toEqual(sectionWithSupports.supports[1]);
+      expect(emitted.start_azimuth).toBe(90);
     });
 
     it('should preserve existing section location values when locationData is null', () => {
       const sectionWithLocation: Section = {
         ...mockSection,
-        start_latitude: 45,
-        start_longitude: 1,
+        supports: [
+          { ...mockSection.supports[0], footLatitude: 45, footLongitude: 1 },
+          ...mockSection.supports.slice(1)
+        ],
         start_azimuth: 45
       };
       fixture.componentRef.setInput('section', sectionWithLocation);

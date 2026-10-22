@@ -10,6 +10,7 @@ import {
   signal,
   viewChild
 } from '@angular/core';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -103,6 +104,7 @@ export class ManualSectionComponent implements OnInit {
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly geopositioning = inject(GeopositioningService);
   readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   readonly plotOptionsService = inject(PlotOptionsService);
@@ -136,6 +138,9 @@ export class ManualSectionComponent implements OnInit {
   regionalTeamRead = signal<string>('');
   linkAdrRead = signal<string>('');
   litAdrRead = signal<string>('');
+
+  /** Start GPS of the section: foot of its first support. */
+  readonly startGps = computed(() => this.geopositioning.getStartGps(this.section()));
 
   readonly uniqueMaintenanceCenters = computed(() =>
     orderBy(uniqBy(this.maintenanceFilterTable(), 'maintenance_center_id'), ['maintenance_center'], ['asc'])

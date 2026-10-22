@@ -366,4 +366,88 @@ describe('AppDatabase', () => {
     expect(section['maintenance_center_names']).toBeUndefined();
     expect(section['regional_maintenance_center_names']).toBeUndefined();
   });
+
+  it('should register version 11 as a data-only upgrade moving the start GPS to the first support', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    const versionCall = dexieState.instances[0].versionCalls[10];
+    expect(versionCall.version).toBe(11);
+    expect(versionCall.schema).toBeUndefined();
+    expect(versionCall.upgrade).toBeInstanceOf(Function);
+  });
+
+  describe('version 11 upgrade', () => {
+    const runUpgrade = async (study: unknown) => {
+      const { AppDatabase } = await import('@infrastructure/database/app-database');
+      new AppDatabase();
+      const upgrade = dexieState.instances[0].versionCalls[10].upgrade!;
+      let modifyCallback: ((s: unknown) => void) | undefined;
+      const tx = {
+        table: (name: string) => {
+          expect(name).toBe('studies');
+          return {
+            toCollection: () => ({
+              modify: (cb: (s: unknown) => void) => {
+                modifyCallback = cb;
+                return Promise.resolve();
+              }
+            })
+          };
+        }
+      };
+      await upgrade(tx);
+      modifyCallback!(study);
+    };
+
+    it('should copy start_latitude/start_longitude to the first support foot GPS and drop both keys', async () => {
+      const study = {
+        sections: [
+          {
+            start_latitude: 45.5,
+            start_longitude: 3.5,
+            supports: [
+              { footLatitude: null, footLongitude: null },
+              { footLatitude: null, footLongitude: null }
+            ]
+          }
+        ]
+      };
+
+      await runUpgrade(study);
+
+      const section = study.sections[0] as Record<string, unknown>;
+      expect(study.sections[0].supports[0]).toEqual({ footLatitude: 45.5, footLongitude: 3.5 });
+      expect(study.sections[0].supports[1]).toEqual({ footLatitude: null, footLongitude: null });
+      expect('start_latitude' in section).toBe(false);
+      expect('start_longitude' in section).toBe(false);
+    });
+
+    it('should keep the existing foot GPS of the first support', async () => {
+      const study = {
+        sections: [{ start_latitude: 1, start_longitude: 2, supports: [{ footLatitude: 10, footLongitude: 20 }] }]
+      };
+
+      await runUpgrade(study);
+
+      expect(study.sections[0].supports[0]).toEqual({ footLatitude: 10, footLongitude: 20 });
+    });
+
+    it('should not copy non-numeric start values and tolerate missing sections/supports', async () => {
+      const study = {
+        sections: [
+          { start_latitude: null, start_longitude: 2, supports: [{ footLatitude: null, footLongitude: null }] },
+          { start_latitude: 1, start_longitude: 2 },
+          { start_latitude: 1, start_longitude: 2, supports: [] }
+        ]
+      };
+
+      await runUpgrade(study);
+
+      expect(study.sections[0].supports?.[0]).toEqual({ footLatitude: null, footLongitude: null });
+      expect('start_latitude' in study.sections[1]).toBe(false);
+      await runUpgrade({});
+    });
+  });
 });

@@ -174,11 +174,7 @@ export interface Section {
   cable_support_manipulations?: CableSupportManipulation[];
   /** UUID of the currently selected cable support manipulation */
   selected_cable_support_manipulation_uuid?: string | null;
-  /** Latitude of the first support */
-  start_latitude: number | null;
-  /** Longitude of the first support */
-  start_longitude: number | null;
-  /** Azimuth of the first support */
+  /** Azimuth of the first support (the start GPS is the foot of `supports[0]`) */
   start_azimuth: number | null;
   /** Saved studio view state (camera, scale, resolution, span selection). */
   studio_view_state?: StudioViewState;

@@ -294,6 +294,11 @@ def compute_localization(js_inputs):
 
 
 @debug_log
+def convert_coordinates(js_inputs):
+    return geography.convert_coordinates(js_to_python(js_inputs))
+
+
+@debug_log
 def import_lambert(js_inputs):
     result = geography.import_lambert(js_to_python(js_inputs))
     logger.debug(f"Result of import_lambert: {result}")

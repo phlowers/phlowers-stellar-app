@@ -15,7 +15,7 @@ import { GenericImportEngineService } from '@shared/import/application/services/
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
- * Component for importing studies from `.clst` (app format) or `.csv` (Proto V4) files.
+ * Component for importing studies from `.clst` / `.stsd` (app format) or `.csv` (Proto V4) files.
  *
  * Acts as a UI orchestration layer delegating all file processing to
  * `GenericImportEngineService` via the `StudyImportService` adapter.
@@ -49,7 +49,7 @@ export class ImportStudyComponent {
 
   /**
    * Public delegation for backward compatibility with tests.
-   * Loads and imports a `.clst` file, then updates `newStudies` on success.
+   * Loads and imports a `.clst` or `.stsd` file, then updates `newStudies` on success.
    */
   loadAppFile(file: File): Promise<void> {
     return this.studyImportService.loadAppFile(file, this.makeCollisionResolver()).then((study) => {

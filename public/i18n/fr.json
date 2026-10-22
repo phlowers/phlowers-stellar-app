@@ -458,6 +458,7 @@
       "invalid-envelope": "Le fichier de canton Stellar est invalide.",
       "unsupported-version": "Version {{ version }} du fichier de canton Stellar non prise en charge (maximum pris en charge : {{ maxVersion }})."
     },
+    "azimuth-reprojection-warning": "Les azimuts de portée calculés à partir des coordonnées importées diffèrent des valeurs du fichier jusqu'à {{ error }}° (seuil : {{ threshold }}°). Les valeurs calculées ont été conservées.",
     "reprojection-info": "La reprojection sur le modèle de données {{ appName }} semble ajouter une erreur absolue moyenne de {{ error }} m",
     "from-file": {
       "file-format": "Formats de fichier : {{ formats }}",
@@ -474,7 +475,7 @@
     },
     "import": {
       "description": "Vous pouvez importer plusieurs fichiers, ils seront disponibles dans l'onglet \"Mes études\".",
-      "file-formats": "Formats de fichiers : .csv, .clst",
+      "file-formats": "Formats de fichiers : .csv, .clst, .stsd",
       "error-cable-not-found": "Câble non trouvé dans la base de données",
       "error-import": "Erreur lors de l'importation de l'étude",
       "error-delete": "Erreur lors de la suppression de l'étude",
