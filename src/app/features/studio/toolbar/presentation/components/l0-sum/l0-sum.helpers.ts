@@ -60,16 +60,21 @@ function formatCsvNumber(value: number, locale: string): string {
   }).format(value);
 }
 
+// Support numbers are free text. Spreadsheet software turns "1-2" into a date and reads a cell starting with "=", "+",
+// "-" or "@" as a formula. Writing the label as a formula string literal (="1-2") keeps it as text in both cases, and
+// as the quotes inside are doubled nothing in the label can end the literal and run as a formula
+function toCsvTextField(value: string): string {
+  return `="${value.replaceAll('"', '""')}"`;
+}
+
 // Builds the L0 export: a heading row of translated upper case labels, then one row per span
 export function buildL0Csv(rows: L0Row[], labels: L0CsvLabels, locale: string): string {
   const headingRow = [labels.span, labels.spanLength, labels.l0, labels.cumulatedL0].map((label) =>
     label.toLocaleUpperCase(locale)
   );
-  // Support numbers are free text: spreadsheet software reads a cell starting with "=", "+", "-" or "@" as a formula,
-  // and leading whitespace can hide that character, so those span labels get an apostrophe before the CSV escaping.
   // The lengths are left alone, a negative one legitimately starts with "-"
   const dataRows = rows.map((row) => [
-    /^[\s=+@-]/.test(row.span) ? `'${row.span}` : row.span,
+    toCsvTextField(row.span),
     formatCsvNumber(row.spanLength, locale),
     formatCsvNumber(row.l0, locale),
     formatCsvNumber(row.cumulatedL0, locale)

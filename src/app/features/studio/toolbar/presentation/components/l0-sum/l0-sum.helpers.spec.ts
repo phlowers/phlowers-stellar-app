@@ -1,3 +1,5 @@
+import Papa from 'papaparse';
+
 import { buildL0Csv, buildL0ExportFilename, isL0TableExportable } from './l0-sum.helpers';
 import { L0Row } from './l0-sum.interfaces';
 
@@ -105,7 +107,11 @@ describe('buildL0Csv', () => {
       frLabels,
       'fr'
     );
-    expect(csv.replace('\uFEFF', '').split('\r\n').slice(1)).toEqual(['1-2;101,25;100;100', '2-3;201;200,5;300,5', '']);
+    expect(csv.replace('\uFEFF', '').split('\r\n').slice(1)).toEqual([
+      '"=""1-2""";101,25;100;100',
+      '"=""2-3""";201;200,5;300,5',
+      ''
+    ]);
   });
 
   it('should use the decimal separator of the locale and no thousands grouping', () => {
@@ -113,20 +119,23 @@ describe('buildL0Csv', () => {
       buildL0Csv([row({ spanLength: 1234.5, l0: 1234.5, cumulatedL0: 1234.5 })], frLabels, locale)
         .replace('\uFEFF', '')
         .split('\r\n')[1];
-    expect(line('fr')).toBe('1-2;1234,5;1234,5;1234,5');
-    expect(line('en')).toBe('1-2;1234.5;1234.5;1234.5');
+    expect(line('fr')).toBe('"=""1-2""";1234,5;1234,5;1234,5');
+    expect(line('en')).toBe('"=""1-2""";1234.5;1234.5;1234.5');
   });
 
   it('should keep at most 3 decimals like the table', () => {
     const line = buildL0Csv([row({ l0: 100.123456 })], frLabels, 'en').split('\r\n')[1];
-    expect(line).toBe('1-2;101.25;100.123;100');
+    expect(line).toBe('"=""1-2""";101.25;100.123;100');
   });
 
-  it('should quote a span label holding the separator or a quote', () => {
-    const line = (span: string) => buildL0Csv([row({ span })], frLabels, 'en').split('\r\n')[1];
-    expect(line('A;1-B')).toBe('"A;1-B";101.25;100;100');
-    expect(line('A"1-B')).toBe('"A""1-B";101.25;100;100');
-  });
+  // Spreadsheet software turns a bare "1-2" into a date, so a span label is written as a text formula: ="1-2"
+  it.each(['1-2', '2-3', '12-13', '1-31', 'A1-B2', '1-=2', 'A+B-C@D'])(
+    'should write the span label "%s" as a text formula',
+    (span) => {
+      const line = buildL0Csv([row({ span })], frLabels, 'en').split('\r\n')[1];
+      expect(line).toBe(`"=""${span}""";101.25;100;100`);
+    }
+  );
 
   it.each([
     ['=', '=1+1-2'],
@@ -137,24 +146,42 @@ describe('buildL0Csv', () => {
     ['a tab then =', '\t=1+1-2'],
     ['a non breaking space then =', ' =1+1-2'],
     ['a tab then a letter', '\tA-B']
-  ])('should prefix a span label starting with %s so it is not read as a formula', (_start, span) => {
+  ])('should keep a span label starting with %s inside the text formula', (_start, span) => {
     const line = buildL0Csv([row({ span })], frLabels, 'en').split('\r\n')[1];
-    expect(line).toBe(`'${span};101.25;100;100`);
+    expect(line).toBe(`"=""${span}""";101.25;100;100`);
   });
 
-  it('should prefix a formula span label before quoting it', () => {
+  it('should double the quotes of a span label holding the separator or a quote', () => {
     const line = (span: string) => buildL0Csv([row({ span })], frLabels, 'en').split('\r\n')[1];
-    expect(line('@A;1-2')).toBe('"\'@A;1-2";101.25;100;100');
-    expect(line('\r=1+1-2')).toBe('"\'\r=1+1-2";101.25;100;100');
+    expect(line('A;1-B')).toBe('"=""A;1-B""";101.25;100;100');
+    expect(line('A"1-B')).toBe('"=""A""""1-B""";101.25;100;100');
   });
 
-  it.each(['1-2', 'A1-B2', '1-=2', 'A+B-C@D'])('should leave the span label "%s" as is', (span) => {
-    const line = buildL0Csv([row({ span })], frLabels, 'en').split('\r\n')[1];
-    expect(line).toBe(`${span};101.25;100;100`);
+  // The text formula must hold the whole label as one string literal, with every inner quote doubled
+  it.each([
+    '1-2',
+    "=cmd|' /C calc'!A0-1",
+    '"&HYPERLINK("http://example.com","x")&"-2',
+    '1-2"; DROP',
+    'A;1-B',
+    'line\nbreak-1',
+    '\r=1+1-2',
+    '"',
+    '""'
+  ])('should read the span label %j back from the CSV as a single string literal', (span) => {
+    const csv = buildL0Csv([row({ span })], frLabels, 'en').replace('\uFEFF', '');
+    const { data, errors } = Papa.parse<string[]>(csv, { delimiter: ';', skipEmptyLines: true });
+
+    expect(errors).toEqual([]);
+    expect(data).toHaveLength(2);
+    expect(data[1]).toHaveLength(4);
+    const literal = /^="((?:[^"]|"")*)"$/.exec(data[1][0]);
+    expect(literal).not.toBeNull();
+    expect(literal![1].replaceAll('""', '"')).toBe(span);
   });
 
   it('should keep the lengths as bare numbers, a negative one included', () => {
     const line = buildL0Csv([row({ spanLength: -101.25, l0: -5, cumulatedL0: -5 })], frLabels, 'en').split('\r\n')[1];
-    expect(line).toBe('1-2;-101.25;-5;-5');
+    expect(line).toBe('"=""1-2""";-101.25;-5;-5');
   });
 });
