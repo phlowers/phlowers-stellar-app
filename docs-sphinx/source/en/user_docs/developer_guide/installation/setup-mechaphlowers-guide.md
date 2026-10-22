@@ -24,7 +24,7 @@ Step 2: DOWNLOAD PYODIDE RUNTIME
   └─ Fetch Pyodide runtime from NPM registry, verified against the integrity in package-lock.json
 
 Step 3: DOWNLOAD PACKAGES
-  └─ Extract deps from built wheel → pip download --require-hashes with constraints.txt
+  └─ Export the runtime deps of uv.lock (with hashes) → pip download --require-hashes
 
 Step 4: CDN REPLACEMENT
   └─ Replace pip wheels with wasm32 versions from CDN (or local CDN directory),
@@ -65,16 +65,15 @@ All transitive dependencies (thermohl, numpy, pandas, pandera, etc.) are resolve
 
 | File | Purpose |
 |------|---------|
-| `stellar-engine/pyproject.toml` | stellar-engine package definition |
-| `scripts/constraints.in` | Version constraints for Pyodide CDN compatibility |
-| `scripts/constraints.txt` | Generated from `constraints.in` with hashes (`npm run lock-python-constraints`); enforced by `pip download --require-hashes` |
+| `stellar-engine/pyproject.toml` | stellar-engine package definition; `[tool.uv] constraint-dependencies` pins the runtime packages to the Pyodide CDN versions |
+| `stellar-engine/uv.lock` | Single source of truth for Python package versions and hashes; exported on the fly and enforced by `pip download --require-hashes` |
 
 ### Integrity checks
 
 - **Pyodide tarball**: its SHA-512 is compared with the `integrity` field of `package-lock.json`. Bump `pyodide` with `npm install`, never by editing the script.
-- **PyPI wheels**: `pip download --require-hashes --only-binary=:all:` accepts only the hashes listed in `scripts/constraints.txt`. After changing `constraints.in` or the `stellar-engine` dependencies, run `npm run lock-python-constraints` and commit the result.
+- **PyPI wheels**: `pip download --require-hashes --only-binary=:all:` accepts only the hashes of `stellar-engine/uv.lock` (exported with `uv export --locked`, which fails when the lock is out of date). After changing the `stellar-engine` dependencies or the Pyodide pins, run `uv lock` in `stellar-engine/` and commit the result.
 - **CDN wheels**: the SHA-256 of each wheel must match `pyodide-lock.json` from the verified tarball (also applies with `--local-cdn-dir`).
-- With `--local-mechaphlowers`, the local wheel is hashed on the fly; its dependencies must still be in `constraints.txt`.
+- With `--local-mechaphlowers`, the local wheel is hashed on the fly; its dependencies must still be in `uv.lock`.
 - Any mismatch stops the script with a non-zero exit code.
 
 ---
