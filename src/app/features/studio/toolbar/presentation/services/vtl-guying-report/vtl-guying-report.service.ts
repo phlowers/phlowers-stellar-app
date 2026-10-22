@@ -10,14 +10,14 @@ import { inject, Injectable } from '@angular/core';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { TranslocoService } from '@jsverse/transloco';
 
+import { sanitizeFilenamePart } from '@shared/helpers/filename.helpers';
 import { PdfBaseService } from '@shared/pdf/pdf-base.service';
 import {
   buildReportLabels,
   drawHeader,
   drawPageFooters,
   generatePdfReport,
-  loadImageAsBase64,
-  sanitizeFilenamePart
+  loadImageAsBase64
 } from '@shared/pdf/pdf-primitives.helpers';
 
 import { PDF_LABEL_KEYS } from './vtl-guying-report.constantes';
