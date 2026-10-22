@@ -40,7 +40,9 @@ PACKAGES_JSON = Path("./src/app/core/services/worker_python/python-packages.json
 SE_DIR = Path("./stellar-engine")
 SE_DIST = SE_DIR / "dist"
 SE_INPUT = SE_DIR / "input"
-CONSTRAINTS = SCRIPTS_DIR / "constraints.in"
+# The runtime packages (versions + hashes) come from stellar-engine/uv.lock, exported on the fly.
+# pip is the downloader, so its version is pinned too.
+PIP_VERSION = "26.2.2"
 CORE_FILES = (
     "pyodide.asm.wasm",
     "pyodide.asm.js",
@@ -190,6 +192,44 @@ def download_pyodide(registry: str) -> None:
 # ── Step 3 – Download packages ───────────────────────────────────────────────
 
 
+def export_requirements(tmp: Path, local_wheel: Path | None) -> Path:
+    """Export the runtime dependencies of ``uv.lock`` as a hashed requirements file.
+
+    With *local_wheel*, mechaphlowers is replaced by the local wheel and its on-the-fly hash.
+    """
+    out = tmp / "requirements.txt"
+    run(
+        [
+            "uv",
+            "export",
+            "--project",
+            str(SE_DIR),
+            "--locked",
+            "--no-dev",
+            "--no-emit-project",
+            "--no-header",
+            "--no-annotate",
+            "--format",
+            "requirements-txt",
+            "--output-file",
+            str(out),
+        ]
+    )
+    if not local_wheel:
+        return out
+
+    name, version = parse_wheel(local_wheel.name)
+    kept = [
+        block
+        for block in re.split(r"\n(?=\S)", out.read_text())
+        if norm(re.split(r"[=<>!~;\s]", block.lstrip(), maxsplit=1)[0]) != name
+    ]
+    digest = hashlib.sha256(local_wheel.read_bytes()).hexdigest()
+    kept.append(f"{name}=={version} --hash=sha256:{digest}")
+    out.write_text("\n".join(kept) + "\n")
+    return out
+
+
 def download_packages(se_wheel: Path, local_wheel: Path | None) -> dict[str, str]:
     """Download stellar-engine's transitive dependencies via pip.
 
@@ -199,21 +239,26 @@ def download_packages(se_wheel: Path, local_wheel: Path | None) -> dict[str, str
     deps = wheel_deps(se_wheel)
     print(f"  stellar-engine requires: {', '.join(deps)}")
 
-    cmd = [
-        "uvx",
-        "--python",
-        ">=3.13,<3.14",
-        "pip",
-        "download",
-        "-d",
-        str(PYODIDE_DIR),
-        "-c",
-        str(CONSTRAINTS),
-        *deps,
-    ]
-    if local_wheel:
-        cmd.extend(["--find-links", str(SE_INPUT)])
-    run(cmd)
+    with tempfile.TemporaryDirectory() as tmp:
+        requirements = export_requirements(Path(tmp), local_wheel)
+        cmd = [
+            "uvx",
+            "--python",
+            ">=3.13,<3.14",
+            "--from",
+            f"pip=={PIP_VERSION}",
+            "pip",
+            "download",
+            "--require-hashes",
+            "--only-binary=:all:",
+            "-d",
+            str(PYODIDE_DIR),
+            "-r",
+            str(requirements),
+        ]
+        if local_wheel:
+            cmd.extend(["--find-links", str(SE_INPUT)])
+        run(cmd)
 
     shutil.copy(se_wheel, PYODIDE_DIR / se_wheel.name)
 

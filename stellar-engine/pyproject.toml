@@ -32,6 +32,34 @@ dependencies = [
 Repository = "https://github.com/phlowers/phlowers-stellar-app"
 
 
+[tool.uv]
+# Runtime packages are pinned to the versions of the Pyodide distribution (pyodide-lock.json), so
+# the precompiled CDN wheels can replace the PyPI ones. These pins drive uv.lock, which is the
+# single source of truth (versions + hashes) of the Python packages shipped to the browser.
+# Update them together with the `pyodide` version in package.json.
+constraint-dependencies = [
+    "annotated-types==0.7.0",
+    "certifi==2026.1.4",
+    "numpy==2.2.5",
+    "packaging==26.2",
+    "pandas==2.3.3",
+    "pandera==0.34.1",
+    "platformdirs==4.3.6",
+    "pydantic==2.12.5",
+    "pydantic-core==2.41.5",
+    "pyproj==3.7.2",
+    "python-dateutil==2.9.0.post0",
+    "pytz==2025.2",
+    "pyyaml==6.0.2",
+    "six==1.17.0",
+    "tenacity==9.2.1",
+    "typing-extensions==4.15.0",
+    "typing-inspection==0.4.2",
+    "tzdata==2025.3",
+    "xxhash==3.5.0",
+]
+
+
 [dependency-groups]
 test = ["pytest==9.1.0", "pytest-cov==5.0.0", "requests==2.33.1"]
 
