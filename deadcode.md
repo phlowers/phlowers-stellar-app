@@ -786,3 +786,16 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the probe, `serverOnline$`, `ServerStatus`, the `HttpClient` dependency and matching tests in `online.service.spec.ts`; `environment.apiUrl` / `API_URL` become unused. |
 | ✅ Validated | ⏳ Pending review |
+
+---
+
+## 44. Cable adjustment `SUPPORT_OPTIONS` + `common.left` / `common.right` i18n keys
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/cable-adjustment/domain/cable-adjustment.constantes.ts` (`SUPPORT_OPTIONS`), `cable-adjustment.interfaces.ts` (`CableAdjustmentSupportOption`), `public/i18n/en.json` / `fr.json` (`common.left`, `common.right`) |
+| Code | Static "Left / Right" support list |
+| 🔍 Evidence | The support list now uses `PlotSpanService.getSupportOptions` (support numbers). Besides the cable adjustment spec translations, no `src` file references `common.left` / `common.right` anymore. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the constant, the interface, the two i18n keys and the matching entries in the cable adjustment spec translations. |
+| ✅ Validated | ⏳ Pending review |

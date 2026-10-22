@@ -12,6 +12,8 @@ import { TranslocoTestingModule } from '@jsverse/transloco';
 import { Select } from 'primeng/select';
 import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
+import { PlotService } from '@services/plot/plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskError } from '@services/worker_python/tasks/types';
 import { NotificationService } from '@core/services/notification/notification.service';
@@ -36,6 +38,8 @@ describe('CableAdjustmentComponent', () => {
   let component: CableAdjustmentComponent;
   let fixture: ComponentFixture<CableAdjustmentComponent>;
   let spanService: PlotSpanService;
+  let plotOptionsService: PlotOptionsService;
+  let mockPlotService: { plotOptionsChange: ReturnType<typeof vi.fn> };
   let mockToolbarDialogService: { setTemplates: ReturnType<typeof vi.fn> };
   let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
   let mockNotificationService: { error: ReturnType<typeof vi.fn> };
@@ -86,6 +90,7 @@ describe('CableAdjustmentComponent', () => {
     };
     mockNotificationService = { error: vi.fn() };
     mockLogger = { error: vi.fn() };
+    mockPlotService = { plotOptionsChange: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -112,11 +117,13 @@ describe('CableAdjustmentComponent', () => {
         { provide: ToolbarDialogService, useValue: mockToolbarDialogService },
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: NotificationService, useValue: mockNotificationService },
-        { provide: LoggerService, useValue: mockLogger }
+        { provide: LoggerService, useValue: mockLogger },
+        { provide: PlotService, useValue: mockPlotService }
       ]
     }).compileComponents();
 
     spanService = TestBed.inject(PlotSpanService);
+    plotOptionsService = TestBed.inject(PlotOptionsService);
     spanService.section.set(makeSection());
     fixture = TestBed.createComponent(CableAdjustmentComponent);
     component = fixture.componentInstance;
@@ -136,8 +143,41 @@ describe('CableAdjustmentComponent', () => {
       expect(spanSelect.options?.map((option) => option.label)).toEqual(['ABCDE - FGHIJ', 'FGHIJ - KLMNO']);
     });
 
-    it('selects the current (first) span by default', () => {
+    it('selects the span currently displayed in the studio by default', () => {
       expect(component.form.controls.span.value).toEqual({ index: 0, uuid: 'support-a' });
+
+      plotOptionsService.plotOptions.update((options) => ({ ...options, startSupport: 1, endSupport: 2 }));
+      const otherFixture = TestBed.createComponent(CableAdjustmentComponent);
+      otherFixture.detectChanges();
+      expect(otherFixture.componentInstance.form.controls.span.value).toEqual({ index: 1, uuid: 'support-b' });
+    });
+
+    it('keeps only the first span when several are displayed', () => {
+      plotOptionsService.plotOptions.update((options) => ({ ...options, startSupport: 1, endSupport: 3 }));
+      const otherFixture = TestBed.createComponent(CableAdjustmentComponent);
+      otherFixture.detectChanges();
+      expect(otherFixture.componentInstance.form.controls.span.value).toEqual({ index: 1, uuid: 'support-b' });
+    });
+
+    it('selects no span when the displayed span is not in the section', () => {
+      plotOptionsService.plotOptions.update((options) => ({ ...options, startSupport: 9, endSupport: 10 }));
+      const otherFixture = TestBed.createComponent(CableAdjustmentComponent);
+      otherFixture.detectChanges();
+      expect(otherFixture.componentInstance.form.controls.span.value).toBeNull();
+    });
+
+    it('does not change the studio span on init', () => {
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
+    });
+
+    it('shows the span picked in the form in the studio', () => {
+      component.onSpanChange({ index: 1, uuid: 'support-b' });
+      expect(mockPlotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 1, endSupport: 2 });
+    });
+
+    it('leaves the studio span untouched when the span is cleared', () => {
+      component.onSpanChange(null);
+      expect(mockPlotService.plotOptionsChange).not.toHaveBeenCalled();
     });
 
     it('selects no span when the section has none', () => {
@@ -198,24 +238,38 @@ describe('CableAdjustmentComponent', () => {
       expect(component.form.controls.support.disabled).toBe(true);
     });
 
-    it('lists the left and right supports of the selected span', () => {
+    it('lists the numbers of the supports of the selected span', () => {
       component.form.controls.span.setValue({ index: 1, uuid: 'support-b' });
       fixture.detectChanges();
       expect(selects()[1].options).toEqual([
-        { label: 'Left', value: 'LEFT' },
-        { label: 'Right', value: 'RIGHT' }
+        { label: 'FGHIJ', value: 'LEFT' },
+        { label: 'KLMNO', value: 'RIGHT' }
       ]);
       expect(component.form.controls.support.enabled).toBe(true);
     });
 
-    it('clears the support when the span changes', () => {
+    it('selects the left support of the current span by default', () => {
+      expect(component.form.controls.support.value).toBe('LEFT');
+    });
+
+    it('goes back to the left support when the span changes', () => {
       component.form.controls.support.setValue('RIGHT');
       component.form.controls.span.setValue({ index: 1, uuid: 'support-b' });
+      expect(component.form.controls.support.value).toBe('LEFT');
+    });
+
+    it('clears the support when the span is cleared', () => {
+      component.form.controls.span.setValue(null);
       expect(component.form.controls.support.value).toBeNull();
     });
   });
 
   describe('Tacheometer distance and adjustment parameter', () => {
+    it('keeps the tacheometer distance label on one line', () => {
+      const field = getByTestId('tacheometer-horizontal-distance-input')?.closest('.cable-adjustment__field');
+      expect(field?.classList).toContain('cable-adjustment__field--single-line');
+    });
+
     const error = (id: string) => fixture.nativeElement.querySelector(`#${id}-error`)?.textContent?.trim();
 
     it('have no default value', () => {
@@ -348,12 +402,12 @@ describe('CableAdjustmentComponent', () => {
       expect(getByTestId('results-frame')).not.toBeNull();
     });
 
-    it('show both angles rounded to the grade', async () => {
+    it('show both angles with at most 2 decimals', async () => {
       fillRequiredFields();
       await calculate();
 
-      expect(textOf('horizontal-sight-angle-value')).toBe('74 gr');
-      expect(textOf('vertical-sight-angle-value')).toBe('97 gr');
+      expect(textOf('horizontal-sight-angle-value')).toBe('73.8 gr');
+      expect(textOf('vertical-sight-angle-value')).toBe('96.92 gr');
     });
 
     it('are read-only', async () => {

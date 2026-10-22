@@ -28,6 +28,8 @@ import { MessageModule } from 'primeng/message';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotService } from '@services/plot/plot.service';
+import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 import { NotificationService } from '@core/services/notification/notification.service';
@@ -43,8 +45,7 @@ import {
   INPUT_LIMITS,
   PARAMETER_DECIMALS,
   PARAMETER_MAX,
-  PARAMETER_MIN,
-  SUPPORT_OPTIONS
+  PARAMETER_MIN
 } from '@features/studio/cable-adjustment/domain/cable-adjustment.constantes';
 import {
   CableAdjustmentSpan,
@@ -53,6 +54,7 @@ import {
 import {
   createAngleControl,
   createNumberControl,
+  findCurrentSpanOption,
   getSpanLength,
   toCableAdjustmentInputs,
   toDisplayedResults
@@ -88,6 +90,8 @@ export class CableAdjustmentComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly logger = inject(LoggerService);
   readonly spanService = inject(PlotSpanService);
+  private readonly plotService = inject(PlotService);
+  private readonly plotOptionsService = inject(PlotOptionsService);
 
   readonly ANGLE_FIELDS = ANGLE_FIELDS;
   readonly limits = INPUT_LIMITS;
@@ -108,12 +112,8 @@ export class CableAdjustmentComponent {
     initialValue: this.form.valid
   });
 
-  // no side to pick without span
-  readonly supportOptions = computed(() =>
-    this.selectedSpan()
-      ? SUPPORT_OPTIONS.map(({ labelKey, value }) => ({ label: this.translocoService.translate(labelKey), value }))
-      : []
-  );
+  // empty without span
+  readonly supportOptions = computed(() => this.spanService.getSupportOptions(this.selectedSpan()?.uuid ?? null));
   readonly spanLength = computed(() => getSpanLength(this.spanService.section(), this.selectedSpan()?.index ?? null));
 
   readonly isCalculating = signal(false);
@@ -134,16 +134,28 @@ export class CableAdjustmentComponent {
       }
     });
 
-    // the support list follows the selected span
+    // the support list follows the selected span, starting on its left support
     this.form.controls.span.valueChanges.pipe(takeUntilDestroyed()).subscribe((span) => {
-      this.form.controls.support.reset({ value: null, disabled: span === null });
+      this.form.controls.support.reset({ value: span ? 'LEFT' : null, disabled: span === null });
     });
 
     // results only match the inputs they were calculated from
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.results.set(null));
 
-    // the current span is the first span of the section
-    this.form.controls.span.setValue(this.spanService.getSpanOptionsWithIndex()[0]?.value ?? null);
+    // the current span is the first displayed span of the studio
+    this.form.controls.span.setValue(
+      findCurrentSpanOption(
+        this.spanService.getSpanOptionsWithIndex(),
+        this.plotOptionsService.plotOptions().startSupport
+      )
+    );
+  }
+
+  /** The studio shows the span picked in the form. */
+  onSpanChange(span: CableAdjustmentSpan | null): void {
+    if (span) {
+      this.plotService.plotOptionsChange({ startSupport: span.index, endSupport: span.index + 1 });
+    }
   }
 
   async calculate(): Promise<void> {
