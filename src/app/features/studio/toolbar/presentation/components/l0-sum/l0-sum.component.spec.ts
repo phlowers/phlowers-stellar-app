@@ -11,13 +11,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { NotificationService } from '@core/services/notification/notification.service';
-
-@Component({
-  selector: 'app-button',
-  standalone: true,
-  template: '<button><ng-content></ng-content></button>'
-})
-class MockButtonComponent {}
+import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 
 @Component({
   selector: 'app-icon',
@@ -75,7 +69,7 @@ describe('L0SumComponent', () => {
             TableModule,
             ProgressSpinnerModule,
             TranslocoModule,
-            MockButtonComponent,
+            ButtonComponent,
             MockIconComponent
           ]
         }
@@ -213,6 +207,49 @@ describe('L0SumComponent', () => {
       );
       expect(lines.slice(1, 3)).toEqual(['1-2;101.25;100;100', '2-3;201;200.5;300.5']);
       expect(lines).toHaveLength(7);
+    });
+
+    it('should not export a span built from a support number starting with "=" as a formula', async () => {
+      (TestBed.inject(PlotSpanService).section as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+        supports: [{ number: '=1+1' }, { number: '2' }]
+      });
+      const formulaFixture = TestBed.createComponent(L0SumComponent);
+      formulaFixture.detectChanges();
+
+      formulaFixture.componentInstance.onExport();
+
+      const lines = (await readBlobAsText(blobs[0])).split('\r\n');
+      expect(lines[1]).toBe("'=1+1-2;101.25;100;100");
+    });
+
+    // The footer is rendered by the toolbar dialog, not in the component view
+    const renderExportButton = (target: ComponentFixture<L0SumComponent>): HTMLButtonElement => {
+      const view = target.componentInstance.footerTemplate()!.createEmbeddedView(null);
+      view.detectChanges();
+      return view.rootNodes.find((node) => node instanceof HTMLButtonElement)!;
+    };
+
+    it('should enable the export button once the data is loaded', () => {
+      const button = renderExportButton(fixture);
+
+      expect(button.disabled).toBe(false);
+      expect(button.classList).not.toContain('app-btn-loading');
+    });
+
+    it('should lock the export button while the data is recalculated', () => {
+      // the previous litData is kept until the worker returns, so the rows are still there under the spinner
+      (TestBed.inject(PlotService).loading as unknown as ReturnType<typeof vi.fn>).mockReturnValue(true);
+      const loadingFixture = TestBed.createComponent(L0SumComponent);
+      loadingFixture.detectChanges();
+      expect(loadingFixture.componentInstance.l0Rows()).toHaveLength(5);
+
+      const button = renderExportButton(loadingFixture);
+      button.click();
+
+      expect(button.disabled).toBe(true);
+      expect(button.classList).toContain('app-btn-loading');
+      expect(clickSpy).not.toHaveBeenCalled();
+      expect(blobs).toHaveLength(0);
     });
 
     it('should keep the dialog open', () => {

@@ -89,4 +89,34 @@ describe('buildL0Csv', () => {
     expect(line('A;1-B')).toBe('"A;1-B";101.25;100;100');
     expect(line('A"1-B')).toBe('"A""1-B";101.25;100;100');
   });
+
+  it.each([
+    ['=', '=1+1-2'],
+    ['+', '+1-2'],
+    ['-', '-1-2'],
+    ['@', '@A-B'],
+    ['a space then =', ' =1+1-2'],
+    ['a tab then =', '\t=1+1-2'],
+    ['a non breaking space then =', ' =1+1-2'],
+    ['a tab then a letter', '\tA-B']
+  ])('should prefix a span label starting with %s so it is not read as a formula', (_start, span) => {
+    const line = buildL0Csv([row({ span })], frLabels, 'en').split('\r\n')[1];
+    expect(line).toBe(`'${span};101.25;100;100`);
+  });
+
+  it('should prefix a formula span label before quoting it', () => {
+    const line = (span: string) => buildL0Csv([row({ span })], frLabels, 'en').split('\r\n')[1];
+    expect(line('@A;1-2')).toBe('"\'@A;1-2";101.25;100;100');
+    expect(line('\r=1+1-2')).toBe('"\'\r=1+1-2";101.25;100;100');
+  });
+
+  it.each(['1-2', 'A1-B2', '1-=2', 'A+B-C@D'])('should leave the span label "%s" as is', (span) => {
+    const line = buildL0Csv([row({ span })], frLabels, 'en').split('\r\n')[1];
+    expect(line).toBe(`${span};101.25;100;100`);
+  });
+
+  it('should keep the lengths as bare numbers, a negative one included', () => {
+    const line = buildL0Csv([row({ spanLength: -101.25, l0: -5, cumulatedL0: -5 })], frLabels, 'en').split('\r\n')[1];
+    expect(line).toBe('1-2;-101.25;-5;-5');
+  });
 });

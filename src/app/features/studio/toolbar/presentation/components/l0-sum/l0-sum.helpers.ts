@@ -44,8 +44,11 @@ export function buildL0Csv(rows: L0Row[], labels: L0CsvLabels, locale: string): 
   const headingRow = [labels.span, labels.spanLength, labels.l0, labels.cumulatedL0].map((label) =>
     label.toLocaleUpperCase(locale)
   );
+  // Support numbers are free text: spreadsheet software reads a cell starting with "=", "+", "-" or "@" as a formula,
+  // and leading whitespace can hide that character, so those span labels get an apostrophe before the CSV escaping.
+  // The lengths are left alone, a negative one legitimately starts with "-"
   const dataRows = rows.map((row) => [
-    row.span,
+    /^[\s=+@-]/.test(row.span) ? `'${row.span}` : row.span,
     formatCsvNumber(row.spanLength, locale),
     formatCsvNumber(row.l0, locale),
     formatCsvNumber(row.cumulatedL0, locale)
