@@ -6,7 +6,8 @@
  */
 
 // ─── PDF LAYOUT OVERVIEW ─────────────────────────────────────────────────────
-//  Page 1 (A4 portrait): header and study & canton cartouche
+//  Page 1 (A4 portrait): header and study & canton cartouche, continued on portrait pages (compact header) when long
+//  metadata does not fit
 //  Following pages (A4 landscape, compact header): the obstacle points as transposed tables of at most 5 points each
 //  (@shared/pdf/pdf-table.helpers)
 // ─────────────────────────────────────────────────────────────────────────────

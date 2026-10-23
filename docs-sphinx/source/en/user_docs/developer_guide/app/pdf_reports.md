@@ -70,7 +70,7 @@ export class ObstaclesTableReportService extends PdfBaseService {
           { compactHeader: true, tableGap: OBSTACLES_TABLES_VERTICAL_GAP }
         );
 
-        drawPageFooters(doc, labels.pageLabel, true);
+        drawPageFooters(doc, labels.pageLabel);
 
         return { doc, filename: buildObstaclesReportFilename(labels.reportTitle, data) };
       }
@@ -114,7 +114,8 @@ from a signal reset in a `finally` block.
 
 - To check whether an element still fits on the page before drawing it, use the constants and
   functions that give its height rather than recomputing it: `SECTION_TITLE_HEIGHT`,
-  `SEPARATOR_HEIGHT` and `computeTableHeight()`.
+  `SEPARATOR_HEIGHT` and `computeTableHeight()`. On a portrait page, no baseline goes below
+  `CONTENT_BOTTOM` (282 mm, the page height minus the bottom margin).
 
 ---
 
@@ -129,11 +130,11 @@ from a signal reset in a `finally` block.
 | `drawSectionTitle(doc, title, y)` | Underlined section title | `y + SECTION_TITLE_HEIGHT` |
 | `drawSeparator(doc, y, width?)` | Horizontal line with a margin above and below | `y + SEPARATOR_HEIGHT` |
 | `drawFooter(doc, text, pageWidth?, pageHeight?)` | Footer text, bottom right | — |
-| `drawPageFooters(doc, pageLabel, landscapeFromPage2?)` | "Page n / total" on every page | — |
+| `drawPageFooters(doc, pageLabel)` | "Page n / total" on every page, placed for the page's own orientation | — |
 
 `pageWidth` and `pageHeight` default to portrait: pass `LANDSCAPE_PAGE.width` / `.height` on landscape
-pages. `drawPageFooters(doc, label, true)` assumes every page after the first is landscape; a report
-that adds portrait pages (the hanging table report) calls it without the flag.
+pages. `drawPageFooters()` reads the size of each page, so portrait and landscape pages can follow each
+other in any order.
 
 ### Metadata sections
 
@@ -142,8 +143,21 @@ that adds portrait pages (the hanging table report) calls it without the flag.
 | `drawBulletItem()` / `drawWrappingBulletItem()` | One "• Label : value" line; the wrapping variant splits the value over several lines |
 | `drawBulletList()` | A column of bullet items |
 | `drawTitledBulletSection()` | Title, one column of bullet items, separator |
-| `drawTwoColumnBullets()` / `drawTwoColumnBulletSection()` | Two independent bullet columns, with title and separator for the section variant |
+| `drawTwoColumnBullets()` / `drawTitledTwoColumnBullets()` / `drawTwoColumnBulletSection()` | Two independent bullet columns, with a title for the titled variant, and a title and separator for the section variant |
 | `drawStudyCartoucheSection(doc, title, labels, data, y)` | The study & canton cartouche shared by the canton reports: author, study, study description, canton, comment, initial condition, load case and its description, `-` for an empty value |
+
+Metadata that does not fit continues on a new portrait page under `drawCompactHeader()`, instead of
+being drawn below the bottom margin:
+
+- the lines of a wrapping value continue on the next page, aligned under the value, so a long
+  description or comment can span several pages;
+- a non-wrapping item moves to the next page whole;
+- a section title moves with its first item (`drawTitledBulletSection()`) or with its whole
+  two-column block (`drawTitledTwoColumnBullets()`, `drawTwoColumnBulletSection()`);
+- the separator that closes a section is left out when it would go below `CONTENT_BOTTOM`: the next
+  section title then starts a new page.
+
+`drawTwoColumnBullets()` alone does not paginate: draw its title with `drawTitledTwoColumnBullets()`.
 
 ### Values and labels
 
