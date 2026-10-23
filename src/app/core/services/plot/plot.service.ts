@@ -267,34 +267,37 @@ export class PlotService {
 
   refreshProjection = async () => {
     this.loading.set(true);
-    const plotOptions = this.plotOptionsService.plotOptions();
-    // The engine study calculates the outputs with the cut strands it holds when the projection is requested
-    const cutStrands = this.cutStrands ?? NO_CUT_STRANDS;
-    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {
-      startSupport: plotOptions.startSupport,
-      endSupport: plotOptions.endSupport,
-      view: plotOptions.view
-    });
-    this.litData.set(result?.sectionOutput?.current ?? null);
-    this.baseLitData.set(result?.sectionOutput?.base ?? null);
-    const currentLitData = result?.sectionOutput?.current ?? null;
-    // Only a successful current output was calculated with them
-    this.projectedCutStrands.set(!error && currentLitData ? cutStrands : NO_CUT_STRANDS);
-    const obstacles = result?.obstacles ?? [];
-    if (currentLitData && obstacles.length > 0) {
-      this.litData.set({ ...currentLitData, obstacles });
+    // runTask rejects on timeout or when the worker is unavailable: the plot must not stay loading
+    try {
+      const plotOptions = this.plotOptionsService.plotOptions();
+      // The engine study calculates the outputs with the cut strands it holds when the projection is requested
+      const cutStrands = this.cutStrands ?? NO_CUT_STRANDS;
+      const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {
+        startSupport: plotOptions.startSupport,
+        endSupport: plotOptions.endSupport,
+        view: plotOptions.view
+      });
+      this.litData.set(result?.sectionOutput?.current ?? null);
+      this.baseLitData.set(result?.sectionOutput?.base ?? null);
+      const currentLitData = result?.sectionOutput?.current ?? null;
+      // Only a successful current output was calculated with them
+      this.projectedCutStrands.set(!error && currentLitData ? cutStrands : NO_CUT_STRANDS);
+      const obstacles = result?.obstacles ?? [];
+      if (currentLitData && obstacles.length > 0) {
+        this.litData.set({ ...currentLitData, obstacles });
+      }
+      this.obstacleStateService.setDistances(
+        this.withFloorFallbackDistances(result?.distances ?? [], obstacles, currentLitData)
+      );
+      this.distanceMeasuringPoints.set(result?.distanceMeasuringPoints ?? []);
+      this.error.set(error);
+      this.diagnostics.set(this.withoutFloorIntersectionWarnings(diagnostics));
+
+      const scalingFactors = untracked(() => this.plotOptionsService.scalingFactors());
+      await this.updateAspectRatio(scalingFactors, plotOptions);
+    } finally {
+      this.loading.set(false);
     }
-    this.obstacleStateService.setDistances(
-      this.withFloorFallbackDistances(result?.distances ?? [], obstacles, currentLitData)
-    );
-    this.distanceMeasuringPoints.set(result?.distanceMeasuringPoints ?? []);
-    this.error.set(error);
-    this.diagnostics.set(this.withoutFloorIntersectionWarnings(diagnostics));
-
-    const scalingFactors = untracked(() => this.plotOptionsService.scalingFactors());
-    await this.updateAspectRatio(scalingFactors, plotOptions);
-
-    this.loading.set(false);
   };
 
   /**
@@ -423,7 +426,6 @@ export class PlotService {
       try {
         await this.refreshProjection();
       } catch (error) {
-        this.loading.set(false);
         this.reportCutStrandsSyncFailure(error);
       }
     }
