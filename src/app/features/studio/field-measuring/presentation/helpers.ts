@@ -303,6 +303,12 @@ export const createInitialMeasureData = (
     exteriorCalculationType: 'parametre',
     exteriorParameter: null,
     exteriorTangentAngle: null,
+    interiorLeftSupport: null,
+    interiorSpanLength: null,
+    interiorHAccDistance: null,
+    interiorVerticalAccAngleLeft: null,
+    interiorVerticalAccAngleRight: null,
+    interiorParameter: null,
     ...PEP_INPUT_DEFAULTS,
     transit: null,
     windIncidence: null,
@@ -357,7 +363,8 @@ export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
   cableTemperature: null,
   parameter15C: null,
   tangentAimingSupport: null,
-  tangentAimingExterior: null
+  tangentAimingExterior: null,
+  tangentAimingInterior: null
 };
 
 /**
@@ -370,12 +377,13 @@ export const getActiveParameterOutput = (
   measureData: Pick<FieldMeasure, 'calculationMethod' | 'outputs'>
 ): Pick<TangentAimingSupportResult, 'parameter' | 'uncertainty'> | null => {
   const { calculationMethod, outputs } = measureData;
-  const source =
-    calculationMethod === 'tangente-aiming'
-      ? outputs.tangentAimingSupport
-      : calculationMethod === 'tangente-aiming-exterior'
-        ? outputs.tangentAimingExterior
-        : outputs.papoto;
+  const sourceByMethod: Partial<Record<typeof calculationMethod, TangentAimingSupportResult | null>> = {
+    'tangente-aiming': outputs.tangentAimingSupport,
+    'tangente-aiming-exterior': outputs.tangentAimingExterior,
+    'tangente-aiming-interior': outputs.tangentAimingInterior
+  };
+  // A tangent aiming method without result yields null: it must not fall back to the PAPOTO result.
+  const source = calculationMethod in sourceByMethod ? sourceByMethod[calculationMethod] : outputs.papoto;
   return source ? { parameter: source.parameter, uncertainty: source.uncertainty } : null;
 };
 

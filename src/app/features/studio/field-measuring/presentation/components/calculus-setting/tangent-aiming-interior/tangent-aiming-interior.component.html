@@ -1,0 +1,102 @@
+<app-tangent-aiming-header [mandatoryId]="mandatoryId" />
+
+<div class="tangent-aiming-interior__form">
+  <div class="leftSupport">
+    @let leftSupportError = getError(form.controls.leftSupport);
+    <label for="taiLeftSupport">{{ 'common.left-support-label' | transloco }}</label>
+    <p-select
+      inputId="taiLeftSupport"
+      [options]="supportOptions()"
+      [formControl]="form.controls.leftSupport"
+      optionLabel="label"
+      optionValue="value"
+      [filter]="true"
+      [fluid]="true"
+      appendTo="body"
+      [attr.aria-describedby]="mandatoryId"
+      [attr.aria-invalid]="leftSupportError ? 'true' : null"
+      [attr.aria-errormessage]="leftSupportError ? 'taiLeftSupport-error' : null"
+      [required]="true"
+      (onHide)="form.controls.leftSupport.markAsTouched()"
+      data-testid="left-support-select"
+    />
+    @if (leftSupportError) {
+      <p-message id="taiLeftSupport-error" severity="error" size="small" variant="simple" role="alert">
+        {{ leftSupportError }}
+      </p-message>
+    }
+  </div>
+
+  <app-tangent-aiming-number-field
+    [control]="form.controls.spanLength"
+    [view]="fields.spanLength"
+    [rule]="rules.spanLength"
+    [error]="getError(form.controls.spanLength)"
+    [mandatoryId]="mandatoryId"
+    describedBy="taiSpanLength-calculated"
+  />
+
+  <div class="spanLengthDesc">
+    <p id="taiSpanLength-calculated" class="spanLength__desc">
+      {{ 'common.calculated-value-label' | transloco }}
+      @if (calculatedSpanLength() !== null) {
+        {{ calculatedSpanLength() | number: '1.0-2' }} {{ 'common.meter' | transloco }}
+      } @else {
+        -
+      }
+    </p>
+  </div>
+
+  <app-tangent-aiming-number-field
+    [control]="form.controls.hAccDistance"
+    [view]="fields.hAccDistance"
+    [rule]="rules.hAccDistance"
+    [error]="getError(form.controls.hAccDistance)"
+    [mandatoryId]="mandatoryId"
+  />
+
+  <app-tangent-aiming-number-field
+    [control]="form.controls.verticalAccAngleLeft"
+    [view]="fields.verticalAccAngleLeft"
+    [rule]="rules.verticalAccAngleLeft"
+    [error]="getError(form.controls.verticalAccAngleLeft)"
+    [mandatoryId]="mandatoryId"
+  />
+
+  <app-tangent-aiming-number-field
+    [control]="form.controls.verticalAccAngleRight"
+    [view]="fields.verticalAccAngleRight"
+    [rule]="rules.verticalAccAngleRight"
+    [error]="getError(form.controls.verticalAccAngleRight)"
+    [mandatoryId]="mandatoryId"
+  />
+
+  <app-tangent-aiming-number-field
+    [control]="form.controls.parameter"
+    [view]="fields.parameter"
+    [rule]="rules.parameter"
+    [error]="getError(form.controls.parameter)"
+    [mandatoryId]="mandatoryId"
+  />
+</div>
+
+<div class="text-right">
+  <button
+    app-btn
+    type="button"
+    [disabled]="!canCalculate()"
+    [btnLoading]="isCalculating()"
+    (click)="calculate()"
+    data-testid="calculate-tangent-aiming-interior-btn"
+  >
+    <app-icon icon="rocket_launch" aria-hidden="true" />
+    <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
+  </button>
+</div>
+
+<app-tangent-aiming-results
+  [result]="measureData().outputs.tangentAimingInterior"
+  [hasError]="hasError()"
+  [isCalculating]="isCalculating()"
+  testIdPrefix="tangent-aiming-interior"
+/>

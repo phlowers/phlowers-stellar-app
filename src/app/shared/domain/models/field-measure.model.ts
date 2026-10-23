@@ -44,7 +44,7 @@ export interface FieldMeasure {
   windDirection: string | null;
   skyCover: SkyCover | null;
   // Parameter calculation fields
-  calculationMethod: 'papoto' | 'tangente-aiming' | 'tangente-aiming-exterior' | 'pep';
+  calculationMethod: 'papoto' | 'tangente-aiming' | 'tangente-aiming-exterior' | 'tangente-aiming-interior' | 'pep';
   // Papoto fields
   leftSupport: string | null;
   spanLength: number | null;
@@ -76,6 +76,13 @@ export interface FieldMeasure {
   exteriorCalculationType: 'parametre' | 'tangente';
   exteriorParameter: number | null;
   exteriorTangentAngle: number | null;
+  // Visées tangentes (intérieur) fields
+  interiorLeftSupport: string | null;
+  interiorSpanLength: number | null;
+  interiorHAccDistance: number | null;
+  interiorVerticalAccAngleLeft: number | null;
+  interiorVerticalAccAngleRight: number | null;
+  interiorParameter: number | null;
   // PEP fields
   lengthBetweenSightGD: number | null;
   elevationDifferenceBetweenSightGD: number | null;
@@ -104,8 +111,14 @@ export interface FieldMeasure {
   cableTemperatureCalibration: number | null;
   cableTemperatureCalibrationUncertainty: number | null;
   manualParameterCalculation15CWithoutWind: ManualParameterCalculation15CWithoutWind | null;
+  /** Tab displayed when the measure was last saved, restored when it is reopened. */
+  savedTab?: FieldMeasureTab | null;
   outputs: FieldMeasureOutputs;
 }
+
+/** Tabs of the field measuring dialog. */
+export type FieldMeasureTab =
+  'terrainData' | 'parameterCalculation' | 'temperatureCalculation' | 'parameterAt15CWithoutWind';
 
 /** Aggregated output results of a field measurement calculation. */
 export interface FieldMeasureOutputs {
@@ -119,6 +132,8 @@ export interface FieldMeasureOutputs {
   tangentAimingSupport: TangentAimingSupportResult | null;
   /** Tangent aiming (exterior) calculation result, if computed. */
   tangentAimingExterior: TangentAimingSupportResult | null;
+  /** Tangent aiming (interior) calculation result, if computed. */
+  tangentAimingInterior: TangentAimingSupportResult | null;
 }
 
 /** Result of the tangent aiming (support) parameter calculation. */

@@ -1,0 +1,19 @@
+@use '../tangent-aiming-common/tangent-aiming-form' as tangent-aiming;
+
+.tangent-aiming-interior {
+  &__form {
+    @include tangent-aiming.form;
+    grid-template-areas:
+      'leftSupport spanLength . . .'
+      'leftSupport spanLength . . .'
+      'leftSupport spanLength . . .'
+      '. spanLengthDesc . . .'
+      'hDistance vAngleLeft vAngleRight . .'
+      'hDistance vAngleLeft vAngleRight . .'
+      'hDistance vAngleLeft vAngleRight . .'
+      'parameter . . . .'
+      'parameter . . . .'
+      'parameter . . . .';
+    grid-template-rows: tangent-aiming.$field-rows auto tangent-aiming.$field-rows tangent-aiming.$field-rows;
+  }
+}

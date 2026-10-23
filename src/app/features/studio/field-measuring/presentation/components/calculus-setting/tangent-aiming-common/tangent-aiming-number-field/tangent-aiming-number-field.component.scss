@@ -1,0 +1,6 @@
+// Label, input and error message follow the rows of the parent form grid.
+:host {
+  display: grid;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+}

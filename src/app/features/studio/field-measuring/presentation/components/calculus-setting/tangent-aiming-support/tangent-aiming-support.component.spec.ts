@@ -7,6 +7,7 @@ import { vi } from 'vitest';
 
 import { TangentAimingSupportComponent } from './tangent-aiming-support.component';
 import * as helpers from './tangent-aiming-support.helpers';
+import * as commonHelpers from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -175,7 +176,7 @@ describe('TangentAimingSupport component', () => {
   });
 
   it('should show the not respected icon when the criterion fails', async () => {
-    vi.spyOn(helpers, 'calculateTangentAimingSupportMock').mockResolvedValueOnce({
+    vi.spyOn(commonHelpers, 'calculateTangentAimingMock').mockResolvedValueOnce({
       result: { parameter: 10, uncertainty: 2, criterion: 5, checkValidity: false },
       error: null
     });
@@ -199,7 +200,7 @@ describe('TangentAimingSupport component', () => {
   });
 
   it('should not calculate when the form is invalid', async () => {
-    const spy = vi.spyOn(helpers, 'calculateTangentAimingSupportMock');
+    const spy = vi.spyOn(commonHelpers, 'calculateTangentAimingMock');
     setInput('parameter-input', '1');
     await component.calculate();
     expect(spy).not.toHaveBeenCalled();
@@ -207,7 +208,7 @@ describe('TangentAimingSupport component', () => {
   });
 
   it('should log and notify when the calculation fails', async () => {
-    vi.spyOn(helpers, 'calculateTangentAimingSupportMock').mockResolvedValueOnce({ result: null, error: 'boom' });
+    vi.spyOn(commonHelpers, 'calculateTangentAimingMock').mockResolvedValueOnce({ result: null, error: 'boom' });
     await component.calculate();
     fixture.detectChanges();
     expect(logger.error).toHaveBeenCalled();
@@ -219,5 +220,18 @@ describe('TangentAimingSupport component', () => {
 
   it('should return no span length when the span is unknown', () => {
     expect(component.calculatedSpanLength()).toBeNull();
+  });
+
+  it('should only enable the calculate button when an input changed since the last calculation', async () => {
+    const button = () => getByTestId('calculate-tangent-aiming-support-btn') as HTMLButtonElement;
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    expect(button().disabled).toBe(false);
+    await component.calculate();
+    fixture.detectChanges();
+    expect(button().disabled).toBe(true);
+    setInput('h-acc-distance-input', '12');
+    expect(component.measureData().cableHAccDistance).toBe(12);
+    expect(button().disabled).toBe(false);
   });
 });

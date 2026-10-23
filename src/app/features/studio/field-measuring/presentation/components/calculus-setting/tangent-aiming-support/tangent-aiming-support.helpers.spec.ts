@@ -1,61 +1,15 @@
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
+import { syncDisplayedControls } from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   applyTangentAimingSupportDefaults,
-  buildSpanSupportOptions,
-  calculateTangentAimingSupportMock,
   createTangentAimingSupportForm,
-  getDefaultLeftSupport,
   getDisplayedInputFields,
   isTangentAimingSupportDataValid,
   resetNonDisplayedParameterFields,
-  getSpanKey,
-  resolveLeftSupport,
-  resolveSpanLeftSupport,
-  syncDisplayedControls,
   toTangentAimingSupportInputs
 } from './tangent-aiming-support.helpers';
 
 describe('tangent-aiming-support helpers', () => {
-  it('should build span support options with a 5-character label, empty without a full span', () => {
-    const supports = [{ number: 'ABCDEFG' }, { number: null }, { number: 'S3' }];
-    expect(buildSpanSupportOptions(supports, [1, 2])).toEqual([
-      { label: '-', value: '1' },
-      { label: 'S3', value: '2' }
-    ]);
-    expect(buildSpanSupportOptions(supports, [0, 1])[0]).toEqual({ label: 'ABCDE', value: '0' });
-    expect(buildSpanSupportOptions(supports, [])).toEqual([]);
-    expect(buildSpanSupportOptions(supports, null)).toEqual([]);
-    expect(buildSpanSupportOptions(supports, [2, 7])[1]).toEqual({ label: '-', value: '7' });
-  });
-
-  it('should keep the left support when it belongs to the span, else use the departure support', () => {
-    expect(resolveLeftSupport('4', [3, 4])).toBe('4');
-    expect(resolveLeftSupport('0', [3, 4])).toBe('3');
-    expect(resolveLeftSupport(null, [3, 4])).toBe('3');
-    expect(resolveLeftSupport('3', null)).toBeNull();
-  });
-
-  it('should restore the support remembered for the span on a span change, else use its departure support', () => {
-    const memory = { '3-4': '3' };
-    const previous = { spanKey: '4-5', leftSupport: '4' };
-    expect(resolveSpanLeftSupport('4', [3, 4], previous, memory)).toBe('3');
-    expect(resolveSpanLeftSupport('4', [2, 3], previous, memory)).toBe('2');
-    expect(resolveSpanLeftSupport('4', [4, 5], previous, memory)).toBe('4');
-    expect(resolveSpanLeftSupport('4', [3, 4], null, memory)).toBe('4');
-    expect(resolveSpanLeftSupport('3', [3, 4], { spanKey: '3-4', leftSupport: '4' }, memory)).toBe('3');
-  });
-
-  it('should build a span key', () => {
-    expect(getSpanKey([3, 4])).toBe('3-4');
-    expect(getSpanKey(null)).toBe('');
-  });
-
-  it('should default the left support to the first support of the span', () => {
-    expect(getDefaultLeftSupport([3, 4])).toBe('3');
-    expect(getDefaultLeftSupport([])).toBeNull();
-    expect(getDefaultLeftSupport(null)).toBeNull();
-  });
-
   it('should list the displayed fields by calculation type', () => {
     expect(getDisplayedInputFields('parametre')).toContain('cableParameter');
     expect(getDisplayedInputFields('parametre')).not.toContain('cableTangentAngle');
@@ -65,10 +19,10 @@ describe('tangent-aiming-support helpers', () => {
 
   it('should disable only the hidden control', () => {
     const form = createTangentAimingSupportForm();
-    syncDisplayedControls(form, 'parametre');
+    syncDisplayedControls(form, getDisplayedInputFields('parametre'));
     expect(form.controls.cableTangentAngle.disabled).toBe(true);
     expect(form.controls.cableParameter.enabled).toBe(true);
-    syncDisplayedControls(form, 'tangente');
+    syncDisplayedControls(form, getDisplayedInputFields('tangente'));
     expect(form.controls.cableTangentAngle.enabled).toBe(true);
     expect(form.controls.cableParameter.disabled).toBe(true);
   });
@@ -134,13 +88,5 @@ describe('tangent-aiming-support helpers', () => {
   it('should map the measure to calculation inputs', () => {
     const data = { ...createTestMeasureData(), tangentLeftSupport: '1', cableParameter: 30 };
     expect(toTangentAimingSupportInputs(data)).toMatchObject({ leftSupport: '1', parameter: 30 });
-  });
-
-  it('should return a constant mock result', async () => {
-    const { result, error } = await calculateTangentAimingSupportMock(
-      toTangentAimingSupportInputs(createTestMeasureData())
-    );
-    expect(error).toBeNull();
-    expect(result?.checkValidity).toBe(true);
   });
 });
