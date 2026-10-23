@@ -5,16 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import {
   TangentAimingFieldRule,
   TangentAimingNumberFieldView
 } from '../tangent-aiming-common/tangent-aiming-common.interfaces';
 import { TANGENT_AIMING_FIELD_RULES } from '../tangent-aiming-common/tangent-aiming-common.constantes';
-import {
-  TangentAimingInteriorInputField,
-  TangentAimingInteriorNumericField
-} from './tangent-aiming-interior.interfaces';
+import { TangentAimingInteriorNumericField } from './tangent-aiming-interior.interfaces';
 
 /** Display description of each numeric input. */
 export const TANGENT_AIMING_INTERIOR_NUMBER_FIELDS: Record<
@@ -71,14 +67,4 @@ export const TANGENT_AIMING_INTERIOR_FIELD_RULES: Record<TangentAimingInteriorNu
   verticalAccAngleLeft: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
   verticalAccAngleRight: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
   parameter: TANGENT_AIMING_FIELD_RULES.parameter
-};
-
-/** `FieldMeasure` field persisting each input of the form. */
-export const TANGENT_AIMING_INTERIOR_MODEL_FIELDS: Record<TangentAimingInteriorInputField, keyof FieldMeasure> = {
-  leftSupport: 'interiorLeftSupport',
-  spanLength: 'interiorSpanLength',
-  hAccDistance: 'interiorHAccDistance',
-  verticalAccAngleLeft: 'interiorVerticalAccAngleLeft',
-  verticalAccAngleRight: 'interiorVerticalAccAngleRight',
-  parameter: 'interiorParameter'
 };

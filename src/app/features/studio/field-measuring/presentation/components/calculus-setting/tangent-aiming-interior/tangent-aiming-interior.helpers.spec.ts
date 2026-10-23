@@ -1,6 +1,8 @@
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import {
   applyTangentAimingInteriorDefaults,
+  applyTangentAimingInteriorInputs,
   createTangentAimingInteriorForm,
   invalidateTangentAimingInteriorResult,
   isTangentAimingInteriorDataValid,
@@ -112,6 +114,26 @@ describe('tangent-aiming-interior helpers', () => {
         verticalAccAngleRight: 0,
         parameter: 20
       });
+    });
+
+    it('should read the inputs missing from a persisted measure as null', () => {
+      const data = { ...createTestMeasureData(), interiorParameter: undefined } as unknown as FieldMeasure;
+      expect(toTangentAimingInteriorInputs(data).parameter).toBeNull();
+    });
+
+    it('should write the form inputs into the measure without touching the other fields', () => {
+      const data = createTestMeasureData({ name: 'kept' });
+      const inputs = {
+        leftSupport: '2',
+        spanLength: 10,
+        hAccDistance: 20,
+        verticalAccAngleLeft: 30,
+        verticalAccAngleRight: 40,
+        parameter: 50
+      };
+      const result = applyTangentAimingInteriorInputs(data, inputs);
+      expect(result.name).toBe('kept');
+      expect(toTangentAimingInteriorInputs(result)).toEqual(inputs);
     });
   });
 });

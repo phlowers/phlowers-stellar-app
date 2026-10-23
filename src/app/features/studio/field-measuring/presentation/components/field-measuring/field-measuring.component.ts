@@ -30,6 +30,7 @@ import { InitialCondition } from '@shared/domain';
 import { ParameterCalculation15WithoutWindComponent } from '../parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
 import {
   createInitialMeasureData,
+  initialFieldMeasureOutputs,
   buildWindDirectionOptions,
   buildSkyCoverOptions,
   buildLeftSupportOptions,
@@ -327,7 +328,13 @@ export class FieldMeasuringComponent implements OnDestroy {
       return;
     }
 
-    this.measureData.set(normalizeFieldMeasureDates(selectedFieldMeasure));
+    // A measure saved before an output existed lacks its key: `undefined` would read as "computed" / "not recalculable".
+    this.measureData.set(
+      normalizeFieldMeasureDates({
+        ...selectedFieldMeasure,
+        outputs: { ...initialFieldMeasureOutputs, ...selectedFieldMeasure.outputs }
+      })
+    );
     this.activeTab.set(selectedFieldMeasure.savedTab ?? 'terrainData');
 
     // Fetch link_adr from lines service

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, model, si
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
+import { isEqual } from 'lodash';
 import { SelectModule } from 'primeng/select';
 import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
@@ -25,13 +26,12 @@ import {
 } from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   TANGENT_AIMING_INTERIOR_FIELD_RULES,
-  TANGENT_AIMING_INTERIOR_MODEL_FIELDS,
   TANGENT_AIMING_INTERIOR_NUMBER_FIELDS
 } from './tangent-aiming-interior.constantes';
 import {
+  applyTangentAimingInteriorInputs,
   createTangentAimingInteriorForm,
   invalidateTangentAimingInteriorResult,
-  TANGENT_AIMING_INTERIOR_INPUT_FIELDS,
   toTangentAimingInteriorInputs
 } from './tangent-aiming-interior.helpers';
 
@@ -100,12 +100,9 @@ export class TangentAimingInteriorComponent {
     });
     // Model -> form: only differing values are written, so a value being typed is never overwritten.
     effect(() => {
-      const data = this.measureData();
-      for (const field of TANGENT_AIMING_INTERIOR_INPUT_FIELDS) {
-        const value = data[TANGENT_AIMING_INTERIOR_MODEL_FIELDS[field]] ?? null;
-        if (this.form.controls[field].value !== value) {
-          this.form.controls[field].setValue(value as never, { emitEvent: false });
-        }
+      const inputs = toTangentAimingInteriorInputs(this.measureData());
+      if (!isEqual(this.form.getRawValue(), inputs)) {
+        this.form.patchValue(inputs, { emitEvent: false });
       }
       this.isFormValid.set(this.form.valid);
     });
@@ -113,17 +110,9 @@ export class TangentAimingInteriorComponent {
     // Form -> model: a change of input invalidates the previous result.
     this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       this.isFormValid.set(this.form.valid);
-      const values = this.form.getRawValue();
+      const inputs = this.form.getRawValue();
       this.measureData.update((d) =>
-        invalidateTangentAimingInteriorResult({
-          ...d,
-          ...Object.fromEntries(
-            TANGENT_AIMING_INTERIOR_INPUT_FIELDS.map((field) => [
-              TANGENT_AIMING_INTERIOR_MODEL_FIELDS[field],
-              values[field]
-            ])
-          )
-        })
+        invalidateTangentAimingInteriorResult(applyTangentAimingInteriorInputs(d, inputs))
       );
     });
   }

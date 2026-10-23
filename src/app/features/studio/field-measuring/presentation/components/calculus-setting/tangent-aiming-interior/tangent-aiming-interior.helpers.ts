@@ -9,13 +9,9 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
 import { createNumberControl } from '../tangent-aiming-common/tangent-aiming-common.helpers';
-import {
-  TANGENT_AIMING_INTERIOR_FIELD_RULES,
-  TANGENT_AIMING_INTERIOR_MODEL_FIELDS
-} from './tangent-aiming-interior.constantes';
+import { TANGENT_AIMING_INTERIOR_FIELD_RULES } from './tangent-aiming-interior.constantes';
 import {
   TangentAimingInteriorForm,
-  TangentAimingInteriorInputField,
   TangentAimingInteriorInputs,
   TangentAimingInteriorNumericField
 } from './tangent-aiming-interior.interfaces';
@@ -36,26 +32,10 @@ export function createTangentAimingInteriorForm(): TangentAimingInteriorForm {
   });
 }
 
-/** Every input of the form, all displayed whatever the state of the measure. */
-export const TANGENT_AIMING_INTERIOR_INPUT_FIELDS = Object.keys(
-  TANGENT_AIMING_INTERIOR_MODEL_FIELDS
-) as TangentAimingInteriorInputField[];
-const NUMERIC_FIELDS = TANGENT_AIMING_INTERIOR_INPUT_FIELDS.filter(
-  (field): field is TangentAimingInteriorNumericField => field !== 'leftSupport'
-);
-
 /** Whether every input of `data` satisfies its rules (single source of truth: the form validators). */
 export function isTangentAimingInteriorDataValid(data: FieldMeasure): boolean {
   const form = createTangentAimingInteriorForm();
-  form.patchValue(
-    Object.fromEntries(
-      TANGENT_AIMING_INTERIOR_INPUT_FIELDS.map((field) => [
-        field,
-        data[TANGENT_AIMING_INTERIOR_MODEL_FIELDS[field]] ?? null
-      ])
-    ),
-    { emitEvent: false }
-  );
+  form.patchValue(toTangentAimingInteriorInputs(data), { emitEvent: false });
   return form.valid;
 }
 
@@ -64,15 +44,16 @@ export function applyTangentAimingInteriorDefaults(
   data: FieldMeasure,
   defaultLeftSupport: string | null
 ): FieldMeasure {
-  const next: FieldMeasure = {
+  const rules = TANGENT_AIMING_INTERIOR_FIELD_RULES;
+  return {
     ...data,
-    interiorLeftSupport: data.interiorLeftSupport ?? defaultLeftSupport
+    interiorLeftSupport: data.interiorLeftSupport ?? defaultLeftSupport,
+    interiorSpanLength: data.interiorSpanLength ?? rules.spanLength.default,
+    interiorHAccDistance: data.interiorHAccDistance ?? rules.hAccDistance.default,
+    interiorVerticalAccAngleLeft: data.interiorVerticalAccAngleLeft ?? rules.verticalAccAngleLeft.default,
+    interiorVerticalAccAngleRight: data.interiorVerticalAccAngleRight ?? rules.verticalAccAngleRight.default,
+    interiorParameter: data.interiorParameter ?? rules.parameter.default
   };
-  for (const field of NUMERIC_FIELDS) {
-    const key = TANGENT_AIMING_INTERIOR_MODEL_FIELDS[field] as 'interiorSpanLength';
-    next[key] ??= TANGENT_AIMING_INTERIOR_FIELD_RULES[field].default;
-  }
-  return next;
 }
 
 /** Clears the interior result and the automatic 15°C result derived from it. */
@@ -80,14 +61,30 @@ export function invalidateTangentAimingInteriorResult(data: FieldMeasure): Field
   return clearAutoParameter15C({ ...data, outputs: { ...data.outputs, tangentAimingInterior: null } });
 }
 
-/** Builds the calculation inputs from the measure. */
+/** Builds the form/calculation inputs from the measure (inputs missing from a persisted measure are `null`). */
 export function toTangentAimingInteriorInputs(data: FieldMeasure): TangentAimingInteriorInputs {
   return {
-    leftSupport: data.interiorLeftSupport,
-    spanLength: data.interiorSpanLength,
-    hAccDistance: data.interiorHAccDistance,
-    verticalAccAngleLeft: data.interiorVerticalAccAngleLeft,
-    verticalAccAngleRight: data.interiorVerticalAccAngleRight,
-    parameter: data.interiorParameter
+    leftSupport: data.interiorLeftSupport ?? null,
+    spanLength: data.interiorSpanLength ?? null,
+    hAccDistance: data.interiorHAccDistance ?? null,
+    verticalAccAngleLeft: data.interiorVerticalAccAngleLeft ?? null,
+    verticalAccAngleRight: data.interiorVerticalAccAngleRight ?? null,
+    parameter: data.interiorParameter ?? null
+  };
+}
+
+/** Writes the form inputs into the measure. */
+export function applyTangentAimingInteriorInputs(
+  data: FieldMeasure,
+  inputs: TangentAimingInteriorInputs
+): FieldMeasure {
+  return {
+    ...data,
+    interiorLeftSupport: inputs.leftSupport,
+    interiorSpanLength: inputs.spanLength,
+    interiorHAccDistance: inputs.hAccDistance,
+    interiorVerticalAccAngleLeft: inputs.verticalAccAngleLeft,
+    interiorVerticalAccAngleRight: inputs.verticalAccAngleRight,
+    interiorParameter: inputs.parameter
   };
 }

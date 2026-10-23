@@ -1305,6 +1305,34 @@ describe('FieldMeasuringComponent', () => {
     });
   });
 
+  describe('measure saved before the interior output existed', () => {
+    it('should load the missing outputs as null so the interior result is not considered computed', async () => {
+      const spanService = TestBed.inject(PlotSpanService);
+      const sectionSignal = spanService.section as ReturnType<typeof signal<Section | null>>;
+      const section = sectionSignal() as Section;
+      const legacyMeasure = createTestMeasureData({
+        uuid: 'legacy-measure',
+        calculationMethod: 'tangente-aiming-interior'
+      });
+      const { tangentAimingInterior: _omitted, ...legacyOutputs } = legacyMeasure.outputs;
+      sectionSignal.set({
+        ...section,
+        field_measures: [{ ...legacyMeasure, outputs: legacyOutputs as FieldMeasure['outputs'] }],
+        selected_field_measure_uuid: 'legacy-measure'
+      });
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(component.measureData().outputs.tangentAimingInterior).toBeNull();
+      expect(component.hasComputedOutputs()).toBe(false);
+      expect(component.hasUnsavedChanges()).toBe(false);
+    });
+  });
+
   describe('onFieldChange edge cases', () => {
     it('should return early when measureData is falsy', () => {
       component.measureData.set(null as unknown as FieldMeasure);
