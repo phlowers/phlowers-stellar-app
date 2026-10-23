@@ -170,6 +170,11 @@
     "calculation-type-label": "Type de calcul :",
     "calculation-type-tangent": "Tangente",
     "tangent-angle-label": "Angle tangent au câble",
+    "tangent-aiming-mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
+    "tangent-aiming-calculation-failed": "Échec du calcul du paramètre par visées tangentes",
+    "tangent-aiming-h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
+    "tangent-aiming-vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
+    "tangent-aiming-vertical-acc-angle-right-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
     "criterion-label": "Critère",
     "criterion-respected": "Critère respecté",
     "criterion-not-respected": "Critère non respecté"
@@ -723,20 +728,12 @@
     },
     "calculus-setting": {
       "tangent-aiming-radio-label": "Visées tangentes (Support)",
-      "tangent-aiming-exterior-radio-label": "Visées tangentes (Extérieur)"
+      "tangent-aiming-exterior-radio-label": "Visées tangentes (Extérieur)",
+      "tangent-aiming-interior-radio-label": "Visées tangentes (Intérieur)"
     },
     "tangent-aiming-support": {
-      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
       "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",
-      "vertical-acc-angle-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
-      "calculation-failed": "Échec du calcul du paramètre par visées tangentes"
-    },
-    "tangent-aiming-exterior": {
-      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul de paramètre.",
-      "h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
-      "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
-      "vertical-acc-angle-right-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
-      "calculation-failed": "Échec du calcul du paramètre par visées tangentes (extérieur)"
+      "vertical-acc-angle-label": "Angle vertical de l'appareil à l'accr. câble du support de droite"
     },
     "papoto": {
       "open-help-aria-label": "ouvrir l'aide de PAPOTO",

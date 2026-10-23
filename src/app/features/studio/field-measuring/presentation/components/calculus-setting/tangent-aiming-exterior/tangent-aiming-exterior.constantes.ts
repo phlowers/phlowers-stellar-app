@@ -18,8 +18,6 @@ import {
   TangentAimingExteriorNumericField
 } from './tangent-aiming-exterior.interfaces';
 
-const I18N = 'field-measuring.tangent-aiming-exterior';
-
 /** Display description of each numeric input. */
 export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   TangentAimingExteriorNumericField,
@@ -35,7 +33,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   },
   hAccDistance: {
     id: 'taeHAccDistance',
-    labelKey: `${I18N}.h-acc-distance-label`,
+    labelKey: 'common.tangent-aiming-h-acc-distance-label',
     unitKey: 'common.meter',
     testId: 'h-acc-distance-input',
     step: 0.01,
@@ -43,7 +41,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   },
   verticalAccAngleLeft: {
     id: 'taeVerticalAccAngleLeft',
-    labelKey: `${I18N}.vertical-acc-angle-left-label`,
+    labelKey: 'common.tangent-aiming-vertical-acc-angle-left-label',
     unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-left-input',
     step: 0.01,
@@ -51,7 +49,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   },
   verticalAccAngleRight: {
     id: 'taeVerticalAccAngleRight',
-    labelKey: `${I18N}.vertical-acc-angle-right-label`,
+    labelKey: 'common.tangent-aiming-vertical-acc-angle-right-label',
     unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-right-input',
     step: 0.01,

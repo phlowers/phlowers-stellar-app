@@ -10,7 +10,7 @@
 
   <p id="mandatory-tangent-aiming-support" class="tangent-aiming-support__mandatory-msg">
     <app-icon icon="info" aria-hidden="true" />
-    <span>{{ 'field-measuring.tangent-aiming-support.mandatory-msg' | transloco }}</span>
+    <span>{{ 'common.tangent-aiming-mandatory-msg' | transloco }}</span>
   </p>
 </div>
 
@@ -171,7 +171,7 @@
   <button
     app-btn
     type="button"
-    [disabled]="!isFormValid() || isCalculating()"
+    [disabled]="!canCalculate()"
     [btnLoading]="isCalculating()"
     (click)="calculate()"
     data-testid="calculate-tangent-aiming-support-btn"
@@ -184,7 +184,7 @@
 <output class="block" [attr.aria-busy]="isCalculating()">
   @if (hasError()) {
     <p-message severity="error" size="small" role="alert" aria-live="assertive" data-testid="calculation-error">
-      {{ 'field-measuring.tangent-aiming-support.calculation-failed' | transloco }}
+      {{ 'common.tangent-aiming-calculation-failed' | transloco }}
     </p-message>
   }
 

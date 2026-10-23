@@ -329,4 +329,17 @@ describe('TangentAimingExterior component', () => {
     expect(component.measureData().cableHAccDistance).toBe(7);
     expect(component.measureData().outputs.tangentAimingSupport).toBe(support);
   });
+
+  it('should only enable the calculate button when an input changed since the last calculation', async () => {
+    const button = () => getByTestId('calculate-tangent-aiming-exterior-btn') as HTMLButtonElement;
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    expect(button().disabled).toBe(false);
+    await component.calculate();
+    fixture.detectChanges();
+    expect(button().disabled).toBe(true);
+    setInput('h-acc-distance-input', '12');
+    expect(component.measureData().exteriorHAccDistance).toBe(12);
+    expect(button().disabled).toBe(false);
+  });
 });

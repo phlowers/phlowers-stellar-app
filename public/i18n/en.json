@@ -170,6 +170,11 @@
     "calculation-type-label": "Calculation type:",
     "calculation-type-tangent": "Tangent",
     "tangent-angle-label": "Cable tangent angle",
+    "tangent-aiming-mandatory-msg": "All data are mandatory for parameter calculation.",
+    "tangent-aiming-calculation-failed": "Failed to calculate parameter by tangent aiming",
+    "tangent-aiming-h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
+    "tangent-aiming-vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support",
+    "tangent-aiming-vertical-acc-angle-right-label": "Vertical angle from device to cable attach. of right support",
     "criterion-label": "Criterion",
     "criterion-respected": "Criterion respected",
     "criterion-not-respected": "Criterion not respected"
@@ -723,20 +728,12 @@
     },
     "calculus-setting": {
       "tangent-aiming-radio-label": "Tangent aiming (Support)",
-      "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)"
+      "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)",
+      "tangent-aiming-interior-radio-label": "Tangent aiming (Interior)"
     },
     "tangent-aiming-support": {
-      "mandatory-msg": "All data are mandatory for parameter calculation.",
       "h-acc-distance-label": "Vertical dist. from device to cable attach. of left support",
-      "vertical-acc-angle-label": "Vertical angle from device to cable attach. of right support",
-      "calculation-failed": "Failed to calculate parameter by tangent aiming"
-    },
-    "tangent-aiming-exterior": {
-      "mandatory-msg": "All data are mandatory for parameter calculation.",
-      "h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
-      "vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support",
-      "vertical-acc-angle-right-label": "Vertical angle from device to cable attach. of right support",
-      "calculation-failed": "Failed to calculate parameter by tangent aiming (exterior)"
+      "vertical-acc-angle-label": "Vertical angle from device to cable attach. of right support"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",

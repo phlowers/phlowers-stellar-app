@@ -36,7 +36,8 @@ describe('resetInactiveCalculusModes', () => {
         cableTemperature: null,
         parameter15C: null,
         tangentAimingSupport: null,
-        tangentAimingExterior: null
+        tangentAimingExterior: null,
+        tangentAimingInterior: null
       }
     });
     const result = resetInactiveCalculusModes(data, 'tangente-aiming', context);
@@ -53,7 +54,8 @@ describe('resetInactiveCalculusModes', () => {
         cableTemperature: null,
         parameter15C: null,
         tangentAimingSupport: { parameter: 1 } as never,
-        tangentAimingExterior: null
+        tangentAimingExterior: null,
+        tangentAimingInterior: null
       }
     });
     const result = resetInactiveCalculusModes(data, 'papoto', context);
@@ -73,7 +75,8 @@ describe('resetInactiveCalculusModes', () => {
         cableTemperature: null,
         parameter15C: null,
         tangentAimingSupport: { parameter: 2 } as never,
-        tangentAimingExterior: { parameter: 1 } as never
+        tangentAimingExterior: { parameter: 1 } as never,
+        tangentAimingInterior: null
       }
     });
     const result = resetInactiveCalculusModes(data, 'tangente-aiming', context);
@@ -87,6 +90,52 @@ describe('resetInactiveCalculusModes', () => {
     });
     expect(result.outputs.tangentAimingExterior).toBeNull();
     expect(result.outputs.tangentAimingSupport).toEqual({ parameter: 2 });
+  });
+
+  it('resets the interior inputs and output when inactive, leaving the support mode untouched', () => {
+    const data = createTestMeasureData({
+      calculationMethod: 'tangente-aiming',
+      cableHAccDistance: 9,
+      interiorSpanLength: 400,
+      interiorHAccDistance: 12,
+      interiorVerticalAccAngleLeft: 3,
+      interiorVerticalAccAngleRight: 4,
+      interiorParameter: 900,
+      interiorLeftSupport: '5',
+      outputs: {
+        papoto: null,
+        cableTemperature: null,
+        parameter15C: null,
+        tangentAimingSupport: { parameter: 2 } as never,
+        tangentAimingExterior: null,
+        tangentAimingInterior: { parameter: 1 } as never
+      }
+    });
+    const result = resetInactiveCalculusModes(data, 'tangente-aiming', context);
+    expect(result).toMatchObject({
+      interiorLeftSupport: '11',
+      interiorSpanLength: 0,
+      interiorHAccDistance: 0,
+      interiorVerticalAccAngleLeft: 0,
+      interiorVerticalAccAngleRight: 0,
+      interiorParameter: 20,
+      cableHAccDistance: 9
+    });
+    expect(result.outputs.tangentAimingInterior).toBeNull();
+    expect(result.outputs.tangentAimingSupport).toEqual({ parameter: 2 });
+  });
+
+  it('keeps the interior mode when active and resets the other modes', () => {
+    const data = createTestMeasureData({
+      calculationMethod: 'tangente-aiming-interior',
+      interiorSpanLength: 400,
+      exteriorSpanLength: 300,
+      cableParameter: 55
+    });
+    const result = resetInactiveCalculusModes(data, 'tangente-aiming-interior', context);
+    expect(result.interiorSpanLength).toBe(400);
+    expect(result.exteriorSpanLength).toBe(0);
+    expect(result.cableParameter).not.toBe(55);
   });
 
   it('keeps the exterior mode when active and does not alter its fields when support is reset', () => {

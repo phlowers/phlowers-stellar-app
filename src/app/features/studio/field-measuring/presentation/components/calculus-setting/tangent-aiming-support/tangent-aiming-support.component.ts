@@ -74,6 +74,11 @@ export class TangentAimingSupportComponent {
   readonly isFormValid = signal(false);
   readonly isCalculating = signal(false);
   readonly hasError = signal(false);
+
+  /** The calculate button is only usable when an input changed since the last calculation (a change clears the result). */
+  readonly canCalculate = computed(
+    () => this.isFormValid() && !this.isCalculating() && this.measureData().outputs.tangentAimingSupport === null
+  );
   /** Left support chosen by the user for each span (by span key), restored when the span is selected again. */
   private readonly leftSupportMemory = signal<Record<string, string>>({});
   private readonly lastLeftSupport = signal<LeftSupportSnapshot | null>(null);
@@ -189,7 +194,7 @@ export class TangentAimingSupportComponent {
       this.logger.error('Failed to calculate the tangent aiming (support) parameter', error);
       this.hasError.set(true);
       this.notificationService.error(
-        this.translocoService.translate('field-measuring.tangent-aiming-support.calculation-failed')
+        this.translocoService.translate('common.tangent-aiming-calculation-failed')
       );
     } finally {
       this.isCalculating.set(false);
