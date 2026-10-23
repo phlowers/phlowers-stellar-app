@@ -360,22 +360,23 @@ export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
   tangentAimingExterior: null
 };
 
+// Result of the selected calculation method: PAPOTO unless a tangent aiming method is selected
+const getActiveMethodOutput = ({ calculationMethod, outputs }: Pick<FieldMeasure, 'calculationMethod' | 'outputs'>) => {
+  if (calculationMethod === 'tangente-aiming') return outputs.tangentAimingSupport;
+  if (calculationMethod === 'tangente-aiming-exterior') return outputs.tangentAimingExterior;
+  return outputs.papoto;
+};
+
 /**
  * Returns the parameter and uncertainty produced by the calculation method currently selected for the field measure:
- * the tangent aiming (support) result for the `tangente-aiming` method, the PAPOTO result otherwise.
+ * the tangent aiming (support or exterior) result for the tangent aiming methods, the PAPOTO result otherwise.
  * @param measureData - The field measure, providing the calculation method and its outputs
  * @returns The active `parameter` and `uncertainty`, or `null` when the selected method has no result yet
  */
 export const getActiveParameterOutput = (
   measureData: Pick<FieldMeasure, 'calculationMethod' | 'outputs'>
 ): Pick<TangentAimingSupportResult, 'parameter' | 'uncertainty'> | null => {
-  const { calculationMethod, outputs } = measureData;
-  const source =
-    calculationMethod === 'tangente-aiming'
-      ? outputs.tangentAimingSupport
-      : calculationMethod === 'tangente-aiming-exterior'
-        ? outputs.tangentAimingExterior
-        : outputs.papoto;
+  const source = getActiveMethodOutput(measureData);
   return source ? { parameter: source.parameter, uncertainty: source.uncertainty } : null;
 };
 
