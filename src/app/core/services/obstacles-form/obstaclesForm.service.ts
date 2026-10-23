@@ -463,6 +463,10 @@ export class ObstacleFormService {
       const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
       this.obstaclesService.setSelectedMeasure(obstacle.uuid, lastPointIndex);
     } catch (error) {
+      // The section already holds the new positions: the previous distances no longer match them
+      this.obstacleStateService.setDistances(
+        this.obstacleStateService.distances().filter((distance) => distance.obstacleUuid !== obstacle.uuid)
+      );
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(
         this.translocoService.translate('studio.conformity.calculation-failed-error', { errorMessage })

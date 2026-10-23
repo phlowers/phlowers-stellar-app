@@ -155,6 +155,7 @@ describe('ObstacleFormService', () => {
     clearAllObstacles: ReturnType<typeof vi.fn>;
     syncObstacles: ReturnType<typeof vi.fn>;
     reset: ReturnType<typeof vi.fn>;
+    setDistances: ReturnType<typeof vi.fn>;
   };
   let mockPlotService: {
     plotOptionsChange: vi.Mock;
@@ -194,7 +195,8 @@ describe('ObstacleFormService', () => {
       deleteObstacle: vi.fn().mockResolvedValue(null),
       clearAllObstacles: vi.fn().mockResolvedValue(null),
       syncObstacles: vi.fn().mockResolvedValue(null),
-      reset: vi.fn()
+      reset: vi.fn(),
+      setDistances: vi.fn((distances: Distance[]) => mockObstacleStateService.distances.set(distances))
     };
     mockPlotService = {
       plotOptionsChange: vi.fn(),
@@ -1192,6 +1194,50 @@ describe('ObstacleFormService', () => {
       }
 
       expect(service.calculationError()).toContain('Calculation failed');
+    });
+
+    describe('when the calculation fails before the projection refresh', () => {
+      const distanceFor = (obstacleUuid: string): Distance => ({
+        obstacleUuid,
+        points: [
+          {
+            pointIndex: 0,
+            linePoint: [10, 0, 5],
+            virtualPointHorizontal: [10, 5, 0],
+            virtualPointVertical: [10, 0, 5],
+            distanceDiagonal: 42,
+            distanceHorizontal: 10,
+            distanceVertical: 5,
+            signedDistanceVertical: 5
+          }
+        ]
+      });
+
+      beforeEach(() => {
+        mockSpanService.section.set({ ...mockSection, obstacles: [{ ...baseObstacle }] } as Section);
+        mockPlotService.study.set(mockStudy);
+        mockObstacleStateService.distances.set([distanceFor('obs-1'), distanceFor('obs-other')]);
+        service.form.patchValue({ ...validFormBase, uuid: 'obs-1' });
+        service.addPosition({ x: 5, y: 5, z: 5 });
+      });
+
+      it('should drop the edited obstacle distances when the worker registration fails', async () => {
+        mockObstacleStateService.addSingleObstacle.mockRejectedValue(new Error('worker timeout'));
+
+        await service.calculateAndSave();
+
+        expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
+        expect(mockObstacleStateService.distances()).toEqual([distanceFor('obs-other')]);
+      });
+
+      it('should drop the edited obstacle distances when the section save fails', async () => {
+        mockSectionService.createOrUpdateSection.mockRejectedValue(new Error('IndexedDB failure'));
+
+        await service.calculateAndSave();
+
+        expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
+        expect(mockObstacleStateService.distances()).toEqual([distanceFor('obs-other')]);
+      });
     });
   });
 
