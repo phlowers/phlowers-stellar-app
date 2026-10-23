@@ -37,10 +37,10 @@ import {
 } from '../../helpers';
 import { buildFieldMeasureExportJson } from '../../field-measure-export.helpers';
 import {
-  getDefaultLeftSupport,
   isTangentAimingSupportDataValid,
   resetNonDisplayedParameterFields
 } from '../calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
+import { getDefaultLeftSupport } from '../calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   isTangentAimingExteriorDataValid,
   resetNonDisplayedExteriorFields

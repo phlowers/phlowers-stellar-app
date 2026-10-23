@@ -1,0 +1,59 @@
+<output class="block" [attr.aria-busy]="isCalculating()">
+  @if (hasError()) {
+    <p-message severity="error" size="small" role="alert" aria-live="assertive" data-testid="calculation-error">
+      {{ 'common.tangent-aiming-calculation-failed' | transloco }}
+    </p-message>
+  }
+
+  @if (result(); as result) {
+    @let prefix = testIdPrefix();
+    <div class="tangent-aiming-results">
+      <h2 class="tangent-aiming-results__title">{{ 'common.results' | transloco }}</h2>
+
+      <dl class="tangent-aiming-results__list">
+        <div class="param">
+          <dt>{{ 'common.parameter-label' | transloco }}</dt>
+          <dd [attr.data-testid]="prefix + '-parameter'">
+            {{ result.parameter.toFixed(0) }} {{ 'common.meter' | transloco }}
+          </dd>
+        </div>
+
+        <div class="incertainParam">
+          <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
+          <dd [attr.data-testid]="prefix + '-uncertainty'">
+            {{ format() === 'percent' ? result.uncertainty.toFixed(0) : (result.uncertainty | number: '1.1-1') }}
+            {{ 'common.meter' | transloco }}
+          </dd>
+        </div>
+
+        <div class="crit">
+          <dt>{{ 'common.criterion-label' | transloco }}</dt>
+          <dd class="crit__result" [attr.data-testid]="prefix + '-criterion'">
+            @if (format() === 'percent') {
+              {{ result.criterion.toFixed(0) }} %
+            } @else {
+              {{ (result.checkValidity ? 'common.yes' : 'common.no') | transloco }}
+            }
+            @if (result.checkValidity) {
+              <app-icon
+                icon="check"
+                class="criterion-ok"
+                role="img"
+                [attr.aria-label]="'common.criterion-respected' | transloco"
+                [attr.data-testid]="prefix + '-criterion-ok'"
+              />
+            } @else {
+              <app-icon
+                icon="close"
+                class="criterion-ko"
+                role="img"
+                [attr.aria-label]="'common.criterion-not-respected' | transloco"
+                [attr.data-testid]="prefix + '-criterion-ko'"
+              />
+            }
+          </dd>
+        </div>
+      </dl>
+    </div>
+  }
+</output>

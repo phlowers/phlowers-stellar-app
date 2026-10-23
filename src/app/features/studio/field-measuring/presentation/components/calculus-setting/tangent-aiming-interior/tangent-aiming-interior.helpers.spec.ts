@@ -1,14 +1,13 @@
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import {
   applyTangentAimingInteriorDefaults,
-  calculateTangentAimingInteriorMock,
   createTangentAimingInteriorForm,
   invalidateTangentAimingInteriorResult,
   isTangentAimingInteriorDataValid,
   toTangentAimingInteriorInputs
 } from './tangent-aiming-interior.helpers';
 import { TANGENT_AIMING_INTERIOR_FIELD_RULES } from './tangent-aiming-interior.constantes';
-import { TANGENT_AIMING_SUPPORT_FIELD_RULES } from '../tangent-aiming-support/tangent-aiming-support.constantes';
+import { TANGENT_AIMING_FIELD_RULES } from '../tangent-aiming-common/tangent-aiming-common.constantes';
 
 describe('tangent-aiming-interior helpers', () => {
   it('should create an invalid form with every control empty', () => {
@@ -17,13 +16,13 @@ describe('tangent-aiming-interior helpers', () => {
     expect(Object.values(form.getRawValue()).every((value) => value === null)).toBe(true);
   });
 
-  it('should reuse the support rules except for the horizontal distance (RG.VIS-INT.DIS-HSG.1)', () => {
+  it('should reuse the common rules except for the horizontal distance (RG.VIS-INT.DIS-HSG.1)', () => {
     expect(TANGENT_AIMING_INTERIOR_FIELD_RULES.verticalAccAngleLeft).toBe(
       TANGENT_AIMING_INTERIOR_FIELD_RULES.verticalAccAngleRight
     );
-    expect(TANGENT_AIMING_INTERIOR_FIELD_RULES.parameter).toBe(TANGENT_AIMING_SUPPORT_FIELD_RULES.cableParameter);
+    expect(TANGENT_AIMING_INTERIOR_FIELD_RULES.parameter).toBe(TANGENT_AIMING_FIELD_RULES.parameter);
     expect(TANGENT_AIMING_INTERIOR_FIELD_RULES.hAccDistance).toEqual({ min: 0, max: 5000, decimals: 2, default: 0 });
-    expect(TANGENT_AIMING_SUPPORT_FIELD_RULES.cableHAccDistance.max).toBe(1000);
+    expect(TANGENT_AIMING_FIELD_RULES.hAccDistance.max).toBe(1000);
   });
 
   it('should accept a horizontal distance up to 5000 and reject more', () => {
@@ -102,7 +101,7 @@ describe('tangent-aiming-interior helpers', () => {
       expect(result.outputs.parameter15C).toBeNull();
     });
 
-    it('should build the calculation inputs and return the mocked result', async () => {
+    it('should build the calculation inputs', () => {
       const data = applyTangentAimingInteriorDefaults(createTestMeasureData(), '3');
       const inputs = toTangentAimingInteriorInputs(data);
       expect(inputs).toEqual({
@@ -112,10 +111,6 @@ describe('tangent-aiming-interior helpers', () => {
         verticalAccAngleLeft: 0,
         verticalAccAngleRight: 0,
         parameter: 20
-      });
-      expect(await calculateTangentAimingInteriorMock(inputs)).toEqual({
-        result: { parameter: 1000, uncertainty: 1.5, criterion: 1, checkValidity: true },
-        error: null
       });
     });
   });

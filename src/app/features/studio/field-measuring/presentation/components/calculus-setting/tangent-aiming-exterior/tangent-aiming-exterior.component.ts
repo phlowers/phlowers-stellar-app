@@ -1,12 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, model, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputGroupModule } from 'primeng/inputgroup';
-import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -15,25 +12,29 @@ import { NotificationService } from '@core/services/notification/notification.se
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
-import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
+import { TangentAimingHeaderComponent } from '../tangent-aiming-common/tangent-aiming-header/tangent-aiming-header.component';
+import { TangentAimingNumberFieldComponent } from '../tangent-aiming-common/tangent-aiming-number-field/tangent-aiming-number-field.component';
+import { TangentAimingResultsComponent } from '../tangent-aiming-common/tangent-aiming-results/tangent-aiming-results.component';
+import { INITIAL_LEFT_SUPPORT_STATE } from '../tangent-aiming-common/tangent-aiming-common.constantes';
 import {
+  buildCalculationTypeOptions,
   buildSpanSupportOptions,
-  getSpanKey,
-  LeftSupportSnapshot,
-  resolveSpanLeftSupport
-} from '../tangent-aiming-support/tangent-aiming-support.helpers';
+  calculateTangentAimingMock,
+  getCalculatedSpanLength,
+  getTangentAimingError,
+  nextLeftSupportState,
+  syncDisplayedControls
+} from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   TANGENT_AIMING_EXTERIOR_FIELD_RULES,
   TANGENT_AIMING_EXTERIOR_MODEL_FIELDS,
   TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS
 } from './tangent-aiming-exterior.constantes';
 import {
-  calculateTangentAimingExteriorMock,
   createTangentAimingExteriorForm,
   getDisplayedInputFields,
   invalidateTangentAimingExteriorResult,
-  syncDisplayedControls,
   toTangentAimingExteriorInputs
 } from './tangent-aiming-exterior.helpers';
 import { TangentAimingExteriorCalculationType } from './tangent-aiming-exterior.interfaces';
@@ -43,17 +44,16 @@ import { TangentAimingExteriorCalculationType } from './tangent-aiming-exterior.
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    NgTemplateOutlet,
     SelectModule,
     SelectButtonModule,
-    InputTextModule,
-    InputGroupModule,
-    InputGroupAddonModule,
     MessageModule,
     IconComponent,
     ButtonComponent,
     DecimalPipe,
-    TranslocoModule
+    TranslocoModule,
+    TangentAimingHeaderComponent,
+    TangentAimingNumberFieldComponent,
+    TangentAimingResultsComponent
   ],
   templateUrl: './tangent-aiming-exterior.component.html',
   styleUrl: './tangent-aiming-exterior.component.scss',
@@ -73,6 +73,7 @@ export class TangentAimingExteriorComponent {
     initialValue: this.translocoService.getActiveLang()
   });
 
+  readonly mandatoryId = 'mandatory-tangent-aiming-exterior';
   readonly fields = TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS;
   readonly rules = TANGENT_AIMING_EXTERIOR_FIELD_RULES;
   readonly form = createTangentAimingExteriorForm();
@@ -84,9 +85,7 @@ export class TangentAimingExteriorComponent {
   readonly canCalculate = computed(
     () => this.isFormValid() && !this.isCalculating() && this.measureData().outputs.tangentAimingExterior === null
   );
-  /** Left support chosen by the user for each span (by span key), restored when the span is selected again. */
-  private readonly leftSupportMemory = signal<Record<string, string>>({});
-  private readonly lastLeftSupport = signal<LeftSupportSnapshot | null>(null);
+  private readonly leftSupportState = signal(INITIAL_LEFT_SUPPORT_STATE);
 
   /** Both supports of the selected span, empty without span. */
   readonly supportOptions = computed(() =>
@@ -96,37 +95,21 @@ export class TangentAimingExteriorComponent {
   readonly showTangentAngleField = computed(() => this.measureData().exteriorCalculationType === 'tangente');
 
   /** Span length computed by the engine for the selected span, or null when unavailable. */
-  readonly calculatedSpanLength = computed(() => {
-    const span = this.measureData().span;
-    const lengths = this.plotService.litData()?.output_parameters.span_length;
-    return span?.length === 2 ? (lengths?.[span[0]] ?? null) : null;
-  });
+  readonly calculatedSpanLength = computed(() =>
+    getCalculatedSpanLength(this.measureData().span, this.plotService.litData()?.output_parameters.span_length)
+  );
 
   readonly calculationTypeOptions = computed(() => {
     this.activeLang();
-    return [
-      { label: this.translocoService.translate('common.parameter-label'), value: 'parametre' },
-      { label: this.translocoService.translate('common.calculation-type-tangent'), value: 'tangente' }
-    ];
+    return buildCalculationTypeOptions(this.translocoService);
   });
 
   constructor() {
     // A span change must not leave a left support outside the span.
     effect(() => {
       const { exteriorLeftSupport, span } = this.measureData();
-      const { spanKey, previous, memory } = untracked(() => ({
-        spanKey: getSpanKey(span),
-        previous: this.lastLeftSupport(),
-        memory: this.leftSupportMemory()
-      }));
-      const resolved = resolveSpanLeftSupport(exteriorLeftSupport, span, previous, memory);
-      untracked(() => {
-        // The left support kept for a span is the one the user will find again when selecting it back.
-        if (resolved === exteriorLeftSupport && resolved !== null) {
-          this.leftSupportMemory.update((m) => ({ ...m, [spanKey]: resolved }));
-        }
-        this.lastLeftSupport.set({ spanKey, leftSupport: resolved });
-      });
+      const { resolved, state } = nextLeftSupportState(exteriorLeftSupport, span, untracked(this.leftSupportState));
+      untracked(() => this.leftSupportState.set(state));
       if (resolved !== exteriorLeftSupport) {
         this.measureData.update((d) => invalidateTangentAimingExteriorResult({ ...d, exteriorLeftSupport: resolved }));
       }
@@ -134,8 +117,9 @@ export class TangentAimingExteriorComponent {
     // Model -> form: only differing values are written, so a value being typed is never overwritten.
     effect(() => {
       const data = this.measureData();
-      syncDisplayedControls(this.form, data.exteriorCalculationType);
-      for (const field of getDisplayedInputFields(data.exteriorCalculationType)) {
+      const displayed = getDisplayedInputFields(data.exteriorCalculationType);
+      syncDisplayedControls(this.form, displayed);
+      for (const field of displayed) {
         const value = data[TANGENT_AIMING_EXTERIOR_MODEL_FIELDS[field]] ?? null;
         if (this.form.controls[field].value !== value) {
           this.form.controls[field].setValue(value as never, { emitEvent: false });
@@ -168,10 +152,7 @@ export class TangentAimingExteriorComponent {
 
   /** Message of the active error of a control, once it has been touched. */
   getError(control: AbstractControl): string {
-    if (!control.touched && !control.dirty) return '';
-    if (control.errors?.['required']) return this.translocoService.translate('common.required');
-    const numberError = getNumberInputErrorParams(control);
-    return numberError ? this.translocoService.translate(numberError.key, numberError.params) : '';
+    return getTangentAimingError(control, this.translocoService);
   }
 
   async calculate(): Promise<void> {
@@ -181,17 +162,13 @@ export class TangentAimingExteriorComponent {
     this.isCalculating.set(true);
     this.hasError.set(false);
     try {
-      const { result, error } = await calculateTangentAimingExteriorMock(
-        toTangentAimingExteriorInputs(this.measureData())
-      );
+      const { result, error } = await calculateTangentAimingMock(toTangentAimingExteriorInputs(this.measureData()));
       if (error || !result) throw new Error(error ?? 'Empty tangent aiming result');
       this.measureData.update((d) => ({ ...d, outputs: { ...d.outputs, tangentAimingExterior: result } }));
     } catch (error) {
       this.logger.error('Failed to calculate the tangent aiming (exterior) parameter', error);
       this.hasError.set(true);
-      this.notificationService.error(
-        this.translocoService.translate('common.tangent-aiming-calculation-failed')
-      );
+      this.notificationService.error(this.translocoService.translate('common.tangent-aiming-calculation-failed'));
     } finally {
       this.isCalculating.set(false);
     }

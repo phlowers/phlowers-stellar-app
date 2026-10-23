@@ -1,20 +1,8 @@
-@use 'abstract.extracts' as app;
+@use '../tangent-aiming-common/tangent-aiming-form' as tangent-aiming;
 
 .tangent-aiming-interior {
-  &__header {
-    @apply flex flex-wrap items-center gap-4 my-4;
-  }
-
-  &__mandatory-msg {
-    @apply flex items-center gap-1 m-0;
-    @extend %text-s-600;
-    color: var(--star-dust-950);
-  }
-
   &__form {
-    // Label, input and error message of a field each get their own row; the error row only grows when an error is shown.
-    $_field-rows: auto auto minmax(0.75rem, auto);
-    @extend %tools-grid-layout;
+    @include tangent-aiming.form;
     grid-template-areas:
       'leftSupport spanLength . . .'
       'leftSupport spanLength . . .'
@@ -26,111 +14,6 @@
       'parameter . . . .'
       'parameter . . . .'
       'parameter . . . .';
-    grid-template-rows: $_field-rows auto $_field-rows $_field-rows;
-    row-gap: 0;
-
-    > div:not(.spanLengthDesc) {
-      display: grid;
-      grid-template-rows: subgrid;
-      row-gap: 0;
-    }
-
-    .leftSupport {
-      grid-area: leftSupport;
-    }
-
-    .spanLength {
-      grid-area: spanLength;
-    }
-
-    .hDistance {
-      grid-area: hDistance;
-    }
-
-    .vAngleLeft {
-      grid-area: vAngleLeft;
-    }
-
-    .vAngleRight {
-      grid-area: vAngleRight;
-    }
-
-    .parameter {
-      grid-area: parameter;
-    }
-
-    .spanLengthDesc {
-      grid-area: spanLengthDesc;
-      margin: -0.5rem 0 0.75rem;
-
-      p {
-        @apply mb-0 font-semibold;
-        margin: 0.125rem 0.25rem;
-        color: var(--star-dust-900);
-      }
-    }
-  }
-
-  &__results {
-    @apply border-t mt-3;
-    border-color: var(--star-dust-300);
-
-    &__title {
-      @apply mt-4 mb-0;
-      @extend %heading-s;
-      color: var(--star-dust-950);
-    }
-
-    &__list {
-      @extend %tools-grid-layout;
-      grid-template-areas:
-        'param incertainParam . . .'
-        'crit . . . .';
-
-      .param {
-        grid-area: param;
-      }
-
-      .incertainParam {
-        grid-area: incertainParam;
-      }
-
-      .crit {
-        grid-area: crit;
-
-        &__result {
-          @apply flex items-center gap-4 py-1;
-
-          .app-icon {
-            color: var(--grey-white);
-            font-size: 1.25rem;
-            border-radius: 1.5rem;
-            width: 1.5rem;
-            height: 1.5rem;
-            line-height: 1.5rem;
-            text-align: center;
-
-            &.criterion-ok {
-              background-color: var(--main-success);
-            }
-
-            &.criterion-ko {
-              background-color: var(--main-error);
-            }
-          }
-        }
-      }
-
-      dt {
-        @apply px-1;
-        color: var(--star-dust-900);
-      }
-
-      dd {
-        @apply px-1 py-2;
-        @extend %text-m-400;
-        color: var(--star-dust-950);
-      }
-    }
+    grid-template-rows: tangent-aiming.$field-rows auto tangent-aiming.$field-rows tangent-aiming.$field-rows;
   }
 }

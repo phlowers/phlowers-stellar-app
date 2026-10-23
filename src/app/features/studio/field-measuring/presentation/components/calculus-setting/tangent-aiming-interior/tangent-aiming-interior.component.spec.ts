@@ -7,6 +7,7 @@ import { vi } from 'vitest';
 
 import { TangentAimingInteriorComponent } from './tangent-aiming-interior.component';
 import * as helpers from './tangent-aiming-interior.helpers';
+import * as commonHelpers from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -161,7 +162,7 @@ describe('TangentAimingInterior component', () => {
   });
 
   it('should render the not respected icon when the criterion fails', async () => {
-    vi.spyOn(helpers, 'calculateTangentAimingInteriorMock').mockResolvedValueOnce({
+    vi.spyOn(commonHelpers, 'calculateTangentAimingMock').mockResolvedValueOnce({
       result: { parameter: 10, uncertainty: 2, criterion: 5, checkValidity: false },
       error: null
     });
@@ -183,14 +184,14 @@ describe('TangentAimingInterior component', () => {
   });
 
   it('should not calculate when the form is invalid', async () => {
-    const spy = vi.spyOn(helpers, 'calculateTangentAimingInteriorMock');
+    const spy = vi.spyOn(commonHelpers, 'calculateTangentAimingMock');
     await component.calculate();
     expect(spy).not.toHaveBeenCalled();
     expect(component.measureData().outputs.tangentAimingInterior).toBeNull();
   });
 
   it('should log and notify when the calculation fails', async () => {
-    vi.spyOn(helpers, 'calculateTangentAimingInteriorMock').mockResolvedValueOnce({ result: null, error: 'boom' });
+    vi.spyOn(commonHelpers, 'calculateTangentAimingMock').mockResolvedValueOnce({ result: null, error: 'boom' });
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
     await component.calculate();
