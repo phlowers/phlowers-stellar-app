@@ -114,7 +114,15 @@
 </p-table>
 
 <ng-template #footer>
-  <button app-btn disabled type="button" btnStyle="text" data-testid="report-btn">
+  <button
+    app-btn
+    type="button"
+    btnStyle="text"
+    [disabled]="!canGenerateReport()"
+    [btnLoading]="isReportLoading()"
+    (click)="onGenerateReport()"
+    data-testid="report-btn"
+  >
     <app-icon icon="description" aria-hidden="true" />
     {{ 'common.report' | transloco }}
   </button>

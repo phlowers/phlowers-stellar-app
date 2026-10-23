@@ -1081,6 +1081,10 @@
       "no-obstacles-message": "No obstacles defined for this span.",
       "current-page-report": "{first} to {last} of {totalRecords}"
     },
+    "obstacles-report": {
+      "title": "Obstacles Table Report",
+      "obstacles-title": "Obstacle points' table"
+    },
     "vtl-and-guying": {
       "guying-span-label": "Guying span",
       "support-type-label": "Support type:",

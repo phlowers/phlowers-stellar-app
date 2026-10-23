@@ -1081,6 +1081,10 @@
       "no-obstacles-message": "Aucun obstacle défini pour cette portée.",
       "current-page-report": "{first} à {last} sur {totalRecords}"
     },
+    "obstacles-report": {
+      "title": "Rapport Tableau des obstacles",
+      "obstacles-title": "Tableau des points d'obstacle"
+    },
     "vtl-and-guying": {
       "guying-span-label": "Portée haubanée",
       "support-type-label": "Type de support :",
