@@ -39,6 +39,7 @@ vi.mock('jspdf', () => {
     rect: vi.fn(),
     addPage: vi.fn(),
     getNumberOfPages: vi.fn().mockReturnValue(2),
+    internal: { pageSize: { getWidth: vi.fn().mockReturnValue(210), getHeight: vi.fn().mockReturnValue(297) } },
     getTextWidth: vi.fn().mockReturnValue(30),
     splitTextToSize: vi.fn().mockImplementation((text: string) => [text]),
     save: vi.fn()
@@ -54,6 +55,7 @@ interface MockDoc {
   rect: ReturnType<typeof vi.fn>;
   text: ReturnType<typeof vi.fn>;
   save: ReturnType<typeof vi.fn>;
+  splitTextToSize: ReturnType<typeof vi.fn>;
 }
 
 async function getMockDoc(): Promise<MockDoc> {
@@ -123,6 +125,7 @@ describe('ObstaclesTableReportService', () => {
     doc.rect.mockClear();
     doc.text.mockClear();
     doc.save.mockClear();
+    doc.splitTextToSize.mockImplementation((text: string) => [text]);
   });
 
   afterEach(() => {
@@ -157,6 +160,22 @@ describe('ObstaclesTableReportService', () => {
     expect(doc.addPage).toHaveBeenCalledWith('a4', 'landscape');
     expect(texts).toContain('Points d obstacles');
     OBSTACLES_TABLE_METRICS.forEach((metric) => expect(texts).toContain(metric.labelKey));
+  });
+
+  it('should continue a multiline study description on a portrait page before the landscape tables', async () => {
+    const doc = await getMockDoc();
+    // jsPDF starts a new line at each line break
+    doc.splitTextToSize.mockImplementation((text: string) => text.split('\n'));
+    // 120 one-character lines: 239 characters, within the 240 the study form accepts
+    const studyDescription = Array.from({ length: 120 }, () => 'a').join('\n');
+
+    await service.generateReport(createData({ studyDescription }));
+
+    const orientations = doc.addPage.mock.calls.map(([, orientation]) => orientation);
+    const valueLines = doc.text.mock.calls.flatMap(([text]) => (Array.isArray(text) ? text : []));
+    expect(orientations).toEqual(['portrait', 'landscape']);
+    expect(valueLines.filter((line) => line === 'a')).toHaveLength(120);
+    expect(valueLines).toContain('Fake load description');
   });
 
   it('should draw the span label and the distances in metres with two decimals', async () => {

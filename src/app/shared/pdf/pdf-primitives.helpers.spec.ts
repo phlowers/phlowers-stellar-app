@@ -23,6 +23,7 @@ import {
   drawSeparator,
   drawStudyCartoucheSection,
   drawTitledBulletSection,
+  drawTitledTwoColumnBullets,
   drawTwoColumnBulletSection,
   drawTwoColumnBullets,
   drawWrappingBulletItem,
@@ -34,6 +35,8 @@ import {
 } from './pdf-primitives.helpers';
 import {
   APP_NAME,
+  BULLET,
+  CONTENT_BOTTOM,
   CONTENT_WIDTH,
   LANDSCAPE_PAGE,
   LINE_HEIGHT,
@@ -41,7 +44,8 @@ import {
   PAGE_SIZE,
   SECTION_TITLE_HEIGHT,
   SEPARATOR_HEIGHT,
-  SEPARATOR_MARGIN_Y
+  SEPARATOR_MARGIN_Y,
+  VALUE_LINE_SPACING
 } from './pdf-layout.constantes';
 
 vi.mock('jspdf');
@@ -59,9 +63,31 @@ function createMockDoc(): jsPDF {
     splitTextToSize: vi.fn().mockImplementation((text: string) => [text]),
     getNumberOfPages: vi.fn().mockReturnValue(1),
     setPage: vi.fn(),
+    addPage: vi.fn(),
+    internal: {
+      pageSize: {
+        getWidth: vi.fn().mockReturnValue(PAGE_SIZE.width),
+        getHeight: vi.fn().mockReturnValue(PAGE_SIZE.height)
+      }
+    },
     save: vi.fn()
   } as unknown as jsPDF;
 }
+
+function getTextCalls(doc: jsPDF): unknown[][] {
+  return (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+}
+
+// Baseline of the lowest line of every text drawn: jsPDF draws the lines of an array VALUE_LINE_SPACING apart
+function getLowestTextBaseline(doc: jsPDF): number {
+  return Math.max(
+    ...getTextCalls(doc).map(
+      ([text, , y]) => (y as number) + (Array.isArray(text) ? Math.max(text.length - 1, 0) : 0) * VALUE_LINE_SPACING
+    )
+  );
+}
+
+const COMPACT_HEADER_Y = drawCompactHeader(createMockDoc());
 
 describe('pdf-primitives helpers', () => {
   afterEach(() => {
@@ -181,20 +207,20 @@ describe('pdf-primitives helpers', () => {
   });
 
   describe('drawWrappingBulletItem', () => {
-    it('should return LINE_HEIGHT for a single-line value', () => {
+    it('should return the Y one LINE_HEIGHT below a single-line value', () => {
       const doc = createMockDoc();
       (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockReturnValueOnce(['short value']);
-      const height = drawWrappingBulletItem(doc, 'Label', 'short value', 15, 30, 100);
+      const nextY = drawWrappingBulletItem(doc, 'Label', 'short value', 15, 30, 100);
 
-      expect(height).toBe(LINE_HEIGHT);
+      expect(nextY).toBe(30 + LINE_HEIGHT);
     });
 
-    it('should return N × LINE_HEIGHT for N wrapped lines', () => {
+    it('should return the Y one LINE_HEIGHT below the last of N wrapped lines', () => {
       const doc = createMockDoc();
       (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockReturnValueOnce(['line1', 'line2', 'line3']);
-      const height = drawWrappingBulletItem(doc, 'Label', 'long value', 15, 30, 100);
+      const nextY = drawWrappingBulletItem(doc, 'Label', 'long value', 15, 30, 100);
 
-      expect(height).toBe(3 * LINE_HEIGHT);
+      expect(nextY).toBe(30 + 2 * VALUE_LINE_SPACING + LINE_HEIGHT);
     });
 
     it('should use "-" fallback for empty value', () => {
@@ -202,6 +228,39 @@ describe('pdf-primitives helpers', () => {
       drawWrappingBulletItem(doc, 'Label', '', 15, 30, 100);
 
       expect(doc.splitTextToSize).toHaveBeenCalledWith('-', expect.any(Number));
+    });
+
+    it('should continue the value lines passing the bottom margin on a new portrait page, under the value', () => {
+      const doc = createMockDoc();
+      const lines = Array.from({ length: 60 }, (_, index) => `line ${index + 1}`);
+      (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockReturnValueOnce(lines);
+      const valueX = 15 + 20;
+
+      const nextY = drawWrappingBulletItem(doc, 'Label', 'long value', 15, 240, 100);
+
+      const valueCalls = getTextCalls(doc).filter(([text]) => Array.isArray(text));
+      const firstPageCount = (valueCalls[0][0] as string[]).length;
+      expect(doc.addPage).toHaveBeenCalledExactlyOnceWith('a4', 'portrait');
+      expect(doc.text).toHaveBeenCalledWith(`${BULLET} Label : `, 15, 240);
+      expect(valueCalls.map(([, x, y]) => [x, y])).toEqual([
+        [valueX, 240],
+        [valueX, COMPACT_HEADER_Y]
+      ]);
+      expect(valueCalls.flatMap(([text]) => text as string[])).toEqual(lines);
+      // The first page takes every line whose baseline stays above the bottom margin
+      expect(240 + (firstPageCount - 1) * VALUE_LINE_SPACING).toBeLessThanOrEqual(CONTENT_BOTTOM);
+      expect(240 + firstPageCount * VALUE_LINE_SPACING).toBeGreaterThan(CONTENT_BOTTOM);
+      expect(nextY).toBe(COMPACT_HEADER_Y + (lines.length - firstPageCount - 1) * VALUE_LINE_SPACING + LINE_HEIGHT);
+    });
+
+    it('should move the label with the first line to a new portrait page when that line would pass the bottom margin', () => {
+      const doc = createMockDoc();
+
+      drawWrappingBulletItem(doc, 'Label', 'value', 15, CONTENT_BOTTOM + 1, 100);
+
+      expect(doc.addPage).toHaveBeenCalledExactlyOnceWith('a4', 'portrait');
+      expect(doc.text).toHaveBeenCalledWith(`${BULLET} Label : `, 15, COMPACT_HEADER_Y);
+      expect(doc.text).toHaveBeenCalledWith(['value'], 15 + 20, COMPACT_HEADER_Y);
     });
   });
 
@@ -234,18 +293,37 @@ describe('pdf-primitives helpers', () => {
       expect(doc.splitTextToSize).not.toHaveBeenCalled();
     });
 
-    it('should advance wrapping items by their wrapped height', () => {
+    it('should advance wrapping items below their last line', () => {
       const doc = createMockDoc();
       (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockReturnValueOnce(['l1', 'l2']);
       const endY = drawBulletList(doc, [{ label: 'A', value: 'long', wrap: true }], 30, 15, 100);
 
-      expect(endY).toBe(30 + 2 * LINE_HEIGHT);
+      expect(endY).toBe(30 + VALUE_LINE_SPACING + LINE_HEIGHT);
       expect(doc.splitTextToSize).toHaveBeenCalledTimes(1);
     });
 
     it('should return startY unchanged for an empty list', () => {
       const doc = createMockDoc();
       expect(drawBulletList(doc, [], 42, 15, 100)).toBe(42);
+    });
+
+    it('should move a non-wrapping item passing the bottom margin to a new portrait page', () => {
+      const doc = createMockDoc();
+      const endY = drawBulletList(
+        doc,
+        [
+          { label: 'A', value: '1' },
+          { label: 'B', value: '2' }
+        ],
+        CONTENT_BOTTOM,
+        15,
+        100
+      );
+
+      expect(doc.addPage).toHaveBeenCalledExactlyOnceWith('a4', 'portrait');
+      expect(doc.text).toHaveBeenCalledWith('1', 15 + 20, CONTENT_BOTTOM);
+      expect(doc.text).toHaveBeenCalledWith('2', 15 + 20, COMPACT_HEADER_Y);
+      expect(endY).toBe(COMPACT_HEADER_Y + LINE_HEIGHT);
     });
   });
 
@@ -395,6 +473,32 @@ describe('pdf-primitives helpers', () => {
 
       expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + SEPARATOR_HEIGHT);
     });
+
+    it('should move the title to a new portrait page with its first item when they do not both fit', () => {
+      const doc = createMockDoc();
+      drawTitledBulletSection(
+        doc,
+        'My section',
+        [{ label: 'A', value: '1' }],
+        CONTENT_BOTTOM - SECTION_TITLE_HEIGHT + 1
+      );
+
+      expect(doc.addPage).toHaveBeenCalledExactlyOnceWith('a4', 'portrait');
+      expect(doc.text).toHaveBeenCalledWith('My section', PAGE_MARGIN.left, COMPACT_HEADER_Y);
+      expect(doc.text).toHaveBeenCalledWith('1', expect.any(Number), COMPACT_HEADER_Y + SECTION_TITLE_HEIGHT);
+    });
+
+    it('should leave the separator out when its line would pass the bottom margin', () => {
+      const doc = createMockDoc();
+      // The last item ends on the bottom margin
+      const startY = CONTENT_BOTTOM - SECTION_TITLE_HEIGHT - LINE_HEIGHT;
+      const nextY = drawTitledBulletSection(doc, 'My section', [{ label: 'A', value: '1' }], startY);
+
+      expect(doc.addPage).not.toHaveBeenCalled();
+      // Only the title underline
+      expect(doc.line).toHaveBeenCalledTimes(1);
+      expect(nextY).toBe(CONTENT_BOTTOM);
+    });
   });
 
   describe('drawStudyCartoucheSection', () => {
@@ -433,6 +537,23 @@ describe('pdf-primitives helpers', () => {
       drawStudyCartoucheSection(doc, 'Cartouche', labels, { ...data, author: '', comment: '' }, 40);
 
       expect(doc.splitTextToSize).toHaveBeenCalledWith('-', expect.any(Number));
+    });
+
+    it('should continue a multiline study description and the fields below it on portrait pages', () => {
+      const doc = createMockDoc();
+      // jsPDF starts a new line at each line break
+      (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockImplementation((text: string) => text.split('\n'));
+      // 120 one-character lines: 239 characters, within the 240 the study form accepts
+      const studyDescription = Array.from({ length: 120 }, () => 'a').join('\n');
+
+      drawStudyCartoucheSection(doc, 'Cartouche', labels, { ...data, studyDescription }, drawHeader(doc, '-', '-'));
+
+      const drawnTexts = getTextCalls(doc).flatMap(([text]) => (Array.isArray(text) ? text : [text]));
+      expect(doc.addPage).toHaveBeenCalledWith('a4', 'portrait');
+      expect(drawnTexts.filter((text) => text === 'a')).toHaveLength(120);
+      Object.values(labels).forEach((label) => expect(drawnTexts).toContain(`${BULLET} ${label} : `));
+      expect(drawnTexts).toContain('Load desc');
+      expect(getLowestTextBaseline(doc)).toBeLessThanOrEqual(CONTENT_BOTTOM);
     });
   });
 
@@ -475,6 +596,43 @@ describe('pdf-primitives helpers', () => {
       expect(doc.text).toHaveBeenCalledWith('Two columns', PAGE_MARGIN.left, 40);
       expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + LINE_HEIGHT + SEPARATOR_HEIGHT);
     });
+
+    it('should move the title and both columns to a new portrait page when the taller column would pass the bottom margin', () => {
+      const doc = createMockDoc();
+      const left = [
+        { label: 'L1', value: '1' },
+        { label: 'L2', value: '2' },
+        { label: 'L3', value: '3' }
+      ];
+      // The title and the first two rows would fit, not the third one
+      const startY = CONTENT_BOTTOM - SECTION_TITLE_HEIGHT - LINE_HEIGHT;
+      const nextY = drawTwoColumnBulletSection(doc, 'Two columns', left, [{ label: 'R1', value: '1' }], startY);
+
+      expect(doc.addPage).toHaveBeenCalledExactlyOnceWith('a4', 'portrait');
+      expect(doc.text).toHaveBeenCalledWith('Two columns', PAGE_MARGIN.left, COMPACT_HEADER_Y);
+      expect(nextY).toBe(COMPACT_HEADER_Y + SECTION_TITLE_HEIGHT + 3 * LINE_HEIGHT + SEPARATOR_HEIGHT);
+    });
+  });
+
+  describe('drawTitledTwoColumnBullets', () => {
+    it('should draw the title and both columns without a separator, returning the Y below the taller column', () => {
+      const doc = createMockDoc();
+      const nextY = drawTitledTwoColumnBullets(
+        doc,
+        'Two columns',
+        [{ label: 'L1', value: '1' }],
+        [
+          { label: 'R1', value: '1' },
+          { label: 'R2', value: '2' }
+        ],
+        40
+      );
+
+      expect(doc.text).toHaveBeenCalledWith('Two columns', PAGE_MARGIN.left, 40);
+      // Only the title underline
+      expect(doc.line).toHaveBeenCalledTimes(1);
+      expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + 2 * LINE_HEIGHT);
+    });
   });
 
   describe('drawPageFooters', () => {
@@ -494,21 +652,35 @@ describe('pdf-primitives helpers', () => {
       });
     });
 
-    it('should use landscape dimensions from page 2 when landscapeFromPage2 is true', () => {
+    it('should place each footer for its own page orientation, portrait continuation pages included', () => {
       const doc = createMockDoc();
-      (doc.getNumberOfPages as ReturnType<typeof vi.fn>).mockReturnValue(2);
+      const pageSizes = [PAGE_SIZE, PAGE_SIZE, LANDSCAPE_PAGE];
+      let currentPage = 1;
+      (doc.getNumberOfPages as ReturnType<typeof vi.fn>).mockReturnValue(pageSizes.length);
+      (doc.setPage as ReturnType<typeof vi.fn>).mockImplementation((pageNumber: number) => (currentPage = pageNumber));
+      (doc.internal.pageSize.getWidth as ReturnType<typeof vi.fn>).mockImplementation(
+        () => pageSizes[currentPage - 1].width
+      );
+      (doc.internal.pageSize.getHeight as ReturnType<typeof vi.fn>).mockImplementation(
+        () => pageSizes[currentPage - 1].height
+      );
 
-      drawPageFooters(doc, 'Page', true);
+      drawPageFooters(doc, 'Page');
 
-      expect(doc.text).toHaveBeenCalledWith('Page 1 / 2', PAGE_SIZE.width - PAGE_MARGIN.right, expect.any(Number), {
+      const footerY = (footer: string): number => getTextCalls(doc).find(([text]) => text === footer)![2] as number;
+      expect(doc.text).toHaveBeenCalledWith('Page 2 / 3', PAGE_SIZE.width - PAGE_MARGIN.right, expect.any(Number), {
         align: 'right'
       });
       expect(doc.text).toHaveBeenCalledWith(
-        'Page 2 / 2',
+        'Page 3 / 3',
         LANDSCAPE_PAGE.width - PAGE_MARGIN.right,
         expect.any(Number),
         { align: 'right' }
       );
+      // At the bottom of the portrait page 2, below the landscape page height
+      expect(footerY('Page 2 / 3')).toBeGreaterThan(LANDSCAPE_PAGE.height);
+      expect(footerY('Page 2 / 3')).toBeLessThan(PAGE_SIZE.height);
+      expect(footerY('Page 3 / 3')).toBeLessThan(LANDSCAPE_PAGE.height);
     });
   });
 

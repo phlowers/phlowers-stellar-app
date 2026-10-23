@@ -29,6 +29,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 import { LateralDistanceType, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { SpanOption } from '@shared/types/plot.types';
@@ -63,6 +64,7 @@ export class ObstaclesTableComponent {
   private readonly obstaclesTableReportService = inject(ObstaclesTableReportService);
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly obstaclesService = inject(ObstaclesService);
+  private readonly obstacleFormService = inject(ObstacleFormService);
   private readonly translocoService = inject(TranslocoService);
   private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
@@ -157,8 +159,12 @@ export class ObstaclesTableComponent {
     );
   });
 
-  // The engine publishes the distances at the end of each projection refresh, while the plot is loading
-  readonly isReportLoading = computed(() => this.isGeneratingReport() || this.plotService.loading());
+  // The engine publishes the distances at the end of each projection refresh, while the plot is loading.
+  // An obstacle calculation updates the positions first and only starts that refresh once the obstacle is
+  // registered in the worker and saved: until then the distances are still the previous ones.
+  readonly isReportLoading = computed(
+    () => this.isGeneratingReport() || this.obstacleFormService.isCalculatingObstacle() || this.plotService.loading()
+  );
 
   // Once the projection is refreshed, a point still without distances (e.g. outside its span) never gets
   // any: the report prints '-' for it, as the table does, rather than blocking the whole report

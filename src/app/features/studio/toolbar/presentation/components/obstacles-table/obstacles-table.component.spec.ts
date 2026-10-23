@@ -14,6 +14,7 @@ import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstaclesTableReportService } from '@features/studio/toolbar/presentation/services/obstacles-table-report/obstacles-table-report.service';
@@ -132,6 +133,7 @@ describe('ObstaclesTableComponent', () => {
   };
   let studySignal: WritableSignal<unknown>;
   let plotLoadingSignal: WritableSignal<boolean>;
+  let isCalculatingObstacleSignal: WritableSignal<boolean>;
   let mockReportService: { generateReport: ReturnType<typeof vi.fn> };
   let mockLogger: {
     error: ReturnType<typeof vi.fn>;
@@ -176,6 +178,7 @@ describe('ObstaclesTableComponent', () => {
 
     studySignal = signal<unknown>(null);
     plotLoadingSignal = signal(false);
+    isCalculatingObstacleSignal = signal(false);
     mockReportService = {
       generateReport: vi.fn((_data: ObstaclesTableReportData): Promise<void> => Promise.resolve())
     };
@@ -195,6 +198,7 @@ describe('ObstaclesTableComponent', () => {
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: ObstacleStateService, useValue: { distances: distancesSignal } },
         { provide: ObstaclesService, useValue: mockObstaclesService },
+        { provide: ObstacleFormService, useValue: { isCalculatingObstacle: isCalculatingObstacleSignal } },
         { provide: PlotService, useValue: { study: studySignal, loading: plotLoadingSignal } },
         { provide: ObstaclesTableReportService, useValue: mockReportService },
         { provide: LoggerService, useValue: mockLogger }
@@ -853,6 +857,34 @@ describe('ObstaclesTableComponent', () => {
       it('generates nothing while the distances are being calculated', async () => {
         setReportContext();
         plotLoadingSignal.set(true);
+
+        await component.onGenerateReport();
+
+        expect(mockReportService.generateReport).not.toHaveBeenCalled();
+      });
+
+      // The obstacle calculation updates the positions before the projection refresh starts
+      it('disables the button and shows its loading state while an obstacle calculation awaits its projection', () => {
+        setReportContext();
+        const { footerFixture, button, buttonComponent } = renderReportButtonWithComponent();
+
+        isCalculatingObstacleSignal.set(true);
+        footerFixture.detectChanges();
+
+        expect(plotLoadingSignal()).toBe(false);
+        expect(button.disabled).toBe(true);
+        expect(buttonComponent.btnLoading()).toBe(true);
+
+        isCalculatingObstacleSignal.set(false);
+        footerFixture.detectChanges();
+
+        expect(button.disabled).toBe(false);
+        expect(buttonComponent.btnLoading()).toBe(false);
+      });
+
+      it('generates nothing while an obstacle calculation awaits its projection', async () => {
+        setReportContext();
+        isCalculatingObstacleSignal.set(true);
 
         await component.onGenerateReport();
 

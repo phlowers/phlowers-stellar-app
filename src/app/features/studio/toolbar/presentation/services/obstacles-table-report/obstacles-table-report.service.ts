@@ -58,7 +58,7 @@ export class ObstaclesTableReportService extends PdfBaseService {
           { compactHeader: true, tableGap: OBSTACLES_TABLES_VERTICAL_GAP }
         );
 
-        drawPageFooters(doc, labels.pageLabel, true);
+        drawPageFooters(doc, labels.pageLabel);
 
         return { doc, filename: buildObstaclesReportFilename(labels.reportTitle, data) };
       }

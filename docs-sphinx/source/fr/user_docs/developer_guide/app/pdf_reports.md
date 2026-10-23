@@ -71,7 +71,7 @@ export class ObstaclesTableReportService extends PdfBaseService {
           { compactHeader: true, tableGap: OBSTACLES_TABLES_VERTICAL_GAP }
         );
 
-        drawPageFooters(doc, labels.pageLabel, true);
+        drawPageFooters(doc, labels.pageLabel);
 
         return { doc, filename: buildObstaclesReportFilename(labels.reportTitle, data) };
       }
@@ -118,7 +118,8 @@ partir d'un signal réinitialisé dans un bloc `finally`.
 
 - Pour vérifier qu'un élément tient encore sur la page avant de le dessiner, utilisez les constantes
   et fonctions qui donnent sa hauteur plutôt que de la recalculer : `SECTION_TITLE_HEIGHT`,
-  `SEPARATOR_HEIGHT` et `computeTableHeight()`.
+  `SEPARATOR_HEIGHT` et `computeTableHeight()`. Sur une page en portrait, aucune ligne de base ne
+  descend sous `CONTENT_BOTTOM` (282 mm, la hauteur de la page moins la marge basse).
 
 ---
 
@@ -133,12 +134,11 @@ partir d'un signal réinitialisé dans un bloc `finally`.
 | `drawSectionTitle(doc, title, y)` | Titre de section souligné | `y + SECTION_TITLE_HEIGHT` |
 | `drawSeparator(doc, y, width?)` | Ligne horizontale avec une marge au-dessus et au-dessous | `y + SEPARATOR_HEIGHT` |
 | `drawFooter(doc, text, pageWidth?, pageHeight?)` | Texte de pied de page, en bas à droite | — |
-| `drawPageFooters(doc, pageLabel, landscapeFromPage2?)` | « Page n / total » sur chaque page | — |
+| `drawPageFooters(doc, pageLabel)` | « Page n / total » sur chaque page, placé selon l'orientation de la page | — |
 
 `pageWidth` et `pageHeight` valent par défaut les dimensions du portrait : passez
-`LANDSCAPE_PAGE.width` / `.height` sur les pages en paysage. `drawPageFooters(doc, label, true)`
-suppose que toutes les pages après la première sont en paysage ; un rapport qui ajoute des pages en
-portrait (le rapport du tableau de pose) l'appelle sans ce paramètre.
+`LANDSCAPE_PAGE.width` / `.height` sur les pages en paysage. `drawPageFooters()` lit les dimensions de
+chaque page : les pages en portrait et en paysage peuvent se suivre dans n'importe quel ordre.
 
 ### Sections de métadonnées
 
@@ -147,8 +147,21 @@ portrait (le rapport du tableau de pose) l'appelle sans ce paramètre.
 | `drawBulletItem()` / `drawWrappingBulletItem()` | Une ligne « • Étiquette : valeur » ; la variante à retour à la ligne répartit la valeur sur plusieurs lignes |
 | `drawBulletList()` | Une colonne d'éléments à puce |
 | `drawTitledBulletSection()` | Titre, une colonne d'éléments à puce, séparateur |
-| `drawTwoColumnBullets()` / `drawTwoColumnBulletSection()` | Deux colonnes d'éléments à puce indépendantes, avec titre et séparateur pour la variante section |
+| `drawTwoColumnBullets()` / `drawTitledTwoColumnBullets()` / `drawTwoColumnBulletSection()` | Deux colonnes d'éléments à puce indépendantes, avec un titre pour la variante titrée, un titre et un séparateur pour la variante section |
 | `drawStudyCartoucheSection(doc, title, labels, data, y)` | Le cartouche étude et canton partagé par les rapports de canton : auteur, étude, description de l'étude, canton, commentaire, condition initiale, cas de charge et sa description, `-` pour une valeur vide |
+
+Les métadonnées qui ne tiennent pas continuent sur une nouvelle page en portrait, sous
+`drawCompactHeader()`, au lieu d'être dessinées sous la marge basse :
+
+- les lignes d'une valeur à retour à la ligne continuent sur la page suivante, alignées sous la
+  valeur : une longue description ou un long commentaire peut s'étendre sur plusieurs pages ;
+- un élément sans retour à la ligne passe entier sur la page suivante ;
+- un titre de section passe avec son premier élément (`drawTitledBulletSection()`) ou avec tout son
+  bloc à deux colonnes (`drawTitledTwoColumnBullets()`, `drawTwoColumnBulletSection()`) ;
+- le séparateur qui ferme une section est omis s'il descendrait sous `CONTENT_BOTTOM` : le titre de
+  la section suivante commence alors une nouvelle page.
+
+`drawTwoColumnBullets()` seul ne pagine pas : dessinez son titre avec `drawTitledTwoColumnBullets()`.
 
 ### Valeurs et étiquettes
 

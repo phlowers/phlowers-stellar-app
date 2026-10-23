@@ -78,7 +78,7 @@ export class SectionStateReportService extends PdfBaseService {
           labelColWidth
         );
 
-        drawPageFooters(doc, labels.pageLabel, true);
+        drawPageFooters(doc, labels.pageLabel);
 
         const filename = `${sanitizeFilenamePart(labels.reportTitle)}_${sanitizeFilenamePart(
           data.sectionName
