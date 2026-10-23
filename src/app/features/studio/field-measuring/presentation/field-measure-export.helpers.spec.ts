@@ -205,7 +205,8 @@ describe('field-measure-export.helpers', () => {
           cableTemperature: { cableSolarFlux: 40, cableTemperature: 35, cableTemperatureUncertainty: 2 },
           parameter15C: null,
           tangentAimingSupport: null,
-          tangentAimingExterior: null
+          tangentAimingExterior: null,
+          tangentAimingInterior: null
         }
       });
       const result = buildTemperatureCalculationExport(measureData, mockTranslocoService);
@@ -246,7 +247,8 @@ describe('field-measure-export.helpers', () => {
           cableTemperature: null,
           parameter15C: null,
           tangentAimingSupport: null,
-          tangentAimingExterior: null
+          tangentAimingExterior: null,
+          tangentAimingInterior: null
         }
       });
       const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
@@ -276,6 +278,13 @@ describe('field-measure-export.helpers', () => {
 
     it('should leave the method block empty for the tangente-aiming-exterior calculation method', () => {
       const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior' });
+      const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
+      expect(result.methodName).toBe('VISEES_TANGENTES');
+      expect(result.method).toEqual({});
+    });
+
+    it('should leave the method block empty for the tangente-aiming-interior calculation method', () => {
+      const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming-interior' });
       const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
       expect(result.methodName).toBe('VISEES_TANGENTES');
       expect(result.method).toEqual({});
@@ -330,7 +339,8 @@ describe('field-measure-export.helpers', () => {
           cableTemperature: { cableSolarFlux: 40, cableTemperature: 30, cableTemperatureUncertainty: 1.5 },
           parameter15C: { parameter15C: 480, parameter15CMinusUncertainty: 470, parameter15CPlusUncertainty: 490 },
           tangentAimingSupport: null,
-          tangentAimingExterior: null
+          tangentAimingExterior: null,
+          tangentAimingInterior: null
         }
       });
       const result = buildZeroWindCalculationExport(measureData, mockTranslocoService);
@@ -357,7 +367,8 @@ describe('field-measure-export.helpers', () => {
             parameter15CPlusUncertainty: null as unknown as number
           },
           tangentAimingSupport: null,
-          tangentAimingExterior: null
+          tangentAimingExterior: null,
+          tangentAimingInterior: null
         }
       });
       const result = buildZeroWindCalculationExport(measureData, mockTranslocoService);

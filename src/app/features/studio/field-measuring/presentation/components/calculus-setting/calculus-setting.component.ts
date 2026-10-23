@@ -13,6 +13,7 @@ import {
   getDefaultLeftSupport
 } from './tangent-aiming-support/tangent-aiming-support.helpers';
 import { applyTangentAimingExteriorDefaults } from './tangent-aiming-exterior/tangent-aiming-exterior.helpers';
+import { applyTangentAimingInteriorDefaults } from './tangent-aiming-interior/tangent-aiming-interior.helpers';
 import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
 import { CALCULUS_TYPE_BY_METHOD } from './calculus-setting.constantes';
 
@@ -60,6 +61,13 @@ export class CalculusSettingComponent {
         clearAutoParameter15C({
           ...applyTangentAimingExteriorDefaults(d, getDefaultLeftSupport(d.span)),
           calculationMethod: 'tangente-aiming-exterior'
+        })
+      );
+    } else if (type === 'TANGENT_AIMING_INTERIOR') {
+      this.measureData.update((d) =>
+        clearAutoParameter15C({
+          ...applyTangentAimingInteriorDefaults(d, getDefaultLeftSupport(d.span)),
+          calculationMethod: 'tangente-aiming-interior'
         })
       );
     }

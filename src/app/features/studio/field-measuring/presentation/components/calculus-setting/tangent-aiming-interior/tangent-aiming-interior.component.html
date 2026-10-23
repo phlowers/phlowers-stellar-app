@@ -10,7 +10,7 @@
 
   <p id="mandatory-tangent-aiming-interior" class="tangent-aiming-interior__mandatory-msg">
     <app-icon icon="info" aria-hidden="true" />
-    <span>{{ 'field-measuring.tangent-aiming.mandatory-msg' | transloco }}</span>
+    <span>{{ 'common.tangent-aiming-mandatory-msg' | transloco }}</span>
   </p>
 </div>
 
@@ -147,7 +147,7 @@
   <button
     app-btn
     type="button"
-    [disabled]="!isFormValid() || isCalculating()"
+    [disabled]="!canCalculate()"
     [btnLoading]="isCalculating()"
     (click)="calculate()"
     data-testid="calculate-tangent-aiming-interior-btn"
@@ -160,11 +160,11 @@
 <output class="block" [attr.aria-busy]="isCalculating()">
   @if (hasError()) {
     <p-message severity="error" size="small" role="alert" aria-live="assertive" data-testid="calculation-error">
-      {{ 'field-measuring.tangent-aiming-interior.calculation-failed' | transloco }}
+      {{ 'common.tangent-aiming-calculation-failed' | transloco }}
     </p-message>
   }
 
-  @if (result(); as result) {
+  @if (measureData().outputs.tangentAimingInterior; as result) {
     <div class="tangent-aiming-interior__results">
       <h2 class="tangent-aiming-interior__results__title">{{ 'common.results' | transloco }}</h2>
 
@@ -186,7 +186,7 @@
         <div class="crit">
           <dt>{{ 'common.criterion-label' | transloco }}</dt>
           <dd class="crit__result" data-testid="tangent-aiming-interior-criterion">
-            {{ result.criterion.toFixed(0) }} %
+            {{ (result.checkValidity ? 'common.yes' : 'common.no') | transloco }}
             @if (result.checkValidity) {
               <app-icon
                 icon="check"

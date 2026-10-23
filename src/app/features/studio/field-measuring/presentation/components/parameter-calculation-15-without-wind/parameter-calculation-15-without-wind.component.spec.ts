@@ -207,6 +207,23 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
     expect(manual?.parameterUncertaintyPapoto).toBe(1.5);
   });
 
+  it('should pre-fill manual fields from the interior result when the interior method is active', () => {
+    component.measureData.update((d) => ({
+      ...d,
+      calculationMethod: 'tangente-aiming-interior',
+      outputs: {
+        ...d.outputs,
+        tangentAimingInterior: { parameter: 800.99, uncertainty: 2.59, criterion: 1, checkValidity: true }
+      }
+    }));
+
+    component.updateMeasureData('updateMode15C', 'manual');
+
+    const manual = component.measureData().manualParameterCalculation15CWithoutWind;
+    expect(manual?.parameterPapoto).toBe(800.9);
+    expect(manual?.parameterUncertaintyPapoto).toBe(2.5);
+  });
+
   it('should not pre-fill manual parameter fields without an active result', () => {
     component.measureData.update((d) => ({
       ...d,
@@ -221,7 +238,8 @@ describe('ParameterCalculation15WithoutWindComponent', () => {
           checkValidity: true,
           uncertainty: 9.99
         },
-        tangentAimingExterior: null
+        tangentAimingExterior: null,
+        tangentAimingInterior: null
       }
     }));
 

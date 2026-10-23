@@ -6,16 +6,25 @@
  */
 
 import { FormControl, FormGroup } from '@angular/forms';
-import { TangentAimingSupportResult } from '@features/studio/field-measuring/domain/types';
 
 /** Numeric input fields of the tangent aiming (interior) form. */
 export type TangentAimingInteriorNumericField =
   'spanLength' | 'hAccDistance' | 'verticalAccAngleLeft' | 'verticalAccAngleRight' | 'parameter';
+
+/** Every input field of the tangent aiming (interior) form. */
+export type TangentAimingInteriorInputField = 'leftSupport' | TangentAimingInteriorNumericField;
 
 /** Typed reactive form of the tangent aiming (interior) inputs. */
 export type TangentAimingInteriorForm = FormGroup<
   { leftSupport: FormControl<string | null> } & Record<TangentAimingInteriorNumericField, FormControl<number | null>>
 >;
 
-/** Result of the tangent aiming (interior) parameter calculation, same shape as the support one. */
-export type TangentAimingInteriorResult = TangentAimingSupportResult;
+/** Inputs sent to the tangent aiming (interior) calculation. */
+export interface TangentAimingInteriorInputs {
+  leftSupport: string | null;
+  spanLength: number | null;
+  hAccDistance: number | null;
+  verticalAccAngleLeft: number | null;
+  verticalAccAngleRight: number | null;
+  parameter: number | null;
+}

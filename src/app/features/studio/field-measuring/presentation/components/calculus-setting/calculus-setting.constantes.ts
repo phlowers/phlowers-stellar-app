@@ -5,5 +5,6 @@ export const CALCULUS_TYPE_BY_METHOD: Record<FieldMeasure['calculationMethod'], 
   papoto: 'PAPOTO',
   'tangente-aiming': 'TANGENT_AIMING_SUPPORT',
   'tangente-aiming-exterior': 'TANGENT_AIMING_EXTERIOR',
+  'tangente-aiming-interior': 'TANGENT_AIMING_INTERIOR',
   pep: 'PEP'
 };

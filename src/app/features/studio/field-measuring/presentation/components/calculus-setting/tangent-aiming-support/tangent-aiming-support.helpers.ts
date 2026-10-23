@@ -16,6 +16,7 @@ import {
 } from './tangent-aiming-support.constantes';
 import {
   TangentAimingSupportCalculation,
+  TangentAimingSupportFieldRule,
   TangentAimingSupportForm,
   TangentAimingSupportInputField,
   TangentAimingSupportInputs,
@@ -87,9 +88,12 @@ export function getDisplayedInputFields(
   return [...TANGENT_AIMING_SUPPORT_COMMON_FIELDS, TANGENT_AIMING_SUPPORT_TYPE_FIELD[calculationType]];
 }
 
-/** Creates a required numeric control bound to the rules of the given field. */
-export function createNumberControl(field: TangentAimingSupportNumericField): FormControl<number | null> {
-  const { min, max, decimals } = TANGENT_AIMING_SUPPORT_FIELD_RULES[field];
+/** Creates a required numeric control bound to the rules of the given field (or to `rule` when the form overrides them). */
+export function createNumberControl(
+  field: TangentAimingSupportNumericField,
+  rule: TangentAimingSupportFieldRule = TANGENT_AIMING_SUPPORT_FIELD_RULES[field]
+): FormControl<number | null> {
+  const { min, max, decimals } = rule;
   return new FormControl<number | null>(null, [
     Validators.required,
     Validators.min(min),
