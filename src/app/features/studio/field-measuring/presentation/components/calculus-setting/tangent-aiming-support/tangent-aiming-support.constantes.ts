@@ -6,18 +6,18 @@
  */
 
 import {
-  TangentAimingSupportFieldRule,
-  TangentAimingSupportInputField,
-  TangentAimingSupportNumberFieldView,
-  TangentAimingSupportNumericField
-} from './tangent-aiming-support.interfaces';
+  TangentAimingFieldRule,
+  TangentAimingNumberFieldView
+} from '../tangent-aiming-common/tangent-aiming-common.interfaces';
+import { TANGENT_AIMING_FIELD_RULES } from '../tangent-aiming-common/tangent-aiming-common.constantes';
+import { TangentAimingSupportInputField, TangentAimingSupportNumericField } from './tangent-aiming-support.interfaces';
 
 const I18N = 'field-measuring.tangent-aiming-support';
 
 /** Display description of each numeric input. */
 export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
   TangentAimingSupportNumericField,
-  TangentAimingSupportNumberFieldView
+  TangentAimingNumberFieldView
 > = {
   tangentSpanLength: {
     id: 'tasSpanLength',
@@ -62,15 +62,12 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
 };
 
 /** Bounds, decimals and default of each numeric input. */
-export const TANGENT_AIMING_SUPPORT_FIELD_RULES: Record<
-  TangentAimingSupportNumericField,
-  TangentAimingSupportFieldRule
-> = {
-  tangentSpanLength: { min: 0, max: 5000, decimals: 2, default: 0 },
-  cableHAccDistance: { min: 0, max: 1000, decimals: 2, default: 0 },
-  cableVerticalAccAngle: { min: -200, max: 200, decimals: 2, default: 0 },
-  cableParameter: { min: 20, max: 5000, decimals: 0, default: 20 },
-  cableTangentAngle: { min: -200, max: 200, decimals: 2, default: 0 }
+export const TANGENT_AIMING_SUPPORT_FIELD_RULES: Record<TangentAimingSupportNumericField, TangentAimingFieldRule> = {
+  tangentSpanLength: TANGENT_AIMING_FIELD_RULES.spanLength,
+  cableHAccDistance: TANGENT_AIMING_FIELD_RULES.hAccDistance,
+  cableVerticalAccAngle: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
+  cableParameter: TANGENT_AIMING_FIELD_RULES.parameter,
+  cableTangentAngle: TANGENT_AIMING_FIELD_RULES.tangentAngle
 };
 
 /** Inputs always displayed, whatever the calculation type. */

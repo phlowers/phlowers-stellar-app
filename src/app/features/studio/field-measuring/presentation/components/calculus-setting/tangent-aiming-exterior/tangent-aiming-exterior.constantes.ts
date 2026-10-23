@@ -7,11 +7,10 @@
 
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import {
-  TangentAimingSupportFieldRule,
-  TangentAimingSupportNumberFieldView,
-  TangentAimingSupportNumericField
-} from '../tangent-aiming-support/tangent-aiming-support.interfaces';
-import { TANGENT_AIMING_SUPPORT_FIELD_RULES } from '../tangent-aiming-support/tangent-aiming-support.constantes';
+  TangentAimingFieldRule,
+  TangentAimingNumberFieldView
+} from '../tangent-aiming-common/tangent-aiming-common.interfaces';
+import { TANGENT_AIMING_FIELD_RULES } from '../tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   TangentAimingExteriorCalculationType,
   TangentAimingExteriorInputField,
@@ -21,7 +20,7 @@ import {
 /** Display description of each numeric input. */
 export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   TangentAimingExteriorNumericField,
-  TangentAimingSupportNumberFieldView
+  TangentAimingNumberFieldView
 > = {
   spanLength: {
     id: 'taeSpanLength',
@@ -61,7 +60,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
     unitKey: 'common.meter',
     testId: 'parameter-input',
     step: 1,
-    area: 'tangentAngle'
+    area: 'parameter'
   },
   tangentAngle: {
     id: 'taeTangentAngle',
@@ -73,26 +72,15 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   }
 };
 
-/** Support field whose rule (bounds, decimals, default) each exterior numeric input reuses. */
-export const TANGENT_AIMING_EXTERIOR_RULE_FIELDS: Record<
-  TangentAimingExteriorNumericField,
-  TangentAimingSupportNumericField
-> = {
-  spanLength: 'tangentSpanLength',
-  hAccDistance: 'cableHAccDistance',
-  verticalAccAngleLeft: 'cableVerticalAccAngle',
-  verticalAccAngleRight: 'cableVerticalAccAngle',
-  parameter: 'cableParameter',
-  tangentAngle: 'cableTangentAngle'
+/** Bounds, decimals and default of each numeric input, shared with the other tangent aiming forms. */
+export const TANGENT_AIMING_EXTERIOR_FIELD_RULES: Record<TangentAimingExteriorNumericField, TangentAimingFieldRule> = {
+  spanLength: TANGENT_AIMING_FIELD_RULES.spanLength,
+  hAccDistance: TANGENT_AIMING_FIELD_RULES.hAccDistance,
+  verticalAccAngleLeft: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
+  verticalAccAngleRight: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
+  parameter: TANGENT_AIMING_FIELD_RULES.parameter,
+  tangentAngle: TANGENT_AIMING_FIELD_RULES.tangentAngle
 };
-
-/** Bounds, decimals and default of each numeric input, shared with the tangent aiming (support) form. */
-export const TANGENT_AIMING_EXTERIOR_FIELD_RULES = Object.fromEntries(
-  Object.entries(TANGENT_AIMING_EXTERIOR_RULE_FIELDS).map(([field, ruleField]) => [
-    field,
-    TANGENT_AIMING_SUPPORT_FIELD_RULES[ruleField]
-  ])
-) as Record<TangentAimingExteriorNumericField, TangentAimingSupportFieldRule>;
 
 /** Inputs always displayed, whatever the calculation type. */
 export const TANGENT_AIMING_EXTERIOR_COMMON_FIELDS: TangentAimingExteriorInputField[] = [

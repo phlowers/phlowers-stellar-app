@@ -7,11 +7,10 @@
 
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import {
-  TangentAimingSupportFieldRule,
-  TangentAimingSupportNumberFieldView,
-  TangentAimingSupportNumericField
-} from '../tangent-aiming-support/tangent-aiming-support.interfaces';
-import { TANGENT_AIMING_SUPPORT_FIELD_RULES } from '../tangent-aiming-support/tangent-aiming-support.constantes';
+  TangentAimingFieldRule,
+  TangentAimingNumberFieldView
+} from '../tangent-aiming-common/tangent-aiming-common.interfaces';
+import { TANGENT_AIMING_FIELD_RULES } from '../tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   TangentAimingInteriorInputField,
   TangentAimingInteriorNumericField
@@ -20,7 +19,7 @@ import {
 /** Display description of each numeric input. */
 export const TANGENT_AIMING_INTERIOR_NUMBER_FIELDS: Record<
   TangentAimingInteriorNumericField,
-  TangentAimingSupportNumberFieldView
+  TangentAimingNumberFieldView
 > = {
   spanLength: {
     id: 'taiSpanLength',
@@ -64,31 +63,14 @@ export const TANGENT_AIMING_INTERIOR_NUMBER_FIELDS: Record<
   }
 };
 
-/** Support field whose rule (bounds, decimals, default) each interior numeric input reuses. */
-export const TANGENT_AIMING_INTERIOR_RULE_FIELDS: Record<
-  TangentAimingInteriorNumericField,
-  TangentAimingSupportNumericField
-> = {
-  spanLength: 'tangentSpanLength',
-  hAccDistance: 'cableHAccDistance',
-  verticalAccAngleLeft: 'cableVerticalAccAngle',
-  verticalAccAngleRight: 'cableVerticalAccAngle',
-  parameter: 'cableParameter'
-};
-
-/** Bounds, decimals and default of each numeric input, shared with the tangent aiming (support) form. */
-export const TANGENT_AIMING_INTERIOR_FIELD_RULES: Record<
-  TangentAimingInteriorNumericField,
-  TangentAimingSupportFieldRule
-> = {
-  ...(Object.fromEntries(
-    Object.entries(TANGENT_AIMING_INTERIOR_RULE_FIELDS).map(([field, ruleField]) => [
-      field,
-      TANGENT_AIMING_SUPPORT_FIELD_RULES[ruleField]
-    ])
-  ) as Record<TangentAimingInteriorNumericField, TangentAimingSupportFieldRule>),
+/** Bounds, decimals and default of each numeric input, shared with the other tangent aiming forms. */
+export const TANGENT_AIMING_INTERIOR_FIELD_RULES: Record<TangentAimingInteriorNumericField, TangentAimingFieldRule> = {
+  spanLength: TANGENT_AIMING_FIELD_RULES.spanLength,
   // RG.VIS-INT.DIS-HSG.1: the interior horizontal distance goes up to 5000 m, unlike the support/exterior one.
-  hAccDistance: { ...TANGENT_AIMING_SUPPORT_FIELD_RULES.cableHAccDistance, max: 5000 }
+  hAccDistance: { ...TANGENT_AIMING_FIELD_RULES.hAccDistance, max: 5000 },
+  verticalAccAngleLeft: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
+  verticalAccAngleRight: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
+  parameter: TANGENT_AIMING_FIELD_RULES.parameter
 };
 
 /** `FieldMeasure` field persisting each input of the form. */

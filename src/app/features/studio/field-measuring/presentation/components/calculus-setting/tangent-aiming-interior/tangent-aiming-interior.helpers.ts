@@ -8,12 +8,10 @@
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
-import { createNumberControl } from '../tangent-aiming-support/tangent-aiming-support.helpers';
-import { TangentAimingSupportCalculation } from '../tangent-aiming-support/tangent-aiming-support.interfaces';
+import { createNumberControl } from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   TANGENT_AIMING_INTERIOR_FIELD_RULES,
-  TANGENT_AIMING_INTERIOR_MODEL_FIELDS,
-  TANGENT_AIMING_INTERIOR_RULE_FIELDS
+  TANGENT_AIMING_INTERIOR_MODEL_FIELDS
 } from './tangent-aiming-interior.constantes';
 import {
   TangentAimingInteriorForm,
@@ -23,7 +21,7 @@ import {
 } from './tangent-aiming-interior.interfaces';
 
 function createControl(field: TangentAimingInteriorNumericField): FormControl<number | null> {
-  return createNumberControl(TANGENT_AIMING_INTERIOR_RULE_FIELDS[field], TANGENT_AIMING_INTERIOR_FIELD_RULES[field]);
+  return createNumberControl(TANGENT_AIMING_INTERIOR_FIELD_RULES[field]);
 }
 
 /** Creates the typed form holding every tangent aiming (interior) input. */
@@ -92,17 +90,4 @@ export function toTangentAimingInteriorInputs(data: FieldMeasure): TangentAiming
     verticalAccAngleRight: data.interiorVerticalAccAngleRight,
     parameter: data.interiorParameter
   };
-}
-
-/**
- * Temporary mock: the engine has no tangent aiming Task yet, constant value on purpose.
- * TODO: replace with workerPythonService.runTask(Task.<tangent aiming>) once the Task exists.
- */
-export function calculateTangentAimingInteriorMock(
-  _inputs: TangentAimingInteriorInputs
-): Promise<TangentAimingSupportCalculation> {
-  return Promise.resolve({
-    result: { parameter: 1000, uncertainty: 1.5, criterion: 1, checkValidity: true },
-    error: null
-  });
 }

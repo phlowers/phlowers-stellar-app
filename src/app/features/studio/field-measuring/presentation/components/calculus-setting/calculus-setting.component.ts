@@ -8,10 +8,8 @@ import { TangentAimingInteriorComponent } from './tangent-aiming-interior/tangen
 import { PepComponent } from './pep/pep.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TranslocoModule } from '@jsverse/transloco';
-import {
-  applyTangentAimingSupportDefaults,
-  getDefaultLeftSupport
-} from './tangent-aiming-support/tangent-aiming-support.helpers';
+import { applyTangentAimingSupportDefaults } from './tangent-aiming-support/tangent-aiming-support.helpers';
+import { getDefaultLeftSupport } from './tangent-aiming-common/tangent-aiming-common.helpers';
 import { applyTangentAimingExteriorDefaults } from './tangent-aiming-exterior/tangent-aiming-exterior.helpers';
 import { applyTangentAimingInteriorDefaults } from './tangent-aiming-interior/tangent-aiming-interior.helpers';
 import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';

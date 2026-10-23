@@ -1,50 +1,4 @@
-<div class="tangent-aiming-support__header">
-  <button
-    app-btn
-    disabled
-    [attr.aria-label]="'common.tangent-aiming-help-aria-label' | transloco"
-    data-testid="help-btn"
-  >
-    <app-icon icon="help" aria-hidden="true" />
-  </button>
-
-  <p id="mandatory-tangent-aiming-support" class="tangent-aiming-support__mandatory-msg">
-    <app-icon icon="info" aria-hidden="true" />
-    <span>{{ 'common.tangent-aiming-mandatory-msg' | transloco }}</span>
-  </p>
-</div>
-
-<ng-template #numberField let-field>
-  @let control = field.control;
-  @let error = getError(control);
-  <div [class]="field.view.area">
-    <label [for]="field.view.id">{{ field.view.labelKey | transloco }}</label>
-    <p-inputgroup>
-      <input
-        [id]="field.view.id"
-        type="number"
-        pInputText
-        [formControl]="control"
-        [attr.min]="field.rule.min"
-        [attr.max]="field.rule.max"
-        [attr.step]="field.view.step"
-        [attr.aria-describedby]="
-          'mandatory-tangent-aiming-support' + (field.describedBy ? ' ' + field.describedBy : '')
-        "
-        [attr.aria-invalid]="error ? 'true' : null"
-        [attr.aria-errormessage]="error ? field.view.id + '-error' : null"
-        required
-        [attr.data-testid]="field.view.testId"
-      />
-      <p-inputgroup-addon>{{ field.view.unitKey | transloco }}</p-inputgroup-addon>
-    </p-inputgroup>
-    @if (error) {
-      <p-message [id]="field.view.id + '-error'" severity="error" size="small" variant="simple" role="alert">
-        {{ error }}
-      </p-message>
-    }
-  </div>
-</ng-template>
+<app-tangent-aiming-header [mandatoryId]="mandatoryId" />
 
 <div class="tangent-aiming-support__form">
   <div class="leftSupport">
@@ -59,7 +13,7 @@
       [filter]="true"
       [fluid]="true"
       appendTo="body"
-      aria-describedby="mandatory-tangent-aiming-support"
+      [attr.aria-describedby]="mandatoryId"
       [attr.aria-invalid]="leftSupportError ? 'true' : null"
       [attr.aria-errormessage]="leftSupportError ? 'tasLeftSupport-error' : null"
       [required]="true"
@@ -73,18 +27,13 @@
     }
   </div>
 
-  <ng-container
-    *ngTemplateOutlet="
-      numberField;
-      context: {
-        $implicit: {
-          control: form.controls.tangentSpanLength,
-          view: fields.tangentSpanLength,
-          rule: rules.tangentSpanLength,
-          describedBy: 'tasSpanLength-calculated'
-        }
-      }
-    "
+  <app-tangent-aiming-number-field
+    [control]="form.controls.tangentSpanLength"
+    [view]="fields.tangentSpanLength"
+    [rule]="rules.tangentSpanLength"
+    [error]="getError(form.controls.tangentSpanLength)"
+    [mandatoryId]="mandatoryId"
+    describedBy="tasSpanLength-calculated"
   />
 
   <div class="spanLengthDesc">
@@ -98,30 +47,20 @@
     </p>
   </div>
 
-  <ng-container
-    *ngTemplateOutlet="
-      numberField;
-      context: {
-        $implicit: {
-          control: form.controls.cableHAccDistance,
-          view: fields.cableHAccDistance,
-          rule: rules.cableHAccDistance
-        }
-      }
-    "
+  <app-tangent-aiming-number-field
+    [control]="form.controls.cableHAccDistance"
+    [view]="fields.cableHAccDistance"
+    [rule]="rules.cableHAccDistance"
+    [error]="getError(form.controls.cableHAccDistance)"
+    [mandatoryId]="mandatoryId"
   />
 
-  <ng-container
-    *ngTemplateOutlet="
-      numberField;
-      context: {
-        $implicit: {
-          control: form.controls.cableVerticalAccAngle,
-          view: fields.cableVerticalAccAngle,
-          rule: rules.cableVerticalAccAngle
-        }
-      }
-    "
+  <app-tangent-aiming-number-field
+    [control]="form.controls.cableVerticalAccAngle"
+    [view]="fields.cableVerticalAccAngle"
+    [rule]="rules.cableVerticalAccAngle"
+    [error]="getError(form.controls.cableVerticalAccAngle)"
+    [mandatoryId]="mandatoryId"
   />
 
   <div class="calculationType">
@@ -141,28 +80,22 @@
   </div>
 
   @if (showParameterField()) {
-    <ng-container
-      *ngTemplateOutlet="
-        numberField;
-        context: {
-          $implicit: { control: form.controls.cableParameter, view: fields.cableParameter, rule: rules.cableParameter }
-        }
-      "
+    <app-tangent-aiming-number-field
+      [control]="form.controls.cableParameter"
+      [view]="fields.cableParameter"
+      [rule]="rules.cableParameter"
+      [error]="getError(form.controls.cableParameter)"
+      [mandatoryId]="mandatoryId"
     />
   }
 
   @if (showTangentAngleField()) {
-    <ng-container
-      *ngTemplateOutlet="
-        numberField;
-        context: {
-          $implicit: {
-            control: form.controls.cableTangentAngle,
-            view: fields.cableTangentAngle,
-            rule: rules.cableTangentAngle
-          }
-        }
-      "
+    <app-tangent-aiming-number-field
+      [control]="form.controls.cableTangentAngle"
+      [view]="fields.cableTangentAngle"
+      [rule]="rules.cableTangentAngle"
+      [error]="getError(form.controls.cableTangentAngle)"
+      [mandatoryId]="mandatoryId"
     />
   }
 </div>
@@ -181,56 +114,10 @@
   </button>
 </div>
 
-<output class="block" [attr.aria-busy]="isCalculating()">
-  @if (hasError()) {
-    <p-message severity="error" size="small" role="alert" aria-live="assertive" data-testid="calculation-error">
-      {{ 'common.tangent-aiming-calculation-failed' | transloco }}
-    </p-message>
-  }
-
-  @if (measureData().outputs.tangentAimingSupport; as result) {
-    <div class="tangent-aiming-support__results">
-      <h2 class="tangent-aiming-support__results__title">{{ 'common.results' | transloco }}</h2>
-
-      <dl class="tangent-aiming-support__results__list">
-        <div class="param">
-          <dt>{{ 'common.parameter-label' | transloco }}</dt>
-          <dd data-testid="tangent-aiming-support-parameter">
-            {{ result.parameter.toFixed(0) }} {{ 'common.meter' | transloco }}
-          </dd>
-        </div>
-
-        <div class="incertainParam">
-          <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
-          <dd data-testid="tangent-aiming-support-uncertainty">
-            {{ result.uncertainty.toFixed(0) }} {{ 'common.meter' | transloco }}
-          </dd>
-        </div>
-
-        <div class="crit">
-          <dt>{{ 'common.criterion-label' | transloco }}</dt>
-          <dd class="crit__result" data-testid="tangent-aiming-support-criterion">
-            {{ result.criterion.toFixed(0) }} %
-            @if (result.checkValidity) {
-              <app-icon
-                icon="check"
-                class="criterion-ok"
-                role="img"
-                [attr.aria-label]="'common.criterion-respected' | transloco"
-                data-testid="tangent-aiming-support-criterion-ok"
-              />
-            } @else {
-              <app-icon
-                icon="close"
-                class="criterion-ko"
-                role="img"
-                [attr.aria-label]="'common.criterion-not-respected' | transloco"
-                data-testid="tangent-aiming-support-criterion-ko"
-              />
-            }
-          </dd>
-        </div>
-      </dl>
-    </div>
-  }
-</output>
+<app-tangent-aiming-results
+  [result]="measureData().outputs.tangentAimingSupport"
+  [hasError]="hasError()"
+  [isCalculating]="isCalculating()"
+  testIdPrefix="tangent-aiming-support"
+  format="percent"
+/>
