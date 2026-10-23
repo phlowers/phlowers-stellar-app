@@ -15,7 +15,13 @@ import {
   SECTION_TITLE_HEIGHT,
   SEPARATOR_HEIGHT
 } from '@shared/pdf/pdf-layout.constantes';
-import { drawHeader, drawSectionTitle, drawSeparator, formatValue } from '@shared/pdf/pdf-primitives.helpers';
+import {
+  drawCompactHeader,
+  drawHeader,
+  drawSectionTitle,
+  drawSeparator,
+  formatValue
+} from '@shared/pdf/pdf-primitives.helpers';
 
 import {
   MAX_COLS_PER_TABLE,
@@ -25,10 +31,13 @@ import {
   TABLE_TEXT_BASELINE_OFFSET,
   TABLE_VERTICAL_GAP
 } from './pdf-table.constantes';
-import { MetricDescriptor, PdfResultSection, PdfTableModel } from './pdf-table.interfaces';
+import { MetricDescriptor, PdfResultSection, PdfResultTablesFlowOptions, PdfTableModel } from './pdf-table.interfaces';
 
 /** Maximum number of wrapped lines rendered inside a single table cell. */
 const MAX_CELL_LINES = 2;
+
+/** Appended to the last line of a cell whose text does not fit in MAX_CELL_LINES. */
+const CELL_ELLIPSIS = '…';
 
 /** Formats a single metric cell: raw string for the identifier row, otherwise value + unit. */
 export function formatCell<T>(row: T, metric: MetricDescriptor<T>): string {
@@ -85,10 +94,21 @@ function drawCell(
   });
 }
 
-/** Splits a cell string into at most MAX_CELL_LINES wrapped lines for the given width. */
+/**
+ * Splits a cell string into at most MAX_CELL_LINES wrapped lines for the given width. A longer text
+ * (e.g. a free-text obstacle name) ends with an ellipsis so the cut is visible.
+ */
 function wrapCell(doc: jsPDF, text: string, width: number): string[] {
-  const lines = doc.splitTextToSize(text, width - 2 * TABLE_CELL_PADDING_X) as string[];
-  return lines.slice(0, MAX_CELL_LINES);
+  const maxWidth = width - 2 * TABLE_CELL_PADDING_X;
+  const lines = doc.splitTextToSize(text, maxWidth) as string[];
+  if (lines.length <= MAX_CELL_LINES) {
+    return lines;
+  }
+  let lastLine = lines[MAX_CELL_LINES - 1];
+  while (lastLine.length > 0 && doc.getTextWidth(`${lastLine}${CELL_ELLIPSIS}`) > maxWidth) {
+    lastLine = lastLine.slice(0, -1);
+  }
+  return [...lines.slice(0, MAX_CELL_LINES - 1), `${lastLine.trimEnd()}${CELL_ELLIPSIS}`];
 }
 
 /** Computes the rendered height (mm) of a single table row, wrapping label + value cells. */
@@ -195,13 +215,15 @@ export function drawResultTablesSection(
  * and their table chunks stack directly below each other, only starting a new page when the
  * remaining vertical space genuinely runs out (unlike `drawResultTablesSection`, which always
  * starts a fresh page per call).
+ * With `options.compactHeader`, `date` and `reportTitle` are not drawn.
  */
 export function drawResultTablesFlow(
   doc: jsPDF,
   date: string,
   reportTitle: string,
   sections: PdfResultSection[],
-  labelColWidth: number
+  labelColWidth: number,
+  { compactHeader = false, tableGap = TABLE_VERTICAL_GAP }: PdfResultTablesFlowOptions = {}
 ): void {
   const contentWidth = LANDSCAPE_PAGE.width - PAGE_MARGIN.left - PAGE_MARGIN.right;
   const pageBottom = LANDSCAPE_PAGE.height - PAGE_MARGIN.bottom;
@@ -209,7 +231,9 @@ export function drawResultTablesFlow(
 
   const startNewPage = (): number => {
     doc.addPage('a4', 'landscape');
-    return drawHeader(doc, date, reportTitle, LANDSCAPE_PAGE.width);
+    return compactHeader
+      ? drawCompactHeader(doc, LANDSCAPE_PAGE.width)
+      : drawHeader(doc, date, reportTitle, LANDSCAPE_PAGE.width);
   };
 
   for (const section of sections) {
@@ -232,7 +256,7 @@ export function drawResultTablesFlow(
     section.tables.forEach((table, index) => {
       if (index > 0) {
         const tableHeight = computeTableHeight(doc, table, LANDSCAPE_PAGE.width, labelColWidth);
-        y += TABLE_VERTICAL_GAP;
+        y += tableGap;
         if (y + tableHeight > pageBottom) {
           y = startNewPage();
           y = drawSectionTitle(doc, section.title, y);

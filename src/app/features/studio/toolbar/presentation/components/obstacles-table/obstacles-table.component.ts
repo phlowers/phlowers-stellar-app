@@ -24,6 +24,8 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PossibleIconNames } from '@shared/model/icon.model';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
+import { ObstaclesTableReportService } from '@features/studio/toolbar/presentation/services/obstacles-table-report/obstacles-table-report.service';
+import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
@@ -56,7 +58,9 @@ export class ObstaclesTableComponent {
   readonly footerTemplate = viewChild<TemplateRef<void>>('footer');
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
+  private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly obstaclesTableReportService = inject(ObstaclesTableReportService);
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly translocoService = inject(TranslocoService);
@@ -69,6 +73,8 @@ export class ObstaclesTableComponent {
 
   readonly sortField = signal<string>('');
   readonly sortOrder = signal<number>(0);
+
+  readonly isGeneratingReport = signal(false);
 
   private readonly realSpanOptions = computed(() => this.spanService.getSpanOptions());
 
@@ -105,11 +111,13 @@ export class ObstaclesTableComponent {
     return section.initial_conditions.find((ic) => ic.uuid === section.selected_initial_condition_uuid)?.name ?? null;
   });
 
-  readonly selectedChargeName = computed(() => {
+  private readonly selectedCharge = computed(() => {
     const section = this.spanService.section();
     if (!section) return null;
-    return section.charges.find((charge) => charge.uuid === section.selected_charge_uuid)?.name ?? null;
+    return section.charges.find((charge) => charge.uuid === section.selected_charge_uuid) ?? null;
   });
+
+  readonly selectedChargeName = computed(() => this.selectedCharge()?.name ?? null);
 
   private readonly spanLabelByUuid = computed<Map<string, string>>(
     () => new Map(this.realSpanOptions().flatMap((option) => (option.value ? [[option.value, option.label]] : [])))
@@ -148,6 +156,13 @@ export class ObstaclesTableComponent {
       this.lateralDistanceTypeOptions
     );
   });
+
+  // The engine publishes the distances at the end of each projection refresh, while the plot is loading
+  readonly isReportLoading = computed(() => this.isGeneratingReport() || this.plotService.loading());
+
+  // Once the projection is refreshed, a point still without distances (e.g. outside its span) never gets
+  // any: the report prints '-' for it, as the table does, rather than blocking the whole report
+  readonly canGenerateReport = computed(() => !this.isReportLoading() && this.rows().length > 0);
 
   constructor() {
     effect(() => {
@@ -197,6 +212,43 @@ export class ObstaclesTableComponent {
           this.logger.error('Failed to load obstacle types catalog', error);
         }
       });
+  }
+
+  // Builds the report data from the table as currently displayed and triggers PDF generation
+  async onGenerateReport(): Promise<void> {
+    if (!this.canGenerateReport()) return;
+
+    // Snapshot of the displayed rows: sorting the table reorders the live array in place
+    const rows = [...this.rows()];
+    const study = this.plotService.study();
+    const section = this.spanService.section();
+    const charge = this.selectedCharge();
+    const now = new Date();
+    const locale = this.getLocaleForDate();
+
+    this.isGeneratingReport.set(true);
+    try {
+      await this.obstaclesTableReportService.generateReport({
+        date: now.toLocaleDateString(locale),
+        time: now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }),
+        author: study?.author_email ?? '-',
+        studyTitle: study?.title ?? '-',
+        studyDescription: study?.description ?? '',
+        cantonName: section?.name ?? '-',
+        cantonComment: section?.comment ?? '',
+        icName: this.selectedInitialConditionName() ?? '-',
+        chargeName: charge?.name ?? '-',
+        chargeDescription: charge?.description ?? '',
+        rows
+      });
+    } finally {
+      this.isGeneratingReport.set(false);
+    }
+  }
+
+  private getLocaleForDate(): string {
+    const activeLang = this.translocoService.getActiveLang();
+    return activeLang === 'en' ? 'en-US' : 'fr-FR';
   }
 
   onPageChange(event: PaginatorState): void {

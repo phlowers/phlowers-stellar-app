@@ -8,9 +8,9 @@
 import { vi } from 'vitest';
 import type jsPDF from 'jspdf';
 
-import { LANDSCAPE_PAGE } from '@shared/pdf/pdf-layout.constantes';
+import { APP_NAME, LANDSCAPE_PAGE, PAGE_MARGIN } from '@shared/pdf/pdf-layout.constantes';
 
-import { TABLE_ROW_HEIGHT } from './pdf-table.constantes';
+import { TABLE_ROW_HEIGHT, TABLE_VERTICAL_GAP } from './pdf-table.constantes';
 import {
   buildTables,
   chunk,
@@ -206,6 +206,37 @@ describe('pdf-table.helpers', () => {
       expect(rects).toHaveLength(9);
       expect(lastX + lastWidth).toBeCloseTo(LANDSCAPE_PAGE.width - 15);
     });
+
+    describe('text longer than two lines', () => {
+      const LABEL_COL_WIDTH = 62;
+      const table: PdfTableModel = { rows: [{ label: 'A', values: ['long'] }] };
+      const wrapLongOnThreeLines = (text: string): string[] =>
+        text === 'long' ? ['line one', 'line two', 'line three'] : [text];
+      const drawnTexts = (doc: ReturnType<typeof createMockDoc>): string[] =>
+        doc.text.mock.calls.map((call) => call[0] as string);
+
+      it('should draw the first two lines only, the second ending with an ellipsis', () => {
+        const doc = createMockDoc();
+        doc.splitTextToSize = vi.fn().mockImplementation(wrapLongOnThreeLines);
+
+        const endY = drawTable(doc as unknown as jsPDF, table, 0, LANDSCAPE_PAGE.width, LABEL_COL_WIDTH);
+
+        expect(drawnTexts(doc)).toEqual(['A', 'line one', 'line two…']);
+        expect(endY).toBe(2 * TABLE_ROW_HEIGHT);
+        expect(computeTableHeight(doc as unknown as jsPDF, table, LANDSCAPE_PAGE.width, LABEL_COL_WIDTH)).toBe(endY);
+      });
+
+      it('should shorten the last line so the ellipsis fits in the cell', () => {
+        const doc = createMockDoc();
+        doc.splitTextToSize = vi.fn().mockImplementation(wrapLongOnThreeLines);
+        // 10 mm per character, the value cell fitting 3 characters: (267 - 62) / 5 - 2 * 1.5 = 38 mm
+        doc.getTextWidth = vi.fn().mockImplementation((text: string) => text.length * 10);
+
+        drawTable(doc as unknown as jsPDF, table, 0, LANDSCAPE_PAGE.width, LABEL_COL_WIDTH);
+
+        expect(drawnTexts(doc)).toEqual(['A', 'line one', 'li…']);
+      });
+    });
   });
 
   describe('drawResultTablesSection', () => {
@@ -361,6 +392,78 @@ describe('pdf-table.helpers', () => {
       const sectionBTitleCalls = doc.text.mock.calls.filter((call) => call[0] === 'Section B');
       expect(sectionBTitleCalls).toHaveLength(1);
       expect(doc.addPage).toHaveBeenCalledTimes(2);
+    });
+
+    describe('options', () => {
+      const twoChunksSection: PdfResultSection[] = [
+        {
+          title: 'Section A',
+          tables: [{ rows: [{ label: 'A1', values: ['1'] }] }, { rows: [{ label: 'A1', values: ['2'] }] }]
+        }
+      ];
+
+      // Y of the first row of each table: the label cell of a row is the one drawn at the left margin
+      const tableStartYs = (doc: ReturnType<typeof createMockDoc>): number[] =>
+        doc.rect.mock.calls.filter((call) => call[0] === PAGE_MARGIN.left).map((call) => call[1] as number);
+
+      it('should draw the full header with the report title and date by default', () => {
+        const doc = createMockDoc();
+
+        drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', twoChunksSection, 62);
+
+        expect(doc.text).toHaveBeenCalledWith('Report', expect.any(Number), expect.any(Number));
+        expect(doc.text).toHaveBeenCalledWith('2026-05-20', expect.any(Number), expect.any(Number), {
+          align: 'right'
+        });
+      });
+
+      it('should draw the compact header, without the report title and date, on every page', () => {
+        const doc = createMockDoc();
+        const manyRows = Array.from({ length: 40 }, (_, i) => ({ label: `R${i}`, values: [String(i)] }));
+        const sections: PdfResultSection[] = [
+          { title: 'Section A', tables: [{ rows: [{ label: 'A1', values: ['1'] }] }] },
+          { title: 'Section B', tables: [{ rows: manyRows }] }
+        ];
+
+        drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', sections, 62, { compactHeader: true });
+
+        expect(doc.addPage).toHaveBeenCalledTimes(2);
+        const appNameCalls = doc.text.mock.calls.filter((call) => call[0] === APP_NAME);
+        expect(appNameCalls).toHaveLength(2);
+        const texts = doc.text.mock.calls.map((call) => call[0]);
+        expect(texts).not.toContain('Report');
+        expect(texts).not.toContain('2026-05-20');
+      });
+
+      it('should start the content higher up the page with the compact header', () => {
+        const fullDoc = createMockDoc();
+        const compactDoc = createMockDoc();
+
+        drawResultTablesFlow(fullDoc as unknown as jsPDF, '2026-05-20', 'Report', twoChunksSection, 62);
+        drawResultTablesFlow(compactDoc as unknown as jsPDF, '2026-05-20', 'Report', twoChunksSection, 62, {
+          compactHeader: true
+        });
+
+        expect(tableStartYs(compactDoc)[0]).toBeLessThan(tableStartYs(fullDoc)[0]);
+      });
+
+      it('should space two stacked tables by TABLE_VERTICAL_GAP by default', () => {
+        const doc = createMockDoc();
+
+        drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', twoChunksSection, 62);
+
+        const [first, second] = tableStartYs(doc);
+        expect(second - first).toBeCloseTo(TABLE_ROW_HEIGHT + TABLE_VERTICAL_GAP);
+      });
+
+      it('should space two stacked tables by the given table gap', () => {
+        const doc = createMockDoc();
+
+        drawResultTablesFlow(doc as unknown as jsPDF, '2026-05-20', 'Report', twoChunksSection, 62, { tableGap: 12 });
+
+        const [first, second] = tableStartYs(doc);
+        expect(second - first).toBeCloseTo(TABLE_ROW_HEIGHT + 12);
+      });
     });
   });
 });

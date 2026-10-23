@@ -15,6 +15,7 @@ import {
   buildReportLabels,
   drawBulletItem,
   drawBulletList,
+  drawCompactHeader,
   drawFooter,
   drawHeader,
   drawPageFooters,
@@ -286,6 +287,45 @@ describe('pdf-primitives helpers', () => {
       const nextY = drawHeader(doc, '20/05/2026', 'Mon rapport');
 
       expect(nextY).toBeGreaterThan(PAGE_MARGIN.top);
+    });
+  });
+
+  describe('drawCompactHeader', () => {
+    it('should draw the app name right-aligned at top', () => {
+      const doc = createMockDoc();
+      drawCompactHeader(doc);
+
+      expect(doc.text).toHaveBeenCalledWith(APP_NAME, PAGE_SIZE.width - PAGE_MARGIN.right, PAGE_MARGIN.top, {
+        align: 'right'
+      });
+    });
+
+    it('should draw nothing but the app name (no report title, no date)', () => {
+      const doc = createMockDoc();
+      drawCompactHeader(doc);
+
+      expect(doc.text).toHaveBeenCalledTimes(1);
+    });
+
+    it('should draw a separator line across the content width', () => {
+      const doc = createMockDoc();
+      drawCompactHeader(doc, LANDSCAPE_PAGE.width);
+
+      expect(doc.line).toHaveBeenCalledTimes(1);
+      expect(doc.line).toHaveBeenCalledWith(
+        PAGE_MARGIN.left,
+        expect.any(Number),
+        LANDSCAPE_PAGE.width - PAGE_MARGIN.right,
+        expect.any(Number)
+      );
+    });
+
+    it('should leave more room for the content than the full header', () => {
+      const compactY = drawCompactHeader(createMockDoc());
+      const fullY = drawHeader(createMockDoc(), '20/05/2026', 'Mon rapport');
+
+      expect(compactY).toBeGreaterThan(PAGE_MARGIN.top);
+      expect(compactY).toBeLessThan(fullY);
     });
   });
 

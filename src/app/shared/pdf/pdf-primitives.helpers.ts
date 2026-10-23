@@ -162,6 +162,21 @@ export function drawBulletList(
   return y;
 }
 
+// App name (top right of the page) — size: FONT_SIZES.appName, bold
+function drawHeaderAppName(doc: jsPDF, pageWidth: number): void {
+  doc.setFont('Nunito', 'bold');
+  doc.setFontSize(FONT_SIZES.appName);
+  doc.text(APP_NAME, pageWidth - PAGE_MARGIN.right, PAGE_MARGIN.top, { align: 'right' });
+}
+
+// Main header separator line, 3 mm below the baseline of the last header text. Returns the next Y position
+function drawHeaderSeparator(doc: jsPDF, textY: number, pageWidth: number): number {
+  const y = textY + 3;
+  doc.setLineWidth(LINE_WIDTH_THIN);
+  doc.line(PAGE_MARGIN.left, y, pageWidth - PAGE_MARGIN.right, y);
+  return y + LINE_HEIGHT;
+}
+
 /**
  * Draws the PDF header: title + app name + date + separator line. Returns the next Y position.
  * `pageWidth` defaults to the portrait A4 width; pass the landscape width (297) for landscape pages.
@@ -169,10 +184,7 @@ export function drawBulletList(
 export function drawHeader(doc: jsPDF, date: string, reportTitle: string, pageWidth: number = PAGE_SIZE.width): number {
   let y = PAGE_MARGIN.top;
 
-  // App name (top right) — size: FONT_SIZES.appName, bold
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.appName);
-  doc.text(APP_NAME, pageWidth - PAGE_MARGIN.right, y, { align: 'right' });
+  drawHeaderAppName(doc, pageWidth);
   y += 2;
 
   // Report title (top left, bold) — size: FONT_SIZES.title
@@ -184,13 +196,17 @@ export function drawHeader(doc: jsPDF, date: string, reportTitle: string, pageWi
   // Date (top right, same line as title) — size: FONT_SIZES.title
   doc.text(date, pageWidth - PAGE_MARGIN.right, y, { align: 'right' });
 
-  // Main separator line — gap of 3 mm below title text
-  y += 3;
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, pageWidth - PAGE_MARGIN.right, y);
-  y += LINE_HEIGHT;
+  return drawHeaderSeparator(doc, y, pageWidth);
+}
 
-  return y;
+/**
+ * Draws the compact PDF header of the pages following the first one: app name + separator line,
+ * without the report title and date. Returns the next Y position.
+ * `pageWidth` defaults to the portrait A4 width; pass the landscape width (297) for landscape pages.
+ */
+export function drawCompactHeader(doc: jsPDF, pageWidth: number = PAGE_SIZE.width): number {
+  drawHeaderAppName(doc, pageWidth);
+  return drawHeaderSeparator(doc, PAGE_MARGIN.top, pageWidth);
 }
 
 /**
