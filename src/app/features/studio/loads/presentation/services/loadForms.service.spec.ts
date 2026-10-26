@@ -156,6 +156,8 @@ describe('LoadFormsService', () => {
       diagnostics: createSignalMock([]),
       pythonErrorCode: createSignalMock(null),
       workerReady: createSignalMock(false),
+      engineStudyId: createSignalMock(0),
+      isStudioActive: createSignalMock(true),
       refreshProjection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<PlotService>;
     mockSpanService = {
@@ -249,7 +251,7 @@ describe('LoadFormsService', () => {
   describe('constructor effect gating', () => {
     it('should not call setLoads when worker is not ready even if a charge is selected', () => {
       mockPlotService.workerReady.mockReturnValue(false);
-      mockPlotService.litData.mockReturnValue(null);
+      mockPlotService.engineStudyId.mockReturnValue(0);
       mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'charge-uuid-1',
@@ -261,23 +263,40 @@ describe('LoadFormsService', () => {
       expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
     });
 
-    it('should not call setLoads when worker is ready but section studio has not finished initializing (litData null)', () => {
+    it('should not call setLoads when worker is ready but section studio has not finished initializing', () => {
       mockPlotService.workerReady.mockReturnValue(true);
-      mockPlotService.litData.mockReturnValue(null);
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        selected_charge_uuid: 'charge-uuid-1',
-        charges: [mockCharge]
-      } as Section);
-
-      TestBed.flushEffects();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
-    it('should call setLoads once worker is ready and litData is set (section studio initialized)', async () => {
-      mockPlotService.workerReady.mockReturnValue(true);
+      // A stale projection may already have set litData
       mockPlotService.litData.mockReturnValue({} as ReturnType<typeof mockPlotService.litData>);
+      mockPlotService.engineStudyId.mockReturnValue(0);
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+
+      TestBed.flushEffects();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+    });
+
+    it('should not apply the charge case outside the studio (section preview)', () => {
+      mockPlotService.workerReady.mockReturnValue(true);
+      mockPlotService.engineStudyId.mockReturnValue(1);
+      mockPlotService.isStudioActive.mockReturnValue(false);
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+
+      TestBed.flushEffects();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+    });
+
+    it('should call setLoads once worker is ready and section studio is initialized', async () => {
+      mockPlotService.workerReady.mockReturnValue(true);
+      mockPlotService.engineStudyId.mockReturnValue(1);
       mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'charge-uuid-1',
@@ -418,6 +437,29 @@ describe('LoadFormsService', () => {
       );
       expect(setLoadsCall).toBeDefined();
       expect((setLoadsCall![1] as { spanLoads: unknown[] }).spanLoads.length).toBeGreaterThan(0);
+    });
+
+    it('should re-apply the saved climate of the same charge once the engine study is rebuilt', async () => {
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+      const changeStateCalls = () =>
+        (mockWorkerPythonService.runTask as ReturnType<typeof vi.fn>).mock.calls.filter(
+          ([task]) => task === Task.changeState
+        );
+
+      mockPlotService.engineStudyId.mockReturnValue(1);
+      await service.initTemporaryLoadData();
+      await service.initTemporaryLoadData();
+      expect(changeStateCalls()).toHaveLength(1);
+
+      // Studio reopened or page reloaded: initSectionStudio built a new study with the base climate
+      mockPlotService.engineStudyId.mockReturnValue(2);
+      await service.initTemporaryLoadData();
+      expect(changeStateCalls()).toHaveLength(2);
+      expect(changeStateCalls()[1][1]).toEqual({ climate: mockChargeData.climate });
     });
   });
 
