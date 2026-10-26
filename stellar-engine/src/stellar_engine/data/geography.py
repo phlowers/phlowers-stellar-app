@@ -202,7 +202,7 @@ def compute_localization(inputs: dict) -> dict:
     current_azimuth = float(geo_inputs.startAzimuth)
     for span_index in range(supports_number - 1):
         # do not add the line angle of the first support
-        if span_index!=0:
+        if span_index != 0:
             # Flat deflection applied at the current support (clockwise positive).
             current_azimuth += line_angle[span_index]
         grid_azimuth[span_index] = current_azimuth
