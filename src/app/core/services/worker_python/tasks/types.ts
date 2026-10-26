@@ -67,8 +67,6 @@ export enum Task {
   deleteObstacle = 'deleteObstacle',
   // Clear all obstacles from the middleware state
   clearObstacles = 'clearObstacles',
-  // Apply a cable length modification (lengthen or shorten) on a span
-  shortenLengthenCable = 'shortenLengthenCable',
   // Apply all manipulations
   applyManipulations = 'applyManipulations',
   // get aspect ratio for plotting scale
@@ -435,8 +433,6 @@ export interface TaskInputs {
   };
   // Inputs for clearObstacles task: no inputs
   [Task.clearObstacles]: undefined;
-  // Inputs for shortenLengthenCable task
-  [Task.shortenLengthenCable]: LengthCableInputs;
   [Task.applyManipulations]: {
     cableModifParams: LengthCableInputs[];
     supportManipParams: SupportManipInputs[];
@@ -817,8 +813,6 @@ export interface TaskOutputs {
   [Task.deleteObstacle]: { success: boolean };
   // Output from clearObstacles task: registration acknowledgement
   [Task.clearObstacles]: { success: boolean };
-  // Output from shortenLengthenCable task: registration acknowledgement
-  [Task.shortenLengthenCable]: { success: boolean };
   [Task.applyManipulations]: { success: boolean };
   [Task.getAspectRatio]: {
     x: number;

@@ -221,13 +221,6 @@ export class LoadFormsService {
   /**
    * Re-register all saved obstacles (and floors, treated as obstacles) in the Python engine.
    *
-   * @remarks
-   * `Task.shortenLengthenCable` ends in `SectionStudy.solve_adjustment()`, which — when
-   * manipulations are registered — replaces `study.position_engine` with a fresh instance,
-   * dropping every obstacle previously registered in it. The next `refreshProjection` then
-   * returns an empty `obstacles` list, wiping obstacle/floor annotations from the plot even
-   * though the underlying section data is untouched. Must run after the cable modifications
-   * and before `refreshProjection`. Re-registering an already-known uuid is a no-op.
    */
   private async resyncObstacles(section: Section | null | undefined): Promise<void> {
     const floorObstacles = (section?.floors ?? []).map((floor) =>

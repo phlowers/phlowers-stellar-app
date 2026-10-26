@@ -92,10 +92,6 @@ const tasks: Record<
     function: 'clear_obstacles',
     externalPackages: []
   },
-  [Task.shortenLengthenCable]: {
-    function: 'shorten_lengthen_cable',
-    externalPackages: []
-  },
   [Task.applyManipulations]: {
     function: 'apply_manipulations',
     externalPackages: []

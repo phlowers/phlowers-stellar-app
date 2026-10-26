@@ -368,13 +368,6 @@ def set_resolution(js_inputs):
     options.graphics.resolution = resolution
     return {"success": True, "resolution": resolution}
 
-
-@debug_log
-def shorten_lengthen_cable(js_inputs):
-    global study
-    return manipulations.modify_cable(js_to_python(js_inputs), study)
-
-
 @debug_log
 def apply_manipulations(js_inputs):
     global study

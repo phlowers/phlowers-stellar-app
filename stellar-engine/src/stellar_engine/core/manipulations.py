@@ -20,42 +20,6 @@ from stellar_engine.entities.inputs import (
 logger = logging.getLogger("stellar_engine")
 
 
-def modify_cable(
-    inputs: dict,
-    study: SectionStudy,
-):
-    modify_cable_inputs = ModifyCableInputs(**inputs)
-    logger.debug("python_inputs: %s", modify_cable_inputs)
-
-    if study.manipulation.shortening_span is not None:
-        current_modification_array = study.manipulation.shortening_span
-        input_dict = {
-            span_index: length_modification
-            for span_index, length_modification in enumerate(
-                current_modification_array
-            )
-        }
-    else:
-        input_dict = {}
-
-    if modify_cable_inputs.modificationType == "lengthening":
-        input_dict[
-            modify_cable_inputs.spanIndex
-        ] = -modify_cable_inputs.modifiedLengthCable
-    elif modify_cable_inputs.modificationType == "shortening":
-        input_dict[modify_cable_inputs.spanIndex] = (
-            modify_cable_inputs.modifiedLengthCable
-        )
-
-    else:
-        raise ValueError(
-            f"Unsupported modificationType: {modify_cable_inputs.modificationType}. Expected 'lengthening' or 'shortening'"
-        )
-    study.manipulation.modify_cable(shorten_span=input_dict)
-    study.solve_adjustment()  # in the long run: we should not need to run solve_adjustment, modify_cable() should suffice
-    return {"success": True}
-
-
 # API call
 def apply_manipulations(
     inputs: dict,
