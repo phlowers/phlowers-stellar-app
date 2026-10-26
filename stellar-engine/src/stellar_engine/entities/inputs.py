@@ -370,7 +370,9 @@ class SupportManipElement:
 
     # allow extra arguments
     @classmethod
-    def from_dict(cls, env: dict):
+    def from_dict(cls, env: dict | None):
+        if env is None:
+            return None
         return cls(
             **{
                 key: value
@@ -421,13 +423,6 @@ class SpanManipInputs:
                 if key in cls.__dataclass_fields__
             }
         )
-
-
-@dataclass
-class ManipulationInputs:
-    cableModifParams: list[ModifyCableInputs]
-    supportManipParams: list[SupportManipInputs]
-    spanManipParams: list[SpanManipInputs]
 
 
 @dataclass

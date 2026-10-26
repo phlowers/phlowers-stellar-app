@@ -547,7 +547,7 @@ export interface LengthCableInputs {
 export interface SupportManipInputs {
   supportIndex: number;
   manip1: CableSupportManipItem;
-  manip2: CableSupportManipItem;
+  manip2: CableSupportManipItem | null;
 }
 
 export interface SpanManipInputs extends Omit<

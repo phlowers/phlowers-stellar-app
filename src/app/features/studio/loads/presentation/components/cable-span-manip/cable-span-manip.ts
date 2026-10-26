@@ -31,6 +31,7 @@ import { getControlErrorIds } from '@shared/helpers/formErrors.helpers';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
+import { LoadFormsService } from '../../services/loadForms.service';
 
 @Component({
   selector: 'app-cable-span-manip',
@@ -75,6 +76,7 @@ export class CableSpanManipComponent implements OnInit {
     }));
   }
   private readonly fb = inject(FormBuilder);
+  private readonly loadFormsService = inject(LoadFormsService);
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   private readonly cableSpanManipService = inject(CableSpanManipService);
@@ -84,7 +86,7 @@ export class CableSpanManipComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
 
   readonly isLoading = signal(false);
-  readonly isCalculating = computed(() => this.plotService.loading());
+  readonly isCalculating = signal(false);
   /** Whether the form has been modified since the last save. */
   readonly isDirtySinceLastSave = signal(false);
   /** Whether a saved manipulation exists for the currently selected span. */
@@ -443,9 +445,14 @@ export class CableSpanManipComponent implements OnInit {
     this.hasSavedManipulation.set(false);
   }
 
-  calculate(): void {
-    // No Python task implemented yet — placeholder for future calculation.
-    if (this.isFormInvalid()) return;
+  async calculateSpanManip(): Promise<void> {
+    if (this.form.invalid) return;
+    this.isCalculating.set(true);
+    try {
+      await this.loadFormsService.calculateLoad();
+    } finally {
+      this.isCalculating.set(false);
+    }
   }
 
   isFormInvalid(): boolean {

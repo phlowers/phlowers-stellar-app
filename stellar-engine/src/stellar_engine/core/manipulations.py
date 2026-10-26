@@ -11,15 +11,13 @@ import logging
 from mechaphlowers import SectionStudy
 
 from stellar_engine.entities.inputs import (
-    ManipulationInputs,
     ModifyCableInputs,
     SpanManipInputs,
+    SupportManipElement,
     SupportManipInputs,
 )
 
 logger = logging.getLogger("stellar_engine")
-# Set logger level to WARNING so info messages are shown
-# logger.setLevel(logging.WARNING) # TODO: not sure about the effect of this, but it seems to be necessary to see info messages in the console
 
 
 def modify_cable(
@@ -63,28 +61,62 @@ def apply_manipulations(
     inputs: dict,
     study: SectionStudy,
 ):
-    manipulation_inputs = ManipulationInputs(**inputs)
+    logger.debug(f"Applying manipulation: inputs: {inputs}")
     modify_cable_inputs, support_manip_inputs, span_manip_inputs = (
-        manipulation_inputs.cableModifParams,
-        manipulation_inputs.supportManipParams,
-        manipulation_inputs.spanManipParams,
+        parse_manip_inputs(inputs)
     )
-    if len(modify_cable_inputs) > 0:
-        apply_modif_cable(modify_cable_inputs, study)
-    if len(support_manip_inputs) > 0:
-        apply_support_manip(support_manip_inputs, study)
-    if len(span_manip_inputs) > 0:
-        apply_span_manip(span_manip_inputs, study)
+    shorten_span_dict = apply_modif_cable(modify_cable_inputs)
+    support_dict, shift_dict, rope_chain_dict = apply_support_manip(
+        support_manip_inputs
+    )
+    virtual_support_dict = apply_span_manip(span_manip_inputs, study)
+
+    # Do not run manipulations if empty dict in input + no manip stored
+    manip = study.manipulation
+    if (
+        len(support_dict) > 0 or manip._support_overlay
+    ):  # should be replaced by a property has_modified_supports
+        manip.modify_support(support_dict)
+    if len(rope_chain_dict) > 0 or manip._rope_or_chain_overlay:
+        manip.set_rope_or_chain(rope_chain_dict)
+    if (
+        len(shorten_span_dict) > 0
+        or len(support_dict) > 0
+        or manip.has_manipulations
+    ):
+        manip.modify_cable(
+            shorten_span=shorten_span_dict, shift_support=shift_dict
+        )
+    if len(virtual_support_dict) > 0 or manip.has_virtual_support:
+        manip.set_virtual_support(virtual_support_dict)
+    if manip.has_manipulations:
+        study.apply_manipulations()
 
     return {"success": True}
 
 
-# TODO: check if multiple calls for manipulations overrides correctly for ALL manipulations
-def apply_modif_cable(
-    cable_modif_inputs: list[ModifyCableInputs], study: SectionStudy
-):
+def parse_manip_inputs(inputs: dict):
+    modify_cable_inputs = []
+    for cable_modif in inputs["cableModifParams"]:
+        modify_cable_inputs.append(ModifyCableInputs.from_dict(cable_modif))
+    support_manip_inputs = []
+    for support_manip in inputs["supportManipParams"]:
+        manip1 = SupportManipElement.from_dict(support_manip["manip1"])
+        manip2 = SupportManipElement.from_dict(support_manip["manip2"])
+        support_manip_inputs.append(
+            SupportManipInputs(support_manip["supportIndex"], manip1, manip2)
+        )
+    span_manip_inputs = []
+    for span_manip in inputs["spanManipParams"]:
+        span_manip_inputs.append(SpanManipInputs.from_dict(span_manip))
+    return modify_cable_inputs, support_manip_inputs, span_manip_inputs
+
+
+def apply_modif_cable(cable_modif_inputs: list[ModifyCableInputs]):
     input_dict = {}
     for cable_modif in cable_modif_inputs:
+        if cable_modif.modifiedLengthCable == 0:
+            pass
         if cable_modif.modificationType == "lengthening":
             input_dict[
                 cable_modif.spanIndex
@@ -95,12 +127,10 @@ def apply_modif_cable(
             raise ValueError(
                 f"Unsupported modificationType: {cable_modif.modificationType}. Expected 'lengthening' or 'shortening'"
             )
-        study.modify_cable(shorten_span=input_dict)
+    return input_dict
 
 
-def apply_support_manip(
-    support_manip_inputs: list[SupportManipInputs], study: SectionStudy
-):
+def apply_support_manip(support_manip_inputs: list[SupportManipInputs]):
     # altitude difference given:
     # relative + end of the arm (not attachment)
     modify_support_inputs = {}
@@ -111,19 +141,17 @@ def apply_support_manip(
         # ------- manip1 --------
         if support_manip.manip1.type == 'crane':
             support_dict = {}
-            chain_dict = {}
+            # chain_dict = {}
+            # not None and not equal to zero
             if support_manip.manip1.lateralDistance:
                 support_dict["y"] = support_manip.manip1.lateralDistance
             if support_manip.manip1.vertDisplacement:
                 support_dict["z"] = support_manip.manip1.vertDisplacement
-                chain_dict = {
-                    "type": "chain",
-                    "length": support_manip.manip1.vertDisplacement,
-                }
+
                 # TODO: manage case with chain -> use chain mass
                 # currently uses default lineic mass from mechaphlowers
             modify_support_inputs[span_index] = support_dict
-            set_rope_or_chain_inputs[span_index] = chain_dict
+            # set_rope_or_chain_inputs[span_index] = chain_dict
 
         # skip if None or length set to 0
         elif (
@@ -133,7 +161,10 @@ def apply_support_manip(
             shifting_inputs[span_index] = (
                 support_manip.manip1.shiftingClampLength
             )
-        elif support_manip.manip1.type == 'rope':
+        elif (
+            support_manip.manip1.type == 'rope'
+            and support_manip.manip1.ropeLength
+        ):
             set_rope_or_chain_inputs[span_index] = {
                 "type": "rope",
                 "length": support_manip.manip1.ropeLength,
@@ -152,10 +183,7 @@ def apply_support_manip(
             shifting_inputs[span_index] = (
                 support_manip.manip2.shiftingClampLength
             )
-
-    study.modify_support(modify_support_inputs)
-    study.modify_cable(shift_support=shifting_inputs)
-    study.set_rope_or_chain(set_rope_or_chain_inputs)
+    return modify_support_inputs, shifting_inputs, set_rope_or_chain_inputs
 
 
 def apply_span_manip(
@@ -163,6 +191,11 @@ def apply_span_manip(
 ):
     input_dict = {}
     for span_manip in span_manip_inputs:
+        if (
+            span_manip.distanceToRefSupport == 0
+            or span_manip.longitudinalDistance == 0
+        ):
+            continue
         span_index = span_manip.spanIndex
         # side support reference
         if span_manip.referenceSupport == 'LEFT':
@@ -202,4 +235,4 @@ def apply_span_manip(
             "hanging_cable_point_from_left_support": hanging_cable_point_from_left_support,
         }
         input_dict[span_index] = current_dict
-    study.set_virtual_support(input_dict)
+    return input_dict

@@ -34,6 +34,7 @@ import {
 } from './cable-support-manip.interfaces';
 import { CABLE_SUPPORT_MANIP_BOUNDS, conditionalRangeValidators } from './cable-support-manip.constantes';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LoadFormsService } from '../../services/loadForms.service';
 
 @Component({
   selector: 'app-cable-support-manip',
@@ -57,12 +58,13 @@ export class CableSupportManipComponent {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly loadFormsService = inject(LoadFormsService);
   private readonly cableSupportManipService = inject(CableSupportManipService);
   private readonly notificationService = inject(NotificationService);
   private readonly translocoService = inject(TranslocoService);
 
   readonly isLoading = signal(false);
-  readonly isCalculating = computed(() => this.plotService.loading());
+  readonly isCalculating = signal(false);
   readonly hasSavedManipulation = signal(false);
   /** Disables manip2 animations for one render cycle during programmatic load-case changes. */
   readonly disableManip2Anim = signal(false);
@@ -384,10 +386,14 @@ export class CableSupportManipComponent {
     }
   }
 
-  calculate(): void {
+  async calculateSupportManip(): Promise<void> {
     if (this.isFormInvalid()) return;
-    // Python task placeholder — to be wired once the calculation API is defined.
-    // Make this async and toggle isLoading around the call at that point.
+    this.isCalculating.set(true);
+    try {
+      await this.loadFormsService.calculateLoad();
+    } finally {
+      this.isCalculating.set(false);
+    }
   }
 
   isFormInvalid(): boolean {
