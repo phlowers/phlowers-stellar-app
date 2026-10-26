@@ -625,7 +625,7 @@ describe('LoadFormsService', () => {
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
     });
-  })
+  });
 
   describe('deleteLoad', () => {
     it('should call deleteAllLoads and changeState with base climate', async () => {
