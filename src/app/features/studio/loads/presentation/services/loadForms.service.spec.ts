@@ -575,7 +575,7 @@ describe('LoadFormsService', () => {
 
       await service.calculateLoad();
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.applyManipulations, expect.any(Object));
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
     });
 
@@ -625,40 +625,7 @@ describe('LoadFormsService', () => {
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
     });
-
-    it('should not run any cable modification task when the section has none', async () => {
-      mockPlotService.temporaryLoadData = mockChargeData;
-      mockSpanService.section.mockReturnValue(mockSection);
-
-      await service.calculateLoad();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
-    });
-
-    it('should skip cable modifications whose span uuid is not in the support list', async () => {
-      mockPlotService.temporaryLoadData = {
-        ...mockChargeData,
-        cableModifParams: [
-          {
-            uuid: 'mod-orphan',
-            spanUuid: 'unknown-support',
-            supportRef: 'LEFT',
-            modificationType: 'lengthening',
-            modifiedLengthCable: 0.5,
-            distanceSupportRef: 100
-          }
-        ]
-      };
-      mockSpanService.getSupportIndex.mockReturnValue(-1);
-      mockSpanService.section.mockReturnValue({
-        ...mockSection
-      } as Section);
-
-      await service.calculateLoad();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
-    });
-  });
+  })
 
   describe('deleteLoad', () => {
     it('should call deleteAllLoads and changeState with base climate', async () => {

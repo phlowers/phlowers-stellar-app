@@ -16,7 +16,7 @@ import {
   TaskError
 } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { CableModification, Section } from '@shared/domain';
+import { Section } from '@shared/domain';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
 import { ChargeData } from '@src/app/shared/domain/models/charge.model';
@@ -197,7 +197,7 @@ export class LoadFormsService {
     const supportManipPythonInputs: SupportManipInputs[] = [];
     for (const supportManip of temporaryLoadData.supportManipParams) {
       const supportIndex = this.spanService.getSupportIndex(supportManip.supportUuid);
-      if (supportIndex < 0) continue;
+      if (supportIndex < 0 && supportManip.chargeUuid !== this.spanService.section()?.selected_charge_uuid) continue;
       const inputs = { ...omit(supportManip, ['uuid', 'supportUuid', 'chargeUuid']), supportIndex };
       supportManipPythonInputs.push(inputs);
     }
@@ -205,8 +205,8 @@ export class LoadFormsService {
     const spanManipPythonInputs: SpanManipInputs[] = [];
     for (const spanManip of temporaryLoadData.spanManipParams) {
       const spanIndex = this.spanService.getSupportIndex(spanManip.spanUuid);
-      if (spanIndex < 0) continue;
-      const inputs = { ...omit(spanManip, ['uuid', 'spanUuid', 'chargeUuid', 'chargeUuid', 'chainName']), spanIndex };
+      if (spanIndex < 0 && spanManip.chargeUuid !== this.spanService.section()?.selected_charge_uuid) continue;
+      const inputs = { ...omit(spanManip, ['uuid', 'spanUuid', 'chargeUuid', 'chainName']), spanIndex };
       spanManipPythonInputs.push(inputs);
     }
 

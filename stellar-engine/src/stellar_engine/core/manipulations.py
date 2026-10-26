@@ -81,7 +81,7 @@ def apply_manipulations(
         manip.set_rope_or_chain(rope_chain_dict)
     if (
         len(shorten_span_dict) > 0
-        or len(support_dict) > 0
+        or len(shift_dict) > 0
         or manip.has_manipulations
     ):
         manip.modify_cable(
