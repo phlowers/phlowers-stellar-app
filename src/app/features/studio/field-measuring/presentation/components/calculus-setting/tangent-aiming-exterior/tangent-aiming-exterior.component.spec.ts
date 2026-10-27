@@ -271,6 +271,18 @@ describe('TangentAimingExterior component', () => {
     expect(component.supportOptions().map((option) => option.value)).toEqual(['1', '2']);
   });
 
+  it('should invalidate the result and allow a new calculation when the span changes but the support is shared', async () => {
+    componentRef.setInput('measureData', validMeasure({ exteriorLeftSupport: '1' }));
+    fixture.detectChanges();
+    await component.calculate();
+    expect(component.measureData().outputs.tangentAimingExterior).not.toBeNull();
+    componentRef.setInput('measureData', { ...component.measureData(), span: [1, 2] });
+    fixture.detectChanges();
+    expect(component.measureData().exteriorLeftSupport).toBe('1');
+    expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
+    expect(component.canCalculate()).toBe(true);
+  });
+
   it('should fall back to the departure support and invalidate the results when the span changes', async () => {
     componentRef.setInput('measureData', validMeasure({ updateMode15C: 'auto' }));
     fixture.detectChanges();

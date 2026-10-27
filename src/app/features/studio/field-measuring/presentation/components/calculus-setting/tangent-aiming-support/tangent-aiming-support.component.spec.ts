@@ -92,6 +92,18 @@ describe('TangentAimingSupport component', () => {
     expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
   });
 
+  it('should invalidate the result and allow a new calculation when the span changes but the support is shared', async () => {
+    componentRef.setInput('measureData', validMeasure({ tangentLeftSupport: '1' }));
+    fixture.detectChanges();
+    await component.calculate();
+    expect(component.measureData().outputs.tangentAimingSupport).not.toBeNull();
+    componentRef.setInput('measureData', { ...component.measureData(), span: [1, 2] });
+    fixture.detectChanges();
+    expect(component.measureData().tangentLeftSupport).toBe('1');
+    expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
+    expect(component.canCalculate()).toBe(true);
+  });
+
   it('should keep the selected left support while it belongs to the span', () => {
     componentRef.setInput('measureData', validMeasure({ span: [0, 1], tangentLeftSupport: '1' }));
     fixture.detectChanges();

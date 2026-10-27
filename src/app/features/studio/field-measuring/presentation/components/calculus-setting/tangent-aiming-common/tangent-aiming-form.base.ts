@@ -20,6 +20,7 @@ import {
   buildSpanSupportOptions,
   calculateTangentAimingMock,
   getCalculatedSpanLength,
+  getSpanKey,
   getTangentAimingError,
   nextLeftSupportState,
   syncDisplayedControls
@@ -69,13 +70,15 @@ export abstract class TangentAimingFormBase {
   protected constructor(protected readonly config: TangentAimingFormConfig) {
     const { form, modelFields, leftSupportKey, calculationTypeKey } = config;
 
-    // A span change must not leave a left support outside the span.
+    // A span change must not leave a left support outside the span, nor a result computed for another span.
     effect(() => {
       const data = this.measureData();
       const leftSupport = data[leftSupportKey];
+      const previous = untracked(this.leftSupportState).previous;
       const { resolved, state } = nextLeftSupportState(leftSupport, data.span, untracked(this.leftSupportState));
       untracked(() => this.leftSupportState.set(state));
-      if (resolved !== leftSupport) {
+      const spanChanged = previous !== null && previous.spanKey !== getSpanKey(data.span);
+      if (resolved !== leftSupport || spanChanged) {
         this.measureData.update((d) => config.invalidateResult({ ...d, [leftSupportKey]: resolved }));
       }
     });
