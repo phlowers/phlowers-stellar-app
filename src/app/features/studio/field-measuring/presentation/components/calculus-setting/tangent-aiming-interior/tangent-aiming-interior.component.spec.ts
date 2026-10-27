@@ -97,7 +97,7 @@ describe('TangentAimingInterior component', () => {
     expect(component.form.controls.leftSupport.value).toBe('0');
   });
 
-  it('should render every field of the form without calculation type selector', () => {
+  it('should render the common fields, the parameter field and hide the tangent angle by default', () => {
     [
       'help-btn',
       'left-support-select',
@@ -105,10 +105,30 @@ describe('TangentAimingInterior component', () => {
       'h-acc-distance-input',
       'vertical-acc-angle-left-input',
       'vertical-acc-angle-right-input',
+      'calculation-type-selector',
       'parameter-input'
     ].forEach((id) => expect(getByTestId(id)).toBeTruthy());
-    expect(getByTestId('calculation-type-selector')).toBeNull();
     expect(getByTestId('tangent-angle-input')).toBeNull();
+  });
+
+  it('should show the tangent angle and hide the parameter when the type is tangente', () => {
+    component.updateCalculationType('tangente');
+    fixture.detectChanges();
+    expect(getByTestId('tangent-angle-input')).toBeTruthy();
+    expect(getByTestId('parameter-input')).toBeNull();
+  });
+
+  it('should expose parameter and tangent calculation type options', () => {
+    expect(component.calculationTypeOptions().map((o) => o.value)).toEqual(['parametre', 'tangente']);
+  });
+
+  it('should only require the displayed type field', () => {
+    fillCommonFields();
+    component.updateCalculationType('tangente');
+    fixture.detectChanges();
+    expect(component.isFormValid()).toBe(false);
+    setInput('tangent-angle-input', '10');
+    expect(component.isFormValid()).toBe(true);
   });
 
   it('should disable the calculate button until the form is valid, then enable it', () => {
@@ -183,6 +203,15 @@ describe('TangentAimingInterior component', () => {
     expect(component.measureData().interiorHAccDistance).toBe(12);
   });
 
+  it('should clear the result when the calculation type changes', async () => {
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    await component.calculate();
+    component.updateCalculationType('tangente');
+    expect(component.measureData().interiorCalculationType).toBe('tangente');
+    expect(component.measureData().outputs.tangentAimingInterior).toBeNull();
+  });
+
   it('should not calculate when the form is invalid', async () => {
     const spy = vi.spyOn(commonHelpers, 'calculateTangentAimingMock');
     await component.calculate();
@@ -220,10 +249,18 @@ describe('TangentAimingInterior component', () => {
       expect(component.measureData().outputs.parameter15C).toBeNull();
     });
 
+    it('should clear it in auto mode when the calculation type changes', () => {
+      componentRef.setInput('measureData', withParameter15C('auto'));
+      fixture.detectChanges();
+      component.updateCalculationType('tangente');
+      expect(component.measureData().outputs.parameter15C).toBeNull();
+    });
+
     it('should preserve it in manual mode', () => {
       componentRef.setInput('measureData', withParameter15C('manual'));
       fixture.detectChanges();
       setInput('h-acc-distance-input', '12');
+      component.updateCalculationType('tangente');
       expect(component.measureData().outputs.parameter15C).toEqual(parameter15C);
     });
   });

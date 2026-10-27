@@ -4,14 +4,14 @@ import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
 import { TangentAimingSupportComponent } from './tangent-aiming-support/tangent-aiming-support.component';
 import { TangentAimingExteriorComponent } from './tangent-aiming-exterior/tangent-aiming-exterior.component';
-import { TangentAimingInteriorComponent } from './tangent-aiming-interior/tangent-aiming-interior.component';
+import { TangentAimingInteriorComponent } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.component';
 import { PepComponent } from './pep/pep.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TranslocoModule } from '@jsverse/transloco';
-import { applyTangentAimingSupportDefaults } from './tangent-aiming-support/tangent-aiming-support.helpers';
-import { getDefaultLeftSupport } from './tangent-aiming-common/tangent-aiming-common.helpers';
+import { applyTangentAimingSupportDefaults } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
+import { getDefaultLeftSupport } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
 import { applyTangentAimingExteriorDefaults } from './tangent-aiming-exterior/tangent-aiming-exterior.helpers';
-import { applyTangentAimingInteriorDefaults } from './tangent-aiming-interior/tangent-aiming-interior.helpers';
+import { applyTangentAimingInteriorDefaults } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
 import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
 import { CALCULUS_TYPE_BY_METHOD } from './calculus-setting.constantes';
 

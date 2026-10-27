@@ -1256,6 +1256,26 @@ describe('FieldMeasuringComponent', () => {
       expect(measureData.time?.getTime()).toBe(measureDate.getTime());
       expect(measureData.season).toBe('winter');
     });
+
+    it('should default the calculation type and inputs of an interior measure saved without them', async () => {
+      const spanService = TestBed.inject(PlotSpanService);
+      const sectionSignal = spanService.section as ReturnType<typeof signal<Section | null>>;
+      const section = sectionSignal() as Section;
+      const legacy = {
+        ...createTestMeasureData({ uuid: 'legacy-interior', calculationMethod: 'tangente-aiming-interior' }),
+        interiorCalculationType: undefined,
+        interiorParameter: undefined
+      } as unknown as FieldMeasure;
+      sectionSignal.set({ ...section, field_measures: [legacy], selected_field_measure_uuid: 'legacy-interior' });
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(component.measureData()).toMatchObject({ interiorCalculationType: 'parametre', interiorParameter: 20 });
+    });
   });
 
   describe('last saved tab', () => {

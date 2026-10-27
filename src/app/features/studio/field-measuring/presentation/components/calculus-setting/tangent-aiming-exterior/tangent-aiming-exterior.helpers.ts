@@ -8,7 +8,10 @@
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
-import { createNumberControl, syncDisplayedControls } from '../tangent-aiming-common/tangent-aiming-common.helpers';
+import {
+  createNumberControl,
+  syncDisplayedControls
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   TANGENT_AIMING_EXTERIOR_COMMON_FIELDS,
   TANGENT_AIMING_EXTERIOR_FIELD_RULES,

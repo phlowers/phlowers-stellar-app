@@ -5,12 +5,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import {
   TangentAimingFieldRule,
   TangentAimingNumberFieldView
-} from '../tangent-aiming-common/tangent-aiming-common.interfaces';
-import { TANGENT_AIMING_FIELD_RULES } from '../tangent-aiming-common/tangent-aiming-common.constantes';
-import { TangentAimingInteriorNumericField } from './tangent-aiming-interior.interfaces';
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
+import { TANGENT_AIMING_FIELD_RULES } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
+import {
+  TangentAimingInteriorCalculationType,
+  TangentAimingInteriorInputField,
+  TangentAimingInteriorNumericField
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.interfaces';
 
 /** Display description of each numeric input. */
 export const TANGENT_AIMING_INTERIOR_NUMBER_FIELDS: Record<
@@ -56,6 +61,14 @@ export const TANGENT_AIMING_INTERIOR_NUMBER_FIELDS: Record<
     testId: 'parameter-input',
     step: 1,
     area: 'parameter'
+  },
+  tangentAngle: {
+    id: 'taiTangentAngle',
+    labelKey: 'common.tangent-angle-label',
+    unitKey: 'common.grade-unit',
+    testId: 'tangent-angle-input',
+    step: 0.01,
+    area: 'tangentAngle'
   }
 };
 
@@ -66,5 +79,35 @@ export const TANGENT_AIMING_INTERIOR_FIELD_RULES: Record<TangentAimingInteriorNu
   hAccDistance: { ...TANGENT_AIMING_FIELD_RULES.hAccDistance, max: 5000 },
   verticalAccAngleLeft: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
   verticalAccAngleRight: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
-  parameter: TANGENT_AIMING_FIELD_RULES.parameter
+  parameter: TANGENT_AIMING_FIELD_RULES.parameter,
+  tangentAngle: TANGENT_AIMING_FIELD_RULES.tangentAngle
+};
+
+/** Inputs always displayed, whatever the calculation type. */
+export const TANGENT_AIMING_INTERIOR_COMMON_FIELDS: TangentAimingInteriorInputField[] = [
+  'leftSupport',
+  'spanLength',
+  'hAccDistance',
+  'verticalAccAngleLeft',
+  'verticalAccAngleRight'
+];
+
+/** Input shown only for the given calculation type. */
+export const TANGENT_AIMING_INTERIOR_TYPE_FIELD: Record<
+  TangentAimingInteriorCalculationType,
+  TangentAimingInteriorNumericField
+> = {
+  parametre: 'parameter',
+  tangente: 'tangentAngle'
+};
+
+/** `FieldMeasure` field persisting each input of the form. */
+export const TANGENT_AIMING_INTERIOR_MODEL_FIELDS: Record<TangentAimingInteriorInputField, keyof FieldMeasure> = {
+  leftSupport: 'interiorLeftSupport',
+  spanLength: 'interiorSpanLength',
+  hAccDistance: 'interiorHAccDistance',
+  verticalAccAngleLeft: 'interiorVerticalAccAngleLeft',
+  verticalAccAngleRight: 'interiorVerticalAccAngleRight',
+  parameter: 'interiorParameter',
+  tangentAngle: 'interiorTangentAngle'
 };

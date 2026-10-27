@@ -11,9 +11,10 @@
       'hDistance vAngleLeft vAngleRight . .'
       'hDistance vAngleLeft vAngleRight . .'
       'hDistance vAngleLeft vAngleRight . .'
+      'calculationType calculationType . . .'
       'parameter . . . .'
       'parameter . . . .'
       'parameter . . . .';
-    grid-template-rows: tangent-aiming.$field-rows auto tangent-aiming.$field-rows tangent-aiming.$field-rows;
+    grid-template-rows: tangent-aiming.$field-rows auto tangent-aiming.$field-rows auto tangent-aiming.$field-rows;
   }
 }

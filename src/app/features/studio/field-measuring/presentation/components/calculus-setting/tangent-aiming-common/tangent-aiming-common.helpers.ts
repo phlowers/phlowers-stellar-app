@@ -16,7 +16,7 @@ import {
   TangentAimingCalculation,
   TangentAimingCalculationType,
   TangentAimingFieldRule
-} from './tangent-aiming-common.interfaces';
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
 
 /** Creates a required numeric control bound to the given rule. */
 export function createNumberControl({ min, max, decimals }: TangentAimingFieldRule): FormControl<number | null> {

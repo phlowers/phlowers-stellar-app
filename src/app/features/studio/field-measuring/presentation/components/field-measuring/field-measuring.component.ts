@@ -41,12 +41,16 @@ import {
   isTangentAimingSupportDataValid,
   resetNonDisplayedParameterFields
 } from '../calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
-import { getDefaultLeftSupport } from '../calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
+import { getDefaultLeftSupport } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   isTangentAimingExteriorDataValid,
   resetNonDisplayedExteriorFields
 } from '../calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.helpers';
-import { isTangentAimingInteriorDataValid } from '../calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
+import {
+  applyTangentAimingInteriorDefaults,
+  isTangentAimingInteriorDataValid,
+  resetNonDisplayedInteriorFields
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
 import { resetInactiveCalculusModes } from '../../calculus-mode-reset.helpers';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -329,11 +333,15 @@ export class FieldMeasuringComponent implements OnDestroy {
     }
 
     // A measure saved before an output existed lacks its key: `undefined` would read as "computed" / "not recalculable".
+    // Likewise, an interior measure saved before the calculation type existed lacks its type and defaults.
+    const measure = normalizeFieldMeasureDates({
+      ...selectedFieldMeasure,
+      outputs: { ...initialFieldMeasureOutputs, ...selectedFieldMeasure.outputs }
+    });
     this.measureData.set(
-      normalizeFieldMeasureDates({
-        ...selectedFieldMeasure,
-        outputs: { ...initialFieldMeasureOutputs, ...selectedFieldMeasure.outputs }
-      })
+      measure.calculationMethod === 'tangente-aiming-interior'
+        ? applyTangentAimingInteriorDefaults(measure, getDefaultLeftSupport(measure.span))
+        : measure
     );
     this.activeTab.set(selectedFieldMeasure.savedTab ?? 'terrainData');
 
@@ -453,6 +461,8 @@ export class FieldMeasuringComponent implements OnDestroy {
       activeMeasureData = resetNonDisplayedParameterFields(currentMeasureData);
     } else if (calculationMethod === 'tangente-aiming-exterior') {
       activeMeasureData = resetNonDisplayedExteriorFields(currentMeasureData);
+    } else if (calculationMethod === 'tangente-aiming-interior') {
+      activeMeasureData = resetNonDisplayedInteriorFields(currentMeasureData);
     }
     const measureData: FieldMeasure = {
       ...resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {

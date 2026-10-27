@@ -5,7 +5,10 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { MessageModule } from 'primeng/message';
 import { TranslocoModule } from '@jsverse/transloco';
-import { TangentAimingFieldRule, TangentAimingNumberFieldView } from '../tangent-aiming-common.interfaces';
+import {
+  TangentAimingFieldRule,
+  TangentAimingNumberFieldView
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
 
 /** Labelled numeric input of a tangent aiming form, placed in the parent grid by its `view.area` class. */
 @Component({

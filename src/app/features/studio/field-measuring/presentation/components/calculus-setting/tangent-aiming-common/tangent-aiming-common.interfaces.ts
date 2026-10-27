@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { FormGroup } from '@angular/forms';
 import { FieldMeasure, TangentAimingSupportResult } from '@features/studio/field-measuring/domain/types';
 
 /** Kind of numeric input shared by the tangent aiming forms, each kind having its own rule. */
@@ -49,4 +50,19 @@ export interface LeftSupportSnapshot {
 export interface LeftSupportState {
   previous: LeftSupportSnapshot | null;
   memory: Record<string, string>;
+}
+
+/** Per-form differences of the tangent aiming forms, consumed by `TangentAimingFormBase`. */
+export interface TangentAimingFormConfig {
+  form: FormGroup;
+  /** Measure key bound to each form control. */
+  modelFields: Record<string, keyof FieldMeasure>;
+  leftSupportKey: 'tangentLeftSupport' | 'interiorLeftSupport' | 'exteriorLeftSupport';
+  calculationTypeKey: 'calculationType' | 'interiorCalculationType' | 'exteriorCalculationType';
+  outputKey: 'tangentAimingSupport' | 'tangentAimingInterior' | 'tangentAimingExterior';
+  /** Label of the form in the calculation failure log. */
+  logLabel: string;
+  getDisplayedInputFields: (calculationType: TangentAimingCalculationType) => readonly string[];
+  invalidateResult: (data: FieldMeasure) => FieldMeasure;
+  toInputs: (data: FieldMeasure) => unknown;
 }

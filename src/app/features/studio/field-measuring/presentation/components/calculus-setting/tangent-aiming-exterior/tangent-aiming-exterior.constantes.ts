@@ -9,8 +9,8 @@ import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import {
   TangentAimingFieldRule,
   TangentAimingNumberFieldView
-} from '../tangent-aiming-common/tangent-aiming-common.interfaces';
-import { TANGENT_AIMING_FIELD_RULES } from '../tangent-aiming-common/tangent-aiming-common.constantes';
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
+import { TANGENT_AIMING_FIELD_RULES } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   TangentAimingExteriorCalculationType,
   TangentAimingExteriorInputField,

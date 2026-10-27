@@ -82,7 +82,9 @@ export interface FieldMeasure {
   interiorHAccDistance: number | null;
   interiorVerticalAccAngleLeft: number | null;
   interiorVerticalAccAngleRight: number | null;
+  interiorCalculationType: 'parametre' | 'tangente';
   interiorParameter: number | null;
+  interiorTangentAngle: number | null;
   // PEP fields
   lengthBetweenSightGD: number | null;
   elevationDifferenceBetweenSightGD: number | null;

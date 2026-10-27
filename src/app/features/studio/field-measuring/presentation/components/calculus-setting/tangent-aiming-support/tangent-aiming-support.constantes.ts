@@ -5,12 +5,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import {
   TangentAimingFieldRule,
   TangentAimingNumberFieldView
-} from '../tangent-aiming-common/tangent-aiming-common.interfaces';
-import { TANGENT_AIMING_FIELD_RULES } from '../tangent-aiming-common/tangent-aiming-common.constantes';
-import { TangentAimingSupportInputField, TangentAimingSupportNumericField } from './tangent-aiming-support.interfaces';
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
+import { TANGENT_AIMING_FIELD_RULES } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
+import {
+  TangentAimingSupportInputField,
+  TangentAimingSupportNumericField
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-support/tangent-aiming-support.interfaces';
 
 const I18N = 'field-measuring.tangent-aiming-support';
 
@@ -83,3 +87,13 @@ export const TANGENT_AIMING_SUPPORT_TYPE_FIELD = {
   parametre: 'cableParameter',
   tangente: 'cableTangentAngle'
 } as const;
+
+/** `FieldMeasure` key bound to each input (identity: the form fields are named after the measure keys). */
+export const TANGENT_AIMING_SUPPORT_MODEL_FIELDS: Record<TangentAimingSupportInputField, keyof FieldMeasure> = {
+  tangentLeftSupport: 'tangentLeftSupport',
+  tangentSpanLength: 'tangentSpanLength',
+  cableHAccDistance: 'cableHAccDistance',
+  cableVerticalAccAngle: 'cableVerticalAccAngle',
+  cableParameter: 'cableParameter',
+  cableTangentAngle: 'cableTangentAngle'
+};

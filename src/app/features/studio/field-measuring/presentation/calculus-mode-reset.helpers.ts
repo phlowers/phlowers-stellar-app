@@ -1,7 +1,7 @@
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TANGENT_AIMING_SUPPORT_FIELD_RULES as RULES } from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.constantes';
 import { TANGENT_AIMING_EXTERIOR_FIELD_RULES as EXTERIOR_RULES } from './components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.constantes';
-import { TANGENT_AIMING_INTERIOR_FIELD_RULES as INTERIOR_RULES } from './components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.constantes';
+import { TANGENT_AIMING_INTERIOR_FIELD_RULES as INTERIOR_RULES } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.constantes';
 import { PAPOTO_INPUT_DEFAULTS, PEP_INPUT_DEFAULTS } from './helpers';
 import { CalculusModeResetContext } from './calculus-mode-reset.interfaces';
 
@@ -22,7 +22,9 @@ const INTERIOR_DEFAULTS = {
   interiorHAccDistance: INTERIOR_RULES.hAccDistance.default,
   interiorVerticalAccAngleLeft: INTERIOR_RULES.verticalAccAngleLeft.default,
   interiorVerticalAccAngleRight: INTERIOR_RULES.verticalAccAngleRight.default,
-  interiorParameter: INTERIOR_RULES.parameter.default
+  interiorParameter: INTERIOR_RULES.parameter.default,
+  interiorTangentAngle: INTERIOR_RULES.tangentAngle.default,
+  interiorCalculationType: 'parametre' as const
 };
 
 /** Resets each calculus mode (inputs and outputs) to its defaults. Typed on every method so a new one requires a resetter. */
