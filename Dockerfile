@@ -1,6 +1,6 @@
 ARG DEFAULT_LANGUAGE=en
 
-FROM node:22-alpine AS build
+FROM node:22.23.4-alpine AS build
 
 # The build fails when empty: git is not available in this image.
 ARG CI_COMMIT_SHA
