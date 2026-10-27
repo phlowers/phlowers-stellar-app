@@ -368,6 +368,7 @@ def set_resolution(js_inputs):
     options.graphics.resolution = resolution
     return {"success": True, "resolution": resolution}
 
+
 @debug_log
 def apply_manipulations(js_inputs):
     global study

@@ -118,9 +118,7 @@ def normalize_wheel(whl: Path) -> None:
             entry.external_attr = (
                 (0o40755 << 16) | 0x10 if info.is_dir() else 0o100644 << 16
             )
-            dst.writestr(
-                entry, src.read(info), compresslevel=WHEEL_COMPRESSION_LEVEL
-            )
+            dst.writestr(entry, src.read(info), compresslevel=WHEEL_COMPRESSION_LEVEL)
     tmp.replace(whl)
 
 

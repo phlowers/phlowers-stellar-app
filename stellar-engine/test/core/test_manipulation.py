@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-from mechaphlowers import BalanceEngine, SectionStudy
+from mechaphlowers import SectionStudy
 
 from stellar_engine.core import manipulations
 from stellar_engine.entities.inputs import (
