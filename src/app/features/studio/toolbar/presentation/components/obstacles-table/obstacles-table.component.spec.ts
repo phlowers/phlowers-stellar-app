@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, input, signal, WritableSignal } from '@angular/core';
+import { Component, input, signal, TemplateRef, WritableSignal } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { DecimalPipe } from '@angular/common';
+import { By } from '@angular/platform-browser';
+import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
 import { PaginatorModule } from 'primeng/paginator';
@@ -13,18 +14,37 @@ import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { ObstaclesTableReportService } from '@features/studio/toolbar/presentation/services/obstacles-table-report/obstacles-table-report.service';
+import { ObstaclesTableReportData } from '@features/studio/toolbar/presentation/services/obstacles-table-report/obstacles-table-report.interfaces';
 import { Section } from '@shared/domain';
+import { Charge } from '@shared/domain/models/charge.model';
+import { InitialCondition } from '@shared/domain/models/initial-condition.model';
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { Distance } from '@services/worker_python/tasks/types';
 import { DEFAULT_TABLE_ROWS_PER_PAGE } from '@shared/constants/tablePagination';
 
 @Component({
-  selector: 'app-button',
+  selector: 'button[app-btn]',
   standalone: true,
-  template: '<button><ng-content></ng-content></button>'
+  template: '<ng-content></ng-content>'
 })
-class MockButtonComponent {}
+class MockButtonComponent {
+  btnStyle = input<string>();
+  btnLoading = input<boolean>(false);
+}
+
+// Renders the footer template the way the toolbar dialog does
+@Component({
+  selector: 'app-footer-host',
+  imports: [NgTemplateOutlet],
+  template: '<ng-container [ngTemplateOutlet]="template ?? null" />'
+})
+class FooterHostComponent {
+  template: TemplateRef<unknown> | undefined;
+}
 
 @Component({
   selector: 'app-icon',
@@ -48,6 +68,27 @@ function makeObstacle(overrides: Partial<Obstacle> = {}): Obstacle {
     positions: [{ x: 12, y: 5.2, z: 1.2 }],
     ...overrides
   };
+}
+
+function makeDistance(obstacleUuid: string, pointIndexes: number[] = [0]): Distance {
+  return {
+    obstacleUuid,
+    points: pointIndexes.map((pointIndex) => ({
+      pointIndex,
+      linePoint: [0, 0, 0],
+      virtualPointHorizontal: [0, 0, 0],
+      virtualPointVertical: [0, 0, 0],
+      distanceDiagonal: 42,
+      distanceHorizontal: 8,
+      distanceVertical: 5,
+      signedDistanceVertical: 5
+    }))
+  };
+}
+
+// The component only reads the uuid and number of a support, so the other fields are left out
+function makeSupports(numbers: string[]): Section['supports'] {
+  return numbers.map((number, index) => ({ uuid: `support-${index + 1}`, number })) as Section['supports'];
 }
 
 function makeSection(overrides: Partial<Section> = {}): Section {
@@ -90,6 +131,10 @@ describe('ObstaclesTableComponent', () => {
     getSpanOptions: ReturnType<typeof vi.fn>;
     getSupportOptions: ReturnType<typeof vi.fn>;
   };
+  let studySignal: WritableSignal<unknown>;
+  let plotLoadingSignal: WritableSignal<boolean>;
+  let isCalculatingObstacleSignal: WritableSignal<boolean>;
+  let mockReportService: { generateReport: ReturnType<typeof vi.fn> };
   let mockLogger: {
     error: ReturnType<typeof vi.fn>;
     log: ReturnType<typeof vi.fn>;
@@ -131,6 +176,13 @@ describe('ObstaclesTableComponent', () => {
       })
     };
 
+    studySignal = signal<unknown>(null);
+    plotLoadingSignal = signal(false);
+    isCalculatingObstacleSignal = signal(false);
+    mockReportService = {
+      generateReport: vi.fn((_data: ObstaclesTableReportData): Promise<void> => Promise.resolve())
+    };
+
     mockLogger = { error: vi.fn(), log: vi.fn(), warn: vi.fn(), info: vi.fn() };
 
     await TestBed.configureTestingModule({
@@ -146,6 +198,9 @@ describe('ObstaclesTableComponent', () => {
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: ObstacleStateService, useValue: { distances: distancesSignal } },
         { provide: ObstaclesService, useValue: mockObstaclesService },
+        { provide: ObstacleFormService, useValue: { isCalculatingObstacle: isCalculatingObstacleSignal } },
+        { provide: PlotService, useValue: { study: studySignal, loading: plotLoadingSignal } },
+        { provide: ObstaclesTableReportService, useValue: mockReportService },
         { provide: LoggerService, useValue: mockLogger }
       ]
     })
@@ -240,7 +295,7 @@ describe('ObstaclesTableComponent', () => {
       );
       fixture.detectChanges();
 
-      expect(component.rows().length).toBe(3);
+      expect(component.rows()).toHaveLength(3);
     });
 
     it('excludes obstacles that do not belong to the selected span', () => {
@@ -251,17 +306,13 @@ describe('ObstaclesTableComponent', () => {
       );
       fixture.detectChanges();
 
-      expect(component.rows().length).toBe(0);
+      expect(component.rows()).toHaveLength(0);
     });
 
     it('includes obstacles from every span and resolves each row\'s own span/reference support labels when "all spans" is selected', () => {
       sectionSignal.set(
         makeSection({
-          supports: [
-            { uuid: 'support-1', number: 'AB12C' },
-            { uuid: 'support-2', number: 'AB13C' },
-            { uuid: 'support-3', number: 'AB14C' }
-          ],
+          supports: makeSupports(['AB12C', 'AB13C', 'AB14C']),
           obstacles: [
             makeObstacle({ uuid: 'obs-span-1', supportUuid: 'support-1', referenceSupport: ReferenceSupport.LEFT }),
             makeObstacle({ uuid: 'obs-span-2', supportUuid: 'support-2', referenceSupport: ReferenceSupport.RIGHT })
@@ -506,11 +557,7 @@ describe('ObstaclesTableComponent', () => {
     it('resets the first-record index to 0 when the span filter changes', () => {
       sectionSignal.set(
         makeSection({
-          supports: [
-            { uuid: 'support-1', number: 'AB12C' },
-            { uuid: 'support-2', number: 'AB13C' },
-            { uuid: 'support-3', number: 'AB14C' }
-          ]
+          supports: makeSupports(['AB12C', 'AB13C', 'AB14C'])
         })
       );
       fixture.detectChanges();
@@ -551,8 +598,335 @@ describe('ObstaclesTableComponent', () => {
       expect(paginator!.compareDocumentPosition(table!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 
-    it('registers a footer template holding the disabled report button', () => {
+    it('registers a footer template holding the report button', () => {
       expect(component.footerTemplate()).toBeTruthy();
+    });
+  });
+
+  describe('onGenerateReport()', () => {
+    const renderReportButton = (): HTMLButtonElement => {
+      const footerFixture = TestBed.createComponent(FooterHostComponent);
+      footerFixture.componentInstance.template = component.footerTemplate();
+      footerFixture.detectChanges();
+      return footerFixture.nativeElement.querySelector('[data-testid="report-btn"]') as HTMLButtonElement;
+    };
+
+    const setReportContext = (): void => {
+      studySignal.set({
+        uuid: 'study-uuid',
+        author_email: 'author@example.test',
+        title: 'Fake study',
+        description: 'Fake study description'
+      });
+      sectionSignal.set(
+        makeSection({
+          name: 'Fake canton',
+          comment: 'Fake comment',
+          initial_conditions: [{ uuid: 'ic-1', name: 'Fake IC' } as InitialCondition],
+          selected_initial_condition_uuid: 'ic-1',
+          charges: [{ uuid: 'charge-1', name: 'Fake load case', description: 'Fake load description' } as Charge],
+          selected_charge_uuid: 'charge-1',
+          obstacles: [makeObstacle()]
+        })
+      );
+      distancesSignal.set([makeDistance('obs-1')]);
+      fixture.detectChanges();
+    };
+
+    it('passes the current study, section, initial condition, load case and displayed rows to the report service', async () => {
+      setReportContext();
+
+      await component.onGenerateReport();
+
+      expect(mockReportService.generateReport).toHaveBeenCalledWith({
+        date: expect.any(String),
+        time: expect.stringMatching(/^\d{2}:\d{2}$/),
+        author: 'author@example.test',
+        studyTitle: 'Fake study',
+        studyDescription: 'Fake study description',
+        cantonName: 'Fake canton',
+        cantonComment: 'Fake comment',
+        icName: 'Fake IC',
+        chargeName: 'Fake load case',
+        chargeDescription: 'Fake load description',
+        rows: component.rows()
+      });
+      expect(component.rows()).toHaveLength(1);
+    });
+
+    it('lists the obstacle points of every span when the "all spans" filter is selected', async () => {
+      distancesSignal.set([makeDistance('obs-1'), makeDistance('obs-2')]);
+      sectionSignal.set(
+        makeSection({
+          supports: makeSupports(['AB12C', 'AB13C', 'AB14C']),
+          obstacles: [
+            makeObstacle(),
+            makeObstacle({ uuid: 'obs-2', supportUuid: 'support-2', positions: [{ x: 1, y: 2, z: 3 }] })
+          ]
+        })
+      );
+      component.selectedSpanUuid.set(ALL_SPANS_OPTION_VALUE);
+      fixture.detectChanges();
+
+      await component.onGenerateReport();
+
+      const { rows } = mockReportService.generateReport.mock.calls[0][0] as ObstaclesTableReportData;
+      expect(rows.map((row) => row.spanLabel)).toEqual(['AB12C - AB13C', 'AB13C - AB14C']);
+    });
+
+    it('falls back to placeholders when no study, initial condition or load case is available', async () => {
+      distancesSignal.set([makeDistance('obs-1')]);
+      sectionSignal.set(makeSection({ name: 'Fake canton', obstacles: [makeObstacle()] }));
+      fixture.detectChanges();
+
+      await component.onGenerateReport();
+
+      expect(mockReportService.generateReport).toHaveBeenCalledWith(
+        expect.objectContaining({
+          author: '-',
+          studyTitle: '-',
+          studyDescription: '',
+          cantonName: 'Fake canton',
+          cantonComment: '',
+          icName: '-',
+          chargeName: '-',
+          chargeDescription: ''
+        })
+      );
+    });
+
+    it('hands the report the rows in the order the table was sorted to', async () => {
+      distancesSignal.set([makeDistance('obs-1'), makeDistance('obs-2')]);
+      sectionSignal.set(
+        makeSection({
+          obstacles: [makeObstacle({ name: 'Bravo' }), makeObstacle({ uuid: 'obs-2', name: 'Alpha' })]
+        })
+      );
+      fixture.detectChanges();
+      // p-table hands its own value, the array rows() returns, to the sort function
+      component.customSort({ field: 'obstacleName', order: 1, data: component.rows() });
+
+      await component.onGenerateReport();
+
+      const { rows } = mockReportService.generateReport.mock.calls[0][0] as ObstaclesTableReportData;
+      expect(rows.map((row) => row.obstacleName)).toEqual(['Alpha', 'Bravo']);
+    });
+
+    it('is not affected by a sort of the table while the report is generating', async () => {
+      let resolveReport!: () => void;
+      mockReportService.generateReport.mockReturnValue(new Promise<void>((resolve) => (resolveReport = resolve)));
+      distancesSignal.set([makeDistance('obs-1'), makeDistance('obs-2')]);
+      sectionSignal.set(
+        makeSection({
+          obstacles: [makeObstacle({ name: 'Bravo' }), makeObstacle({ uuid: 'obs-2', name: 'Alpha' })]
+        })
+      );
+      fixture.detectChanges();
+
+      const generation = component.onGenerateReport();
+      component.customSort({ field: 'obstacleName', order: 1, data: component.rows() });
+      resolveReport();
+      await generation;
+
+      const { rows } = mockReportService.generateReport.mock.calls[0][0] as ObstaclesTableReportData;
+      expect(component.rows().map((row) => row.obstacleName)).toEqual(['Alpha', 'Bravo']);
+      expect(rows.map((row) => row.obstacleName)).toEqual(['Bravo', 'Alpha']);
+    });
+
+    it('generates nothing when the table has no row', async () => {
+      expect(component.rows()).toHaveLength(0);
+
+      await component.onGenerateReport();
+
+      expect(mockReportService.generateReport).not.toHaveBeenCalled();
+    });
+
+    it('disables the report button while the table has no row and enables it once it has some', () => {
+      const footerFixture = TestBed.createComponent(FooterHostComponent);
+      footerFixture.componentInstance.template = component.footerTemplate();
+      footerFixture.detectChanges();
+      const button = footerFixture.nativeElement.querySelector('[data-testid="report-btn"]') as HTMLButtonElement;
+
+      expect(component.rows()).toHaveLength(0);
+      expect(button.disabled).toBe(true);
+
+      distancesSignal.set([makeDistance('obs-1')]);
+      sectionSignal.set(makeSection({ obstacles: [makeObstacle()] }));
+      fixture.detectChanges();
+      footerFixture.detectChanges();
+
+      expect(component.rows()).toHaveLength(1);
+      expect(button.disabled).toBe(false);
+    });
+
+    it('is triggered by a click on the report button', () => {
+      setReportContext();
+      const spy = vi.spyOn(component, 'onGenerateReport').mockResolvedValue();
+      const button = renderReportButton();
+
+      button.click();
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('disables the button and shows its loading state while the report is generating', async () => {
+      setReportContext();
+      let resolveReport!: () => void;
+      mockReportService.generateReport.mockReturnValue(new Promise<void>((resolve) => (resolveReport = resolve)));
+      const footerFixture = TestBed.createComponent(FooterHostComponent);
+      footerFixture.componentInstance.template = component.footerTemplate();
+      footerFixture.detectChanges();
+      const buttonElement = footerFixture.debugElement.query(By.css('[data-testid="report-btn"]'));
+      const button = buttonElement.nativeElement as HTMLButtonElement;
+      const buttonComponent = buttonElement.injector.get(MockButtonComponent);
+
+      expect(button.disabled).toBe(false);
+      expect(buttonComponent.btnLoading()).toBe(false);
+
+      const generation = component.onGenerateReport();
+      footerFixture.detectChanges();
+
+      expect(component.isGeneratingReport()).toBe(true);
+      expect(button.disabled).toBe(true);
+      expect(buttonComponent.btnLoading()).toBe(true);
+
+      resolveReport();
+      await generation;
+      footerFixture.detectChanges();
+
+      expect(component.isGeneratingReport()).toBe(false);
+      expect(button.disabled).toBe(false);
+      expect(buttonComponent.btnLoading()).toBe(false);
+    });
+
+    it('does not start a second generation while one is running', async () => {
+      setReportContext();
+      let resolveReport!: () => void;
+      mockReportService.generateReport.mockReturnValue(new Promise<void>((resolve) => (resolveReport = resolve)));
+
+      const firstGeneration = component.onGenerateReport();
+      await component.onGenerateReport();
+      resolveReport();
+      await firstGeneration;
+
+      expect(mockReportService.generateReport).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves the loading state even when the report service rejects', async () => {
+      setReportContext();
+      mockReportService.generateReport.mockRejectedValue(new Error('PDF error'));
+
+      await expect(component.onGenerateReport()).rejects.toThrow('PDF error');
+
+      expect(component.isGeneratingReport()).toBe(false);
+    });
+
+    describe('distances', () => {
+      const renderReportButtonWithComponent = () => {
+        const footerFixture = TestBed.createComponent(FooterHostComponent);
+        footerFixture.componentInstance.template = component.footerTemplate();
+        footerFixture.detectChanges();
+        const buttonElement = footerFixture.debugElement.query(By.css('[data-testid="report-btn"]'));
+        return {
+          footerFixture,
+          button: buttonElement.nativeElement as HTMLButtonElement,
+          buttonComponent: buttonElement.injector.get(MockButtonComponent)
+        };
+      };
+
+      it('disables the button and shows its loading state while the distances are being calculated', () => {
+        setReportContext();
+        const { footerFixture, button, buttonComponent } = renderReportButtonWithComponent();
+        expect(button.disabled).toBe(false);
+        expect(buttonComponent.btnLoading()).toBe(false);
+
+        plotLoadingSignal.set(true);
+        footerFixture.detectChanges();
+
+        expect(component.isGeneratingReport()).toBe(false);
+        expect(button.disabled).toBe(true);
+        expect(buttonComponent.btnLoading()).toBe(true);
+
+        plotLoadingSignal.set(false);
+        footerFixture.detectChanges();
+
+        expect(button.disabled).toBe(false);
+        expect(buttonComponent.btnLoading()).toBe(false);
+      });
+
+      it('generates nothing while the distances are being calculated', async () => {
+        setReportContext();
+        plotLoadingSignal.set(true);
+
+        await component.onGenerateReport();
+
+        expect(mockReportService.generateReport).not.toHaveBeenCalled();
+      });
+
+      // The obstacle calculation updates the positions before the projection refresh starts
+      it('disables the button and shows its loading state while an obstacle calculation awaits its projection', () => {
+        setReportContext();
+        const { footerFixture, button, buttonComponent } = renderReportButtonWithComponent();
+
+        isCalculatingObstacleSignal.set(true);
+        footerFixture.detectChanges();
+
+        expect(plotLoadingSignal()).toBe(false);
+        expect(button.disabled).toBe(true);
+        expect(buttonComponent.btnLoading()).toBe(true);
+
+        isCalculatingObstacleSignal.set(false);
+        footerFixture.detectChanges();
+
+        expect(button.disabled).toBe(false);
+        expect(buttonComponent.btnLoading()).toBe(false);
+      });
+
+      it('generates nothing while an obstacle calculation awaits its projection', async () => {
+        setReportContext();
+        isCalculatingObstacleSignal.set(true);
+
+        await component.onGenerateReport();
+
+        expect(mockReportService.generateReport).not.toHaveBeenCalled();
+      });
+
+      it('keeps the button enabled when a row has no distances once the distances are calculated', () => {
+        setReportContext();
+        sectionSignal.update((section) => ({
+          ...section!,
+          obstacles: [...section!.obstacles, makeObstacle({ uuid: 'obs-2', name: 'Without distances' })]
+        }));
+        fixture.detectChanges();
+        const { button, buttonComponent } = renderReportButtonWithComponent();
+
+        expect(component.rows()).toHaveLength(2);
+        expect(button.disabled).toBe(false);
+        expect(buttonComponent.btnLoading()).toBe(false);
+      });
+
+      it('hands the report the rows whose distances could not be calculated', async () => {
+        setReportContext();
+        distancesSignal.set([]);
+
+        await component.onGenerateReport();
+
+        const { rows } = mockReportService.generateReport.mock.calls[0][0] as ObstaclesTableReportData;
+        expect(rows).toEqual([expect.objectContaining({ oblique: null, vertical: null, horizontal: null })]);
+      });
+
+      it('generates the report once the distances are calculated', async () => {
+        setReportContext();
+        plotLoadingSignal.set(true);
+
+        await component.onGenerateReport();
+        expect(mockReportService.generateReport).not.toHaveBeenCalled();
+
+        plotLoadingSignal.set(false);
+        await component.onGenerateReport();
+
+        expect(mockReportService.generateReport).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

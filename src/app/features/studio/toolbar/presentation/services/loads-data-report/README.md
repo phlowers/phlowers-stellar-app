@@ -38,8 +38,9 @@ Four sections, each skipped when its data set is empty:
 All four sections share a single label column width (`computeLabelColWidth()` computed over every
 table) so the columns line up from one section to the next.
 
-Footers are added last by `drawPageFooters(doc, labels.pageLabel, true)` — the `true` flag places
-page numbers on the landscape footer from page 2 onward.
+Footers are added last by `drawPageFooters(doc, labels.pageLabel)`, which places each page number for
+its page's orientation: portrait for page 1 and any page the metadata continues on, landscape for the
+result tables.
 
 ## Labels
 

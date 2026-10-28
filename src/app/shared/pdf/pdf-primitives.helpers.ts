@@ -13,17 +13,18 @@ import { NotificationService } from '@core/services/notification/notification.se
 import {
   APP_NAME,
   BULLET,
+  CONTENT_BOTTOM,
   CONTENT_WIDTH,
   DECIMAL_PLACES,
   FONT_SIZES,
-  LANDSCAPE_PAGE,
   LINE_HEIGHT,
   LINE_WIDTH_THIN,
   PAGE_MARGIN,
   PAGE_SIZE,
   PARAGRAPH_INDENT,
   SECTION_TITLE_HEIGHT,
-  SEPARATOR_MARGIN_Y
+  SEPARATOR_MARGIN_Y,
+  VALUE_LINE_SPACING
 } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem, StudyCartoucheData, StudyCartoucheLabels } from '@shared/pdf/pdf-report.interfaces';
 
@@ -102,18 +103,37 @@ export function drawBulletItem(
   doc.text(value, x + labelWidth, y);
 }
 
+// Starts a new portrait page under the compact header. Returns the Y where its content starts
+function startPortraitPage(doc: jsPDF): number {
+  doc.addPage('a4', 'portrait');
+  return drawCompactHeader(doc);
+}
+
+// Returns `y` when the content reaching `height` mm below the baseline `y` stays above the bottom margin,
+// otherwise the Y of a new portrait page
+function ensurePortraitSpace(doc: jsPDF, y: number, height = 0): number {
+  return y + height <= CONTENT_BOTTOM ? y : startPortraitPage(doc);
+}
+
+// Number of value lines jsPDF can draw from the baseline `y` before passing the bottom margin
+function fittingValueLineCount(y: number): number {
+  return Math.floor((CONTENT_BOTTOM - y) / VALUE_LINE_SPACING) + 1;
+}
+
 /**
- * Draws a bullet item where the value can wrap to multiple lines.
- * Returns the total height consumed (number of lines × LINE_HEIGHT).
+ * Draws a bullet item where the value can wrap to multiple lines. The item starts on a new portrait page when its
+ * first line would pass the bottom margin, and the value lines passing it continue on a new portrait page, aligned
+ * under the value. Returns the Y of the next item, one LINE_HEIGHT below the last line.
  */
 export function drawWrappingBulletItem(
   doc: jsPDF,
   label: string,
   value: string,
   x: number,
-  y: number,
+  startY: number,
   maxWidth: number
 ): number {
+  let y = ensurePortraitSpace(doc, startY);
   const bulletText = `${BULLET} `;
   doc.setFont('Nunito', 'bold');
   doc.setFontSize(FONT_SIZES.label);
@@ -123,9 +143,21 @@ export function drawWrappingBulletItem(
   doc.setFont('Nunito', 'normal');
   doc.setFontSize(FONT_SIZES.value);
   const availableWidth = maxWidth - labelWidth;
-  const lines = doc.splitTextToSize(value || '-', availableWidth);
-  doc.text(lines, x + labelWidth, y);
-  return Math.max(lines.length, 1) * LINE_HEIGHT;
+  const lines: string[] = doc.splitTextToSize(value || '-', availableWidth);
+
+  let pageLines = lines.slice(0, fittingValueLineCount(y));
+  let drawnLineCount = pageLines.length;
+  doc.text(pageLines, x + labelWidth, y);
+  while (drawnLineCount < lines.length) {
+    y = startPortraitPage(doc);
+    // The header leaves its own font set
+    doc.setFont('Nunito', 'normal');
+    doc.setFontSize(FONT_SIZES.value);
+    pageLines = lines.slice(drawnLineCount, drawnLineCount + fittingValueLineCount(y));
+    drawnLineCount += pageLines.length;
+    doc.text(pageLines, x + labelWidth, y);
+  }
+  return y + (Math.max(pageLines.length, 1) - 1) * VALUE_LINE_SPACING + LINE_HEIGHT;
 }
 
 /** Draws an underlined section title at the page margin. Returns the next Y position. */
@@ -140,8 +172,9 @@ export function drawSectionTitle(doc: jsPDF, title: string, startY: number): num
 }
 
 /**
- * Draws a single-column list of metadata bullets from `startY`. Wrapping items advance by their
- * wrapped height; non-wrapping items advance by one LINE_HEIGHT. Returns the Y below the last item.
+ * Draws a single-column list of metadata bullets from `startY`. Wrapping items advance below their
+ * last line; non-wrapping items advance by one LINE_HEIGHT. Items reaching the bottom margin continue
+ * on a new portrait page. Returns the Y below the last item.
  */
 export function drawBulletList(
   doc: jsPDF,
@@ -153,13 +186,29 @@ export function drawBulletList(
   let y = startY;
   for (const item of items) {
     if (item.wrap) {
-      y += drawWrappingBulletItem(doc, item.label, item.value, leftX, y, wrapWidth);
+      y = drawWrappingBulletItem(doc, item.label, item.value, leftX, y, wrapWidth);
     } else {
+      y = ensurePortraitSpace(doc, y);
       drawBulletItem(doc, item.label, item.value, leftX, y);
       y += LINE_HEIGHT;
     }
   }
   return y;
+}
+
+// App name (top right of the page) — size: FONT_SIZES.appName, bold
+function drawHeaderAppName(doc: jsPDF, pageWidth: number): void {
+  doc.setFont('Nunito', 'bold');
+  doc.setFontSize(FONT_SIZES.appName);
+  doc.text(APP_NAME, pageWidth - PAGE_MARGIN.right, PAGE_MARGIN.top, { align: 'right' });
+}
+
+// Main header separator line, 3 mm below the baseline of the last header text. Returns the next Y position
+function drawHeaderSeparator(doc: jsPDF, textY: number, pageWidth: number): number {
+  const y = textY + 3;
+  doc.setLineWidth(LINE_WIDTH_THIN);
+  doc.line(PAGE_MARGIN.left, y, pageWidth - PAGE_MARGIN.right, y);
+  return y + LINE_HEIGHT;
 }
 
 /**
@@ -169,10 +218,7 @@ export function drawBulletList(
 export function drawHeader(doc: jsPDF, date: string, reportTitle: string, pageWidth: number = PAGE_SIZE.width): number {
   let y = PAGE_MARGIN.top;
 
-  // App name (top right) — size: FONT_SIZES.appName, bold
-  doc.setFont('Nunito', 'bold');
-  doc.setFontSize(FONT_SIZES.appName);
-  doc.text(APP_NAME, pageWidth - PAGE_MARGIN.right, y, { align: 'right' });
+  drawHeaderAppName(doc, pageWidth);
   y += 2;
 
   // Report title (top left, bold) — size: FONT_SIZES.title
@@ -184,13 +230,17 @@ export function drawHeader(doc: jsPDF, date: string, reportTitle: string, pageWi
   // Date (top right, same line as title) — size: FONT_SIZES.title
   doc.text(date, pageWidth - PAGE_MARGIN.right, y, { align: 'right' });
 
-  // Main separator line — gap of 3 mm below title text
-  y += 3;
-  doc.setLineWidth(LINE_WIDTH_THIN);
-  doc.line(PAGE_MARGIN.left, y, pageWidth - PAGE_MARGIN.right, y);
-  y += LINE_HEIGHT;
+  return drawHeaderSeparator(doc, y, pageWidth);
+}
 
-  return y;
+/**
+ * Draws the compact PDF header of the pages following the first one: app name + separator line,
+ * without the report title and date. Returns the next Y position.
+ * `pageWidth` defaults to the portrait A4 width; pass the landscape width (297) for landscape pages.
+ */
+export function drawCompactHeader(doc: jsPDF, pageWidth: number = PAGE_SIZE.width): number {
+  drawHeaderAppName(doc, pageWidth);
+  return drawHeaderSeparator(doc, PAGE_MARGIN.top, pageWidth);
 }
 
 /**
@@ -220,16 +270,23 @@ export function drawSeparator(doc: jsPDF, y: number, width: number = CONTENT_WID
   return lineY + SEPARATOR_MARGIN_Y;
 }
 
+// Closes a portrait section with a separator, except when its line would pass the bottom margin: the section title
+// that follows then starts a new page, which sets the section apart. Returns the next Y position
+function drawSectionEndSeparator(doc: jsPDF, y: number): number {
+  return y + SEPARATOR_MARGIN_Y > CONTENT_BOTTOM ? y : drawSeparator(doc, y);
+}
+
 /**
  * Draws a titled single-column bullet section (title + wrapped bullet list + separator).
  * Shared by every report whose page 1 renders one metadata block in a single column.
+ * The title moves to a new portrait page with the first item when they do not both fit.
  * Returns the next Y position (below the separator).
  */
 export function drawTitledBulletSection(doc: jsPDF, title: string, items: PdfBulletItem[], startY: number): number {
-  const y = drawSectionTitle(doc, title, startY);
+  const y = drawSectionTitle(doc, title, ensurePortraitSpace(doc, startY, SECTION_TITLE_HEIGHT));
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const wrapWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
-  return drawSeparator(doc, drawBulletList(doc, items, y, leftX, wrapWidth));
+  return drawSectionEndSeparator(doc, drawBulletList(doc, items, y, leftX, wrapWidth));
 }
 
 /** Draws the study & canton metadata cartouche (1 column, all values wrapping). Returns the next Y. */
@@ -286,8 +343,25 @@ export function drawTwoColumnBullets(
 }
 
 /**
- * Draws a titled two-column bullet section (title + two independent bullet columns + separator).
- * Returns the next Y position (below the separator).
+ * Draws a section title and two independent bullet columns below it, moved together to a new portrait
+ * page when the last row of the taller column would pass the bottom margin.
+ * Returns the Y position below the taller column.
+ */
+export function drawTitledTwoColumnBullets(
+  doc: jsPDF,
+  title: string,
+  left: PdfBulletItem[],
+  right: PdfBulletItem[],
+  startY: number
+): number {
+  const lastRowOffset = SECTION_TITLE_HEIGHT + (Math.max(left.length, right.length, 1) - 1) * LINE_HEIGHT;
+  const y = drawSectionTitle(doc, title, ensurePortraitSpace(doc, startY, lastRowOffset));
+  return drawTwoColumnBullets(doc, left, right, y);
+}
+
+/**
+ * Draws a titled two-column bullet section (title + two independent bullet columns + separator),
+ * kept on one page. Returns the next Y position (below the separator).
  */
 export function drawTwoColumnBulletSection(
   doc: jsPDF,
@@ -296,22 +370,21 @@ export function drawTwoColumnBulletSection(
   right: PdfBulletItem[],
   startY: number
 ): number {
-  const y = drawSectionTitle(doc, title, startY);
-  return drawSeparator(doc, drawTwoColumnBullets(doc, left, right, y));
+  return drawSectionEndSeparator(doc, drawTitledTwoColumnBullets(doc, title, left, right, startY));
 }
 
 /**
- * Draws a footer with the page number on every page of the document.
- * Pass `landscapeFromPage2: true` when pages after the first flip to landscape (result tables).
+ * Draws a footer with the page number on every page of the document, placed for the page's own
+ * orientation: portrait pages (metadata continuing past page 1) and landscape pages (result tables)
+ * can follow each other.
  */
-export function drawPageFooters(doc: jsPDF, pageLabel: string, landscapeFromPage2 = false): void {
+export function drawPageFooters(doc: jsPDF, pageLabel: string): void {
   const totalPages = doc.getNumberOfPages();
   for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
     doc.setPage(pageNumber);
-    const isLandscape = landscapeFromPage2 && pageNumber > 1;
-    const width = isLandscape ? LANDSCAPE_PAGE.width : PAGE_SIZE.width;
-    const height = isLandscape ? LANDSCAPE_PAGE.height : PAGE_SIZE.height;
-    drawFooter(doc, `${pageLabel} ${pageNumber} / ${totalPages}`, width, height);
+    // The page size follows the current page
+    const { pageSize } = doc.internal;
+    drawFooter(doc, `${pageLabel} ${pageNumber} / ${totalPages}`, pageSize.getWidth(), pageSize.getHeight());
   }
 }
 

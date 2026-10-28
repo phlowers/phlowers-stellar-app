@@ -1209,6 +1209,13 @@ describe('PlotService', () => {
       expect(service.loading()).toBe(false);
     });
 
+    it('should set loading to false when the projection task rejects', async () => {
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task refreshProjection timed out after 30000ms'));
+
+      await expect(service.refreshProjection()).rejects.toThrow('timed out');
+      expect(service.loading()).toBe(false);
+    });
+
     it('should drop the intersection warning raised for a floor, but keep an obstacle one', async () => {
       // A floor's end points sit on the supports, where the engine's distance plane finds no cable:
       // it warns for every saved floor whatever its clearance, so the toast is pure noise there.
