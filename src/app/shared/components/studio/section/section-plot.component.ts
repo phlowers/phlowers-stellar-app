@@ -12,6 +12,7 @@ import {
 
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { applyRestoreCamera, createPlot } from './helpers/createPlot';
+import { shouldBlockPlotlyDrag } from './helpers/plotlyDragGuard';
 import Plotly from 'plotly.js-dist-min';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -308,6 +309,13 @@ export class SectionPlotComponent implements OnDestroy {
     }
   }
 
+  // Capture phase: runs before Plotly's own mousedown handlers on the inner drag layers.
+  private readonly blockPlotlyRightClickDrag = (event: MouseEvent): void => {
+    if (this.plotOptionsService.plotOptions().view !== '3d' && shouldBlockPlotlyDrag(event)) {
+      event.stopPropagation();
+    }
+  };
+
   addEventListenersToPlot = (plot: Plotly.PlotlyHTMLElement) => {
     const plotEl = plot as Plotly.PlotlyHTMLElement & {
       on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
@@ -318,6 +326,8 @@ export class SectionPlotComponent implements OnDestroy {
     // and each refresh call would otherwise accumulate a new listener, causing a memory leak.
     plotEl.removeAllListeners('plotly_clickannotation');
     plotEl.removeAllListeners('plotly_relayout');
+    plotEl.removeEventListener('mousedown', this.blockPlotlyRightClickDrag, true);
+    plotEl.addEventListener('mousedown', this.blockPlotlyRightClickDrag, true);
     plotEl.on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
       if (event?.annotation?.data?.type === 'obstacle') {
         const section = this.spanService.section();

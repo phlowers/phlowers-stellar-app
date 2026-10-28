@@ -232,7 +232,12 @@ describe('SectionPlotComponent', () => {
     }
   ];
 
-  const mockPlotElement = { on: vi.fn(), removeAllListeners: vi.fn() };
+  const mockPlotElement = {
+    on: vi.fn(),
+    removeAllListeners: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn()
+  };
   const noopMock = vi.fn();
 
   const litDataSignal = signal<GetSectionOutput | null>(null);
@@ -1101,6 +1106,8 @@ describe('SectionPlotComponent', () => {
     const makePlotWithCapture = () => {
       const self = {
         removeAllListeners: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
           if (event === 'plotly_clickannotation') {
             capturedHandler = fn;
@@ -1167,6 +1174,8 @@ describe('SectionPlotComponent', () => {
     const makePlotWithCapture = () => {
       const self = {
         removeAllListeners: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
           if (event === 'plotly_clickannotation') {
             capturedHandler = fn;
@@ -1238,6 +1247,8 @@ describe('SectionPlotComponent', () => {
       capturedHandler = null;
       return {
         removeAllListeners: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
           if (event === 'plotly_clickannotation') {
             capturedHandler = fn;
@@ -1283,6 +1294,8 @@ describe('SectionPlotComponent', () => {
       capturedRelayoutHandler = null;
       return {
         removeAllListeners: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         on: (event: string, fn: (eventData: Record<string, unknown>) => void) => {
           if (event === 'plotly_relayout') {
             capturedRelayoutHandler = fn;
@@ -1326,6 +1339,8 @@ describe('SectionPlotComponent', () => {
       const on = vi.fn();
       const plot = {
         removeAllListeners,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         on
       } as unknown as PlotlyHTMLElement;
 
@@ -1335,6 +1350,54 @@ describe('SectionPlotComponent', () => {
       expect(removeAllListeners).toHaveBeenCalledWith('plotly_relayout');
       expect(on).toHaveBeenCalledWith('plotly_clickannotation', expect.any(Function));
       expect(on).toHaveBeenCalledWith('plotly_relayout', expect.any(Function));
+    });
+  });
+
+  describe('addEventListenersToPlot — Plotly right-click drag guard', () => {
+    const attachAndGetGuard = (): ((event: MouseEvent) => void) => {
+      const addEventListener = vi.fn();
+      const removeEventListener = vi.fn();
+      component.addEventListenersToPlot({
+        removeAllListeners: vi.fn(),
+        on: vi.fn(),
+        addEventListener,
+        removeEventListener
+      } as unknown as PlotlyHTMLElement);
+
+      expect(removeEventListener).toHaveBeenCalledWith('mousedown', addEventListener.mock.calls[0][1], true);
+      expect(addEventListener).toHaveBeenCalledWith('mousedown', expect.any(Function), true);
+      return addEventListener.mock.calls[0][1];
+    };
+
+    afterEach(() => {
+      plotOptionsSignal.set(mockPlotOptions);
+    });
+
+    it('should stop Ctrl+mousedown from reaching Plotly on a 2D plot', () => {
+      plotOptionsSignal.set({ ...mockPlotOptions, view: '2d' });
+      const stopPropagation = vi.fn();
+
+      attachAndGetGuard()({ ctrlKey: true, buttons: 1, stopPropagation } as unknown as MouseEvent);
+
+      expect(stopPropagation).toHaveBeenCalledTimes(1);
+    });
+
+    it('should let a plain mousedown reach Plotly on a 2D plot', () => {
+      plotOptionsSignal.set({ ...mockPlotOptions, view: '2d' });
+      const stopPropagation = vi.fn();
+
+      attachAndGetGuard()({ ctrlKey: false, buttons: 1, stopPropagation } as unknown as MouseEvent);
+
+      expect(stopPropagation).not.toHaveBeenCalled();
+    });
+
+    it('should not interfere with Ctrl+mousedown on a 3D plot', () => {
+      plotOptionsSignal.set({ ...mockPlotOptions, view: '3d' });
+      const stopPropagation = vi.fn();
+
+      attachAndGetGuard()({ ctrlKey: true, buttons: 1, stopPropagation } as unknown as MouseEvent);
+
+      expect(stopPropagation).not.toHaveBeenCalled();
     });
   });
 
