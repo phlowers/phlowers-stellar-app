@@ -24,18 +24,18 @@ def test_apply_manipulations_all_manips(study_base: SectionStudy):
             {
                 'supportRef': 'LEFT',
                 'modificationType': 'lengthening',
-                'modifiedLengthCable': 10,
+                'modifiedLengthCable': 7,
                 'distanceSupportRef': 0,
-                'spanIndex': 0,
+                'spanIndex': 1,
             }
         ],
         'supportManipParams': [
             {
                 'manip1': {
                     'type': 'crane',
-                    'vertDisplacement': 10,
-                    'anchoring': 'without_chain',
-                    'lateralDistance': 5,
+                    'vertDisplacement': 2,
+                    'anchoring': 'with_chain',
+                    'lateralDistance': 3,
                     'ropeLength': None,
                     'shiftingClampLength': None,
                     'chainName': None,
@@ -51,10 +51,10 @@ def test_apply_manipulations_all_manips(study_base: SectionStudy):
         'spanManipParams': [
             {
                 'referenceSupport': 'LEFT',
-                'distanceToRefSupport': 100,
+                'distanceToRefSupport': 200,
                 'cableManipType': 'with_a_crane',
                 'cableManipMethod': 'clamp',
-                'longitudinalDistance': 1,
+                'longitudinalDistance': 200,
                 'lateralDistance': 2,
                 'altitude': 3,
                 'anchoring': 'with_sling',
@@ -63,7 +63,7 @@ def test_apply_manipulations_all_manips(study_base: SectionStudy):
                 'chainSurface': None,
                 'counterWeight': None,
                 'slingLength': 5,
-                'spanIndex': 0,
+                'spanIndex': 2,
             }
         ],
     }
