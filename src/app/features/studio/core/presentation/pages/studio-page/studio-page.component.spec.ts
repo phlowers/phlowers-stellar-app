@@ -25,7 +25,7 @@ import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.serv
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { Section, Study } from '@shared/domain';
 import { Camera } from 'plotly.js-dist-min';
-import { ScalingFactors, StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
+import { PlotOptions, ScalingFactors, StudioViewCamera, StudioViewState, Zoom2d } from '@shared/types/plot.types';
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -91,6 +91,9 @@ describe('StudioPageComponent', () => {
     setFreePositioningMode: ReturnType<typeof vi.fn>;
     camera: SignalFn<Camera | null>;
     pendingCameraRestore: SignalFn<Camera | null>;
+    zoom2d: SignalFn<Zoom2d | null>;
+    pendingZoom2dRestore: SignalFn<Zoom2d | null>;
+    freePositioningSavedView: SignalFn<{ plotOptions: PlotOptions } | null>;
     setScalingFactors: ReturnType<typeof vi.fn>;
     scalingFactors: SignalFn<ScalingFactors>;
     getCamera: ReturnType<typeof vi.fn>;
@@ -124,6 +127,9 @@ describe('StudioPageComponent', () => {
       setFreePositioningMode: vi.fn(),
       camera: createSignalMock<Camera | null>(null),
       pendingCameraRestore: createSignalMock<Camera | null>(null),
+      zoom2d: createSignalMock<Zoom2d | null>(null),
+      pendingZoom2dRestore: createSignalMock<Zoom2d | null>(null),
+      freePositioningSavedView: createSignalMock<{ plotOptions: PlotOptions } | null>(null),
       setScalingFactors: vi.fn(),
       scalingFactors: createSignalMock<ScalingFactors>({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
       getCamera: vi.fn().mockReturnValue(null)
@@ -317,7 +323,9 @@ describe('StudioPageComponent', () => {
     expect(sectionSetSpy).toHaveBeenCalledWith(study.sections[1]);
     expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
       endSupport: 2,
-      startSupport: 0
+      startSupport: 0,
+      view: '3d',
+      side: 'profile'
     });
   });
 
@@ -731,7 +739,15 @@ describe('StudioPageComponent', () => {
     });
 
     it('should call updateStudy with studioViewState on the active section', () => {
-      plotOptionsServiceMock.plotOptions.mockReturnValue({ invert: false, startSupport: 1, endSupport: 3 });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({
+        invert: false,
+        startSupport: 1,
+        endSupport: 3,
+        view: '2d',
+        side: 'face'
+      });
+      const savedZoom = { x: [1, 2] as [number, number], y: [3, 4] as [number, number] };
+      plotOptionsServiceMock.zoom2d.set(savedZoom);
       const mockCam: StudioViewCamera = {
         eye: { x: 0.02, y: -3.5, z: 0.2 },
         center: { x: 0, y: 0, z: 0 },
@@ -751,6 +767,9 @@ describe('StudioPageComponent', () => {
               uuid: sectionUuid,
               studio_view_state: {
                 camera: mockCam,
+                view: '2d',
+                side: 'face',
+                zoom2d: savedZoom,
                 scalingFactors: savedScaling,
                 resolution: 75,
                 startSupport: 1,
@@ -811,6 +830,47 @@ describe('StudioPageComponent', () => {
         expect.objectContaining({ camera: liveCam })
       );
     });
+
+    it('should persist view, side and zoom2d on exit', () => {
+      const zoom = { x: [1, 2] as [number, number], y: [3, 4] as [number, number] };
+      plotOptionsServiceMock.zoom2d.set(zoom);
+      plotOptionsServiceMock.plotOptions.mockReturnValue({
+        invert: false,
+        startSupport: 0,
+        endSupport: 3,
+        view: '2d',
+        side: 'face'
+      });
+      mockPersistenceService.save.mockClear();
+
+      component.ngOnDestroy();
+
+      expect(mockPersistenceService.save).toHaveBeenCalledWith(
+        sectionUuid,
+        expect.objectContaining({ view: '2d', side: 'face', zoom2d: zoom })
+      );
+    });
+
+    it('should persist the view saved before free positioning instead of the temporary one', () => {
+      plotOptionsServiceMock.freePositioningSavedView.set({
+        plotOptions: { view: '3d', side: 'profile' } as PlotOptions
+      });
+      plotOptionsServiceMock.plotOptions.mockReturnValue({
+        invert: false,
+        startSupport: 0,
+        endSupport: 1,
+        view: '2d',
+        side: 'face'
+      });
+      mockPersistenceService.save.mockClear();
+
+      component.ngOnDestroy();
+
+      expect(mockPersistenceService.save).toHaveBeenCalledWith(
+        sectionUuid,
+        expect.objectContaining({ view: '3d', side: 'profile' })
+      );
+    });
   });
 
   describe('ngOnInit – studioViewState restoration', () => {
@@ -824,12 +884,16 @@ describe('StudioPageComponent', () => {
         up: { x: 0, y: 0, z: 1 }
       };
       const savedScaling: ScalingFactors = { x: 1, y: 1, z: 0.5, aspectMode: 'manual' };
+      const savedZoom = { x: [1, 2] as [number, number], y: [3, 4] as [number, number] };
       const studioViewState: StudioViewState = {
         camera: savedCamera,
         scalingFactors: savedScaling,
         resolution: 75,
         startSupport: 1,
-        endSupport: 3
+        endSupport: 3,
+        view: '2d',
+        side: 'face',
+        zoom2d: savedZoom
       };
       const study = {
         sections: [{ uuid: 'section-1', supports: [1, 2, 3, 4], obstacles: [], studio_view_state: studioViewState }]
@@ -838,12 +902,19 @@ describe('StudioPageComponent', () => {
       studiesService.getStudyAsObservable.mockReturnValue(of(study));
       const cameraSpy = vi.spyOn(plotOptionsServiceMock.camera, 'set');
       const pendingCameraRestoreSpy = vi.spyOn(plotOptionsServiceMock.pendingCameraRestore, 'set');
+      const pendingZoomSpy = vi.spyOn(plotOptionsServiceMock.pendingZoom2dRestore, 'set');
 
       component.ngOnInit();
       studiesService.ready.next(true);
       fixture.detectChanges();
 
-      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 1, endSupport: 3 });
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+        startSupport: 1,
+        endSupport: 3,
+        view: '2d',
+        side: 'face'
+      });
+      expect(pendingZoomSpy).toHaveBeenCalledWith(savedZoom);
       expect(cameraSpy).toHaveBeenCalledWith(savedCamera);
       expect(pendingCameraRestoreSpy).toHaveBeenCalledWith(savedCamera);
       expect(plotOptionsServiceMock.setScalingFactors).toHaveBeenCalledWith(savedScaling);
@@ -864,7 +935,12 @@ describe('StudioPageComponent', () => {
       studiesService.ready.next(true);
       fixture.detectChanges();
 
-      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 0, endSupport: 2 });
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+        startSupport: 0,
+        endSupport: 2,
+        view: '3d',
+        side: 'profile'
+      });
       expect(plotOptionsServiceMock.setScalingFactors).not.toHaveBeenCalled();
       expect(mockResolutionService.setResolution).not.toHaveBeenCalled();
     });
@@ -873,7 +949,12 @@ describe('StudioPageComponent', () => {
       (route.snapshot.paramMap.get as vi.Mock).mockReturnValue('study-1');
       (route.snapshot.queryParamMap.get as vi.Mock).mockReturnValue('section-1');
 
-      const studioViewState: StudioViewState = { startSupport: 10, endSupport: 20 };
+      const studioViewState = {
+        startSupport: 10,
+        endSupport: 20,
+        view: 'bogus',
+        side: 'bogus'
+      } as unknown as StudioViewState;
       const study = {
         sections: [{ uuid: 'section-1', supports: [1, 2, 3], obstacles: [], studio_view_state: studioViewState }]
       } as unknown as Study;
@@ -884,7 +965,12 @@ describe('StudioPageComponent', () => {
       studiesService.ready.next(true);
       fixture.detectChanges();
 
-      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 0, endSupport: 2 });
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+        startSupport: 0,
+        endSupport: 2,
+        view: '3d',
+        side: 'profile'
+      });
     });
 
     it('should call applyResolution with saved resolution when studioViewState has resolution', () => {
@@ -995,8 +1081,12 @@ describe('StudioPageComponent', () => {
       studiesService.ready.next(true);
       fixture.detectChanges();
 
-      // localStorage wins over Dexie
-      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 1, endSupport: 3 });
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+        startSupport: 1,
+        endSupport: 3,
+        view: '3d',
+        side: 'profile'
+      });
     });
 
     it('should fall back to section.studio_view_state when localStorage returns null', () => {
@@ -1015,7 +1105,12 @@ describe('StudioPageComponent', () => {
       studiesService.ready.next(true);
       fixture.detectChanges();
 
-      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({ startSupport: 0, endSupport: 2 });
+      expect(plotService.plotOptionsChange).toHaveBeenCalledWith({
+        startSupport: 0,
+        endSupport: 2,
+        view: '3d',
+        side: 'profile'
+      });
     });
 
     it('should call persistenceService.load with the sectionUuid', () => {

@@ -94,10 +94,25 @@ export interface StudioViewCamera {
 }
 
 /**
+ * Visible axis ranges of the 2D plot.
+ * @category Studio
+ */
+export interface Zoom2d {
+  x: [number, number];
+  y: [number, number];
+}
+
+/**
  * Persisted studio view state stored per section.
  * Saved when the user leaves the studio and restored when they return.
  */
 export interface StudioViewState {
+  /** Rendering dimension (2D/3D) chosen by the user. */
+  view?: View;
+  /** Viewing side (profile/face) chosen by the user. */
+  side?: Side;
+  /** Last 2D axis ranges. Null if the user never zoomed or panned in 2D. */
+  zoom2d?: Zoom2d | null;
   /** Last known 3D camera position. Null if the user never moved the camera. */
   camera?: StudioViewCamera | null;
   /** Axis scaling factors chosen via the Scale/View panel. */
