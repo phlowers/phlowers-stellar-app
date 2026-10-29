@@ -40,6 +40,10 @@ const tasks: Record<
     function: 'calculate_papoto',
     externalPackages: []
   },
+  [Task.calculateTangentAiming]: {
+    function: 'calculate_tangent_aiming',
+    externalPackages: []
+  },
   [Task.calculateGuying]: {
     function: 'calculate_guying',
     externalPackages: []

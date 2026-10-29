@@ -13,6 +13,8 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 
 const validMeasure = (overrides?: Partial<FieldMeasure>): FieldMeasure =>
   helpers.applyTangentAimingExteriorDefaults(
@@ -27,6 +29,7 @@ describe('TangentAimingExterior component', () => {
   const litData = signal<unknown>(null);
   const logger = { error: vi.fn(), warn: vi.fn(), info: vi.fn(), log: vi.fn() };
   const notification = { error: vi.fn() };
+  const workerPythonService = { runTask: vi.fn() };
 
   const getByTestId = (id: string): HTMLElement | null => fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
   const setInput = (id: string, value: string) => {
@@ -61,6 +64,7 @@ describe('TangentAimingExterior component', () => {
         provideHttpClientTesting(),
         { provide: LoggerService, useValue: logger },
         { provide: NotificationService, useValue: notification },
+        { provide: WorkerPythonService, useValue: workerPythonService },
         {
           provide: PlotSpanService,
           useValue: { section: signal({ supports: [{ number: 'ABCDEFG' }, { number: 'S2' }] }) }
@@ -209,6 +213,48 @@ describe('TangentAimingExterior component', () => {
     component.updateCalculationType('tangente');
     expect(component.measureData().exteriorCalculationType).toBe('tangente');
     expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
+  });
+
+  describe('tangente calculation type', () => {
+    const taskResult = { parameter: 2000.2, uncertainty: 13.3, criterion: 1, checkValidity: true };
+
+    beforeEach(() => {
+      componentRef.setInput(
+        'measureData',
+        validMeasure({ exteriorCalculationType: 'tangente', exteriorTangentAngle: 101.4, exteriorHAccDistance: 10 })
+      );
+      fixture.detectChanges();
+    });
+
+    it('should run the tangent aiming task with a negative distance and store its result', async () => {
+      workerPythonService.runTask.mockResolvedValueOnce({ result: taskResult, error: null, diagnostics: [] });
+      const mockSpy = vi.spyOn(helpers, 'calculateTangentAimingExteriorMock');
+      await component.calculate();
+      fixture.detectChanges();
+      expect(workerPythonService.runTask).toHaveBeenCalledWith(
+        Task.calculateTangentAiming,
+        expect.objectContaining({ angleToCableTangent: 101.4, inputHeight: 0, distance: -10 })
+      );
+      expect(mockSpy).not.toHaveBeenCalled();
+      expect(component.measureData().outputs.tangentAimingExterior).toEqual(taskResult);
+      expect(getByTestId('tangent-aiming-exterior-parameter')?.textContent?.trim()).toBe('2000 m');
+    });
+
+    it('should log and notify when the task fails', async () => {
+      workerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'boom', diagnostics: [] });
+      await component.calculate();
+      expect(logger.error).toHaveBeenCalled();
+      expect(notification.error).toHaveBeenCalled();
+      expect(component.hasError()).toBe(true);
+      expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
+    });
+  });
+
+  it('should not run the task in parametre mode', async () => {
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    await component.calculate();
+    expect(workerPythonService.runTask).not.toHaveBeenCalled();
   });
 
   it('should not calculate when the form is invalid', async () => {

@@ -13,7 +13,8 @@ import {
   PapotoResult,
   Section,
   SkyCover,
-  SpanLoad
+  SpanLoad,
+  TangentAimingSupportResult
 } from '@shared/domain';
 import { View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
@@ -39,6 +40,8 @@ export enum Task {
   getSupportCoordinates = 'getSupportCoordinates',
   // Calculate PAPOTO (field measurement) parameters
   calculatePapoto = 'calculatePapoto',
+  // Calculate the parameter by tangent aiming (ground measurement)
+  calculateTangentAiming = 'calculateTangentAiming',
   // Calculate guying forces and angles
   calculateGuying = 'calculateGuying',
   // Calculate sighting angles at mid-span sag for cable adjustment
@@ -347,6 +350,15 @@ export interface TaskInputs {
     V2: number;
     V3: number;
     VR: number;
+  };
+  // Inputs for calculateTangentAiming task (angles in grad, lengths in meters)
+  [Task.calculateTangentAiming]: {
+    angleToCableTangent: number;
+    angleToLeftSupport: number;
+    angleToRightSupport: number;
+    spanLength: number;
+    inputHeight: number;
+    distance: number;
   };
   // Inputs for calculateGuying task
   [Task.calculateGuying]: {
@@ -743,6 +755,8 @@ export interface TaskOutputs {
   };
   // Output from calculatePapoto task
   [Task.calculatePapoto]: PapotoResult;
+  // Output from calculateTangentAiming task
+  [Task.calculateTangentAiming]: TangentAimingSupportResult;
   // Output from calculateGuying task
   [Task.calculateGuying]: {
     tensionInGuy: number;

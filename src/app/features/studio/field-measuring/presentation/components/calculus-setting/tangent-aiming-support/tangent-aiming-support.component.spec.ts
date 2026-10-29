@@ -13,6 +13,8 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 
 const validMeasure = (overrides?: Partial<FieldMeasure>): FieldMeasure =>
   helpers.applyTangentAimingSupportDefaults(
@@ -26,6 +28,7 @@ describe('TangentAimingSupport component', () => {
   let componentRef: ComponentRef<TangentAimingSupportComponent>;
   const logger = { error: vi.fn(), warn: vi.fn(), info: vi.fn(), log: vi.fn() };
   const notification = { error: vi.fn() };
+  const workerPythonService = { runTask: vi.fn() };
 
   const getByTestId = (id: string): HTMLElement | null => fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
   const setInput = (id: string, value: string) => {
@@ -52,6 +55,7 @@ describe('TangentAimingSupport component', () => {
         provideHttpClientTesting(),
         { provide: LoggerService, useValue: logger },
         { provide: NotificationService, useValue: notification },
+        { provide: WorkerPythonService, useValue: workerPythonService },
         {
           provide: PlotSpanService,
           useValue: { section: signal({ supports: [{ number: 'ABCDEFG' }, { number: 'S2' }] }) }
@@ -219,5 +223,42 @@ describe('TangentAimingSupport component', () => {
 
   it('should return no span length when the span is unknown', () => {
     expect(component.calculatedSpanLength()).toBeNull();
+  });
+
+  describe('tangente calculation type', () => {
+    const taskResult = { parameter: 2000.2, uncertainty: 13.3, criterion: 1, checkValidity: true };
+
+    beforeEach(() => {
+      componentRef.setInput('measureData', validMeasure({ calculationType: 'tangente', cableTangentAngle: 100 }));
+      fixture.detectChanges();
+    });
+
+    it('should run the tangent aiming task and store its result', async () => {
+      workerPythonService.runTask.mockResolvedValueOnce({ result: taskResult, error: null, diagnostics: [] });
+      const mockSpy = vi.spyOn(helpers, 'calculateTangentAimingSupportMock');
+      await component.calculate();
+      fixture.detectChanges();
+      expect(workerPythonService.runTask).toHaveBeenCalledWith(
+        Task.calculateTangentAiming,
+        expect.objectContaining({ angleToCableTangent: 100, angleToLeftSupport: 0, distance: 0 })
+      );
+      expect(mockSpy).not.toHaveBeenCalled();
+      expect(component.measureData().outputs.tangentAimingSupport).toEqual(taskResult);
+      expect(getByTestId('tangent-aiming-support-parameter')?.textContent?.trim()).toBe('2000 m');
+    });
+
+    it('should log and notify when the task fails', async () => {
+      workerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'boom', diagnostics: [] });
+      await component.calculate();
+      expect(logger.error).toHaveBeenCalled();
+      expect(notification.error).toHaveBeenCalled();
+      expect(component.hasError()).toBe(true);
+      expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
+    });
+  });
+
+  it('should not run the task in parametre mode', async () => {
+    await component.calculate();
+    expect(workerPythonService.runTask).not.toHaveBeenCalled();
   });
 });

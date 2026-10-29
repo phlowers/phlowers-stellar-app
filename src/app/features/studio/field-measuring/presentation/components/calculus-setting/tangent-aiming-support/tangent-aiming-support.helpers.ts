@@ -9,6 +9,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
+import { Task, TaskInputs } from '@services/worker_python/tasks/types';
 import {
   TANGENT_AIMING_SUPPORT_COMMON_FIELDS,
   TANGENT_AIMING_SUPPORT_FIELD_RULES,
@@ -174,9 +175,21 @@ export function toTangentAimingSupportInputs(data: FieldMeasure): TangentAimingS
   };
 }
 
+/** Builds the `calculateTangentAiming` task inputs: sighting device right below the left support (no horizontal distance). */
+export function toTangentAimingTaskInputs(inputs: TangentAimingSupportInputs): TaskInputs[Task.calculateTangentAiming] {
+  return {
+    angleToCableTangent: inputs.tangentAngle ?? 0,
+    angleToLeftSupport: 0,
+    angleToRightSupport: inputs.verticalAccAngle ?? 0,
+    spanLength: inputs.spanLength ?? 0,
+    inputHeight: inputs.hAccDistance ?? 0,
+    distance: 0
+  };
+}
+
 /**
- * Temporary mock: the engine has no tangent aiming Task yet, constant value on purpose.
- * TODO: replace with workerPythonService.runTask(Task.<tangent aiming>) once the Task exists.
+ * Temporary mock for the `parametre` calculation type: the task only handles the tangent angle input.
+ * TODO: replace with a task once the `parametre` calculation exists in the engine.
  */
 export function calculateTangentAimingSupportMock(
   _inputs: TangentAimingSupportInputs

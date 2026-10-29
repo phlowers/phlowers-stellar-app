@@ -7,7 +7,8 @@ import {
   isTangentAimingExteriorDataValid,
   resetNonDisplayedExteriorFields,
   syncDisplayedControls,
-  toTangentAimingExteriorInputs
+  toTangentAimingExteriorInputs,
+  toTangentAimingExteriorTaskInputs
 } from './tangent-aiming-exterior.helpers';
 import { TANGENT_AIMING_EXTERIOR_FIELD_RULES } from './tangent-aiming-exterior.constantes';
 
@@ -121,6 +122,25 @@ describe('tangent-aiming-exterior helpers', () => {
       expect(resetNonDisplayedExteriorFields({ ...data, exteriorCalculationType: 'tangente' })).toMatchObject({
         exteriorParameter: null,
         exteriorTangentAngle: 0
+      });
+    });
+
+    it('should map the measure to the tangent aiming task inputs (device left of the left support)', () => {
+      const inputs = toTangentAimingExteriorInputs({
+        ...createTestMeasureData(),
+        exteriorSpanLength: 400,
+        exteriorHAccDistance: 50,
+        exteriorVerticalAccAngleLeft: 93.6,
+        exteriorVerticalAccAngleRight: 99.3,
+        exteriorTangentAngle: 101.4
+      });
+      expect(toTangentAimingExteriorTaskInputs(inputs)).toEqual({
+        angleToCableTangent: 101.4,
+        angleToLeftSupport: 93.6,
+        angleToRightSupport: 99.3,
+        spanLength: 400,
+        inputHeight: 0,
+        distance: -50
       });
     });
 

@@ -8,6 +8,7 @@
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
+import { Task, TaskInputs } from '@services/worker_python/tasks/types';
 import { createNumberControl } from '../tangent-aiming-support/tangent-aiming-support.helpers';
 import { TangentAimingSupportCalculation } from '../tangent-aiming-support/tangent-aiming-support.interfaces';
 import {
@@ -124,9 +125,23 @@ export function toTangentAimingExteriorInputs(data: FieldMeasure): TangentAiming
   };
 }
 
+/** Builds the `calculateTangentAiming` task inputs: sighting device outside the span, left of the left support. */
+export function toTangentAimingExteriorTaskInputs(
+  inputs: TangentAimingExteriorInputs
+): TaskInputs[Task.calculateTangentAiming] {
+  return {
+    angleToCableTangent: inputs.tangentAngle ?? 0,
+    angleToLeftSupport: inputs.verticalAccAngleLeft ?? 0,
+    angleToRightSupport: inputs.verticalAccAngleRight ?? 0,
+    spanLength: inputs.spanLength ?? 0,
+    inputHeight: 0,
+    distance: -(inputs.hAccDistance ?? 0)
+  };
+}
+
 /**
- * Temporary mock: the engine has no tangent aiming Task yet, constant value on purpose.
- * TODO: replace with workerPythonService.runTask(Task.<tangent aiming>) once the Task exists.
+ * Temporary mock for the `parametre` calculation type: the task only handles the tangent angle input.
+ * TODO: replace with a task once the `parametre` calculation exists in the engine.
  */
 export async function calculateTangentAimingExteriorMock(
   _inputs: TangentAimingExteriorInputs

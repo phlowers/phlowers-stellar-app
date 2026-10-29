@@ -10,6 +10,7 @@ from stellar_engine.tools.cable_adjustment import calculate_cable_adjustment
 from stellar_engine.tools.guying import calculate_guying
 from stellar_engine.tools.papoto import calculate_papoto
 from stellar_engine.tools.param_calibration import parameter_15_without_wind
+from stellar_engine.tools.tangent_aiming import calculate_tangent_aiming
 from stellar_engine.tools.temperature import (
     compute_diffuse_and_beam_radiations,
     temperature_calculation,
@@ -20,6 +21,7 @@ __all__ = [
     "calculate_guying",
     "parameter_15_without_wind",
     "calculate_papoto",
+    "calculate_tangent_aiming",
     "temperature_calculation",
     "compute_diffuse_and_beam_radiations",
 ]

@@ -10,6 +10,8 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -30,7 +32,8 @@ import {
   resolveSpanLeftSupport,
   LeftSupportSnapshot,
   syncDisplayedControls,
-  toTangentAimingSupportInputs
+  toTangentAimingSupportInputs,
+  toTangentAimingTaskInputs
 } from './tangent-aiming-support.helpers';
 
 @Component({
@@ -61,6 +64,7 @@ export class TangentAimingSupportComponent {
 
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly workerPythonService = inject(WorkerPythonService);
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
   private readonly translocoService = inject(TranslocoService);
@@ -180,9 +184,11 @@ export class TangentAimingSupportComponent {
     this.isCalculating.set(true);
     this.hasError.set(false);
     try {
-      const { result, error } = await calculateTangentAimingSupportMock(
-        toTangentAimingSupportInputs(this.measureData())
-      );
+      const inputs = toTangentAimingSupportInputs(this.measureData());
+      const { result, error } =
+        inputs.calculationType === 'tangente'
+          ? await this.workerPythonService.runTask(Task.calculateTangentAiming, toTangentAimingTaskInputs(inputs))
+          : await calculateTangentAimingSupportMock(inputs);
       if (error || !result) throw new Error(error ?? 'Empty tangent aiming result');
       this.measureData.update((d) => ({ ...d, outputs: { ...d.outputs, tangentAimingSupport: result } }));
     } catch (error) {

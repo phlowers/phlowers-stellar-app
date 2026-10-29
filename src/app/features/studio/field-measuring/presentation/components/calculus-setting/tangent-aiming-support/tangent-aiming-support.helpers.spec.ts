@@ -12,7 +12,8 @@ import {
   resolveLeftSupport,
   resolveSpanLeftSupport,
   syncDisplayedControls,
-  toTangentAimingSupportInputs
+  toTangentAimingSupportInputs,
+  toTangentAimingTaskInputs
 } from './tangent-aiming-support.helpers';
 
 describe('tangent-aiming-support helpers', () => {
@@ -134,6 +135,24 @@ describe('tangent-aiming-support helpers', () => {
   it('should map the measure to calculation inputs', () => {
     const data = { ...createTestMeasureData(), tangentLeftSupport: '1', cableParameter: 30 };
     expect(toTangentAimingSupportInputs(data)).toMatchObject({ leftSupport: '1', parameter: 30 });
+  });
+
+  it('should map the measure to the tangent aiming task inputs (sighting device below the left support)', () => {
+    const inputs = toTangentAimingSupportInputs({
+      ...createTestMeasureData(),
+      tangentSpanLength: 400,
+      cableHAccDistance: 10,
+      cableVerticalAccAngle: 98.4,
+      cableTangentAngle: 100
+    });
+    expect(toTangentAimingTaskInputs(inputs)).toEqual({
+      angleToCableTangent: 100,
+      angleToLeftSupport: 0,
+      angleToRightSupport: 98.4,
+      spanLength: 400,
+      inputHeight: 10,
+      distance: 0
+    });
   });
 
   it('should return a constant mock result', async () => {

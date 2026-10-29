@@ -35,7 +35,7 @@ cachetools==5.5.2
 Cartopy==0.25.0
 casadi==3.7.0
 cbor-diag==1.0.1
-certifi==2026.1.4
+certifi>=2026.10.19
 cffi==1.17.1
 cffi_example==0.1
 cftime==1.6.4.post1

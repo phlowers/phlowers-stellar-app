@@ -10,6 +10,8 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { MessageModule } from 'primeng/message';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -34,7 +36,8 @@ import {
   getDisplayedInputFields,
   invalidateTangentAimingExteriorResult,
   syncDisplayedControls,
-  toTangentAimingExteriorInputs
+  toTangentAimingExteriorInputs,
+  toTangentAimingExteriorTaskInputs
 } from './tangent-aiming-exterior.helpers';
 import { TangentAimingExteriorCalculationType } from './tangent-aiming-exterior.interfaces';
 
@@ -66,6 +69,7 @@ export class TangentAimingExteriorComponent {
 
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly workerPythonService = inject(WorkerPythonService);
   private readonly logger = inject(LoggerService);
   private readonly notificationService = inject(NotificationService);
   private readonly translocoService = inject(TranslocoService);
@@ -176,9 +180,14 @@ export class TangentAimingExteriorComponent {
     this.isCalculating.set(true);
     this.hasError.set(false);
     try {
-      const { result, error } = await calculateTangentAimingExteriorMock(
-        toTangentAimingExteriorInputs(this.measureData())
-      );
+      const inputs = toTangentAimingExteriorInputs(this.measureData());
+      const { result, error } =
+        inputs.calculationType === 'tangente'
+          ? await this.workerPythonService.runTask(
+              Task.calculateTangentAiming,
+              toTangentAimingExteriorTaskInputs(inputs)
+            )
+          : await calculateTangentAimingExteriorMock(inputs);
       if (error || !result) throw new Error(error ?? 'Empty tangent aiming result');
       this.measureData.update((d) => ({ ...d, outputs: { ...d.outputs, tangentAimingExterior: result } }));
     } catch (error) {
