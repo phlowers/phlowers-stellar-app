@@ -49,6 +49,7 @@ import { resetInactiveCalculusModes } from '../../calculus-mode-reset.helpers';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { isNumber, isEqual } from 'lodash';
+import { normalizeFieldMeasureDates } from '@shared/domain/helpers/field-measure.helpers';
 import { MessageService } from 'primeng/api';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -309,7 +310,7 @@ export class FieldMeasuringComponent implements OnDestroy {
       return;
     }
 
-    this.measureData.set(selectedFieldMeasure);
+    this.measureData.set(normalizeFieldMeasureDates(selectedFieldMeasure));
 
     // Fetch link_adr from lines service
     const linesTable = await this.linesService.getLines();

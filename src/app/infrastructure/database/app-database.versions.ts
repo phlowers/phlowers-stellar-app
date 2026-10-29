@@ -6,6 +6,7 @@
  */
 import type Dexie from 'dexie';
 import type { Study } from '@shared/domain';
+import { stripLocalization } from '@shared/domain/helpers/geopositioning.helpers';
 import {
   USER_SCHEMA,
   USER_SCHEMA_V3,
@@ -257,6 +258,21 @@ export function applyStellarDbVersions(db: Dexie): void {
           delete rawSection['eel_idr'];
           delete rawSection['maintenance_center_names'];
           delete rawSection['regional_maintenance_center_names'];
+        }
+      });
+  });
+
+  // V11 resets all section geolocation data: the localization convention changed (start azimuth meaning,
+  // line angles in gradians) and old values are deliberately not converted (breaking change, the app is in
+  // development). Users re-enter or re-import their positions. Data-only migration (sections are stored as a
+  // JSON blob on the studies table), no schema/index change, so no `.stores()` call is needed.
+  db.version(11).upgrade(async (tx) => {
+    await tx
+      .table('studies')
+      .toCollection()
+      .modify((study: Study) => {
+        if (Array.isArray(study.sections)) {
+          study.sections = study.sections.map(stripLocalization);
         }
       });
   });

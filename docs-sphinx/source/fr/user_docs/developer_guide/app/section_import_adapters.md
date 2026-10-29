@@ -28,8 +28,8 @@ L'orchestrateur lit le fichier une seule fois, choisit le premier adaptateur (da
 1. `adapter.import(source)` — analyse, validation de son propre format, conversion en `Section`.
 2. Validation par le cœur de la `Section` obtenue (champs requis, bornes des supports), pour tous les adaptateurs.
 3. Correction par les catalogues, si l'adaptateur a défini `applyCatalogCorrections` : identifiants de maintenance, tension, accroches et chaînes sont corrigés avec les catalogues locaux (un service de correction par catalogue dans `src/app/features/study/application/services/catalog-correction/`), puis les nouveaux noms de supports sont ajoutés au catalogue des accroches. Une entrée absente du catalogue des accroches lève un avertissement.
-4. Reprojection des coordonnées, si l'adaptateur a renvoyé `coordinates`.
-5. Contrôle de collision et persistance, puis notifications (succès, information de reprojection, notices de l'adaptateur et des catalogues).
+4. Reprojection des coordonnées, si l'adaptateur a renvoyé `coordinates`, puis calcul des GPS de pied manquants.
+5. Contrôle de collision et persistance, puis notifications (succès, notices d'erreur d'azimut et de position, notices de l'adaptateur et des catalogues).
 
 ---
 
@@ -56,7 +56,7 @@ interface SectionImportPayload {
 
 - `source` contient `fileName`, le `text` décodé et le `json` analysé (`undefined` si le texte n'est pas du JSON valide).
 - `coordinates` contient une entrée `x`/`y` par support, dans l'ordre des supports.
-  - `LAMBERT93` : est/nord en mètres. Le cœur les reprojette en GPS, renseigne `footLatitude`/`footLongitude`, le point de départ du canton et l'erreur moyenne de reprojection.
+  - `LAMBERT93` : est/nord en mètres. Le cœur (`GeopositioningService.applyImportedCoordinates`) les reprojette en GPS et renseigne `footLatitude`/`footLongitude`, puis écrase `spanAzimut`, `start_azimuth` et `position_error_meters` par support avec les valeurs reconstruites depuis les positions (voir « Contrôles de position à l'import » dans le document Système géographique). Le point de départ est le pied du premier support. Deux notices suivent l'import : un contrôle d'azimut de travée (fichier vs calculé, seuil `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG` = 1°) et un contrôle de position des supports (seuil `POSITION_ERROR_THRESHOLD_METERS` = 1 m). Chacune est une notice d'information à ou sous son seuil et un avertissement au-delà ; les vecteurs d'erreurs complets sont journalisés.
   - `WGS84` : `x` est la longitude et `y` la latitude, en degrés ; appliquées telles quelles.
   - Une entrée `null` ignore la reprojection sans bloquer l'import.
 - `notices.message` doit déjà être traduit.

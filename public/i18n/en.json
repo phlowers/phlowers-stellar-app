@@ -455,7 +455,8 @@
       "invalid-envelope": "The Stellar section file is invalid.",
       "unsupported-version": "Unsupported Stellar section file version {{ version }} (maximum supported: {{ maxVersion }})."
     },
-    "reprojection-info": "Reprojection using {{ appName }} data model seems to add a mean absolute error of {{ error }} m",
+    "azimuth-reprojection-notice": "Maximum span azimuth gap after reprojection: {{ error }}° (threshold {{ threshold }}°). The computed values were kept.",
+    "position-error-notice": "Maximum support position gap: {{ error }} m on support {{ support }} (threshold {{ threshold }} m). Check your values above the threshold.",
     "from-file": {
       "file-format": "File formats: {{ formats }}",
       "description": "You can import a section from a JSON file. It will be added to the current study.",
@@ -471,7 +472,7 @@
     },
     "import": {
       "description": "You can import multiple files, they will be available in the \"My studies\" tab.",
-      "file-formats": "File formats: .csv, .clst",
+      "file-formats": "File formats: .csv, .clst, .stsd",
       "error-cable-not-found": "Cable not found in database",
       "error-import": "Error importing study",
       "error-delete": "Error deleting study",
@@ -544,7 +545,8 @@
     "update-btn": "Update section",
     "title-view": "View a study section",
     "title-modify": "Modify a study section",
-    "title-create": "Create a study section"
+    "title-create": "Create a study section",
+    "location-removed-after-insert": "The start position could not be computed from the next support: the section is saved without geolocation."
   },
   "manual-section": {
     "tab-general": "General",
@@ -600,7 +602,8 @@
     "auto-fill-hint": "The attachment set and the arm length (m) will be automatically filled in the table."
   },
   "location": {
-    "title": "Support 1 coordinates:"
+    "title": "Support 1 coordinates:",
+    "incomplete-error": "Fill in latitude, longitude and azimuth together, or leave all three empty."
   },
   "loads": {
     "shared": {

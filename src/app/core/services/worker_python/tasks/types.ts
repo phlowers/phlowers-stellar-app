@@ -75,8 +75,14 @@ export enum Task {
   computeLocalization = 'computeLocalization',
   // compute gps coordinates using imported lambert data
   importLambert = 'importLambert',
+  // convert coordinates between two CRS (EPSG codes)
+  convertCoordinates = 'convertCoordinates',
   // lambert to gps and compare to gps coordinates using section data
   importLambertAndValidate = 'importLambertAndValidate',
+  // gps positions to span azimuths and per-support position error
+  validateGpsPositions = 'validateGpsPositions',
+  // gps of a new support 0 and start azimuth from the next support
+  computeStartFromNextSupport = 'computeStartFromNextSupport',
   // get equivalent span/ruling span value
   getEquivalentSpan = 'getEquivalentSpan',
   // compute pose table at different temperatures
@@ -458,6 +464,12 @@ export interface TaskInputs {
     spanLength: number[];
     lineAngle: number[];
   };
+  [Task.convertCoordinates]: {
+    sourceCrs: string;
+    targetCrs: string;
+    x: number[];
+    y: number[];
+  };
   [Task.importLambert]: {
     lambert_x: number[];
     lambert_y: number[];
@@ -465,9 +477,21 @@ export interface TaskInputs {
   [Task.importLambertAndValidate]: {
     lambert_x: number[];
     lambert_y: number[];
-    startAzimuth: number;
     spanLength: number[];
     lineAngle: number[];
+  };
+  [Task.validateGpsPositions]: {
+    latitude: number[];
+    longitude: number[];
+    spanLength: (number | null)[];
+    lineAngle: (number | null)[];
+  };
+  [Task.computeStartFromNextSupport]: {
+    latitude: number;
+    longitude: number;
+    nextSpanAzimuth: number;
+    spanLength: number;
+    lineAngle: [number, number];
   };
   // Inputs for getEquivalentSpan task: no inputs
   [Task.getEquivalentSpan]: undefined;
@@ -803,10 +827,26 @@ export interface TaskOutputs {
     windIncidence: number;
   };
   [Task.computeLocalization]: Localization;
+  [Task.convertCoordinates]: { x: number[]; y: number[] };
   [Task.importLambert]: Localization;
   [Task.importLambertAndValidate]: {
     localization: Localization;
-    meanGpsDiffMeter: number;
+    /** Azimuth (deg) before the deflection at the first support: `azimuth[0] - spanAngle[0]`. */
+    startAzimuth: number;
+    /** Per-support distance (m) between the imported position and the rebuilt one; `NaN` when a span length is missing. */
+    positionErrorMeter: number[];
+  };
+  [Task.validateGpsPositions]: {
+    /** Grid azimuth (deg) of each span, size N-1. */
+    azimuth: number[];
+    startAzimuth: number | null;
+    /** Per-support distance (m) between the GPS position and the rebuilt one, size N. */
+    positionErrorMeter: number[];
+  };
+  [Task.computeStartFromNextSupport]: {
+    latitude: number;
+    longitude: number;
+    startAzimuth: number;
   };
   [Task.getEquivalentSpan]: { equivalentSpan: number };
   [Task.getPoseTable]: PoseResults;
