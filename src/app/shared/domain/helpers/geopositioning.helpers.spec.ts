@@ -330,7 +330,11 @@ describe('hasGeometryChanged', () => {
 
 describe('applySpanAzimuths', () => {
   it('should set spanAzimut from the computed azimuths and leave the last support untouched', () => {
-    const supports = [buildSupport({ spanAzimut: 10 }), buildSupport({ spanAzimut: 20 }), buildSupport({ spanAzimut: 30 })];
+    const supports = [
+      buildSupport({ spanAzimut: 10 }),
+      buildSupport({ spanAzimut: 20 }),
+      buildSupport({ spanAzimut: 30 })
+    ];
 
     const result = applySpanAzimuths(supports, [90, 180]);
 

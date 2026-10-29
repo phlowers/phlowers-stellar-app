@@ -24,8 +24,22 @@ const LEGACY_SECTION = {
   start_azimuth: 90,
   mean_reprojection_diff_meters: 0.4,
   supports: [
-    { uuid: 'legacy-support-1', spanLength: 100, spanAngle: 5, footLatitude: 10.5, footLongitude: 20.5, spanAzimut: 12 },
-    { uuid: 'legacy-support-2', spanLength: null, spanAngle: null, footLatitude: 10.6, footLongitude: 20.6, spanAzimut: 13 }
+    {
+      uuid: 'legacy-support-1',
+      spanLength: 100,
+      spanAngle: 5,
+      footLatitude: 10.5,
+      footLongitude: 20.5,
+      spanAzimut: 12
+    },
+    {
+      uuid: 'legacy-support-2',
+      spanLength: null,
+      spanAngle: null,
+      footLatitude: 10.6,
+      footLongitude: 20.6,
+      spanAzimut: 13
+    }
   ]
 };
 
@@ -34,8 +48,22 @@ const CURRENT_SECTION = {
   name: 'Current section',
   start_azimuth: 37,
   supports: [
-    { uuid: 'current-support-1', spanLength: 100, spanAngle: 5, footLatitude: 30.5, footLongitude: 40.5, spanAzimut: 12 },
-    { uuid: 'current-support-2', spanLength: null, spanAngle: null, footLatitude: 30.6, footLongitude: 40.6, spanAzimut: 13 }
+    {
+      uuid: 'current-support-1',
+      spanLength: 100,
+      spanAngle: 5,
+      footLatitude: 30.5,
+      footLongitude: 40.5,
+      spanAzimut: 12
+    },
+    {
+      uuid: 'current-support-2',
+      spanLength: null,
+      spanAngle: null,
+      footLatitude: 30.6,
+      footLongitude: 40.6,
+      spanAzimut: 13
+    }
   ],
   field_measures: [null, { date: '2025-06-01T00:00:00.000Z', time: '2025-06-01T10:00:00.000Z', season: 'summer' }]
 };

@@ -25,7 +25,10 @@ import { NotificationService } from '@services/notification/notification.service
 import { LoggerService } from '@core/services/logger/logger.service';
 import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
 import { GeopositioningError } from '@services/geopositioning/geopositioning.interfaces';
-import { SPAN_AZIMUTH_ERROR_THRESHOLD_DEG, POSITION_ERROR_THRESHOLD_METERS } from '@shared/domain/helpers/geopositioning.constantes';
+import {
+  SPAN_AZIMUTH_ERROR_THRESHOLD_DEG,
+  POSITION_ERROR_THRESHOLD_METERS
+} from '@shared/domain/helpers/geopositioning.constantes';
 import { computeSpanAzimuthErrors } from '@shared/domain/helpers/geopositioning.helpers';
 import { hasSupportsBoundsErrors } from '@shared/domain/helpers/support-limits.helpers';
 import { TranslocoService } from '@jsverse/transloco';

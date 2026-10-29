@@ -250,9 +250,30 @@ describe('NewSectionModalComponent', () => {
     });
 
     it('should validate the section with the former support 1 as start after deleting support 0', async () => {
-      const s1 = { ...createEmptySupport(), footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 };
-      const s2 = { ...createEmptySupport(), footLatitude: 45.1, footLongitude: 3.1, spanAzimut: 137, spanAngle: 25, spanLength: 250 };
-      const s3 = { ...createEmptySupport(), footLatitude: 45.2, footLongitude: 3.2, spanAzimut: 200, spanAngle: 0, spanLength: 200 };
+      const s1 = {
+        ...createEmptySupport(),
+        footLatitude: 45,
+        footLongitude: 3,
+        spanAzimut: 100,
+        spanAngle: 10,
+        spanLength: 300
+      };
+      const s2 = {
+        ...createEmptySupport(),
+        footLatitude: 45.1,
+        footLongitude: 3.1,
+        spanAzimut: 137,
+        spanAngle: 25,
+        spanLength: 250
+      };
+      const s3 = {
+        ...createEmptySupport(),
+        footLatitude: 45.2,
+        footLongitude: 3.2,
+        spanAzimut: 200,
+        spanAngle: 0,
+        spanLength: 200
+      };
       const geolocatedSection: Section = { ...mockSection, supports: [s1, s2, s3], start_azimuth: 90 };
       fixture.componentRef.setInput('section', geolocatedSection);
       fixture.componentRef.setInput('mode', 'edit');

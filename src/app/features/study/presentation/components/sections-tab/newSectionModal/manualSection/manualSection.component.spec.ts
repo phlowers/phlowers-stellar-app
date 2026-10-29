@@ -299,9 +299,30 @@ describe('ManualSectionComponent', () => {
     });
 
     it('should move the start to the former support 1 when support 0 is deleted on a geolocated section', async () => {
-      const s1 = { ...createSupportMock(), footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 };
-      const s2 = { ...createSupportMock(), footLatitude: 45.1, footLongitude: 3.1, spanAzimut: 137, spanAngle: 25, spanLength: 250 };
-      const s3 = { ...createSupportMock(), footLatitude: 45.2, footLongitude: 3.2, spanAzimut: 200, spanAngle: 0, spanLength: 200 };
+      const s1 = {
+        ...createSupportMock(),
+        footLatitude: 45,
+        footLongitude: 3,
+        spanAzimut: 100,
+        spanAngle: 10,
+        spanLength: 300
+      };
+      const s2 = {
+        ...createSupportMock(),
+        footLatitude: 45.1,
+        footLongitude: 3.1,
+        spanAzimut: 137,
+        spanAngle: 25,
+        spanLength: 250
+      };
+      const s3 = {
+        ...createSupportMock(),
+        footLatitude: 45.2,
+        footLongitude: 3.2,
+        spanAzimut: 200,
+        spanAngle: 0,
+        spanLength: 200
+      };
       mockSection.supports = [s1, s2, s3];
       mockSection.start_azimuth = 90;
       await component.deleteSupport(s1.uuid);
@@ -317,9 +338,30 @@ describe('ManualSectionComponent', () => {
     });
 
     it('should remove the geolocation when support 0 is deleted and the former support 1 has no GPS', async () => {
-      const s1 = { ...createSupportMock(), footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 };
-      const s2 = { ...createSupportMock(), footLatitude: null, footLongitude: null, spanAzimut: null, spanAngle: 25, spanLength: 250 };
-      const s3 = { ...createSupportMock(), footLatitude: null, footLongitude: null, spanAzimut: null, spanAngle: 0, spanLength: 200 };
+      const s1 = {
+        ...createSupportMock(),
+        footLatitude: 45,
+        footLongitude: 3,
+        spanAzimut: 100,
+        spanAngle: 10,
+        spanLength: 300
+      };
+      const s2 = {
+        ...createSupportMock(),
+        footLatitude: null,
+        footLongitude: null,
+        spanAzimut: null,
+        spanAngle: 25,
+        spanLength: 250
+      };
+      const s3 = {
+        ...createSupportMock(),
+        footLatitude: null,
+        footLongitude: null,
+        spanAzimut: null,
+        spanAngle: 0,
+        spanLength: 200
+      };
       mockSection.supports = [s1, s2, s3];
       mockSection.start_azimuth = 90;
       const geopositioning = TestBed.inject(GeopositioningService);
@@ -332,9 +374,30 @@ describe('ManualSectionComponent', () => {
     });
 
     it('should use the resolved localization when the former support 1 has no stored GPS', async () => {
-      const s1 = { ...createSupportMock(), footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 };
-      const s2 = { ...createSupportMock(), footLatitude: null, footLongitude: null, spanAzimut: null, spanAngle: 25, spanLength: 250 };
-      const s3 = { ...createSupportMock(), footLatitude: null, footLongitude: null, spanAzimut: null, spanAngle: 0, spanLength: 200 };
+      const s1 = {
+        ...createSupportMock(),
+        footLatitude: 45,
+        footLongitude: 3,
+        spanAzimut: 100,
+        spanAngle: 10,
+        spanLength: 300
+      };
+      const s2 = {
+        ...createSupportMock(),
+        footLatitude: null,
+        footLongitude: null,
+        spanAzimut: null,
+        spanAngle: 25,
+        spanLength: 250
+      };
+      const s3 = {
+        ...createSupportMock(),
+        footLatitude: null,
+        footLongitude: null,
+        spanAzimut: null,
+        spanAngle: 0,
+        spanLength: 200
+      };
       mockSection.supports = [s1, s2, s3];
       const geopositioning = TestBed.inject(GeopositioningService);
       vi.spyOn(geopositioning, 'resolveLocalization').mockResolvedValue({
@@ -349,9 +412,30 @@ describe('ManualSectionComponent', () => {
     });
 
     it('should not resolve the localization when deleting a support other than support 0', async () => {
-      const s1 = { ...createSupportMock(), footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 };
-      const s2 = { ...createSupportMock(), footLatitude: 45.1, footLongitude: 3.1, spanAzimut: 137, spanAngle: 25, spanLength: 250 };
-      const s3 = { ...createSupportMock(), footLatitude: 45.2, footLongitude: 3.2, spanAzimut: 200, spanAngle: 0, spanLength: 200 };
+      const s1 = {
+        ...createSupportMock(),
+        footLatitude: 45,
+        footLongitude: 3,
+        spanAzimut: 100,
+        spanAngle: 10,
+        spanLength: 300
+      };
+      const s2 = {
+        ...createSupportMock(),
+        footLatitude: 45.1,
+        footLongitude: 3.1,
+        spanAzimut: 137,
+        spanAngle: 25,
+        spanLength: 250
+      };
+      const s3 = {
+        ...createSupportMock(),
+        footLatitude: 45.2,
+        footLongitude: 3.2,
+        spanAzimut: 200,
+        spanAngle: 0,
+        spanLength: 200
+      };
       mockSection.supports = [s1, s2, s3];
       mockSection.start_azimuth = 90;
       const geopositioning = TestBed.inject(GeopositioningService);

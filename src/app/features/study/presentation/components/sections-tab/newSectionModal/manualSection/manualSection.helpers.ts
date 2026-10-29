@@ -3,12 +3,7 @@ import { FootLocalization, GpsPoint } from '@shared/domain/helpers/geopositionin
 import { normalizeAzimuth } from '@shared/domain/helpers/geopositioning.helpers';
 import { StartFromNextSupportInput } from '@services/geopositioning/geopositioning.interfaces';
 import { lineTablePropertiesToSectionProperties, orderedLineTableProperties } from './manualSection.constantes';
-import {
-  LineTableProperties,
-  SectionStart,
-  StartAnchor,
-  StartFromNextSupportFn
-} from './manualSection.interfaces';
+import { LineTableProperties, SectionStart, StartAnchor, StartFromNextSupportFn } from './manualSection.interfaces';
 import { LocationValues } from './location/location.interfaces';
 import { isLocationEmpty } from './location/location.helpers';
 

@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  output,
+  signal,
+  untracked
+} from '@angular/core';
 import { StartAnchor } from './manualSection/manualSection.interfaces';
 import { computeStartBeforeAnchor, keepStartAnchor } from './manualSection/manualSection.helpers';
 import { FormsModule } from '@angular/forms';
@@ -204,7 +214,11 @@ export class NewSectionModalComponent {
       this.notificationService.warning(this.transloco.translate('section-modal.location-removed-after-insert'));
       return stripLocalization(section);
     }
-    return this.geopositioning.setStartGps(section, { latitude: start.latitude, longitude: start.longitude }, start.azimuth);
+    return this.geopositioning.setStartGps(
+      section,
+      { latitude: start.latitude, longitude: start.longitude },
+      start.azimuth
+    );
   }
 
   async onDuplicateSection() {

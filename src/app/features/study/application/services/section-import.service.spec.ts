@@ -1481,7 +1481,6 @@ describe('SectionImportService', () => {
       });
 
       expect(result?.position_error_meters).toEqual([0, 0.0001, 0.0001]);
-
     });
   });
 

@@ -372,7 +372,11 @@ export class ManualSectionComponent implements OnInit {
     if (start) {
       Object.assign(
         section,
-        this.geopositioning.setStartGps(section, { latitude: start.latitude, longitude: start.longitude }, start.azimuth)
+        this.geopositioning.setStartGps(
+          section,
+          { latitude: start.latitude, longitude: start.longitude },
+          start.azimuth
+        )
       );
     } else {
       Object.assign(section, stripLocalization(section));

@@ -207,7 +207,11 @@ describe('getStartAfterFirstSupportDeletion', () => {
   });
 
   it('should use the stored foot GPS of the former support 1 as new start', () => {
-    const supports = [makeSupport({ footLatitude: 1 }), makeSupport({ footLatitude: 45.5, footLongitude: 3.5 }), makeSupport()];
+    const supports = [
+      makeSupport({ footLatitude: 1 }),
+      makeSupport({ footLatitude: 45.5, footLongitude: 3.5 }),
+      makeSupport()
+    ];
     const result = getStartAfterFirstSupportDeletion(supports, null);
     expect(result?.latitude).toBe(45.5);
     expect(result?.longitude).toBe(3.5);
@@ -330,10 +334,7 @@ describe('start anchor helpers', () => {
     });
 
     it('should normalize the start azimuth to ]-180, 180]', () => {
-      const result = getStartFromAnchorSupport(
-        { ...anchor, spanAzimuth: -175 },
-        makeAnchorSupport({ spanAngle: 20 })
-      );
+      const result = getStartFromAnchorSupport({ ...anchor, spanAzimuth: -175 }, makeAnchorSupport({ spanAngle: 20 }));
       expect(result.azimuth).toBeCloseTo(167, 10);
     });
 
@@ -388,7 +389,11 @@ describe('start anchor helpers', () => {
     it('should return the start from the anchor without computing a step when the anchor is support 0', async () => {
       const computeStart = vi.fn();
       const supports = [makeAnchorSupport({ uuid: 'old-support-0', spanAngle: 10 })];
-      const result = await computeStartBeforeAnchor(supports, { ...anchor, supportUuid: 'old-support-0' }, computeStart);
+      const result = await computeStartBeforeAnchor(
+        supports,
+        { ...anchor, supportUuid: 'old-support-0' },
+        computeStart
+      );
       expect(result).toEqual({ latitude: 45, longitude: 3, azimuth: 91 });
       expect(computeStart).not.toHaveBeenCalled();
     });
@@ -400,7 +405,11 @@ describe('start anchor helpers', () => {
         makeAnchorSupport({ uuid: 'old-support-0', spanAngle: 10 }),
         makeAnchorSupport({ uuid: 'old-support-1' })
       ];
-      const result = await computeStartBeforeAnchor(supports, { ...anchor, supportUuid: 'old-support-0' }, computeStart);
+      const result = await computeStartBeforeAnchor(
+        supports,
+        { ...anchor, supportUuid: 'old-support-0' },
+        computeStart
+      );
       expect(computeStart).toHaveBeenCalledOnce();
       expect(computeStart).toHaveBeenCalledWith({
         next: { latitude: 45, longitude: 3 },
@@ -421,7 +430,11 @@ describe('start anchor helpers', () => {
         makeAnchorSupport({ uuid: 'new-1', spanLength: 180, spanAngle: 6 }),
         makeAnchorSupport({ uuid: 'old-support-0', spanAngle: 10 })
       ];
-      const result = await computeStartBeforeAnchor(supports, { ...anchor, supportUuid: 'old-support-0' }, computeStart);
+      const result = await computeStartBeforeAnchor(
+        supports,
+        { ...anchor, supportUuid: 'old-support-0' },
+        computeStart
+      );
       expect(computeStart).toHaveBeenCalledTimes(2);
       expect(computeStart).toHaveBeenNthCalledWith(1, {
         next: { latitude: 45, longitude: 3 },
@@ -430,11 +443,14 @@ describe('start anchor helpers', () => {
         lineAngle: [6, 10]
       });
       // Span azimuth at new-1 = 30 + 6 * 0.9 = 35.4
-      expect(computeStart).toHaveBeenNthCalledWith(2, expect.objectContaining({
-        next: { latitude: 44, longitude: 2 },
-        spanLength: 150,
-        lineAngle: [2, 6]
-      }));
+      expect(computeStart).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          next: { latitude: 44, longitude: 2 },
+          spanLength: 150,
+          lineAngle: [2, 6]
+        })
+      );
       expect(computeStart.mock.calls[1][0].nextSpanAzimuth).toBeCloseTo(35.4, 10);
       expect(result?.latitude).toBe(43);
       expect(result?.longitude).toBe(1);
@@ -451,14 +467,18 @@ describe('start anchor helpers', () => {
     it('should return null without calling the service when a span length is missing', async () => {
       const computeStart = vi.fn();
       const supports = [makeAnchorSupport({ spanLength: null }), makeAnchorSupport({ uuid: 'old-support-0' })];
-      expect(await computeStartBeforeAnchor(supports, { ...anchor, supportUuid: 'old-support-0' }, computeStart)).toBeNull();
+      expect(
+        await computeStartBeforeAnchor(supports, { ...anchor, supportUuid: 'old-support-0' }, computeStart)
+      ).toBeNull();
       expect(computeStart).not.toHaveBeenCalled();
     });
 
     it('should return null when a step fails', async () => {
       const computeStart = vi.fn().mockResolvedValue(null);
       const supports = [makeAnchorSupport({ uuid: 'new' }), makeAnchorSupport({ uuid: 'old-support-0' })];
-      expect(await computeStartBeforeAnchor(supports, { ...anchor, supportUuid: 'old-support-0' }, computeStart)).toBeNull();
+      expect(
+        await computeStartBeforeAnchor(supports, { ...anchor, supportUuid: 'old-support-0' }, computeStart)
+      ).toBeNull();
     });
   });
 
