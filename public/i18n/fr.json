@@ -71,6 +71,7 @@
     "meter": "m",
     "grade-unit": "gr",
     "min-value-error": "Valeur min : {{ min }}",
+    "modification-date-format": "d MMMM y, 'à' HH:mm",
     "my-last-studies-label": "Mes dernières études",
     "network-speed-unknown-label": "Débit réseau inconnu du navigateur",
     "network-too-slow-label": "Réseau trop lent",
@@ -484,8 +485,7 @@
       "col-modification-date": "Date de modification",
       "col-description": "Description/commentaire",
       "study-actions-menu": "Menu des actions d'étude",
-      "pagination-report": "Étude {first} à {last} sur {totalRecords}",
-      "date-format": "d MMMM yyyy 'à' HH'h'mm"
+      "pagination-report": "Étude {first} à {last} sur {totalRecords}"
     },
     "tabs": {
       "search-study": "Rechercher une étude",
