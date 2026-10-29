@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms'; // Import FormsModule
 import { TableModule } from 'primeng/table';
 import { AppUpdateService } from '@services/app-update/app-update.service';
 import { isAppCacheName, offlineStatusKind } from '@services/app-update/app-update.helpers';
-import { APP_UPDATE_I18N, OFFLINE_STATUS_I18N_PREFIX } from '@services/app-update/app-update.constantes';
+import { APP_UPDATE_I18N, OFFLINE_STATUS_I18N_KEYS } from '@services/app-update/app-update.constantes';
 import { UpdateDiagnostics } from '@services/app-update/app-update.interfaces';
 import { CardComponent } from '@shared/components/atoms/card/card.component';
 import { ToastModule } from 'primeng/toast';
@@ -72,9 +72,7 @@ export class AdminComponent implements OnInit {
 
   readonly checking = signal(false);
   readonly diagnostics = signal<UpdateDiagnostics | null>(null);
-  readonly offlineLabelKey = computed(
-    () => `${OFFLINE_STATUS_I18N_PREFIX}.${offlineStatusKind(this.appUpdateService.state())}`
-  );
+  readonly offlineLabelKey = computed(() => OFFLINE_STATUS_I18N_KEYS[offlineStatusKind(this.appUpdateService.state())]);
   readonly pendingVersionKey = computed(() =>
     this.appUpdateService.state() === 'update-waiting'
       ? APP_UPDATE_I18N.updateWaitingSummary

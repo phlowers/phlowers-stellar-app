@@ -62,7 +62,7 @@ export const PDF_LABEL_KEYS: CantonReportLabels = {
   type: 'common.section-type-label',
   cableName: 'common.cable-name-label',
   maintenanceCenter: 'studio.section-report.maintenance-center-label',
-  lit: 'studio.section-report.lit-label',
+  lit: 'common.lit-label',
   supportsCount: 'studio.section-report.supports-count-label',
   supportsDescription: 'common.description-label',
   phaseNumber: 'common.electric-phase-number-label',

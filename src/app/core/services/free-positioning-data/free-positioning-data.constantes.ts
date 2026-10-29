@@ -8,5 +8,5 @@
 /** Transloco keys — translated by `FreePositioningDataService` (pure aggregator helpers cannot inject `TranslocoService`). */
 export const FLOOR_POINT_KEY = 'shared.free-positioning-data.floor-point';
 export const DISTANCE_POINT_KEY = 'shared.free-positioning-data.distance-point';
-export const PUNCTUAL_LOAD_KEY = 'shared.free-positioning-data.punctual-load';
+export const PUNCTUAL_LOAD_KEY = 'common.punctual-load-label';
 export const MARKING_LOAD_KEY = 'shared.free-positioning-data.marking-load';

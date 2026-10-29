@@ -42,6 +42,7 @@ import {
   DEBOUNCED_UPDATE_SELECTED_POSITION_MARKERS_DELAY,
   DEFAULT_VISIBLE_CATEGORIES,
   FREE_POSITIONING_CATEGORIES,
+  FREE_POSITIONING_CATEGORY_LABEL_KEYS,
   getFreePositioningPlotConfig,
   getFreePositioningPlotLayout,
   POINT_SELECTION_PIXEL_RADIUS
@@ -95,6 +96,7 @@ export class FreePositioningPlotComponent implements OnDestroy {
 
   // Constants exposed to template
   readonly categories = FREE_POSITIONING_CATEGORIES;
+  readonly categoryLabelKeys = FREE_POSITIONING_CATEGORY_LABEL_KEYS;
   readonly categoryDrawings = PlotlyDrawings.freePositioning.category;
   readonly plotIds = CORE_PLOT_IDS;
 

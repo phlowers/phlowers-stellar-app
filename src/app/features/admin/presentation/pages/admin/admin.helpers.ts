@@ -1,6 +1,7 @@
 import { APP_UPDATE_I18N } from '@services/app-update/app-update.constantes';
 import { UpdateCheckDecision } from '@services/app-update/app-update.interfaces';
 import { InstallRefusalReason } from '@services/app-update/sw-messages.interfaces';
+import { REFUSAL_REASON_I18N_KEYS } from './admin.constantes';
 
 /** i18n key of the feedback shown after the "check for updates" button. */
 export function checkResultKey(decision: UpdateCheckDecision): string {
@@ -19,5 +20,5 @@ export function toMegabytes(bytes: number | null): string | null {
 
 /** i18n key explaining why the last update download was postponed. */
 export function refusalReasonKey(reason: InstallRefusalReason): string {
-  return `admin.refusal.${reason}`;
+  return REFUSAL_REASON_I18N_KEYS[reason];
 }

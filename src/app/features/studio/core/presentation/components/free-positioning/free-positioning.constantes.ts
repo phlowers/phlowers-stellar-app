@@ -18,4 +18,12 @@ export const FREE_POSITIONING_CATEGORIES: readonly FreePositioningCategory[] = [
   'loads'
 ] as const;
 
+/** i18n key of each category toggle label (obstacle, loads and distance are shared `common.*` texts). */
+export const FREE_POSITIONING_CATEGORY_LABEL_KEYS: Record<FreePositioningCategory, string> = {
+  obstacle: 'common.obstacles-label',
+  floor: 'studio.free-positioning.floor',
+  distance: 'common.distance-label',
+  loads: 'common.loads-label'
+};
+
 export const POINT_SELECTION_PIXEL_RADIUS = 15;

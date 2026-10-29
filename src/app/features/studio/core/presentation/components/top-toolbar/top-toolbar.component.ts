@@ -146,7 +146,7 @@ export class StudioTopToolbarComponent implements OnInit {
       value: string;
     }[]
   >([
-    { label: this.translocoService.translate('studio.top-toolbar.loads-option'), value: 'loads' },
+    { label: this.translocoService.translate('common.loads-label'), value: 'loads' },
     { label: this.translocoService.translate('studio.top-toolbar.base-option'), value: 'baseState' },
     {
       label: this.translocoService.translate('studio.top-toolbar.transparent-background-option'),
@@ -154,7 +154,7 @@ export class StudioTopToolbarComponent implements OnInit {
     },
     { label: this.translocoService.translate('studio.top-toolbar.measurement-points-option'), value: 'measurePoints' },
     { label: this.translocoService.translate('studio.free-positioning.floor'), value: 'floor' },
-    { label: this.translocoService.translate('studio.free-positioning.obstacle'), value: 'obstacles' }
+    { label: this.translocoService.translate('common.obstacles-label'), value: 'obstacles' }
   ]);
 
   selectedDisplayOptions = computed(() =>

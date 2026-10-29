@@ -82,7 +82,7 @@ export const CABLE_MODIF_METRICS: MetricDescriptor<CableModifReportRow>[] = [
 /** Support manipulation metric rows (transposed table: one row per metric, one column per manipulation). */
 export const SUPPORT_MANIP_METRICS: MetricDescriptor<SupportManipReportRow>[] = [
   { labelKey: 'studio.loads-table.index-label', unit: null, decimals: 0, field: 'displayIndex' },
-  { labelKey: 'studio.loads-report.support-label', unit: null, decimals: 0, field: 'supportLabel' },
+  { labelKey: 'common.support-label', unit: null, decimals: 0, field: 'supportLabel' },
   { labelKey: 'loads.cable-support-manip.manipulation-type-label', unit: null, decimals: 0, field: 'type' },
   {
     labelKey: 'loads.cable-support-manip.vert-displacement-cable-label',

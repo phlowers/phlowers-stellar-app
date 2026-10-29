@@ -22,7 +22,8 @@ describe('CalculusSetting component', () => {
               'common.papoto-label': 'PAPOTO',
               'common.pep-label': 'PEP',
               'field-measuring.calculus-setting.tangent-aiming-radio-label': 'Tangent aiming (Support)',
-              'field-measuring.calculus-setting.tangent-aiming-exterior-radio-label': 'Tangent aiming (Exterior)'
+              'field-measuring.calculus-setting.tangent-aiming-exterior-radio-label': 'Tangent aiming (Exterior)',
+              'field-measuring.calculus-setting.tangent-aiming-interior-radio-label': 'Tangent aiming (Interior)'
             }
           },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
@@ -48,12 +49,13 @@ describe('CalculusSetting component', () => {
     expect(component.selectedCalculusType()).toBe('PAPOTO');
   });
 
-  it('should render four radio buttons with correct labels', () => {
+  it('should render five radio buttons with correct labels', () => {
     const labels = fixture.debugElement.queryAll(By.css('.cac-set-select label'));
     expect(labels[0].nativeElement.textContent.trim()).toBe('PAPOTO');
     expect(labels[1].nativeElement.textContent.trim()).toBe('Tangent aiming (Support)');
     expect(labels[2].nativeElement.textContent.trim()).toBe('Tangent aiming (Exterior)');
-    expect(labels[3].nativeElement.textContent.trim()).toBe('PEP');
+    expect(labels[3].nativeElement.textContent.trim()).toBe('Tangent aiming (Interior)');
+    expect(labels[4].nativeElement.textContent.trim()).toBe('PEP');
   });
 
   it('should display the tangent aiming exterior component when selected and persist the method', () => {

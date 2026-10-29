@@ -12,6 +12,9 @@ import {
   TangentAimingSupportNumericField
 } from './tangent-aiming-support.interfaces';
 
+/** Transloco prefix of the keys shared by the tangent aiming (support, exterior, interior) forms. */
+export const TANGENT_AIMING_SHARED_I18N = 'field-measuring.tangent-aiming';
+
 const I18N = 'field-measuring.tangent-aiming-support';
 
 /** Display description of each numeric input. */
@@ -37,7 +40,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
   },
   cableVerticalAccAngle: {
     id: 'tasVerticalAccAngle',
-    labelKey: `${I18N}.vertical-acc-angle-label`,
+    labelKey: 'common.vertical-angle-right-support-label',
     unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-input',
     step: 0.01,

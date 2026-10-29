@@ -29,7 +29,7 @@
     </div>
 
     <dl class="cable-adjustment__field">
-      <dt>{{ 'studio.cable-adjustment.span-length-label' | transloco }}</dt>
+      <dt>{{ 'common.span-length-label' | transloco }}</dt>
       <dd data-testid="span-length-value">
         {{ spanLength() !== null ? (spanLength() | number: '1.0-2') : '-' }}&nbsp;{{ 'common.meter' | transloco }}
       </dd>
@@ -84,7 +84,7 @@
 
   <div class="cable-adjustment__grid cable-adjustment__grid--measure">
     <div class="cable-adjustment__field">
-      <label for="cable-adjustment-support">{{ 'studio.cable-adjustment.support-label' | transloco }}</label>
+      <label for="cable-adjustment-support">{{ 'common.support-label' | transloco }}</label>
       <p-select
         inputId="cable-adjustment-support"
         [options]="supportOptions()"
