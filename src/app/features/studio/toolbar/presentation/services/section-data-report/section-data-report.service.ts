@@ -10,13 +10,9 @@ import { inject, Injectable } from '@angular/core';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { TranslocoService } from '@jsverse/transloco';
 
+import { sanitizeFilenamePart } from '@shared/helpers/filename.helpers';
 import { PdfBaseService } from '@shared/pdf/pdf-base.service';
-import {
-  buildReportLabels,
-  drawPageFooters,
-  generatePdfReport,
-  sanitizeFilenamePart
-} from '@shared/pdf/pdf-primitives.helpers';
+import { buildReportLabels, drawPageFooters, generatePdfReport } from '@shared/pdf/pdf-primitives.helpers';
 import { buildTables, computeLabelColWidth, drawResultTablesSection } from '@shared/pdf/pdf-table.helpers';
 
 import { PDF_LABEL_KEYS, SUPPORT_METRICS } from './section-data-report.constantes';

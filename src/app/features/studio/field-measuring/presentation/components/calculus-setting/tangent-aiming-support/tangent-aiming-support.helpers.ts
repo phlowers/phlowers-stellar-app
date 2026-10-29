@@ -27,9 +27,57 @@ export function buildCantonSupportOptions(supports: { number: string | null }[])
   return supports.map((support, index) => ({ label: formatSupportNumber(support.number), value: index.toString() }));
 }
 
-/** Default left support: the first support of the current span, as a support index. */
+/** Options of the left support selector limited to the two supports of the span (RG.VIS-SUP.SUP.1/2), value = support index. */
+export function buildSpanSupportOptions(
+  supports: { number: string | null }[],
+  span: number[] | null | undefined
+): { label: string; value: string }[] {
+  if (span?.length !== 2) return [];
+  return span.map((index) => ({
+    label: formatSupportNumber(supports[index]?.number ?? null),
+    value: index.toString()
+  }));
+}
+
+/** Default left support: the first (departure) support of the current span, as a support index (RG.VIS-SUP.SUP.3). */
 export function getDefaultLeftSupport(span: number[] | null): string | null {
   return span?.length ? span[0].toString() : null;
+}
+
+/** Keeps the current left support when it belongs to the span, otherwise falls back to the default one. */
+export function resolveLeftSupport(current: string | null, span: number[] | null): string | null {
+  return current !== null && span?.some((index) => index.toString() === current)
+    ? current
+    : getDefaultLeftSupport(span);
+}
+
+/** Identifies a span, empty without span. */
+export function getSpanKey(span: number[] | null | undefined): string {
+  return span?.join('-') ?? '';
+}
+
+/** Left support seen at the last resolution, with the span it was resolved for. */
+export interface LeftSupportSnapshot {
+  spanKey: string;
+  leftSupport: string | null;
+}
+
+/**
+ * Left support to apply: on a span change (the left support is still the one of the previous span), the support
+ * the user had chosen for that span, else its departure support; otherwise the current one if it belongs to the span.
+ */
+export function resolveSpanLeftSupport(
+  current: string | null,
+  span: number[] | null,
+  previous: LeftSupportSnapshot | null,
+  memory: Record<string, string>
+): string | null {
+  const key = getSpanKey(span);
+  if (previous && previous.spanKey !== key && previous.leftSupport === current) {
+    const remembered = memory[key];
+    return resolveLeftSupport(remembered ?? null, span);
+  }
+  return resolveLeftSupport(current, span);
 }
 
 /** Inputs displayed for the given calculation type. */
@@ -39,7 +87,8 @@ export function getDisplayedInputFields(
   return [...TANGENT_AIMING_SUPPORT_COMMON_FIELDS, TANGENT_AIMING_SUPPORT_TYPE_FIELD[calculationType]];
 }
 
-function createNumberControl(field: TangentAimingSupportNumericField): FormControl<number | null> {
+/** Creates a required numeric control bound to the rules of the given field. */
+export function createNumberControl(field: TangentAimingSupportNumericField): FormControl<number | null> {
   const { min, max, decimals } = TANGENT_AIMING_SUPPORT_FIELD_RULES[field];
   return new FormControl<number | null>(null, [
     Validators.required,
@@ -129,8 +178,11 @@ export function toTangentAimingSupportInputs(data: FieldMeasure): TangentAimingS
  * Temporary mock: the engine has no tangent aiming Task yet, constant value on purpose.
  * TODO: replace with workerPythonService.runTask(Task.<tangent aiming>) once the Task exists.
  */
-export async function calculateTangentAimingSupportMock(
+export function calculateTangentAimingSupportMock(
   _inputs: TangentAimingSupportInputs
 ): Promise<TangentAimingSupportCalculation> {
-  return { result: { parameter: 1000, uncertainty: 1.5, criterion: 1, checkValidity: true }, error: null };
+  return Promise.resolve({
+    result: { parameter: 1000, uncertainty: 1.5, criterion: 1, checkValidity: true },
+    error: null
+  });
 }

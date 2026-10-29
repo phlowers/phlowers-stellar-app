@@ -14,6 +14,7 @@ export type {
   CsvImportDoneMessage,
   CsvImportErrorMessage
 } from './csv-import.worker.interfaces';
+export { CatalogIntegrityError } from './csv-import.errors';
 export { runCsvImport } from './csv-import.engine';
 export type { CsvImportEngineDeps, CsvImportEngineResult } from './csv-import.engine';
 export { resolveCsvImportConfig, CSV_IMPORT_REGISTRY } from './configs';

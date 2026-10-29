@@ -1,23 +1,53 @@
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import {
   applyTangentAimingSupportDefaults,
-  buildCantonSupportOptions,
+  buildSpanSupportOptions,
   calculateTangentAimingSupportMock,
   createTangentAimingSupportForm,
   getDefaultLeftSupport,
   getDisplayedInputFields,
   isTangentAimingSupportDataValid,
   resetNonDisplayedParameterFields,
+  getSpanKey,
+  resolveLeftSupport,
+  resolveSpanLeftSupport,
   syncDisplayedControls,
   toTangentAimingSupportInputs
 } from './tangent-aiming-support.helpers';
 
 describe('tangent-aiming-support helpers', () => {
-  it('should build options for every support with a 5-character label', () => {
-    expect(buildCantonSupportOptions([{ number: 'ABCDEFG' }, { number: null }])).toEqual([
-      { label: 'ABCDE', value: '0' },
-      { label: '-', value: '1' }
+  it('should build span support options with a 5-character label, empty without a full span', () => {
+    const supports = [{ number: 'ABCDEFG' }, { number: null }, { number: 'S3' }];
+    expect(buildSpanSupportOptions(supports, [1, 2])).toEqual([
+      { label: '-', value: '1' },
+      { label: 'S3', value: '2' }
     ]);
+    expect(buildSpanSupportOptions(supports, [0, 1])[0]).toEqual({ label: 'ABCDE', value: '0' });
+    expect(buildSpanSupportOptions(supports, [])).toEqual([]);
+    expect(buildSpanSupportOptions(supports, null)).toEqual([]);
+    expect(buildSpanSupportOptions(supports, [2, 7])[1]).toEqual({ label: '-', value: '7' });
+  });
+
+  it('should keep the left support when it belongs to the span, else use the departure support', () => {
+    expect(resolveLeftSupport('4', [3, 4])).toBe('4');
+    expect(resolveLeftSupport('0', [3, 4])).toBe('3');
+    expect(resolveLeftSupport(null, [3, 4])).toBe('3');
+    expect(resolveLeftSupport('3', null)).toBeNull();
+  });
+
+  it('should restore the support remembered for the span on a span change, else use its departure support', () => {
+    const memory = { '3-4': '3' };
+    const previous = { spanKey: '4-5', leftSupport: '4' };
+    expect(resolveSpanLeftSupport('4', [3, 4], previous, memory)).toBe('3');
+    expect(resolveSpanLeftSupport('4', [2, 3], previous, memory)).toBe('2');
+    expect(resolveSpanLeftSupport('4', [4, 5], previous, memory)).toBe('4');
+    expect(resolveSpanLeftSupport('4', [3, 4], null, memory)).toBe('4');
+    expect(resolveSpanLeftSupport('3', [3, 4], { spanKey: '3-4', leftSupport: '4' }, memory)).toBe('3');
+  });
+
+  it('should build a span key', () => {
+    expect(getSpanKey([3, 4])).toBe('3-4');
+    expect(getSpanKey(null)).toBe('');
   });
 
   it('should default the left support to the first support of the span', () => {

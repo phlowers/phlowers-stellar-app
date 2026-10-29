@@ -135,4 +135,12 @@ describe('TopbarComponent', () => {
       expect(userInfo?.textContent).toContain('No user');
     });
   });
+
+  describe('offline status indicator', () => {
+    it('should not render any offline status in the top bar', () => {
+      fixture.detectChanges();
+
+      expect(getByTestId('offline-status-indicator')).toBeNull();
+    });
+  });
 });

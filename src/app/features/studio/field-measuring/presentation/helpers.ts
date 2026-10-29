@@ -244,6 +244,14 @@ export const createInitialMeasureData = (
     cableParameter: null,
     tangentLeftSupport: null,
     tangentSpanLength: null,
+    exteriorLeftSupport: null,
+    exteriorSpanLength: null,
+    exteriorHAccDistance: null,
+    exteriorVerticalAccAngleLeft: null,
+    exteriorVerticalAccAngleRight: null,
+    exteriorCalculationType: 'parametre',
+    exteriorParameter: null,
+    exteriorTangentAngle: null,
     ...PEP_INPUT_DEFAULTS,
     transit: null,
     windIncidence: null,
@@ -297,7 +305,8 @@ export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
   papoto: null,
   cableTemperature: null,
   parameter15C: null,
-  tangentAimingSupport: null
+  tangentAimingSupport: null,
+  tangentAimingExterior: null
 };
 
 /**
@@ -309,9 +318,21 @@ export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
 export const getActiveParameterOutput = (
   measureData: Pick<FieldMeasure, 'calculationMethod' | 'outputs'>
 ): Pick<TangentAimingSupportResult, 'parameter' | 'uncertainty'> | null => {
+  const { calculationMethod, outputs } = measureData;
   const source =
-    measureData.calculationMethod === 'tangente-aiming'
-      ? measureData.outputs.tangentAimingSupport
-      : measureData.outputs.papoto;
+    calculationMethod === 'tangente-aiming'
+      ? outputs.tangentAimingSupport
+      : calculationMethod === 'tangente-aiming-exterior'
+        ? outputs.tangentAimingExterior
+        : outputs.papoto;
   return source ? { parameter: source.parameter, uncertainty: source.uncertainty } : null;
 };
+
+/**
+ * Clears the 15°C result when it is derived from the active parameter output (auto mode); a manual result
+ * is built from user-entered values and stays valid.
+ * @param data - The field measure
+ * @returns The measure without a stale automatic 15°C result
+ */
+export const clearAutoParameter15C = (data: FieldMeasure): FieldMeasure =>
+  data.updateMode15C === 'manual' ? data : { ...data, outputs: { ...data.outputs, parameter15C: null } };

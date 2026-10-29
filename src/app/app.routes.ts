@@ -8,6 +8,7 @@ import { Routes } from '@angular/router';
 import { LoggedLayoutComponent } from '@shared/components/layout/logged-layout/logged-layout.component';
 import { NotFoundComponent } from '@shared/components/layout/not-found/not-found.component';
 import { authGuard } from '@core/guards/auth.guard';
+import { catalogReadyGuard } from '@core/guards/catalog-ready.guard';
 import { devRoutes } from '@src/app/dev-routes';
 
 /** Application route definitions mapping URL paths to page components. */
@@ -23,6 +24,7 @@ export const appRoutes: Routes = [
     path: '',
     component: LoggedLayoutComponent,
     canActivate: [authGuard],
+    canActivateChild: [catalogReadyGuard],
     children: [
       {
         path: '',
@@ -46,7 +48,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'tools',
-        title: 'routes.tools',
+        title: 'common.tools-label',
         loadChildren: () => import('@features/tools/presentation/tools.routes').then((m) => m.toolsRoutes)
       },
       {
@@ -60,8 +62,16 @@ export const appRoutes: Routes = [
         loadChildren: () => import('@features/changelog/presentation/changelog.routes').then((m) => m.changelogRoutes)
       },
       {
+        path: 'instruction-manual',
+        title: 'common.instruction-manual-label',
+        loadChildren: () =>
+          import('@features/instruction-manual/presentation/instruction-manual.routes').then(
+            (m) => m.instructionManualRoutes
+          )
+      },
+      {
         path: 'studio',
-        title: 'routes.studio',
+        title: 'common.studio',
         loadComponent: () =>
           import('@features/studio/core/presentation/pages/studio-page/studio-page.component').then(
             (m) => m.StudioPageComponent

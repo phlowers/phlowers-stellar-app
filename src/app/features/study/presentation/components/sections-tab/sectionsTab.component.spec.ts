@@ -193,7 +193,7 @@ describe('SectionsTabComponent', () => {
               'sections-tab.aria-select-section': "select this study's section",
               'sections-tab.load-cases': 'Load cases',
               'sections-tab.col-last-modified': 'Last modified',
-              'sections-tab.col-lit': 'LIT ADR',
+              'common.lit-adr-label': 'LIT - ADR',
               'common.section-name-label': 'Section name',
               'common.section-type-label': 'Section type',
               'common.create-a-section-label': 'Create a section',

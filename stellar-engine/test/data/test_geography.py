@@ -28,7 +28,7 @@ def test_compute_localization():
         "startLongitude": 2.3522,
         "startAzimuth": 90,
         "spanLength": [500, 500, 500, np.nan],
-        "lineAngle": [0, 10, 0, 0],
+        "lineAngle": [50, 10, 0, 0],
     }
     result = compute_localization(inputs)
     expected_keys = {
@@ -51,6 +51,11 @@ def test_compute_localization():
     np.testing.assert_allclose(
         result["longitude"],
         [2.3522, 2.3590134705562726, 2.365751623583987, 2.3724896006661265],
+        rtol=1e-6,
+    )
+    np.testing.assert_allclose(
+        result["azimuth"],
+        [90, 100, 100],
         rtol=1e-6,
     )
 

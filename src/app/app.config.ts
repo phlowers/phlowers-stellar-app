@@ -20,10 +20,12 @@ import { provideMarkdown } from 'ngx-markdown';
 import { StorageService } from '@services/storage/storage.service';
 import { AuthService } from '@services/auth/auth.service';
 import { authSessionInterceptor } from '@services/auth/auth-session.interceptor';
-import { UpdateService } from '@services/worker_update/worker_update.service';
+import { AppUpdateService } from '@services/app-update/app-update.service';
+import { APP_UPDATE_ENABLED } from '@services/app-update/app-update.constantes';
 import { GlobalErrorHandler } from '@core/handlers/global-error-handler';
 import { TranslocoTitleStrategy } from '@core/strategies/transloco-title.strategy';
 import { LoggerService } from '@services/logger/logger.service';
+import { environment } from '@src/environments/environment';
 import { AppConfigService } from '@core/config/app-config.service';
 import { getAndClearBootstrapErrors } from '../bootstrap-logger';
 import { TranslocoService } from '@jsverse/transloco';
@@ -49,9 +51,9 @@ import { firstValueFrom } from 'rxjs';
  * on demand and re-renders once the data arrives, so nothing is blocked.
  * Running both branches in parallel (rather than sequentially) avoids adding
  * extra bootstrap latency.
- * 4. UpdateService.checkForUpdateOnce() — started in the background, not
- *    awaited: the update/install prompt is not part of the critical
- *    first-render path and must never delay it.
+ * 4. AppUpdateService.start() — started in the background, not awaited:
+ *    registering the service worker is not part of the critical first-render
+ *    path and must never delay it.
  *
  * Steps 5 (setupData) and 6 (WorkerPythonService.setup) are handled by AppComponent.ngOnInit
  * after this initializer completes, with an explicit try/catch so step 6 always runs.
@@ -60,9 +62,11 @@ import { firstValueFrom } from 'rxjs';
  */
 export async function initializeApp(): Promise<void> {
   const logger = inject(LoggerService);
+  logger.info(`Welcome to ${environment.appName} v${environment.version} hash ${environment.gitHash}`);
   const storageService = inject(StorageService);
   const authService = inject(AuthService);
-  const updateService = inject(UpdateService);
+  const appUpdateService = inject(AppUpdateService);
+  const appUpdateEnabled = inject(APP_UPDATE_ENABLED);
   const translocoService = inject(TranslocoService);
   const appConfigService = inject(AppConfigService);
   const document = inject(DOCUMENT);
@@ -90,7 +94,9 @@ export async function initializeApp(): Promise<void> {
       });
     })()
   ]);
-  void updateService.checkForUpdateOnce();
+  if (appUpdateEnabled) {
+    void appUpdateService.start();
+  }
 }
 
 /** Root Angular application configuration with routing, HTTP, PrimeNG theme, and markdown support. */

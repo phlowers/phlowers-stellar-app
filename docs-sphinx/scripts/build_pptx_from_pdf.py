@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import runpy
 import sys
 from pathlib import Path
 
@@ -22,6 +23,14 @@ from pptx.util import Inches, Pt
 # A4 dimensions at 72 points/inch, matching the PDF page size.
 A4_WIDTH_IN = 8.27
 A4_HEIGHT_IN = 11.69
+
+CONF_PATH = Path(__file__).resolve().parents[1] / "source" / "conf.py"
+
+
+def _default_pdf_path() -> Path:
+    """Default input: the PDF named by simplepdf_file_name in the Sphinx conf."""
+    pdf_name = runpy.run_path(str(CONF_PATH))["simplepdf_file_name"]
+    return Path("build/simplepdf") / pdf_name
 
 
 def _to_rgb(color_int: int) -> tuple[int, int, int]:
@@ -265,11 +274,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Convert a Sphinx-SimplePDF PDF into an editable PowerPoint deck."
     )
+    default_pdf = _default_pdf_path()
     parser.add_argument(
         "--pdf",
         type=Path,
-        default=Path("build/simplepdf/stellar_documentation.pdf"),
-        help="Input PDF path (default: build/simplepdf/stellar_documentation.pdf).",
+        default=default_pdf,
+        help=f"Input PDF path (default: {default_pdf}).",
     )
     parser.add_argument(
         "--output",

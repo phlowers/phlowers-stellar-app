@@ -7,6 +7,7 @@
 import Papa from 'papaparse';
 import { createSHA256 } from 'hash-wasm';
 import type { CsvImportWorkerResponse } from './csv-import.worker.interfaces';
+import { CatalogIntegrityError } from './csv-import.errors';
 
 const LIVE_TABLE_NAMES = [
   'catSupportAttachments',
@@ -233,7 +234,7 @@ describe('csv-import.worker - runWorkerImport', () => {
         { csvKey: 'cables', url: 'http://x/cables.csv', expectedHash: 'not-the-real-hash' },
         () => undefined
       )
-    ).rejects.toThrow(/Catalog hash mismatch/);
+    ).rejects.toBeInstanceOf(CatalogIntegrityError);
 
     expect(dexieState.open).not.toHaveBeenCalled();
     expect(dexieState.tables.staging_catCables.clear).not.toHaveBeenCalled();

@@ -83,9 +83,9 @@ export function drawCantonSection(
     { label: labels.cableName, value: data.cableName || '-' },
     { label: labels.maintenanceCenter, value: data.maintenanceCenter || '-' },
     { label: labels.lit, value: data.litName || '-' },
+    { label: labels.branch, value: data.branchName || '-' },
     { label: labels.supportsCount, value: String(data.supportsCount) },
-    { label: labels.supportsDescription, value: data.supportsDescription || '-' },
-    { label: labels.branch, value: data.branchName || '-' }
+    { label: labels.supportsDescription, value: data.supportsDescription || '-' }
   ];
 
   const phaseNumberValue = data.phaseNumber != null ? String(data.phaseNumber) : '-';

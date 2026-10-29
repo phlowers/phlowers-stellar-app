@@ -2,7 +2,7 @@
   <button
     app-btn
     disabled
-    [attr.aria-label]="'field-measuring.tangent-aiming-support.open-help-aria-label' | transloco"
+    [attr.aria-label]="'common.tangent-aiming-help-aria-label' | transloco"
     data-testid="help-btn"
   >
     <app-icon icon="help" aria-hidden="true" />
@@ -10,7 +10,7 @@
 
   <p id="mandatory-tangent-aiming-support" class="tangent-aiming-support__mandatory-msg">
     <app-icon icon="info" aria-hidden="true" />
-    <span>{{ 'field-measuring.tangent-aiming-support.mandatory-msg' | transloco }}</span>
+    <span>{{ 'field-measuring.tangent-aiming.mandatory-msg' | transloco }}</span>
   </p>
 </div>
 
@@ -126,7 +126,7 @@
 
   <div class="calculationType">
     <p id="tasCalculationTypeLabel" class="mb-0 font-bold">
-      {{ 'field-measuring.tangent-aiming-support.calculation-type-label' | transloco }}
+      {{ 'common.calculation-type-label' | transloco }}
     </p>
     <p-selectbutton
       [options]="calculationTypeOptions()"
@@ -208,7 +208,7 @@
         </div>
 
         <div class="crit">
-          <dt>{{ 'field-measuring.tangent-aiming-support.criterion-label' | transloco }}</dt>
+          <dt>{{ 'common.criterion-label' | transloco }}</dt>
           <dd class="crit__result" data-testid="tangent-aiming-support-criterion">
             {{ result.criterion.toFixed(0) }} %
             @if (result.checkValidity) {
@@ -216,7 +216,7 @@
                 icon="check"
                 class="criterion-ok"
                 role="img"
-                [attr.aria-label]="'field-measuring.tangent-aiming-support.criterion-respected' | transloco"
+                [attr.aria-label]="'common.criterion-respected' | transloco"
                 data-testid="tangent-aiming-support-criterion-ok"
               />
             } @else {
@@ -224,7 +224,7 @@
                 icon="close"
                 class="criterion-ko"
                 role="img"
-                [attr.aria-label]="'field-measuring.tangent-aiming-support.criterion-not-respected' | transloco"
+                [attr.aria-label]="'common.criterion-not-respected' | transloco"
                 data-testid="tangent-aiming-support-criterion-ko"
               />
             }

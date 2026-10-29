@@ -12,13 +12,29 @@
   }
 
   &__form {
+    // Label, input and error message of a field each get their own row; the error row only grows when an error is shown.
+    $_field-rows: auto auto minmax(0.75rem, auto);
     @extend %tools-grid-layout;
     grid-template-areas:
       'leftSupport spanLength . . .'
+      'leftSupport spanLength . . .'
+      'leftSupport spanLength . . .'
       '. spanLengthDesc . . .'
       'hDistance vAngle . . .'
+      'hDistance vAngle . . .'
+      'hDistance vAngle . . .'
       'calculationType calculationType . . .'
+      'tangentAngle . . . .'
+      'tangentAngle . . . .'
       'tangentAngle . . . .';
+    grid-template-rows: $_field-rows auto $_field-rows auto $_field-rows;
+    row-gap: 0;
+
+    > div:not(.calculationType, .spanLengthDesc) {
+      display: grid;
+      grid-template-rows: subgrid;
+      row-gap: 0;
+    }
 
     .leftSupport {
       grid-area: leftSupport;
@@ -39,6 +55,7 @@
     .calculationType {
       @apply flex items-center gap-2;
       grid-area: calculationType;
+      margin-bottom: 0.75rem;
     }
 
     .parameter,
@@ -48,25 +65,13 @@
 
     .spanLengthDesc {
       grid-area: spanLengthDesc;
-      margin-top: -0.5rem;
+      margin: -0.5rem 0 0.75rem;
 
       p {
         @apply mb-0 font-semibold;
         margin: 0.125rem 0.25rem;
         color: var(--star-dust-900);
       }
-    }
-
-    @media (max-width: 40rem) {
-      grid-template-columns: minmax(0, 1fr);
-      grid-template-areas:
-        'leftSupport'
-        'spanLength'
-        'spanLengthDesc'
-        'hDistance'
-        'vAngle'
-        'calculationType'
-        'tangentAngle';
     }
   }
 
@@ -85,14 +90,6 @@
       grid-template-areas:
         'param incertainParam . . .'
         'crit . . . .';
-
-      @media (max-width: 40rem) {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-areas:
-          'param'
-          'incertainParam'
-          'crit';
-      }
 
       .param {
         grid-area: param;

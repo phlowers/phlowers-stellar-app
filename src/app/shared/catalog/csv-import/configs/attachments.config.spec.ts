@@ -28,7 +28,7 @@ describe('attachments.config - createAttachmentsConfig', () => {
     const rows = parseFixtureCsv<AttachmentCsvDto>('attachments');
     const ctx = { table: { bulkGet, bulkPut } as never, now: '2026-01-01T00:00:00.000Z' };
     const r = await config.processChunk(rows, ctx);
-    expect(r.keys?.sort()).toEqual(['SUP-A', 'SUP-B', 'Support Charlie']);
+    expect(r.keys?.sort((a, b) => a.localeCompare(b))).toEqual(['SUP-A', 'SUP-B', 'Support Charlie']);
     expect(bulkGet).toHaveBeenCalledWith(expect.arrayContaining(['SUP-A', 'SUP-B', 'Support Charlie']));
     const merged = bulkPut.mock.calls[0][0] as { support_name: string; attachments: unknown[] }[];
     const alpha = merged.find((m) => m.support_name === 'SUP-A');

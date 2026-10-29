@@ -5,8 +5,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4200",
-    "build:service-worker": "tsc -p tsconfig.worker.json && sed -i 's/export //g' public/service-worker.js",
-    "build": "npm run build:service-worker && ng build --configuration=production && npm run set-env-variables && npm run create-assets-list-for-service-worker",
+    "build": "ng build --configuration=production && npm run set-env-variables && npm run build:sw && npm run create-assets-list-for-service-worker",
+    "build:sw": "node scripts/build-service-worker.mjs",
+    "check:sw-manifest": "node scripts/check-sw-manifest.mjs",
     "watch": "ng build --watch --configuration development",
     "format": "prettier --write \"**/*.{js,mjs,ts,mts,d.ts,html}\" --cache",
     "prettier-check": "prettier --check \"**/*.{js,mjs,ts,mts,d.ts,html}\"",
@@ -18,7 +19,7 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "e2e:headed": "playwright test --headed",
-    "e2e:update": "playwright test e2e/update-flow.spec.ts",
+    "e2e:update": "playwright test e2e/update-lifecycle.spec.ts e2e/update-flow.spec.ts e2e/update-network-offline.spec.ts e2e/update-transition.spec.ts",
     "e2e:update-faults": "playwright test e2e/update-faults.spec.ts",
     "update:sim": "node e2e/update-sim-server.mjs",
     "e2e:prepare": "npm run build",
@@ -38,6 +39,7 @@
     "autodocs:en": "cd docs-sphinx && SPHINX_LANGUAGE=en uv run sphinx-autobuild -c source --host localhost --port 8080 source/en build/en",
     "autodocs:fr": "cd docs-sphinx && SPHINX_LANGUAGE=fr uv run sphinx-autobuild -c source --host localhost --port 8081 source/fr build/fr",
     "docs:open": "npm run docs:en && xdg-open docs-sphinx/build/en/html/index.html",
+    "docs:pdf": "cd docs-sphinx && make publish-pdf",
     "docs:pptx": "cd docs-sphinx && make pptx",
     "docs:pptx:fr": "cd docs-sphinx && make pptx-fr"
   },
@@ -55,7 +57,7 @@
   },
   "private": true,
   "engines": {
-    "node": "22"
+    "node": "22.23.4"
   },
   "config": {
     "mechaphlowers": "0.6.0rc2",
@@ -93,6 +95,12 @@
     "tailwindcss-primeui": "0.5.1",
     "tslib": "2.3.0",
     "uuid": "14.0.0",
+    "workbox-core": "7.4.1",
+    "workbox-expiration": "7.4.1",
+    "workbox-precaching": "7.4.1",
+    "workbox-routing": "7.4.1",
+    "workbox-strategies": "7.4.1",
+    "workbox-window": "7.4.1",
     "zone.js": "0.16.2"
   },
   "overrides": {
@@ -135,6 +143,7 @@
     "@vitest/coverage-v8": "4.1.10",
     "angular-eslint": "21.4.0",
     "autoprefixer": "10.5.2",
+    "esbuild": "0.28.2",
     "esbuild-node-externals": "1.23.1",
     "eslint": "9.39.4",
     "eslint-config-prettier": "9.1.2",
@@ -150,6 +159,7 @@
     "typescript-eslint": "8.63.0",
     "vite-tsconfig-paths": "6.1.1",
     "vitest": "4.1.10",
-    "vitest-sonar-reporter": "3.0.0"
+    "vitest-sonar-reporter": "3.0.0",
+    "workbox-build": "7.4.1"
   }
 }
