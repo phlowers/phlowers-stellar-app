@@ -6,7 +6,7 @@
  */
 
 import { Camera } from 'plotly.js-dist-min';
-import { PlotOptions } from '@shared/types/plot.types';
+import { PlotOptions, Zoom2d } from '@shared/types/plot.types';
 
 /**
  * Checks whether a projection refresh is needed based on changed plot options.
@@ -64,4 +64,33 @@ export const getLiveCamera = (documentRef: Document, plotId: string): Camera | n
     | null;
   const scene = el?._fullLayout?.scene;
   return scene?._scene?.getCamera?.() ?? scene?.camera ?? null;
+};
+
+const isRange = (range: unknown): range is [number, number] =>
+  Array.isArray(range) && range.length === 2 && range.every((value) => Number.isFinite(value));
+
+/**
+ * Validates an untrusted (persisted) value as 2D axis ranges.
+ * @returns The ranges when both axes hold two finite numbers, otherwise `null`.
+ */
+export const toZoom2d = (value: unknown): Zoom2d | null => {
+  const { x, y } = (value ?? {}) as Partial<Zoom2d>;
+  return isRange(x) && isRange(y) ? { x: [x[0], x[1]], y: [y[0], y[1]] } : null;
+};
+
+/**
+ * Reads the 2D axis ranges currently displayed by Plotly.
+ * @param documentRef - The document used to locate the plot element.
+ * @param plotId - The DOM id of the Plotly chart container.
+ * @returns The ranges, or `null` when the plot is not a zoomed/panned 2D plot (autorange still active).
+ */
+export const getLiveZoom2d = (documentRef: Document, plotId: string): Zoom2d | null => {
+  const el = documentRef.getElementById(plotId) as
+    | (HTMLElement & {
+        _fullLayout?: { xaxis?: { range?: unknown; autorange?: unknown }; yaxis?: { range?: unknown } };
+      })
+    | null;
+  const { xaxis, yaxis } = el?._fullLayout ?? {};
+  // Plotly turns autorange off on the x axis as soon as the user zooms or pans
+  return xaxis?.autorange === false ? toZoom2d({ x: xaxis.range, y: yaxis?.range }) : null;
 };
