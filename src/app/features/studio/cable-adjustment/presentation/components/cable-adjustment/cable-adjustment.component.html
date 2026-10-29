@@ -21,7 +21,7 @@
         optionLabel="label"
         optionValue="value"
         formControlName="span"
-        [showClear]="true"
+        (onChange)="onSpanChange($event.value)"
         appendTo="body"
         fluid
         data-testid="span-select"
@@ -99,7 +99,7 @@
 
     @let distanceControl = form.controls.tacheometerHorizontalDistance;
     @let distanceError = distanceControl.dirty || distanceControl.touched ? getError(distanceControl) : '';
-    <div class="cable-adjustment__field">
+    <div class="cable-adjustment__field cable-adjustment__field--single-line">
       <label for="tacheometer-horizontal-distance">
         {{ 'studio.cable-adjustment.tacheometer-horizontal-distance-label' | transloco }}
       </label>
@@ -183,13 +183,13 @@
         <div class="cable-adjustment__field">
           <dt>{{ 'studio.cable-adjustment.horizontal-sight-angle-label' | transloco }}</dt>
           <dd data-testid="horizontal-sight-angle-value">
-            {{ res.horizontalSightAngle }}&nbsp;{{ 'common.grade-unit' | transloco }}
+            {{ res.horizontalSightAngle | number: '1.0-2' }}&nbsp;{{ 'common.grade-unit' | transloco }}
           </dd>
         </div>
         <div class="cable-adjustment__field">
           <dt>{{ 'studio.cable-adjustment.vertical-sight-angle-label' | transloco }}</dt>
           <dd data-testid="vertical-sight-angle-value">
-            {{ res.verticalSightAngle }}&nbsp;{{ 'common.grade-unit' | transloco }}
+            {{ res.verticalSightAngle | number: '1.0-2' }}&nbsp;{{ 'common.grade-unit' | transloco }}
           </dd>
         </div>
       </dl>

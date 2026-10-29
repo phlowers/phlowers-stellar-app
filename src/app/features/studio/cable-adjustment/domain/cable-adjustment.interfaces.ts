@@ -44,7 +44,7 @@ export interface CableAdjustmentFormValue {
   adjustmentParameter: number | null;
 }
 
-/** Sighting angles displayed in the results frame, rounded to the grade. */
+/** Sighting angles displayed in the results frame, in the limits and decimals of the input angles. */
 export interface CableAdjustmentDisplayedResults {
   horizontalSightAngle: number;
   verticalSightAngle: number;
