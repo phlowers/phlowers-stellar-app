@@ -68,9 +68,8 @@ D'autres champs existent pour les autres onglets (calcul du paramètre, tempéra
 - Lorsqu'une portée ou un support de référence change, le composant tente aussi de préremplir la longitude / latitude / azimut à partir de la localisation de l'étude pour cette portée.
 
 **Résolution automatique de localisation :**
-- La logique est dans `HeaderComponent.fillLocalization()` et utilise le même contrat de worker que la vue de données de section : `Task.computeLocalization`.
-- `buildSectionLocalizationPayload()` construit la charge utile à partir des `start_latitude`, `start_longitude`, `start_azimuth` de la section, ainsi que des `spanLength` / `spanAngle` de chaque support.
-- `getSpanLocalization()` sélectionne la localisation correspondante du support calculé, en privilégiant le support de référence sélectionné puis le support gauche à défaut.
+- La logique est dans `HeaderComponent.fillLocalization()` et utilise `GeopositioningService.resolveLocalization()` : le GPS de pied / `spanAzimut` stockés des supports, ou un `Task.computeLocalization` à la volée (à partir du GPS de pied du premier support, de `start_azimuth` et des `spanLength` / `spanAngle` de chaque support) s'ils ne sont pas stockés.
+- `getSpanLocalization()` sélectionne la localisation correspondante du support résolu, en privilégiant le support de référence sélectionné puis le support gauche à défaut.
 - Si aucune valeur finie n'est disponible, l'application affiche le message d'information traduit `field-measuring.header.localization-not-available` (texte : « Localization not available in study »).
 
 ### FieldDatasComponent

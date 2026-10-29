@@ -6,7 +6,8 @@
   grid-template-areas:
     '. labelLat labelLong labelAz'
     'title inputLat inputLong inputAz'
-    '. errorLat errorLong errorAz';
+    '. errorLat errorLong errorAz'
+    '. errorIncomplete errorIncomplete errorIncomplete';
   align-items: end;
 }
 
@@ -52,9 +53,14 @@
   grid-area: errorAz;
 }
 
+.error-incomplete {
+  grid-area: errorIncomplete;
+}
+
 .error-lat,
 .error-long,
-.error-az {
+.error-az,
+.error-incomplete {
   align-self: start;
 }
 

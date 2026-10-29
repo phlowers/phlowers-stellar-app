@@ -37,7 +37,7 @@ describe('HeaderComponent', () => {
       ready$: new BehaviorSubject(true),
       runTask: vi.fn().mockResolvedValue({ result: null, error: null, diagnostics: [] })
     } as unknown as vi.Mocked<WorkerPythonService>;
-    loggerServiceMock = { error: vi.fn() } as unknown as vi.Mocked<LoggerService>;
+    loggerServiceMock = { error: vi.fn(), warn: vi.fn() } as unknown as vi.Mocked<LoggerService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -307,11 +307,9 @@ describe('HeaderComponent', () => {
       workerPythonServiceMock.runTask.mockClear();
       const spanService = TestBed.inject(PlotSpanService);
       vi.spyOn(spanService, 'section').mockReturnValue({
-        start_latitude: 48.8566,
-        start_longitude: 2.3522,
         start_azimuth: 30,
         supports: [
-          { spanLength: 10, spanAngle: 20 },
+          { spanLength: 10, spanAngle: 20, footLatitude: 48.8566, footLongitude: 2.3522 },
           { spanLength: 12, spanAngle: 18 }
         ]
       } as unknown as Section);
@@ -338,13 +336,15 @@ describe('HeaderComponent', () => {
       startupFixture.detectChanges();
       await startupFixture.whenStable();
 
-      expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(
-        Task.computeLocalization,
-        expect.objectContaining({
-          startLatitude: 48.8566,
-          startLongitude: 2.3522,
-          startAzimuth: 30
-        })
+      await vi.waitFor(() =>
+        expect(workerPythonServiceMock.runTask).toHaveBeenCalledWith(
+          Task.computeLocalization,
+          expect.objectContaining({
+            startLatitude: 48.8566,
+            startLongitude: 2.3522,
+            startAzimuth: 30
+          })
+        )
       );
     });
   });
@@ -680,11 +680,9 @@ describe('HeaderComponent', () => {
 
   describe('Localization from study', () => {
     const localizedSection = {
-      start_latitude: 10,
-      start_longitude: 1,
       start_azimuth: 0,
       supports: [
-        { number: '1', spanLength: 100, spanAngle: 0 },
+        { number: '1', spanLength: 100, spanAngle: 0, footLatitude: 10, footLongitude: 1 },
         { number: '2', spanLength: 200, spanAngle: 10 },
         { number: '3', spanLength: null, spanAngle: null }
       ]
@@ -787,7 +785,11 @@ describe('HeaderComponent', () => {
     });
 
     it('should notify when the section has no start localization', async () => {
-      await setup({ ...localizedSection, start_latitude: null }, { span: [0, 1], leftSupport: null });
+      const [first, ...others] = localizedSection.supports;
+      await setup(
+        { ...localizedSection, supports: [{ ...first, footLatitude: null }, ...others] },
+        { span: [0, 1], leftSupport: null }
+      );
 
       expect(workerPythonServiceMock.runTask).not.toHaveBeenCalled();
       expect(notificationServiceMock.info).toHaveBeenCalledWith('Localization not available in study');
@@ -806,7 +808,7 @@ describe('HeaderComponent', () => {
 
       await setup(localizedSection, { span: [0, 1], leftSupport: null });
 
-      expect(loggerServiceMock.error).toHaveBeenCalled();
+      expect(loggerServiceMock.warn).toHaveBeenCalled();
       expect(notificationServiceMock.info).toHaveBeenCalledWith('Localization not available in study');
     });
   });

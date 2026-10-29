@@ -4,6 +4,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { LOCATION_CONFIG, LOCATION_ERROR_IDS } from './location.constantes';
 import { LocationData } from './location.interfaces';
+import { isLocationPartiallyFilled, isLocationValid } from './location.helpers';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { TranslocoModule } from '@jsverse/transloco';
@@ -19,21 +20,26 @@ export class LocationComponent {
   readonly initialLatitude = input<number | null>(null);
   readonly initialLongitude = input<number | null>(null);
   readonly initialAzimuth = input<number | null>(null);
+  /** Changing this value resets the fields to the initial values, even when those are unchanged. */
+  readonly resetToken = input(0);
 
   readonly locationChange = output<LocationData>();
 
   protected readonly config = LOCATION_CONFIG;
 
   // Mirrors exactly what is in the DOM, so re-rendering `[value]` never fights an in-progress keystroke.
-  protected readonly latitudeText = linkedSignal<string>(() =>
-    String(this.initialLatitude() ?? LOCATION_CONFIG.latitude.default)
-  );
-  protected readonly longitudeText = linkedSignal<string>(() =>
-    String(this.initialLongitude() ?? LOCATION_CONFIG.longitude.default)
-  );
-  protected readonly azimuthText = linkedSignal<string>(() =>
-    String(this.initialAzimuth() ?? LOCATION_CONFIG.azimuth.default)
-  );
+  protected readonly latitudeText = linkedSignal<string>(() => {
+    this.resetToken();
+    return String(this.initialLatitude() ?? '');
+  });
+  protected readonly longitudeText = linkedSignal<string>(() => {
+    this.resetToken();
+    return String(this.initialLongitude() ?? '');
+  });
+  protected readonly azimuthText = linkedSignal<string>(() => {
+    this.resetToken();
+    return String(this.initialAzimuth() ?? '');
+  });
 
   protected readonly latitudeValue = computed<number | null>(() => this.parseInputValue(this.latitudeText()));
   protected readonly longitudeValue = computed<number | null>(() => this.parseInputValue(this.longitudeText()));
@@ -64,14 +70,20 @@ export class LocationComponent {
     return v !== null && v < this.config.azimuth.min;
   });
 
-  protected readonly isValid = computed(
-    () =>
-      !this.isLatitudeOverMax() &&
-      !this.isLatitudeUnderMin() &&
-      !this.isLongitudeOverMax() &&
-      !this.isLongitudeUnderMin() &&
-      !this.isAzimuthOverMax() &&
-      !this.isAzimuthUnderMin()
+  protected readonly isPartiallyFilled = computed(() =>
+    isLocationPartiallyFilled({
+      latitude: this.latitudeValue(),
+      longitude: this.longitudeValue(),
+      azimuth: this.azimuthValue()
+    })
+  );
+
+  protected readonly isValid = computed(() =>
+    isLocationValid({
+      latitude: this.latitudeValue(),
+      longitude: this.longitudeValue(),
+      azimuth: this.azimuthValue()
+    })
   );
 
   protected readonly latitudeErrorId = computed<string | null>(() => {

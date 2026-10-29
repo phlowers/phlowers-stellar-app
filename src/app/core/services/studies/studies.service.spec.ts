@@ -706,6 +706,51 @@ describe('StudiesService', () => {
 
     await service.downloadStudy('existing-uuid-123', 'file-name');
 
+    const blob = createObjectUrlSpy.mock.calls[0][0] as Blob;
+    expect(blob.type).toBe('application/octet-stream');
+    expect(JSON.parse(atob(await blob.text()))).toEqual(await service.getStudy('existing-uuid-123'));
+    expect(
+      (createElementSpy.mock.results.find((r) => r.value instanceof HTMLAnchorElement)?.value as HTMLAnchorElement)
+        .download
+    ).toBe('file-name.clst');
+    expect(createObjectUrlSpy).toHaveBeenCalled();
+    expect(clickSpy).toHaveBeenCalled();
+    expect(revokeObjectUrlSpy).toHaveBeenCalled();
+
+    createObjectUrlSpy.mockRestore();
+    revokeObjectUrlSpy.mockRestore();
+    createElementSpy.mockRestore();
+  });
+
+  it('downloads a study as readable JSON with stsd format', async () => {
+    const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+    if (!URL.revokeObjectURL) {
+      Object.defineProperty(URL, 'revokeObjectURL', {
+        value: vi.fn(),
+        writable: true
+      });
+    }
+    const revokeObjectUrlSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    const clickSpy = vi.fn();
+    const originalCreateElement = document.createElement.bind(document);
+
+    const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
+      const element = originalCreateElement(tagName);
+      if (tagName === 'a') {
+        element.click = clickSpy;
+      }
+      return element;
+    });
+
+    await service.downloadStudy('existing-uuid-123', 'file-name', 'stsd');
+
+    const blob = createObjectUrlSpy.mock.calls[0][0] as Blob;
+    expect(blob.type).toBe('application/json');
+    expect(JSON.parse(await blob.text())).toEqual(await service.getStudy('existing-uuid-123'));
+    expect(
+      (createElementSpy.mock.results.find((r) => r.value instanceof HTMLAnchorElement)?.value as HTMLAnchorElement)
+        .download
+    ).toBe('file-name.stsd');
     expect(createObjectUrlSpy).toHaveBeenCalled();
     expect(clickSpy).toHaveBeenCalled();
     expect(revokeObjectUrlSpy).toHaveBeenCalled();

@@ -27,8 +27,6 @@ const mockSection: Partial<Section> = {
   cable_span_manipulations: [],
   selected_cable_span_manipulation_uuid: null,
   selected_charge_uuid: 'charge-uuid-1',
-  start_latitude: null,
-  start_longitude: null,
   start_azimuth: null
 };
 

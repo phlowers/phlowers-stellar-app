@@ -22,7 +22,9 @@ import { TableModule } from 'primeng/table';
 import { Section, Support, CatalogChain } from '@shared/domain';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Localization, Task } from '@core/services/worker_python/tasks/types';
+import { Localization } from '@core/services/worker_python/tasks/types';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
+import { CRS } from '@shared/domain/helpers/geopositioning.constantes';
 import { AttachmentSetModalComponent } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -43,7 +45,7 @@ import {
 import { SUPPORT_FIELD_LIMITS } from '@shared/domain/helpers/support-limits.constantes';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
-import { LOCATION_CONFIG } from '../location/location.constantes';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ExpandableSelectField } from './supportsTable.types';
 
@@ -112,6 +114,8 @@ export class SupportsTableComponent implements OnInit {
   private readonly allCatalogSupportNames = toSignal(this.attachmentService.distinctSupportNames$);
   readonly catalogLoaded = computed(() => this.allCatalogSupportNames() !== undefined);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly geopositioning = inject(GeopositioningService);
+  private readonly logger = inject(LoggerService);
   readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
   private readonly transloco = inject(TranslocoService);
   localization = signal<Localization | null>(null);
@@ -181,46 +185,41 @@ export class SupportsTableComponent implements OnInit {
     });
   }
 
-  private hasLocalizationInputs(section: Section | null | undefined, supports: Support[]): boolean {
-    return (
-      supports.length > 0 &&
-      !!section &&
-      !supports.slice(0, -1).some((s) => s.spanLength == null || s.spanAngle == null)
-    );
-  }
-
-  private buildLocalizationPayload(section: Section, supports: Support[]) {
-    const lastIndex = supports.length - 1;
-    return {
-      startLatitude: section.start_latitude ?? LOCATION_CONFIG.latitude.default,
-      startLongitude: section.start_longitude ?? LOCATION_CONFIG.longitude.default,
-      startAzimuth: section.start_azimuth ?? LOCATION_CONFIG.azimuth.default,
-      spanLength: supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!)),
-      lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
-    };
-  }
-
   private async computeLocalization(): Promise<void> {
     if (this.mode() !== 'view') return;
 
     const section = this.section();
-    const supports = this.supports();
+    if (!section || !this.workerReady()) return;
 
-    if (!this.hasLocalizationInputs(section, supports)) return;
-    if (!this.workerReady()) return;
+    const located = { ...section, supports: this.supports() };
+    if (!this.geopositioning.getStartGps(located)) {
+      this.localization.set(null);
+      return;
+    }
 
     this.localizationLoading.set(true);
 
     try {
-      const { result, error } = await this.workerPythonService.runTask(
-        Task.computeLocalization,
-        this.buildLocalizationPayload(section!, supports)
-      );
-      if (result && !error) {
-        this.localization.set(result);
+      const resolved = await this.geopositioning.resolveLocalization(located);
+      if (!resolved) {
+        this.logger.warn('Supports table: localization unavailable although a start GPS is set');
+        return;
       }
-    } catch {
-      // runTask failure — localizationLoading is cleared in finally
+
+      const points = resolved.latitude.map((latitude, i) => ({ latitude, longitude: resolved.longitude[i] }));
+      const projected = await this.geopositioning.toCrs(points, CRS.LAMBERT93);
+      if (!projected) {
+        this.logger.warn('Supports table: Lambert projection unavailable although a start GPS is set');
+        return;
+      }
+
+      this.localization.set({
+        ...resolved,
+        lambert_x: projected.map((point) => point.x),
+        lambert_y: projected.map((point) => point.y)
+      });
+    } catch (error: unknown) {
+      this.logger.warn('Supports table: localization failed', error);
     } finally {
       this.localizationLoading.set(false);
     }

@@ -53,7 +53,7 @@ Sous les informations en lecture seule, saisissez le **lieu où vous avez enregi
 
 ### Localisation automatique depuis l'étude
 
-Lorsqu'une portée est sélectionnée, {{app_name}} tente de préremplir la longitude, la latitude et l'azimut à partir de la localisation déjà enregistrée dans l'étude en cours pour cette portée.
+Lorsqu'une portée est sélectionnée, {{app_name}} tente de préremplir la longitude, la latitude et l'azimut à partir de la localisation déjà enregistrée dans l'étude en cours pour cette portée. La géolocalisation est facultative : si la section de l'étude n'a pas de position de départ, ces champs restent vides et doivent être saisis manuellement.
 
 La valeur utilisée dépend de la portée sélectionnée et du support de référence choisi :
 - L'application prend la localisation étudiée de la portée sélectionnée.

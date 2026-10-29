@@ -92,19 +92,20 @@ describe('RTE custom canton file → Section (integration)', () => {
   let runTaskMock: ReturnType<typeof vi.fn>;
 
   /** Reprojection is a Python-worker boundary: it answers with the GPS values of the expected section. */
-  const mockReprojection = (task: Task) => {
+  const mockReprojection = () => {
     const localization = {
       latitude: expectedSection.supports.map((s) => s.footLatitude),
       longitude: expectedSection.supports.map((s) => s.footLongitude),
-      azimuth: expectedSection.supports.map(() => expectedSection.start_azimuth),
+      azimuth: expectedSection.supports.slice(0, -1).map((s) => s.spanAzimut),
       lambert_x: EXPECTED_LAMBERT_X,
       lambert_y: EXPECTED_LAMBERT_Y
     };
-    if (task === Task.importLambert) {
-      return Promise.resolve({ result: localization, error: null, pythonErrorCode: null });
-    }
     return Promise.resolve({
-      result: { localization, meanGpsDiffMeter: expectedSection.mean_reprojection_diff_meters },
+      result: {
+        localization,
+        positionErrorMeter: expectedSection.supports.map(() => 0),
+        startAzimuth: expectedSection.start_azimuth
+      },
       error: null,
       pythonErrorCode: null
     });
@@ -131,7 +132,7 @@ describe('RTE custom canton file → Section (integration)', () => {
         { provide: SectionService, useValue: sectionServiceMock },
         { provide: NotificationService, useValue: notificationMock },
         { provide: LoggerService, useValue: { warn: vi.fn(), error: vi.fn(), log: vi.fn(), info: vi.fn() } },
-        { provide: WorkerPythonService, useValue: { runTask: runTaskMock } },
+        { provide: WorkerPythonService, useValue: { runTask: runTaskMock, ready: true } },
         { provide: MaintenanceService, useValue: { getMaintenance: vi.fn().mockResolvedValue(MAINTENANCE_CATALOG) } },
         { provide: ChainsService, useValue: { getChains: vi.fn().mockResolvedValue(CHAIN_CATALOG) } },
         { provide: LinesService, useValue: { getLines: vi.fn().mockResolvedValue([{ voltage_idr: '63 KV' }]) } },
@@ -175,24 +176,21 @@ describe('RTE custom canton file → Section (integration)', () => {
     expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledWith(expect.anything(), section);
   });
 
-  it('should reproject the Lambert93 foot coordinates in span order', async () => {
+  it('should reproject the Lambert93 foot coordinates with a single validation task', async () => {
     await importFakeCanton();
 
-    expect(runTaskMock).toHaveBeenCalledWith(Task.importLambert, {
-      lambert_x: EXPECTED_LAMBERT_X,
-      lambert_y: EXPECTED_LAMBERT_Y
-    });
+    expect(runTaskMock).toHaveBeenCalledTimes(1);
     expect(runTaskMock).toHaveBeenCalledWith(
       Task.importLambertAndValidate,
       expect.objectContaining({ lambert_x: EXPECTED_LAMBERT_X, lambert_y: EXPECTED_LAMBERT_Y })
     );
   });
 
-  it('should notify the success, the reprojection error and one catalog warning', async () => {
+  it('should notify the success, the azimuth and position notices and one catalog warning', async () => {
     await importFakeCanton();
 
     expect(notificationMock.success).toHaveBeenCalledTimes(1);
     expect(notificationMock.warning).toHaveBeenCalledTimes(1);
-    expect(notificationMock.info).toHaveBeenCalledTimes(1);
+    expect(notificationMock.info).toHaveBeenCalledTimes(2);
   });
 });
