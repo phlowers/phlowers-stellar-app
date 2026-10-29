@@ -574,7 +574,7 @@ describe('StudioTopToolbarComponent', () => {
       const options = component.selectedDisplayOptions();
 
       expect(options).toEqual([
-        { label: 'studio.top-toolbar.loads-option', value: 'loads' },
+        { label: 'common.loads-label', value: 'loads' },
         { label: 'studio.top-toolbar.base-option', value: 'baseState' },
         { label: 'studio.top-toolbar.transparent-background-option', value: 'transparentBackground' },
         { label: 'studio.top-toolbar.measurement-points-option', value: 'measurePoints' }
@@ -636,7 +636,7 @@ describe('StudioTopToolbarComponent', () => {
 
       expect(component.selectedDisplayOptions()).toEqual([
         { label: 'studio.free-positioning.floor', value: 'floor' },
-        { label: 'studio.free-positioning.obstacle', value: 'obstacles' }
+        { label: 'common.obstacles-label', value: 'obstacles' }
       ]);
       expect(component.selectedDisplayValues()).toEqual(['floor', 'obstacles']);
     });

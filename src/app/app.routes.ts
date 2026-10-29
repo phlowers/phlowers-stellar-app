@@ -48,7 +48,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'tools',
-        title: 'routes.tools',
+        title: 'common.tools-label',
         loadChildren: () => import('@features/tools/presentation/tools.routes').then((m) => m.toolsRoutes)
       },
       {
@@ -63,7 +63,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'instruction-manual',
-        title: 'routes.instruction-manual',
+        title: 'common.instruction-manual-label',
         loadChildren: () =>
           import('@features/instruction-manual/presentation/instruction-manual.routes').then(
             (m) => m.instructionManualRoutes
@@ -71,7 +71,7 @@ export const appRoutes: Routes = [
       },
       {
         path: 'studio',
-        title: 'routes.studio',
+        title: 'common.studio',
         loadComponent: () =>
           import('@features/studio/core/presentation/pages/studio-page/studio-page.component').then(
             (m) => m.StudioPageComponent
