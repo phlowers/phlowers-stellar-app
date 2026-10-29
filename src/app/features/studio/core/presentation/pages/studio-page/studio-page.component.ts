@@ -401,9 +401,8 @@ export class StudioPageComponent implements OnInit, OnDestroy {
           up: { x: rawCam.up?.x ?? 0, y: rawCam.up?.y ?? 0, z: rawCam.up?.z ?? 0 }
         }
       : null;
-    const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
-    // Free positioning temporarily forces a 2D view: persist the view the user chose before it
-    const { view, side } =
+    // Free positioning temporarily forces a single-span 2D view: persist the options the user chose before it
+    const { view, side, startSupport, endSupport } =
       this.plotOptionsService.freePositioningSavedView()?.plotOptions ?? this.plotOptionsService.plotOptions();
     return {
       camera,

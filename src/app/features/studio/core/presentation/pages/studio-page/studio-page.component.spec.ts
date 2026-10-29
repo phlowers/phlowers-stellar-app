@@ -853,12 +853,12 @@ describe('StudioPageComponent', () => {
 
     it('should persist the view saved before free positioning instead of the temporary one', () => {
       plotOptionsServiceMock.freePositioningSavedView.set({
-        plotOptions: { view: '3d', side: 'profile' } as PlotOptions
+        plotOptions: { view: '3d', side: 'profile', startSupport: 0, endSupport: 3 } as PlotOptions
       });
       plotOptionsServiceMock.plotOptions.mockReturnValue({
         invert: false,
-        startSupport: 0,
-        endSupport: 1,
+        startSupport: 1,
+        endSupport: 2,
         view: '2d',
         side: 'face'
       });
@@ -868,7 +868,7 @@ describe('StudioPageComponent', () => {
 
       expect(mockPersistenceService.save).toHaveBeenCalledWith(
         sectionUuid,
-        expect.objectContaining({ view: '3d', side: 'profile' })
+        expect.objectContaining({ view: '3d', side: 'profile', startSupport: 0, endSupport: 3 })
       );
     });
   });

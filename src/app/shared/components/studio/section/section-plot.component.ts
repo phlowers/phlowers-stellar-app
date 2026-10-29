@@ -11,12 +11,7 @@ import {
 } from '@angular/core';
 
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-<<<<<<< Updated upstream
-import { applyRestoreCamera, createPlot } from './helpers/createPlot';
-=======
 import { applyRestoreCamera, applyRestoreZoom2d, createPlot } from './helpers/createPlot';
-import { shouldBlockPlotlyDrag } from './helpers/plotlyDragGuard';
->>>>>>> Stashed changes
 import Plotly from 'plotly.js-dist-min';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
