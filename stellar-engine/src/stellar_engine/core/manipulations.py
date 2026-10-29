@@ -106,17 +106,20 @@ def apply_support_manip(support_manip_inputs: list[SupportManipInputs]):
         # ------- manip1 --------
         if support_manip.manip1.type == 'crane':
             support_dict = {}
-            # chain_dict = {}
             # not None and not equal to zero
             if support_manip.manip1.lateralDistance:
                 support_dict["y"] = support_manip.manip1.lateralDistance
             if support_manip.manip1.vertDisplacement:
                 support_dict["z"] = support_manip.manip1.vertDisplacement
-
-                # TODO: manage case with chain -> use chain mass
-                # currently uses default lineic mass from mechaphlowers
+            # If no chain altitude taken as a reference is the arm altitude:
+            # it will put the attachement altitude higher
+            if support_manip.manip1.anchoring == 'without_chain':
+                set_rope_or_chain_inputs[span_index] = {
+                    "type": "chain",
+                    "length": 0,
+                    "mass": 0,
+                }
             modify_support_inputs[span_index] = support_dict
-            # set_rope_or_chain_inputs[span_index] = chain_dict
 
         # skip if None or length set to 0
         elif (

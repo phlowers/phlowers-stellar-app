@@ -146,7 +146,7 @@ export class CableSupportManipComponent {
     {
       label: this.translocoService.translate('loads.shared.with-chain-option'),
       value: 'with_chain' as SupportAnchoringType,
-      disabled: true
+      disabled: false
     }
   ];
 
