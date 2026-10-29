@@ -41,6 +41,10 @@ import {
   isTangentAimingSupportDataValid,
   resetNonDisplayedParameterFields
 } from '../calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
+import {
+  isTangentAimingExteriorDataValid,
+  resetNonDisplayedExteriorFields
+} from '../calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.helpers';
 import { resetInactiveCalculusModes } from '../../calculus-mode-reset.helpers';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -199,8 +203,10 @@ export class FieldMeasuringComponent implements OnDestroy {
     return isValid && !this.isNameAlreadyTaken();
   });
 
-  /** Whether the tangent aiming (support) method is selected. */
-  readonly isTangentAimingMethod = computed(() => this.measureData().calculationMethod === 'tangente-aiming');
+  /** Whether a tangent aiming (support or exterior) method is selected. */
+  readonly isTangentAimingMethod = computed(() =>
+    ['tangente-aiming', 'tangente-aiming-exterior'].includes(this.measureData().calculationMethod)
+  );
 
   /**
    * Validity of the "Parameter calculation" tab (RG.MES.EXP-BTN.2). Only the PAPOTO method has an
@@ -210,6 +216,9 @@ export class FieldMeasuringComponent implements OnDestroy {
     const measureData = this.measureData();
     if (measureData.calculationMethod === 'tangente-aiming') {
       return isTangentAimingSupportDataValid(measureData);
+    }
+    if (measureData.calculationMethod === 'tangente-aiming-exterior') {
+      return isTangentAimingExteriorDataValid(measureData);
     }
     if (measureData.calculationMethod !== 'papoto') {
       return true;
@@ -273,7 +282,9 @@ export class FieldMeasuringComponent implements OnDestroy {
   /** Whether the measure has been computed at least once (PAPOTO is currently the only implemented method). */
   readonly hasComputedOutputs = computed(() => {
     const { calculationMethod, outputs } = this.measureData();
-    return calculationMethod === 'tangente-aiming' ? outputs.tangentAimingSupport !== null : outputs.papoto !== null;
+    if (calculationMethod === 'tangente-aiming') return outputs.tangentAimingSupport !== null;
+    if (calculationMethod === 'tangente-aiming-exterior') return outputs.tangentAimingExterior !== null;
+    return outputs.papoto !== null;
   });
 
   /** RG.MES.EXP-BTN.1: the "Exporter" button stays inactive until the measure is both valid and calculated/saved. */
@@ -409,11 +420,14 @@ export class FieldMeasuringComponent implements OnDestroy {
     if (!section || !currentMeasureData) {
       return;
     }
-    // Only the displayed inputs are persisted (RG.VIS-SUP.ENR-BTN.2)
-    const activeMeasureData =
-      currentMeasureData.calculationMethod === 'tangente-aiming'
-        ? resetNonDisplayedParameterFields(currentMeasureData)
-        : currentMeasureData;
+    // Only the displayed inputs are persisted (RG.VIS-SUP.ENR-BTN.2, RG.ENR-BTN.2)
+    const { calculationMethod } = currentMeasureData;
+    let activeMeasureData = currentMeasureData;
+    if (calculationMethod === 'tangente-aiming') {
+      activeMeasureData = resetNonDisplayedParameterFields(currentMeasureData);
+    } else if (calculationMethod === 'tangente-aiming-exterior') {
+      activeMeasureData = resetNonDisplayedExteriorFields(currentMeasureData);
+    }
     const measureData = resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {
       defaultTangentLeftSupport: getDefaultLeftSupport(activeMeasureData.span)
     });

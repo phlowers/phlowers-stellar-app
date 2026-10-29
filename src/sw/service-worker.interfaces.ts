@@ -1,0 +1,96 @@
+import type { PrecacheController } from 'workbox-precaching';
+import type { NetworkConnectionLike, ThroughputProbe } from '@services/app-update/network-rule.interfaces';
+import type { SizedManifestEntry } from '@services/app-update/storage-rule.interfaces';
+import type { PrefetchCatalogsMessage } from '@services/app-update/sw-messages.interfaces';
+
+export type {
+  InstallRefusalReason,
+  PrefetchCatalogsMessage,
+  PrefetchCatalogsResult,
+  SwInstallRefusedMessage,
+  SwLogLevel,
+  SwLogMessage,
+  SwOutgoingMessage
+} from '@services/app-update/sw-messages.interfaces';
+
+export interface SwLogger {
+  info(message: string): void;
+  warn(message: string): void;
+  error(message: string): void;
+}
+
+/** Minimal `Clients` surface used by the service worker. */
+export interface SwClients {
+  matchAll(options?: ClientQueryOptions): Promise<readonly { postMessage(message: unknown): void }[]>;
+  claim(): Promise<void>;
+}
+
+export interface StorageEstimator {
+  estimate(): Promise<{ usage?: number; quota?: number }>;
+}
+
+/** `PrecacheController` subset used by the install/activate helpers. */
+export type PrecacheControllerLike = Pick<
+  PrecacheController,
+  'install' | 'activate' | 'getCacheKeyForURL' | 'strategy'
+>;
+
+export interface GuardedInstallDeps {
+  event: ExtendableEvent;
+  controller: PrecacheControllerLike;
+  entries: readonly SizedManifestEntry[];
+  connection: NetworkConnectionLike | undefined;
+  /** Active throughput measurement, used when the browser estimate alone refuses the download. */
+  probe?: ThroughputProbe;
+  storage: StorageEstimator | undefined;
+  caches: CacheStorage;
+  clients: SwClients;
+  logger: SwLogger;
+}
+
+export interface ActivationDeps {
+  event: ExtendableEvent;
+  controller: PrecacheControllerLike;
+  caches: CacheStorage;
+  clients: SwClients;
+  logger: SwLogger;
+}
+
+/**
+ * Workbox strategy subset used to prefetch through the same cache and plugins as the catalog route.
+ *
+ * @remarks
+ * `handleAll` returns the response (resolved once headers are available) and a completion promise that settles
+ * after the streamed body and the cache write are done (rejected when either fails).
+ */
+export interface CatalogStrategyLike {
+  handleAll(options: { request: Request; event: ExtendableEvent }): [Promise<Response>, Promise<void>];
+}
+
+export interface ShellNavigationDeps {
+  /** Cached shell, or undefined when it is missing from the precache. */
+  matchShell(): Promise<Response | undefined>;
+  fetch(request: Request): Promise<Response>;
+  origin: string;
+}
+
+/** Catalog cache subset used to skip cached URLs and evict a download that exceeds the storage reserve. */
+export interface CatalogCacheLike {
+  has(url: string): Promise<boolean>;
+  delete(url: string): Promise<boolean>;
+}
+
+export interface PrefetchCatalogsDeps {
+  message: PrefetchCatalogsMessage;
+  event: ExtendableEvent;
+  origin: string;
+  strategy: CatalogStrategyLike;
+  connection: NetworkConnectionLike | undefined;
+  probe?: ThroughputProbe;
+  storage: StorageEstimator | undefined;
+  cache?: CatalogCacheLike;
+  logger: SwLogger;
+}
+
+// 'stopped': the user data reserve is exhausted, so this catalog and the following ones are not prefetched.
+export type CatalogPrefetchOutcome = 'cached' | 'failed' | 'stopped';

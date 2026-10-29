@@ -1,59 +1,62 @@
 <ng-template #header>
   <p class="text-l-600 mb-0 flex gap-2 items-center">
     <app-icon icon="table_chart" />
-    <span>{{ 'studio.l0-sum.natural-lengths-title' | transloco }}</span>
+    <span>{{ 'studio.l0-sum.naturals-lengths-title' | transloco }}</span>
   </p>
 </ng-template>
 
 @if (!loading()) {
-  <div class="l0-sum">
-    <section>
-      <h3 class="heading-xs underline-text">{{ 'studio.top-toolbar.l0-table-label' | transloco }}</h3>
+  <section class="l0-sum">
+    <h3 class="heading-xs underline-text l0-sum__title">{{ 'studio.top-toolbar.l0-table-label' | transloco }}</h3>
 
-      <p-table
-        [value]="l0Rows()"
-        [paginator]="true"
-        [rows]="rowsPerPage"
-        [rowsPerPageOptions]="rowsPerPageOptions"
-        [showCurrentPageReport]="true"
-        currentPageReportTemplate="{currentPage} sur {totalPages}"
-        styleClass="l0-table"
-        [customSort]="true"
-        paginatorDropdownAppendTo="body"
-        (sortFunction)="customSort($event)"
-        data-testid="l0-table"
-      >
-        <ng-template pTemplate="header">
-          <tr>
-            <th id="span-header" pSortableColumn="span">
-              <div class="flex items-center gap-2">
-                <span>{{ 'common.span-label' | transloco }}</span>
-                <app-icon [icon]="getSortIcon('span')" />
-              </div>
-            </th>
+    <p-table
+      [value]="l0Rows()"
+      [paginator]="true"
+      [rows]="rowsPerPage"
+      [rowsPerPageOptions]="rowsPerPageOptions"
+      paginatorPosition="top"
+      [showCurrentPageReport]="true"
+      [currentPageReportTemplate]="'studio.l0-sum.current-page-report' | transloco"
+      [customSort]="true"
+      paginatorDropdownAppendTo="body"
+      (sortFunction)="customSort($event)"
+      data-testid="l0-table"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th id="span-header" pSortableColumn="span">
+            <div class="flex items-center gap-2">
+              <span>{{ 'common.span-label' | transloco }}</span>
+              <app-icon [icon]="getSortIcon('span')" />
+            </div>
+          </th>
 
-            <th id="l0-header">{{ 'studio.l0-sum.l0-column-label' | transloco }}</th>
-          </tr>
-        </ng-template>
+          <th id="span-length-header">{{ 'common.span-length-short-label' | transloco }}</th>
 
-        <ng-template pTemplate="body" let-row>
-          <tr>
-            <td>
-              <span>{{ row.span }}</span>
-            </td>
-            <td>
-              <span>{{ row.l0 | number: '1.2-2' }}&nbsp;m</span>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </section>
+          <th id="l0-header">{{ 'studio.l0-sum.l0-column-label' | transloco }}</th>
 
-    <dl class="l0-sum__section-summary">
-      <dt class="l0-sum__section-summary__title">{{ 'studio.l0-sum.sum-l0-label' | transloco }}</dt>
-      <dd class="l0-sum__section-summary__value">{{ totalL0() | number: '1.2-2' }}&nbsp;m</dd>
-    </dl>
-  </div>
+          <th id="cumulated-l0-header">{{ 'studio.l0-sum.cumulated-l0-column-label' | transloco }}</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row>
+        <tr>
+          <td>
+            <span>{{ row.span }}</span>
+          </td>
+          <td>
+            <span>{{ row.spanLength | number: '1.0-3' }}&nbsp;{{ 'common.meter' | transloco }}</span>
+          </td>
+          <td>
+            <span>{{ row.l0 | number: '1.0-3' }}&nbsp;{{ 'common.meter' | transloco }}</span>
+          </td>
+          <td>
+            <span>{{ row.cumulatedL0 | number: '1.0-3' }}&nbsp;{{ 'common.meter' | transloco }}</span>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
 } @else {
   <div class="l0-sum__loading">
     <p-progressSpinner />
@@ -62,7 +65,15 @@
 }
 
 <ng-template #footer>
-  <button disabled="true" app-btn type="button" btnSize="m" (click)="onExport()" data-testid="l0-export-btn">
+  <button
+    app-btn
+    type="button"
+    btnSize="m"
+    [btnLoading]="loading()"
+    [disabled]="loading()"
+    (click)="onExport()"
+    data-testid="l0-export-btn"
+  >
     <app-icon icon="download" />
     <span>{{ 'common.export' | transloco }}</span>
   </button>

@@ -1,0 +1,11 @@
+/* Type-checks the Workbox service worker (bundled by scripts/build-service-worker.mjs). */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["webworker", "es2022"],
+    "types": []
+  },
+  "include": ["src/sw/**/*.ts"],
+  "exclude": ["src/sw/**/*.spec.ts"]
+}

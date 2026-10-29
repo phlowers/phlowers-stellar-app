@@ -38,19 +38,19 @@ export class LoggedLayoutComponent {
         },
         {
           id: 'sideB-tools',
-          label: this.translocoService.translate('shared.logged-layout.tools'),
+          label: this.translocoService.translate('common.tools-label'),
           route: '/tools',
           icon: 'build'
-        },
-        {
-          id: 'sideB-documentation',
-          label: this.translocoService.translate('shared.logged-layout.documentation'),
-          externalUrl: '/docs/index.html',
-          target: '_blank',
-          icon: 'help'
         }
       ],
       footer: [
+        {
+          id: 'sideB-instruction-manual',
+          label: this.translocoService.translate('common.instruction-manual-label'),
+          shortLabel: this.translocoService.translate('common.manual-label'),
+          route: '/instruction-manual',
+          icon: 'help'
+        },
         {
           id: 'sideB-usrPref',
           label: this.translocoService.translate('shared.logged-layout.version-maj'),

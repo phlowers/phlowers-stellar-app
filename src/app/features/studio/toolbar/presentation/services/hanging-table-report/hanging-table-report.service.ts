@@ -9,6 +9,7 @@ import { inject, Injectable } from '@angular/core';
 import { TranslocoService } from '@jsverse/transloco';
 
 import { NotificationService } from '@core/services/notification/notification.service';
+import { sanitizeFilenamePart } from '@shared/helpers/filename.helpers';
 import { PdfBaseService } from '@shared/pdf/pdf-base.service';
 import { PAGE_MARGIN, PAGE_SIZE, SECTION_TITLE_HEIGHT } from '@shared/pdf/pdf-layout.constantes';
 import {
@@ -16,8 +17,7 @@ import {
   drawHeader,
   drawPageFooters,
   drawSectionTitle,
-  generatePdfReport,
-  sanitizeFilenamePart
+  generatePdfReport
 } from '@shared/pdf/pdf-primitives.helpers';
 import { buildTables, computeLabelColWidth, computeTableHeight, drawTable } from '@shared/pdf/pdf-table.helpers';
 

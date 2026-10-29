@@ -24,6 +24,8 @@ export interface CatalogObstacleConformityConfigEntity {
   key: string;
   /** Default value of the Conformity modal "Repartition temperature" field. */
   repartition_temperature_default: number;
+  /** Default value of the Conformity modal "Lateral distance temperature" field. */
+  lateral_temperature_default: number;
   /** Rule identifier whose name is rendered in the "Lateral distance temperature" field label. */
   lateral_temperature_rule_type: string;
   /** Message displayed below the "Lateral distance temperature" field. */

@@ -61,6 +61,8 @@ make simplepdf
 
 The generated PDF is written to `docs-sphinx/build/simplepdf/` folder.
 
+To build both language PDFs and publish them where the app links to them (`dist/docs/<lang>/<app>_documentation.pdf`), run `npm run docs:pdf` after `npm run build`. Set `SPHINX_APP_NAME` to the same value as the `APP_NAME` used for the build so the file name matches the one the app expects. The Docker image does this automatically, with the `APP_NAME` build argument (default `Stellar`).
+
 > **Note:** Sphinx-SimplePDF relies on [WeasyPrint](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html), which requires native libraries. On Debian/Ubuntu install `libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0`; on Fedora install `pango`; on macOS run `brew install pango`.
 >
 > If you get an error such as `pango_context_set_round_glyph_positions` not found, your system Pango is too old for the latest WeasyPrint. Pin WeasyPrint to a compatible version:

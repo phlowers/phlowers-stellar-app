@@ -12,6 +12,7 @@ import { openWorkerDb } from '../csv-import.worker-db';
 import { isJsonImportConfig, resolveCsvImportConfig } from '../configs';
 import type { StellarDexieHandle } from '../json-import.engine.interfaces';
 import type { CsvImportWorkerRequest, CsvImportWorkerResponse } from '../csv-import.worker.interfaces';
+import { CatalogIntegrityError } from '../csv-import.errors';
 import { downloadAndHash } from './verified-download.helpers';
 import { STAGING_TABLE_PREFIX } from '@infrastructure/database/app-database.versions';
 
@@ -113,7 +114,7 @@ export async function runWorkerImport(
 ): Promise<void> {
   const { blob, hash } = await downloadAndHash(request.url);
   if (request.expectedHash && request.expectedHash !== hash) {
-    throw new Error(
+    throw new CatalogIntegrityError(
       `Catalog hash mismatch for ${request.url}: expected ${request.expectedHash}, got ${hash} — refusing to import`
     );
   }

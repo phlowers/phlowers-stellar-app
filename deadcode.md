@@ -19,6 +19,40 @@
 - **Removal impact**: Remove the method and its `deleteCharge` spec block; check whether `AppIconComponent` and the `loads.shared.erase-load-case-aria-label` key are still used.
 - **Detected on**: 2026-10-13.
 - **Status**: PENDING REVIEW; deletion requires user validation.
+### Previous application update system (replaced by Workbox, task P5-05)
+
+- **Sources**:
+  - `src/app/core/services/worker_update/` (whole folder: `service-worker.ts`, `service-worker.interfaces.ts`,
+    `service-worker.spec.ts`, `worker_update.service.ts`, `worker_update.service.spec.ts`,
+    `worker_update.service.helpers.ts`, `worker_update.service.helpers.spec.ts`, `worker_update.service.constantes.ts`,
+    `tsconfig.json`).
+  - `tsconfig.worker.json`: NOT dead (correction 2026-10-12) — `angular.json` uses it as `webWorkerTsConfig` for
+    the application Web Workers; only its `include` (old service worker) and `outDir` were replaced.
+  - `package.json`: script `build:service-worker` (no longer called by `build`).
+  - `.gitignore` lines 49-50 (`public/service-worker.js`, `public/service-worker.interfaces.js`) and
+    `eslint.config.js` ignore `public/service-worker.js`: outputs of the old script. The local generated files
+    `public/service-worker.js` / `public/service-worker.interfaces.js` are still copied into `dist/` by `ng build`
+    (the first is overwritten by `build:sw`, the second is excluded from the precache).
+  - `public/i18n/{en,fr}.json`: `shared.update-service.*` (10 keys, only used by `worker_update.service.ts`).
+  - `src/app/features/admin/presentation/pages/admin/admin.ts`: fields `updateAvailable` and `newVersion` (never
+    read, leftovers of the old admin update flow) and their assertions in `admin.spec.ts`.
+- **Evidence**: no file outside `src/app/core/services/worker_update/` imports it any more (checked on 2026-10-12:
+  `grep -rln worker_update src --include=*.ts` only lists the folder itself); the Workbox service worker
+  (`src/sw/`, `scripts/build-service-worker.mjs`) and `AppUpdateService` replace it (tasks P3 to P5-04).
+- **Keep**: `scripts/create_assets_list_for_service_worker.py` and `dist/assets_list.json` (hypothesis H8: still
+  needed by workstations on the old system to reach the Workbox version; removal is backlog item BL-01).
+- **Removal impact**: delete the files and lines above; `npm run lint-check`, `npm run test` and `npm run build`
+  must stay green; no runtime behavior change.
+- **Detected on**: 2026-10-12.
+- **Status**: 🗑️ REMOVED — 2026-10-12, validated by the user (task P5-05).
+
+### `buildCantonSupportOptions()`
+
+- **Source**: `src/app/features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers.ts`.
+- **Evidence**: Replaced by `buildSpanSupportOptions()` (selector limited to the span supports); no caller and no spec in `src` (PR #1299 review).
+- **Removal impact**: Remove the function; `formatSupportNumber` stays used by `buildSpanSupportOptions`.
+- **Detected on**: 2026-10-21.
+- **Status**: PENDING REVIEW; deletion requires user validation.
 
 ## Legend
 - **📍 Source**: file and line number
@@ -589,6 +623,133 @@
 
 ---
 
+## 41. `RuleClimaticCondition.set_wind_pressure` — `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/scenarios.py` (`RuleClimaticCondition.set_wind_pressure`) |
+| Code | `def set_wind_pressure(self, wind_pressure: float)` |
+| 🔍 Evidence | No caller in `stellar-engine/src` or `stellar-engine/test`; wind pressure is resolved at construction time (`wind_zone_pressure`) and by `apply_wind_minus`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method only. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 42. `ConformityResult.compute_table_result` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityResult.compute_table_result`) |
+| Code | `def compute_table_result(self, points_list: list) -> None: pass` |
+| 🔍 Evidence | Empty body (`pass`) and no caller. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method only. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 43. `ConformityTableResult.set_conformity_point` + `current_conformity_point` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult.set_conformity_point`) |
+| Code | `def set_conformity_point(self, conformity_point)` assigning the undeclared attribute `current_conformity_point` |
+| 🔍 Evidence | `get_conformity` no longer calls it: compliance is now computed from `scenario_compliances` over every scenario. `current_conformity_point` is no longer read. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 44. `ConformityTableResult.add_scenario_compliance` + `scenario_compliances` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult`), call in `simulation.py` (`get_conformity`) |
+| Code | `scenario_compliances: list[bool]` and `add_scenario_compliance(distance, conformity_point, security_distance)` |
+| 🔍 Evidence | Encoded the old rule (every scenario's u/v projection > distance to comply). `conformity_compliance_status` is now derived from `overhang_compliance_altitude` / `lateral_compliance_line_axis_distance` per conformity plot. The 5 related unit tests in `test_conformity_compute.py` were replaced. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Field, method, call and 5 obsolete unit tests removed. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-07 |
+
+---
+
+## 45. `ConformityTableResult.set_target_state` + `set_distance` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult.set_target_state`, `ConformityTableResult.set_distance`) |
+| Code | `set_target_state(point, conformity_point)` (temperature / wind pressure of the `lateral` and `overhang` scenarios only) and `set_distance(distance, conformity_point)` (minimal distance from `distance_projection_u` / `distance_projection_v`) |
+| 🔍 Evidence | `get_conformity` now calls `set_closest_point`, which fills `*Temperature`, `*WindPressure` and `*MinimalDistance` from the point closest to the obstacle (lateral side = lateral + lateral_inverse + intermediate). No other caller. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both methods; the `DistanceResult` import becomes unused and must be removed too. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 46. `ConformityResult.add_zone_3d_point` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityResult.add_zone_3d_point`) |
+| Code | `def add_zone_3d_point(self, rule_type, point, radius)` projecting a 3D point then calling `add_zone_2d_point` |
+| 🔍 Evidence | No caller in `stellar-engine/src` or `stellar-engine/test`; `get_conformity` projects the point itself and calls `add_zone_2d_point`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the method only. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 47. `ConformityTableResult.overhang_compliance_line_axis_distance` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/compute.py` (`ConformityTableResult.overhang_compliance_line_axis_distance`) |
+| Code | `@property def overhang_compliance_line_axis_distance(self)` |
+| 🔍 Evidence | Not serialized by `TableResultWriter` and no caller. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the property only. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 48. `Point2D.from_array` + `TableResultWriter.__init__` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`, `stellar-engine/src/stellar_engine/entities/conformity.py`
+
+| | |
+|---|---|
+| 📍 Source | `Point2D.from_array` (`compute.py`), `TableResultWriter.__init__` (`entities/conformity.py`) |
+| Code | `Point2D.from_array(arr)` and `TableResultWriter.__init__(self, result)` storing `self.result` |
+| 🔍 Evidence | No caller: `Point2D` is always built from coordinates and `TableResultWriter.write` is a static method that never reads `self.result`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both methods; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 49. `to_dict` of the conformity inputs — `stellar-engine/src/stellar_engine/entities/conformity.py`, `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+
+| | |
+|---|---|
+| 📍 Source | `TensionRules.to_dict`, `RuleDistanceInput.to_dict`, `ConformityParametersInput.to_dict` (`entities/conformity.py`); `RuleClimaticCondition.to_dict`, `ClimaticPoint.to_dict` (`scenarios.py`) |
+| Code | `def to_dict(self) -> dict` serializing the parsed inputs back to dictionaries |
+| 🔍 Evidence | Inputs are only parsed (`from_dict`); no caller serializes them in `stellar-engine/src` or `stellar-engine/test`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the five methods; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
+
+---
+
+## 50. `Scenario.to_dict` + `TargetState.to_dict` — `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+
+| | |
+|---|---|
+| 📍 Source | `stellar-engine/src/stellar_engine/core/conformity/scenarios.py` (`Scenario.to_dict`, `TargetState.to_dict`) |
+| Code | `def to_dict(self) -> dict` serializing a scenario and its target state |
+| 🔍 Evidence | Only caller was a `logger.debug` dump in `get_conformity`, replaced by lazy `%s` formatting of the scenario in `ScenarioRunner.run`. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both methods; no other change. |
+| ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
 ## 41. `app-assets-candidate-*` cache cleanup — `features/admin/presentation/pages/admin/admin.ts`
 
 | | |
@@ -598,4 +759,30 @@
 | 🔍 Evidence | The service worker no longer creates `app-assets-candidate-*` caches: every version is cached under `app-assets-v-<git_hash>` (`cacheNameForVersion` in `service-worker.ts`). Only leftovers from very old installs could still match. |
 | ⚠️ Confidence | **MEDIUM** — harmless to keep; removing it would leave such leftovers on very old installs |
 | Removal impact | Remove the condition and the `app-assets-candidate-xyz789` fixture/assertion in `admin.spec.ts` |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 42. `topbar.constantes.ts` — `shared/components/layout/topbar`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/shared/components/layout/topbar/topbar.constantes.ts` |
+| Code | `OFFLINE_STATUS_ICONS`, `OFFLINE_STATUS_WARNING_KINDS` |
+| 🔍 Evidence | Only consumed by the top bar offline indicator, removed when the offline status moved to the home page card. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Delete the file. Icons `cloud_done`, `cloud_sync`, `network_check`, `sd_card_alert`, `cloud_off` may become unused in `PossibleIconNames`. |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 43. `OnlineService.serverOnline$` health probe — `core/services/online/online.service.ts`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/core/services/online/online.service.ts` (constructor probe, `serverOnline$`, `ServerStatus`) |
+| Code | `GET environment.apiUrl` with 2 s timeout, result published on `serverOnline$` |
+| 🔍 Evidence | The home card was the only consumer of `serverOnline$`; it now relies on `online$` and the offline readiness state. There is no backend, so the probe always fails. `online$` is still used by news, changelog, admin and home. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the probe, `serverOnline$`, `ServerStatus`, the `HttpClient` dependency and matching tests in `online.service.spec.ts`; `environment.apiUrl` / `API_URL` become unused. |
 | ✅ Validated | ⏳ Pending review |

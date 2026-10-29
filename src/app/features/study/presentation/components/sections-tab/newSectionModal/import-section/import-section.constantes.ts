@@ -6,7 +6,6 @@
  */
 
 import { TranslocoService } from '@jsverse/transloco';
-import { uniq } from 'lodash';
 import { ImportContextConfig } from '@shared/import/domain/import-contracts.interfaces';
 import { SectionImportAdapter } from '@shared/import/section-adapter/section-import-adapter';
 
@@ -16,8 +15,8 @@ export const createSectionImportConfig = (
   adapters: readonly SectionImportAdapter[]
 ): ImportContextConfig => ({
   acceptedFiles: {
-    extensions: uniq(adapters.flatMap((adapter) => adapter.extensions)),
-    mimeTypes: uniq(adapters.flatMap((adapter) => adapter.mimeTypes ?? [])),
+    extensions: [...new Set(adapters.flatMap((adapter) => adapter.extensions))],
+    mimeTypes: [...new Set(adapters.flatMap((adapter) => adapter.mimeTypes ?? []))],
     hint: transloco.translate('section-import.from-file.file-format', {
       formats: adapters.map((adapter) => adapter.formatLabel).join(', ')
     })

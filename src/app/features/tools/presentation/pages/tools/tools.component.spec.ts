@@ -39,7 +39,7 @@ describe('ToolsComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
-              'routes.tools': 'Tools',
+              'common.tools-label': 'Tools',
               'common.import.action.open': 'Open',
               'tools.aria-open-tool': 'Open tool {{ tool }}',
               'tools.coming-soon': 'Coming soon',

@@ -78,8 +78,9 @@ export const PlotlyDrawings = {
     iconSize: { '2d': 12, '3d': 12 },
     borderPad: { '2d': 6, '3d': 6 },
     // pixels, never data units: the gap stays the same at any zoom level. The dashed line stops at the bottom edge of
-    // the icon box, worked out from iconSize and borderPad (see getCutStrandsLineLength)
-    offsetY: 90,
+    // the icon box, worked out from iconSize and borderPad (see getCutStrandsLineLength). Clears the cable modification
+    // label (top at ~118 px) by at least 4 px, see annotationsClearance.spec.ts
+    offsetY: 135,
     lineWidth: { '2d': 1, '3d': 1 },
     dashLength: 6,
     dashGap: 4,
@@ -155,7 +156,7 @@ export const PlotlyDrawings = {
     cablePoint: { color: '#2563EB', markerSize: 7 },
     obstaclePoint: { color: '#9F1239', symbol: 'diamond', markerSize: 10 },
     defaultZoneColor: '#888888', // used when a rule has no catalog color
-    fillOpacity: 0.2,
+    fillOpacity: 1,
     borderWidth: 2,
     borderMarkerSize: 4
   },

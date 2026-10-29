@@ -91,7 +91,9 @@ describe('StellarJsonAdapter', () => {
       expect(section).toMatchObject({ uuid: 'sec-1', name: 'Section', cable_name: 'ASTER570', extra: 'kept' });
       expect(Object.keys(section)).toEqual(expect.arrayContaining(Object.keys(createEmptySection())));
       expect(section.supports[0]).toMatchObject({ number: '1', spanLength: 100 });
-      expect(Object.keys(section.supports[0]).sort()).toEqual(Object.keys(createEmptySupport()).sort());
+      expect(Object.keys(section.supports[0]).sort((a, b) => a.localeCompare(b))).toEqual(
+        Object.keys(createEmptySupport()).sort((a, b) => a.localeCompare(b))
+      );
       expect(coordinates).toBeUndefined();
     });
 
