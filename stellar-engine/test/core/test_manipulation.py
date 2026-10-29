@@ -14,10 +14,11 @@ from stellar_engine.entities.inputs import (
 )
 
 
-def test_apply_manipulations_one_of_each(study_base: SectionStudy):
+def test_apply_manipulations_all_manips(study_base: SectionStudy):
     study_base.solve_adjustment()
     study_base.solve_change_state()
 
+    # inputs sent by stellar
     inputs = {
         'cableModifParams': [
             {

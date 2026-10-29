@@ -10,6 +10,7 @@ import logging
 
 from mechaphlowers import SectionStudy
 
+from stellar_engine.entities.errors import SelectorInputError
 from stellar_engine.entities.inputs import (
     ModifyCableInputs,
     SpanManipInputs,
@@ -88,7 +89,7 @@ def apply_modif_cable(cable_modif_inputs: list[ModifyCableInputs]):
         elif cable_modif.modificationType == "shortening":
             input_dict[cable_modif.spanIndex] = cable_modif.modifiedLengthCable
         else:
-            raise ValueError(
+            raise SelectorInputError(
                 f"Unsupported modificationType: {cable_modif.modificationType}. Expected 'lengthening' or 'shortening'"
             )
     return input_dict
@@ -174,7 +175,9 @@ def apply_span_manip(
                 current_span_length - span_manip.distanceToRefSupport
             )
         else:
-            raise ValueError
+            raise SelectorInputError(
+                f"Unsupported referenceSupport: {span_manip.referenceSupport}. Expected 'LEFT' or 'RIGHT'"
+            )
 
         # with sling or with chain
         if span_manip.anchoring == 'with_sling':
@@ -185,7 +188,9 @@ def apply_span_manip(
             #
             raise NotImplementedError
         else:
-            raise ValueError
+            raise SelectorInputError(
+                f"Unsupported anchoring value: {span_manip.anchoring}. Expected 'with_sling' or 'with_chain'"
+            )
 
         if span_manip.cableManipMethod == "pulley":
             # TODO: manage cableManipMethod "pulley" case (later)
