@@ -30,7 +30,7 @@ The coordinate systems are not used in the plotting part.
 |---|---|
 | `getFootGps` / `getStartGps` / `setStartGps` | Read/write the foot GPS in memory; the start point is `supports[0]`. |
 | `computeFootGps` | Computes every foot GPS and `spanAzimut` with `Task.computeLocalization` from the start point, `start_azimuth` and the span geometry. Never throws: the section is returned unchanged if inputs are missing or the worker fails. |
-| `syncFootGps` | Recomputes only when a start GPS exists and the geometry changed (start point, `start_azimuth`, support uuids/order, `spanLength`, `spanAngle`) or a foot GPS is missing. |
+| `syncFootGps` | Recomputes only when a start GPS exists and the geometry changed (start point, `start_azimuth`, support uuids/order, `spanLength`, `spanAngle`) or a foot GPS is missing. On failure, the derived foot GPS and `spanAzimut` are cleared (start GPS kept) only if the geometry changed; otherwise the known values are kept. |
 | `save` | `syncFootGps` then `SectionService.createOrUpdateSection`. A worker failure never blocks a save. |
 | `resolveLocalization` | Stored foot GPS/`spanAzimut` when complete, otherwise an on-the-fly computation that is not persisted. |
 | `toCrs` / `sectionToCrs` | On-the-fly reprojection of WGS84 points to any EPSG CRS with `Task.convertCoordinates`. |

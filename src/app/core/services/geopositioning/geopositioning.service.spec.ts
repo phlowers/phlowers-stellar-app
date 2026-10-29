@@ -204,6 +204,40 @@ describe('GeopositioningService', () => {
       expect(service.getFootGps(result)).toEqual([{ latitude: 45, longitude: 3 }, null, null]);
       expect(result.supports.map((s) => s.spanAzimut)).toEqual([null, null, null]);
     });
+
+    it('should keep the known localization when the computation fails and the geometry is unchanged', async () => {
+      const located = buildLocatedSection();
+      const section: Section = {
+        ...located,
+        start_azimuth: null,
+        supports: located.supports.map((s, i) => (i === 2 ? { ...s, footLatitude: null, footLongitude: null } : s))
+      };
+
+      const result = await service.syncFootGps(section, section);
+
+      expect(workerMock.runTask).not.toHaveBeenCalled();
+      expect(result).toBe(section);
+      expect(service.getFootGps(result)).toEqual([
+        { latitude: 45, longitude: 3 },
+        { latitude: 45.1, longitude: 3.1 },
+        null
+      ]);
+      expect(result.supports.map((s) => s.spanAzimut)).toEqual([90, 91, null]);
+    });
+
+    it('should keep the known localization when the worker fails and the geometry is unchanged', async () => {
+      workerMock.runTask.mockRejectedValue(new Error('boom'));
+      const located = buildLocatedSection();
+      const section: Section = {
+        ...located,
+        supports: located.supports.map((s, i) => (i === 2 ? { ...s, footLatitude: null, footLongitude: null } : s))
+      };
+
+      const result = await service.syncFootGps(section, section);
+
+      expect(result).toBe(section);
+      expect(result.supports[1].footLatitude).toBe(45.1);
+    });
   });
 
   describe('save', () => {

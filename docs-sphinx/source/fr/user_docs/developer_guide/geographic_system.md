@@ -30,7 +30,7 @@ Les systèmes de coordonnées ne sont pas utilisés dans la partie tracé du gra
 |---|---|
 | `getFootGps` / `getStartGps` / `setStartGps` | Lecture/écriture en mémoire du GPS des pieds ; le point de départ est `supports[0]`. |
 | `computeFootGps` | Calcule tous les GPS de pied et `spanAzimut` avec `Task.computeLocalization` à partir du point de départ, de `start_azimuth` et de la géométrie des portées. Ne lève jamais d'erreur : la section est renvoyée inchangée si des entrées manquent ou si le worker échoue. |
-| `syncFootGps` | Ne recalcule que si un GPS de départ existe et que la géométrie a changé (point de départ, `start_azimuth`, uuids/ordre des supports, `spanLength`, `spanAngle`) ou qu'un GPS de pied manque. |
+| `syncFootGps` | Ne recalcule que si un GPS de départ existe et que la géométrie a changé (point de départ, `start_azimuth`, uuids/ordre des supports, `spanLength`, `spanAngle`) ou qu'un GPS de pied manque. En cas d'échec, les GPS de pied dérivés et `spanAzimut` sont effacés (GPS de départ conservé) uniquement si la géométrie a changé ; sinon les valeurs connues sont conservées. |
 | `save` | `syncFootGps` puis `SectionService.createOrUpdateSection`. Un échec du worker ne bloque jamais une sauvegarde. |
 | `resolveLocalization` | GPS de pied/`spanAzimut` stockés si complets, sinon calcul à la volée non persisté. |
 | `toCrs` / `sectionToCrs` | Reprojection à la volée de points WGS84 vers n'importe quel CRS EPSG avec `Task.convertCoordinates`. |

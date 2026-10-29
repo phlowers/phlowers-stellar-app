@@ -264,7 +264,7 @@ describe('NewSectionModalComponent', () => {
       await manualSection.deleteSupport(s1.uuid);
       fixture.detectChanges();
       const spyOutput = vi.spyOn(component.outputSection, 'emit');
-      component.onValidate();
+      await component.onValidate();
 
       const emitted = spyOutput.mock.calls[0][0];
       expect(emitted.supports[0].footLatitude).toBe(45.1);

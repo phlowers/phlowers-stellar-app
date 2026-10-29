@@ -91,16 +91,17 @@ export class GeopositioningService {
   /**
    * Recomputes the foot GPS only when a start GPS exists and either the geometry changed since `previous`
    * or a foot GPS is missing. Otherwise returns `next` unchanged.
-   * When the computation fails, the derived foot GPS and `spanAzimut` are cleared (start GPS kept) so stale
-   * values are never persisted and a later sync recomputes them.
+   * When the computation fails after a geometry change, the derived foot GPS and `spanAzimut` are cleared
+   * (start GPS kept) so stale values are never persisted and a later sync recomputes them. When the geometry
+   * did not change, the known values are still valid and are kept as is.
    */
   async syncFootGps(previous: Section | undefined, next: Section): Promise<Section> {
     if (!getStartGps(next)) return next;
-    if (!hasGeometryChanged(previous, next) && hasCompleteFootGps(next)) return next;
+    const geometryChanged = hasGeometryChanged(previous, next);
+    if (!geometryChanged && hasCompleteFootGps(next)) return next;
     const localization = await this.runComputeLocalization(next);
-    return localization
-      ? { ...next, supports: applyLocalization(next.supports, localization) }
-      : clearDerivedLocalization(next);
+    if (localization) return { ...next, supports: applyLocalization(next.supports, localization) };
+    return geometryChanged ? clearDerivedLocalization(next) : next;
   }
 
   /** Synchronizes the foot GPS then persists the section in the study. */
