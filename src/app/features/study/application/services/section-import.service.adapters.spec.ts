@@ -102,7 +102,7 @@ describe('SectionImportService — adapter orchestration', () => {
         { provide: SectionService, useValue: sectionServiceMock },
         { provide: NotificationService, useValue: notificationMock },
         { provide: LoggerService, useValue: loggerMock },
-        { provide: WorkerPythonService, useValue: { runTask: runTaskMock } },
+        { provide: WorkerPythonService, useValue: { runTask: runTaskMock, ready: true } },
         { provide: AttachmentService, useValue: attachmentServiceMock },
         { provide: MaintenanceCorrectionService, useValue: maintenanceCorrectionMock },
         { provide: LineCorrectionService, useValue: lineCorrectionMock },
@@ -379,9 +379,14 @@ describe('SectionImportService — adapter orchestration', () => {
   });
 
   describe('coordinates', () => {
-    it('should apply WGS84 coordinates as foot positions without calling Python', async () => {
+    it('should apply WGS84 coordinates as foot positions and validate them with Python', async () => {
       const coordinates = { crs: 'WGS84' as const, x: [3.1, 3.2], y: [45.1, 45.2] };
       configure([buildAdapter({ import: () => Promise.resolve({ section: buildSection(), coordinates }) })]);
+      runTaskMock.mockResolvedValue({
+        result: { azimuth: [90], startAzimuth: 12, positionErrorMeter: [0, 0.2] },
+        error: null,
+        diagnostics: []
+      });
 
       const result = await service.processFile(makeFile('{}'), accept);
 
@@ -389,7 +394,8 @@ describe('SectionImportService — adapter orchestration', () => {
         [45.1, 3.1],
         [45.2, 3.2]
       ]);
-      expect(runTaskMock).not.toHaveBeenCalled();
+      expect(runTaskMock.mock.calls[0][0]).toBe(Task.validateGpsPositions);
+      expect(result?.position_error_meters).toEqual([0, 0.2]);
     });
 
     it('should skip incomplete WGS84 coordinates and keep the section unchanged', async () => {
@@ -408,18 +414,18 @@ describe('SectionImportService — adapter orchestration', () => {
 
       const result = await service.processFile(makeFile('{}'), accept);
 
-      expect(result?.mean_reprojection_diff_meters).toBeNull();
+      expect(result?.position_error_meters).toBeNull();
       expect(runTaskMock).not.toHaveBeenCalled();
       expect(loggerMock.error).toHaveBeenCalled();
     });
   });
 
-  describe('span azimuth error after Lambert93 reprojection', () => {
-    const mockReprojection = (azimuth: number[]) =>
-      runTaskMock.mockImplementation((task: Task) => {
+  describe('span azimuth and position error after Lambert93 reprojection', () => {
+    const mockReprojection = (azimuth: number[], positionErrorMeter: number[] = [0, 0.5]) =>
+      runTaskMock.mockImplementation(() => {
         const localization = { latitude: [45, 45.1], longitude: [3, 3.1], azimuth, lambert_x: [], lambert_y: [] };
         return Promise.resolve({
-          result: task === Task.importLambert ? localization : { localization, meanGpsDiffMeter: 1, startAzimuth: 0 },
+          result: { localization, positionErrorMeter, startAzimuth: 0 },
           error: null,
           diagnostics: []
         });
@@ -442,25 +448,66 @@ describe('SectionImportService — adapter orchestration', () => {
 
       expect(result?.supports[0].spanAzimut).toBe(92);
       expect(loggerMock.info).toHaveBeenCalledWith(expect.any(String), [2, null]);
-      expect(notificationMock.warning).toHaveBeenCalledWith('section-import.azimuth-reprojection-warning');
+      expect(notificationMock.warning).toHaveBeenCalledWith('section-import.azimuth-reprojection-notice');
     });
 
-    it('should not warn when the error stays within the threshold', async () => {
+    it('should show an info notice when the azimuth gap equals the threshold', async () => {
+      mockReprojection([91]);
+
+      await importWithFileAzimuth(90);
+
+      expect(notificationMock.info).toHaveBeenCalledWith('section-import.azimuth-reprojection-notice');
+      expect(notificationMock.warning).not.toHaveBeenCalledWith('section-import.azimuth-reprojection-notice');
+    });
+
+    it('should show an info notice when the azimuth gap is within the threshold', async () => {
       mockReprojection([90.5]);
 
       await importWithFileAzimuth(90);
 
-      expect(loggerMock.info).toHaveBeenCalled();
-      expect(notificationMock.warning).not.toHaveBeenCalled();
+      expect(notificationMock.info).toHaveBeenCalledWith('section-import.azimuth-reprojection-notice');
+      expect(notificationMock.warning).not.toHaveBeenCalledWith('section-import.azimuth-reprojection-notice');
     });
 
-    it('should neither log nor warn when the file has no azimuth', async () => {
+    it('should neither log nor show an azimuth notice when the file has no azimuth', async () => {
       mockReprojection([90.5]);
 
       await importWithFileAzimuth(null);
 
-      expect(loggerMock.info).not.toHaveBeenCalled();
-      expect(notificationMock.warning).not.toHaveBeenCalled();
+      expect(loggerMock.info).not.toHaveBeenCalledWith(
+        'Span azimuth error vector after reprojection (deg)',
+        expect.anything()
+      );
+      expect(notificationMock.info).not.toHaveBeenCalledWith('section-import.azimuth-reprojection-notice');
+      expect(notificationMock.warning).not.toHaveBeenCalledWith('section-import.azimuth-reprojection-notice');
+    });
+
+    it('should show an info position notice when the maximum position error equals the threshold', async () => {
+      mockReprojection([90], [0, 1]);
+
+      const result = await importWithFileAzimuth(90);
+
+      expect(result?.position_error_meters).toEqual([0, 1]);
+      expect(loggerMock.info).toHaveBeenCalledWith(expect.any(String), [0, 1]);
+      expect(notificationMock.info).toHaveBeenCalledWith('section-import.position-error-notice');
+    });
+
+    it('should show a warning position notice when the maximum position error exceeds the threshold', async () => {
+      mockReprojection([90], [0, 1.5]);
+
+      await importWithFileAzimuth(90);
+
+      expect(notificationMock.warning).toHaveBeenCalledWith('section-import.position-error-notice');
+    });
+
+    it('should show no position notice when no finite position error was computed', async () => {
+      mockReprojection([90], [null as unknown as number, NaN]);
+
+      const result = await importWithFileAzimuth(90);
+
+      expect(result?.position_error_meters).toEqual([null, null]);
+      expect(notificationMock.info).not.toHaveBeenCalledWith('section-import.position-error-notice');
+      expect(notificationMock.warning).not.toHaveBeenCalledWith('section-import.position-error-notice');
     });
   });
 

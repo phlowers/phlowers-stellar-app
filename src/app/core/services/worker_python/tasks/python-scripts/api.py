@@ -310,6 +310,16 @@ def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
 
 
+@debug_log
+def validate_gps_positions(js_inputs):
+    return geography.validate_gps_positions(js_to_python(js_inputs))
+
+
+@debug_log
+def compute_start_from_next_support(js_inputs):
+    return geography.compute_start_from_next_support(js_to_python(js_inputs))
+
+
 # ---------------------------cut strands----------------
 
 

@@ -29,7 +29,7 @@ The orchestrator reads the file once, picks the first adapter (registry order) w
 2. Core validation of the mapped `Section` (required fields, supports bounds), for every adapter.
 3. Catalog correction, when the adapter set `applyCatalogCorrections`: maintenance IDs, voltage, attachments and chains are corrected against the local catalogs (one correction service per catalog under `src/app/features/study/application/services/catalog-correction/`), then the new support names are added to the attachment catalog. A missing attachment catalog entry raises one warning.
 4. Coordinates reprojection, when the adapter returned `coordinates`, then computation of any missing support foot GPS.
-5. Collision check and persistence, then notifications (success, reprojection info, adapter and catalog notices).
+5. Collision check and persistence, then notifications (success, azimuth and position error notices, adapter and catalog notices).
 
 ---
 
@@ -56,7 +56,7 @@ interface SectionImportPayload {
 
 - `source` carries `fileName`, the decoded `text` and the parsed `json` (`undefined` when the text is not valid JSON).
 - `coordinates` holds one `x`/`y` entry per support, in support order.
-  - `LAMBERT93`: easting/northing in meters. The core (`GeopositioningService.applyImportedCoordinates`) reprojects them to GPS and fills `footLatitude`/`footLongitude` and `spanAzimut` (overwriting the file value), `start_azimuth` and the mean reprojection error. The start point is the foot of the first support. When a computed span azimuth differs from the file one by more than 1° (`SPAN_AZIMUTH_ERROR_THRESHOLD_DEG`), the full error vector is logged and a warning notice is shown.
+  - `LAMBERT93`: easting/northing in meters. The core (`GeopositioningService.applyImportedCoordinates`) reprojects them to GPS and fills `footLatitude`/`footLongitude`, then overwrites `spanAzimut`, `start_azimuth` and the per-support `position_error_meters` with the values rebuilt from the positions (see "Import position checks" in the Geographic system document). The start point is the foot of the first support. Two notices follow the import: a span azimuth check (file vs computed, threshold `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG` = 1°) and a support position check (threshold `POSITION_ERROR_THRESHOLD_METERS` = 1 m). Each is an information notice at or below its threshold and a warning above it; the full error vectors are logged.
   - `WGS84`: `x` is the longitude and `y` the latitude, in degrees; applied as-is.
   - Any `null` entry skips the reprojection without blocking the import.
 - `notices.message` must already be localized.

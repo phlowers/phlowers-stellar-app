@@ -200,7 +200,7 @@ describe('SectionImportService', () => {
   };
   let chainsServiceMock: { getChains: ReturnType<typeof vi.fn> };
   let linesServiceMock: { getLines: ReturnType<typeof vi.fn> };
-  let workerPythonServiceMock: { runTask: ReturnType<typeof vi.fn> };
+  let workerPythonServiceMock: { runTask: ReturnType<typeof vi.fn>; ready: boolean };
 
   /** Default successful runTask mock: returns arrays matching the length of the input arrays. */
   const mockSuccessfulRunTask = (task: Task, inputs: Record<string, unknown>) => {
@@ -229,7 +229,7 @@ describe('SectionImportService', () => {
             lambert_x: lambertX,
             lambert_y: inputs['lambert_y']
           },
-          meanGpsDiffMeter: 0.0001,
+          positionErrorMeter: lambertX.map((_, i) => (i === 0 ? 0 : 0.0001)),
           startAzimuth: 12
         },
         error: null,
@@ -299,7 +299,8 @@ describe('SectionImportService', () => {
     };
 
     workerPythonServiceMock = {
-      runTask: vi.fn(mockSuccessfulRunTask)
+      runTask: vi.fn(mockSuccessfulRunTask),
+      ready: true
     };
 
     TestBed.configureTestingModule({
@@ -318,8 +319,11 @@ describe('SectionImportService', () => {
           provide: TranslocoService,
           useValue: {
             translate: (key: string, params?: Record<string, unknown>): string => {
-              if (key === 'section-import.reprojection-info') {
-                return `Reprojection using ${params?.['appName']} data model seems to add a mean absolute error of ${params?.['error']} m`;
+              if (key === 'section-import.position-error-notice') {
+                return `Maximum support position gap: ${params?.['error']} m on support ${params?.['support']} (threshold ${params?.['threshold']} m).`;
+              }
+              if (key === 'section-import.azimuth-reprojection-notice') {
+                return `Maximum span azimuth gap after reprojection: ${params?.['error']}° (threshold ${params?.['threshold']}°).`;
               }
               return sectionImportTranslations[key] ?? key;
             },
@@ -1283,7 +1287,7 @@ describe('SectionImportService', () => {
         initial_conditions: [],
         selected_initial_condition_uuid: undefined,
         start_azimuth: 12,
-        mean_reprojection_diff_meters: 0.0001
+        position_error_meters: [0, 0.0001, 0.0001]
       });
     });
 
@@ -1476,9 +1480,8 @@ describe('SectionImportService', () => {
         expect(supportRest).toEqual({ ...expectedSupports[i], spanAzimut: i < expectedSupports.length - 1 ? 0 : null });
       });
 
-      expect(result?.mean_reprojection_diff_meters).toBeCloseTo(0.0001, 6);
+      expect(result?.position_error_meters).toEqual([0, 0.0001, 0.0001]);
 
-      expect(result?.start_azimuth).toBe(12);
     });
   });
 
@@ -1487,19 +1490,19 @@ describe('SectionImportService', () => {
       service.setStudyContext(buildMockStudy());
     });
 
-    it('should call importLambert and importLambertAndValidate in order', async () => {
+    it('should call importLambertAndValidate once, without a bootstrap importLambert call', async () => {
       const file = makeJsonFile(buildValidSectionImportPayload());
       await service.processFile(file, neverAccept);
 
       const calledTasks = workerPythonServiceMock.runTask.mock.calls.map((call) => call[0]);
-      expect(calledTasks).toEqual([Task.importLambert, Task.importLambertAndValidate]);
+      expect(calledTasks).toEqual([Task.importLambertAndValidate]);
     });
 
-    it('should store mean_reprojection_diff_meters from the validation task meanGpsDiffMeter', async () => {
+    it('should store position_error_meters from the validation task positionErrorMeter', async () => {
       const file = makeJsonFile(buildValidSectionImportPayload());
       const result = await service.processFile(file, neverAccept);
 
-      expect(result?.mean_reprojection_diff_meters).toBeCloseTo(0.0001, 6);
+      expect(result?.position_error_meters).toEqual([0, 0.0001, 0.0001]);
     });
 
     it('should persist the first validated localization point as the first support foot GPS', async () => {
@@ -1511,9 +1514,9 @@ describe('SectionImportService', () => {
       expect(result?.start_azimuth).toBe(12);
     });
 
-    it('should throw an ImportError and abort the import when a reprojection task fails', async () => {
+    it('should throw an ImportError and abort the import when the reprojection task fails', async () => {
       workerPythonServiceMock.runTask.mockImplementation((task: Task) => {
-        if (task === Task.importLambert) {
+        if (task === Task.importLambertAndValidate) {
           return Promise.resolve({ result: null, error: TaskError.CALCULATION_ERROR, pythonErrorCode: null });
         }
         return mockSuccessfulRunTask(task, {});
@@ -1536,7 +1539,7 @@ describe('SectionImportService', () => {
       const result = await service.processFile(file, neverAccept);
 
       expect(result).not.toBeNull();
-      expect(result?.mean_reprojection_diff_meters).toBeNull();
+      expect(result?.position_error_meters).toBeNull();
       expect(result?.supports.every((s) => s.footLatitude === null && s.footLongitude === null)).toBe(true);
       expect(workerPythonServiceMock.runTask).not.toHaveBeenCalled();
       expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledTimes(1);

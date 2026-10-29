@@ -329,13 +329,39 @@ describe('GeopositioningService', () => {
   describe('applyImportedCoordinates', () => {
     const section = (): Section => buildSection({ supports: [buildSupport(), buildSupport()], start_azimuth: null });
 
-    it('should apply WGS84 coordinates as-is', async () => {
+    it('should set the foot GPS and derive span azimuths, start azimuth and position errors from the positions', async () => {
+      workerMock.runTask.mockResolvedValueOnce({
+        result: { azimuth: [80], startAzimuth: 35, positionErrorMeter: [0, 0.4] },
+        error: null,
+        diagnostics: []
+      });
       const result = await service.applyImportedCoordinates(section(), { crs: 'WGS84', x: [3, 4], y: [45, 46] });
-      expect(result.supports.map((s) => [s.footLatitude, s.footLongitude])).toEqual([
-        [45, 3],
-        [46, 4]
+
+      expect(workerMock.runTask).toHaveBeenCalledWith(
+        Task.validateGpsPositions,
+        expect.objectContaining({ latitude: [45, 46], longitude: [3, 4] })
+      );
+      expect(result.supports.map((s) => [s.footLatitude, s.footLongitude, s.spanAzimut])).toEqual([
+        [45, 3, 80],
+        [46, 4, null]
       ]);
-      expect(workerMock.runTask).not.toHaveBeenCalled();
+      expect(result.start_azimuth).toBe(35);
+      expect(result.position_error_meters).toEqual([0, 0.4]);
+    });
+
+    it('should keep the foot GPS and the file values when the GPS validation fails', async () => {
+      workerMock.runTask.mockResolvedValueOnce({ result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] });
+      const input = buildSection({ supports: [buildSupport({ spanAzimut: 12 }), buildSupport()], start_azimuth: 40 });
+
+      const result = await service.applyImportedCoordinates(input, { crs: 'WGS84', x: [3, 4], y: [45, 46] });
+
+      expect(result.supports.map((s) => [s.footLatitude, s.footLongitude, s.spanAzimut])).toEqual([
+        [45, 3, 12],
+        [46, 4, null]
+      ]);
+      expect(result.start_azimuth).toBe(40);
+      expect(result.position_error_meters).toBeNull();
+      expect(loggerMock.warn).toHaveBeenCalled();
     });
 
     it('should skip incomplete WGS84 coordinates', async () => {
@@ -350,22 +376,16 @@ describe('GeopositioningService', () => {
       expect(workerMock.runTask).not.toHaveBeenCalled();
     });
 
-    it('should reproject Lambert93 coordinates and store the azimuth and mean error', async () => {
-      workerMock.runTask
-        .mockResolvedValueOnce({
-          result: { latitude: [45, 45.1], longitude: [3, 3.1], azimuth: [80], lambert_x: [], lambert_y: [] },
-          error: null,
-          diagnostics: []
-        })
-        .mockResolvedValueOnce({
-          result: {
-            localization: { latitude: [45, 45.2], longitude: [3, 3.2], azimuth: [81], lambert_x: [], lambert_y: [] },
-            meanGpsDiffMeter: 2.5,
-            startAzimuth: 36
-          },
-          error: null,
-          diagnostics: []
-        });
+    it('should reproject Lambert93 coordinates in a single call and store the azimuth, start azimuth and position errors', async () => {
+      workerMock.runTask.mockResolvedValueOnce({
+        result: {
+          localization: { latitude: [45, 45.2], longitude: [3, 3.2], azimuth: [81], lambert_x: [], lambert_y: [] },
+          startAzimuth: 36,
+          positionErrorMeter: [Number.NaN, 2.5]
+        },
+        error: null,
+        diagnostics: []
+      });
 
       const result = await service.applyImportedCoordinates(section(), {
         crs: 'LAMBERT93',
@@ -373,41 +393,79 @@ describe('GeopositioningService', () => {
         y: [3, 4]
       });
 
-      expect(workerMock.runTask).toHaveBeenNthCalledWith(1, Task.importLambert, {
-        lambert_x: [1, 2],
-        lambert_y: [3, 4]
-      });
-      expect(workerMock.runTask).toHaveBeenNthCalledWith(
-        2,
+      expect(workerMock.runTask).toHaveBeenCalledTimes(1);
+      expect(workerMock.runTask).toHaveBeenCalledWith(
         Task.importLambertAndValidate,
-        expect.objectContaining({ startAzimuth: 80 })
+        expect.objectContaining({ lambert_x: [1, 2], lambert_y: [3, 4] })
       );
+      expect(workerMock.runTask.mock.calls[0][1]).not.toHaveProperty('startAzimuth');
       expect(result.supports.map((s) => [s.footLatitude, s.spanAzimut])).toEqual([
         [45, 81],
         [45.2, null]
       ]);
       expect(result.start_azimuth).toBe(36);
-      expect(result.mean_reprojection_diff_meters).toBe(2.5);
+      expect(result.position_error_meters).toEqual([null, 2.5]);
     });
 
-    it('should throw a GeopositioningError when the bootstrap fails', async () => {
-      workerMock.runTask.mockResolvedValue({ result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] });
+    it('should throw a GeopositioningError when the worker is not ready', async () => {
+      vi.useFakeTimers();
+      try {
+        workerMock.ready = false;
+        ready$.next(false);
+        const promise = service.applyImportedCoordinates(section(), { crs: 'LAMBERT93', x: [1, 2], y: [3, 4] });
+        const assertion = expect(promise).rejects.toThrow('Python worker is not ready');
+        await vi.advanceTimersByTimeAsync(11_000);
+        await assertion;
+        expect(workerMock.runTask).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('should throw a GeopositioningError when the reprojection fails', async () => {
+      workerMock.runTask.mockResolvedValueOnce({ result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] });
       await expect(
         service.applyImportedCoordinates(section(), { crs: 'LAMBERT93', x: [1, 2], y: [3, 4] })
       ).rejects.toBeInstanceOf(GeopositioningError);
     });
+  });
 
-    it('should throw a GeopositioningError when the validation fails', async () => {
-      workerMock.runTask
-        .mockResolvedValueOnce({
-          result: { latitude: [45, 45.1], longitude: [3, 3.1], azimuth: [80], lambert_x: [], lambert_y: [] },
-          error: null,
-          diagnostics: []
-        })
-        .mockResolvedValueOnce({ result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] });
-      await expect(
-        service.applyImportedCoordinates(section(), { crs: 'LAMBERT93', x: [1, 2], y: [3, 4] })
-      ).rejects.toBeInstanceOf(GeopositioningError);
+  describe('computeStartFromNextSupport', () => {
+    const input = {
+      next: { latitude: 45, longitude: 3 },
+      nextSpanAzimuth: 90,
+      spanLength: 50,
+      lineAngle: [0, 10] as [number, number]
+    };
+
+    it('should return the GPS of the new support 0 and the new start azimuth', async () => {
+      workerMock.runTask.mockResolvedValueOnce({
+        result: { latitude: 44.9, longitude: 2.9, startAzimuth: 30 },
+        error: null,
+        diagnostics: []
+      });
+
+      expect(await service.computeStartFromNextSupport(input)).toEqual({
+        point: { latitude: 44.9, longitude: 2.9 },
+        azimuth: 30
+      });
+      expect(workerMock.runTask).toHaveBeenCalledWith(Task.computeStartFromNextSupport, {
+        latitude: 45,
+        longitude: 3,
+        nextSpanAzimuth: 90,
+        spanLength: 50,
+        lineAngle: [0, 10]
+      });
+    });
+
+    it('should return null when the task reports an error', async () => {
+      workerMock.runTask.mockResolvedValueOnce({ result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] });
+      expect(await service.computeStartFromNextSupport(input)).toBeNull();
+    });
+
+    it('should return null when the task rejects', async () => {
+      workerMock.runTask.mockRejectedValueOnce(new Error('boom'));
+      expect(await service.computeStartFromNextSupport(input)).toBeNull();
     });
   });
 });

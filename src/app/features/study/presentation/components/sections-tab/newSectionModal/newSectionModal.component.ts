@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { StartAnchor } from './manualSection/manualSection.interfaces';
+import { computeStartBeforeAnchor, keepStartAnchor } from './manualSection/manualSection.helpers';
 import { FormsModule } from '@angular/forms';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
@@ -22,10 +24,11 @@ import { NotificationService } from '@services/notification/notification.service
 import { SectionSourceMode } from './newSectionModal.interfaces';
 import { cloneDeep } from 'lodash';
 import { LocationData } from './manualSection/location/location.interfaces';
-import { LOCATION_CONFIG } from './manualSection/location/location.constantes';
+import { isLocationValid } from './manualSection/location/location.helpers';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
+import { stripLocalization } from '@shared/domain/helpers/geopositioning.helpers';
 
 /**
  * Modal dialog for creating, editing, or viewing a study section.
@@ -85,6 +88,8 @@ export class NewSectionModalComponent {
       this.areAllRequiredFieldsFilled() && this.isNameUnique() && !this.supportsBoundsErrors() && this.isLocationValid()
   );
   locationData = signal<LocationData | null>(null);
+  /** Anchor kept while supports are inserted before support 0; the start is computed from it on validation. */
+  startAnchor = signal<StartAnchor | null>(null);
   /** Incremented to trigger a reset of the import outcomes in the ImportSectionComponent. */
   readonly importResetToken = signal<number>(0);
 
@@ -112,26 +117,27 @@ export class NewSectionModalComponent {
         this.locationData.set(null);
       }
     });
+    effect(() => {
+      this.isOpen();
+      untracked(() => this.startAnchor.set(null));
+    });
   }
 
   /**
-   * Pre-seeds `locationData` from the current section, falling back to
-   * `LOCATION_CONFIG` defaults whenever a coordinate is null. This guarantees
-   * the defaults are persisted to IndexedDB even when the user validates
-   * without ever opening the lazily-mounted "supports" tab (where
-   * `<app-location>` lives). The child component overrides this as soon as
-   * the user interacts with the inputs.
+   * Pre-seeds `locationData` from the current section. Fields without a start GPS or azimuth stay empty:
+   * geolocation is optional, so no default position is ever injected.
    */
   private initializeLocationData(): void {
     const section = this.section();
     const startGps = this.geopositioning.getStartGps(section);
-    this.locationData.set({
-      latitude: startGps?.latitude ?? LOCATION_CONFIG.latitude.default,
-      longitude: startGps?.longitude ?? LOCATION_CONFIG.longitude.default,
-      azimuth: section.start_azimuth ?? LOCATION_CONFIG.azimuth.default,
-      isValid: true
-    });
-    this.isLocationValid.set(true);
+    const values = {
+      latitude: startGps?.latitude ?? null,
+      longitude: startGps?.longitude ?? null,
+      azimuth: section.start_azimuth ?? null
+    };
+    const isValid = isLocationValid(values);
+    this.locationData.set({ ...values, isValid });
+    this.isLocationValid.set(isValid);
   }
 
   checkFields = () => {
@@ -157,21 +163,48 @@ export class NewSectionModalComponent {
   onLocationChange(location: LocationData) {
     this.locationData.set(location);
     this.isLocationValid.set(location.isValid);
+    this.startAnchor.set(keepStartAnchor(this.startAnchor(), location));
   }
 
-  onValidate() {
+  async onValidate() {
     const section = this.section();
-    const location = this.locationData();
-    const currentGps = this.geopositioning.getStartGps(section);
-    const latitude = location?.latitude ?? currentGps?.latitude;
-    const longitude = location?.longitude ?? currentGps?.longitude;
-    const azimuth = location?.azimuth ?? section.start_azimuth;
-    const updatedSection =
-      latitude != null && longitude != null
-        ? this.geopositioning.setStartGps(section, { latitude, longitude }, azimuth)
-        : { ...section, start_azimuth: azimuth };
+    const { latitude, longitude, azimuth } = this.locationData() ?? {
+      latitude: null,
+      longitude: null,
+      azimuth: null
+    };
+    const hasLocation = latitude !== null && longitude !== null && azimuth !== null;
+    const anchor = hasLocation ? null : this.startAnchor();
+    let updatedSection = section;
+    if (hasLocation) {
+      updatedSection = this.geopositioning.setStartGps(section, { latitude, longitude }, azimuth);
+    } else if (anchor) {
+      updatedSection = await this.computeSectionStartFromAnchor(section, anchor);
+    } else if (this.geopositioning.getStartGps(section)) {
+      // The user cleared the location: the section is no longer geolocated.
+      updatedSection = stripLocalization(section);
+    }
+    this.startAnchor.set(null);
     this.outputSection.emit(updatedSection);
     this.isOpenChange.emit(false);
+  }
+
+  /**
+   * Computes the start of a section whose support was inserted before support 0, from the anchor support.
+   * The section is saved without geolocation, with a warning, when the start cannot be computed.
+   */
+  private async computeSectionStartFromAnchor(section: Section, anchor: StartAnchor): Promise<Section> {
+    const start = await computeStartBeforeAnchor(section.supports ?? [], anchor, (input) =>
+      this.geopositioning.computeStartFromNextSupport(input)
+    );
+    if (!start) {
+      this.logger.warn('Start position could not be computed from the next support', {
+        supportUuid: anchor.supportUuid
+      });
+      this.notificationService.warning(this.transloco.translate('section-modal.location-removed-after-insert'));
+      return stripLocalization(section);
+    }
+    return this.geopositioning.setStartGps(section, { latitude: start.latitude, longitude: start.longitude }, start.azimuth);
   }
 
   async onDuplicateSection() {

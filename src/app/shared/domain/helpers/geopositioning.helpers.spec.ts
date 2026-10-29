@@ -9,6 +9,7 @@ import { createEmptySection, createEmptySupport } from './sections.helpers';
 import {
   applyFootCoordinates,
   applyLocalization,
+  applySpanAzimuths,
   areCoordinatesComplete,
   buildLocalizationInputs,
   buildReprojectionAngles,
@@ -18,7 +19,11 @@ import {
   getStartGps,
   hasCompleteFootGps,
   hasGeometryChanged,
-  withStartGps
+  isLegacyLocalizationSection,
+  stripLocalization,
+  toPositionErrorMeters,
+  withStartGps,
+  normalizeAzimuth
 } from './geopositioning.helpers';
 
 /** Builds a minimal Support for helper tests, overriding only the fields under test. */
@@ -126,6 +131,83 @@ describe('withStartGps', () => {
   it('should return the section unchanged when it has no support', () => {
     const section = buildSection({ supports: [] });
     expect(withStartGps(section, { latitude: 1, longitude: 2 })).toBe(section);
+  });
+});
+
+describe('isLegacyLocalizationSection', () => {
+  it('should be true when the legacy start latitude or longitude key exists, even when null', () => {
+    expect(isLegacyLocalizationSection({ start_azimuth: 90, start_latitude: null })).toBe(true);
+    expect(isLegacyLocalizationSection({ start_azimuth: 90, start_longitude: 3 })).toBe(true);
+  });
+
+  it('should be true when the start_azimuth key is missing (even older data)', () => {
+    expect(isLegacyLocalizationSection({ name: 'section' })).toBe(true);
+  });
+
+  it('should be false for a current section carrying start_azimuth and no legacy key', () => {
+    expect(isLegacyLocalizationSection({ start_azimuth: 90, mean_reprojection_diff_meters: 0.2 })).toBe(false);
+    expect(isLegacyLocalizationSection({ start_azimuth: null })).toBe(false);
+  });
+});
+
+describe('stripLocalization', () => {
+  const buildLegacySection = (): Section & Record<string, unknown> => ({
+    ...buildSection(),
+    start_latitude: 45,
+    start_longitude: 3,
+    mean_reprojection_diff_meters: 0.4,
+    position_error_meters: [0, 0.2, 0.3]
+  });
+
+  it('should return a copy without legacy keys, with start azimuth, position error and support geolocation cleared', () => {
+    const legacy = buildLegacySection();
+    legacy.supports = legacy.supports.map((support) => ({ ...support, spanAzimut: 12 }));
+
+    const result = stripLocalization(legacy);
+
+    expect(result).not.toBe(legacy);
+    expect(result).not.toHaveProperty('start_latitude');
+    expect(result).not.toHaveProperty('start_longitude');
+    expect(result).not.toHaveProperty('mean_reprojection_diff_meters');
+    expect(result.start_azimuth).toBeNull();
+    expect(result.position_error_meters).toBeNull();
+    expect(result.supports.map((s) => [s.footLatitude, s.footLongitude, s.spanAzimut])).toEqual([
+      [null, null, null],
+      [null, null, null],
+      [null, null, null]
+    ]);
+    expect(result.supports.map((s) => [s.uuid, s.spanLength, s.spanAngle])).toEqual([
+      ['a', 100, 5],
+      ['b', 200, 10],
+      ['c', null, 0]
+    ]);
+    expect(result.name).toBe(legacy.name);
+  });
+
+  it('should not mutate the input section nor its supports', () => {
+    const legacy = buildLegacySection();
+    const supportsBefore = legacy.supports;
+    const firstSupportBefore = { ...legacy.supports[0] };
+
+    stripLocalization(legacy);
+
+    expect(legacy.start_latitude).toBe(45);
+    expect(legacy.start_longitude).toBe(3);
+    expect(legacy.mean_reprojection_diff_meters).toBe(0.4);
+    expect(legacy.position_error_meters).toEqual([0, 0.2, 0.3]);
+    expect(legacy.start_azimuth).toBe(90);
+    expect(legacy.supports).toBe(supportsBefore);
+    expect(legacy.supports[0]).toEqual(firstSupportBefore);
+  });
+
+  it('should leave a missing supports array untouched', () => {
+    const section = { ...createEmptySection(), start_latitude: 1, supports: undefined } as unknown as Section;
+
+    const result = stripLocalization(section);
+
+    expect(result.supports).toBeUndefined();
+    expect(result.start_azimuth).toBeNull();
+    expect(result).not.toHaveProperty('start_latitude');
   });
 });
 
@@ -246,6 +328,23 @@ describe('hasGeometryChanged', () => {
   });
 });
 
+describe('applySpanAzimuths', () => {
+  it('should set spanAzimut from the computed azimuths and leave the last support untouched', () => {
+    const supports = [buildSupport({ spanAzimut: 10 }), buildSupport({ spanAzimut: 20 }), buildSupport({ spanAzimut: 30 })];
+
+    const result = applySpanAzimuths(supports, [90, 180]);
+
+    expect(result.map((s) => s.spanAzimut)).toEqual([90, 180, 30]);
+    expect(supports[0].spanAzimut).toBe(10);
+  });
+});
+
+describe('toPositionErrorMeters', () => {
+  it('should keep finite values and map NaN and Infinity to null', () => {
+    expect(toPositionErrorMeters([0, 0.5, NaN, Infinity, -Infinity])).toEqual([0, 0.5, null, null, null]);
+  });
+});
+
 describe('computeSpanAzimuthErrors', () => {
   it('should return the absolute gap per support, null when a value is missing', () => {
     const before = [10, 20, null].map((spanAzimut) => buildSupport({ spanAzimut }));
@@ -261,5 +360,26 @@ describe('computeSpanAzimuthErrors', () => {
 
   it('should return null when the other list is shorter', () => {
     expect(computeSpanAzimuthErrors([buildSupport({ spanAzimut: 1 })], [])).toEqual([null]);
+  });
+});
+
+describe('normalizeAzimuth', () => {
+  it('should keep azimuths already in ]-180, 180]', () => {
+    expect(normalizeAzimuth(0)).toBe(0);
+    expect(normalizeAzimuth(90)).toBe(90);
+    expect(normalizeAzimuth(-90)).toBe(-90);
+    expect(normalizeAzimuth(180)).toBe(180);
+  });
+
+  it('should wrap azimuths above 180 into the negative range', () => {
+    expect(normalizeAzimuth(190)).toBeCloseTo(-170, 10);
+    expect(normalizeAzimuth(360)).toBe(0);
+    expect(normalizeAzimuth(725)).toBeCloseTo(5, 10);
+  });
+
+  it('should wrap azimuths below -180 into the positive range', () => {
+    expect(normalizeAzimuth(-190)).toBeCloseTo(170, 10);
+    expect(normalizeAzimuth(-180)).toBe(180);
+    expect(normalizeAzimuth(-360)).toBe(0);
   });
 });

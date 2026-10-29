@@ -367,7 +367,7 @@ describe('AppDatabase', () => {
     expect(section['regional_maintenance_center_names']).toBeUndefined();
   });
 
-  it('should register version 11 as a data-only upgrade moving the start GPS to the first support', async () => {
+  it('should register version 11 as a data-only upgrade purging all section geolocation data', async () => {
     const { AppDatabase } = await import('@infrastructure/database/app-database');
 
     new AppDatabase();
@@ -401,15 +401,17 @@ describe('AppDatabase', () => {
       modifyCallback!(study);
     };
 
-    it('should copy start_latitude/start_longitude to the first support foot GPS and drop both keys', async () => {
+    it('should drop the legacy section keys and reset the start azimuth and support geolocation', async () => {
       const study = {
         sections: [
           {
             start_latitude: 45.5,
             start_longitude: 3.5,
+            start_azimuth: 90,
+            mean_reprojection_diff_meters: 0.3,
             supports: [
-              { footLatitude: null, footLongitude: null },
-              { footLatitude: null, footLongitude: null }
+              { footLatitude: 45.5, footLongitude: 3.5, spanAzimut: 12 },
+              { footLatitude: 45.6, footLongitude: 3.6, spanAzimut: 13 }
             ]
           }
         ]
@@ -418,36 +420,72 @@ describe('AppDatabase', () => {
       await runUpgrade(study);
 
       const section = study.sections[0] as Record<string, unknown>;
-      expect(study.sections[0].supports[0]).toEqual({ footLatitude: 45.5, footLongitude: 3.5 });
-      expect(study.sections[0].supports[1]).toEqual({ footLatitude: null, footLongitude: null });
       expect('start_latitude' in section).toBe(false);
       expect('start_longitude' in section).toBe(false);
+      expect('mean_reprojection_diff_meters' in section).toBe(false);
+      expect(section['start_azimuth']).toBeNull();
+      expect(study.sections[0].supports).toEqual([
+        { footLatitude: null, footLongitude: null, spanAzimut: null },
+        { footLatitude: null, footLongitude: null, spanAzimut: null }
+      ]);
     });
 
-    it('should keep the existing foot GPS of the first support', async () => {
-      const study = {
-        sections: [{ start_latitude: 1, start_longitude: 2, supports: [{ footLatitude: 10, footLongitude: 20 }] }]
-      };
-
-      await runUpgrade(study);
-
-      expect(study.sections[0].supports[0]).toEqual({ footLatitude: 10, footLongitude: 20 });
-    });
-
-    it('should not copy non-numeric start values and tolerate missing sections/supports', async () => {
+    it('should not copy the legacy start GPS onto the first support', async () => {
       const study = {
         sections: [
-          { start_latitude: null, start_longitude: 2, supports: [{ footLatitude: null, footLongitude: null }] },
-          { start_latitude: 1, start_longitude: 2 },
-          { start_latitude: 1, start_longitude: 2, supports: [] }
+          {
+            start_latitude: 1,
+            start_longitude: 2,
+            supports: [{ footLatitude: null, footLongitude: null, spanAzimut: null }]
+          }
         ]
       };
 
       await runUpgrade(study);
 
-      expect(study.sections[0].supports?.[0]).toEqual({ footLatitude: null, footLongitude: null });
-      expect('start_latitude' in study.sections[1]).toBe(false);
-      await runUpgrade({});
+      expect(study.sections[0].supports).toEqual([{ footLatitude: null, footLongitude: null, spanAzimut: null }]);
+    });
+
+    it('should keep the other section and support fields untouched', async () => {
+      const study = {
+        sections: [
+          {
+            uuid: 'section-uuid',
+            name: 'Section name',
+            start_latitude: 1,
+            start_longitude: 2,
+            start_azimuth: 10,
+            supports: [
+              { uuid: 'support-uuid', spanLength: 100, spanAngle: 5, footLatitude: 1, footLongitude: 2, spanAzimut: 3 }
+            ]
+          }
+        ]
+      };
+
+      await runUpgrade(study);
+
+      expect(study.sections[0]).toMatchObject({ uuid: 'section-uuid', name: 'Section name' });
+      expect(study.sections[0].supports[0]).toEqual({
+        uuid: 'support-uuid',
+        spanLength: 100,
+        spanAngle: 5,
+        footLatitude: null,
+        footLongitude: null,
+        spanAzimut: null
+      });
+    });
+
+    it('should tolerate sections without supports and studies without sections', async () => {
+      const study = { sections: [{ start_latitude: 1, start_longitude: 2, start_azimuth: 3 }] };
+
+      await runUpgrade(study);
+
+      const section = study.sections[0] as Record<string, unknown>;
+      expect('start_latitude' in section).toBe(false);
+      expect(section['start_azimuth']).toBeNull();
+      expect(section['supports']).toBeUndefined();
+
+      await expect(runUpgrade({})).resolves.toBeUndefined();
     });
   });
 });

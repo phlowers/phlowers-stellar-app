@@ -194,7 +194,7 @@ describe('LoadsTableComponent', () => {
     cable_span_manipulations: [],
     selected_cable_span_manipulation_uuid: null,
     start_azimuth: null,
-    mean_reprojection_diff_meters: null
+    position_error_meters: null
   };
 
   beforeEach(async () => {

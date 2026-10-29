@@ -120,6 +120,14 @@ const tasks: Record<
     function: 'import_lambert_and_validate',
     externalPackages: []
   },
+  [Task.validateGpsPositions]: {
+    function: 'validate_gps_positions',
+    externalPackages: []
+  },
+  [Task.computeStartFromNextSupport]: {
+    function: 'compute_start_from_next_support',
+    externalPackages: []
+  },
   [Task.getEquivalentSpan]: {
     function: 'get_equivalent_span',
     externalPackages: []

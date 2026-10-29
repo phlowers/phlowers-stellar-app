@@ -67,6 +67,13 @@ export const formatProtoV4Parameters = (rawParameters: string[], fileName: strin
 };
 
 /**
+ * Returns `true` when a parsed JSON value is an object (not `null`, not an array).
+ * @param value - Any value coming from a parsed file
+ */
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
  * Returns `true` if the filename is a plain-JSON `.stsd` study export.
  * @param fileName - The file name to check
  */

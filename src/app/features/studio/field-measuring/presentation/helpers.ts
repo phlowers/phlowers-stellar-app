@@ -1,5 +1,6 @@
 import { Section, Support } from '@shared/domain';
 import { FootLocalization } from '@shared/domain/helpers/geopositioning.interfaces';
+import { normalizeAzimuth } from '@shared/domain/helpers/geopositioning.helpers';
 import { FieldMeasure, FieldMeasureOutputs, TangentAimingSupportResult } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
@@ -92,16 +93,6 @@ export const formatSpanLabel = (section: Section | null, span: number[] | null):
   const supports = section?.supports ?? [];
   const [leftIndex, rightIndex] = span;
   return `${formatSupportLabel(supports, leftIndex)} - ${formatSupportLabel(supports, rightIndex)}`;
-};
-
-/**
- * Normalizes an azimuth (degrees) into the `]-180, 180]` range accepted by the field measure form.
- * @param azimuth - The azimuth in degrees
- * @returns The normalized azimuth
- */
-const normalizeAzimuth = (azimuth: number): number => {
-  const positive = ((azimuth % 360) + 360) % 360;
-  return positive > 180 ? positive - 360 : positive;
 };
 
 /**

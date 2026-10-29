@@ -79,87 +79,159 @@ def import_lambert(inputs: dict) -> dict:
 
 
 def import_lambert_and_validate(inputs: dict) -> dict:
-    """Validate the Lambert93 import using pyproj.
+    """Import Lambert93 points as GPS and validate them against the flat geometry.
 
-    The flat approximation is performed directly in GPS: each subsequent point
-    is reconstructed geodesically from the previous one, using the input span
-    length and the geodesic azimuth. This is valid anywhere on the globe. The
-    reconstructed points are compared against the directly converted
-    Lambert93 -> GPS points.
+    The Lambert93 points are converted to GPS with :func:`import_lambert`, whose
+    ``azimuth`` is kept as the localization azimuth. The GPS points are then
+    checked by :func:`validate_gps_positions`, which derives the start azimuth
+    from the first span and the first line angle, and reports the position
+    error of each support.
 
-    Expected ``inputs`` dict, combining :class:`Lambert93Data` and
-    :class:`SectionGeoData` fields (extra keys ignored). ``startLatitude`` and
-    ``startLongitude`` are not expected from the caller: they are derived
-    internally from the direct Lambert93 -> GPS conversion. Among the remaining
-    :class:`SectionGeoData` fields, only ``spanLength`` and the first
-    ``lineAngle`` are used here::
+    Expected ``inputs`` dict (extra keys ignored)::
 
         {
             "lambert_x": list[float],  # easting, one per point (N)
             "lambert_y": list[float],  # northing, one per point (N)
-            "startAzimuth": float,  # flat-plane azimuth (deg), required but unused
             "spanLength": list[float],  # span length (m), size N (last unused)
-            "lineAngle": list[
-                float
-            ],  # flat deflection angle (grad), only the first one is used
+            "lineAngle": list[float],  # flat deflection angle (grad), size N
         }
+
+    A ``startAzimuth`` key may still be passed by callers: it is ignored, the
+    start azimuth being derived from the imported points.
 
     Returns a dict::
 
         {
             "localization": dict,  # same structure as import_lambert() output
-            "meanGpsDiffMeter": float,  # mean reconstruction error, in meters
-            "startAzimuth": float,  # flat azimuth (deg) before the deflection at the first support
+            "startAzimuth": float,  # flat azimuth (deg) before the deflection at the first support, in ]-180, 180]
+            "positionErrorMeter": list[
+                float
+            ],  # distance (m) between each given and rebuilt support, size N, first is 0.0
         }
 
     ``startAzimuth`` is the value to feed back to :func:`compute_localization`,
-    which adds ``lineAngle[0]`` to it: ``azimuth[0] == startAzimuth + lineAngle[0]``.
+    which adds ``lineAngle[0]`` to it: ``azimuth[0] == startAzimuth + lineAngle[0]``
+    (modulo 360).
     """
 
     result_loc = import_lambert(inputs)
-    # Derive the start point internally so callers don't have to supply
-    # startLatitude/startLongitude, which are required by SectionGeoData.
-    inputs["startLatitude"] = result_loc["latitude"][0]
-    inputs["startLongitude"] = result_loc["longitude"][0]
-
-    section_data = SectionGeoData.from_dict(inputs)
-
-    latitude = np.array(result_loc["latitude"], dtype=np.float64)
-    longitude = np.array(result_loc["longitude"], dtype=np.float64)
-
-    # Geodesic azimuth between consecutive points, used for reconstruction.
-    geodesic_azimuth = geodesic_azimuth_from_gps(longitude, latitude)
-
-    # Span lengths, dropping the trailing NaN (unused last span).
-    span_length = np.array(section_data.spanLength, dtype=np.float64)[
-        : geodesic_azimuth.size
-    ]
-
-    # Geodesic computation in GPS: reconstruct each next point geodesically from
-    # the previous one using the input span length and the geodesic azimuth.
-    reconstructed_lon, reconstructed_lat = forward_gps_reconstruction(
-        latitude[:-1], longitude[:-1], geodesic_azimuth, span_length
-    )
-
-    lat_diff, lon_diff, dist_diff_meter, mean_gps_diff_meter = compute_errors(
-        latitude, longitude, reconstructed_lon, reconstructed_lat
-    )
-    logger.debug(f"Mean GPS difference (meter): {mean_gps_diff_meter}")
-    logger.debug(f"azimuth geodesic: {geodesic_azimuth}")
-    logger.debug(f"Latitude difference: {lat_diff}")
-    logger.debug(f"Longitude difference: {lon_diff}")
-    logger.debug(
-        f"error norm in meter (0.01 decdeg = 1.11 km): {dist_diff_meter}"
-    )
-
-    first_line_angle_deg = (
-        units(float(section_data.lineAngle[0]), "grad").to("deg").magnitude
+    validation = validate_gps_positions(
+        {
+            "latitude": result_loc["latitude"],
+            "longitude": result_loc["longitude"],
+            "spanLength": inputs["spanLength"],
+            "lineAngle": inputs["lineAngle"],
+        }
     )
 
     return {
         "localization": result_loc,
-        "meanGpsDiffMeter": mean_gps_diff_meter,
-        "startAzimuth": float(result_loc["azimuth"][0] - first_line_angle_deg),
+        "startAzimuth": validation["startAzimuth"],
+        "positionErrorMeter": validation["positionErrorMeter"],
+    }
+
+
+def validate_gps_positions(inputs: dict) -> dict:
+    """Check GPS support positions against the flat section geometry using pyproj.
+
+    The grid azimuth of each span is derived from the GPS points, with the same
+    convention as :func:`import_lambert`. The start azimuth is then deduced from
+    the first span azimuth and the first line angle, and the section is rebuilt
+    with :func:`compute_localization` from the first GPS point. The geodesic
+    distance between each given support and its rebuilt counterpart is reported:
+    a small error means that the GPS points, span lengths and line angles are
+    consistent with each other.
+
+    Expected ``inputs`` dict::
+
+        {
+            "latitude": list[float],  # decimal degrees, size N
+            "longitude": list[float],  # decimal degrees, size N
+            "spanLength": list[
+                float
+            ],  # span length (m), size N (last unused, may be NaN or None)
+            "lineAngle": list[
+                float
+            ],  # flat deflection angle (grad), size N, None is treated as 0
+        }
+
+    Returns a dict::
+
+        {
+            "azimuth": list[
+                float
+            ],  # flat-plane (grid) azimuth (deg) of each span, size N-1
+            "startAzimuth": float,  # flat azimuth (deg) before the deflection at the first support, in ]-180, 180]
+            "positionErrorMeter": list[
+                float
+            ],  # distance (m) between each given and rebuilt support, size N, first is 0.0
+        }
+
+    With fewer than two points there is no span: ``azimuth`` is empty,
+    ``startAzimuth`` is None and ``positionErrorMeter`` is ``[0.0] * N``.
+    """
+    latitude = np.asarray(inputs["latitude"], dtype=np.float64)
+    longitude = np.asarray(inputs["longitude"], dtype=np.float64)
+    supports_number = latitude.size
+    if supports_number < 2:
+        return {
+            "azimuth": [],
+            "startAzimuth": None,
+            "positionErrorMeter": [0.0] * supports_number,
+        }
+
+    span_length = np.array(
+        [np.nan if value is None else value for value in inputs["spanLength"]],
+        dtype=np.float64,
+    )
+    line_angle = np.array(
+        [0.0 if value is None else value for value in inputs["lineAngle"]],
+        dtype=np.float64,
+    )
+    if (
+        span_length.size != supports_number
+        or line_angle.size != supports_number
+    ):
+        raise ValueError(
+            "spanLength and lineAngle must have the same length as latitude"
+        )
+
+    # Same grid azimuth convention as import_lambert.
+    geodesic_azimuth = geodesic_azimuth_from_gps(longitude, latitude)
+    grid_azimuth = grid_azimuth_from_gps_azimuth(
+        longitude, latitude, geodesic_azimuth
+    )
+
+    first_line_angle_deg = (
+        units(float(line_angle[0]), "grad").to("deg").magnitude
+    )
+    start_azimuth = _normalize_azimuth(
+        float(grid_azimuth[0]) - first_line_angle_deg
+    )
+
+    rebuilt = compute_localization(
+        {
+            "startLatitude": float(latitude[0]),
+            "startLongitude": float(longitude[0]),
+            "startAzimuth": start_azimuth,
+            "spanLength": span_length.tolist(),
+            "lineAngle": line_angle.tolist(),
+        }
+    )
+
+    geod = Geod(ellps="WGS84")
+    _, _, position_error_meter = geod.inv(
+        longitude,
+        latitude,
+        np.array(rebuilt["longitude"], dtype=np.float64),
+        np.array(rebuilt["latitude"], dtype=np.float64),
+    )
+    logger.debug(f"GPS position error (meter): {position_error_meter}")
+
+    return {
+        "azimuth": grid_azimuth.tolist(),
+        "startAzimuth": start_azimuth,
+        "positionErrorMeter": np.atleast_1d(position_error_meter).tolist(),
     }
 
 
@@ -246,7 +318,120 @@ def compute_localization(inputs: dict) -> dict:
     }
 
 
+def compute_start_from_next_support(inputs: dict) -> dict:
+    """Compute the new first support when a support is inserted before a section.
+
+    Used when a new support is inserted before support 0 of a section: the old
+    support 0 becomes support 1 and keeps its GPS position. This function finds
+    the GPS position of the new support 0 and the new section start azimuth, so
+    that the old supports do not move when the section is rebuilt with
+    :func:`compute_localization`.
+
+    The grid azimuth of the new first span is deduced from the azimuth of the
+    next span and the deflection angle at support 1. The new support 0 is first
+    estimated by a geodesic step back from support 1, then refined by a
+    fixed-point iteration (at most 10 iterations, stopping when the miss is
+    below 1e-4 m) so that a forward reconstruction from support 0 lands on
+    support 1.
+
+    Expected ``inputs`` dict::
+
+        {
+            "latitude": float,  # decimal degrees, GPS latitude of support 1 (known point)
+            "longitude": float,  # decimal degrees, GPS longitude of support 1 (known point)
+            "nextSpanAzimuth": float,  # flat-plane (grid) azimuth (deg) of span 1, from support 1 to support 2
+            "spanLength": float,  # length (m) of the new span 0, from the new support 0 to support 1
+            "lineAngle": list[
+                float
+            ],  # two flat deflection angles (grad): [at new support 0, at support 1]
+        }
+
+    Returns a dict::
+
+        {
+            "latitude": float,  # decimal degrees, GPS latitude of the new support 0
+            "longitude": float,  # decimal degrees, GPS longitude of the new support 0
+            "startAzimuth": float,  # flat azimuth (deg) before the deflection at the new support 0, in ]-180, 180]
+        }
+
+    Raises:
+        ValueError: if ``spanLength`` is missing, not finite or not strictly
+            positive, or if ``lineAngle`` does not contain two values.
+    """
+    raw_span_length = inputs.get("spanLength")
+    try:
+        span_length = float(raw_span_length)
+    except (TypeError, ValueError):
+        span_length = float("nan")
+    if not np.isfinite(span_length) or span_length <= 0.0:
+        raise ValueError(
+            "spanLength must be a finite and strictly positive length in "
+            f"meters, got {raw_span_length!r}"
+        )
+
+    line_angle = [float(value) for value in inputs["lineAngle"]]
+    if len(line_angle) != 2:
+        raise ValueError("lineAngle must contain exactly two values")
+
+    latitude = float(inputs["latitude"])
+    longitude = float(inputs["longitude"])
+    next_span_azimuth = float(inputs["nextSpanAzimuth"])
+
+    # Span 1 azimuth = span 0 azimuth + deflection at support 1.
+    new_span_azimuth = (
+        next_span_azimuth - units(line_angle[1], "grad").to("deg").magnitude
+    )
+
+    geod = Geod(ellps="WGS84")
+    # First estimate: step back from support 1 over the new span length.
+    back_geodesic_azimuth = gps_azimuth_from_grid_azimuth(
+        longitude, latitude, new_span_azimuth + 180.0
+    )
+    new_lon, new_lat, _ = geod.fwd(
+        longitude, latitude, float(back_geodesic_azimuth), span_length
+    )
+
+    # Fixed-point refinement: rebuild support 1 from the estimate exactly as
+    # compute_localization does, then move the estimate by the miss vector.
+    max_iterations = 10
+    miss_tolerance_meter = 1e-4
+    for _ in range(max_iterations):
+        geodesic_azimuth = gps_azimuth_from_grid_azimuth(
+            new_lon, new_lat, new_span_azimuth
+        )
+        rebuilt_lon, rebuilt_lat, _ = geod.fwd(
+            new_lon, new_lat, float(geodesic_azimuth), span_length
+        )
+        miss_azimuth, _, miss_distance = geod.inv(
+            rebuilt_lon, rebuilt_lat, longitude, latitude
+        )
+        if miss_distance < miss_tolerance_meter:
+            break
+        new_lon, new_lat, _ = geod.fwd(
+            new_lon, new_lat, float(miss_azimuth), float(miss_distance)
+        )
+
+    start_azimuth = _normalize_azimuth(
+        new_span_azimuth - units(line_angle[0], "grad").to("deg").magnitude
+    )
+
+    return {
+        "latitude": float(new_lat),
+        "longitude": float(new_lon),
+        "startAzimuth": start_azimuth,
+    }
+
+
 # ---------------- helper Functions ----------------
+
+
+def _normalize_azimuth(angle_deg):
+    """Map an angle (deg) or an array of angles to the interval ]-180, 180]."""
+    wrapped = np.mod(np.asarray(angle_deg, dtype=np.float64), 360.0)
+    wrapped = np.where(wrapped > 180.0, wrapped - 360.0, wrapped)
+    if wrapped.ndim == 0:
+        return float(wrapped)
+    return wrapped
 
 
 def compute_errors(latitude, longitude, reconstructed_lon, reconstructed_lat):

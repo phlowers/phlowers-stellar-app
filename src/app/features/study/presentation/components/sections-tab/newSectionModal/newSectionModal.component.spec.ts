@@ -13,6 +13,9 @@ import { SectionService } from '@services/section/section.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { Subject } from 'rxjs';
 import { TranslocoTestingModule } from '@jsverse/transloco';
+import { ManualSectionComponent } from './manualSection/manualSection.component';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
+import { LoggerService } from '@core/services/logger/logger.service';
 
 class MockMaintenanceService {
   ready = { next: vi.fn() };
@@ -53,6 +56,7 @@ class MockSectionService {
 class MockNotificationService {
   error = vi.fn();
   success = vi.fn();
+  warning = vi.fn();
 }
 
 describe('NewSectionModalComponent', () => {
@@ -110,7 +114,7 @@ describe('NewSectionModalComponent', () => {
     cable_span_manipulations: [],
     selected_cable_span_manipulation_uuid: null,
     start_azimuth: null,
-    mean_reprojection_diff_meters: null
+    position_error_meters: null
   };
 
   const mockStudy: Study = {
@@ -220,11 +224,9 @@ describe('NewSectionModalComponent', () => {
       supports: [createEmptySupport(), createEmptySupport()]
     };
 
-    it('should persist location defaults when the section has null coordinates and the user never interacted with the location inputs', async () => {
-      const { LOCATION_CONFIG } =
-        await import('@features/study/presentation/components/sections-tab/newSectionModal/manualSection/location/location.constantes');
+    it('should leave the section without geolocation when the location inputs are empty', () => {
       fixture.componentRef.setInput('section', sectionWithSupports);
-      fixture.componentRef.setInput('mode', 'edit');
+      fixture.componentRef.setInput('mode', 'create');
       fixture.detectChanges();
       const spyOutput = vi.spyOn(component.outputSection, 'emit');
       const spyOpen = vi.spyOn(component.isOpenChange, 'emit');
@@ -232,10 +234,43 @@ describe('NewSectionModalComponent', () => {
       component.onValidate();
 
       const emitted = spyOutput.mock.calls[0][0];
-      expect(emitted.supports[0].footLatitude).toBe(LOCATION_CONFIG.latitude.default);
-      expect(emitted.supports[0].footLongitude).toBe(LOCATION_CONFIG.longitude.default);
-      expect(emitted.start_azimuth).toBe(LOCATION_CONFIG.azimuth.default);
+      expect(emitted.supports[0].footLatitude).toBeNull();
+      expect(emitted.supports[0].footLongitude).toBeNull();
+      expect(emitted.start_azimuth).toBe(sectionWithSupports.start_azimuth);
+      expect(emitted).toEqual(sectionWithSupports);
       expect(spyOpen).toHaveBeenCalledWith(false);
+    });
+
+    it('should start with empty location data when the section has no start GPS', () => {
+      fixture.componentRef.setInput('section', sectionWithSupports);
+      fixture.detectChanges();
+
+      expect(component.locationData()).toEqual({ latitude: null, longitude: null, azimuth: null, isValid: true });
+      expect(component.isLocationValid()).toBe(true);
+    });
+
+    it('should validate the section with the former support 1 as start after deleting support 0', async () => {
+      const s1 = { ...createEmptySupport(), footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 };
+      const s2 = { ...createEmptySupport(), footLatitude: 45.1, footLongitude: 3.1, spanAzimut: 137, spanAngle: 25, spanLength: 250 };
+      const s3 = { ...createEmptySupport(), footLatitude: 45.2, footLongitude: 3.2, spanAzimut: 200, spanAngle: 0, spanLength: 200 };
+      const geolocatedSection: Section = { ...mockSection, supports: [s1, s2, s3], start_azimuth: 90 };
+      fixture.componentRef.setInput('section', geolocatedSection);
+      fixture.componentRef.setInput('mode', 'edit');
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      const manualSection = fixture.debugElement.query(By.directive(ManualSectionComponent))
+        .componentInstance as ManualSectionComponent;
+
+      await manualSection.deleteSupport(s1.uuid);
+      fixture.detectChanges();
+      const spyOutput = vi.spyOn(component.outputSection, 'emit');
+      component.onValidate();
+
+      const emitted = spyOutput.mock.calls[0][0];
+      expect(emitted.supports[0].footLatitude).toBe(45.1);
+      expect(emitted.supports[0].footLongitude).toBe(3.1);
+      expect(emitted.supports[1].footLatitude).toBe(45.2);
+      expect(emitted.start_azimuth).toBeCloseTo(137 - 25 * 0.9, 10);
     });
 
     it('should merge locationData into section when locationData is set', () => {
@@ -269,6 +304,190 @@ describe('NewSectionModalComponent', () => {
       component.onValidate();
 
       expect(spyOutput).toHaveBeenCalledWith(sectionWithLocation);
+    });
+
+    it('should remove the geolocation when the user clears the location of a geolocated section', () => {
+      const geolocated: Section = {
+        ...mockSection,
+        supports: [
+          { ...createEmptySupport(), footLatitude: 45, footLongitude: 1, spanAzimut: 30 },
+          { ...createEmptySupport(), footLatitude: 45.1, footLongitude: 1.1 }
+        ],
+        start_azimuth: 45
+      };
+      fixture.componentRef.setInput('section', geolocated);
+      fixture.detectChanges();
+      component.onLocationChange({ latitude: null, longitude: null, azimuth: null, isValid: true });
+      const spyOutput = vi.spyOn(component.outputSection, 'emit');
+
+      component.onValidate();
+
+      const emitted = spyOutput.mock.calls[0][0];
+      expect(emitted.start_azimuth).toBeNull();
+      for (const support of emitted.supports) {
+        expect(support.footLatitude).toBeNull();
+        expect(support.footLongitude).toBeNull();
+        expect(support.spanAzimut).toBeNull();
+      }
+    });
+  });
+
+  describe('adding a support before support 0 on a geolocated section', () => {
+    const makeSupport = (uuid: string, overrides: Partial<Support>): Support => ({
+      ...createEmptySupport(),
+      uuid,
+      ...overrides
+    });
+
+    const geolocatedSupports = (): Support[] => [
+      makeSupport('old-0', { footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 }),
+      makeSupport('old-1', { footLatitude: 45.1, footLongitude: 3.1, spanAzimut: 137, spanAngle: 25, spanLength: 250 }),
+      makeSupport('old-2', { footLatitude: 45.2, footLongitude: 3.2, spanAzimut: 200, spanAngle: 0, spanLength: 200 })
+    ];
+
+    let geopositioning: GeopositioningService;
+    let manualSection: ManualSectionComponent;
+
+    beforeEach(() => {
+      geopositioning = TestBed.inject(GeopositioningService);
+      fixture.componentRef.setInput('section', { ...mockSection, supports: geolocatedSupports(), start_azimuth: 90 });
+      fixture.componentRef.setInput('mode', 'edit');
+      fixture.detectChanges();
+      manualSection = fixture.debugElement.query(By.directive(ManualSectionComponent))
+        .componentInstance as ManualSectionComponent;
+    });
+
+    const insertBeforeFirstSupport = async (): Promise<void> => {
+      await manualSection.addSupport(0, 'before');
+      fixture.detectChanges();
+    };
+
+    it('should keep the existing supports in place and clear the start while the anchor is pending', async () => {
+      await insertBeforeFirstSupport();
+
+      const supports = component.section().supports ?? [];
+      expect(component.startAnchor()).toEqual({
+        supportUuid: 'old-0',
+        gps: { latitude: 45, longitude: 3 },
+        spanAzimuth: 100
+      });
+      expect(supports).toHaveLength(4);
+      expect(supports[0].footLatitude).toBeNull();
+      expect(supports[1].footLatitude).toBe(45);
+      expect(supports[1].spanAzimut).toBe(100);
+      expect(supports[2].footLatitude).toBe(45.1);
+      expect(component.section().start_azimuth).toBeNull();
+      expect(component.locationData()).toEqual({ latitude: null, longitude: null, azimuth: null, isValid: true });
+    });
+
+    it('should compute the new start from the former support 0 on validate', async () => {
+      await insertBeforeFirstSupport();
+      const newSupport = component.section().supports![0];
+      newSupport.spanLength = 180;
+      newSupport.spanAngle = 4;
+      const computeSpy = vi
+        .spyOn(geopositioning, 'computeStartFromNextSupport')
+        .mockResolvedValue({ point: { latitude: 44.9, longitude: 2.9 }, azimuth: 30 });
+      const spyOutput = vi.spyOn(component.outputSection, 'emit');
+
+      await component.onValidate();
+
+      expect(computeSpy).toHaveBeenCalledOnce();
+      expect(computeSpy).toHaveBeenCalledWith({
+        next: { latitude: 45, longitude: 3 },
+        nextSpanAzimuth: 100,
+        spanLength: 180,
+        lineAngle: [4, 10]
+      });
+      const emitted = spyOutput.mock.calls[0][0];
+      expect(emitted.supports[0].footLatitude).toBe(44.9);
+      expect(emitted.supports[0].footLongitude).toBe(2.9);
+      expect(emitted.start_azimuth).toBe(30);
+      expect(emitted.supports[1].footLatitude).toBe(45);
+      expect(emitted.supports[1].spanAzimut).toBe(100);
+      expect(emitted.supports[2].footLatitude).toBe(45.1);
+      expect(emitted.supports[3].footLatitude).toBe(45.2);
+    });
+
+    it('should chain one computation per support inserted before support 0', async () => {
+      await insertBeforeFirstSupport();
+      await manualSection.addSupport(0, 'before');
+      fixture.detectChanges();
+      const supports = component.section().supports ?? [];
+      supports[0].spanLength = 150;
+      supports[0].spanAngle = 2;
+      supports[1].spanLength = 180;
+      supports[1].spanAngle = 6;
+      const computeSpy = vi
+        .spyOn(geopositioning, 'computeStartFromNextSupport')
+        .mockResolvedValueOnce({ point: { latitude: 44, longitude: 2 }, azimuth: 30 })
+        .mockResolvedValueOnce({ point: { latitude: 43, longitude: 1 }, azimuth: -20 });
+      const spyOutput = vi.spyOn(component.outputSection, 'emit');
+
+      await component.onValidate();
+
+      expect(computeSpy).toHaveBeenCalledTimes(2);
+      expect(computeSpy).toHaveBeenNthCalledWith(1, {
+        next: { latitude: 45, longitude: 3 },
+        nextSpanAzimuth: 100,
+        spanLength: 180,
+        lineAngle: [6, 10]
+      });
+      expect(computeSpy).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ next: { latitude: 44, longitude: 2 }, spanLength: 150, lineAngle: [2, 6] })
+      );
+      expect(computeSpy.mock.calls[1][0].nextSpanAzimuth).toBeCloseTo(35.4, 10);
+      const emitted = spyOutput.mock.calls[0][0];
+      expect(emitted.supports[0].footLatitude).toBe(43);
+      expect(emitted.supports[0].footLongitude).toBe(1);
+      expect(emitted.start_azimuth).toBeCloseTo(-20, 10);
+    });
+
+    it('should save the section without geolocation and warn when the start cannot be computed', async () => {
+      await insertBeforeFirstSupport();
+      component.section().supports![0].spanLength = 180;
+      vi.spyOn(geopositioning, 'computeStartFromNextSupport').mockResolvedValue(null);
+      const loggerWarn = vi.spyOn(TestBed.inject(LoggerService), 'warn').mockImplementation(() => undefined);
+      const notificationService = TestBed.inject(NotificationService) as unknown as MockNotificationService;
+      const spyOutput = vi.spyOn(component.outputSection, 'emit');
+
+      await component.onValidate();
+
+      expect(notificationService.warning).toHaveBeenCalledWith('section-modal.location-removed-after-insert');
+      expect(loggerWarn).toHaveBeenCalled();
+      const emitted = spyOutput.mock.calls[0][0];
+      expect(emitted.start_azimuth).toBeNull();
+      for (const support of emitted.supports) {
+        expect(support.footLatitude).toBeNull();
+        expect(support.footLongitude).toBeNull();
+      }
+    });
+
+    it('should use the location typed by the user instead of the anchor', async () => {
+      await insertBeforeFirstSupport();
+      component.onLocationChange({ latitude: 46, longitude: 4, azimuth: 15, isValid: true });
+      const computeSpy = vi.spyOn(geopositioning, 'computeStartFromNextSupport');
+      const spyOutput = vi.spyOn(component.outputSection, 'emit');
+
+      await component.onValidate();
+
+      expect(component.startAnchor()).toBeNull();
+      expect(computeSpy).not.toHaveBeenCalled();
+      const emitted = spyOutput.mock.calls[0][0];
+      expect(emitted.supports[0].footLatitude).toBe(46);
+      expect(emitted.supports[0].footLongitude).toBe(4);
+      expect(emitted.start_azimuth).toBe(15);
+    });
+
+    it('should forget the anchor when the modal is closed', async () => {
+      await insertBeforeFirstSupport();
+      expect(component.startAnchor()).not.toBeNull();
+
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+
+      expect(component.startAnchor()).toBeNull();
     });
   });
 

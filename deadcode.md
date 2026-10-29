@@ -25,6 +25,30 @@
 - **Detected on**: 2026-10-13.
 - **Status**: PENDING REVIEW; deletion requires user validation.
 
+### Unused `compute_errors` — `stellar-engine/src/stellar_engine/data/geography.py`
+
+- **Source**: `stellar-engine/src/stellar_engine/data/geography.py` (`compute_errors`).
+- **Evidence**: `import_lambert_and_validate` now uses `validate_gps_positions` (`positionErrorMeter`) instead of `compute_errors` (`meanGpsDiffMeter`); no caller remains in `stellar-engine/src` or `src/app/core/services/worker_python`. Only its own unit tests in `stellar-engine/test/data/test_geography.py` still use it.
+- **Removal impact**: Remove the function and its tests in `test_geography.py`. The TypeScript side already uses `positionErrorMeter` (`meanGpsDiffMeter` is gone from `tasks/types.ts`).
+- **Detected on**: 2026-10-29.
+- **Status**: PENDING REVIEW; deletion requires user validation.
+
+### Unused `Task.importLambert` — worker task `import_lambert`
+
+- **Source**: `src/app/core/services/worker_python/tasks/types.ts` (`Task.importLambert` enum member and its `TaskInputs`/`TaskOutputs` entries), `src/app/core/services/worker_python/tasks/handle-task.ts` (registration), Python `import_lambert` in `stellar-engine/src/stellar_engine/data/geography.py` and its bridge in `src/app/core/services/worker_python/tasks/python-scripts/api.py`.
+- **Evidence**: `GeopositioningService.applyLambert93` (ARCHI-06) now performs a single `Task.importLambertAndValidate` call; the bootstrap call to `Task.importLambert` was removed. No other TypeScript caller remains in `src`.
+- **Removal impact**: Remove the enum member, its inputs/outputs and the `handle-task.ts` entry; check that `import_lambert` is not used by another Python caller or test before removing it from `geography.py` and `api.py`.
+- **Detected on**: 2026-10-29.
+- **Status**: PENDING REVIEW; deletion requires user validation.
+
+### Unused geopositioning helpers `getFootGps`, `computeFootGps`, `sectionToCrs` (ARCHI-05)
+
+- **Sources**: `src/app/core/services/geopositioning/geopositioning.service.ts` (methods `getFootGps`, `computeFootGps`, `sectionToCrs`), `src/app/shared/domain/helpers/geopositioning.helpers.ts` (helper `getFootGps`, used only by the service method).
+- **Evidence**: a repository search excluding `*.spec.ts` finds no production caller of these members; only their specs call them.
+- **Removal impact**: Delete the three service methods and the helper; delete their tests in `geopositioning.service.spec.ts` (`computeFootGps`, `sectionToCrs`, `getFootGps` blocks) and in `geopositioning.helpers.spec.ts`; delete the matching rows in `docs-sphinx/source/en/user_docs/developer_guide/geographic_system.md` and `docs-sphinx/source/fr/user_docs/developer_guide/geographic_system.md`.
+- **Detected on**: 2026-10-29.
+- **Status**: PENDING REVIEW; deletion requires user validation.
+
 ## Legend
 - **📍 Source**: file and line number
 - **🔍 Evidence**: why it is considered dead

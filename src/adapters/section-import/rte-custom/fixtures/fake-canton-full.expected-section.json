@@ -184,5 +184,5 @@
   "cable_support_manipulations": [],
   "selected_cable_support_manipulation_uuid": null,
   "start_azimuth": -122.125,
-  "mean_reprojection_diff_meters": 0.025
+  "position_error_meters": [0, 0, 0, 0, 0, 0]
 }

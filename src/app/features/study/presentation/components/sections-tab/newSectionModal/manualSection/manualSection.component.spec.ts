@@ -38,6 +38,7 @@ import { LinesService } from '@shared/catalog/services/lines.service';
 import { MessageService } from 'primeng/api';
 import { Subject } from 'rxjs';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { DEFAULT_TABLE_ROWS_PER_PAGE } from '@shared/constants/tablePagination';
 
@@ -187,7 +188,7 @@ describe('ManualSectionComponent', () => {
       cable_span_manipulations: [],
       selected_cable_span_manipulation_uuid: null,
       start_azimuth: null,
-      mean_reprojection_diff_meters: null
+      position_error_meters: null
     };
 
     await TestBed.configureTestingModule({
@@ -295,6 +296,70 @@ describe('ManualSectionComponent', () => {
       component.deleteSupport(s1.uuid);
       expect(mockSection.supports.length).toBe(2);
       expect(mockSection.supports[0].uuid).toBe(s2.uuid);
+    });
+
+    it('should move the start to the former support 1 when support 0 is deleted on a geolocated section', async () => {
+      const s1 = { ...createSupportMock(), footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 };
+      const s2 = { ...createSupportMock(), footLatitude: 45.1, footLongitude: 3.1, spanAzimut: 137, spanAngle: 25, spanLength: 250 };
+      const s3 = { ...createSupportMock(), footLatitude: 45.2, footLongitude: 3.2, spanAzimut: 200, spanAngle: 0, spanLength: 200 };
+      mockSection.supports = [s1, s2, s3];
+      mockSection.start_azimuth = 90;
+      await component.deleteSupport(s1.uuid);
+      expect(mockSection.supports.map((support) => support.uuid)).toEqual([s2.uuid, s3.uuid]);
+      expect(mockSection.supports[0].footLatitude).toBe(45.1);
+      expect(mockSection.supports[0].footLongitude).toBe(3.1);
+      expect(mockSection.start_azimuth).toBeCloseTo(137 - 25 * 0.9, 10);
+      expect(mockSection.supports[1].footLatitude).toBe(45.2);
+      expect(mockSection.supports[1].footLongitude).toBe(3.2);
+      expect(component.startGps()?.latitude).toBe(45.1);
+      expect(component.startGps()?.longitude).toBe(3.1);
+      expect(component.sectionChange.emit).toHaveBeenCalledWith(mockSection);
+    });
+
+    it('should remove the geolocation when support 0 is deleted and the former support 1 has no GPS', async () => {
+      const s1 = { ...createSupportMock(), footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 };
+      const s2 = { ...createSupportMock(), footLatitude: null, footLongitude: null, spanAzimut: null, spanAngle: 25, spanLength: 250 };
+      const s3 = { ...createSupportMock(), footLatitude: null, footLongitude: null, spanAzimut: null, spanAngle: 0, spanLength: 200 };
+      mockSection.supports = [s1, s2, s3];
+      mockSection.start_azimuth = 90;
+      const geopositioning = TestBed.inject(GeopositioningService);
+      vi.spyOn(geopositioning, 'resolveLocalization').mockResolvedValue(null);
+      await component.deleteSupport(s1.uuid);
+      expect(mockSection.supports[0].footLatitude).toBeNull();
+      expect(mockSection.supports[0].footLongitude).toBeNull();
+      expect(mockSection.start_azimuth).toBeNull();
+      expect(component.startGps()).toBeNull();
+    });
+
+    it('should use the resolved localization when the former support 1 has no stored GPS', async () => {
+      const s1 = { ...createSupportMock(), footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 };
+      const s2 = { ...createSupportMock(), footLatitude: null, footLongitude: null, spanAzimut: null, spanAngle: 25, spanLength: 250 };
+      const s3 = { ...createSupportMock(), footLatitude: null, footLongitude: null, spanAzimut: null, spanAngle: 0, spanLength: 200 };
+      mockSection.supports = [s1, s2, s3];
+      const geopositioning = TestBed.inject(GeopositioningService);
+      vi.spyOn(geopositioning, 'resolveLocalization').mockResolvedValue({
+        latitude: [45, 45.1, 45.2],
+        longitude: [3, 3.1, 3.2],
+        azimuth: [100, 137]
+      });
+      await component.deleteSupport(s1.uuid);
+      expect(mockSection.supports[0].footLatitude).toBe(45.1);
+      expect(mockSection.supports[0].footLongitude).toBe(3.1);
+      expect(mockSection.start_azimuth).toBeCloseTo(137 - 25 * 0.9, 10);
+    });
+
+    it('should not resolve the localization when deleting a support other than support 0', async () => {
+      const s1 = { ...createSupportMock(), footLatitude: 45, footLongitude: 3, spanAzimut: 100, spanAngle: 10, spanLength: 300 };
+      const s2 = { ...createSupportMock(), footLatitude: 45.1, footLongitude: 3.1, spanAzimut: 137, spanAngle: 25, spanLength: 250 };
+      const s3 = { ...createSupportMock(), footLatitude: 45.2, footLongitude: 3.2, spanAzimut: 200, spanAngle: 0, spanLength: 200 };
+      mockSection.supports = [s1, s2, s3];
+      mockSection.start_azimuth = 90;
+      const geopositioning = TestBed.inject(GeopositioningService);
+      const resolveSpy = vi.spyOn(geopositioning, 'resolveLocalization');
+      await component.deleteSupport(s2.uuid);
+      expect(resolveSpy).not.toHaveBeenCalled();
+      expect(mockSection.supports[0].footLatitude).toBe(45);
+      expect(mockSection.start_azimuth).toBe(90);
     });
   });
 

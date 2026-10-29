@@ -176,7 +176,7 @@ export class RteCustomAdapter implements SectionImportAdapter {
         selected_initial_condition_uuid: undefined,
         start_azimuth: null,
         supports,
-        mean_reprojection_diff_meters: null
+        position_error_meters: null
       },
       lambertX,
       lambertY

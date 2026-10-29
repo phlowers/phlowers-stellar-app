@@ -13,6 +13,7 @@ import { CablesService } from '@shared/catalog/services/cables.service';
 import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { normalizeFieldMeasureDates } from '@shared/domain/helpers/field-measure.helpers';
+import { isLegacyLocalizationSection, stripLocalization } from '@shared/domain/helpers/geopositioning.helpers';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ImportAdapter, UUIDCollisionResolver } from '@shared/import/domain/import-contracts';
@@ -22,6 +23,7 @@ import {
   formatProtoV4Support,
   formatProtoV4Parameters,
   isAppStudyFile,
+  isRecord,
   isStsdFile
 } from './study-import.helpers';
 
@@ -201,16 +203,21 @@ export class StudyImportService implements ImportAdapter<Study> {
   }
 
   private transformSections(sections: unknown[]): (Section & { supports: Support[] })[] {
-    return sections.map((section: unknown) => {
-      const sectionObj = section as Section;
-      return {
+    return sections.filter(isRecord).map((rawSection) => {
+      const sectionObj = rawSection as unknown as Section;
+      const section = {
         ...createEmptySection(),
         ...sectionObj,
         supports: Array.isArray(sectionObj.supports) ? this.transformSupports(sectionObj.supports) : [],
         field_measures: Array.isArray(sectionObj.field_measures)
-          ? sectionObj.field_measures.map(normalizeFieldMeasureDates)
+          ? sectionObj.field_measures.filter((measure) => isRecord(measure)).map(normalizeFieldMeasureDates)
           : []
       };
+      if (!isLegacyLocalizationSection(rawSection)) {
+        return section;
+      }
+      this.logger.info('Legacy section geolocation dropped on import', { sectionUuid: section.uuid });
+      return stripLocalization(section);
     });
   }
 

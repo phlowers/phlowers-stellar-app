@@ -6,8 +6,8 @@
  */
 import { isEqual } from 'lodash';
 import { Section, Support } from '@shared/domain';
-import { TaskInputs, Task } from '@core/services/worker_python/tasks/types';
-import { SectionImportCoordinates } from '@shared/import/section-adapter/section-import-adapter.interfaces';
+import type { TaskInputs, Task } from '@core/services/worker_python/tasks/types';
+import type { SectionImportCoordinates } from '@shared/import/section-adapter/section-import-adapter.interfaces';
 import { FootLocalization, GpsPoint } from './geopositioning.interfaces';
 
 /**
@@ -102,6 +102,16 @@ export function applyLocalization(supports: Support[], localization: FootLocaliz
   }));
 }
 
+/** Returns a copy of `supports` whose `spanAzimut` is set from `azimuth` (by index, span supports only). */
+export function applySpanAzimuths(supports: Support[], azimuth: readonly number[]): Support[] {
+  return supports.map((support, i) => (i < azimuth.length ? { ...support, spanAzimut: azimuth[i] } : support));
+}
+
+/** Maps the worker position errors (meters) to stored values: non-finite values (`NaN`, `Infinity`) become `null`. */
+export function toPositionErrorMeters(errors: readonly number[]): (number | null)[] {
+  return errors.map((error) => (isFiniteNumber(error) ? error : null));
+}
+
 /**
  * Returns a copy of `section` without derived localization: foot GPS of every support but the first
  * (start anchor) and every `spanAzimut` are reset to `null`.
@@ -155,4 +165,54 @@ const geometrySignature = (section: Section) => ({
 export function hasGeometryChanged(previous: Section | undefined, next: Section): boolean {
   if (!previous) return true;
   return !isEqual(geometrySignature(previous), geometrySignature(next));
+}
+
+/**
+ * `true` when a raw (parsed, not yet normalized) section comes from the legacy localization model.
+ * Sections of that model carry `start_latitude`/`start_longitude` keys (even when `null`) once those
+ * fields existed, and older sections have no `start_azimuth` key at all. Their values use another
+ * convention, so they must never be read as current ones.
+ */
+export function isLegacyLocalizationSection(rawSection: Record<string, unknown>): boolean {
+  return (
+    Object.hasOwn(rawSection, 'start_latitude') ||
+    Object.hasOwn(rawSection, 'start_longitude') ||
+    !Object.hasOwn(rawSection, 'start_azimuth')
+  );
+}
+
+const clearSupportLocalization = (support: Support): Support => ({
+  ...support,
+  footLatitude: null,
+  footLongitude: null,
+  spanAzimut: null
+});
+
+/**
+ * Returns a copy of `section` without any geolocation: the legacy `start_latitude`, `start_longitude`
+ * and `mean_reprojection_diff_meters` keys are removed, `start_azimuth`, `position_error_meters` and the
+ * foot GPS and `spanAzimut` of every support are reset to `null`. The input is not mutated.
+ */
+export function stripLocalization<T extends Section>(section: T): T {
+  const {
+    start_latitude: _startLatitude,
+    start_longitude: _startLongitude,
+    mean_reprojection_diff_meters: _meanReprojectionDiffMeters,
+    ...rest
+  } = section as unknown as Record<string, unknown>;
+  const stripped: Record<string, unknown> = { ...rest, start_azimuth: null, position_error_meters: null };
+  if (Array.isArray(rest['supports'])) {
+    stripped['supports'] = (rest['supports'] as Support[]).map(clearSupportLocalization);
+  }
+  return stripped as unknown as T;
+}
+
+/**
+ * Normalizes an azimuth (degrees) into the `]-180, 180]` range.
+ * @param azimuth - The azimuth in degrees, any value
+ * @returns The equivalent azimuth in `]-180, 180]`
+ */
+export function normalizeAzimuth(azimuth: number): number {
+  const positive = ((azimuth % 360) + 360) % 360;
+  return positive > 180 ? positive - 360 : positive;
 }

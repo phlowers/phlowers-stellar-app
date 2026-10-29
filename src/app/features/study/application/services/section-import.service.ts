@@ -25,18 +25,18 @@ import { NotificationService } from '@services/notification/notification.service
 import { LoggerService } from '@core/services/logger/logger.service';
 import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
 import { GeopositioningError } from '@services/geopositioning/geopositioning.interfaces';
-import { SPAN_AZIMUTH_ERROR_THRESHOLD_DEG } from '@shared/domain/helpers/geopositioning.constantes';
+import { SPAN_AZIMUTH_ERROR_THRESHOLD_DEG, POSITION_ERROR_THRESHOLD_METERS } from '@shared/domain/helpers/geopositioning.constantes';
 import { computeSpanAzimuthErrors } from '@shared/domain/helpers/geopositioning.helpers';
 import { hasSupportsBoundsErrors } from '@shared/domain/helpers/support-limits.helpers';
 import { TranslocoService } from '@jsverse/transloco';
-import { environment } from '@src/environments/environment';
 import {
-  AZIMUTH_REPROJECTION_WARNING_KEY,
+  AZIMUTH_REPROJECTION_NOTICE_KEY,
   CATALOG_MISSING_WARNING_KEY,
   IMPORT_SUCCESS_KEY,
-  REPROJECTION_INFO_KEY,
+  POSITION_ERROR_NOTICE_KEY,
   SECTION_IMPORT_ERROR_KEYS
 } from './section-import.constantes';
+import { getNoticeSeverity, summarizePositionError } from './section-import.helpers';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { AttachmentCorrectionService } from './catalog-correction/attachment-correction.service';
 import { ChainCorrectionService } from './catalog-correction/chain-correction.service';
@@ -174,8 +174,10 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     // Stage: MAPPING (coordinates)
     const section = await this.applyCoordinates(corrected, payload.coordinates);
-    const azimuthWarning = this.checkSpanAzimuthError(corrected, section);
-    if (azimuthWarning) notices.push(azimuthWarning);
+    const azimuthNotice = this.checkSpanAzimuthError(corrected, section);
+    if (azimuthNotice) notices.push(azimuthNotice);
+    const positionNotice = this.buildPositionErrorNotice(section);
+    if (positionNotice) notices.push(positionNotice);
 
     // Stage: COLLISION_CHECK + PERSISTENCE
     return this.persistSection(section, study, collisionResolver, notices);
@@ -301,7 +303,8 @@ export class SectionImportService implements ImportAdapter<Section> {
 
   /**
    * Compares the span azimuths of the file (`before`) with the computed ones (`after`), logs the full error
-   * vector and returns a warning notice when any gap exceeds `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG`.
+   * vector and returns a notice: `info` when the maximum gap is within `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG`,
+   * `warning` otherwise. Returns `null` when no gap could be computed.
    */
   private checkSpanAzimuthError(before: Section, after: Section): SectionImportNotice | null {
     const errors = computeSpanAzimuthErrors(before.supports, after.supports);
@@ -310,13 +313,31 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     this.logger.info('Span azimuth error vector after reprojection (deg)', errors);
     const maxError = Math.max(...known);
-    if (maxError <= SPAN_AZIMUTH_ERROR_THRESHOLD_DEG) return null;
-
     return {
-      severity: 'warning',
-      message: this.transloco.translate(AZIMUTH_REPROJECTION_WARNING_KEY, {
-        error: maxError.toFixed(1),
+      severity: getNoticeSeverity(maxError, SPAN_AZIMUTH_ERROR_THRESHOLD_DEG),
+      message: this.transloco.translate(AZIMUTH_REPROJECTION_NOTICE_KEY, {
+        error: maxError.toFixed(2),
         threshold: SPAN_AZIMUTH_ERROR_THRESHOLD_DEG
+      })
+    };
+  }
+
+  /**
+   * Builds the notice on the maximum support position error recorded at import (`position_error_meters`).
+   * Returns `null` when no finite position error was computed. The full vector is logged.
+   */
+  private buildPositionErrorNotice(section: Section): SectionImportNotice | null {
+    if (!section.position_error_meters) return null;
+    this.logger.info('Support position error vector after reprojection (m)', section.position_error_meters);
+
+    const summary = summarizePositionError(section, POSITION_ERROR_THRESHOLD_METERS);
+    if (!summary) return null;
+    return {
+      severity: summary.severity,
+      message: this.transloco.translate(POSITION_ERROR_NOTICE_KEY, {
+        error: summary.maxError.toFixed(2),
+        support: summary.support,
+        threshold: POSITION_ERROR_THRESHOLD_METERS
       })
     };
   }
@@ -401,7 +422,7 @@ export class SectionImportService implements ImportAdapter<Section> {
         throw error;
       }
 
-      this.notifyImported(section, notices);
+      this.notifyImported(notices);
       return section;
     }
 
@@ -418,34 +439,18 @@ export class SectionImportService implements ImportAdapter<Section> {
       throw error;
     }
 
-    this.notifyImported(section, notices);
+    this.notifyImported(notices);
     return section;
   }
 
-  private notifyImported(section: Section, notices: readonly SectionImportNotice[]): void {
+  private notifyImported(notices: readonly SectionImportNotice[]): void {
     this.notificationService.success(this.transloco.translate(IMPORT_SUCCESS_KEY));
-    this.notifyGpsReprojection(section);
     for (const notice of notices) {
       if (notice.severity === 'warning') {
         this.notificationService.warning(notice.message);
       } else {
         this.notificationService.info(notice.message);
       }
-    }
-  }
-
-  /**
-   * Shows an info toast reporting the mean Lambert93-to-GPS reprojection error (meters), when one
-   * was computed for this import (see `applyLambert93`).
-   */
-  private notifyGpsReprojection(section: Section): void {
-    if (section.mean_reprojection_diff_meters != null) {
-      this.notificationService.info(
-        this.transloco.translate(REPROJECTION_INFO_KEY, {
-          appName: environment.appName,
-          error: section.mean_reprojection_diff_meters.toFixed(1)
-        })
-      );
     }
   }
 }

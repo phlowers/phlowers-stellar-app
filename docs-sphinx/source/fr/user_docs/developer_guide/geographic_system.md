@@ -35,6 +35,24 @@ Les systèmes de coordonnées ne sont pas utilisés dans la partie tracé du gra
 | `resolveLocalization` | GPS de pied/`spanAzimut` stockés si complets, sinon calcul à la volée non persisté. |
 | `toCrs` / `sectionToCrs` | Reprojection à la volée de points WGS84 vers n'importe quel CRS EPSG avec `Task.convertCoordinates`. |
 | `applyImportedCoordinates` | Applique les coordonnées WGS84 ou Lambert93 importées (voir les adaptateurs d'import de section). Lève une `GeopositioningError` si la reprojection Lambert93 échoue. |
+| `computeStartFromNextSupport` | Utilisé quand un support est inséré avant le support 0 : renvoie `{ point, azimuth }`, le GPS du nouveau support 0 et le nouvel azimut de départ, pour que les supports existants gardent leur position. Ne lève jamais d'erreur : renvoie `null` en cas d'échec. |
+
+### Contrôles de position à l'import
+
+Les positions sont la source de vérité. Après un import avec coordonnées, le worker reconstruit la géométrie à partir des positions (WGS84 via `Task.validateGpsPositions`, Lambert93 via `Task.importLambertAndValidate`) et les valeurs calculées écrasent les valeurs du fichier : `spanAzimut`, `start_azimuth` et `position_error_meters` par support.
+
+- `position_error_meters` est la distance (m) entre le GPS importé de chaque support et la position reconstruite depuis la géométrie de la section (longueurs et angles de travée). Elle vaut `null` si elle n'est pas calculée. Les valeurs non finies renvoyées par Python (`NaN`, `Infinity`) sont stockées à `null`.
+- L'ancienne clé `mean_reprojection_diff_meters` est supprimée au chargement par `stripLocalization`.
+- Les notices d'import reposent sur deux seuils :
+
+| Contrôle | Seuil | Inférieur ou égal au seuil | Au-dessus du seuil |
+|---|---|---|---|
+| Écart d'azimut de travée (fichier vs calculé, en degrés) | `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG` = 1° | notice d'information | notice d'avertissement |
+| Écart de position d'un support (mètres, maximum et son support) | `POSITION_ERROR_THRESHOLD_METERS` = 1 m | notice d'information | notice d'avertissement |
+
+Les notices sont affichées après l'import lorsque l'écart peut être calculé (le contrôle d'azimut nécessite un azimut dans le fichier, le contrôle de position nécessite une erreur finie), et le vecteur d'erreurs complet est journalisé. Un avertissement invite l'utilisateur à vérifier les valeurs importées.
+
+Si la validation WGS84 échoue, les GPS de pied sont conservés, les azimuts du fichier restent inchangés et un avertissement est journalisé.
 
 Le géopositionnement est optionnel : une section sans GPS de départ (ex. import d'étude ProtoV4) est valide et n'est jamais forcée à calculer.
 

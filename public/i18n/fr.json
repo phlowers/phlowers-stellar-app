@@ -421,8 +421,8 @@
       "invalid-envelope": "Le fichier de canton Stellar est invalide.",
       "unsupported-version": "Version {{ version }} du fichier de canton Stellar non prise en charge (maximum pris en charge : {{ maxVersion }})."
     },
-    "azimuth-reprojection-warning": "Les azimuts de portée calculés à partir des coordonnées importées diffèrent des valeurs du fichier jusqu'à {{ error }}° (seuil : {{ threshold }}°). Les valeurs calculées ont été conservées.",
-    "reprojection-info": "La reprojection sur le modèle de données {{ appName }} semble ajouter une erreur absolue moyenne de {{ error }} m",
+    "azimuth-reprojection-notice": "Écart maximal des azimuts de portée après reprojection : {{ error }}° (seuil : {{ threshold }}°). Les valeurs calculées ont été conservées.",
+    "position-error-notice": "Écart maximal de position des supports : {{ error }} m sur le support {{ support }} (seuil : {{ threshold }} m). Vérifiez vos valeurs au-delà du seuil.",
     "from-file": {
       "file-format": "Formats de fichier : {{ formats }}",
       "description": "Vous pouvez importer un canton à partir d'un fichier JSON. Il sera ajouté à l'étude en cours.",
@@ -514,7 +514,8 @@
     "update-btn": "Mettre à jour le canton",
     "title-view": "Voir un canton de l'étude",
     "title-modify": "Modifier un canton de l'étude",
-    "title-create": "Créer un canton de l'étude"
+    "title-create": "Créer un canton de l'étude",
+    "location-removed-after-insert": "La position de départ n'a pas pu être calculée à partir du support suivant : le canton est enregistré sans géolocalisation."
   },
   "manual-section": {
     "tab-general": "Général",
@@ -573,7 +574,8 @@
     "auto-fill-hint": "Le Set d'accroche et la valeur de L. bras (m) sera automatiquement renseigné dans le tableau."
   },
   "location": {
-    "title": "Coordonnées du support 1 :"
+    "title": "Coordonnées du support 1 :",
+    "incomplete-error": "Renseignez la latitude, la longitude et l'azimut ensemble, ou laissez les trois vides."
   },
   "loads": {
     "shared": {

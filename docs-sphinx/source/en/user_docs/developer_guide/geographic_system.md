@@ -35,6 +35,24 @@ The coordinate systems are not used in the plotting part.
 | `resolveLocalization` | Stored foot GPS/`spanAzimut` when complete, otherwise an on-the-fly computation that is not persisted. |
 | `toCrs` / `sectionToCrs` | On-the-fly reprojection of WGS84 points to any EPSG CRS with `Task.convertCoordinates`. |
 | `applyImportedCoordinates` | Applies imported WGS84 or Lambert93 coordinates (see the section import adapters). Throws a `GeopositioningError` when the Lambert93 reprojection fails. |
+| `computeStartFromNextSupport` | Used when a support is inserted before support 0: returns `{ point, azimuth }`, the GPS of the new support 0 and the new start azimuth, so that the existing supports keep their position. Never throws: returns `null` on failure. |
+
+### Import position checks
+
+Positions are the source of truth. After an import with coordinates, the worker rebuilds the geometry from the positions (WGS84 through `Task.validateGpsPositions`, Lambert93 through `Task.importLambertAndValidate`) and the computed values overwrite the file values: `spanAzimut`, `start_azimuth` and the per-support `position_error_meters`.
+
+- `position_error_meters` is the distance (m) between each imported support GPS position and the position rebuilt from the section geometry (span lengths and angles). It is `null` when not computed. Non-finite values returned by Python (`NaN`, `Infinity`) are stored as `null`.
+- The legacy `mean_reprojection_diff_meters` key is removed on load by `stripLocalization`.
+- The import notices are built from two thresholds:
+
+| Check | Threshold | At or below the threshold | Above the threshold |
+|---|---|---|---|
+| Span azimuth gap (file vs computed, degrees) | `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG` = 1° | info notice | warning notice |
+| Support position gap (metres, maximum and its support) | `POSITION_ERROR_THRESHOLD_METERS` = 1 m | info notice | warning notice |
+
+The notices are shown after the import when the gap can be computed (the azimuth check needs a file azimuth, the position check needs a finite error), and the full error vector is logged. A warning asks the user to check the imported values.
+
+If the WGS84 validation fails, the foot GPS are kept, the file azimuths are left unchanged, and a warning is logged.
 
 Geopositioning is optional: a section without start GPS (e.g. a ProtoV4 study import) is valid and is never forced to compute.
 

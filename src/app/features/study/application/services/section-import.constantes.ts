@@ -18,14 +18,14 @@ export const SECTION_IMPORT_ERROR_KEYS = {
   lambertReprojectionError: 'section-import.lambert-reprojection-error'
 } as const;
 
-/** Transloco translation key for the Lambert93-to-GPS reprojection info toast. */
-export const REPROJECTION_INFO_KEY = 'section-import.reprojection-info';
-
 /** Transloco translation key for the section import success toast. */
 export const IMPORT_SUCCESS_KEY = 'section-import.import-success';
 
 /** Transloco translation key for the warning shown when a support is absent from the attachment catalog. */
 export const CATALOG_MISSING_WARNING_KEY = 'section-import.catalog-missing-warning';
 
-/** Transloco translation key for the warning shown when the computed span azimuths differ from the file ones. */
-export const AZIMUTH_REPROJECTION_WARNING_KEY = 'section-import.azimuth-reprojection-warning';
+/** Transloco translation key for the notice (info or warning) on the gap between computed and file span azimuths. */
+export const AZIMUTH_REPROJECTION_NOTICE_KEY = 'section-import.azimuth-reprojection-notice';
+
+/** Transloco translation key for the notice (info or warning) on the maximum support position error. */
+export const POSITION_ERROR_NOTICE_KEY = 'section-import.position-error-notice';

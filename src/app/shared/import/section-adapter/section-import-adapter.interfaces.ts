@@ -26,7 +26,7 @@ export interface SectionImportSource {
  *
  * - `LAMBERT93`: `x` / `y` are Lambert93 easting / northing in meters. The core reprojects them to GPS
  *   and fills the support foot coordinates and `spanAzimut` (the start GPS is the foot of the first support),
- *   plus `start_azimuth` and the mean reprojection error.
+ *   plus `start_azimuth` and the per-support position error (`position_error_meters`).
  * - `WGS84`: `x` is the longitude and `y` the latitude, in degrees. Applied as-is.
  *
  * A `null` entry means the coordinate is unknown; the core then skips the reprojection.

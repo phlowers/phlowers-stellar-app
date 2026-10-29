@@ -45,7 +45,7 @@ import {
 import { SUPPORT_FIELD_LIMITS } from '@shared/domain/helpers/support-limits.constantes';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
-import { LOCATION_CONFIG } from '../location/location.constantes';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ExpandableSelectField } from './supportsTable.types';
 
@@ -115,6 +115,7 @@ export class SupportsTableComponent implements OnInit {
   readonly catalogLoaded = computed(() => this.allCatalogSupportNames() !== undefined);
   private readonly workerPythonService = inject(WorkerPythonService);
   private readonly geopositioning = inject(GeopositioningService);
+  private readonly logger = inject(LoggerService);
   readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
   private readonly transloco = inject(TranslocoService);
   localization = signal<Localization | null>(null);
@@ -184,42 +185,41 @@ export class SupportsTableComponent implements OnInit {
     });
   }
 
-  /** Section used for display: falls back to the default location when no start point is stored. */
-  private withDefaultStart(section: Section, supports: Support[]): Section {
-    const located = { ...section, supports };
-    const withGps = this.geopositioning.getStartGps(located)
-      ? located
-      : this.geopositioning.setStartGps(located, {
-          latitude: LOCATION_CONFIG.latitude.default,
-          longitude: LOCATION_CONFIG.longitude.default
-        });
-    return withGps.start_azimuth == null ? { ...withGps, start_azimuth: LOCATION_CONFIG.azimuth.default } : withGps;
-  }
-
   private async computeLocalization(): Promise<void> {
     if (this.mode() !== 'view') return;
 
     const section = this.section();
     if (!section || !this.workerReady()) return;
 
+    const located = { ...section, supports: this.supports() };
+    if (!this.geopositioning.getStartGps(located)) {
+      this.localization.set(null);
+      return;
+    }
+
     this.localizationLoading.set(true);
 
     try {
-      const located = this.withDefaultStart(section, this.supports());
       const resolved = await this.geopositioning.resolveLocalization(located);
-      if (!resolved) return;
+      if (!resolved) {
+        this.logger.warn('Supports table: localization unavailable although a start GPS is set');
+        return;
+      }
 
       const points = resolved.latitude.map((latitude, i) => ({ latitude, longitude: resolved.longitude[i] }));
       const projected = await this.geopositioning.toCrs(points, CRS.LAMBERT93);
-      if (!projected) return;
+      if (!projected) {
+        this.logger.warn('Supports table: Lambert projection unavailable although a start GPS is set');
+        return;
+      }
 
       this.localization.set({
         ...resolved,
         lambert_x: projected.map((point) => point.x),
         lambert_y: projected.map((point) => point.y)
       });
-    } catch {
-      // worker failure — localizationLoading is cleared in finally
+    } catch (error: unknown) {
+      this.logger.warn('Supports table: localization failed', error);
     } finally {
       this.localizationLoading.set(false);
     }

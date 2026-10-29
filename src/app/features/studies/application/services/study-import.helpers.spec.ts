@@ -1,6 +1,21 @@
-import { isAppStudyFile, isStsdFile } from './study-import.helpers';
+import { isAppStudyFile, isRecord, isStsdFile } from './study-import.helpers';
 
 describe('study-import helpers', () => {
+  describe('isRecord', () => {
+    it('should return true for plain objects', () => {
+      expect(isRecord({})).toBe(true);
+      expect(isRecord({ uuid: 'a' })).toBe(true);
+    });
+
+    it('should return false for null, primitives and arrays', () => {
+      expect(isRecord(null)).toBe(false);
+      expect(isRecord(undefined)).toBe(false);
+      expect(isRecord(42)).toBe(false);
+      expect(isRecord('section')).toBe(false);
+      expect(isRecord([])).toBe(false);
+    });
+  });
+
   describe('isStsdFile', () => {
     it('should return true for .stsd files (case-insensitive)', () => {
       expect(isStsdFile('study.stsd')).toBe(true);

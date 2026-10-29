@@ -13,3 +13,6 @@ export const CRS = {
 
 /** Maximum accepted gap (degrees) between a source span azimuth and the computed one before warning the user. */
 export const SPAN_AZIMUTH_ERROR_THRESHOLD_DEG = 1;
+
+/** Maximum position gap (m) between an imported support and its position rebuilt from the section geometry before the import notice becomes a warning. */
+export const POSITION_ERROR_THRESHOLD_METERS = 1;

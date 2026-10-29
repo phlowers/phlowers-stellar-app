@@ -19,6 +19,7 @@ import { CrsCode, FootLocalization, GpsPoint, ProjectedPoint } from '@shared/dom
 import {
   applyFootCoordinates,
   applyLocalization,
+  applySpanAzimuths,
   areCoordinatesComplete,
   buildLocalizationInputs,
   buildReprojectionAngles,
@@ -27,10 +28,15 @@ import {
   getStartGps,
   hasCompleteFootGps,
   hasGeometryChanged,
+  toPositionErrorMeters,
   withStartGps
 } from '@shared/domain/helpers/geopositioning.helpers';
 import { WORKER_READY_TIMEOUT_MS } from './geopositioning.constantes';
-import { GeopositioningError } from './geopositioning.interfaces';
+import {
+  GeopositioningError,
+  StartFromNextSupportInput,
+  StartFromNextSupportResult
+} from './geopositioning.interfaces';
 
 /**
  * Single entry point for the geopositioning of a section.
@@ -52,7 +58,7 @@ export class GeopositioningService {
   // Get / set (sync, in memory)
   // ---------------------------------------------------------------------------
 
-  /** Foot GPS of each support, `null` when unknown. */
+  /** Foot GPS of each support, `null` when unknown. No production caller yet: kept for review, see `deadcode.md` (ARCHI-05). */
   getFootGps(section: Section): (GpsPoint | null)[] {
     return getFootGps(section);
   }
@@ -75,6 +81,7 @@ export class GeopositioningService {
   /**
    * Computes the foot GPS and `spanAzimut` of every support from the start GPS, `start_azimuth` and the
    * span geometry. Returns the section unchanged (with a warning) when inputs are missing or the task fails.
+   * No production caller yet: kept for review, see `deadcode.md` (ARCHI-05).
    */
   async computeFootGps(section: Section): Promise<Section> {
     const localization = await this.runComputeLocalization(section);
@@ -132,7 +139,10 @@ export class GeopositioningService {
     return output.x.map((x, i) => ({ x, y: output.y[i] }));
   }
 
-  /** Reprojects every support foot of `section` to `targetCrs` (see `resolveLocalization`). */
+  /**
+   * Reprojects every support foot of `section` to `targetCrs` (see `resolveLocalization`).
+   * No production caller yet: kept for review, see `deadcode.md` (ARCHI-05).
+   */
   async sectionToCrs(section: Section, targetCrs: CrsCode, reference?: Section): Promise<ProjectedPoint[] | null> {
     const localization = await this.resolveLocalization(section, reference);
     if (!localization) return null;
@@ -147,9 +157,11 @@ export class GeopositioningService {
   /**
    * Applies imported support coordinates to `section`.
    *
-   * - WGS84: used as-is (`x` = longitude, `y` = latitude).
-   * - Lambert93: reprojected to GPS; also sets `spanAzimut`, `start_azimuth` (azimuth before the first
-   *   deflection, computed by the worker) and the mean reprojection error.
+   * - WGS84: the foot GPS are set, then the worker derives `spanAzimut`, `start_azimuth` and the per-support
+   *   position error from the positions and the span geometry (positions are the source of truth). When the
+   *   worker fails, the foot GPS are kept and the file values are left unchanged.
+   * - Lambert93: reprojected to GPS by the worker; also sets `spanAzimut`, `start_azimuth` (azimuth before the
+   *   first deflection) and the per-support position error.
    *
    * Incomplete coordinates are skipped (section returned unchanged).
    *
@@ -161,14 +173,28 @@ export class GeopositioningService {
       : this.applyLambert93(section, coordinates);
   }
 
-  private applyWgs84(section: Section, coordinates: SectionImportCoordinates): Section {
+  private async applyWgs84(section: Section, coordinates: SectionImportCoordinates): Promise<Section> {
     if (!areCoordinatesComplete(coordinates, section.supports.length)) {
       this.logger.warn('Skipping WGS84 coordinates: missing or mismatching values for at least one support');
       return section;
     }
     const longitude = coordinates.x as number[];
     const latitude = coordinates.y as number[];
-    return { ...section, supports: applyFootCoordinates(section.supports, latitude, longitude) };
+    const withFootGps = { ...section, supports: applyFootCoordinates(section.supports, latitude, longitude) };
+
+    const { spanLength, lineAngle } = buildReprojectionAngles(section.supports);
+    const validated = await this.runTask(Task.validateGpsPositions, { latitude, longitude, spanLength, lineAngle });
+    if (!validated) {
+      this.logger.warn('WGS84 positions imported without span azimuths: GPS validation failed');
+      return withFootGps;
+    }
+
+    return {
+      ...withFootGps,
+      supports: applySpanAzimuths(withFootGps.supports, validated.azimuth),
+      start_azimuth: validated.startAzimuth ?? withFootGps.start_azimuth,
+      position_error_meters: toPositionErrorMeters(validated.positionErrorMeter)
+    };
   }
 
   private async applyLambert93(section: Section, coordinates: SectionImportCoordinates): Promise<Section> {
@@ -181,31 +207,44 @@ export class GeopositioningService {
     const lambert_y = coordinates.y as number[];
     const { spanLength, lineAngle } = buildReprojectionAngles(section.supports);
 
-    // Call 1 — bootstrap: direct conversion of the raw Lambert93 arrays to get the start azimuth.
-    const bootstrap = await this.workerPythonService.runTask(Task.importLambert, { lambert_x, lambert_y });
-    if (bootstrap.error || !bootstrap.result) {
-      throw new GeopositioningError('Lambert93 bootstrap reprojection failed', { cause: bootstrap.error });
+    if (!(await this.isWorkerReady())) {
+      throw new GeopositioningError('Python worker is not ready');
     }
 
-    // Call 2 — direct conversion + degree-based validation.
-    const validated = await this.workerPythonService.runTask(Task.importLambertAndValidate, {
+    const { error, result } = await this.workerPythonService.runTask(Task.importLambertAndValidate, {
       lambert_x,
       lambert_y,
-      startAzimuth: bootstrap.result.azimuth[0],
       spanLength,
       lineAngle
     });
-    if (validated.error || !validated.result) {
-      throw new GeopositioningError('Lambert93 reprojection validation failed', { cause: validated.error });
+    if (error || !result) {
+      throw new GeopositioningError('Lambert93 reprojection failed', { cause: error });
     }
 
-    const { localization, meanGpsDiffMeter, startAzimuth } = validated.result;
     return {
       ...section,
-      supports: applyLocalization(section.supports, localization),
-      start_azimuth: startAzimuth,
-      mean_reprojection_diff_meters: meanGpsDiffMeter
+      supports: applyLocalization(section.supports, result.localization),
+      start_azimuth: result.startAzimuth,
+      position_error_meters: toPositionErrorMeters(result.positionErrorMeter)
     };
+  }
+
+  /**
+   * Computes the GPS of a new support 0 and the new start azimuth, used when a support is inserted before
+   * support 0: returns the GPS of the new support 0 and the new start azimuth so that existing supports keep
+   * their position. Never throws: returns `null` when the worker is unavailable or the computation fails.
+   */
+  async computeStartFromNextSupport(input: StartFromNextSupportInput): Promise<StartFromNextSupportResult | null> {
+    const output = await this.runTask(Task.computeStartFromNextSupport, {
+      latitude: input.next.latitude,
+      longitude: input.next.longitude,
+      nextSpanAzimuth: input.nextSpanAzimuth,
+      spanLength: input.spanLength,
+      lineAngle: input.lineAngle
+    });
+    return output
+      ? { point: { latitude: output.latitude, longitude: output.longitude }, azimuth: output.startAzimuth }
+      : null;
   }
 
   // ---------------------------------------------------------------------------

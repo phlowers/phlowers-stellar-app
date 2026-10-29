@@ -459,6 +459,7 @@
               [initialLatitude]="startGps()?.latitude ?? null"
               [initialLongitude]="startGps()?.longitude ?? null"
               [initialAzimuth]="section().start_azimuth"
+              [resetToken]="startRevision()"
               (locationChange)="locationChange.emit($event)"
             />
           </div>
