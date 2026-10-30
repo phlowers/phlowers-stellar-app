@@ -11,7 +11,7 @@ import { SortEvent } from 'primeng/api';
 import { StudiesTableComponent } from './studies-table.component';
 import { Study } from '@shared/domain';
 import { MessageService } from 'primeng/api';
-import { TranslocoTestingModule } from '@jsverse/transloco';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 
 describe('StudiesTableComponent', () => {
   let component: StudiesTableComponent;
@@ -58,7 +58,10 @@ describe('StudiesTableComponent', () => {
       imports: [
         StudiesTableComponent,
         TranslocoTestingModule.forRoot({
-          langs: { en: {}, fr: {} },
+          langs: {
+            en: { 'common.modification-date-format': "MMMM d'.' y, hh:mm a" },
+            fr: { 'common.modification-date-format': "d MMMM y, 'à' HH:mm" }
+          },
           translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' }
         })
       ],
@@ -94,6 +97,32 @@ describe('StudiesTableComponent', () => {
     it('should handle undefined studies input', () => {
       fixture.componentRef.setInput('studies', undefined as unknown as Study[]);
       expect(component.studies()).toBeUndefined();
+    });
+  });
+
+  describe('Modification date display', () => {
+    const localDate = new Date(2026, 8, 10, 16, 32).toISOString();
+    const renderDate = (): string => {
+      fixture.componentRef.setInput('studies', [{ ...mockStudy1, updated_at_offline: localDate }]);
+      fixture.detectChanges();
+      return getByTestId('study-modification-date')!.textContent!.trim();
+    };
+
+    it('should render the date in French format', () => {
+      TestBed.inject(TranslocoService).setActiveLang('fr');
+      expect(renderDate()).toBe('10 septembre 2026, à 16:32');
+    });
+
+    it('should render the date in American English format', () => {
+      expect(renderDate()).toBe('September 10. 2026, 04:32 PM');
+    });
+
+    it('should update the date when the language changes', () => {
+      expect(renderDate()).toBe('September 10. 2026, 04:32 PM');
+
+      TestBed.inject(TranslocoService).setActiveLang('fr');
+      fixture.detectChanges();
+      expect(getByTestId('study-modification-date')!.textContent!.trim()).toBe('10 septembre 2026, à 16:32');
     });
   });
 

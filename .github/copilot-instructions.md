@@ -149,6 +149,14 @@ Semantic tags: `<main>` · `<header>` · `<section>` · `<nav>` · `<aside>`.
 
 ---
 
+## Tests — mandatory with every change
+
+Every requested feature, fix, or modification **must** ship with its corresponding Vitest test(s) in the same
+task, without being asked: add new specs or update the existing ones so the new behavior is pinned down.
+Run the targeted specs and report the result. Conventions: `.github/instructions/testing.instructions.md`.
+
+---
+
 ## Dead code
 
 Never delete silently. Log in `./deadcode.md` under "Pending review". Delete only after user validation.

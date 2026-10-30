@@ -18,7 +18,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { Subject } from 'rxjs';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 
-import { TranslocoTestingModule } from '@jsverse/transloco';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 class MockMaintenanceService {
   ready = { next: vi.fn() };
   getMaintenance = vi.fn().mockResolvedValue([]);
@@ -204,10 +204,12 @@ describe('SectionsTabComponent', () => {
               'sections-tab.placeholder-view-ic': 'Select IC',
               'sections-tab.placeholder-view-cc': 'Select CC',
               'common.section-type.guard': 'Guard',
-              'common.section-type.phase': 'Phase'
-            }
+              'common.section-type.phase': 'Phase',
+              'common.modification-date-format': "MMMM d'.' y, hh:mm a"
+            },
+            fr: { 'common.modification-date-format': "d MMMM y, 'à' HH:mm" }
           },
-          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' },
           preloadLangs: true
         }),
         SectionsTabComponent
@@ -469,6 +471,24 @@ describe('SectionsTabComponent', () => {
 
       const generateBtn = getByTestId('generate-state-btn');
       expect(generateBtn).toBeTruthy();
+    });
+  });
+
+  describe('last modified date display', () => {
+    const localDate = new Date(2026, 8, 10, 16, 32).toISOString();
+    const renderDate = (): string => {
+      fixture.componentRef.setInput('study', { sections: [{ ...mockSection, updated_at: localDate }] });
+      fixture.detectChanges();
+      return getByTestId('section-last-modified')!.textContent!.trim();
+    };
+
+    it('should render the date in French format', () => {
+      TestBed.inject(TranslocoService).setActiveLang('fr');
+      expect(renderDate()).toBe('10 septembre 2026, à 16:32');
+    });
+
+    it('should render the date in American English format', () => {
+      expect(renderDate()).toBe('September 10. 2026, 04:32 PM');
     });
   });
 

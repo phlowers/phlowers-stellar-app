@@ -27,7 +27,7 @@ import { TranslocoService, TranslocoModule } from '@jsverse/transloco';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { HangingTableReportService } from '@features/studio/toolbar/presentation/services/hanging-table-report/hanging-table-report.service';
-import { getReportDateLocale } from '@features/studio/toolbar/presentation/services/hanging-table-report/hanging-table-report.helpers';
+import { getDateLocale } from '@shared/helpers/modification-date.helpers';
 
 @Component({
   selector: 'app-hanging-table',
@@ -232,7 +232,7 @@ export class HangingTableComponent {
     const charge = section?.charges.find((c) => c.uuid === section.selected_charge_uuid);
 
     await this.hangingTableReportService.generateReport({
-      date: new Date().toLocaleDateString(getReportDateLocale(this.translocoService.getActiveLang())),
+      date: new Date().toLocaleDateString(getDateLocale(this.translocoService.getActiveLang())),
       author: study?.author_email ?? '-',
       studyTitle: study?.title ?? '-',
       studyDescription: study?.description ?? '',

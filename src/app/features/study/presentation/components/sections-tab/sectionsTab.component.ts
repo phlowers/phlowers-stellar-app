@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Section, InitialCondition, Study } from '@shared/domain';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -36,6 +37,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { SectionExportService } from '@services/section/section-export.service';
+import { getDateLocale } from '@shared/helpers/modification-date.helpers';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.
@@ -88,6 +90,13 @@ export class SectionsTabComponent {
   readonly popover = viewChild<Popover>('popover');
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   readonly transloco = inject(TranslocoService);
+  private readonly activeLang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
+  /** Emits the translated date format each time the language (and its translations) changes. */
+  readonly dateFormat = toSignal(this.transloco.selectTranslate('common.modification-date-format'), {
+    initialValue: ''
+  });
+  /** Locale used to render localized month names and AM/PM (e.g. "septembre" vs "September"). */
+  readonly dateLocale = computed(() => getDateLocale(this.activeLang()));
 
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
@@ -163,7 +172,7 @@ export class SectionsTabComponent {
     const typeCode = rawType === 'garde' ? 'guard' : rawType;
 
     const data: CantonReportData = {
-      date: new Date().toLocaleDateString(this.getLocaleForDate()),
+      date: new Date().toLocaleDateString(getDateLocale(this.transloco.getActiveLang())),
       author: study?.author_email ?? '',
       studyTitle: study?.title ?? '',
       studyDescription: study?.description ?? '',
@@ -202,11 +211,6 @@ export class SectionsTabComponent {
     };
 
     await this.sectionDataReportService.generateReport(data);
-  }
-
-  private getLocaleForDate(): string {
-    const activeLang = this.transloco.getActiveLang();
-    return activeLang === 'en' ? 'en-US' : 'fr-FR';
   }
 
   openNewSectionModalCreate() {
