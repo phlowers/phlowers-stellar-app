@@ -136,6 +136,17 @@ input {
   right: 0;
 }
 
+// Body sticky cells (and their input icons) must stay below PrimeNG's sticky thead (z-index 1)
+td.sticky-left,
+td.sticky-right {
+  z-index: 0;
+}
+
+th.sticky-left,
+th.sticky-right {
+  background-color: var(--p-datatable-header-cell-background);
+}
+
 .integer-column {
   min-width: 6rem;
 }

@@ -349,9 +349,14 @@ def compile_wheels(cdn_names: set[str]) -> None:
     if cdn_count:
         print(f"  Skipping {cdn_count} CDN wheels (already compiled)")
 
+    # py-compile must use the same CPython version as the Pyodide runtime:
+    # it embeds .pyc bytecode and retags wheels, so without a pin uvx picks the
+    # newest interpreter (e.g. 3.14) and Pyodide fails with "bad magic number".
     result = subprocess.run(
         [
             "uvx",
+            "--python",
+            ">=3.13,<3.14",
             "--from",
             "pyodide-build",
             "pyodide",

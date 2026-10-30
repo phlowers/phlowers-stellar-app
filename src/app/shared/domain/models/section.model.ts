@@ -174,14 +174,12 @@ export interface Section {
   cable_support_manipulations?: CableSupportManipulation[];
   /** UUID of the currently selected cable support manipulation */
   selected_cable_support_manipulation_uuid?: string | null;
-  /** Latitude of the first support */
-  start_latitude: number | null;
-  /** Longitude of the first support */
-  start_longitude: number | null;
-  /** Azimuth of the first support */
+  /** Azimuth of the first support (the start GPS is the foot of `supports[0]`) */
   start_azimuth: number | null;
   /** Saved studio view state (camera, scale, resolution, span selection). */
   studio_view_state?: StudioViewState;
-  /** Mean absolute error (meters) between surveyed Lambert93 foot coordinates and the app's span/angle data model reprojection, computed on canton import */
-  mean_reprojection_diff_meters: number | null;
+  /**
+   * Distance (m) between each imported support GPS position and the position rebuilt from the section geometry (span lengths and angles), recorded at import; `null` when not computed.
+   */
+  position_error_meters: (number | null)[] | null;
 }

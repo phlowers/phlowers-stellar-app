@@ -59,6 +59,7 @@ class PlotServiceMock {
   isCutStrandApplied = signal<boolean>(false);
   resetAll = vi.fn();
   workerReady: SignalFn<boolean> = createSignalMock<boolean>(true);
+  engineStudyId = signal(0);
 }
 
 // SpanService mock

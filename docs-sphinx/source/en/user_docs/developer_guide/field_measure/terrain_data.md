@@ -68,9 +68,8 @@ Additional fields exist for other tabs (parameter calculation, temperature, para
 - On span or reference-support change, the component also attempts to auto-fill longitude/latitude/azimuth from the study localization for that span.
 
 **Automatic localization resolution:**
-- The logic lives in `HeaderComponent.fillLocalization()` and uses the same worker contract as the section-data view: `Task.computeLocalization`.
-- `buildSectionLocalizationPayload()` builds the payload from the section's `start_latitude`, `start_longitude`, `start_azimuth`, and each support's `spanLength` / `spanAngle`.
-- `getSpanLocalization()` selects the corresponding support localization from the computed arrays, preferring the selected reference support and falling back to the left support when needed.
+- The logic lives in `HeaderComponent.fillLocalization()` and uses `GeopositioningService.resolveLocalization()`: the stored foot GPS / `spanAzimut` of the supports, or an on-the-fly `Task.computeLocalization` (from the first support foot GPS, `start_azimuth` and each support's `spanLength` / `spanAngle`) when they are not stored.
+- `getSpanLocalization()` selects the corresponding support localization from the resolved arrays, preferring the selected reference support and falling back to the left support when needed.
 - If no finite values are available, the app shows the translated info message `field-measuring.header.localization-not-available` (text: “Localization not available in study”).
 
 ### FieldDatasComponent

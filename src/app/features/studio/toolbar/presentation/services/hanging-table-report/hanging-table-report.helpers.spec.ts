@@ -13,8 +13,7 @@ import {
   drawHangingCalculationSection,
   drawHangingTableReportPage1,
   drawStudyAndCantonSection,
-  formatTemperature,
-  getReportDateLocale
+  formatTemperature
 } from './hanging-table-report.helpers';
 import { HangingTableReportData, HangingTableReportLabels } from './hanging-table-report.interfaces';
 
@@ -85,13 +84,6 @@ describe('hanging-table-report.helpers', () => {
     it('keeps the raw value without rounding', () => {
       expect(formatTemperature(-10.25)).toBe('-10.25 °C');
       expect(formatTemperature(5)).toBe('5 °C');
-    });
-  });
-
-  describe('getReportDateLocale', () => {
-    it('maps en to en-US and any other language to fr-FR', () => {
-      expect(getReportDateLocale('en')).toBe('en-US');
-      expect(getReportDateLocale('fr')).toBe('fr-FR');
     });
   });
 

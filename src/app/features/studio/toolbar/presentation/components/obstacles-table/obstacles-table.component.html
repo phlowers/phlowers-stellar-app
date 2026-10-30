@@ -21,7 +21,7 @@
 
   <dl class="obstacles-table__field--groups">
     <div class="obstacles-table__field">
-      <dt>{{ 'studio.obstacles-table.initial-condition-label' | transloco }}</dt>
+      <dt>{{ 'common.initial-condition-label' | transloco }}</dt>
       <dd data-testid="initial-condition-value">{{ selectedInitialConditionName() ?? '-' }}</dd>
     </div>
     <div class="obstacles-table__field">
@@ -68,15 +68,15 @@
           <app-icon [icon]="getSortIcon('obstacleName')" aria-hidden="true" />
         </div>
       </th>
-      <th id="type-col">{{ 'studio.obstacles-table.obstacle-type-column-label' | transloco }}</th>
+      <th id="type-col">{{ 'common.obstacle-type-label' | transloco }}</th>
       <th id="span-col">{{ 'common.span-label' | transloco }}</th>
       <th id="ref-support-col">{{ 'common.reference-support-label' | transloco }}</th>
       <th id="altitude-type-col">{{ 'studio.obstacles-table.altitude-type-column-label' | transloco }}</th>
       <th id="lateral-distance-type-col">{{ 'studio.shared.lateral-distance-type-label' | transloco }}</th>
-      <th id="point-col">{{ 'studio.obstacles-table.point-column-label' | transloco }}</th>
-      <th id="altitude-col">{{ 'studio.obstacles-table.altitude-column-label' | transloco }}</th>
+      <th id="point-col">{{ 'common.point-label' | transloco }}</th>
+      <th id="altitude-col">{{ 'common.altitude-label' | transloco }}</th>
       <th id="ref-support-distance-col">
-        {{ 'studio.obstacles-table.ref-support-distance-column-label' | transloco }}
+        {{ 'common.ref-support-dist-label' | transloco }}
       </th>
       <th id="line-axis-distance-col">{{ 'studio.obstacles-table.line-axis-distance-column-label' | transloco }}</th>
       <th id="oblique-col">{{ 'studio.shared.oblique' | transloco }}</th>

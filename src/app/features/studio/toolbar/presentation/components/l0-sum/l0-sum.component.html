@@ -31,7 +31,7 @@
             </div>
           </th>
 
-          <th id="span-length-header">{{ 'studio.l0-sum.span-length-column-label' | transloco }}</th>
+          <th id="span-length-header">{{ 'common.span-length-short-label' | transloco }}</th>
 
           <th id="l0-header">{{ 'studio.l0-sum.l0-column-label' | transloco }}</th>
 
@@ -65,7 +65,15 @@
 }
 
 <ng-template #footer>
-  <button disabled="true" app-btn type="button" btnSize="m" (click)="onExport()" data-testid="l0-export-btn">
+  <button
+    app-btn
+    type="button"
+    btnSize="m"
+    [btnLoading]="loading()"
+    [disabled]="loading()"
+    (click)="onExport()"
+    data-testid="l0-export-btn"
+  >
     <app-icon icon="download" />
     <span>{{ 'common.export' | transloco }}</span>
   </button>

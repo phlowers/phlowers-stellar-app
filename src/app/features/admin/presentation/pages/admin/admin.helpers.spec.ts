@@ -9,6 +9,10 @@ describe('admin helpers', () => {
 
   it('maps a refusal reason to its i18n key', () => {
     expect(refusalReasonKey('save-data')).toBe('admin.refusal.save-data');
+    expect(refusalReasonKey('downlink-unknown')).toBe('common.network-speed-unknown-label');
+    expect(refusalReasonKey('api-unavailable')).toBe('common.network-speed-unknown-label');
+    expect(refusalReasonKey('downlink-below-threshold')).toBe('common.network-too-slow-label');
+    expect(refusalReasonKey('storage-insufficient')).toBe('common.storage-insufficient-label');
   });
 
   it('maps a check decision to its feedback key', () => {

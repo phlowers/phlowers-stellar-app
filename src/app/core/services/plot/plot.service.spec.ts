@@ -259,10 +259,8 @@ describe('PlotService', () => {
     selected_cable_modification_uuid: null,
     cable_span_manipulations: [],
     selected_cable_span_manipulation_uuid: null,
-    start_latitude: null,
-    start_longitude: null,
     start_azimuth: null,
-    mean_reprojection_diff_meters: null
+    position_error_meters: null
   };
 
   beforeEach(() => {
@@ -478,6 +476,26 @@ describe('PlotService', () => {
 
       expect(service.error()).toBeNull();
       expect(service.litData()).toEqual(mockGetSectionOutput);
+    });
+
+    it('should expose a new engine study id only once the study is fully initialized', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null });
+
+      const firstInit = service.initSectionStudio(mockSection);
+      expect(service.engineStudyId()).toBe(0);
+      await firstInit;
+      const firstId = service.engineStudyId();
+      expect(firstId).toBeGreaterThan(0);
+
+      const secondInit = service.initSectionStudio(mockSection);
+      expect(service.engineStudyId()).toBe(0);
+      await secondInit;
+      expect(service.engineStudyId()).toBeGreaterThan(firstId);
+
+      service.resetAll();
+      expect(service.engineStudyId()).toBe(0);
     });
 
     it('should set error when workerPythonService is not ready', async () => {

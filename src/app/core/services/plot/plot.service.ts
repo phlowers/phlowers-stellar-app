@@ -51,6 +51,9 @@ export class PlotService {
   loading = signal<boolean>(true);
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
+  /** Id of the engine study built by the last completed initSectionStudio; 0 while none is ready. */
+  readonly engineStudyId = signal(0);
+  private engineStudyCount = 0;
 
   isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
@@ -149,6 +152,7 @@ export class PlotService {
     this.isStudioActive.set(false);
     this.spanService.section.set(null);
     this.study.set(null);
+    this.engineStudyId.set(0);
     this.currentSectionUuid = null;
     this.highSafety = null;
     this.cutStrands = null;
@@ -191,6 +195,7 @@ export class PlotService {
 
   initSectionStudio = async (section: Section) => {
     this.currentSectionUuid = section?.uuid ?? null;
+    this.engineStudyId.set(0);
     // The engine study is being replaced: high safety and cut strands are applied once the new one exists
     this.highSafety = null;
     this.cutStrands = null;
@@ -263,6 +268,8 @@ export class PlotService {
 
     // initLit initializes the study — refreshProjection gets the actual render data
     await this.refreshProjection();
+    // Signals LoadFormsService to apply the selected charge (loads, climate…) on top of this new study
+    this.engineStudyId.set(++this.engineStudyCount);
   };
 
   refreshProjection = async () => {

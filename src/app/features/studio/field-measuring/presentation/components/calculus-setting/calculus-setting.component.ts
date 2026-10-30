@@ -4,6 +4,7 @@ import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
 import { TangentAimingSupportComponent } from './tangent-aiming-support/tangent-aiming-support.component';
 import { TangentAimingExteriorComponent } from './tangent-aiming-exterior/tangent-aiming-exterior.component';
+import { TangentAimingInteriorComponent } from './tangent-aiming-interior/tangent-aiming-interior.component';
 import { PepComponent } from './pep/pep.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TranslocoModule } from '@jsverse/transloco';
@@ -24,6 +25,7 @@ import { CALCULUS_TYPE_BY_METHOD } from './calculus-setting.constantes';
     PepComponent,
     TangentAimingSupportComponent,
     TangentAimingExteriorComponent,
+    TangentAimingInteriorComponent,
     TranslocoModule
   ],
   templateUrl: './calculus-setting.component.html',

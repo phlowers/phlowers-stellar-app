@@ -300,11 +300,6 @@ export function drawTwoColumnBulletSection(
   return drawSeparator(doc, drawTwoColumnBullets(doc, left, right, y));
 }
 
-/** Sanitizes a filename fragment by replacing characters that are illegal on common filesystems. */
-export function sanitizeFilenamePart(value: string): string {
-  return value.replace(/[/\\:*?"<>|]/g, '-');
-}
-
 /**
  * Draws a footer with the page number on every page of the document.
  * Pass `landscapeFromPage2: true` when pages after the first flip to landscape (result tables).

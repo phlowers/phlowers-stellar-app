@@ -68,6 +68,8 @@ export class LoadFormsService {
 
   /** UUID of the charge case last pushed to the Python engine — prevents redundant setLoads on section updates. */
   private lastLoadedChargeUuid: string | null = null;
+  /** Engine study the charge case was last pushed to — a rebuilt study (studio reopened) needs it again. */
+  private lastLoadedEngineStudyId = 0;
   /**
    * Initialize the temporary load data by getting the selected charge case and checking the span loads,
    * then push all span loads into the Python engine via setLoads.
@@ -83,7 +85,8 @@ export class LoadFormsService {
 
     // Skip entirely when re-entering for the same charge case
     // (e.g. after save writes back to IndexedDB and liveQuery re-fires).
-    if (currentChargeUuid === this.lastLoadedChargeUuid) return;
+    const engineStudyId = this.plotService.engineStudyId();
+    if (currentChargeUuid === this.lastLoadedChargeUuid && engineStudyId === this.lastLoadedEngineStudyId) return;
 
     const charge = section?.charges?.find((c) => c.uuid === currentChargeUuid);
     if (!charge) {
@@ -127,6 +130,7 @@ export class LoadFormsService {
     // Set before async calls so the effect guard prevents concurrent re-entrant
     // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
     this.lastLoadedChargeUuid = currentChargeUuid;
+    this.lastLoadedEngineStudyId = engineStudyId;
 
     try {
       // When there are no saved span loads, pass an empty array so the Python engine
@@ -157,10 +161,11 @@ export class LoadFormsService {
 
   constructor() {
     effect(() => {
-      if (!this.plotService.workerReady()) return;
-      // Wait for initSectionStudio to complete (litData is populated by refreshProjection after initLit succeeds).
-      // Without this gate, setLoads could be posted before initialize_study finishes.
-      if (!this.plotService.litData()) return;
+      // The section preview (manual section modal) also builds engine studies: charge cases belong to the studio only
+      if (!this.plotService.workerReady() || !this.plotService.isStudioActive()) return;
+      // Wait for initSectionStudio to complete: before that, a stale projection can set litData, and the base
+      // climate applied at the end of initSectionStudio would overwrite the charge pushed here.
+      if (!this.plotService.engineStudyId()) return;
       void this.initTemporaryLoadData();
     });
   }

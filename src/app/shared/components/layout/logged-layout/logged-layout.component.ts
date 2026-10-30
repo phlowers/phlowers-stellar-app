@@ -38,7 +38,7 @@ export class LoggedLayoutComponent {
         },
         {
           id: 'sideB-tools',
-          label: this.translocoService.translate('shared.logged-layout.tools'),
+          label: this.translocoService.translate('common.tools-label'),
           route: '/tools',
           icon: 'build'
         }
@@ -46,8 +46,8 @@ export class LoggedLayoutComponent {
       footer: [
         {
           id: 'sideB-instruction-manual',
-          label: this.translocoService.translate('shared.logged-layout.instruction-manual'),
-          shortLabel: this.translocoService.translate('shared.logged-layout.manual'),
+          label: this.translocoService.translate('common.instruction-manual-label'),
+          shortLabel: this.translocoService.translate('common.manual-label'),
           route: '/instruction-manual',
           icon: 'help'
         },

@@ -9,7 +9,7 @@ import {
   signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
@@ -22,8 +22,9 @@ import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { LoggerService } from '@core/services/logger/logger.service';
+import { NotificationService } from '@core/services/notification/notification.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
+import { buildL0Csv, buildL0ExportFilename, isL0TableExportable, L0_EXPORT_MIME_TYPE } from './l0-sum.helpers';
 import { L0Row } from './l0-sum.interfaces';
 
 @Component({
@@ -49,7 +50,8 @@ export class L0SumComponent {
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
-  private readonly logger = inject(LoggerService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly l0Rows = signal<L0Row[]>([]);
 
@@ -105,11 +107,36 @@ export class L0SumComponent {
     }
   }
 
+  // Downloads the table as a CSV file, the dialog stays open
   onExport() {
-    // TODO: Implement export functionality
-    this.logger.log('Export L0 sum', {
-      rows: this.l0Rows()
-    });
+    const rows = this.l0Rows();
+    if (!isL0TableExportable(rows)) {
+      this.notificationService.error(this.translocoService.translate('studio.l0-sum.export-invalid-table'));
+      return;
+    }
+
+    const translate = (key: string) => this.translocoService.translate(key);
+    const csv = buildL0Csv(
+      rows,
+      {
+        span: translate('common.span-label'),
+        spanLength: translate('studio.l0-sum.csv-span-length-label'),
+        l0: translate('studio.l0-sum.csv-l0-label'),
+        cumulatedL0: translate('studio.l0-sum.csv-cumulated-l0-label')
+      },
+      this.translocoService.getActiveLang()
+    );
+
+    const url = URL.createObjectURL(new Blob([csv], { type: L0_EXPORT_MIME_TYPE }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = buildL0ExportFilename(
+      translate('studio.l0-sum.csv-filename-prefix'),
+      this.plotService.study()?.title ?? '-',
+      this.spanService.section()?.name ?? '-'
+    );
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   getSortIcon(field: string): PossibleIconNames {

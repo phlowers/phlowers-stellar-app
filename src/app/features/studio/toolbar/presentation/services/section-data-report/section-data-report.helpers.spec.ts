@@ -266,14 +266,16 @@ describe('section-data-report.helpers', () => {
       expect(cableNameCall?.[2]).toBe(cablesAmountCall?.[2]);
     });
 
-    it('draws the branch in the left column, on the row right below the supports description', () => {
+    it('draws the branch in the left column, on the row right below the LIT', () => {
       const doc = createMockDoc();
       drawCantonSection(doc as unknown as jsPDF, createData(), LABELS, 20);
       const calls = (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
-      const descriptionCall = calls.find((c) => String(c[0]).includes('Supports description'));
+      const litCall = calls.find((c) => String(c[0]).includes('LIT'));
       const branchCall = calls.find((c) => String(c[0]).includes('Branch'));
-      expect(branchCall?.[1]).toBe(descriptionCall?.[1]);
-      expect(Number(branchCall?.[2])).toBeGreaterThan(Number(descriptionCall?.[2]));
+      const supportsCountCall = calls.find((c) => String(c[0]).includes('Supports count'));
+      expect(branchCall?.[1]).toBe(litCall?.[1]);
+      expect(Number(branchCall?.[2])).toBeGreaterThan(Number(litCall?.[2]));
+      expect(Number(supportsCountCall?.[2])).toBeGreaterThan(Number(branchCall?.[2]));
     });
 
     it('shows the phase number as "0" (not blank/hidden) when the section is a phase with an unset phase number', () => {

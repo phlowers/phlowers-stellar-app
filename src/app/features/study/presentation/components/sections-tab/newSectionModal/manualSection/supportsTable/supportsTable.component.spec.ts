@@ -8,12 +8,15 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { AttachmentService } from '@shared/catalog/services/attachment.service';
 import { AttachmentSetModalComponent } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/attachmentSetModal/attachmentSetModal.component';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { Task } from '@services/worker_python/tasks/types';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { createEmptyChain } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/helpers';
 import { createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { vi } from 'vitest';
 import { TranslocoTestingModule } from '@jsverse/transloco';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
 
 // Mock child component
 @Component({
@@ -64,9 +67,13 @@ const mockWorkerPythonService = {
   runTask: vi.fn()
 };
 
+const mockLoggerService = {
+  warn: vi.fn(),
+  error: vi.fn(),
+  info: vi.fn()
+};
+
 const mockSectionWithCoordinates = {
-  start_latitude: 48.8566,
-  start_longitude: 2.3522,
   start_azimuth: 90
 } as unknown as Section;
 
@@ -198,7 +205,8 @@ describe('SupportsTableComponent', () => {
       providers: [
         { provide: ChainsService, useValue: mockChainsService },
         { provide: AttachmentService, useValue: mockAttachmentService },
-        { provide: WorkerPythonService, useValue: mockWorkerPythonService }
+        { provide: WorkerPythonService, useValue: mockWorkerPythonService },
+        { provide: LoggerService, useValue: mockLoggerService }
       ]
     })
       .overrideComponent(SupportsTableComponent, {
@@ -971,11 +979,20 @@ describe('SupportsTableComponent', () => {
     beforeEach(() => {
       (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
       (component.section as unknown as () => Section) = () => mockSectionWithCoordinates;
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: mockLocalizationResult,
-        error: null,
-        diagnostics: []
-      });
+      (component.supports as unknown as () => Support[]) = () => [
+        { ...mockSupports[0], footLatitude: 48.8566, footLongitude: 2.3522 },
+        ...mockSupports.slice(1)
+      ];
+      mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+        Promise.resolve({
+          result:
+            task === Task.convertCoordinates
+              ? { x: mockLocalizationResult.lambert_x, y: mockLocalizationResult.lambert_y }
+              : mockLocalizationResult,
+          error: null,
+          diagnostics: []
+        })
+      );
     });
 
     it('should set localization and clear loading flag when worker becomes ready', async () => {
@@ -985,10 +1002,9 @@ describe('SupportsTableComponent', () => {
 
       workerReadySubject.next(true);
       fixture.detectChanges();
-      await fixture.whenStable();
 
+      await vi.waitFor(() => expect(component.localization()).toEqual(mockLocalizationResult));
       expect(component.localizationLoading()).toBe(false);
-      expect(component.localization()).toEqual(mockLocalizationResult);
     });
 
     it('should clear localizationLoading when runTask rejects', async () => {
@@ -996,9 +1012,8 @@ describe('SupportsTableComponent', () => {
       workerReadySubject.next(true);
       fixture.detectChanges();
       component.ngOnInit();
-      await fixture.whenStable();
-
-      expect(component.localizationLoading()).toBe(false);
+      await vi.waitFor(() => expect(mockWorkerPythonService.runTask).toHaveBeenCalled());
+      await vi.waitFor(() => expect(component.localizationLoading()).toBe(false));
     });
 
     it('should not set localization when runTask returns an error', async () => {
@@ -1010,28 +1025,99 @@ describe('SupportsTableComponent', () => {
       workerReadySubject.next(true);
       fixture.detectChanges();
       component.ngOnInit();
-      await fixture.whenStable();
-
+      await vi.waitFor(() => expect(mockWorkerPythonService.runTask).toHaveBeenCalled());
+      await vi.waitFor(() => expect(component.localizationLoading()).toBe(false));
       expect(component.localization()).toBeNull();
-      expect(component.localizationLoading()).toBe(false);
     });
 
     it('should call runTask with correct localization parameters', async () => {
       workerReadySubject.next(true);
       fixture.detectChanges();
       component.ngOnInit();
-      await fixture.whenStable();
-
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          startLatitude: 48.8566,
-          startLongitude: 2.3522,
-          startAzimuth: 90,
-          spanLength: [50, 60, Number.NaN],
-          lineAngle: [90, 85, 0]
-        })
+      await vi.waitFor(() =>
+        expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+          Task.computeLocalization,
+          expect.objectContaining({
+            startLatitude: 48.8566,
+            startLongitude: 2.3522,
+            startAzimuth: 90,
+            spanLength: [50, 60, Number.NaN],
+            lineAngle: [90, 85, 0]
+          })
+        )
       );
+    });
+  });
+
+  describe('localization logging', () => {
+    const supportsWithStartGps = (): Support[] => [
+      { ...mockSupports[0], footLatitude: 48.8566, footLongitude: 2.3522 },
+      ...mockSupports.slice(1)
+    ];
+
+    beforeEach(() => {
+      mockLoggerService.warn.mockClear();
+      mockWorkerPythonService.runTask.mockClear();
+      (component.mode as unknown as () => 'create' | 'edit' | 'view') = () => 'view';
+      (component.section as unknown as () => Section) = () => mockSectionWithCoordinates;
+    });
+
+    it('should return silently without warning and without computing when there is no start GPS', () => {
+      (component.supports as unknown as () => Support[]) = () => [createEmptySupport(), createEmptySupport()];
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+      expect(component.localization()).toBeNull();
+      expect(component.localizationLoading()).toBe(false);
+      expect(mockLoggerService.warn).not.toHaveBeenCalled();
+    });
+
+    it('should log a warning when the localization is unavailable while a start GPS exists', async () => {
+      (component.supports as unknown as () => Support[]) = supportsWithStartGps;
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: 'CALCULATION_ERROR', diagnostics: [] });
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+
+      await vi.waitFor(() =>
+        expect(mockLoggerService.warn).toHaveBeenCalledWith(expect.stringContaining('localization unavailable'))
+      );
+      expect(component.localization()).toBeNull();
+    });
+
+    it('should log a warning when the Lambert projection is unavailable while a start GPS exists', async () => {
+      (component.supports as unknown as () => Support[]) = supportsWithStartGps;
+      mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+        Promise.resolve(
+          task === Task.convertCoordinates
+            ? { result: null, error: 'CONVERSION_ERROR', diagnostics: [] }
+            : {
+                result: { latitude: [48.8566], longitude: [2.3522], azimuth: [90] },
+                error: null,
+                diagnostics: []
+              }
+        )
+      );
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+
+      await vi.waitFor(() =>
+        expect(mockLoggerService.warn).toHaveBeenCalledWith(expect.stringContaining('Lambert projection unavailable'))
+      );
+      expect(component.localization()).toBeNull();
+    });
+
+    it('should log a warning when the localization computation throws', async () => {
+      (component.supports as unknown as () => Support[]) = supportsWithStartGps;
+      const geopositioning = TestBed.inject(GeopositioningService);
+      vi.spyOn(geopositioning, 'resolveLocalization').mockRejectedValue(new Error('unexpected'));
+      workerReadySubject.next(true);
+      fixture.detectChanges();
+
+      await vi.waitFor(() =>
+        expect(mockLoggerService.warn).toHaveBeenCalledWith('Supports table: localization failed', expect.any(Error))
+      );
+      await vi.waitFor(() => expect(component.localizationLoading()).toBe(false));
     });
   });
 

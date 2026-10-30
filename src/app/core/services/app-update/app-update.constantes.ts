@@ -21,8 +21,14 @@ export const APP_UPDATE_LOG_PREFIX = '[AppUpdate]';
 /** Workbox precache, catalog cache and the caches of the previous update system. */
 export const APP_CACHE_NAME_PREFIXES: readonly string[] = ['workbox-precache', 'stellar-catalogs', 'app-assets'];
 
-/** i18n key prefix of the five offline status labels (`<prefix>.<OfflineStatusKind>`). */
-export const OFFLINE_STATUS_I18N_PREFIX = 'shared.app-update-service.offline-status';
+/** i18n key of each offline status label; `ready` and `waiting-network` reuse the shared `common.*` texts. */
+export const OFFLINE_STATUS_I18N_KEYS: Record<OfflineStatusKind, string> = {
+  ready: 'common.ready',
+  preparing: 'shared.app-update-service.offline-status.preparing',
+  'waiting-network': 'common.network-too-slow-label',
+  'storage-insufficient': 'shared.app-update-service.offline-status.storage-insufficient',
+  'not-prepared': 'shared.app-update-service.offline-status.not-prepared'
+};
 
 /** A waiting update does not change offline readiness: the active version still works offline. */
 export const OFFLINE_STATUS_KIND_BY_STATE: Record<AppUpdateState, OfflineStatusKind> = {
@@ -38,7 +44,7 @@ export const OFFLINE_STATUS_KIND_BY_STATE: Record<AppUpdateState, OfflineStatusK
 export const APP_UPDATE_I18N = {
   updateWaitingSummary: 'shared.app-update-service.update-waiting-summary',
   updateWaitingDetail: 'shared.app-update-service.update-waiting-detail',
-  storageInsufficientSummary: 'shared.app-update-service.storage-insufficient-summary',
+  storageInsufficientSummary: 'common.storage-insufficient-label',
   storageInsufficientDetail: 'shared.app-update-service.storage-insufficient-detail',
   updateDeferredNetwork: 'shared.app-update-service.update-deferred-network',
   checkStarted: 'shared.app-update-service.check-started'

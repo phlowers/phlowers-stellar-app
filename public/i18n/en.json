@@ -1,13 +1,7 @@
 {
   "routes": {
     "login": "Login",
-    "admin": "Admin",
-    "study": "Study",
-    "news": "News",
-    "changelog": "Changelog",
-    "studio": "Studio",
-    "tools": "Tools",
-    "instruction-manual": "Instruction manual"
+    "admin": "Admin"
   },
   "common": {
     "actions-label": "Actions",
@@ -41,6 +35,7 @@
     "delete": "Delete",
     "description-label": "Description",
     "dis-symmetric": "Dissymmetric",
+    "distance-label": "Distance",
     "duplicate": "Duplicate",
     "edit": "Edit",
     "eel-label": "EEL",
@@ -56,25 +51,36 @@
     "ice-thickness-after-support-frontier": "Ice thickness after support frontier",
     "ice-thickness-before-support-frontier": "Ice thickness before support frontier",
     "initial-condition-label": "Initial condition",
+    "instruction-manual-label": "Instruction manual",
     "latitude-label": "Latitude",
     "line-angle-label": "Line angle",
     "line-axis-dist-label": "Line axis dist.",
+    "lit-label": "LIT",
+    "lit-idr-label": "LIT - IDR",
+    "lit-adr-label": "LIT - ADR",
     "link-label": "Link",
     "load-description-label": "Load case description",
     "load-name-label": "Load case",
     "loading": "Loading",
+    "loads-label": "Loads",
     "longitude-label": "Longitude",
+    "manual-label": "Manual",
     "marking-label": "Marking",
     "max-decimals-error": "Max decimals: {{ maxDecimals }}",
     "max-value-error": "Max. value: {{ max }}",
     "meter": "m",
     "grade-unit": "gr",
     "min-value-error": "Min. value: {{ min }}",
+    "modification-date-format": "MMMM d'.' y, hh:mm a",
     "my-last-studies-label": "My last studies",
+    "network-speed-unknown-label": "Network speed unknown to the browser",
+    "network-too-slow-label": "Network too slow",
     "news-label": "News",
     "next": "Next",
     "no": "No",
     "number-of-points-per-range": "Number of points per range",
+    "obstacle-type-label": "Obstacle type",
+    "obstacles-label": "Obstacles",
     "out-of-bound-error": "Value must be between {{ min }} and {{ max }}",
     "page-label": "Page",
     "papoto-label": "PAPOTO",
@@ -104,16 +110,21 @@
     "select-point-label": "Select point",
     "sign-in-label": "Sign in",
     "span-label": "Span",
+    "span-length-short-label": "Span l.",
+    "storage-insufficient-label": "Not enough storage space",
     "studies-label": "Studies",
     "studio": "Studio",
     "study-and-section-label": "Study and section",
     "study-label": "Study",
     "success": "Success",
+    "support-label": "Support",
     "support-name-label": "Support name",
     "support-no-label": "Support no.",
     "symmetric": "Symmetric",
+    "tools-label": "Tools",
     "uncertainty-cable-temperature-label": "Uncertainty cable temperature",
     "validate": "Validate",
+    "vertical-angle-right-support-label": "Vertical angle from device to cable attach. of right support",
     "view": "View",
     "yes": "Yes",
     "you-are-offline-label": "You are offline",
@@ -270,11 +281,7 @@
     "storage-value": "{{ usage }} MB used out of {{ quota }} MB",
     "not-available": "Not available",
     "refusal": {
-      "api-unavailable": "Network speed unknown to the browser",
-      "downlink-unknown": "Network speed unknown to the browser",
-      "downlink-below-threshold": "Network too slow",
-      "save-data": "Data saver enabled",
-      "storage-insufficient": "Not enough storage space"
+      "save-data": "Data saver enabled"
     },
     "activate-python-logs": "Activate Python logs",
     "danger-zone": "Danger zone",
@@ -310,11 +317,6 @@
       "menu": "Menu"
     },
     "logged-layout": {
-      "home": "Home",
-      "studies": "Studies",
-      "tools": "Tools",
-      "instruction-manual": "Instruction manual",
-      "manual": "Manual",
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"
     },
@@ -329,9 +331,7 @@
     },
     "app-update-service": {
       "offline-status": {
-        "ready": "Ready",
         "preparing": "Preparing",
-        "waiting-network": "Network too slow",
         "storage-insufficient": "Not enough storage",
         "not-prepared": "Unavailable"
       },
@@ -339,7 +339,6 @@
       "check-started": "Checking for updates: a new version will be downloaded in the background.",
       "update-waiting-summary": "Update downloaded",
       "update-waiting-detail": "It will be applied the next time the application starts (close every Stellar window, then reopen it).",
-      "storage-insufficient-summary": "Not enough storage space",
       "storage-insufficient-detail": "Not enough storage space to download the update: free up space on this device."
     },
     "obstacle-form-service": {
@@ -352,7 +351,6 @@
     "free-positioning-data": {
       "floor-point": "Floor #{{ index }}",
       "distance-point": "Distance #{{ index }}",
-      "punctual-load": "Punctual load",
       "marking-load": "Marking load"
     },
     "floor-form-service": {
@@ -458,7 +456,8 @@
       "invalid-envelope": "The Stellar section file is invalid.",
       "unsupported-version": "Unsupported Stellar section file version {{ version }} (maximum supported: {{ maxVersion }})."
     },
-    "reprojection-info": "Reprojection using {{ appName }} data model seems to add a mean absolute error of {{ error }} m",
+    "azimuth-reprojection-notice": "Maximum span azimuth gap after reprojection: {{ error }}° (threshold {{ threshold }}°). The computed values were kept.",
+    "position-error-notice": "Maximum support position gap: {{ error }} m on support {{ support }} (threshold {{ threshold }} m). Check your values above the threshold.",
     "from-file": {
       "file-format": "File formats: {{ formats }}",
       "description": "You can import a section from a JSON file. It will be added to the current study.",
@@ -474,7 +473,7 @@
     },
     "import": {
       "description": "You can import multiple files, they will be available in the \"My studies\" tab.",
-      "file-formats": "File formats: .csv, .clst",
+      "file-formats": "File formats: .csv, .clst, .stsd",
       "error-cable-not-found": "Cable not found in database",
       "error-import": "Error importing study",
       "error-delete": "Error deleting study",
@@ -485,11 +484,9 @@
     "table": {
       "col-title": "Title",
       "col-modification-date": "Modification date",
-      "col-lit": "LIT IDR",
       "col-description": "Description/comment",
       "study-actions-menu": "Study actions menu",
-      "pagination-report": "Study {first} to {last} of {totalRecords}",
-      "date-format": "d MMMM yyyy 'at' HH'h'mm"
+      "pagination-report": "Study {first} to {last} of {totalRecords}"
     },
     "tabs": {
       "search-study": "Search a study",
@@ -529,7 +526,6 @@
     "no-section": "No existing section",
     "select-btn": "Select the study section",
     "aria-select-section": "select this study's section",
-    "col-lit": "LIT ADR",
     "col-last-modified": "Last modified",
     "add-initial-condition": "Add initial condition",
     "aria-select-ic": "Select initial conditions",
@@ -542,7 +538,6 @@
   },
   "section-modal": {
     "choose-type": "Choose a creation type",
-    "type-manual": "Manual",
     "type-local-ref": "From local referencial",
     "type-distant-ref": "From distant referencial",
     "type-file": "From a file",
@@ -550,7 +545,8 @@
     "update-btn": "Update section",
     "title-view": "View a study section",
     "title-modify": "Modify a study section",
-    "title-create": "Create a study section"
+    "title-create": "Create a study section",
+    "location-removed-after-insert": "The start position could not be computed from the next support: the section is saved without geolocation."
   },
   "manual-section": {
     "tab-general": "General",
@@ -562,8 +558,6 @@
     "label-etl": "Electric tension level",
     "label-link-idr": "Link - IDR",
     "label-link-adr": "Link - ADR",
-    "label-lit-idr": "LIT - IDR",
-    "label-lit-adr": "LIT - ADR",
     "current-page-report": "Support {first} to {last} of {totalRecords}",
     "name-unique": "Section name must be unique.",
     "no-voltage": "NO VOLTAGE",
@@ -574,7 +568,6 @@
   "supports-table": {
     "localization-status": "Waiting for the engine to finish the calculation",
     "col-number": "N° supp.",
-    "col-span-length": "Span l.",
     "col-attachment-alt": "Attachment alt. (NGF)",
     "col-attachment-position": "Attachment pos.",
     "col-angle": "Angle",
@@ -609,7 +602,8 @@
     "auto-fill-hint": "The attachment set and the arm length (m) will be automatically filled in the table."
   },
   "location": {
-    "title": "Support 1 coordinates:"
+    "title": "Support 1 coordinates:",
+    "incomplete-error": "Fill in latitude, longitude and azimuth together, or leave all three empty."
   },
   "loads": {
     "shared": {
@@ -642,7 +636,6 @@
       "longitudinal-distance-label": "Longitudinal dist.",
       "lateral-distance-label": "Lateral dist.",
       "dist-calc-between-points-label": "Dist. calc. between points",
-      "distance-label": "Distance",
       "anchoring-label": "Anchoring",
       "chain-surface-label": "Chain surface",
       "sling-length-label": "Sling length",
@@ -723,20 +716,23 @@
     },
     "calculus-setting": {
       "tangent-aiming-radio-label": "Tangent aiming (Support)",
-      "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)"
+      "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)",
+      "tangent-aiming-interior-radio-label": "Tangent aiming (Interior)"
+    },
+    "tangent-aiming": {
+      "mandatory-msg": "All data are mandatory for parameter calculation.",
+      "h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
+      "vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support"
     },
     "tangent-aiming-support": {
-      "mandatory-msg": "All data are mandatory for parameter calculation.",
       "h-acc-distance-label": "Vertical dist. from device to cable attach. of left support",
-      "vertical-acc-angle-label": "Vertical angle from device to cable attach. of right support",
       "calculation-failed": "Failed to calculate parameter by tangent aiming"
     },
     "tangent-aiming-exterior": {
-      "mandatory-msg": "All data are mandatory for parameter calculation.",
-      "h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
-      "vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support",
-      "vertical-acc-angle-right-label": "Vertical angle from device to cable attach. of right support",
       "calculation-failed": "Failed to calculate parameter by tangent aiming (exterior)"
+    },
+    "tangent-aiming-interior": {
+      "calculation-failed": "Failed to calculate parameter by tangent aiming (interior)"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",
@@ -771,9 +767,6 @@
       "span-type-label": "Span type",
       "phase-number-label": "Phase number",
       "degree-addon": "°",
-      "latitude-label": "Latitude",
-      "altitude-label": "Altitude",
-      "meter-addon": "m",
       "azimuth-label": "Azimuth (clockwise — 0° North/South)",
       "localization-not-available": "Localization not available in study"
     },
@@ -875,7 +868,6 @@
       "display-label": "Display",
       "display-info-text": "Select which elements to display on the studio.",
       "tables-label": "Tables",
-      "tools-label": "Tools",
       "edit-shortcuts-aria-label": "Edit your selected tools shortcuts",
       "export-section-aria-label": "Export the section as a Stellar section file",
       "inset-title": "Inset",
@@ -887,7 +879,6 @@
       "grounds-table-label": "Grounds table",
       "profile-option": "Profile",
       "face-option": "Face",
-      "loads-option": "Loads",
       "base-option": "Base",
       "transparent-background-option": "Transparent background",
       "measurement-points-option": "Measurement points",
@@ -930,10 +921,7 @@
       "x-label": "x:",
       "z-label": "z:",
       "y-label": "y:",
-      "obstacle": "Obstacles",
-      "floor": "Floor",
-      "distance": "Distance",
-      "loads": "Loads"
+      "floor": "Floor"
     },
     "studio-page": {
       "working-load-label": "Working load",
@@ -955,7 +943,6 @@
       "all-option": "All",
       "max-section-option": "Max section",
       "charges-label": "Charges",
-      "obstacles-label": "Obstacles",
       "distances-label": "Distances",
       "floor-sidetab-label": "Floor",
       "no-load-case-message": "In order to add loads, you need to create a load case."
@@ -968,18 +955,10 @@
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Create new obstacle",
-      "obstacle-type-label": "Obstacle type",
       "obstacle-name-label": "Obstacle name",
       "obstacle-altitude-type-label": "Obstacle altitude type",
-      "free-positioning-label": "Free positioning",
       "free-positioning-forced-frame-warning": "Free positioning mode is only available with a left reference support, an absolute altitude type and a span-axis lateral distance type. The current obstacle settings differ, so the results may be inaccurate.",
-      "add-point-btn": "Add point",
-      "select-point-label": "Select point",
-      "point-label": "Point",
       "delete-point-aria-label": "delete point",
-      "point-alt-label": "Point alt.",
-      "ref-support-dist-label": "Ref. support dist.",
-      "line-axis-dist-label": "Line axis dist.",
       "delete-obstacle-aria-label": "delete obstacle",
       "conformity-dialog-title": "Conformity verifications",
       "obstacle-must-be-saved-warning": "obstacle must be saved",
@@ -1041,15 +1020,17 @@
       "point-alt-label": "Alt. point.",
       "delete-floor-aria-label": "delete floor",
       "min-vertical-distance-label": "Minimum vertical distance",
-      "floor-altitude-label": "Point alt.",
-      "cable-altitude-label": "Cable alt.",
-      "min-vertical-position-label": "Ref. supp. dist."
+      "cable-altitude-label": "Cable alt."
     },
     "l0-sum": {
       "naturals-lengths-title": "Naturals lengths L0",
-      "span-length-column-label": "Span l.",
       "l0-column-label": "Natural L0",
       "cumulated-l0-column-label": "Cumulated L0",
+      "csv-filename-prefix": "L0 Lengths Export",
+      "csv-span-length-label": "Span_length",
+      "csv-l0-label": "L0_span_length",
+      "csv-cumulated-l0-label": "Cumulated_L0_span_length",
+      "export-invalid-table": "Export failed: the L0 table is empty or contains invalid values",
       "loading-data-text": "Loading L0 data…",
       "current-page-report": "{currentPage} of {totalPages}"
     },
@@ -1062,16 +1043,11 @@
       "distance-to-ref-support-label": "Distance to ref. support"
     },
     "obstacles-table": {
-      "initial-condition-label": "Initial condition",
       "charge-case-label": "Charge case",
       "all-spans-option": "All spans",
       "number-column-label": "No.",
       "obstacle-name-column-label": "Obstacle name",
-      "obstacle-type-column-label": "Obstacle type",
       "altitude-type-column-label": "Altitude type",
-      "point-column-label": "Point",
-      "altitude-column-label": "Altitude",
-      "ref-support-distance-column-label": "Ref. support dist.",
       "line-axis-distance-column-label": "Line axis dist.",
       "no-obstacles-message": "No obstacles defined for this span.",
       "current-page-report": "{first} to {last} of {totalRecords}"
@@ -1151,14 +1127,12 @@
     },
     "loads-report": {
       "title": "Loads Table Report",
-      "modified-length-label": "Modified length",
-      "support-label": "Support"
+      "modified-length-label": "Modified length"
     },
     "section-report": {
       "title": "Section Data Report",
       "supports-title": "Supports list",
       "maintenance-center-label": "CM",
-      "lit-label": "LIT",
       "supports-count-label": "Number of supports",
       "cables-amount-label": "Number of cables",
       "max-frost-width-label": "Max frost width",
@@ -1184,12 +1158,10 @@
       "integer-error": "Value must be a whole number"
     },
     "cable-adjustment": {
-      "span-length-label": "Span length",
       "left-horizontal-angle-label": "HL horizontal angle at left support",
       "right-horizontal-angle-label": "HR horizontal angle at right support",
       "left-vertical-angle-label": "VL vertical angle at left support",
       "right-vertical-angle-label": "VR vertical angle at right support",
-      "support-label": "Support",
       "tacheometer-horizontal-distance-label": "Tacheometer horizontal distance",
       "adjustment-parameter-label": "Adjustment parameter",
       "calculate-sight-angles": "Calculate the sighting angles at mid-span sag",
@@ -1209,7 +1181,6 @@
     },
     "rrts-cut-strands": {
       "layers-detail": "Layers detail",
-      "cable-name-label": "Cable name",
       "current-work-load-label": "Current max working load",
       "staff-presence-label": "Staff presence",
       "distance-support-ref-label": "Distance to reference support",
