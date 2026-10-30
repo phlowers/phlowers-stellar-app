@@ -12,6 +12,7 @@ import {
 
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { applyRestoreCamera, createPlot } from './helpers/createPlot';
+import { hidePlotlyDragMoves, isPlotlyRightClickPress } from './helpers/plotlyDragGuard';
 import Plotly from 'plotly.js-dist-min';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -308,6 +309,15 @@ export class SectionPlotComponent implements OnDestroy {
     }
   }
 
+  // Registered on the plot element, which sits above Plotly's inner drag layers: the press itself is not
+  // blocked (clicks keep working), only the mouse moves that follow are hidden from Plotly.
+  private readonly guardPlotlyRightClickDrag = (event: MouseEvent): void => {
+    const view = this.documentRef.defaultView;
+    if (view && this.plotOptionsService.plotOptions().view !== '3d' && isPlotlyRightClickPress(event)) {
+      hidePlotlyDragMoves(view);
+    }
+  };
+
   addEventListenersToPlot = (plot: Plotly.PlotlyHTMLElement) => {
     const plotEl = plot as Plotly.PlotlyHTMLElement & {
       on(e: 'plotly_clickannotation', fn: (event: ClickAnnotationEvent) => void): void;
@@ -318,6 +328,8 @@ export class SectionPlotComponent implements OnDestroy {
     // and each refresh call would otherwise accumulate a new listener, causing a memory leak.
     plotEl.removeAllListeners('plotly_clickannotation');
     plotEl.removeAllListeners('plotly_relayout');
+    plotEl.removeEventListener('mousedown', this.guardPlotlyRightClickDrag, true);
+    plotEl.addEventListener('mousedown', this.guardPlotlyRightClickDrag, true);
     plotEl.on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
       if (event?.annotation?.data?.type === 'obstacle') {
         const section = this.spanService.section();
