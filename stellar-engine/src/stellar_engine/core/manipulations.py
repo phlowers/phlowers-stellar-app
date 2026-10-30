@@ -26,6 +26,23 @@ def apply_manipulations(
     inputs: dict,
     study: SectionStudy,
 ):
+    """Python task called to apply manipulations.
+
+    Will apply maniplation on `study` given as argument.
+
+    `input` is a dictionary of three lists. Each list represents a type of manipulation, containing dictionaries.
+
+    ```
+    inputs = {
+        'cableModifParams': [{...}, {...}],  # see ModifyCableInputs
+        'supportManipParams': [{...}],  # see SupportManipInputs
+        'spanManipParams': [{...}],  # see SpanManipInputs
+    }
+    ```
+
+    See inputs.py or test_manipulations.py in order to see the format of the objects.
+
+    """
     logger.debug(f"Applying manipulation: inputs: {inputs}")
     modify_cable_inputs, support_manip_inputs, span_manip_inputs = (
         parse_manip_inputs(inputs)
