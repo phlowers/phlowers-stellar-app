@@ -16,6 +16,8 @@ import { TangentAimingSupportResult } from '@features/studio/field-measuring/dom
 export class TangentAimingResultsComponent {
   readonly result = input<TangentAimingSupportResult | null>(null);
   readonly hasError = input(false);
+  /** Transloco key of the calculation failure message (one per tangent aiming mode). */
+  readonly errorKey = input.required<string>();
   readonly isCalculating = input(false);
   /** Prefix of the result `data-testid`s, e.g. `tangent-aiming-support`. */
   readonly testIdPrefix = input.required<string>();

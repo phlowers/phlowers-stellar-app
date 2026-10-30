@@ -8,6 +8,7 @@
       inputId="taeLeftSupport"
       [options]="supportOptions()"
       [formControl]="form.controls.leftSupport"
+      [invalid]="!!leftSupportError"
       optionLabel="label"
       optionValue="value"
       [filter]="true"
@@ -125,6 +126,7 @@
 <app-tangent-aiming-results
   [result]="measureData().outputs.tangentAimingExterior"
   [hasError]="hasError()"
+  [errorKey]="calculationFailedKey"
   [isCalculating]="isCalculating()"
   testIdPrefix="tangent-aiming-exterior"
 />

@@ -111,3 +111,7 @@ export const TANGENT_AIMING_INTERIOR_MODEL_FIELDS: Record<TangentAimingInteriorI
   parameter: 'interiorParameter',
   tangentAngle: 'interiorTangentAngle'
 };
+
+/** Transloco key of the calculation failure message of the tangent aiming (interior) form. */
+export const TANGENT_AIMING_INTERIOR_CALCULATION_FAILED_KEY =
+  'field-measuring.tangent-aiming-interior.calculation-failed';

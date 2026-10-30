@@ -126,6 +126,7 @@
 <app-tangent-aiming-results
   [result]="measureData().outputs.tangentAimingInterior"
   [hasError]="hasError()"
+  [errorKey]="calculationFailedKey"
   [isCalculating]="isCalculating()"
   testIdPrefix="tangent-aiming-interior"
 />

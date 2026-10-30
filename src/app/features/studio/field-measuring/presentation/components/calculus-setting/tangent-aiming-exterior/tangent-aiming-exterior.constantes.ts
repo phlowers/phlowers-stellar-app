@@ -110,3 +110,7 @@ export const TANGENT_AIMING_EXTERIOR_MODEL_FIELDS: Record<TangentAimingExteriorI
   parameter: 'exteriorParameter',
   tangentAngle: 'exteriorTangentAngle'
 };
+
+/** Transloco key of the calculation failure message of the tangent aiming (exterior) form. */
+export const TANGENT_AIMING_EXTERIOR_CALCULATION_FAILED_KEY =
+  'field-measuring.tangent-aiming-exterior.calculation-failed';

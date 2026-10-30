@@ -151,6 +151,14 @@ describe('TangentAimingSupport component', () => {
     expect(component.isFormValid()).toBe(false);
   });
 
+  it('should flag the left support select as invalid when it has an error', () => {
+    expect(getByTestId('left-support-select')?.classList).not.toContain('p-invalid');
+    vi.spyOn(component, 'getError').mockReturnValue('Required');
+    fixture.componentRef.setInput('measureData', { ...component.measureData() });
+    fixture.detectChanges();
+    expect(getByTestId('left-support-select')?.classList).toContain('p-invalid');
+  });
+
   it('should accept a negative angle with two decimals', () => {
     setInput('vertical-acc-angle-input', '-12.34');
     expect((getByTestId('vertical-acc-angle-input') as HTMLInputElement).getAttribute('aria-invalid')).toBeNull();
@@ -224,7 +232,7 @@ describe('TangentAimingSupport component', () => {
     await component.calculate();
     fixture.detectChanges();
     expect(logger.error).toHaveBeenCalled();
-    expect(notification.error).toHaveBeenCalled();
+    expect(notification.error).toHaveBeenCalledWith('field-measuring.tangent-aiming-support.calculation-failed');
     expect(component.hasError()).toBe(true);
     expect(getByTestId('calculation-error')).toBeTruthy();
     expect(component.isCalculating()).toBe(false);

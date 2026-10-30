@@ -1,7 +1,7 @@
 <output class="block" [attr.aria-busy]="isCalculating()">
   @if (hasError()) {
     <p-message severity="error" size="small" role="alert" aria-live="assertive" data-testid="calculation-error">
-      {{ 'common.tangent-aiming-calculation-failed' | transloco }}
+      {{ errorKey() | transloco }}
     </p-message>
   }
 

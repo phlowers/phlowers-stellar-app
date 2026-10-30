@@ -61,9 +61,11 @@ describe('TangentAimingNumberField component', () => {
 
   it('should render the error and flag the input as invalid', () => {
     expect(getInput().getAttribute('aria-invalid')).toBeNull();
+    expect(getInput().classList).not.toContain('p-invalid');
     fixture.componentRef.setInput('error', 'Required');
     fixture.detectChanges();
     expect(getInput().getAttribute('aria-invalid')).toBe('true');
+    expect(getInput().classList).toContain('p-invalid');
     expect(getInput().getAttribute('aria-errormessage')).toBe('testParameter-error');
     expect(fixture.nativeElement.querySelector('#testParameter-error')?.textContent).toContain('Required');
   });

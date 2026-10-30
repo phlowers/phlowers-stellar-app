@@ -45,6 +45,8 @@ export abstract class TangentAimingFormBase {
   readonly isFormValid = signal(false);
   readonly isCalculating = signal(false);
   readonly hasError = signal(false);
+  /** Transloco key of the calculation failure message of this form. */
+  readonly calculationFailedKey: string;
   private readonly leftSupportState = signal(INITIAL_LEFT_SUPPORT_STATE);
 
   /** The calculate button is only usable when an input changed since the last calculation (a change clears the result). */
@@ -69,6 +71,7 @@ export abstract class TangentAimingFormBase {
 
   protected constructor(protected readonly config: TangentAimingFormConfig) {
     const { form, modelFields, leftSupportKey, calculationTypeKey } = config;
+    this.calculationFailedKey = config.calculationFailedKey;
 
     // A span change must not leave a left support outside the span, nor a result computed for another span.
     effect(() => {
@@ -130,7 +133,7 @@ export abstract class TangentAimingFormBase {
     } catch (error) {
       this.logger.error(`Failed to calculate the tangent aiming (${this.config.logLabel}) parameter`, error);
       this.hasError.set(true);
-      this.notificationService.error(this.translocoService.translate('common.tangent-aiming-calculation-failed'));
+      this.notificationService.error(this.translocoService.translate(this.calculationFailedKey));
     } finally {
       this.isCalculating.set(false);
     }

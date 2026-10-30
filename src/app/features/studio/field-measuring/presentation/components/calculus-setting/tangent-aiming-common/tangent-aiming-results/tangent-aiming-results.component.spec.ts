@@ -12,7 +12,14 @@ describe('TangentAimingResults component', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: { 'common.meter': 'm', 'common.yes': 'Yes', 'common.no': 'No' } },
+          langs: {
+            en: {
+              'common.meter': 'm',
+              'common.yes': 'Yes',
+              'common.no': 'No',
+              'field-measuring.tangent-aiming-exterior.calculation-failed': 'Failed (exterior)'
+            }
+          },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
         }),
@@ -21,6 +28,7 @@ describe('TangentAimingResults component', () => {
     }).compileComponents();
     fixture = TestBed.createComponent(TangentAimingResultsComponent);
     fixture.componentRef.setInput('testIdPrefix', 'test');
+    fixture.componentRef.setInput('errorKey', 'field-measuring.tangent-aiming-exterior.calculation-failed');
     fixture.detectChanges();
   });
 
@@ -29,10 +37,10 @@ describe('TangentAimingResults component', () => {
     expect(getByTestId('calculation-error')).toBeNull();
   });
 
-  it('should render the calculation error', () => {
+  it('should render the calculation error of the given mode', () => {
     fixture.componentRef.setInput('hasError', true);
     fixture.detectChanges();
-    expect(getByTestId('calculation-error')).toBeTruthy();
+    expect(getByTestId('calculation-error')?.textContent?.trim()).toBe('Failed (exterior)');
   });
 
   it('should flag the output as busy while calculating', () => {

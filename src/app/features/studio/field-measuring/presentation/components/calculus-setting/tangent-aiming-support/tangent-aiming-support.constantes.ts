@@ -97,3 +97,6 @@ export const TANGENT_AIMING_SUPPORT_MODEL_FIELDS: Record<TangentAimingSupportInp
   cableParameter: 'cableParameter',
   cableTangentAngle: 'cableTangentAngle'
 };
+
+/** Transloco key of the calculation failure message of the tangent aiming (support) form. */
+export const TANGENT_AIMING_SUPPORT_CALCULATION_FAILED_KEY = `${I18N}.calculation-failed`;

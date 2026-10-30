@@ -150,6 +150,14 @@ describe('TangentAimingInterior component', () => {
     expect(fixture.nativeElement.querySelector('#taiSpanLength-error')).toBeTruthy();
   });
 
+  it('should flag the left support select as invalid when it has an error', () => {
+    expect(getByTestId('left-support-select')?.classList).not.toContain('p-invalid');
+    vi.spyOn(component, 'getError').mockReturnValue('Required');
+    fixture.componentRef.setInput('measureData', { ...component.measureData() });
+    fixture.detectChanges();
+    expect(getByTestId('left-support-select')?.classList).toContain('p-invalid');
+  });
+
   it('should show "-" when the calculated span length is unavailable', () => {
     expect(fixture.nativeElement.querySelector('#taiSpanLength-calculated').textContent).toContain('-');
   });
@@ -226,7 +234,7 @@ describe('TangentAimingInterior component', () => {
     await component.calculate();
     fixture.detectChanges();
     expect(logger.error).toHaveBeenCalled();
-    expect(notification.error).toHaveBeenCalled();
+    expect(notification.error).toHaveBeenCalledWith('field-measuring.tangent-aiming-interior.calculation-failed');
     expect(component.hasError()).toBe(true);
     expect(getByTestId('calculation-error')).toBeTruthy();
     expect(component.isCalculating()).toBe(false);

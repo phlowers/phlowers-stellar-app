@@ -62,6 +62,8 @@ export interface TangentAimingFormConfig {
   outputKey: 'tangentAimingSupport' | 'tangentAimingInterior' | 'tangentAimingExterior';
   /** Label of the form in the calculation failure log. */
   logLabel: string;
+  /** Transloco key of the calculation failure message, specific to each tangent aiming mode. */
+  calculationFailedKey: string;
   getDisplayedInputFields: (calculationType: TangentAimingCalculationType) => readonly string[];
   invalidateResult: (data: FieldMeasure) => FieldMeasure;
   toInputs: (data: FieldMeasure) => unknown;

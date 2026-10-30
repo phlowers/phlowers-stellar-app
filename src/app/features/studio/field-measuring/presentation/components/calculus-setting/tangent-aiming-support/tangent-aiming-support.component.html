@@ -8,6 +8,7 @@
       inputId="tasLeftSupport"
       [options]="supportOptions()"
       [formControl]="form.controls.tangentLeftSupport"
+      [invalid]="!!leftSupportError"
       optionLabel="label"
       optionValue="value"
       [filter]="true"
@@ -117,6 +118,7 @@
 <app-tangent-aiming-results
   [result]="measureData().outputs.tangentAimingSupport"
   [hasError]="hasError()"
+  [errorKey]="calculationFailedKey"
   [isCalculating]="isCalculating()"
   testIdPrefix="tangent-aiming-support"
   format="percent"

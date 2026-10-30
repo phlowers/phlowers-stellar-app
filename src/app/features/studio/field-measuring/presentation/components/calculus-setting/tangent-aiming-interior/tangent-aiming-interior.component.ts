@@ -12,6 +12,7 @@ import { TangentAimingHeaderComponent } from '@features/studio/field-measuring/p
 import { TangentAimingNumberFieldComponent } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-number-field/tangent-aiming-number-field.component';
 import { TangentAimingResultsComponent } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-results/tangent-aiming-results.component';
 import {
+  TANGENT_AIMING_INTERIOR_CALCULATION_FAILED_KEY,
   TANGENT_AIMING_INTERIOR_FIELD_RULES,
   TANGENT_AIMING_INTERIOR_MODEL_FIELDS,
   TANGENT_AIMING_INTERIOR_NUMBER_FIELDS
@@ -65,6 +66,7 @@ export class TangentAimingInteriorComponent extends TangentAimingFormBase {
       calculationTypeKey: 'interiorCalculationType',
       outputKey: 'tangentAimingInterior',
       logLabel: 'interior',
+      calculationFailedKey: TANGENT_AIMING_INTERIOR_CALCULATION_FAILED_KEY,
       getDisplayedInputFields,
       invalidateResult: invalidateTangentAimingInteriorResult,
       toInputs: toTangentAimingInteriorInputs
