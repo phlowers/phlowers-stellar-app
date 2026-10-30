@@ -1,0 +1,63 @@
+@use 'abstract.extracts' as app;
+
+// Label, input and error message of a field each get their own row; the error row only grows when an error is shown.
+$field-rows: auto auto minmax(0.75rem, auto);
+
+// Grid of a tangent aiming form; each form only declares its own `grid-template-areas` and `grid-template-rows`.
+@mixin form {
+  @extend %tools-grid-layout;
+  row-gap: 0;
+
+  > div:not(.calculationType, .spanLengthDesc) {
+    display: grid;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+  }
+
+  .leftSupport {
+    grid-area: leftSupport;
+  }
+
+  .spanLength {
+    grid-area: spanLength;
+  }
+
+  .hDistance {
+    grid-area: hDistance;
+  }
+
+  .vAngle {
+    grid-area: vAngle;
+  }
+
+  .vAngleLeft {
+    grid-area: vAngleLeft;
+  }
+
+  .vAngleRight {
+    grid-area: vAngleRight;
+  }
+
+  .calculationType {
+    @apply flex items-center gap-2;
+    grid-area: calculationType;
+    margin-bottom: 0.75rem;
+  }
+
+  // Parameter and tangent angle are never displayed together: they share the same cell.
+  .parameter,
+  .tangentAngle {
+    grid-area: parameter;
+  }
+
+  .spanLengthDesc {
+    grid-area: spanLengthDesc;
+    margin: -0.5rem 0 0.75rem;
+
+    p {
+      @apply mb-0 font-semibold;
+      margin: 0.125rem 0.25rem;
+      color: var(--star-dust-900);
+    }
+  }
+}

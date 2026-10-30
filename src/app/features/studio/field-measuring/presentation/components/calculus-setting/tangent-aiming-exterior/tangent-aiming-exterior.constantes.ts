@@ -7,14 +7,10 @@
 
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import {
-  TangentAimingSupportFieldRule,
-  TangentAimingSupportNumberFieldView,
-  TangentAimingSupportNumericField
-} from '../tangent-aiming-support/tangent-aiming-support.interfaces';
-import {
-  TANGENT_AIMING_SHARED_I18N,
-  TANGENT_AIMING_SUPPORT_FIELD_RULES
-} from '../tangent-aiming-support/tangent-aiming-support.constantes';
+  TangentAimingFieldRule,
+  TangentAimingNumberFieldView
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
+import { TANGENT_AIMING_FIELD_RULES } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   TangentAimingExteriorCalculationType,
   TangentAimingExteriorInputField,
@@ -24,7 +20,7 @@ import {
 /** Display description of each numeric input. */
 export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   TangentAimingExteriorNumericField,
-  TangentAimingSupportNumberFieldView
+  TangentAimingNumberFieldView
 > = {
   spanLength: {
     id: 'taeSpanLength',
@@ -36,7 +32,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   },
   hAccDistance: {
     id: 'taeHAccDistance',
-    labelKey: `${TANGENT_AIMING_SHARED_I18N}.h-acc-distance-label`,
+    labelKey: 'common.tangent-aiming-h-acc-distance-label',
     unitKey: 'common.meter',
     testId: 'h-acc-distance-input',
     step: 0.01,
@@ -44,7 +40,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   },
   verticalAccAngleLeft: {
     id: 'taeVerticalAccAngleLeft',
-    labelKey: `${TANGENT_AIMING_SHARED_I18N}.vertical-acc-angle-left-label`,
+    labelKey: 'common.tangent-aiming-vertical-acc-angle-left-label',
     unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-left-input',
     step: 0.01,
@@ -64,7 +60,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
     unitKey: 'common.meter',
     testId: 'parameter-input',
     step: 1,
-    area: 'tangentAngle'
+    area: 'parameter'
   },
   tangentAngle: {
     id: 'taeTangentAngle',
@@ -76,26 +72,15 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
   }
 };
 
-/** Support field whose rule (bounds, decimals, default) each exterior numeric input reuses. */
-export const TANGENT_AIMING_EXTERIOR_RULE_FIELDS: Record<
-  TangentAimingExteriorNumericField,
-  TangentAimingSupportNumericField
-> = {
-  spanLength: 'tangentSpanLength',
-  hAccDistance: 'cableHAccDistance',
-  verticalAccAngleLeft: 'cableVerticalAccAngle',
-  verticalAccAngleRight: 'cableVerticalAccAngle',
-  parameter: 'cableParameter',
-  tangentAngle: 'cableTangentAngle'
+/** Bounds, decimals and default of each numeric input, shared with the other tangent aiming forms. */
+export const TANGENT_AIMING_EXTERIOR_FIELD_RULES: Record<TangentAimingExteriorNumericField, TangentAimingFieldRule> = {
+  spanLength: TANGENT_AIMING_FIELD_RULES.spanLength,
+  hAccDistance: TANGENT_AIMING_FIELD_RULES.hAccDistance,
+  verticalAccAngleLeft: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
+  verticalAccAngleRight: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
+  parameter: TANGENT_AIMING_FIELD_RULES.parameter,
+  tangentAngle: TANGENT_AIMING_FIELD_RULES.tangentAngle
 };
-
-/** Bounds, decimals and default of each numeric input, shared with the tangent aiming (support) form. */
-export const TANGENT_AIMING_EXTERIOR_FIELD_RULES = Object.fromEntries(
-  Object.entries(TANGENT_AIMING_EXTERIOR_RULE_FIELDS).map(([field, ruleField]) => [
-    field,
-    TANGENT_AIMING_SUPPORT_FIELD_RULES[ruleField]
-  ])
-) as Record<TangentAimingExteriorNumericField, TangentAimingSupportFieldRule>;
 
 /** Inputs always displayed, whatever the calculation type. */
 export const TANGENT_AIMING_EXTERIOR_COMMON_FIELDS: TangentAimingExteriorInputField[] = [
@@ -125,3 +110,7 @@ export const TANGENT_AIMING_EXTERIOR_MODEL_FIELDS: Record<TangentAimingExteriorI
   parameter: 'exteriorParameter',
   tangentAngle: 'exteriorTangentAngle'
 };
+
+/** Transloco key of the calculation failure message of the tangent aiming (exterior) form. */
+export const TANGENT_AIMING_EXTERIOR_CALCULATION_FAILED_KEY =
+  'field-measuring.tangent-aiming-exterior.calculation-failed';

@@ -7,6 +7,7 @@ import { vi } from 'vitest';
 
 import { TangentAimingExteriorComponent } from './tangent-aiming-exterior.component';
 import * as helpers from './tangent-aiming-exterior.helpers';
+import * as commonHelpers from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -149,6 +150,14 @@ describe('TangentAimingExterior component', () => {
     expect(fixture.nativeElement.querySelector('#taeSpanLength-error')).toBeTruthy();
   });
 
+  it('should flag the left support select as invalid when it has an error', () => {
+    expect(getByTestId('left-support-select')?.classList).not.toContain('p-invalid');
+    vi.spyOn(component, 'getError').mockReturnValue('Required');
+    fixture.componentRef.setInput('measureData', { ...component.measureData() });
+    fixture.detectChanges();
+    expect(getByTestId('left-support-select')?.classList).toContain('p-invalid');
+  });
+
   it('should show "-" when the calculated span length is unavailable', () => {
     expect(fixture.nativeElement.querySelector('#taeSpanLength-calculated').textContent).toContain('-');
   });
@@ -181,7 +190,7 @@ describe('TangentAimingExterior component', () => {
   });
 
   it('should render the not respected icon when the criterion fails', async () => {
-    vi.spyOn(helpers, 'calculateTangentAimingExteriorMock').mockResolvedValueOnce({
+    vi.spyOn(commonHelpers, 'calculateTangentAimingMock').mockResolvedValueOnce({
       result: { parameter: 10, uncertainty: 2, criterion: 5, checkValidity: false },
       error: null
     });
@@ -212,20 +221,20 @@ describe('TangentAimingExterior component', () => {
   });
 
   it('should not calculate when the form is invalid', async () => {
-    const spy = vi.spyOn(helpers, 'calculateTangentAimingExteriorMock');
+    const spy = vi.spyOn(commonHelpers, 'calculateTangentAimingMock');
     await component.calculate();
     expect(spy).not.toHaveBeenCalled();
     expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
   });
 
   it('should log and notify when the calculation fails', async () => {
-    vi.spyOn(helpers, 'calculateTangentAimingExteriorMock').mockResolvedValueOnce({ result: null, error: 'boom' });
+    vi.spyOn(commonHelpers, 'calculateTangentAimingMock').mockResolvedValueOnce({ result: null, error: 'boom' });
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
     await component.calculate();
     fixture.detectChanges();
     expect(logger.error).toHaveBeenCalled();
-    expect(notification.error).toHaveBeenCalled();
+    expect(notification.error).toHaveBeenCalledWith('field-measuring.tangent-aiming-exterior.calculation-failed');
     expect(component.hasError()).toBe(true);
     expect(getByTestId('calculation-error')).toBeTruthy();
     expect(component.isCalculating()).toBe(false);
@@ -268,6 +277,18 @@ describe('TangentAimingExterior component', () => {
     componentRef.setInput('measureData', validMeasure({ span: [1, 2] }));
     fixture.detectChanges();
     expect(component.supportOptions().map((option) => option.value)).toEqual(['1', '2']);
+  });
+
+  it('should invalidate the result and allow a new calculation when the span changes but the support is shared', async () => {
+    componentRef.setInput('measureData', validMeasure({ exteriorLeftSupport: '1' }));
+    fixture.detectChanges();
+    await component.calculate();
+    expect(component.measureData().outputs.tangentAimingExterior).not.toBeNull();
+    componentRef.setInput('measureData', { ...component.measureData(), span: [1, 2] });
+    fixture.detectChanges();
+    expect(component.measureData().exteriorLeftSupport).toBe('1');
+    expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
+    expect(component.canCalculate()).toBe(true);
   });
 
   it('should fall back to the departure support and invalidate the results when the span changes', async () => {
@@ -328,5 +349,18 @@ describe('TangentAimingExterior component', () => {
     setInput('h-acc-distance-input', '12');
     expect(component.measureData().cableHAccDistance).toBe(7);
     expect(component.measureData().outputs.tangentAimingSupport).toBe(support);
+  });
+
+  it('should only enable the calculate button when an input changed since the last calculation', async () => {
+    const button = () => getByTestId('calculate-tangent-aiming-exterior-btn') as HTMLButtonElement;
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    expect(button().disabled).toBe(false);
+    await component.calculate();
+    fixture.detectChanges();
+    expect(button().disabled).toBe(true);
+    setInput('h-acc-distance-input', '12');
+    expect(component.measureData().exteriorHAccDistance).toBe(12);
+    expect(button().disabled).toBe(false);
   });
 });

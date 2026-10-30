@@ -5,22 +5,23 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import {
-  TangentAimingSupportFieldRule,
+  TangentAimingFieldRule,
+  TangentAimingNumberFieldView
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
+import { TANGENT_AIMING_FIELD_RULES } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
+import {
   TangentAimingSupportInputField,
-  TangentAimingSupportNumberFieldView,
   TangentAimingSupportNumericField
-} from './tangent-aiming-support.interfaces';
-
-/** Transloco prefix of the keys shared by the tangent aiming (support, exterior, interior) forms. */
-export const TANGENT_AIMING_SHARED_I18N = 'field-measuring.tangent-aiming';
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-support/tangent-aiming-support.interfaces';
 
 const I18N = 'field-measuring.tangent-aiming-support';
 
 /** Display description of each numeric input. */
 export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
   TangentAimingSupportNumericField,
-  TangentAimingSupportNumberFieldView
+  TangentAimingNumberFieldView
 > = {
   tangentSpanLength: {
     id: 'tasSpanLength',
@@ -65,15 +66,12 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
 };
 
 /** Bounds, decimals and default of each numeric input. */
-export const TANGENT_AIMING_SUPPORT_FIELD_RULES: Record<
-  TangentAimingSupportNumericField,
-  TangentAimingSupportFieldRule
-> = {
-  tangentSpanLength: { min: 0, max: 5000, decimals: 2, default: 0 },
-  cableHAccDistance: { min: 0, max: 1000, decimals: 2, default: 0 },
-  cableVerticalAccAngle: { min: -200, max: 200, decimals: 2, default: 0 },
-  cableParameter: { min: 20, max: 5000, decimals: 0, default: 20 },
-  cableTangentAngle: { min: -200, max: 200, decimals: 2, default: 0 }
+export const TANGENT_AIMING_SUPPORT_FIELD_RULES: Record<TangentAimingSupportNumericField, TangentAimingFieldRule> = {
+  tangentSpanLength: TANGENT_AIMING_FIELD_RULES.spanLength,
+  cableHAccDistance: TANGENT_AIMING_FIELD_RULES.hAccDistance,
+  cableVerticalAccAngle: TANGENT_AIMING_FIELD_RULES.verticalAccAngle,
+  cableParameter: TANGENT_AIMING_FIELD_RULES.parameter,
+  cableTangentAngle: TANGENT_AIMING_FIELD_RULES.tangentAngle
 };
 
 /** Inputs always displayed, whatever the calculation type. */
@@ -89,3 +87,16 @@ export const TANGENT_AIMING_SUPPORT_TYPE_FIELD = {
   parametre: 'cableParameter',
   tangente: 'cableTangentAngle'
 } as const;
+
+/** `FieldMeasure` key bound to each input (identity: the form fields are named after the measure keys). */
+export const TANGENT_AIMING_SUPPORT_MODEL_FIELDS: Record<TangentAimingSupportInputField, keyof FieldMeasure> = {
+  tangentLeftSupport: 'tangentLeftSupport',
+  tangentSpanLength: 'tangentSpanLength',
+  cableHAccDistance: 'cableHAccDistance',
+  cableVerticalAccAngle: 'cableVerticalAccAngle',
+  cableParameter: 'cableParameter',
+  cableTangentAngle: 'cableTangentAngle'
+};
+
+/** Transloco key of the calculation failure message of the tangent aiming (support) form. */
+export const TANGENT_AIMING_SUPPORT_CALCULATION_FAILED_KEY = `${I18N}.calculation-failed`;

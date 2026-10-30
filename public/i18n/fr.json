@@ -181,6 +181,9 @@
     "calculation-type-label": "Type de calcul :",
     "calculation-type-tangent": "Tangente",
     "tangent-angle-label": "Angle tangent au câble",
+    "tangent-aiming-mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
+    "tangent-aiming-h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
+    "tangent-aiming-vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
     "criterion-label": "Critère",
     "criterion-respected": "Critère respecté",
     "criterion-not-respected": "Critère non respecté"
@@ -718,11 +721,6 @@
       "tangent-aiming-radio-label": "Visées tangentes (Support)",
       "tangent-aiming-exterior-radio-label": "Visées tangentes (Extérieur)",
       "tangent-aiming-interior-radio-label": "Visées tangentes (Intérieur)"
-    },
-    "tangent-aiming": {
-      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
-      "h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support de gauche",
-      "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche"
     },
     "tangent-aiming-support": {
       "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",

@@ -87,7 +87,10 @@ export const WIND_SPEED_UNIT_EXPORT_KEYS: Record<FieldMeasure['windSpeedUnit'], 
 
 /** Maps the translatable `calculationMethod` values (papoto/pep) to a Transloco key for JSON export label. */
 export const PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS: Record<
-  Exclude<FieldMeasure['calculationMethod'], 'tangente-aiming' | 'tangente-aiming-exterior'>,
+  Exclude<
+    FieldMeasure['calculationMethod'],
+    'tangente-aiming' | 'tangente-aiming-exterior' | 'tangente-aiming-interior'
+  >,
   string
 > = {
   papoto: 'common.papoto-label',
