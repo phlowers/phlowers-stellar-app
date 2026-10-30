@@ -71,3 +71,7 @@ class NightTimeError(ValueError):
 
 class ConformityInputError(ValueError):
     """Raised when a conformity input is missing or invalid."""
+
+
+class SelectorInputError(ValueError):
+    """Raised when a invalid value comes out of a selector."""

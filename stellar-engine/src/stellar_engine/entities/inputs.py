@@ -347,6 +347,83 @@ class ModifyCableInputs:
     distanceSupportRef: float
     supportRef: Literal['LEFT', 'RIGHT']
 
+    # allow extra arguments
+    @classmethod
+    def from_dict(cls, env: dict):
+        return cls(
+            **{
+                key: value
+                for key, value in env.items()
+                if key in cls.__dataclass_fields__
+            }
+        )
+
+
+@dataclass
+class SupportManipElement:
+    type: Literal['crane', 'rope', 'shifting']
+    vertDisplacement: float | None  # None possible
+    anchoring: Literal['with_chain', 'without_chain']
+    lateralDistance: float | None
+    ropeLength: float | None
+    shiftingClampLength: float | None
+
+    # allow extra arguments
+    @classmethod
+    def from_dict(cls, env: dict | None):
+        if env is None:
+            return None
+        return cls(
+            **{
+                key: value
+                for key, value in env.items()
+                if key in cls.__dataclass_fields__
+            }
+        )
+
+
+@dataclass
+class SupportManipInputs:
+    supportIndex: int
+    manip1: SupportManipElement
+    manip2: SupportManipElement | None
+
+    # allow extra arguments
+    @classmethod
+    def from_dict(cls, env: dict):
+        return cls(
+            **{
+                key: value
+                for key, value in env.items()
+                if key in cls.__dataclass_fields__
+            }
+        )
+
+
+@dataclass
+class SpanManipInputs:
+    spanIndex: int
+    referenceSupport: Literal['LEFT', 'RIGHT']
+    cableManipType: Literal['with_a_crane', 'temporary_support']  # useless ?
+    cableManipMethod: Literal['clamp', 'pulley']  # no pulley (disabled)
+    distanceToRefSupport: float
+    longitudinalDistance: float
+    lateralDistance: float
+    altitude: float
+    anchoring: Literal['with_sling', 'with_chain']
+    slingLength: float  # insulator length
+
+    # allow extra arguments
+    @classmethod
+    def from_dict(cls, env: dict):
+        return cls(
+            **{
+                key: value
+                for key, value in env.items()
+                if key in cls.__dataclass_fields__
+            }
+        )
+
 
 @dataclass
 class SpanLoad:

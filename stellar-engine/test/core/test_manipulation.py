@@ -5,31 +5,152 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-from mechaphlowers import BalanceEngine, SectionStudy
+from mechaphlowers import SectionStudy
 
 from stellar_engine.core import manipulations
+from stellar_engine.entities.inputs import (
+    SupportManipElement,
+    SupportManipInputs,
+)
 
 
-def test_lengthen_cable(balance_engine_base: BalanceEngine):
-    study = SectionStudy(
-        cable_array=balance_engine_base.cable_array,
-        section_array=balance_engine_base.section_array,
-    )
+def test_apply_manipulations_all_manips(study_base: SectionStudy):
+    study_base.solve_adjustment()
+    study_base.solve_change_state()
+
+    # inputs sent by stellar
     inputs = {
-        'spanIndex': 0,
-        'modificationType': 'lengthening',
-        'modifiedLengthCable': 10,
-        'distanceSupportRef': 0,
-        'supportRef': 'LEFT',
+        'cableModifParams': [
+            {
+                'supportRef': 'LEFT',
+                'modificationType': 'lengthening',
+                'modifiedLengthCable': 7,
+                'distanceSupportRef': 0,
+                'spanIndex': 1,
+            }
+        ],
+        'supportManipParams': [
+            {
+                'manip1': {
+                    'type': 'crane',
+                    'vertDisplacement': 2,
+                    'anchoring': 'with_chain',
+                    'lateralDistance': 3,
+                    'ropeLength': None,
+                    'shiftingClampLength': None,
+                    'chainName': None,
+                    'chainLength': None,
+                    'chainWeight': None,
+                    'chainSurface': None,
+                    'counterWeight': None,
+                },
+                'manip2': None,
+                'supportIndex': 0,
+            }
+        ],
+        'spanManipParams': [
+            {
+                'referenceSupport': 'LEFT',
+                'distanceToRefSupport': 200,
+                'cableManipType': 'with_a_crane',
+                'cableManipMethod': 'clamp',
+                'longitudinalDistance': 200,
+                'lateralDistance': 2,
+                'altitude': 3,
+                'anchoring': 'with_sling',
+                'chainLength': None,
+                'chainWeight': None,
+                'chainSurface': None,
+                'counterWeight': None,
+                'slingLength': 5,
+                'spanIndex': 2,
+            }
+        ],
     }
-    study.solve_adjustment()
-    study.solve_change_state()
-    # plot_2d.refresh_projection(study)
-    spans_coords_0 = study.position_engine.get_group_points().spans.coords
-    extract_span_coords_0 = spans_coords_0[0][0:6]
-    manipulations.modify_cable(inputs, study)
 
-    spans_coords_1 = study.position_engine.get_group_points().spans.coords
-    extract_span_coords_1 = spans_coords_1[0][0:6]
+    manipulations.apply_manipulations(inputs, study_base)
 
-    assert not np.allclose(extract_span_coords_0, extract_span_coords_1)
+
+def test_apply_manipulations_shortening(study_base: SectionStudy):
+    study_base.solve_adjustment()
+    previous_L_ref = study_base.balance_engine.L_ref
+
+    inputs = {
+        'cableModifParams': [
+            {
+                'supportRef': 'LEFT',
+                'modificationType': 'lengthening',
+                'modifiedLengthCable': 10,
+                'distanceSupportRef': 0,
+                'spanIndex': 1,
+            }
+        ],
+        "supportManipParams": [],
+        "spanManipParams": [],
+    }
+
+    manipulations.apply_manipulations(inputs, study_base)
+    expected_L_ref = previous_L_ref + np.array([0, 10, 0])
+    np.testing.assert_allclose(
+        study_base.balance_engine.L_ref, expected_L_ref, rtol=1e-6
+    )
+
+
+def test_apply_manipulations_span_manip(study_base: SectionStudy):
+    study_base.solve_adjustment()
+
+    inputs = {
+        'cableModifParams': [],
+        "supportManipParams": [],
+        "spanManipParams": [
+            {
+                'referenceSupport': 'LEFT',
+                'distanceToRefSupport': 100,
+                'cableManipType': 'with_a_crane',
+                'cableManipMethod': 'clamp',
+                'longitudinalDistance': 1,
+                'lateralDistance': 2,
+                'altitude': 3,
+                'anchoring': 'with_sling',
+                'chainLength': None,
+                'chainWeight': None,
+                'chainSurface': None,
+                'counterWeight': None,
+                'slingLength': 5,
+                'spanIndex': 0,
+            }
+        ],
+    }
+
+    manipulations.apply_manipulations(inputs, study_base)
+    assert len(study_base.balance_engine.section_array.data["name"]) == 5
+
+
+def test_inputs_validation():
+    input_dict = {
+        "type": "crane",
+        "vertDisplacement": 0,
+        "anchoring": "without_chain",
+        "lateralDistance": None,
+        "ropeLength": None,
+        "shiftingClampLength": None,
+    }
+    SupportManipElement(**input_dict)
+
+
+def test_inputs_validation_empty_object():
+    element_dict = {
+        "type": "crane",
+        "vertDisplacement": 0,
+        "anchoring": "without_chain",
+        "lateralDistance": None,
+        "ropeLength": None,
+        "shiftingClampLength": None,
+    }
+    support_manip_element = SupportManipElement(**element_dict)
+    input_dict = {
+        "supportIndex": 0,
+        "manip1": support_manip_element,
+        "manip2": None,
+    }
+    SupportManipInputs(**input_dict)
