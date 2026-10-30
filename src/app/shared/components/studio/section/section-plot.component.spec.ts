@@ -1373,31 +1373,34 @@ describe('SectionPlotComponent', () => {
       plotOptionsSignal.set(mockPlotOptions);
     });
 
-    it('should stop Ctrl+mousedown from reaching Plotly on a 2D plot', () => {
-      plotOptionsSignal.set({ ...mockPlotOptions, view: '2d' });
+    const pressAndCountMoveGuards = (view: '2d' | '3d', press: Partial<MouseEvent>): number => {
+      plotOptionsSignal.set({ ...mockPlotOptions, view });
+      const addSpy = vi.spyOn(document.defaultView!, 'addEventListener');
       const stopPropagation = vi.fn();
 
-      attachAndGetGuard()({ ctrlKey: true, buttons: 1, stopPropagation } as unknown as MouseEvent);
+      attachAndGetGuard()({ ...press, stopPropagation } as unknown as MouseEvent);
 
-      expect(stopPropagation).toHaveBeenCalledTimes(1);
+      const guards = addSpy.mock.calls.filter(([type]) => type === 'mousemove').length;
+      addSpy.mockRestore();
+      // The press itself must always reach Plotly so that clicks keep working.
+      expect(stopPropagation).not.toHaveBeenCalled();
+      return guards;
+    };
+
+    it('should hide the following mouse moves from Plotly on a Ctrl+press in 2D', () => {
+      expect(pressAndCountMoveGuards('2d', { ctrlKey: true, buttons: 1 })).toBe(1);
     });
 
-    it('should let a plain mousedown reach Plotly on a 2D plot', () => {
-      plotOptionsSignal.set({ ...mockPlotOptions, view: '2d' });
-      const stopPropagation = vi.fn();
-
-      attachAndGetGuard()({ ctrlKey: false, buttons: 1, stopPropagation } as unknown as MouseEvent);
-
-      expect(stopPropagation).not.toHaveBeenCalled();
+    it('should hide the following mouse moves from Plotly on a right-button press in 2D', () => {
+      expect(pressAndCountMoveGuards('2d', { ctrlKey: false, buttons: 2 })).toBe(1);
     });
 
-    it('should not interfere with Ctrl+mousedown on a 3D plot', () => {
-      plotOptionsSignal.set({ ...mockPlotOptions, view: '3d' });
-      const stopPropagation = vi.fn();
+    it('should leave a plain left-button press untouched in 2D', () => {
+      expect(pressAndCountMoveGuards('2d', { ctrlKey: false, buttons: 1 })).toBe(0);
+    });
 
-      attachAndGetGuard()({ ctrlKey: true, buttons: 1, stopPropagation } as unknown as MouseEvent);
-
-      expect(stopPropagation).not.toHaveBeenCalled();
+    it('should leave a Ctrl+press untouched in 3D', () => {
+      expect(pressAndCountMoveGuards('3d', { ctrlKey: true, buttons: 1 })).toBe(0);
     });
   });
 

@@ -12,7 +12,7 @@ import {
 
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { applyRestoreCamera, createPlot } from './helpers/createPlot';
-import { shouldBlockPlotlyDrag } from './helpers/plotlyDragGuard';
+import { hidePlotlyDragMoves, isPlotlyRightClickPress } from './helpers/plotlyDragGuard';
 import Plotly from 'plotly.js-dist-min';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -309,10 +309,12 @@ export class SectionPlotComponent implements OnDestroy {
     }
   }
 
-  // Capture phase: runs before Plotly's own mousedown handlers on the inner drag layers.
-  private readonly blockPlotlyRightClickDrag = (event: MouseEvent): void => {
-    if (this.plotOptionsService.plotOptions().view !== '3d' && shouldBlockPlotlyDrag(event)) {
-      event.stopPropagation();
+  // Registered on the plot element, which sits above Plotly's inner drag layers: the press itself is not
+  // blocked (clicks keep working), only the mouse moves that follow are hidden from Plotly.
+  private readonly guardPlotlyRightClickDrag = (event: MouseEvent): void => {
+    const view = this.documentRef.defaultView;
+    if (view && this.plotOptionsService.plotOptions().view !== '3d' && isPlotlyRightClickPress(event)) {
+      hidePlotlyDragMoves(view);
     }
   };
 
@@ -326,8 +328,8 @@ export class SectionPlotComponent implements OnDestroy {
     // and each refresh call would otherwise accumulate a new listener, causing a memory leak.
     plotEl.removeAllListeners('plotly_clickannotation');
     plotEl.removeAllListeners('plotly_relayout');
-    plotEl.removeEventListener('mousedown', this.blockPlotlyRightClickDrag, true);
-    plotEl.addEventListener('mousedown', this.blockPlotlyRightClickDrag, true);
+    plotEl.removeEventListener('mousedown', this.guardPlotlyRightClickDrag, true);
+    plotEl.addEventListener('mousedown', this.guardPlotlyRightClickDrag, true);
     plotEl.on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
       if (event?.annotation?.data?.type === 'obstacle') {
         const section = this.spanService.section();
