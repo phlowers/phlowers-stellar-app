@@ -17,6 +17,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
 import { Study } from '@shared/domain';
 import { CommonModule, DatePipe } from '@angular/common';
+import { getDateLocale } from '@shared/helpers/modification-date.helpers';
 import { RouterLink } from '@angular/router';
 import { StudiesService } from '@services/studies/studies.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
@@ -38,8 +39,8 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     TableModule,
     CheckboxModule,
     PopoverModule,
-    DatePipe,
     CommonModule,
+    DatePipe,
     RouterLink,
     TranslocoModule
   ],
@@ -66,13 +67,12 @@ export class StudiesTableComponent {
   private readonly activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang()
   });
-  /** Recomputed whenever the active language changes so the date format stays in sync. */
-  public dateFormat = computed<string>(() => {
-    this.activeLang();
-    return this.transloco.translate('studies.table.date-format');
+  /** Emits the translated date format each time the language (and its translations) changes. */
+  public dateFormat = toSignal(this.transloco.selectTranslate('common.modification-date-format'), {
+    initialValue: ''
   });
-  /** Locale used to render localized month names (e.g. "septembre" vs "September"). */
-  public dateLocale = computed<string>(() => (this.activeLang() === 'en' ? 'en-US' : 'fr-FR'));
+  /** Locale used to render localized month names and AM/PM (e.g. "septembre" vs "September"). */
+  public dateLocale = computed(() => getDateLocale(this.activeLang()));
 
   openExportDialog = (uuid: string) => {
     this.studiesService.exportDialogData.set({

@@ -77,8 +77,8 @@
           <dd class="section__text-lit">{{ section.lit_adr }}</dd>
 
           <dt class="section__title-date">{{ 'sections-tab.col-last-modified' | transloco }}</dt>
-          <dd class="section__text-date">
-            {{ section.updated_at | date: 'dd MMMM yyyy HH:mm' }}
+          <dd class="section__text-date" data-testid="section-last-modified">
+            {{ section.updated_at | date: dateFormat() : undefined : dateLocale() }}
           </dd>
         </dl>
 
