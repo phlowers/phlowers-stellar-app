@@ -17,20 +17,21 @@ Le script `set_up_mechaphlowers_v2.py` construit **stellar-engine** depuis les s
 ## Architecture
 
 ```
-Step 1: BUILD STELLAR-ENGINE
-  └─ uv build --wheel (optionally patch mechaphlowers version for local wheel)
+Étape 1 : CONSTRUCTION DE STELLAR-ENGINE
+  └─ uv build --wheel (avec, si besoin, remplacement de la version de mechaphlowers par celle d'un wheel local)
 
-Step 2: DOWNLOAD PYODIDE RUNTIME
-  └─ Fetch Pyodide runtime from NPM registry
+Étape 2 : TÉLÉCHARGEMENT DU RUNTIME PYODIDE
+  └─ Récupération depuis le registre NPM, avec vérification de l'intégrité du tarball (package-lock.json)
 
-Step 3: DOWNLOAD PACKAGES
-  └─ Extract deps from built wheel → pip download with constraints.in
+Étape 3 : TÉLÉCHARGEMENT DES PACKAGES
+  └─ Export des dépendances d'exécution de uv.lock (avec empreintes) → pip download --require-hashes
 
-Step 4: CDN REPLACEMENT
-  └─ Replace pip wheels with wasm32 versions from CDN (or local CDN directory)
+Étape 4 : REMPLACEMENT PAR LES WHEELS DU CDN
+  └─ Remplacement des wheels pip par les versions wasm32 du CDN (ou d'un dossier CDN local),
+     chacun vérifié par son empreinte SHA-256 déclarée dans le pyodide-lock.json du tarball NPM
 
-Step 5: COMPILE & CONFIG
-  └─ Deduplicate, compile to .pyc, generate python-packages.json
+Étape 5 : COMPILATION ET CONFIGURATION
+  └─ Dédoublonnage, compilation en .pyc, génération de python-packages.json
 ```
 
 ---
@@ -64,8 +65,16 @@ Toutes les dépendances transitives (thermohl, numpy, pandas, pandera, etc.) son
 
 | Fichier | Rôle |
 |------|---------|
-| `stellar-engine/pyproject.toml` | Définition du package stellar-engine |
-| `scripts/constraints.in` | Contraintes de version pour la compatibilité CDN Pyodide |
+| `stellar-engine/pyproject.toml` | Définition du package stellar-engine ; `[tool.uv] constraint-dependencies` fige les packages d'exécution sur les versions du CDN Pyodide |
+| `stellar-engine/uv.lock` | Source unique de vérité des versions et empreintes des packages Python ; exporté à la volée et imposé par `pip download --require-hashes` |
+
+### Vérifications d'intégrité
+
+- **Tarball Pyodide** : son empreinte SHA-512 est comparée au champ `integrity` de `package-lock.json`. Pour changer de version de Pyodide, utiliser `npm install` et non une modification du script.
+- **Wheels PyPI** : `pip download --require-hashes --only-binary=:all:` n'accepte que les empreintes de `stellar-engine/uv.lock` (exporté avec `uv export --locked`, qui échoue si le lock est obsolète). Après toute modification des dépendances de `stellar-engine` ou des versions Pyodide figées, exécuter `uv lock` dans `stellar-engine/` puis versionner le résultat.
+- **Wheels du CDN** : l'empreinte SHA-256 de chaque wheel doit correspondre à celle déclarée dans le `pyodide-lock.json` du tarball vérifié (y compris avec `--local-cdn-dir`).
+- Avec `--local-mechaphlowers`, l'empreinte du wheel local est calculée à la volée ; ses dépendances doivent en revanche figurer dans `uv.lock`.
+- Au moindre écart, le script s'interrompt avec un code de sortie différent de zéro.
 
 ---
 
