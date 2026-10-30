@@ -1,7 +1,7 @@
 import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons, ModeBarButton, Icon } from 'plotly.js-dist-min';
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
-import { AspectRatio, ScalingFactors, Side, SelectedDisplayOptions, View } from '@shared/types/plot.types';
+import { AspectRatio, ScalingFactors, Side, SelectedDisplayOptions, View, Zoom2d } from '@shared/types/plot.types';
 import { Distance, GetSectionOutput, ObstacleOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
@@ -505,3 +505,13 @@ export const purgePlot = (documentRef: Document, plotId: string): void => {
  */
 export const applyRestoreCamera = (plotId: string, camera: Camera): Promise<void> =>
   Plotly.relayout(plotId, { 'scene.camera': camera as unknown } as Record<string, unknown>) as unknown as Promise<void>;
+
+/**
+ * Applies saved 2D axis ranges to a Plotly 2D plot via `Plotly.relayout`.
+ * Called after the first render following a back-navigation.
+ *
+ * @param plotId - The DOM element ID of the Plotly plot container.
+ * @param zoom - The axis ranges to restore.
+ */
+export const applyRestoreZoom2d = (plotId: string, zoom: Zoom2d): Promise<void> =>
+  Plotly.relayout(plotId, { 'xaxis.range': zoom.x, 'yaxis.range': zoom.y }) as unknown as Promise<void>;

@@ -59,7 +59,8 @@ import { DistanceFreePositioningComponent } from '@features/studio/distance-meas
 import { FloorComponent } from '@features/studio/floor/presentation/floor.component';
 import { FloorFreePositioningComponent } from '@features/studio/floor/presentation/components/floor-free-positioning/floor-free-positioning.component';
 import { Camera } from 'plotly.js-dist-min';
-import { StudioViewCamera, StudioViewState } from '@shared/types/plot.types';
+import { Side, StudioViewCamera, StudioViewState, View } from '@shared/types/plot.types';
+import { toZoom2d } from '@services/plot/plot-options.utils';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { StudioViewPersistenceService } from '@services/plot/studio-view-persistence.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -315,8 +316,14 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     const viewState = this.persistenceService.load(sectionUuid) ?? section.studio_view_state;
     const { startSupport, endSupport } = this.getValidatedSupportBounds(maxSupport, viewState);
 
-    this.plotService.plotOptionsChange({ startSupport, endSupport });
+    this.plotService.plotOptionsChange({
+      startSupport,
+      endSupport,
+      view: (['2d', '3d'] as View[]).find((v) => v === viewState?.view) ?? '3d',
+      side: (['profile', 'face'] as Side[]).find((s) => s === viewState?.side) ?? 'profile'
+    });
     this.restoreCamera(viewState);
+    this.restoreZoom2d(viewState);
     this.restoreScalingFactors(viewState);
     this.restoreResolution(viewState);
 
@@ -356,6 +363,12 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     this.plotOptionsService.pendingCameraRestore.set(viewState.camera as Camera);
   }
 
+  private restoreZoom2d(viewState: StudioViewState | null | undefined): void {
+    const zoom = viewState?.view === '2d' ? toZoom2d(viewState.zoom2d) : null;
+    this.plotOptionsService.zoom2d.set(zoom);
+    this.plotOptionsService.pendingZoom2dRestore.set(zoom);
+  }
+
   private restoreScalingFactors(viewState: StudioViewState | null | undefined): void {
     if (viewState?.scalingFactors) {
       this.plotOptionsService.setScalingFactors(viewState.scalingFactors);
@@ -389,9 +402,14 @@ export class StudioPageComponent implements OnInit, OnDestroy {
           up: { x: rawCam.up?.x ?? 0, y: rawCam.up?.y ?? 0, z: rawCam.up?.z ?? 0 }
         }
       : null;
-    const { startSupport, endSupport } = this.plotOptionsService.plotOptions();
+    // Free positioning temporarily forces a single-span 2D view: persist the options the user chose before it
+    const { view, side, startSupport, endSupport } =
+      this.plotOptionsService.freePositioningSavedView()?.plotOptions ?? this.plotOptionsService.plotOptions();
     return {
       camera,
+      view,
+      side,
+      zoom2d: this.plotOptionsService.zoom2d(),
       scalingFactors: this.plotOptionsService.scalingFactors(),
       resolution: this.resolutionService.resolution(),
       startSupport,

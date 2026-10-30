@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import { SectionPlotComponent } from './section-plot.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { createPlot, applyRestoreCamera } from './helpers/createPlot';
+import { createPlot, applyRestoreCamera, applyRestoreZoom2d } from './helpers/createPlot';
 import { createPlotData } from './helpers/createPlotData';
 import { Data, PlotlyHTMLElement } from 'plotly.js-dist-min';
 import { PlotOptions, SelectedDisplayOptions } from '@shared/types/plot.types';
@@ -36,6 +36,7 @@ import { createShadowPlotData } from './helpers/createShadowPlotData';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 const mockCreatePlot = vi.mocked(createPlot);
 const mockApplyRestoreCamera = vi.mocked(applyRestoreCamera);
+const mockApplyRestoreZoom2d = vi.mocked(applyRestoreZoom2d);
 const mockCreatePlotData = vi.mocked(createPlotData);
 const mockCreateShadowPlotData = vi.mocked(createShadowPlotData);
 
@@ -255,6 +256,7 @@ describe('SectionPlotComponent', () => {
   };
 
   const pendingCameraRestoreSignal = signal<unknown>(null);
+  const pendingZoom2dRestoreSignal = signal<unknown>(null);
 
   const plotOptionsServiceMock = {
     plotOptions: plotOptionsSignal,
@@ -264,7 +266,9 @@ describe('SectionPlotComponent', () => {
     scalingFactors: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
     aspectRatio: signal({ x: 1, y: 1, z: 1 }),
     refreshCamera: noopMock,
-    pendingCameraRestore: pendingCameraRestoreSignal
+    refreshZoom2d: noopMock,
+    pendingCameraRestore: pendingCameraRestoreSignal,
+    pendingZoom2dRestore: pendingZoom2dRestoreSignal
   };
 
   const mockSideTabsService = {
@@ -348,6 +352,8 @@ describe('SectionPlotComponent', () => {
     sectionSignal.set(mockSection);
     cameraSignal.set(null);
     pendingCameraRestoreSignal.set(null);
+    pendingZoom2dRestoreSignal.set(null);
+    mockApplyRestoreZoom2d.mockResolvedValue(undefined);
     mockObstacleFormService.form.get = createFormGet();
     mockObstacleFormService.form.value = { uuid: null };
 
@@ -726,6 +732,30 @@ describe('SectionPlotComponent', () => {
 
       expect(mockApplyRestoreCamera).not.toHaveBeenCalled();
       expect(clearSpy).toHaveBeenCalledWith(null);
+    });
+
+    it('should call applyRestoreZoom2d and clear pendingZoom2dRestore when view is 2d', async () => {
+      const zoom = { x: [1, 2], y: [3, 4] };
+      plotOptionsSignal.set({ ...mockPlotOptions, view: '2d' });
+      pendingZoom2dRestoreSignal.set(zoom);
+      litDataSignal.set(mockLitData);
+
+      const clearSpy = vi.spyOn(pendingZoom2dRestoreSignal, 'set');
+      await component.refreshPlot();
+
+      expect(mockApplyRestoreZoom2d).toHaveBeenCalledWith('plotly-output', zoom);
+      expect(clearSpy).toHaveBeenCalledWith(null);
+    });
+
+    it('should NOT call applyRestoreZoom2d when view is 3d but still clear pendingZoom2dRestore', async () => {
+      plotOptionsSignal.set({ ...mockPlotOptions, view: '3d' });
+      pendingZoom2dRestoreSignal.set({ x: [1, 2], y: [3, 4] });
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockApplyRestoreZoom2d).not.toHaveBeenCalled();
+      expect(pendingZoom2dRestoreSignal()).toBeNull();
     });
 
     it('should NOT call applyRestoreCamera when pendingCameraRestore is null', async () => {

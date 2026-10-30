@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { applyRestoreCamera, createPlot } from './helpers/createPlot';
+import { applyRestoreCamera, applyRestoreZoom2d, createPlot } from './helpers/createPlot';
 import Plotly from 'plotly.js-dist-min';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -300,6 +300,13 @@ export class SectionPlotComponent implements OnDestroy {
           }
           this.plotOptionsService.pendingCameraRestore.set(null);
         }
+        const pendingZoom = this.plotOptionsService.pendingZoom2dRestore();
+        if (pendingZoom) {
+          if (plotOptions.view === '2d') {
+            await applyRestoreZoom2d(PLOT_ID, pendingZoom);
+          }
+          this.plotOptionsService.pendingZoom2dRestore.set(null);
+        }
       }
     } catch (error) {
       this.logger.error('Error refreshing plot:', error);
@@ -361,6 +368,9 @@ export class SectionPlotComponent implements OnDestroy {
       if (hasCameraKey) {
         this.plotOptionsService.refreshCamera();
       }
+      if (Object.keys(eventData ?? {}).some((k) => k.startsWith('xaxis.') || k.startsWith('yaxis.'))) {
+        this.plotOptionsService.refreshZoom2d();
+      }
     });
   };
 
@@ -369,6 +379,7 @@ export class SectionPlotComponent implements OnDestroy {
     // The parent StudioPageComponent runs its ngOnDestroy after children, so
     // saveViewState() reads camera() as a fallback when getCamera() returns null.
     this.plotOptionsService.refreshCamera();
+    this.plotOptionsService.refreshZoom2d();
     this.plotService.purgePlot();
   }
 }
