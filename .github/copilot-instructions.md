@@ -33,7 +33,7 @@ User-facing text → **Transloco**, never `$localize` or `i18n` attributes (see
 
 ## Angular — mandatory patterns
 
-Every component: `standalone: true` · `ChangeDetectionStrategy.OnPush` · `inject()` (no constructor DI) · `input()`/`output()` (no `@Input`/`@Output`).  
+Every component: no `standalone: true` (default since Angular 20) · `ChangeDetectionStrategy.OnPush` · `inject()` (no constructor DI) · `input()`/`output()` (no `@Input`/`@Output`).  
 State: `signal()` / `computed()` / `effect()` — no plain mutable properties.  
 Observables in components: always `toSignal()`.  
 Control flow: `@if` / `@for` / `@switch` — never `*ngIf` / `*ngFor`.

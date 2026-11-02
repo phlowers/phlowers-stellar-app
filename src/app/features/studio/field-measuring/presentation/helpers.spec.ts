@@ -5,7 +5,44 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { buildFieldMeasureExportFilename, createTestMeasureData } from './helpers';
+import { FieldMeasure, FieldMeasureOutputs } from '@features/studio/field-measuring/domain/types';
+import { buildFieldMeasureExportFilename, createTestMeasureData, getActiveParameterOutput } from './helpers';
+
+describe('getActiveParameterOutput', () => {
+  const result = { parameter: 1200, uncertainty: 2, criterion: 1, checkValidity: true };
+  const papoto = { parameter: 900, uncertainty: 3 };
+
+  const withOutputs = (calculationMethod: FieldMeasure['calculationMethod'], outputs: Partial<FieldMeasureOutputs>) => {
+    const measureData = createTestMeasureData({ calculationMethod });
+    return { calculationMethod, outputs: { ...measureData.outputs, ...outputs } };
+  };
+
+  it.each([
+    ['tangente-aiming', 'tangentAimingSupport'],
+    ['tangente-aiming-exterior', 'tangentAimingExterior'],
+    ['tangente-aiming-interior', 'tangentAimingInterior']
+  ] as const)('should return the %s result', (method, outputKey) => {
+    expect(getActiveParameterOutput(withOutputs(method, { [outputKey]: result }))).toEqual({
+      parameter: 1200,
+      uncertainty: 2
+    });
+  });
+
+  it.each(['tangente-aiming', 'tangente-aiming-exterior', 'tangente-aiming-interior'] as const)(
+    'should return null without result for %s, never falling back to the PAPOTO result',
+    (method) => {
+      expect(
+        getActiveParameterOutput(withOutputs(method, { papoto: papoto as FieldMeasureOutputs['papoto'] }))
+      ).toBeNull();
+    }
+  );
+
+  it('should return the PAPOTO result for the PAPOTO method', () => {
+    expect(
+      getActiveParameterOutput(withOutputs('papoto', { papoto: { ...papoto } as FieldMeasureOutputs['papoto'] }))
+    ).toEqual(papoto);
+  });
+});
 
 describe('buildFieldMeasureExportFilename', () => {
   const date = new Date(2026, 8, 30);

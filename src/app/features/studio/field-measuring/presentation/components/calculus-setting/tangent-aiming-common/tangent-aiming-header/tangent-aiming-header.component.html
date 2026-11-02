@@ -1,0 +1,15 @@
+<div class="tangent-aiming-header">
+  <button
+    app-btn
+    disabled
+    [attr.aria-label]="'common.tangent-aiming-help-aria-label' | transloco"
+    data-testid="help-btn"
+  >
+    <app-icon icon="help" aria-hidden="true" />
+  </button>
+
+  <p [id]="mandatoryId()" class="tangent-aiming-header__mandatory-msg">
+    <app-icon icon="info" aria-hidden="true" />
+    <span>{{ 'common.tangent-aiming-mandatory-msg' | transloco }}</span>
+  </p>
+</div>

@@ -190,6 +190,31 @@ describe('Init component', () => {
     });
   });
 
+  describe('preselection of the last selected measure', () => {
+    const createWithSection = (selectedUuid: string | undefined) => {
+      mockSpanService.section.set({
+        uuid: 'section-uuid',
+        field_measures: [{ uuid: 'uuid-1', name: 'TM 1' }],
+        selected_field_measure_uuid: selectedUuid
+      } as unknown as Section);
+      const newFixture = TestBed.createComponent(InitComponent);
+      newFixture.detectChanges();
+      return newFixture.componentInstance;
+    };
+
+    it('should preselect the section selected measure when it exists', () => {
+      expect(createWithSection('uuid-1').chooseMeasureControl.value).toBe('uuid-1');
+    });
+
+    it('should not preselect when the selected measure no longer exists', () => {
+      expect(createWithSection('unknown-uuid').chooseMeasureControl.value).toBeNull();
+    });
+
+    it('should not preselect when no measure was selected', () => {
+      expect(createWithSection(undefined).chooseMeasureControl.value).toBeNull();
+    });
+  });
+
   describe('deleteMeasure', () => {
     const measure1 = {
       uuid: 'uuid-1',

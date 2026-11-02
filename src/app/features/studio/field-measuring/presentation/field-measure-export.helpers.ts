@@ -303,7 +303,8 @@ export const buildParameterCalculationExport = (
       method.tangentialSights = buildTangentialSightsMethodExport(measureData, translocoService);
       break;
     case 'tangente-aiming-exterior':
-      // Export is disabled for this method (RG.EXP-BTN.1): the block stays empty.
+    case 'tangente-aiming-interior':
+      // Export is disabled for these methods (RG.EXP-BTN.1): the block stays empty.
       break;
     case 'pep':
       method.pep = buildPepMethodExport(measureData);
@@ -311,7 +312,9 @@ export const buildParameterCalculationExport = (
   }
   const { calculationMethod } = measureData;
   const methodName: ParameterCalculationExport['methodName'] =
-    calculationMethod === 'tangente-aiming' || calculationMethod === 'tangente-aiming-exterior'
+    calculationMethod === 'tangente-aiming' ||
+    calculationMethod === 'tangente-aiming-exterior' ||
+    calculationMethod === 'tangente-aiming-interior'
       ? TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE
       : translocoService.translate(PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS[calculationMethod]);
   return {

@@ -6,7 +6,7 @@
  */
 
 import { FormControl, FormGroup } from '@angular/forms';
-import { FieldMeasure, TangentAimingSupportResult } from '@features/studio/field-measuring/domain/types';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 
 /** Numeric input fields of the tangent aiming (support) form. */
 export type TangentAimingSupportNumericField =
@@ -14,26 +14,6 @@ export type TangentAimingSupportNumericField =
 
 /** Every `FieldMeasure` field read by the tangent aiming (support) form. */
 export type TangentAimingSupportInputField = 'tangentLeftSupport' | TangentAimingSupportNumericField;
-
-/** Validation bounds and default of a numeric field. */
-export interface TangentAimingSupportFieldRule {
-  min: number;
-  max: number;
-  decimals: number;
-  default: number;
-}
-
-/** Static display description of a numeric input. */
-export interface TangentAimingSupportNumberFieldView {
-  id: string;
-  labelKey: string;
-  /** Transloco key of the unit displayed next to the input. */
-  unitKey: string;
-  testId: string;
-  step: number;
-  /** CSS grid area class. */
-  area: string;
-}
 
 /** Typed reactive form of the tangent aiming (support) inputs. */
 export type TangentAimingSupportForm = FormGroup<
@@ -52,10 +32,4 @@ export interface TangentAimingSupportInputs {
   calculationType: FieldMeasure['calculationType'];
   parameter: number | null;
   tangentAngle: number | null;
-}
-
-/** Outcome of the tangent aiming (support) calculation, same shape as a worker task response. */
-export interface TangentAimingSupportCalculation {
-  result: TangentAimingSupportResult | null;
-  error: string | null;
 }

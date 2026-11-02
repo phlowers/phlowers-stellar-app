@@ -14,9 +14,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
-import { TabsModule } from 'primeng/tabs';
+import { TabList, TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from '../header/header.component';
-import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
+import { FieldMeasure, FieldMeasureTab } from '@features/studio/field-measuring/domain/types';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { SelectOption, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS } from '../../constants';
 import { FieldDatasComponent } from '../field-datas/field-datas.component';
@@ -30,6 +30,7 @@ import { InitialCondition } from '@shared/domain';
 import { ParameterCalculation15WithoutWindComponent } from '../parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component';
 import {
   createInitialMeasureData,
+  initialFieldMeasureOutputs,
   buildWindDirectionOptions,
   buildSkyCoverOptions,
   buildLeftSupportOptions,
@@ -37,15 +38,20 @@ import {
 } from '../../helpers';
 import { buildFieldMeasureExportJson } from '../../field-measure-export.helpers';
 import {
-  getDefaultLeftSupport,
   isTangentAimingSupportDataValid,
   resetNonDisplayedParameterFields
 } from '../calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
+import { getDefaultLeftSupport } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   isTangentAimingExteriorDataValid,
   resetNonDisplayedExteriorFields
 } from '../calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.helpers';
-import { resetInactiveCalculusModes } from '../../calculus-mode-reset.helpers';
+import {
+  applyTangentAimingInteriorDefaults,
+  isTangentAimingInteriorDataValid,
+  resetNonDisplayedInteriorFields
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
+import { resetInactiveCalculusModes, toUnsavedChangesComparable } from '../../calculus-mode-reset.helpers';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { isNumber, isEqual } from 'lodash';
@@ -76,6 +82,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 export class FieldMeasuringComponent implements OnDestroy {
   readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
   readonly footerTemplate = viewChild<TemplateRef<unknown>>('footer');
+  private readonly tabList = viewChild(TabList);
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   public readonly plotService = inject(PlotService);
@@ -100,9 +107,7 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   selectedSpan = signal<number[]>([]);
 
-  activeTab = signal<'terrainData' | 'parameterCalculation' | 'temperatureCalculation' | 'parameterAt15CWithoutWind'>(
-    'terrainData'
-  );
+  activeTab = signal<FieldMeasureTab>('terrainData');
 
   readonly cableOptions = signal<SelectOption[]>([]);
 
@@ -135,7 +140,24 @@ export class FieldMeasuringComponent implements OnDestroy {
   /** Whether `measureData` differs from the last saved snapshot. */
   readonly hasUnsavedChanges = computed(() => !isEqual(this.measureData(), this.lastSavedMeasureData()));
 
+  /** Whether an input differs from the last saved snapshot: selecting a calculus mode is a choice, not an edit. */
+  readonly hasEditedInputs = computed(() => {
+    const current = this.measureData();
+    const lastSaved = this.lastSavedMeasureData();
+    if (!lastSaved) return true;
+    return !isEqual(
+      toUnsavedChangesComparable(current, getDefaultLeftSupport(current.span)),
+      toUnsavedChangesComparable(lastSaved, getDefaultLeftSupport(lastSaved.span))
+    );
+  });
+
   constructor() {
+    // The active tab bar is measured while the dialog is still zooming in: re-measure it once the dialog is displayed.
+    effect(() => {
+      this.toolbarDialogService.shownCount();
+      this.tabList()?.updateInkBar();
+    });
+
     effect(() => {
       const header = this.headerTemplate();
       const footer = this.footerTemplate();
@@ -204,9 +226,11 @@ export class FieldMeasuringComponent implements OnDestroy {
     return isValid && !this.isNameAlreadyTaken();
   });
 
-  /** Whether a tangent aiming (support or exterior) method is selected. */
+  /** Whether a tangent aiming (support, exterior or interior) method is selected. */
   readonly isTangentAimingMethod = computed(() =>
-    ['tangente-aiming', 'tangente-aiming-exterior'].includes(this.measureData().calculationMethod)
+    ['tangente-aiming', 'tangente-aiming-exterior', 'tangente-aiming-interior'].includes(
+      this.measureData().calculationMethod
+    )
   );
 
   /**
@@ -220,6 +244,9 @@ export class FieldMeasuringComponent implements OnDestroy {
     }
     if (measureData.calculationMethod === 'tangente-aiming-exterior') {
       return isTangentAimingExteriorDataValid(measureData);
+    }
+    if (measureData.calculationMethod === 'tangente-aiming-interior') {
+      return isTangentAimingInteriorDataValid(measureData);
     }
     if (measureData.calculationMethod !== 'papoto') {
       return true;
@@ -285,8 +312,21 @@ export class FieldMeasuringComponent implements OnDestroy {
     const { calculationMethod, outputs } = this.measureData();
     if (calculationMethod === 'tangente-aiming') return outputs.tangentAimingSupport !== null;
     if (calculationMethod === 'tangente-aiming-exterior') return outputs.tangentAimingExterior !== null;
+    if (calculationMethod === 'tangente-aiming-interior') return outputs.tangentAimingInterior !== null;
     return outputs.papoto !== null;
   });
+
+  /**
+   * The "Enregistrer" button: valid terrain data (and valid parameter inputs for the tangent aiming methods) with
+   * edited inputs, with or without a calculation (a parameter input edit clears the result, which is then saved as
+   * not calculated). Right after a save nothing is unsaved.
+   */
+  readonly canSave = computed(
+    () =>
+      this.isFormValid() &&
+      this.hasEditedInputs() &&
+      (!this.isTangentAimingMethod() || this.isParameterCalculationValid())
+  );
 
   /** RG.MES.EXP-BTN.1: the "Exporter" button stays inactive until the measure is both valid and calculated/saved. */
   readonly canExport = computed(
@@ -310,7 +350,18 @@ export class FieldMeasuringComponent implements OnDestroy {
       return;
     }
 
-    this.measureData.set(normalizeFieldMeasureDates(selectedFieldMeasure));
+    // A measure saved before an output existed lacks its key: `undefined` would read as "computed" / "not recalculable".
+    // Likewise, an interior measure saved before the calculation type existed lacks its type and defaults.
+    const measure = normalizeFieldMeasureDates({
+      ...selectedFieldMeasure,
+      outputs: { ...initialFieldMeasureOutputs, ...selectedFieldMeasure.outputs }
+    });
+    this.measureData.set(
+      measure.calculationMethod === 'tangente-aiming-interior'
+        ? applyTangentAimingInteriorDefaults(measure, getDefaultLeftSupport(measure.span))
+        : measure
+    );
+    this.activeTab.set(selectedFieldMeasure.savedTab ?? 'terrainData');
 
     // Fetch link_adr from lines service
     const linesTable = await this.linesService.getLines();
@@ -428,10 +479,15 @@ export class FieldMeasuringComponent implements OnDestroy {
       activeMeasureData = resetNonDisplayedParameterFields(currentMeasureData);
     } else if (calculationMethod === 'tangente-aiming-exterior') {
       activeMeasureData = resetNonDisplayedExteriorFields(currentMeasureData);
+    } else if (calculationMethod === 'tangente-aiming-interior') {
+      activeMeasureData = resetNonDisplayedInteriorFields(currentMeasureData);
     }
-    const measureData = resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {
-      defaultTangentLeftSupport: getDefaultLeftSupport(activeMeasureData.span)
-    });
+    const measureData: FieldMeasure = {
+      ...resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {
+        defaultTangentLeftSupport: getDefaultLeftSupport(activeMeasureData.span)
+      }),
+      savedTab: this.activeTab()
+    };
     const isExistingMeasure = section.field_measures.some((measure) => measure.uuid === measureData.uuid);
     if (isExistingMeasure) {
       await this.plotService.modifySection({
