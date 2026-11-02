@@ -1,8 +1,12 @@
+import { omit } from 'lodash';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TANGENT_AIMING_SUPPORT_FIELD_RULES as RULES } from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.constantes';
 import { TANGENT_AIMING_EXTERIOR_FIELD_RULES as EXTERIOR_RULES } from './components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.constantes';
 import { TANGENT_AIMING_INTERIOR_FIELD_RULES as INTERIOR_RULES } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.constantes';
-import { PAPOTO_INPUT_DEFAULTS, PEP_INPUT_DEFAULTS } from './helpers';
+import { applyTangentAimingSupportDefaults } from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
+import { applyTangentAimingExteriorDefaults } from './components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.helpers';
+import { applyTangentAimingInteriorDefaults } from './components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
+import { clearAutoParameter15C, PAPOTO_INPUT_DEFAULTS, PEP_INPUT_DEFAULTS } from './helpers';
 import { CalculusModeResetContext } from './calculus-mode-reset.interfaces';
 
 type CalculationMethod = FieldMeasure['calculationMethod'];
@@ -78,3 +82,28 @@ export const resetInactiveCalculusModes = (
   (Object.keys(CALCULUS_MODE_RESETTERS) as CalculationMethod[])
     .filter((method) => method !== activeMethod)
     .reduce((data, method) => CALCULUS_MODE_RESETTERS[method](data, context), measureData);
+
+/**
+ * Projection of a measure used to detect unsaved changes: selecting a calculus mode is a choice, not an edit, so the
+ * selected method, the defaults the selection fills in and the stale automatic 15°C result it clears are neutralized.
+ * @param measureData - The measure to project
+ * @param defaultLeftSupport - Default left support of the tangent aiming modes
+ * @returns The measure as it compares, whatever the selected calculus mode
+ */
+export const toUnsavedChangesComparable = (
+  measureData: FieldMeasure,
+  defaultLeftSupport: string | null
+): Omit<FieldMeasure, 'calculationMethod'> => {
+  return omit(
+    clearAutoParameter15C(
+      applyTangentAimingInteriorDefaults(
+        applyTangentAimingExteriorDefaults(
+          applyTangentAimingSupportDefaults(measureData, defaultLeftSupport),
+          defaultLeftSupport
+        ),
+        defaultLeftSupport
+      )
+    ),
+    'calculationMethod'
+  );
+};

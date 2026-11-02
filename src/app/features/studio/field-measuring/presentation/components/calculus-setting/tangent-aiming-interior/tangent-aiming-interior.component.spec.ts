@@ -363,4 +363,17 @@ describe('TangentAimingInterior component', () => {
     expect(component.measureData().interiorHAccDistance).toBe(12);
     expect(button().disabled).toBe(false);
   });
+
+  it('should keep the calculate button disabled while the inputs are back to their calculated values', async () => {
+    const button = () => getByTestId('calculate-tangent-aiming-interior-btn') as HTMLButtonElement;
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    await component.calculate();
+    fixture.detectChanges();
+    const calculated = String(component.measureData().interiorHAccDistance);
+    setInput('h-acc-distance-input', '12');
+    expect(button().disabled).toBe(false);
+    setInput('h-acc-distance-input', calculated);
+    expect(button().disabled).toBe(true);
+  });
 });

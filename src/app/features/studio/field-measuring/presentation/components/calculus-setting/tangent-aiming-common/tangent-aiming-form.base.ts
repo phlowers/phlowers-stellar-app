@@ -49,10 +49,30 @@ export abstract class TangentAimingFormBase {
   readonly calculationFailedKey: string;
   private readonly leftSupportState = signal(INITIAL_LEFT_SUPPORT_STATE);
 
-  /** The calculate button is only usable when an input changed since the last calculation (a change clears the result). */
-  readonly canCalculate = computed(
-    () => this.isFormValid() && !this.isCalculating() && this.measureData().outputs[this.config.outputKey] === null
-  );
+  /** Displayed inputs as of the last calculation, or of the opening of the form while nothing was calculated. */
+  private readonly baselineInputs = signal<string | null>(null);
+
+  private readonly displayedInputs = computed(() => {
+    const { modelFields, calculationTypeKey, getDisplayedInputFields } = this.config;
+    const data = this.measureData();
+    const calculationType = data[calculationTypeKey];
+    return JSON.stringify([
+      calculationType,
+      getDisplayedInputFields(calculationType).map((f) => data[modelFields[f]] ?? null)
+    ]);
+  });
+
+  /** The calculate button is only usable on a valid form whose inputs changed since the last calculation (or opening). */
+  readonly canCalculate = computed(() => {
+    const baseline = this.baselineInputs();
+    return (
+      this.isFormValid() &&
+      !this.isCalculating() &&
+      this.measureData().outputs[this.config.outputKey] === null &&
+      baseline !== null &&
+      baseline !== this.displayedInputs()
+    );
+  });
 
   /** Both supports of the selected span, empty without span. */
   readonly supportOptions = computed(() =>
@@ -81,6 +101,10 @@ export abstract class TangentAimingFormBase {
       const { resolved, state } = nextLeftSupportState(leftSupport, data.span, untracked(this.leftSupportState));
       untracked(() => this.leftSupportState.set(state));
       const spanChanged = previous !== null && previous.spanKey !== getSpanKey(data.span);
+      if (spanChanged) {
+        // The result is stale although no input was edited: a new calculation must be allowed.
+        untracked(() => this.baselineInputs.set(''));
+      }
       if (resolved !== leftSupport || spanChanged) {
         this.measureData.update((d) => config.invalidateResult({ ...d, [leftSupportKey]: resolved }));
       }
@@ -89,6 +113,7 @@ export abstract class TangentAimingFormBase {
     // Model -> form: only differing values are written, so a value being typed is never overwritten.
     effect(() => {
       const data = this.measureData();
+      untracked(() => this.baselineInputs.update((baseline) => baseline ?? this.displayedInputs()));
       const displayed = config.getDisplayedInputFields(data[calculationTypeKey]);
       syncDisplayedControls(form, displayed);
       for (const field of displayed) {
@@ -130,6 +155,7 @@ export abstract class TangentAimingFormBase {
       const { result, error } = await calculateTangentAimingMock(this.config.toInputs(this.measureData()));
       if (error || !result) throw new Error(error ?? 'Empty tangent aiming result');
       this.measureData.update((d) => ({ ...d, outputs: { ...d.outputs, [this.config.outputKey]: result } }));
+      this.baselineInputs.set(this.displayedInputs());
     } catch (error) {
       this.logger.error(`Failed to calculate the tangent aiming (${this.config.logLabel}) parameter`, error);
       this.hasError.set(true);

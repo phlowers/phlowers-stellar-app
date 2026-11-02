@@ -182,7 +182,7 @@ describe('TangentAimingSupport component', () => {
 
   it('should hide the results before a calculation', () => {
     expect(getByTestId('tangent-aiming-support-parameter')).toBeNull();
-    expect((getByTestId('calculate-tangent-aiming-support-btn') as HTMLButtonElement).disabled).toBe(false);
+    expect((getByTestId('calculate-tangent-aiming-support-btn') as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('should show the results after calculating and keep the form editable', async () => {
@@ -246,6 +246,8 @@ describe('TangentAimingSupport component', () => {
     const button = () => getByTestId('calculate-tangent-aiming-support-btn') as HTMLButtonElement;
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
+    expect(button().disabled).toBe(true);
+    setInput('h-acc-distance-input', '11');
     expect(button().disabled).toBe(false);
     await component.calculate();
     fixture.detectChanges();
@@ -253,5 +255,18 @@ describe('TangentAimingSupport component', () => {
     setInput('h-acc-distance-input', '12');
     expect(component.measureData().cableHAccDistance).toBe(12);
     expect(button().disabled).toBe(false);
+  });
+
+  it('should keep the calculate button disabled while the inputs are back to their calculated values', async () => {
+    const button = () => getByTestId('calculate-tangent-aiming-support-btn') as HTMLButtonElement;
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    await component.calculate();
+    fixture.detectChanges();
+    const calculated = String(component.measureData().cableHAccDistance);
+    setInput('h-acc-distance-input', '12');
+    expect(button().disabled).toBe(false);
+    setInput('h-acc-distance-input', calculated);
+    expect(button().disabled).toBe(true);
   });
 });

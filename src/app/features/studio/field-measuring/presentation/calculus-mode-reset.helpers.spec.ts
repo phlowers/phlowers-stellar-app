@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createTestMeasureData } from './helpers';
-import { resetInactiveCalculusModes } from './calculus-mode-reset.helpers';
+import { applyTangentAimingInteriorDefaults } from './components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
+import { resetInactiveCalculusModes, toUnsavedChangesComparable } from './calculus-mode-reset.helpers';
 
 const context = { defaultTangentLeftSupport: '11' };
 
@@ -147,5 +148,30 @@ describe('resetInactiveCalculusModes', () => {
     const result = resetInactiveCalculusModes(data, 'tangente-aiming-exterior', context);
     expect(result.exteriorSpanLength).toBe(400);
     expect(result.cableParameter).not.toBe(55);
+  });
+});
+
+describe('toUnsavedChangesComparable', () => {
+  it('ignores the selected method and the defaults it fills in', () => {
+    const saved = createTestMeasureData({ calculationMethod: 'papoto', interiorSpanLength: null });
+    const switched = applyTangentAimingInteriorDefaults(
+      { ...saved, calculationMethod: 'tangente-aiming-interior' },
+      '0'
+    );
+    expect(switched.interiorSpanLength).not.toBeNull();
+    expect(toUnsavedChangesComparable(switched, '0')).toEqual(toUnsavedChangesComparable(saved, '0'));
+    expect(toUnsavedChangesComparable(saved, '0')).not.toHaveProperty('calculationMethod');
+  });
+
+  it('ignores the stale automatic 15°C result but not an input edit', () => {
+    const data = createTestMeasureData({ calculationMethod: 'tangente-aiming', tangentSpanLength: 10 });
+    const withAuto = {
+      ...data,
+      outputs: { ...data.outputs, parameter15C: { parameter: 1 } as never }
+    };
+    expect(toUnsavedChangesComparable(withAuto, '0')).toEqual(toUnsavedChangesComparable(data, '0'));
+    expect(toUnsavedChangesComparable({ ...data, tangentSpanLength: 11 }, '0')).not.toEqual(
+      toUnsavedChangesComparable(data, '0')
+    );
   });
 });

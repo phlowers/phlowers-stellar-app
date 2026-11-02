@@ -858,9 +858,9 @@ describe('FieldMeasuringComponent', () => {
 
       beforeEach(() => vi.spyOn(component, 'isFormValid').mockReturnValue(true));
 
-      it('should keep the save button disabled until the measure has been calculated', () => {
+      it('should enable the save button without calculation', () => {
         component.measureData.set(validMeasure());
-        expect(component.canSave()).toBe(false);
+        expect(component.canSave()).toBe(true);
       });
 
       it('should enable the save button once the measure has been calculated', () => {
@@ -875,27 +875,43 @@ describe('FieldMeasuringComponent', () => {
           ...base,
           tangentSpanLength: null,
           exteriorSpanLength: null,
-          interiorSpanLength: null,
-          outputs: { ...base.outputs, [outputKey]: result }
+          interiorSpanLength: null
         });
         expect(component.canSave()).toBe(false);
       });
 
-      it('should wait for a new calculation after a save when a parameter input is edited', async () => {
+      it('should keep the save button disabled when the terrain data is invalid', () => {
+        vi.spyOn(component, 'isFormValid').mockReturnValue(false);
+        component.measureData.set(validMeasure());
+        expect(component.canSave()).toBe(false);
+      });
+
+      it('should re-enable the save button after a save when a parameter input is edited without calculation', async () => {
         const base = validMeasure();
         component.measureData.set({ ...base, outputs: { ...base.outputs, [outputKey]: result } });
         await component.onSave();
         expect(component.canSave()).toBe(false);
-        // Editing a parameter input clears the result: no calculation, no save.
         const saved = component.measureData();
         component.measureData.set({
           ...saved,
           interiorHAccDistance: 3,
           outputs: { ...saved.outputs, [outputKey]: null }
         });
-        expect(component.canSave()).toBe(false);
-        component.measureData.update((d) => ({ ...d, outputs: { ...d.outputs, [outputKey]: result } }));
         expect(component.canSave()).toBe(true);
+      });
+
+      it('should keep the save button disabled after a save when only the calculus mode is switched', async () => {
+        const base = validMeasure();
+        component.measureData.set({ ...base, outputs: { ...base.outputs, [outputKey]: result } });
+        await component.onSave();
+        const saved = component.measureData();
+        const otherMethod = (['tangente-aiming', 'tangente-aiming-exterior', 'tangente-aiming-interior'] as const).find(
+          (method) => method !== calculationMethod
+        )!;
+        component.measureData.set({ ...saved, calculationMethod: otherMethod });
+        expect(component.hasUnsavedChanges()).toBe(true);
+        expect(component.hasEditedInputs()).toBe(false);
+        expect(component.canSave()).toBe(false);
       });
 
       it('should re-enable the save button after a save when a terrain field is edited', async () => {

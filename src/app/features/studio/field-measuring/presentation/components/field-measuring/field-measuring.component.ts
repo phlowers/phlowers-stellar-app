@@ -51,7 +51,7 @@ import {
   isTangentAimingInteriorDataValid,
   resetNonDisplayedInteriorFields
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
-import { resetInactiveCalculusModes } from '../../calculus-mode-reset.helpers';
+import { resetInactiveCalculusModes, toUnsavedChangesComparable } from '../../calculus-mode-reset.helpers';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { isNumber, isEqual } from 'lodash';
@@ -138,6 +138,17 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   /** Whether `measureData` differs from the last saved snapshot. */
   readonly hasUnsavedChanges = computed(() => !isEqual(this.measureData(), this.lastSavedMeasureData()));
+
+  /** Whether an input differs from the last saved snapshot: selecting a calculus mode is a choice, not an edit. */
+  readonly hasEditedInputs = computed(() => {
+    const current = this.measureData();
+    const lastSaved = this.lastSavedMeasureData();
+    if (!lastSaved) return true;
+    return !isEqual(
+      toUnsavedChangesComparable(current, getDefaultLeftSupport(current.span)),
+      toUnsavedChangesComparable(lastSaved, getDefaultLeftSupport(lastSaved.span))
+    );
+  });
 
   constructor() {
     effect(() => {
@@ -299,15 +310,15 @@ export class FieldMeasuringComponent implements OnDestroy {
   });
 
   /**
-   * The "Enregistrer" button: valid form with unsaved changes. For the tangent aiming methods an up-to-date calculation
-   * is also required: editing a parameter input clears the result, so Save waits for the next "Calculer", whereas a
-   * terrain data change keeps the result and re-enables Save right away. Right after a save nothing is unsaved.
+   * The "Enregistrer" button: valid terrain data (and valid parameter inputs for the tangent aiming methods) with
+   * edited inputs, with or without a calculation (a parameter input edit clears the result, which is then saved as
+   * not calculated). Right after a save nothing is unsaved.
    */
   readonly canSave = computed(
     () =>
       this.isFormValid() &&
-      this.hasUnsavedChanges() &&
-      (!this.isTangentAimingMethod() || (this.isParameterCalculationValid() && this.hasComputedOutputs()))
+      this.hasEditedInputs() &&
+      (!this.isTangentAimingMethod() || this.isParameterCalculationValid())
   );
 
   /** RG.MES.EXP-BTN.1: the "Exporter" button stays inactive until the measure is both valid and calculated/saved. */
