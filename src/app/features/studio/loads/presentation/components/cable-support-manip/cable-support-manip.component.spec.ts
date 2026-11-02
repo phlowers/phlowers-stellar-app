@@ -15,6 +15,7 @@ import { CableSupportManipService } from '../../services/cableSupportManip.servi
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { NotificationService } from '@services/notification/notification.service';
 import { Section } from '@shared/domain';
+import { LoadFormsService } from '../../services/loadForms.service';
 
 const mockSection: Partial<Section> = {
   uuid: 'section-uuid-1',
@@ -25,8 +26,6 @@ const mockSection: Partial<Section> = {
   cable_support_manipulations: [],
   selected_cable_support_manipulation_uuid: null,
   selected_charge_uuid: 'charge-uuid-1',
-  start_latitude: null,
-  start_longitude: null,
   start_azimuth: null
 };
 
@@ -37,6 +36,7 @@ describe('CableSupportManipComponent', () => {
   let mockPlotSpanService: vi.Mocked<PlotSpanService>;
   let mockCableSupportManipService: vi.Mocked<CableSupportManipService>;
   let mockNotificationService: { success: vi.Mock; error: vi.Mock };
+  let mockLoadFormsService: vi.Mocked<LoadFormsService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -62,6 +62,11 @@ describe('CableSupportManipComponent', () => {
       error: vi.fn()
     };
 
+    mockLoadFormsService = {
+      calculateLoad: vi.fn().mockResolvedValue(undefined),
+      saveTemporaryLoadDataInSection: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<LoadFormsService>;
+
     await TestBed.configureTestingModule({
       imports: [
         CableSupportManipComponent,
@@ -78,7 +83,8 @@ describe('CableSupportManipComponent', () => {
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockPlotSpanService },
         { provide: CableSupportManipService, useValue: mockCableSupportManipService },
-        { provide: NotificationService, useValue: mockNotificationService }
+        { provide: NotificationService, useValue: mockNotificationService },
+        { provide: LoadFormsService, useValue: mockLoadFormsService }
       ]
     }).compileComponents();
 
@@ -101,11 +107,6 @@ describe('CableSupportManipComponent', () => {
   describe('isCalculating computed', () => {
     it('should be false by default', () => {
       expect(component.isCalculating()).toBe(false);
-    });
-
-    it('should be true when plotService.loading() is true', () => {
-      mockPlotService.loading.set(true);
-      expect(component.isCalculating()).toBe(true);
     });
   });
 

@@ -1221,6 +1221,73 @@ describe('ImportStudyComponent', () => {
       expect(component.newStudies()).toContainEqual(mockCreatedStudy);
     });
 
+    it('should successfully load and import a plain JSON .stsd file', async () => {
+      const mockStudyData = {
+        title: 'Test Study',
+        sections: [{ uuid: 'section-uuid', name: 'Section 1', supports: [{ uuid: 'support-uuid', number: 1 }] }]
+      };
+      const mockCreatedStudy = { uuid: 'test-uuid', title: 'Test Study' } as Study;
+
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue(mockCreatedStudy);
+
+      mockFile = new File([JSON.stringify(mockStudyData, null, 2)], 'test.stsd', { type: '' });
+      await component.loadAppFile(mockFile);
+
+      const importedStudy = (studiesServiceMock.createStudy as ReturnType<typeof vi.fn>).mock.calls[0][0] as Study;
+      expect(importedStudy.title).toBe('Test Study');
+      expect(importedStudy.sections[0].supports[0].uuid).toBe('support-uuid');
+      expect(component.newStudies()).toContainEqual(mockCreatedStudy);
+    });
+
+    it('should reject a base64-encoded .stsd file with fileParseError', async () => {
+      mockFile = new File([btoa(JSON.stringify({ title: 'Test Study' }))], 'test.stsd', { type: '' });
+
+      await expect(component.loadAppFile(mockFile)).rejects.toThrow('fileParseError');
+      expect(studiesServiceMock.createStudy).not.toHaveBeenCalled();
+    });
+
+    it('should accept .stsd files and detect UUID collisions from plain JSON', async () => {
+      const studyImportService = TestBed.inject(StudyImportService);
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue({ uuid: 'existing-uuid', title: 'Existing' } as Study);
+      mockFile = new File([JSON.stringify({ uuid: 'existing-uuid' })], 'test.stsd', { type: '' });
+
+      expect(studyImportService.accepts(mockFile)).toBe(true);
+      await expect(studyImportService.checkCollision(mockFile)).resolves.toEqual({
+        uuid: 'existing-uuid',
+        label: 'Existing'
+      });
+    });
+
+    it('should revive field measure date, time and season after a JSON round-trip', async () => {
+      const measureDate = new Date(2026, 6, 14, 10, 30);
+      const mockStudyData = {
+        title: 'Test Study',
+        sections: [
+          {
+            uuid: 'section-uuid',
+            name: 'Section 1',
+            supports: [],
+            field_measures: [{ uuid: 'measure-uuid', date: measureDate, time: measureDate, season: 'winter' }]
+          }
+        ]
+      };
+
+      studiesServiceMock.createStudy = vi.fn().mockResolvedValue('test-uuid');
+      studiesServiceMock.getStudy = vi.fn().mockResolvedValue({ uuid: 'test-uuid' } as Study);
+
+      mockFile = new File([btoa(JSON.stringify(mockStudyData))], 'test.clst', { type: 'application/json' });
+      await component.loadAppFile(mockFile);
+
+      const importedStudy = (studiesServiceMock.createStudy as ReturnType<typeof vi.fn>).mock.calls[0][0] as Study;
+      const importedMeasure = importedStudy.sections[0].field_measures[0];
+      expect(importedMeasure.date).toBeInstanceOf(Date);
+      expect(importedMeasure.date?.getTime()).toBe(measureDate.getTime());
+      expect(importedMeasure.time).toBeInstanceOf(Date);
+      expect(importedMeasure.time?.getTime()).toBe(measureDate.getTime());
+      expect(importedMeasure.season).toBe('winter');
+    });
+
     it('should handle file with no sections', async () => {
       const mockStudyData = {
         title: 'Test Study',

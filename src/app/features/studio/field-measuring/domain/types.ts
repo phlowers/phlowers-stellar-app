@@ -9,6 +9,7 @@
 export type {
   FieldMeasure,
   FieldMeasureOutputs,
+  FieldMeasureTab,
   PapotoResult,
   TangentAimingSupportResult,
   TemperatureCalculationResult,

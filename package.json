@@ -57,10 +57,10 @@
   },
   "private": true,
   "engines": {
-    "node": "22.23.4"
+    "node": "24.22.2"
   },
   "config": {
-    "mechaphlowers": "0.6.0rc2",
+    "mechaphlowers": "0.13.1",
     "thermohl": "1.4.0"
   },
   "dependencies": {

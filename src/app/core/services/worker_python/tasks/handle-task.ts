@@ -96,8 +96,8 @@ const tasks: Record<
     function: 'clear_obstacles',
     externalPackages: []
   },
-  [Task.shortenLengthenCable]: {
-    function: 'shorten_lengthen_cable',
+  [Task.applyManipulations]: {
+    function: 'apply_manipulations',
     externalPackages: []
   },
   [Task.getAspectRatio]: {
@@ -112,12 +112,24 @@ const tasks: Record<
     function: 'compute_localization',
     externalPackages: []
   },
+  [Task.convertCoordinates]: {
+    function: 'convert_coordinates',
+    externalPackages: []
+  },
   [Task.importLambert]: {
     function: 'import_lambert',
     externalPackages: []
   },
   [Task.importLambertAndValidate]: {
     function: 'import_lambert_and_validate',
+    externalPackages: []
+  },
+  [Task.validateGpsPositions]: {
+    function: 'validate_gps_positions',
+    externalPackages: []
+  },
+  [Task.computeStartFromNextSupport]: {
+    function: 'compute_start_from_next_support',
     externalPackages: []
   },
   [Task.getEquivalentSpan]: {

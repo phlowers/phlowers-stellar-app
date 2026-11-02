@@ -300,6 +300,11 @@ def compute_localization(js_inputs):
 
 
 @debug_log
+def convert_coordinates(js_inputs):
+    return geography.convert_coordinates(js_to_python(js_inputs))
+
+
+@debug_log
 def import_lambert(js_inputs):
     result = geography.import_lambert(js_to_python(js_inputs))
     logger.debug(f"Result of import_lambert: {result}")
@@ -311,6 +316,16 @@ def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
 
 
+@debug_log
+def validate_gps_positions(js_inputs):
+    return geography.validate_gps_positions(js_to_python(js_inputs))
+
+
+@debug_log
+def compute_start_from_next_support(js_inputs):
+    return geography.compute_start_from_next_support(js_to_python(js_inputs))
+
+
 # ---------------------------cut strands----------------
 
 
@@ -318,9 +333,7 @@ def import_lambert_and_validate(js_inputs):
 def set_cut_strands(js_inputs):
     global study
     python_inputs = js_to_python(js_inputs)
-    return cut_strands_module.set_cut_strands(
-        study, python_inputs["cutStrands"]
-    )
+    return cut_strands_module.set_cut_strands(study, python_inputs["cutStrands"])
 
 
 @debug_log
@@ -345,9 +358,7 @@ def get_utilization_rate():
 def set_high_safety(js_inputs):
     global study
     python_inputs = js_to_python(js_inputs)
-    return cut_strands_module.set_high_safety(
-        study, python_inputs["highSafety"]
-    )
+    return cut_strands_module.set_high_safety(study, python_inputs["highSafety"])
 
 
 # ---------------------------conformity----------------
@@ -380,6 +391,6 @@ def set_resolution(js_inputs):
 
 
 @debug_log
-def shorten_lengthen_cable(js_inputs):
+def apply_manipulations(js_inputs):
     global study
-    return manipulations.modify_cable(js_to_python(js_inputs), study)
+    return manipulations.apply_manipulations(js_to_python(js_inputs), study)

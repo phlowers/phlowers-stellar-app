@@ -5,40 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { isNil } from 'lodash';
-import { Section, Support } from '@shared/domain';
-import { SectionImportCoordinates } from './section-import-adapter.interfaces';
-
-// ---------------------------------------------------------------------------
-// Coordinates reprojection helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Builds the `spanLength`/`lineAngle` arrays consumed by the Lambert93-to-GPS reprojection
- * tasks. The last support has no outgoing span, so it gets `NaN`/`0` placeholders.
- */
-export function buildReprojectionAngles(supports: Support[]): { spanLength: number[]; lineAngle: number[] } {
-  const lastIndex = supports.length - 1;
-  return {
-    spanLength: supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!)),
-    lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
-  };
-}
-
-/** Returns a copy of `supports` with `footLatitude`/`footLongitude` set from the given arrays (by index). */
-export function applyFootCoordinates(supports: Support[], latitude: number[], longitude: number[]): Support[] {
-  return supports.map((support, i) => ({
-    ...support,
-    footLatitude: latitude[i] ?? null,
-    footLongitude: longitude[i] ?? null
-  }));
-}
-
-/** Returns `true` when every entry of the coordinate arrays is a number (same length as `supportsCount`). */
-export function areCoordinatesComplete(coordinates: SectionImportCoordinates, supportsCount: number): boolean {
-  const isComplete = (values: readonly (number | null)[]): values is readonly number[] =>
-    values.length === supportsCount && !values.includes(null);
-  return isComplete(coordinates.x) && isComplete(coordinates.y);
-}
+import { Section } from '@shared/domain';
 
 // ---------------------------------------------------------------------------
 // Generic section validation

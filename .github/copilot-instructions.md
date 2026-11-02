@@ -33,7 +33,7 @@ User-facing text → **Transloco**, never `$localize` or `i18n` attributes (see
 
 ## Angular — mandatory patterns
 
-Every component: `standalone: true` · `ChangeDetectionStrategy.OnPush` · `inject()` (no constructor DI) · `input()`/`output()` (no `@Input`/`@Output`).  
+Every component: no `standalone: true` (default since Angular 20) · `ChangeDetectionStrategy.OnPush` · `inject()` (no constructor DI) · `input()`/`output()` (no `@Input`/`@Output`).  
 State: `signal()` / `computed()` / `effect()` — no plain mutable properties.  
 Observables in components: always `toSignal()`.  
 Control flow: `@if` / `@for` / `@switch` — never `*ngIf` / `*ngFor`.
@@ -146,6 +146,14 @@ Semantic tags: `<main>` · `<header>` · `<section>` · `<nav>` · `<aside>`.
 - Stop exploring once you have enough context to act; prefer a targeted search over repeated
   broad scans of the repository.
 - Keep responses concise: state what changed and why, skip restating unchanged code.
+
+---
+
+## Tests — mandatory with every change
+
+Every requested feature, fix, or modification **must** ship with its corresponding Vitest test(s) in the same
+task, without being asked: add new specs or update the existing ones so the new behavior is pinned down.
+Run the targeted specs and report the result. Conventions: `.github/instructions/testing.instructions.md`.
 
 ---
 

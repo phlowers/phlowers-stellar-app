@@ -2,17 +2,24 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { effect, inject, Injectable, signal } from '@angular/core';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
 import { emptySpanLoad } from '../helpers';
 import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError } from '@services/worker_python/tasks/types';
+import {
+  LengthCableInputs,
+  SpanManipInputs,
+  SupportManipInputs,
+  Task,
+  TaskError
+} from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { CableModification, Section } from '@shared/domain';
+import { Section } from '@shared/domain';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
+import { ChargeData } from '@src/app/shared/domain/models/charge.model';
 
 @Injectable({
   providedIn: 'root'
@@ -61,6 +68,8 @@ export class LoadFormsService {
 
   /** UUID of the charge case last pushed to the Python engine — prevents redundant setLoads on section updates. */
   private lastLoadedChargeUuid: string | null = null;
+  /** Engine study the charge case was last pushed to — a rebuilt study (studio reopened) needs it again. */
+  private lastLoadedEngineStudyId = 0;
   /**
    * Initialize the temporary load data by getting the selected charge case and checking the span loads,
    * then push all span loads into the Python engine via setLoads.
@@ -76,7 +85,8 @@ export class LoadFormsService {
 
     // Skip entirely when re-entering for the same charge case
     // (e.g. after save writes back to IndexedDB and liveQuery re-fires).
-    if (currentChargeUuid === this.lastLoadedChargeUuid) return;
+    const engineStudyId = this.plotService.engineStudyId();
+    if (currentChargeUuid === this.lastLoadedChargeUuid && engineStudyId === this.lastLoadedEngineStudyId) return;
 
     const charge = section?.charges?.find((c) => c.uuid === currentChargeUuid);
     if (!charge) {
@@ -120,12 +130,14 @@ export class LoadFormsService {
     // Set before async calls so the effect guard prevents concurrent re-entrant
     // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
     this.lastLoadedChargeUuid = currentChargeUuid;
+    this.lastLoadedEngineStudyId = engineStudyId;
 
     try {
       // When there are no saved span loads, pass an empty array so the Python engine
       // takes its "no loads" code path instead of receiving zero-weight placeholder
       // entries created by recheckSpanLoads (which would have the wrong array size).
-      await this.applyCableModifications(newData.cableModifParams ?? []);
+      // await this.applyCableModifications(newData.cableModifParams ?? []);
+      await this.setManipulations(this.plotService.temporaryLoadData);
       await this.workerPythonService.runTask(Task.setLoads, {
         spanLoads: rawSpanLoads.length > 0 ? newData.spanLoads : []
       });
@@ -149,10 +161,11 @@ export class LoadFormsService {
 
   constructor() {
     effect(() => {
-      if (!this.plotService.workerReady()) return;
-      // Wait for initSectionStudio to complete (litData is populated by refreshProjection after initLit succeeds).
-      // Without this gate, setLoads could be posted before initialize_study finishes.
-      if (!this.plotService.litData()) return;
+      // The section preview (manual section modal) also builds engine studies: charge cases belong to the studio only
+      if (!this.plotService.workerReady() || !this.plotService.isStudioActive()) return;
+      // Wait for initSectionStudio to complete: before that, a stale projection can set litData, and the base
+      // climate applied at the end of initSectionStudio would overwrite the charge pushed here.
+      if (!this.plotService.engineStudyId()) return;
       void this.initTemporaryLoadData();
     });
   }
@@ -178,45 +191,41 @@ export class LoadFormsService {
     await this.calculateLoad();
   };
 
-  /**
-   * Sequentially apply cable length modifications in the Python engine.
-   *
-   * @remarks
-   * Must run **awaited and in order**: `manipulations.modify_cable` accumulates into
-   * `study.manipulation.shortening_span` one call at a time, and `Task.changeState`
-   * (called right after) re-solves assuming all prior manipulations already landed.
-   * An unawaited `forEach` here would let `changeState` race ahead of the
-   * `shortenLengthenCable` calls, corrupting the engine state (previously
-   * collapsing/losing other plot annotations after Calculate).
-   *
-   * Must also run **before** `Task.setLoads`: the manipulation solve rebuilds
-   * `study.position_engine`, discarding load coordinates registered beforehand.
-   */
-  private async applyCableModifications(modifications: CableModification[]): Promise<void> {
-    for (const modification of modifications) {
-      const spanIndex = this.spanService.getSupportIndex(modification.spanUuid);
+  private async setManipulations(temporaryLoadData: ChargeData) {
+    const cableModifPythonInputs: LengthCableInputs[] = [];
+    for (const cableModif of temporaryLoadData.cableModifParams) {
+      const spanIndex = this.spanService.getSupportIndex(cableModif.spanUuid);
       if (spanIndex < 0) continue;
-      const inputs = {
-        spanIndex,
-        modificationType: modification.modificationType,
-        modifiedLengthCable: modification.modifiedLengthCable,
-        distanceSupportRef: modification.distanceSupportRef,
-        supportRef: modification.supportRef
-      };
-      await this.workerPythonService.runTask(Task.shortenLengthenCable, inputs); //NOSONAR — must run in order, see remarks above
+      const inputs = { ...omit(cableModif, ['uuid', 'spanUuid']), spanIndex };
+      cableModifPythonInputs.push(inputs);
     }
+    const supportManipPythonInputs: SupportManipInputs[] = [];
+    for (const supportManip of temporaryLoadData.supportManipParams) {
+      const supportIndex = this.spanService.getSupportIndex(supportManip.supportUuid);
+      if (supportIndex < 0 && supportManip.chargeUuid !== this.spanService.section()?.selected_charge_uuid) continue;
+      const inputs = { ...omit(supportManip, ['uuid', 'supportUuid', 'chargeUuid']), supportIndex };
+      supportManipPythonInputs.push(inputs);
+    }
+
+    const spanManipPythonInputs: SpanManipInputs[] = [];
+    for (const spanManip of temporaryLoadData.spanManipParams) {
+      const spanIndex = this.spanService.getSupportIndex(spanManip.spanUuid);
+      if (spanIndex < 0 && spanManip.chargeUuid !== this.spanService.section()?.selected_charge_uuid) continue;
+      const inputs = { ...omit(spanManip, ['uuid', 'spanUuid', 'chargeUuid', 'chainName']), spanIndex };
+      spanManipPythonInputs.push(inputs);
+    }
+
+    const manipPythonInputs = {
+      cableModifParams: cableModifPythonInputs,
+      supportManipParams: supportManipPythonInputs,
+      spanManipParams: spanManipPythonInputs
+    };
+    await this.workerPythonService.runTask(Task.applyManipulations, manipPythonInputs);
   }
 
   /**
    * Re-register all saved obstacles (and floors, treated as obstacles) in the Python engine.
    *
-   * @remarks
-   * `Task.shortenLengthenCable` ends in `SectionStudy.solve_adjustment()`, which — when
-   * manipulations are registered — replaces `study.position_engine` with a fresh instance,
-   * dropping every obstacle previously registered in it. The next `refreshProjection` then
-   * returns an empty `obstacles` list, wiping obstacle/floor annotations from the plot even
-   * though the underlying section data is untouched. Must run after the cable modifications
-   * and before `refreshProjection`. Re-registering an already-known uuid is a no-op.
    */
   private async resyncObstacles(section: Section | null | undefined): Promise<void> {
     const floorObstacles = (section?.floors ?? []).map((floor) =>
@@ -246,9 +255,7 @@ export class LoadFormsService {
         spanLoads: checkedSpanLoads
       };
 
-      // Must run before setLoads: the manipulation solve rebuilds the engine's position engine,
-      // discarding any load coordinates and obstacles registered beforehand.
-      await this.applyCableModifications(this.plotService.temporaryLoadData?.cableModifParams ?? []);
+      await this.setManipulations(this.plotService.temporaryLoadData);
 
       await this.workerPythonService.runTask(Task.setLoads, {
         spanLoads: checkedSpanLoads

@@ -71,6 +71,7 @@
     "meter": "m",
     "grade-unit": "gr",
     "min-value-error": "Valeur min : {{ min }}",
+    "modification-date-format": "d MMMM y, 'à' HH:mm",
     "my-last-studies-label": "Mes dernières études",
     "network-speed-unknown-label": "Débit réseau inconnu du navigateur",
     "network-too-slow-label": "Réseau trop lent",
@@ -180,6 +181,9 @@
     "calculation-type-label": "Type de calcul :",
     "calculation-type-tangent": "Tangente",
     "tangent-angle-label": "Angle tangent au câble",
+    "tangent-aiming-mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
+    "tangent-aiming-h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
+    "tangent-aiming-vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
     "criterion-label": "Critère",
     "criterion-respected": "Critère respecté",
     "criterion-not-respected": "Critère non respecté"
@@ -455,7 +459,8 @@
       "invalid-envelope": "Le fichier de canton Stellar est invalide.",
       "unsupported-version": "Version {{ version }} du fichier de canton Stellar non prise en charge (maximum pris en charge : {{ maxVersion }})."
     },
-    "reprojection-info": "La reprojection sur le modèle de données {{ appName }} semble ajouter une erreur absolue moyenne de {{ error }} m",
+    "azimuth-reprojection-notice": "Écart maximal des azimuts de portée après reprojection : {{ error }}° (seuil : {{ threshold }}°). Les valeurs calculées ont été conservées.",
+    "position-error-notice": "Écart maximal de position des supports : {{ error }} m sur le support {{ support }} (seuil : {{ threshold }} m). Vérifiez vos valeurs au-delà du seuil.",
     "from-file": {
       "file-format": "Formats de fichier : {{ formats }}",
       "description": "Vous pouvez importer un canton à partir d'un fichier JSON. Il sera ajouté à l'étude en cours.",
@@ -471,7 +476,7 @@
     },
     "import": {
       "description": "Vous pouvez importer plusieurs fichiers, ils seront disponibles dans l'onglet \"Mes études\".",
-      "file-formats": "Formats de fichiers : .csv, .clst",
+      "file-formats": "Formats de fichiers : .csv, .clst, .stsd",
       "error-cable-not-found": "Câble non trouvé dans la base de données",
       "error-import": "Erreur lors de l'importation de l'étude",
       "error-delete": "Erreur lors de la suppression de l'étude",
@@ -484,8 +489,7 @@
       "col-modification-date": "Date de modification",
       "col-description": "Description/commentaire",
       "study-actions-menu": "Menu des actions d'étude",
-      "pagination-report": "Étude {first} à {last} sur {totalRecords}",
-      "date-format": "d MMMM yyyy 'à' HH'h'mm"
+      "pagination-report": "Étude {first} à {last} sur {totalRecords}"
     },
     "tabs": {
       "search-study": "Rechercher une étude",
@@ -544,7 +548,8 @@
     "update-btn": "Mettre à jour le canton",
     "title-view": "Voir un canton de l'étude",
     "title-modify": "Modifier un canton de l'étude",
-    "title-create": "Créer un canton de l'étude"
+    "title-create": "Créer un canton de l'étude",
+    "location-removed-after-insert": "La position de départ n'a pas pu être calculée à partir du support suivant : le canton est enregistré sans géolocalisation."
   },
   "manual-section": {
     "tab-general": "Général",
@@ -600,7 +605,8 @@
     "auto-fill-hint": "Le Set d'accroche et la valeur de L. bras (m) sera automatiquement renseigné dans le tableau."
   },
   "location": {
-    "title": "Coordonnées du support 1 :"
+    "title": "Coordonnées du support 1 :",
+    "incomplete-error": "Renseignez la latitude, la longitude et l'azimut ensemble, ou laissez les trois vides."
   },
   "loads": {
     "shared": {
@@ -715,11 +721,6 @@
       "tangent-aiming-radio-label": "Visées tangentes (Support)",
       "tangent-aiming-exterior-radio-label": "Visées tangentes (Extérieur)",
       "tangent-aiming-interior-radio-label": "Visées tangentes (Intérieur)"
-    },
-    "tangent-aiming": {
-      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
-      "h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support de gauche",
-      "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche"
     },
     "tangent-aiming-support": {
       "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",

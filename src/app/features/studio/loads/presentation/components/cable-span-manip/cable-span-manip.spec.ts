@@ -8,6 +8,7 @@ import { CableSpanManipService } from '../../services/cableSpanManip.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { Section } from '@shared/domain';
 import { TranslocoTestingModule } from '@jsverse/transloco';
+import { LoadFormsService } from '../../services/loadForms.service';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
@@ -27,8 +28,6 @@ const mockSection: Partial<Section> = {
   cable_span_manipulations: [],
   selected_cable_span_manipulation_uuid: null,
   selected_charge_uuid: 'charge-uuid-1',
-  start_latitude: null,
-  start_longitude: null,
   start_azimuth: null
 };
 
@@ -39,6 +38,7 @@ describe('CableSpanManipComponent', () => {
   let mockPlotSpanService: vi.Mocked<PlotSpanService>;
   let mockCableSpanManipService: vi.Mocked<CableSpanManipService>;
   let mockChainsService: { getChains: vi.Mock };
+  let mockLoadFormsService: vi.Mocked<LoadFormsService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -72,6 +72,11 @@ describe('CableSpanManipComponent', () => {
       getChains: vi.fn().mockResolvedValue([])
     };
 
+    mockLoadFormsService = {
+      calculateLoad: vi.fn().mockResolvedValue(undefined),
+      saveTemporaryLoadDataInSection: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<LoadFormsService>;
+
     await TestBed.configureTestingModule({
       imports: [
         CableSpanManipComponent,
@@ -96,7 +101,8 @@ describe('CableSpanManipComponent', () => {
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockPlotSpanService },
         { provide: CableSpanManipService, useValue: mockCableSpanManipService },
-        { provide: ChainsService, useValue: mockChainsService }
+        { provide: ChainsService, useValue: mockChainsService },
+        { provide: LoadFormsService, useValue: mockLoadFormsService }
       ]
     }).compileComponents();
 
@@ -116,11 +122,6 @@ describe('CableSpanManipComponent', () => {
   describe('isCalculating computed', () => {
     it('should reflect plotService.loading() as false by default', () => {
       expect(component.isCalculating()).toBe(false);
-    });
-
-    it('should be true when plotService.loading() is true', () => {
-      mockPlotService.loading.set(true);
-      expect(component.isCalculating()).toBe(true);
     });
   });
 

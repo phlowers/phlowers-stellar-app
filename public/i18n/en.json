@@ -71,6 +71,7 @@
     "meter": "m",
     "grade-unit": "gr",
     "min-value-error": "Min. value: {{ min }}",
+    "modification-date-format": "MMMM d'.' y, hh:mm a",
     "my-last-studies-label": "My last studies",
     "network-speed-unknown-label": "Network speed unknown to the browser",
     "network-too-slow-label": "Network too slow",
@@ -180,6 +181,9 @@
     "calculation-type-label": "Calculation type:",
     "calculation-type-tangent": "Tangent",
     "tangent-angle-label": "Cable tangent angle",
+    "tangent-aiming-mandatory-msg": "All data are mandatory for parameter calculation.",
+    "tangent-aiming-h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
+    "tangent-aiming-vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support",
     "criterion-label": "Criterion",
     "criterion-respected": "Criterion respected",
     "criterion-not-respected": "Criterion not respected"
@@ -455,7 +459,8 @@
       "invalid-envelope": "The Stellar section file is invalid.",
       "unsupported-version": "Unsupported Stellar section file version {{ version }} (maximum supported: {{ maxVersion }})."
     },
-    "reprojection-info": "Reprojection using {{ appName }} data model seems to add a mean absolute error of {{ error }} m",
+    "azimuth-reprojection-notice": "Maximum span azimuth gap after reprojection: {{ error }}° (threshold {{ threshold }}°). The computed values were kept.",
+    "position-error-notice": "Maximum support position gap: {{ error }} m on support {{ support }} (threshold {{ threshold }} m). Check your values above the threshold.",
     "from-file": {
       "file-format": "File formats: {{ formats }}",
       "description": "You can import a section from a JSON file. It will be added to the current study.",
@@ -471,7 +476,7 @@
     },
     "import": {
       "description": "You can import multiple files, they will be available in the \"My studies\" tab.",
-      "file-formats": "File formats: .csv, .clst",
+      "file-formats": "File formats: .csv, .clst, .stsd",
       "error-cable-not-found": "Cable not found in database",
       "error-import": "Error importing study",
       "error-delete": "Error deleting study",
@@ -484,8 +489,7 @@
       "col-modification-date": "Modification date",
       "col-description": "Description/comment",
       "study-actions-menu": "Study actions menu",
-      "pagination-report": "Study {first} to {last} of {totalRecords}",
-      "date-format": "d MMMM yyyy 'at' HH'h'mm"
+      "pagination-report": "Study {first} to {last} of {totalRecords}"
     },
     "tabs": {
       "search-study": "Search a study",
@@ -544,7 +548,8 @@
     "update-btn": "Update section",
     "title-view": "View a study section",
     "title-modify": "Modify a study section",
-    "title-create": "Create a study section"
+    "title-create": "Create a study section",
+    "location-removed-after-insert": "The start position could not be computed from the next support: the section is saved without geolocation."
   },
   "manual-section": {
     "tab-general": "General",
@@ -600,7 +605,8 @@
     "auto-fill-hint": "The attachment set and the arm length (m) will be automatically filled in the table."
   },
   "location": {
-    "title": "Support 1 coordinates:"
+    "title": "Support 1 coordinates:",
+    "incomplete-error": "Fill in latitude, longitude and azimuth together, or leave all three empty."
   },
   "loads": {
     "shared": {
@@ -715,11 +721,6 @@
       "tangent-aiming-radio-label": "Tangent aiming (Support)",
       "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)",
       "tangent-aiming-interior-radio-label": "Tangent aiming (Interior)"
-    },
-    "tangent-aiming": {
-      "mandatory-msg": "All data are mandatory for parameter calculation.",
-      "h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
-      "vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support"
     },
     "tangent-aiming-support": {
       "h-acc-distance-label": "Vertical dist. from device to cable attach. of left support",

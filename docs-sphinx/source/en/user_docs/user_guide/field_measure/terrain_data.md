@@ -53,7 +53,7 @@ Below the read-only info, enter the **location where you recorded the measuremen
 
 ### Automatic localization from the study
 
-When a span is selected, {{app_name}} tries to pre-fill the longitude, latitude and azimuth using the localization already stored in the current study for that span.
+When a span is selected, {{app_name}} tries to pre-fill the longitude, latitude and azimuth using the localization already stored in the current study for that span. Geolocation is optional: if the study section has no start position, these fields stay empty and you enter them manually.
 
 The value used depends on the selected span and the selected reference support:
 - The app takes the studied localization for the selected span.

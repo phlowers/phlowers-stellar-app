@@ -5,11 +5,14 @@ import {
   DestroyRef,
   inject,
   input,
+  model,
   OnInit,
   output,
   signal,
   viewChild
 } from '@angular/core';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
+import { stripLocalization } from '@shared/domain/helpers/geopositioning.helpers';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -48,8 +51,15 @@ import {
   orderedLineTableProperties,
   orderedMaintenanceTableProperties
 } from './manualSection.constantes';
-import { applyLinesCascadeFilter, applyLinesFallback, sortCatalogLines } from './manualSection.helpers';
-import { LineTableProperties } from './manualSection.interfaces';
+import {
+  applyLinesCascadeFilter,
+  applyLinesFallback,
+  extractStartAnchor,
+  getStartAfterFirstSupportDeletion,
+  getStartFromAnchorSupport,
+  sortCatalogLines
+} from './manualSection.helpers';
+import { LineTableProperties, SectionStart, StartAnchor } from './manualSection.interfaces';
 import { LocationData } from './location/location.interfaces';
 import { extractBranchIdr } from '@shared/helpers/extract-branch-idr.helpers';
 
@@ -92,6 +102,8 @@ export class ManualSectionComponent implements OnInit {
   section = input.required<Section>();
   sectionChange = output<Section>();
   locationChange = output<LocationData>();
+  /** Anchor kept while supports are inserted before support 0; its start is computed on validation. */
+  startAnchor = model<StartAnchor | null>(null);
   studio = viewChild(StudioComponent);
   cablesFilterTable = signal<CatalogCable[]>([]);
   isNameUnique = input<boolean>();
@@ -103,6 +115,7 @@ export class ManualSectionComponent implements OnInit {
   private readonly linesService = inject(LinesService);
   private readonly cablesService = inject(CablesService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly geopositioning = inject(GeopositioningService);
   readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   readonly plotOptionsService = inject(PlotOptionsService);
@@ -136,6 +149,15 @@ export class ManualSectionComponent implements OnInit {
   regionalTeamRead = signal<string>('');
   linkAdrRead = signal<string>('');
   litAdrRead = signal<string>('');
+
+  /** Bumped when the start is changed in place, so `startGps` and the location inputs are refreshed. */
+  readonly startRevision = signal(0);
+
+  /** Start GPS of the section: foot of its first support. */
+  readonly startGps = computed(() => {
+    this.startRevision();
+    return this.geopositioning.getStartGps(this.section());
+  });
 
   readonly uniqueMaintenanceCenters = computed(() =>
     orderBy(uniqBy(this.maintenanceFilterTable(), 'maintenance_center_id'), ['maintenance_center'], ['asc'])
@@ -281,9 +303,12 @@ export class ManualSectionComponent implements OnInit {
     this.updateSupportsAmount(Number(target.value));
   }
 
-  addSupport(index: number, position: 'before' | 'after') {
+  async addSupport(index: number, position: 'before' | 'after') {
     const newSupport = createEmptySupport();
     if (position === 'before') {
+      if (index === 0 && !this.startAnchor() && this.geopositioning.getStartGps(this.section())) {
+        await this.captureStartAnchor();
+      }
       this.section().supports?.splice(index, 0, newSupport);
     } else {
       this.section().supports?.splice(index + 1, 0, newSupport);
@@ -291,15 +316,72 @@ export class ManualSectionComponent implements OnInit {
     this.onSectionChange();
   }
 
-  deleteSupport(uuid: string) {
-    if (this.section().supports?.length <= 2) {
+  /**
+   * Keeps the former first support as anchor before a support is inserted before it on a geolocated section, so
+   * that the new start can be computed from it on validation. Existing supports keep their position.
+   * When the anchor cannot be determined, the geolocation is removed.
+   */
+  private async captureStartAnchor(): Promise<void> {
+    const section = this.section();
+    const supports = (section.supports ?? []).map((support) => ({ ...support }));
+    const localization = await this.geopositioning.resolveLocalization({ ...section, supports });
+    const anchor = extractStartAnchor(supports, localization);
+    if (anchor) {
+      this.startAnchor.set(anchor);
+      section.start_azimuth = null;
+      this.startRevision.update((revision) => revision + 1);
+    } else {
+      this.applyStart(null);
+    }
+  }
+
+  async deleteSupport(uuid: string) {
+    const currentSupports = this.section().supports ?? [];
+    if (currentSupports.length <= 2) {
       return;
     }
+    const anchor = this.startAnchor();
+    const deletesGeolocatedStart =
+      currentSupports[0].uuid === uuid && this.geopositioning.getStartGps(this.section()) !== null;
+    const previousSupports = currentSupports.map((support) => ({ ...support }));
+    const localization = deletesGeolocatedStart
+      ? await this.geopositioning.resolveLocalization({ ...this.section(), supports: previousSupports })
+      : null;
     const supports = this.section().supports?.filter((support) => support.uuid !== uuid) || [];
     const lastSupport = supports.at(-1)!;
     lastSupport.spanLength = null;
     this.section().supports = supports;
+    if (anchor?.supportUuid === uuid) {
+      this.startAnchor.set(null);
+      this.applyStart(null);
+    } else if (anchor && supports[0].uuid === anchor.supportUuid) {
+      this.startAnchor.set(null);
+      this.applyStart(getStartFromAnchorSupport(anchor, supports[0]));
+    } else if (deletesGeolocatedStart) {
+      this.applyStart(getStartAfterFirstSupportDeletion(previousSupports, localization));
+    }
     this.onSectionChange();
+  }
+
+  /**
+   * Moves the section start to the new first support, or removes the geolocation when no start can be kept.
+   * @param start - New start point and azimuth, or null to remove the geolocation
+   */
+  private applyStart(start: SectionStart | null) {
+    const section = this.section();
+    if (start) {
+      Object.assign(
+        section,
+        this.geopositioning.setStartGps(
+          section,
+          { latitude: start.latitude, longitude: start.longitude },
+          start.azimuth
+        )
+      );
+    } else {
+      Object.assign(section, stripLocalization(section));
+    }
+    this.startRevision.update((revision) => revision + 1);
   }
 
   duplicateSupport(uuid: string) {

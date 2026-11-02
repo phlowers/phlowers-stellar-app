@@ -8,6 +8,8 @@
 import {
   CableAdjustmentInputs,
   CableAdjustmentResult,
+  CableSpanManipulation,
+  CableSupportManipItem,
   CatalogCable,
   ClimateCharge,
   PapotoResult,
@@ -68,8 +70,8 @@ export enum Task {
   deleteObstacle = 'deleteObstacle',
   // Clear all obstacles from the middleware state
   clearObstacles = 'clearObstacles',
-  /** Apply a cable length modification (lengthen or shorten) on a span */
-  shortenLengthenCable = 'shortenLengthenCable',
+  // Apply all manipulations
+  applyManipulations = 'applyManipulations',
   // get aspect ratio for plotting scale
   getAspectRatio = 'getAspectRatio',
   // get wind incidence angle for cable temperature calculation
@@ -78,8 +80,14 @@ export enum Task {
   computeLocalization = 'computeLocalization',
   // compute gps coordinates using imported lambert data
   importLambert = 'importLambert',
+  // convert coordinates between two CRS (EPSG codes)
+  convertCoordinates = 'convertCoordinates',
   // lambert to gps and compare to gps coordinates using section data
   importLambertAndValidate = 'importLambertAndValidate',
+  // gps positions to span azimuths and per-support position error
+  validateGpsPositions = 'validateGpsPositions',
+  // gps of a new support 0 and start azimuth from the next support
+  computeStartFromNextSupport = 'computeStartFromNextSupport',
   // get equivalent span/ruling span value
   getEquivalentSpan = 'getEquivalentSpan',
   // compute pose table at different temperatures
@@ -443,13 +451,10 @@ export interface TaskInputs {
   };
   // Inputs for clearObstacles task: no inputs
   [Task.clearObstacles]: undefined;
-  // Inputs for shortenLengthenCable task
-  [Task.shortenLengthenCable]: {
-    spanIndex: number;
-    modificationType: 'lengthening' | 'shortening';
-    modifiedLengthCable: number;
-    distanceSupportRef: number;
-    supportRef: 'LEFT' | 'RIGHT';
+  [Task.applyManipulations]: {
+    cableModifParams: LengthCableInputs[];
+    supportManipParams: SupportManipInputs[];
+    spanManipParams: SpanManipInputs[];
   };
   [Task.getWindIncidence]: {
     azimuth: number;
@@ -470,6 +475,12 @@ export interface TaskInputs {
     spanLength: number[];
     lineAngle: number[];
   };
+  [Task.convertCoordinates]: {
+    sourceCrs: string;
+    targetCrs: string;
+    x: number[];
+    y: number[];
+  };
   [Task.importLambert]: {
     lambert_x: number[];
     lambert_y: number[];
@@ -477,9 +488,21 @@ export interface TaskInputs {
   [Task.importLambertAndValidate]: {
     lambert_x: number[];
     lambert_y: number[];
-    startAzimuth: number;
     spanLength: number[];
     lineAngle: number[];
+  };
+  [Task.validateGpsPositions]: {
+    latitude: number[];
+    longitude: number[];
+    spanLength: (number | null)[];
+    lineAngle: (number | null)[];
+  };
+  [Task.computeStartFromNextSupport]: {
+    latitude: number;
+    longitude: number;
+    nextSpanAzimuth: number;
+    spanLength: number;
+    lineAngle: [number, number];
   };
   // Inputs for getEquivalentSpan task: no inputs
   [Task.getEquivalentSpan]: undefined;
@@ -544,6 +567,28 @@ export interface TaskInputs {
  *
  * @category Worker Types
  */
+
+export interface LengthCableInputs {
+  spanIndex: number;
+  modificationType: 'lengthening' | 'shortening';
+  modifiedLengthCable: number;
+  distanceSupportRef: number;
+  supportRef: 'LEFT' | 'RIGHT';
+}
+
+export interface SupportManipInputs {
+  supportIndex: number;
+  manip1: CableSupportManipItem;
+  manip2: CableSupportManipItem | null;
+}
+
+export interface SpanManipInputs extends Omit<
+  CableSpanManipulation,
+  'uuid' | 'spanUuid' | 'chargeUuid' | 'chainName' | 'chainLength' | 'chainWeight' | 'chainSurface' | 'counterWeight'
+> {
+  spanIndex: number;
+}
+
 export interface ObstacleOutput {
   // Rendered 3D coordinates for each registered obstacle
   obstacles: {
@@ -806,8 +851,7 @@ export interface TaskOutputs {
   [Task.deleteObstacle]: { success: boolean };
   // Output from clearObstacles task: registration acknowledgement
   [Task.clearObstacles]: { success: boolean };
-  // Output from shortenLengthenCable task: registration acknowledgement
-  [Task.shortenLengthenCable]: { success: boolean };
+  [Task.applyManipulations]: { success: boolean };
   [Task.getAspectRatio]: {
     x: number;
     y: number;
@@ -817,10 +861,26 @@ export interface TaskOutputs {
     windIncidence: number;
   };
   [Task.computeLocalization]: Localization;
+  [Task.convertCoordinates]: { x: number[]; y: number[] };
   [Task.importLambert]: Localization;
   [Task.importLambertAndValidate]: {
     localization: Localization;
-    meanGpsDiffMeter: number;
+    /** Azimuth (deg) before the deflection at the first support: `azimuth[0] - spanAngle[0]`. */
+    startAzimuth: number;
+    /** Per-support distance (m) between the imported position and the rebuilt one; `NaN` when a span length is missing. */
+    positionErrorMeter: number[];
+  };
+  [Task.validateGpsPositions]: {
+    /** Grid azimuth (deg) of each span, size N-1. */
+    azimuth: number[];
+    startAzimuth: number | null;
+    /** Per-support distance (m) between the GPS position and the rebuilt one, size N. */
+    positionErrorMeter: number[];
+  };
+  [Task.computeStartFromNextSupport]: {
+    latitude: number;
+    longitude: number;
+    startAzimuth: number;
   };
   [Task.getEquivalentSpan]: { equivalentSpan: number };
   [Task.getPoseTable]: PoseResults;

@@ -5,6 +5,7 @@
   [modal]="true"
   [style]="toolbarDialogService.getDialogStyle()"
   [closeAriaLabel]="'common.close' | transloco"
+  (onShow)="toolbarDialogService.notifyShown()"
   (onHide)="onDialogHide()"
   data-testid="toolbar-dialog"
 >

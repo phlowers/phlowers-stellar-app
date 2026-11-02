@@ -74,6 +74,7 @@ import {
 } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.helpers';
 import { maxOf } from '@shared/helpers/maxOf.helpers';
 import { SectionStateReportData } from '@features/studio/toolbar/presentation/services/section-state-report/section-state-report.interfaces';
+import { getDateLocale } from '@shared/helpers/modification-date.helpers';
 
 /** Display mode for global section parameters: middle span or section maximum. */
 type GlobalStateMode = 'span' | 'max_section';
@@ -486,7 +487,7 @@ export class StudioPageComponent implements OnInit, OnDestroy {
 
     const data: SectionStateReportData = {
       author: study?.author_email ?? '-',
-      date: new Date().toLocaleDateString(this.getLocaleForDate()),
+      date: new Date().toLocaleDateString(getDateLocale(this.translocoService.getActiveLang())),
       studyTitle: study?.title ?? '-',
       studyDescription: study?.description ?? '',
       sectionName: section.name ?? '-',
@@ -502,11 +503,6 @@ export class StudioPageComponent implements OnInit, OnDestroy {
     };
 
     await this.sectionStateReportService.generateReport(data);
-  }
-
-  private getLocaleForDate(): string {
-    const activeLang = this.translocoService.getActiveLang();
-    return activeLang === 'en' ? 'en-US' : 'fr-FR';
   }
 
   onSelectSpanAmount(value: string) {

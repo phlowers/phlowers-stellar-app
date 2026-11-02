@@ -65,19 +65,20 @@ describe('LocationComponent', () => {
   });
 
   describe('HTML rendering - initial displayed values', () => {
-    it('should display the default latitude value', () => {
-      const input = getByTestId('latitude-input') as HTMLInputElement;
-      expect(+input.value).toBe(LOCATION_CONFIG.latitude.default);
+    it('should display empty inputs when no initial values are provided', () => {
+      expect((getByTestId('latitude-input') as HTMLInputElement).value).toBe('');
+      expect((getByTestId('longitude-input') as HTMLInputElement).value).toBe('');
+      expect((getByTestId('azimuth-input') as HTMLInputElement).value).toBe('');
     });
 
-    it('should display the default longitude value', () => {
-      const input = getByTestId('longitude-input') as HTMLInputElement;
-      expect(+input.value).toBe(LOCATION_CONFIG.longitude.default);
+    it('should not render the incomplete-location error when all fields are empty', () => {
+      expect(getByTestId('location-incomplete-error')).toBeNull();
     });
 
-    it('should display azimuth default value', () => {
-      const input = getByTestId('azimuth-input') as HTMLInputElement;
-      expect(+input.value).toBe(LOCATION_CONFIG.azimuth.default);
+    it('should render the incomplete-location error when only some fields are filled', () => {
+      fixture.componentRef.setInput('initialLatitude', 45);
+      fixture.detectChanges();
+      expect(getByTestId('location-incomplete-error')).not.toBeNull();
     });
   });
 
@@ -94,6 +95,41 @@ describe('LocationComponent', () => {
       fixture.detectChanges();
       const input = getByTestId('longitude-input') as HTMLInputElement;
       expect(+input.value).toBe(10);
+    });
+  });
+
+  describe('resetToken - forced reset to the initial values', () => {
+    it('should discard typed values when resetToken changes even if the initial values are unchanged', () => {
+      const emitSpy = vi.spyOn(component.locationChange, 'emit');
+      triggerInput('latitude-input', '45.5');
+      triggerInput('azimuth-input', '30');
+
+      fixture.componentRef.setInput('resetToken', 1);
+      fixture.detectChanges();
+
+      expect((getByTestId('latitude-input') as HTMLInputElement).value).toBe('');
+      expect((getByTestId('azimuth-input') as HTMLInputElement).value).toBe('');
+      expect(emitSpy).toHaveBeenLastCalledWith({ latitude: null, longitude: null, azimuth: null, isValid: true });
+    });
+
+    it('should reset to the current initial values when resetToken changes', () => {
+      fixture.componentRef.setInput('initialLatitude', 45);
+      fixture.detectChanges();
+      triggerInput('latitude-input', '46');
+
+      fixture.componentRef.setInput('resetToken', 1);
+      fixture.detectChanges();
+
+      expect(+(getByTestId('latitude-input') as HTMLInputElement).value).toBe(45);
+    });
+
+    it('should keep typed values while resetToken is unchanged', () => {
+      triggerInput('latitude-input', '45.5');
+
+      fixture.componentRef.setInput('initialLongitude', null);
+      fixture.detectChanges();
+
+      expect((getByTestId('latitude-input') as HTMLInputElement).value).toBe('45.5');
     });
   });
 
@@ -273,21 +309,22 @@ describe('LocationComponent', () => {
       initComponent = initFixture.componentInstance;
     });
 
-    it('should emit locationChange with defaults on first detectChanges when no initial values are provided', () => {
+    it('should emit locationChange with empty values and isValid true when no initial values are provided', () => {
       vi.spyOn(initComponent.locationChange, 'emit');
       initFixture.detectChanges();
       expect(initComponent.locationChange.emit).toHaveBeenCalledWith({
-        latitude: LOCATION_CONFIG.latitude.default,
-        longitude: LOCATION_CONFIG.longitude.default,
-        azimuth: LOCATION_CONFIG.azimuth.default,
+        latitude: null,
+        longitude: null,
+        azimuth: null,
         isValid: true
       });
     });
 
-    it('should emit isValid true on first detectChanges when defaults are in range', () => {
+    it('should emit isValid false when only some initial values are provided', () => {
+      initFixture.componentRef.setInput('initialLatitude', 45);
       vi.spyOn(initComponent.locationChange, 'emit');
       initFixture.detectChanges();
-      expect(initComponent.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ isValid: true }));
+      expect(initComponent.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
     });
 
     it('should emit locationChange with provided initial values when they are non-null', () => {
@@ -351,71 +388,78 @@ describe('LocationComponent', () => {
     });
 
     it('should emit null latitude when latitude is cleared', () => {
+      triggerInput('latitude-input', '45');
       triggerInput('latitude-input', '');
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ latitude: null }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ latitude: null }));
     });
 
     it('should emit null longitude when longitude is cleared', () => {
+      triggerInput('longitude-input', '10');
       triggerInput('longitude-input', '');
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ longitude: null }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ longitude: null }));
     });
 
     it('should emit null azimuth when azimuth is cleared', () => {
+      triggerInput('azimuth-input', '90');
       triggerInput('azimuth-input', '');
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ azimuth: null }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ azimuth: null }));
     });
 
     it('should emit null latitude when latitude receives an invalid value', () => {
+      triggerInput('latitude-input', '45');
       triggerInput('latitude-input', 'abc');
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ latitude: null }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ latitude: null }));
     });
 
-    it('should emit null then the valid latitude after a valid value follows an empty field', () => {
+    it('should emit the valid latitude again after the field was cleared', () => {
+      triggerInput('latitude-input', '45');
       triggerInput('latitude-input', '');
       triggerInput('latitude-input', '45');
-      expect(component.locationChange.emit).toHaveBeenCalledTimes(2);
       expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ latitude: 45 }));
     });
   });
 
   describe('output - locationChange isValid', () => {
     beforeEach(() => {
+      triggerInput('latitude-input', '45');
+      triggerInput('longitude-input', '10');
+      triggerInput('azimuth-input', '90');
       vi.spyOn(component.locationChange, 'emit');
     });
 
     it('should emit isValid true when all fields are within bounds', () => {
-      triggerInput('latitude-input', '45');
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ isValid: true }));
+      triggerInput('latitude-input', '46');
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: true }));
     });
 
     it('should emit isValid false when latitude is over max', () => {
       triggerInput('latitude-input', String(LOCATION_CONFIG.latitude.max + 1));
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: false }));
     });
 
     it('should emit isValid false when latitude is under min', () => {
       triggerInput('latitude-input', String(LOCATION_CONFIG.latitude.min - 1));
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: false }));
     });
 
     it('should emit isValid false when longitude is over max', () => {
       triggerInput('longitude-input', String(LOCATION_CONFIG.longitude.max + 1));
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: false }));
     });
 
     it('should emit isValid false when longitude is under min', () => {
       triggerInput('longitude-input', String(LOCATION_CONFIG.longitude.min - 1));
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: false }));
     });
 
     it('should emit isValid false when azimuth is over max', () => {
       triggerInput('azimuth-input', String(LOCATION_CONFIG.azimuth.max + 1));
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: false }));
     });
 
     it('should emit isValid false when azimuth is under min', () => {
       triggerInput('azimuth-input', String(LOCATION_CONFIG.azimuth.min - 1));
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ isValid: false }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: false }));
     });
 
     it('should emit isValid true when value returns to valid range after being out of bounds', () => {
@@ -424,9 +468,16 @@ describe('LocationComponent', () => {
       expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: true }));
     });
 
-    it('should emit isValid true when a field is cleared', () => {
+    it('should emit isValid false when only one field is cleared', () => {
       triggerInput('latitude-input', '');
-      expect(component.locationChange.emit).toHaveBeenCalledWith(expect.objectContaining({ isValid: true }));
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: false }));
+    });
+
+    it('should emit isValid true when all fields are cleared', () => {
+      triggerInput('latitude-input', '');
+      triggerInput('longitude-input', '');
+      triggerInput('azimuth-input', '');
+      expect(component.locationChange.emit).toHaveBeenLastCalledWith(expect.objectContaining({ isValid: true }));
     });
   });
 
