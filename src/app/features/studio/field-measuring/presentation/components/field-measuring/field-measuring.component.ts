@@ -14,7 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
-import { TabsModule } from 'primeng/tabs';
+import { TabList, TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from '../header/header.component';
 import { FieldMeasure, FieldMeasureTab } from '@features/studio/field-measuring/domain/types';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
@@ -82,6 +82,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 export class FieldMeasuringComponent implements OnDestroy {
   readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
   readonly footerTemplate = viewChild<TemplateRef<unknown>>('footer');
+  private readonly tabList = viewChild(TabList);
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   public readonly plotService = inject(PlotService);
@@ -151,6 +152,12 @@ export class FieldMeasuringComponent implements OnDestroy {
   });
 
   constructor() {
+    // The active tab bar is measured while the dialog is still zooming in: re-measure it once the dialog is displayed.
+    effect(() => {
+      this.toolbarDialogService.shownCount();
+      this.tabList()?.updateInkBar();
+    });
+
     effect(() => {
       const header = this.headerTemplate();
       const footer = this.footerTemplate();

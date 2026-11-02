@@ -25,9 +25,16 @@ export class ToolbarDialogService {
   readonly currentTool = signal<Tool | null>(null);
   readonly isOpen = signal(false);
   readonly phase = signal<DialogPhase>('main');
+  /** Incremented each time the dialog finished its opening animation (layout measures are only reliable afterwards). */
+  readonly shownCount = signal(0);
   readonly templates = signal<ToolTemplates>({});
   readonly loadTableContext = signal<LoadTableContext | null>(null);
   readonly strandRrtsContext = signal<StrandRrtsContext | null>(null);
+
+  /** Signals that the dialog finished its opening animation. */
+  notifyShown(): void {
+    this.shownCount.update((count) => count + 1);
+  }
 
   private readonly toolMap: Record<Tool, ToolConfig> = {
     'field-measuring': {

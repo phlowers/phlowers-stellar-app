@@ -36,6 +36,15 @@ describe('ToolbarDialogService', () => {
     });
   });
 
+  describe('notifyShown', () => {
+    it('should increment the shown count each time the dialog finished opening', () => {
+      expect(service.shownCount()).toBe(0);
+      service.notifyShown();
+      service.notifyShown();
+      expect(service.shownCount()).toBe(2);
+    });
+  });
+
   describe('openTool', () => {
     it('should set currentTool signal', () => {
       service.openTool('field-measuring');
