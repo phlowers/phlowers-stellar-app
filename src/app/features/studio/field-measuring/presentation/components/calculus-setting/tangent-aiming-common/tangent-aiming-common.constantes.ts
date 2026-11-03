@@ -7,6 +7,7 @@
 
 import {
   LeftSupportState,
+  TangentAimingCalculationType,
   TangentAimingFieldRule,
   TangentAimingRuleField
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
@@ -19,6 +20,12 @@ export const TANGENT_AIMING_FIELD_RULES: Record<TangentAimingRuleField, TangentA
   parameter: { min: 20, max: 5000, decimals: 0, default: 20 },
   tangentAngle: { min: -200, max: 200, decimals: 2, default: 0 }
 };
+
+/**
+ * Only calculation type supported by the engine (`calculate_tangent_aiming`): the parameter is calculated from the
+ * cable tangent angle. The `parametre` type is disabled until the engine handles it.
+ */
+export const TANGENT_AIMING_CALCULATION_TYPE: TangentAimingCalculationType = 'tangente';
 
 /** Left support tracking before any resolution. */
 export const INITIAL_LEFT_SUPPORT_STATE: LeftSupportState = { previous: null, memory: {} };

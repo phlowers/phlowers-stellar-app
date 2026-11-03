@@ -16,6 +16,7 @@ import {
   LEFT_SUPPORT_OPTION_KEYS,
   MEASURED_SOLAR_FLUX_BOUNDS
 } from './constants';
+import { TANGENT_AIMING_CALCULATION_TYPE } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 
 /**
  * Builds select options from translatable option keys, resolving each label through Transloco.
@@ -239,7 +240,7 @@ export const createInitialMeasureData = (
     ...PAPOTO_INPUT_DEFAULTS,
     cableHAccDistance: null,
     cableVerticalAccAngle: null,
-    calculationType: 'parametre',
+    calculationType: TANGENT_AIMING_CALCULATION_TYPE,
     cableTangentAngle: null,
     cableParameter: null,
     tangentLeftSupport: null,
@@ -249,7 +250,7 @@ export const createInitialMeasureData = (
     exteriorHAccDistance: null,
     exteriorVerticalAccAngleLeft: null,
     exteriorVerticalAccAngleRight: null,
-    exteriorCalculationType: 'parametre',
+    exteriorCalculationType: TANGENT_AIMING_CALCULATION_TYPE,
     exteriorParameter: null,
     exteriorTangentAngle: null,
     interiorLeftSupport: null,
@@ -257,7 +258,7 @@ export const createInitialMeasureData = (
     interiorHAccDistance: null,
     interiorVerticalAccAngleLeft: null,
     interiorVerticalAccAngleRight: null,
-    interiorCalculationType: 'parametre',
+    interiorCalculationType: TANGENT_AIMING_CALCULATION_TYPE,
     interiorParameter: null,
     interiorTangentAngle: null,
     ...PEP_INPUT_DEFAULTS,

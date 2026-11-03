@@ -6,6 +6,7 @@ import { TANGENT_AIMING_INTERIOR_FIELD_RULES as INTERIOR_RULES } from '@features
 import { applyTangentAimingSupportDefaults } from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
 import { applyTangentAimingExteriorDefaults } from './components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.helpers';
 import { applyTangentAimingInteriorDefaults } from './components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
+import { TANGENT_AIMING_CALCULATION_TYPE } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import { clearAutoParameter15C, PAPOTO_INPUT_DEFAULTS, PEP_INPUT_DEFAULTS } from './helpers';
 import { CalculusModeResetContext } from './calculus-mode-reset.interfaces';
 
@@ -18,7 +19,7 @@ const EXTERIOR_DEFAULTS = {
   exteriorVerticalAccAngleRight: EXTERIOR_RULES.verticalAccAngleRight.default,
   exteriorParameter: EXTERIOR_RULES.parameter.default,
   exteriorTangentAngle: EXTERIOR_RULES.tangentAngle.default,
-  exteriorCalculationType: 'parametre' as const
+  exteriorCalculationType: TANGENT_AIMING_CALCULATION_TYPE
 };
 
 const INTERIOR_DEFAULTS = {
@@ -28,7 +29,7 @@ const INTERIOR_DEFAULTS = {
   interiorVerticalAccAngleRight: INTERIOR_RULES.verticalAccAngleRight.default,
   interiorParameter: INTERIOR_RULES.parameter.default,
   interiorTangentAngle: INTERIOR_RULES.tangentAngle.default,
-  interiorCalculationType: 'parametre' as const
+  interiorCalculationType: TANGENT_AIMING_CALCULATION_TYPE
 };
 
 /** Resets each calculus mode (inputs and outputs) to its defaults. Typed on every method so a new one requires a resetter. */
@@ -49,7 +50,7 @@ export const CALCULUS_MODE_RESETTERS: Record<
     cableVerticalAccAngle: RULES.cableVerticalAccAngle.default,
     cableParameter: RULES.cableParameter.default,
     cableTangentAngle: RULES.cableTangentAngle.default,
-    calculationType: 'parametre',
+    calculationType: TANGENT_AIMING_CALCULATION_TYPE,
     outputs: { ...data.outputs, tangentAimingSupport: null }
   }),
   'tangente-aiming-exterior': (data, context) => ({
@@ -82,6 +83,29 @@ export const resetInactiveCalculusModes = (
   (Object.keys(CALCULUS_MODE_RESETTERS) as CalculationMethod[])
     .filter((method) => method !== activeMethod)
     .reduce((data, method) => CALCULUS_MODE_RESETTERS[method](data, context), measureData);
+
+/**
+ * Applies the defaults of the active tangent aiming mode (other modes are untouched), so a persisted measure missing
+ * inputs or saved with a calculation type no longer supported opens on the supported one.
+ * @param measureData - The measure to complete
+ * @param defaultLeftSupport - Default left support of the tangent aiming modes
+ * @returns The measure with the defaults of its active tangent aiming mode
+ */
+export const applyActiveTangentAimingDefaults = (
+  measureData: FieldMeasure,
+  defaultLeftSupport: string | null
+): FieldMeasure => {
+  switch (measureData.calculationMethod) {
+    case 'tangente-aiming':
+      return applyTangentAimingSupportDefaults(measureData, defaultLeftSupport);
+    case 'tangente-aiming-exterior':
+      return applyTangentAimingExteriorDefaults(measureData, defaultLeftSupport);
+    case 'tangente-aiming-interior':
+      return applyTangentAimingInteriorDefaults(measureData, defaultLeftSupport);
+    default:
+      return measureData;
+  }
+};
 
 /**
  * Projection of a measure used to detect unsaved changes: selecting a calculus mode is a choice, not an edit, so the

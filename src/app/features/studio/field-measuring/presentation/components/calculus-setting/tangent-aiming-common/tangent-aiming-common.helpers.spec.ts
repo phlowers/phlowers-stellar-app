@@ -4,7 +4,6 @@ import { INITIAL_LEFT_SUPPORT_STATE, TANGENT_AIMING_FIELD_RULES } from './tangen
 import {
   buildCalculationTypeOptions,
   buildSpanSupportOptions,
-  calculateTangentAimingMock,
   createNumberControl,
   getCalculatedSpanLength,
   getDefaultLeftSupport,
@@ -112,8 +111,8 @@ describe('tangent-aiming-common helpers', () => {
 
     it('should build the calculation type options', () => {
       expect(buildCalculationTypeOptions(transloco)).toEqual([
-        { label: 'common.parameter-label', value: 'parametre' },
-        { label: 'common.calculation-type-tangent', value: 'tangente' }
+        { label: 'common.parameter-label', value: 'parametre', disabled: true },
+        { label: 'common.calculation-type-tangent', value: 'tangente', disabled: false }
       ]);
     });
 
@@ -127,11 +126,5 @@ describe('tangent-aiming-common helpers', () => {
       control.setValue(100);
       expect(getTangentAimingError(control, transloco)).toBe('');
     });
-  });
-
-  it('should return a constant mock result', async () => {
-    const { result, error } = await calculateTangentAimingMock({});
-    expect(error).toBeNull();
-    expect(result?.checkValidity).toBe(true);
   });
 });

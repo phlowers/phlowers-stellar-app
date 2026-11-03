@@ -9,6 +9,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { Task, TaskInputs } from '@services/worker_python/tasks/types';
+import { TANGENT_AIMING_CALCULATION_TYPE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   createNumberControl,
   syncDisplayedControls
@@ -70,9 +71,9 @@ export function isTangentAimingSupportDataValid(data: FieldMeasure): boolean {
   return form.valid;
 }
 
-/** Fills the empty (`null`/`undefined`) tangent aiming (support) inputs with their default. */
+/** Fills the empty (`null`/`undefined`) tangent aiming (support) inputs with their default; forces the supported calculation type. */
 export function applyTangentAimingSupportDefaults(data: FieldMeasure, defaultLeftSupport: string | null): FieldMeasure {
-  const next: FieldMeasure = { ...data, calculationType: data.calculationType ?? 'parametre' };
+  const next: FieldMeasure = { ...data, calculationType: TANGENT_AIMING_CALCULATION_TYPE };
   next.tangentLeftSupport ??= defaultLeftSupport;
   for (const field of Object.keys(TANGENT_AIMING_SUPPORT_FIELD_RULES) as TangentAimingSupportNumericField[]) {
     next[field] ??= TANGENT_AIMING_SUPPORT_FIELD_RULES[field].default;

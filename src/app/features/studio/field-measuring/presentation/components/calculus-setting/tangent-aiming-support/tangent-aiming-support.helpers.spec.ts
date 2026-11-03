@@ -38,7 +38,15 @@ describe('tangent-aiming-support helpers', () => {
       cableVerticalAccAngle: 0,
       cableParameter: 20,
       cableTangentAngle: 0,
-      calculationType: 'parametre'
+      calculationType: 'tangente'
+    });
+  });
+
+  it('should force the tangente calculation type, the only one supported', () => {
+    const data = { ...createTestMeasureData(), calculationType: 'parametre' as const, cableParameter: 1500 };
+    expect(applyTangentAimingSupportDefaults(data, '0')).toMatchObject({
+      calculationType: 'tangente',
+      cableParameter: 1500
     });
   });
 
@@ -71,17 +79,23 @@ describe('tangent-aiming-support helpers', () => {
     });
 
     it('should reject out-of-bound or too precise values', () => {
-      expect(isTangentAimingSupportDataValid({ ...valid, cableParameter: 19 })).toBe(false);
-      expect(isTangentAimingSupportDataValid({ ...valid, cableParameter: 20.5 })).toBe(false);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 201 })).toBe(false);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 1.234 })).toBe(false);
+      expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'parametre', cableParameter: 19 })).toBe(
+        false
+      );
+      expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'parametre', cableParameter: 20.5 })).toBe(
+        false
+      );
       expect(isTangentAimingSupportDataValid({ ...valid, tangentSpanLength: 5001 })).toBe(false);
       expect(isTangentAimingSupportDataValid({ ...valid, cableHAccDistance: 1.234 })).toBe(false);
     });
 
     it('should ignore the hidden field', () => {
-      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 999 })).toBe(true);
-      expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'tangente', cableParameter: 1 })).toBe(true);
-      expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'tangente', cableTangentAngle: 999 })).toBe(
-        false
+      expect(isTangentAimingSupportDataValid({ ...valid, cableParameter: 1 })).toBe(true);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 999 })).toBe(false);
+      expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'parametre', cableTangentAngle: 999 })).toBe(
+        true
       );
     });
   });

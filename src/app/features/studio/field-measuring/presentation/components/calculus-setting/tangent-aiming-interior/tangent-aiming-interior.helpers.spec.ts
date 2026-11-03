@@ -7,7 +7,8 @@ import {
   invalidateTangentAimingInteriorResult,
   isTangentAimingInteriorDataValid,
   resetNonDisplayedInteriorFields,
-  toTangentAimingInteriorInputs
+  toTangentAimingInteriorInputs,
+  toTangentAimingInteriorTaskInputs
 } from './tangent-aiming-interior.helpers';
 import { TANGENT_AIMING_INTERIOR_FIELD_RULES } from './tangent-aiming-interior.constantes';
 import { TANGENT_AIMING_FIELD_RULES } from '../tangent-aiming-common/tangent-aiming-common.constantes';
@@ -88,7 +89,19 @@ describe('tangent-aiming-interior helpers', () => {
         interiorVerticalAccAngleRight: 0,
         interiorParameter: 20,
         interiorTangentAngle: 0,
-        interiorCalculationType: 'parametre'
+        interiorCalculationType: 'tangente'
+      });
+    });
+
+    it('should force the tangente calculation type, the only one supported', () => {
+      const data = {
+        ...createTestMeasureData(),
+        interiorCalculationType: 'parametre' as const,
+        interiorParameter: 1500
+      };
+      expect(applyTangentAimingInteriorDefaults(data, '0')).toMatchObject({
+        interiorCalculationType: 'tangente',
+        interiorParameter: 1500
       });
     });
 
@@ -109,32 +122,35 @@ describe('tangent-aiming-interior helpers', () => {
       const data = applyTangentAimingInteriorDefaults(createTestMeasureData(), '0');
       expect(isTangentAimingInteriorDataValid(data)).toBe(true);
       expect(isTangentAimingInteriorDataValid({ ...data, interiorLeftSupport: null })).toBe(false);
-      expect(isTangentAimingInteriorDataValid({ ...data, interiorParameter: null })).toBe(false);
-      expect(isTangentAimingInteriorDataValid({ ...data, interiorParameter: 19 })).toBe(false);
+      expect(isTangentAimingInteriorDataValid({ ...data, interiorTangentAngle: null })).toBe(false);
+      expect(isTangentAimingInteriorDataValid({ ...data, interiorTangentAngle: 201 })).toBe(false);
+      expect(
+        isTangentAimingInteriorDataValid({ ...data, interiorCalculationType: 'parametre', interiorParameter: 19 })
+      ).toBe(false);
       expect(isTangentAimingInteriorDataValid({ ...data, interiorHAccDistance: 5000 })).toBe(true);
       expect(isTangentAimingInteriorDataValid({ ...data, interiorHAccDistance: 5001 })).toBe(false);
     });
 
     it('should ignore the hidden field for the validity', () => {
       const data = applyTangentAimingInteriorDefaults(createTestMeasureData(), '0');
-      expect(isTangentAimingInteriorDataValid({ ...data, interiorTangentAngle: null })).toBe(true);
+      expect(isTangentAimingInteriorDataValid({ ...data, interiorParameter: null })).toBe(true);
       expect(
-        isTangentAimingInteriorDataValid({ ...data, interiorCalculationType: 'tangente', interiorParameter: null })
+        isTangentAimingInteriorDataValid({ ...data, interiorCalculationType: 'parametre', interiorTangentAngle: null })
       ).toBe(true);
       expect(
-        isTangentAimingInteriorDataValid({ ...data, interiorCalculationType: 'tangente', interiorTangentAngle: null })
+        isTangentAimingInteriorDataValid({ ...data, interiorCalculationType: 'parametre', interiorParameter: null })
       ).toBe(false);
     });
 
     it('should clear the field hidden by the calculation type', () => {
       const data = applyTangentAimingInteriorDefaults(createTestMeasureData(), '0');
       expect(resetNonDisplayedInteriorFields(data)).toMatchObject({
-        interiorParameter: 20,
-        interiorTangentAngle: null
-      });
-      expect(resetNonDisplayedInteriorFields({ ...data, interiorCalculationType: 'tangente' })).toMatchObject({
         interiorParameter: null,
         interiorTangentAngle: 0
+      });
+      expect(resetNonDisplayedInteriorFields({ ...data, interiorCalculationType: 'parametre' })).toMatchObject({
+        interiorParameter: 20,
+        interiorTangentAngle: null
       });
     });
 
@@ -161,9 +177,40 @@ describe('tangent-aiming-interior helpers', () => {
         hAccDistance: 0,
         verticalAccAngleLeft: 0,
         verticalAccAngleRight: 0,
-        calculationType: 'parametre',
+        calculationType: 'tangente',
         parameter: 20,
         tangentAngle: 0
+      });
+    });
+
+    it('should map the measure to the tangent aiming task inputs (device inside the span, positive distance)', () => {
+      const inputs = toTangentAimingInteriorInputs({
+        ...createTestMeasureData(),
+        interiorSpanLength: 400,
+        interiorHAccDistance: 50,
+        interiorVerticalAccAngleLeft: 93.655,
+        interiorVerticalAccAngleRight: 99.293,
+        interiorTangentAngle: 101.398
+      });
+      expect(toTangentAimingInteriorTaskInputs(inputs)).toEqual({
+        angleToCableTangent: 101.398,
+        angleToLeftSupport: 93.655,
+        angleToRightSupport: 99.293,
+        spanLength: 400,
+        inputHeight: 0,
+        distance: 50
+      });
+    });
+
+    it('should default the missing task inputs to 0', () => {
+      const inputs = toTangentAimingInteriorInputs(createTestMeasureData());
+      expect(toTangentAimingInteriorTaskInputs(inputs)).toEqual({
+        angleToCableTangent: 0,
+        angleToLeftSupport: 0,
+        angleToRightSupport: 0,
+        spanLength: 0,
+        inputHeight: 0,
+        distance: 0
       });
     });
 
@@ -171,7 +218,7 @@ describe('tangent-aiming-interior helpers', () => {
       const data = { ...createTestMeasureData(), interiorParameter: undefined } as unknown as FieldMeasure;
       expect(toTangentAimingInteriorInputs(data).parameter).toBeNull();
       const legacy = { ...createTestMeasureData(), interiorCalculationType: undefined } as unknown as FieldMeasure;
-      expect(toTangentAimingInteriorInputs(legacy).calculationType).toBe('parametre');
+      expect(toTangentAimingInteriorInputs(legacy).calculationType).toBe('tangente');
     });
   });
 });

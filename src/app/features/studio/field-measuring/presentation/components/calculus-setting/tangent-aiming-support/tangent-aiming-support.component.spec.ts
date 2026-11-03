@@ -7,7 +7,6 @@ import { vi } from 'vitest';
 
 import { TangentAimingSupportComponent } from './tangent-aiming-support.component';
 import * as helpers from './tangent-aiming-support.helpers';
-import * as commonHelpers from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -16,6 +15,8 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
+
+const TASK_RESULT = { parameter: 2000.2, uncertainty: 13.3, criterion: 1, checkValidity: true };
 
 const validMeasure = (overrides?: Partial<FieldMeasure>): FieldMeasure =>
   helpers.applyTangentAimingSupportDefaults(
@@ -42,6 +43,7 @@ describe('TangentAimingSupport component', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    workerPythonService.runTask.mockResolvedValue({ result: TASK_RESULT, error: null, diagnostics: [] });
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
@@ -114,23 +116,27 @@ describe('TangentAimingSupport component', () => {
     expect(component.measureData().tangentLeftSupport).toBe('1');
   });
 
-  it('should render the parameter field and hide the tangent angle by default', () => {
+  it('should render the tangent angle field and hide the parameter by default', () => {
     ['left-support-select', 'span-length-input', 'h-acc-distance-input', 'vertical-acc-angle-input'].forEach((id) =>
       expect(getByTestId(id)).toBeTruthy()
     );
-    expect(getByTestId('parameter-input')).toBeTruthy();
-    expect(getByTestId('tangent-angle-input')).toBeNull();
-  });
-
-  it('should show the tangent angle and hide the parameter when the type is tangente', () => {
-    component.updateCalculationType('tangente');
-    fixture.detectChanges();
+    expect(component.measureData().calculationType).toBe('tangente');
     expect(getByTestId('tangent-angle-input')).toBeTruthy();
     expect(getByTestId('parameter-input')).toBeNull();
   });
 
-  it('should expose parameter and tangent calculation type options', () => {
-    expect(component.calculationTypeOptions().map((o) => o.value)).toEqual(['parametre', 'tangente']);
+  it('should show the parameter and hide the tangent angle when the type is parametre', () => {
+    component.updateCalculationType('parametre');
+    fixture.detectChanges();
+    expect(getByTestId('parameter-input')).toBeTruthy();
+    expect(getByTestId('tangent-angle-input')).toBeNull();
+  });
+
+  it('should expose parameter and tangent calculation type options with only the tangent one enabled', () => {
+    expect(component.calculationTypeOptions().map(({ value, disabled }) => ({ value, disabled }))).toEqual([
+      { value: 'parametre', disabled: true },
+      { value: 'tangente', disabled: false }
+    ]);
   });
 
   it('should write the typed value to measureData', () => {
@@ -139,9 +145,9 @@ describe('TangentAimingSupport component', () => {
   });
 
   it.each([
-    ['parameter-input', '19', 'cableParameter'],
-    ['parameter-input', '5001', 'cableParameter'],
-    ['parameter-input', '30.5', 'cableParameter'],
+    ['tangent-angle-input', '201', 'cableTangentAngle'],
+    ['tangent-angle-input', '-201', 'cableTangentAngle'],
+    ['tangent-angle-input', '1.234', 'cableTangentAngle'],
     ['span-length-input', '-1', 'tangentSpanLength'],
     ['span-length-input', '1.234', 'tangentSpanLength'],
     ['h-acc-distance-input', '1001', 'cableHAccDistance'],
@@ -175,12 +181,12 @@ describe('TangentAimingSupport component', () => {
   });
 
   it('should ignore the hidden field in the validity', () => {
-    component.form.controls.cableTangentAngle.setValue(9999);
+    component.form.controls.cableParameter.setValue(9999);
     expect(component.isFormValid()).toBe(true);
   });
 
   it('should disable the calculate button while the form is invalid', () => {
-    setInput('parameter-input', '1');
+    setInput('tangent-angle-input', '201');
     expect((getByTestId('calculate-tangent-aiming-support-btn') as HTMLButtonElement).disabled).toBe(true);
   });
 
@@ -192,17 +198,18 @@ describe('TangentAimingSupport component', () => {
   it('should show the results after calculating and keep the form editable', async () => {
     await component.calculate();
     fixture.detectChanges();
-    expect(getByTestId('tangent-aiming-support-parameter')?.textContent?.trim()).toBe('1000 m');
-    expect(getByTestId('tangent-aiming-support-uncertainty')?.textContent?.trim()).toBe('2 m');
+    expect(getByTestId('tangent-aiming-support-parameter')?.textContent?.trim()).toBe('2000 m');
+    expect(getByTestId('tangent-aiming-support-uncertainty')?.textContent?.trim()).toBe('13 m');
     expect(getByTestId('tangent-aiming-support-criterion')?.textContent).toContain('1 %');
     expect(getByTestId('tangent-aiming-support-criterion-ok')).toBeTruthy();
-    expect(getByTestId('parameter-input')).toBeTruthy();
+    expect(getByTestId('tangent-angle-input')).toBeTruthy();
   });
 
   it('should show the not respected icon when the criterion fails', async () => {
-    vi.spyOn(commonHelpers, 'calculateTangentAimingMock').mockResolvedValueOnce({
-      result: { parameter: 10, uncertainty: 2, criterion: 5, checkValidity: false },
-      error: null
+    workerPythonService.runTask.mockResolvedValueOnce({
+      result: { parameter: 2000, uncertainty: 150, criterion: 7.5, checkValidity: false },
+      error: null,
+      diagnostics: []
     });
     await component.calculate();
     fixture.detectChanges();
@@ -219,20 +226,19 @@ describe('TangentAimingSupport component', () => {
 
   it('should clear a stale result when the calculation type changes', async () => {
     await component.calculate();
-    component.updateCalculationType('tangente');
+    component.updateCalculationType('parametre');
     expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
   });
 
   it('should not calculate when the form is invalid', async () => {
-    const spy = vi.spyOn(commonHelpers, 'calculateTangentAimingMock');
-    setInput('parameter-input', '1');
+    setInput('tangent-angle-input', '201');
     await component.calculate();
-    expect(spy).not.toHaveBeenCalled();
+    expect(workerPythonService.runTask).not.toHaveBeenCalled();
     expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
   });
 
   it('should log and notify when the calculation fails', async () => {
-    vi.spyOn(commonHelpers, 'calculateTangentAimingMock').mockResolvedValueOnce({ result: null, error: 'boom' });
+    workerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'boom', diagnostics: [] });
     await component.calculate();
     fixture.detectChanges();
     expect(logger.error).toHaveBeenCalled();
@@ -246,41 +252,38 @@ describe('TangentAimingSupport component', () => {
     expect(component.calculatedSpanLength()).toBeNull();
   });
 
-  describe('tangente calculation type', () => {
-    const taskResult = { parameter: 2000.2, uncertainty: 13.3, criterion: 1, checkValidity: true };
-
-    beforeEach(() => {
-      componentRef.setInput('measureData', validMeasure({ calculationType: 'tangente', cableTangentAngle: 100 }));
-      fixture.detectChanges();
+  it('should run the tangent aiming task with the support inputs and store its result', async () => {
+    componentRef.setInput(
+      'measureData',
+      validMeasure({
+        tangentSpanLength: 400,
+        cableHAccDistance: 10,
+        cableVerticalAccAngle: 98.41,
+        cableTangentAngle: 100
+      })
+    );
+    fixture.detectChanges();
+    await component.calculate();
+    fixture.detectChanges();
+    expect(workerPythonService.runTask).toHaveBeenCalledWith(Task.calculateTangentAiming, {
+      spanLength: 400,
+      angleToCableTangent: 100,
+      angleToLeftSupport: 0,
+      angleToRightSupport: 98.41,
+      inputHeight: 10,
+      distance: 0
     });
-
-    it('should run the tangent aiming task and store its result', async () => {
-      workerPythonService.runTask.mockResolvedValueOnce({ result: taskResult, error: null, diagnostics: [] });
-      const mockSpy = vi.spyOn(commonHelpers, 'calculateTangentAimingMock');
-      await component.calculate();
-      fixture.detectChanges();
-      expect(workerPythonService.runTask).toHaveBeenCalledWith(
-        Task.calculateTangentAiming,
-        expect.objectContaining({ angleToCableTangent: 100, angleToLeftSupport: 0, distance: 0 })
-      );
-      expect(mockSpy).not.toHaveBeenCalled();
-      expect(component.measureData().outputs.tangentAimingSupport).toEqual(taskResult);
-      expect(getByTestId('tangent-aiming-support-parameter')?.textContent?.trim()).toBe('2000 m');
-    });
-
-    it('should log and notify when the task fails', async () => {
-      workerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'boom', diagnostics: [] });
-      await component.calculate();
-      expect(logger.error).toHaveBeenCalled();
-      expect(notification.error).toHaveBeenCalled();
-      expect(component.hasError()).toBe(true);
-      expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
-    });
+    expect(component.measureData().outputs.tangentAimingSupport).toEqual(TASK_RESULT);
+    expect(getByTestId('tangent-aiming-support-parameter')?.textContent?.trim()).toBe('2000 m');
   });
 
-  it('should not run the task in parametre mode', async () => {
+  it('should keep the result empty when the task returns no result', async () => {
+    workerPythonService.runTask.mockResolvedValueOnce({ result: null, error: null, diagnostics: [] });
     await component.calculate();
-    expect(workerPythonService.runTask).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalled();
+    expect(notification.error).toHaveBeenCalled();
+    expect(component.hasError()).toBe(true);
+    expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
   });
 
   it('should only enable the calculate button when an input changed since the last calculation', async () => {

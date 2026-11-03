@@ -208,7 +208,7 @@ describe('FieldMeasuringComponent', () => {
       const measureData = component.measureData();
       expect(measureData).toBeDefined();
       expect(measureData.calculationMethod).toBe('papoto');
-      expect(measureData.calculationType).toBe('parametre');
+      expect(measureData.calculationType).toBe('tangente');
       expect(measureData.diffuseSolarFlux).toBe(123);
       expect(measureData.diffuseDirectSolarFlux).toBe(246);
     });
@@ -767,7 +767,7 @@ describe('FieldMeasuringComponent', () => {
       const plotService = TestBed.inject(PlotService);
       const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
       component.measureData.set(
-        createTestMeasureData({ calculationMethod: 'tangente-aiming', HL: 5, leftSupport: '1', cableParameter: 100 })
+        createTestMeasureData({ calculationMethod: 'tangente-aiming', HL: 5, leftSupport: '1', cableTangentAngle: 100 })
       );
 
       await component.onSave();
@@ -775,7 +775,7 @@ describe('FieldMeasuringComponent', () => {
       const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
       expect(saved?.HL).toBeNull();
       expect(saved?.leftSupport).toBeNull();
-      expect(saved?.cableParameter).toBe(100);
+      expect(saved?.cableTangentAngle).toBe(100);
     });
 
     it('should reset tangent aiming to defaults when papoto is active', async () => {
@@ -804,7 +804,7 @@ describe('FieldMeasuringComponent', () => {
           tangentSpanLength: 10,
           cableHAccDistance: 1,
           cableVerticalAccAngle: 1,
-          cableParameter: 100
+          cableTangentAngle: 100
         })
       );
       expect(component.isParameterCalculationValid()).toBe(true);
@@ -841,19 +841,19 @@ describe('FieldMeasuringComponent', () => {
           tangentSpanLength: 10,
           cableHAccDistance: 1,
           cableVerticalAccAngle: 1,
-          cableParameter: 100,
+          cableTangentAngle: 100,
           exteriorLeftSupport: '0',
           exteriorSpanLength: 10,
           exteriorHAccDistance: 1,
           exteriorVerticalAccAngleLeft: 1,
           exteriorVerticalAccAngleRight: 1,
-          exteriorParameter: 100,
+          exteriorTangentAngle: 100,
           interiorLeftSupport: '0',
           interiorSpanLength: 10,
           interiorHAccDistance: 1,
           interiorVerticalAccAngleLeft: 1,
           interiorVerticalAccAngleRight: 1,
-          interiorParameter: 100
+          interiorTangentAngle: 100
         });
 
       beforeEach(() => vi.spyOn(component, 'isFormValid').mockReturnValue(true));
@@ -960,7 +960,7 @@ describe('FieldMeasuringComponent', () => {
           exteriorHAccDistance: 1,
           exteriorVerticalAccAngleLeft: 1,
           exteriorVerticalAccAngleRight: 1,
-          exteriorParameter: 100
+          exteriorTangentAngle: 100
         })
       );
       expect(component.isParameterCalculationValid()).toBe(true);
@@ -988,7 +988,7 @@ describe('FieldMeasuringComponent', () => {
       component.measureData.set(
         createTestMeasureData({
           calculationMethod: 'tangente-aiming-interior',
-          interiorParameter: 100,
+          interiorTangentAngle: 100,
           interiorHAccDistance: 4000,
           HL: 5,
           exteriorSpanLength: 300
@@ -998,7 +998,8 @@ describe('FieldMeasuringComponent', () => {
       await component.onSave();
 
       const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
-      expect(saved?.interiorParameter).toBe(100);
+      expect(saved?.interiorTangentAngle).toBe(100);
+      expect(saved?.interiorParameter).toBeNull();
       expect(saved?.interiorHAccDistance).toBe(4000);
       expect(saved?.HL).toBeNull();
       expect(saved?.exteriorSpanLength).toBe(0);
@@ -1017,7 +1018,7 @@ describe('FieldMeasuringComponent', () => {
           interiorHAccDistance: 1,
           interiorVerticalAccAngleLeft: 1,
           interiorVerticalAccAngleRight: 1,
-          interiorParameter: 100
+          interiorTangentAngle: 100
         })
       );
       expect(component.isParameterCalculationValid()).toBe(true);
@@ -1290,7 +1291,33 @@ describe('FieldMeasuringComponent', () => {
       fixture.detectChanges();
       await new Promise((resolve) => setTimeout(resolve, 50));
 
-      expect(component.measureData()).toMatchObject({ interiorCalculationType: 'parametre', interiorParameter: 20 });
+      expect(component.measureData()).toMatchObject({ interiorCalculationType: 'tangente', interiorParameter: 20 });
+    });
+
+    it('should open a support measure saved with the parametre type on the tangente type', async () => {
+      const spanService = TestBed.inject(PlotSpanService);
+      const sectionSignal = spanService.section as ReturnType<typeof signal<Section | null>>;
+      const section = sectionSignal() as Section;
+      const legacy = createTestMeasureData({
+        uuid: 'legacy-support',
+        calculationMethod: 'tangente-aiming',
+        calculationType: 'parametre',
+        cableParameter: 1500,
+        cableTangentAngle: null
+      });
+      sectionSignal.set({ ...section, field_measures: [legacy], selected_field_measure_uuid: 'legacy-support' });
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(component.measureData()).toMatchObject({
+        calculationType: 'tangente',
+        cableTangentAngle: 0,
+        cableParameter: 1500
+      });
     });
   });
 

@@ -68,7 +68,6 @@ export class TangentAimingSupportComponent extends TangentAimingFormBase {
       calculationFailedKey: TANGENT_AIMING_SUPPORT_CALCULATION_FAILED_KEY,
       getDisplayedInputFields,
       invalidateResult: invalidateTangentAimingSupportResult,
-      toInputs: toTangentAimingSupportInputs,
       toTaskInputs: (data) => toTangentAimingTaskInputs(toTangentAimingSupportInputs(data))
     });
   }

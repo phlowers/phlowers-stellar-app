@@ -76,7 +76,19 @@ describe('tangent-aiming-exterior helpers', () => {
         exteriorVerticalAccAngleRight: 0,
         exteriorParameter: 20,
         exteriorTangentAngle: 0,
-        exteriorCalculationType: 'parametre'
+        exteriorCalculationType: 'tangente'
+      });
+    });
+
+    it('should force the tangente calculation type, the only one supported', () => {
+      const data = {
+        ...createTestMeasureData(),
+        exteriorCalculationType: 'parametre' as const,
+        exteriorParameter: 1500
+      };
+      expect(applyTangentAimingExteriorDefaults(data, '0')).toMatchObject({
+        exteriorCalculationType: 'tangente',
+        exteriorParameter: 1500
       });
     });
 
@@ -97,17 +109,18 @@ describe('tangent-aiming-exterior helpers', () => {
       const data = applyTangentAimingExteriorDefaults(createTestMeasureData(), '0');
       expect(isTangentAimingExteriorDataValid(data)).toBe(true);
       expect(isTangentAimingExteriorDataValid({ ...data, exteriorLeftSupport: null })).toBe(false);
-      expect(isTangentAimingExteriorDataValid({ ...data, exteriorParameter: null })).toBe(false);
+      expect(isTangentAimingExteriorDataValid({ ...data, exteriorTangentAngle: null })).toBe(false);
+      expect(isTangentAimingExteriorDataValid({ ...data, exteriorTangentAngle: 201 })).toBe(false);
     });
 
     it('should ignore the hidden field for the validity', () => {
       const data = applyTangentAimingExteriorDefaults(createTestMeasureData(), '0');
-      expect(isTangentAimingExteriorDataValid({ ...data, exteriorTangentAngle: null })).toBe(true);
+      expect(isTangentAimingExteriorDataValid({ ...data, exteriorParameter: null })).toBe(true);
       expect(
         isTangentAimingExteriorDataValid({
           ...data,
-          exteriorCalculationType: 'tangente',
-          exteriorParameter: null
+          exteriorCalculationType: 'parametre',
+          exteriorTangentAngle: null
         })
       ).toBe(true);
     });
@@ -115,12 +128,12 @@ describe('tangent-aiming-exterior helpers', () => {
     it('should clear the field hidden by the calculation type', () => {
       const data = applyTangentAimingExteriorDefaults(createTestMeasureData(), '0');
       expect(resetNonDisplayedExteriorFields(data)).toMatchObject({
-        exteriorParameter: 20,
-        exteriorTangentAngle: null
-      });
-      expect(resetNonDisplayedExteriorFields({ ...data, exteriorCalculationType: 'tangente' })).toMatchObject({
         exteriorParameter: null,
         exteriorTangentAngle: 0
+      });
+      expect(resetNonDisplayedExteriorFields({ ...data, exteriorCalculationType: 'parametre' })).toMatchObject({
+        exteriorParameter: 20,
+        exteriorTangentAngle: null
       });
     });
 
@@ -146,7 +159,7 @@ describe('tangent-aiming-exterior helpers', () => {
     it('should build the calculation inputs', () => {
       const data = applyTangentAimingExteriorDefaults(createTestMeasureData(), '3');
       const inputs = toTangentAimingExteriorInputs(data);
-      expect(inputs).toMatchObject({ leftSupport: '3', calculationType: 'parametre', parameter: 20 });
+      expect(inputs).toMatchObject({ leftSupport: '3', calculationType: 'tangente', tangentAngle: 0 });
     });
   });
 });

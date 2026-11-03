@@ -70,7 +70,6 @@ export class TangentAimingExteriorComponent extends TangentAimingFormBase {
       calculationFailedKey: TANGENT_AIMING_EXTERIOR_CALCULATION_FAILED_KEY,
       getDisplayedInputFields,
       invalidateResult: invalidateTangentAimingExteriorResult,
-      toInputs: toTangentAimingExteriorInputs,
       toTaskInputs: (data) => toTangentAimingExteriorTaskInputs(toTangentAimingExteriorInputs(data))
     });
   }
