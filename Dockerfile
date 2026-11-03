@@ -17,7 +17,8 @@ COPY . /usr/src/app
 
 RUN npm ci
 
-RUN uv python install 3.13
+# 3.14: set-up script and stellar-engine (Pyodide runtime); 3.13: Sphinx docs venv below.
+RUN uv python install 3.14 3.13
 
 RUN npm run set-up-mechaphlowers
 
