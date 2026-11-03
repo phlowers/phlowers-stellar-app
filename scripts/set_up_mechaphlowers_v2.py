@@ -353,9 +353,9 @@ def replace_with_cdn(
                         local_cdn / v
                         for v in (
                             fname,
-                            fname.replace("-py3-none-any.whl", "-cp313-none-any.whl"),
+                            fname.replace("-py3-none-any.whl", "-cp314-none-any.whl"),
                             fname.replace(
-                                "-py2.py3-none-any.whl", "-cp313-none-any.whl"
+                                "-py2.py3-none-any.whl", "-cp314-none-any.whl"
                             ),
                         )
                         if (local_cdn / v).exists()
@@ -404,7 +404,7 @@ def deduplicate(cdn_names: set[str]) -> None:
         if len(ws) <= 1:
             continue
         # A CDN build is either compiled for wasm (pyemscripten) or pure Python (none-any);
-        # cp313 is never used as a criterion since it can change with the Python version.
+        # cp314 is never used as a criterion since it can change with the Python version.
         tags = ("pyemscripten", "none-any") if name in cdn_names else ("none-any",)
         keep = next(
             (w for tag in tags for w in ws if tag in w.lower()),
