@@ -19,6 +19,8 @@ Usage:
 """
 
 import argparse
+import base64
+import hashlib
 import json
 import os
 import re
@@ -35,6 +37,7 @@ import requests
 
 SCRIPTS_DIR = Path(__file__).parent
 PACKAGE_JSON = SCRIPTS_DIR.parent / "package.json"
+PACKAGE_LOCK_JSON = SCRIPTS_DIR.parent / "package-lock.json"
 PYODIDE_DIR = Path("./public/pyodide")
 PACKAGES_JSON = Path("./src/app/core/services/worker_python/python-packages.json")
 SE_DIR = Path("./stellar-engine")
@@ -43,6 +46,8 @@ SE_INPUT = SE_DIR / "input"
 # The runtime packages (versions + hashes) come from stellar-engine/uv.lock, exported on the fly.
 # pip is the downloader, so its version is pinned too.
 PIP_VERSION = "26.2.2"
+# Same for the py-compile tool: uvx would otherwise resolve the newest release on every build.
+PYODIDE_BUILD_VERSION = "0.39.3"
 CORE_FILES = (
     "pyodide.asm.wasm",
     "pyodide.asm.js",
@@ -129,6 +134,48 @@ def pyodide_version() -> str:
     return json.loads(PACKAGE_JSON.read_text())["dependencies"]["pyodide"].lstrip("^~")
 
 
+def fetch(url: str, timeout: int) -> bytes:
+    """Download *url* and fail on any HTTP error."""
+    resp = requests.get(url, timeout=timeout)
+    resp.raise_for_status()
+    return resp.content
+
+
+def check_sha256(data: bytes, expected: str, label: str) -> None:
+    """Raise ``ValueError`` if the sha256 of *data* differs from *expected*."""
+    actual = hashlib.sha256(data).hexdigest()
+    if actual != expected.lower():
+        raise ValueError(f"{label} sha256 mismatch (expected {expected}, got {actual})")
+
+
+def verify_npm_integrity(data: bytes, integrity: str, label: str) -> None:
+    """Check *data* against an npm SRI string (``<algo>-<base64 digest>``); exit on mismatch."""
+    algo, _, expected = integrity.partition("-")
+    if algo not in ("sha256", "sha384", "sha512") or not expected:
+        print(f"Error: unsupported integrity value for {label}: {integrity!r}")
+        raise SystemExit(1)
+    actual = base64.b64encode(hashlib.new(algo, data).digest()).decode()
+    if actual != expected:
+        print(f"Error: {label} {algo} integrity mismatch")
+        print(f"  expected {expected}")
+        print(f"  got      {actual}")
+        raise SystemExit(1)
+
+
+def pyodide_integrity(version: str) -> str:
+    """Read the pinned ``integrity`` of the pyodide tarball from ``package-lock.json``."""
+    entry = json.loads(PACKAGE_LOCK_JSON.read_text())["packages"].get(
+        "node_modules/pyodide", {}
+    )
+    if entry.get("version") != version or not entry.get("integrity"):
+        print(
+            f"Error: no integrity for pyodide {version} in {PACKAGE_LOCK_JSON.name} "
+            f"(found version {entry.get('version')!r})"
+        )
+        raise SystemExit(1)
+    return entry["integrity"]
+
+
 # ── Step 1 – Build stellar-engine ────────────────────────────────────────────
 
 
@@ -172,9 +219,9 @@ def download_pyodide(registry: str) -> None:
 
     with tempfile.TemporaryDirectory() as tmp:
         tgz = Path(tmp) / "pyodide.tgz"
-        tgz.write_bytes(
-            requests.get(f"{registry}/pyodide/-/pyodide-{ver}.tgz", timeout=60).content
-        )
+        data = fetch(f"{registry.rstrip('/')}/pyodide/-/pyodide-{ver}.tgz", 60)
+        verify_npm_integrity(data, pyodide_integrity(ver), f"pyodide-{ver}.tgz")
+        tgz.write_bytes(data)
         with tarfile.open(tgz, "r:gz") as tar:
             tar.extractall(path=PYODIDE_DIR, filter="data")
 
@@ -288,20 +335,24 @@ def replace_with_cdn(
     label = f"local CDN ({local_cdn})" if local_cdn else "CDN"
     print(f"\n[4/5] Replacing with {label} wheels...")
 
-    if local_cdn:
-        lock_data = json.loads((local_cdn / "pyodide-lock.json").read_text())
-    else:
-        resp = requests.get(f"{cdn_url}/pyodide-lock.json", timeout=30)
-        resp.raise_for_status()
-        lock_data = resp.json()
+    # Remote mode reads the lock from the integrity-checked npm tarball (extracted in step 2),
+    # so its sha256 values are trusted and the CDN only serves the files.
+    lock_path = (local_cdn or PYODIDE_DIR) / "pyodide-lock.json"
+    lock_data = json.loads(lock_path.read_text())
 
     cdn_names: set[str] = set()
     missing: list[tuple[str, str]] = []
+    failed: list[str] = []
 
     for pkg in lock_data.get("packages", {}).values():
         name = norm(pkg.get("name", ""))
         ver, fname = pkg.get("version", ""), pkg.get("file_name", "")
+        expected_sha = pkg.get("sha256", "")
         if name not in downloaded or downloaded[name] != ver:
+            continue
+        if not expected_sha:
+            print(f"  ✗ {name}: no sha256 in {lock_path.name}")
+            failed.append(name)
             continue
 
         for w in PYODIDE_DIR.glob(f"{name.replace('-', '_')}*.whl"):
@@ -324,6 +375,7 @@ def replace_with_cdn(
                     None,
                 )
                 if src:
+                    check_sha256(src.read_bytes(), expected_sha, src.name)
                     shutil.copy(src, PYODIDE_DIR / src.name)
                     cdn_names.add(src.name)
                     print(f"  ✓ {name} ({ver})")
@@ -332,12 +384,18 @@ def replace_with_cdn(
                     print(f"  ✗ {name}: {fname} not found")
             else:
                 print(f"  ↓ Downloading {cdn_url}/{fname})...")
-                data = requests.get(f"{cdn_url}/{fname}", timeout=60).content
+                data = fetch(f"{cdn_url}/{fname}", 60)
+                check_sha256(data, expected_sha, fname)
                 (PYODIDE_DIR / fname).write_bytes(data)
                 cdn_names.add(fname)
                 print(f"  ✓ {name} ({ver})")
-        except (requests.RequestException, OSError) as exc:
+        except (requests.RequestException, OSError, ValueError) as exc:
             print(f"  ✗ {name}: {exc}")
+            failed.append(name)
+
+    if failed:
+        print(f"\n  ✗ {len(failed)} package(s) failed: {', '.join(failed)}")
+        raise SystemExit(1)
 
     if local_cdn and missing:
         print(f"\n  ✗ {len(missing)} wheel(s) missing from local CDN:")
@@ -403,7 +461,7 @@ def compile_wheels(cdn_names: set[str]) -> None:
             "--python",
             ">=3.13,<3.14",
             "--from",
-            "pyodide-build",
+            f"pyodide-build=={PYODIDE_BUILD_VERSION}",
             "pyodide",
             "py-compile",
             "--compression-level",

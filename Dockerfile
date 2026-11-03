@@ -9,13 +9,13 @@ ARG CI_COMMIT_SHA
 # link in the app and the published PDF file name always match.
 ARG APP_NAME=Stellar
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
 
 WORKDIR /usr/src/app
 
 COPY . /usr/src/app
 
-RUN npm install
+RUN npm ci
 
 RUN uv python install 3.13
 
