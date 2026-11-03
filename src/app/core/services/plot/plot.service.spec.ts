@@ -648,7 +648,13 @@ describe('PlotService', () => {
       name: 'Load case 1',
       personnelPresence,
       description: '',
-      data: { climate: { ...defaultClimaticCharge }, spanLoads: [], cableModifParams: [] }
+      data: {
+        climate: { ...defaultClimaticCharge },
+        spanLoads: [],
+        cableModifParams: [],
+        supportManipParams: [],
+        spanManipParams: []
+      }
     });
 
     const sectionWithStaff = (personnelPresence: boolean): Section => ({
@@ -1231,6 +1237,33 @@ describe('PlotService', () => {
       mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task refreshProjection timed out after 30000ms'));
 
       await expect(service.refreshProjection()).rejects.toThrow('timed out');
+      expect(service.loading()).toBe(false);
+    });
+
+    it('should clear the previous distances when the projection task rejects', async () => {
+      obstacleStateService.setDistances([{ obstacleUuid: 'obs-uuid', points: [{ pointIndex: 0 } as DistancePoint] }]);
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task refreshProjection timed out after 30000ms'));
+
+      await expect(service.refreshProjection()).rejects.toThrow('timed out');
+
+      expect(obstacleStateService.distances()).toEqual([]);
+    });
+
+    it('should keep the new distances when only the aspect ratio task rejects', async () => {
+      const obstacleDistance = { obstacleUuid: 'obs-uuid', points: [{ pointIndex: 0 } as DistancePoint] };
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+        if (task === Task.refreshProjection) {
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [obstacleDistance] },
+            error: null
+          });
+        }
+        return Promise.reject(new Error('Task getAspectRatio timed out after 30000ms'));
+      });
+
+      await expect(service.refreshProjection()).rejects.toThrow('timed out');
+
+      expect(obstacleStateService.distances()).toEqual([obstacleDistance]);
       expect(service.loading()).toBe(false);
     });
 

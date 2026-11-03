@@ -1,7 +1,7 @@
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { effect, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { cloneDeep, omit } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
@@ -70,6 +70,11 @@ export class LoadFormsService {
   private lastLoadedChargeUuid: string | null = null;
   /** Engine study the charge case was last pushed to — a rebuilt study (studio reopened) needs it again. */
   private lastLoadedEngineStudyId = 0;
+  // Load case switches in flight, counted because a quick switch overlaps the previous one. The engine outputs
+  // (distances…) still belong to the previous load case until the last one is projected, and `plotService.loading`
+  // only covers the final projection, not the engine tasks before it
+  private readonly pendingLoadCases = signal(0);
+  readonly isApplyingLoadCase = computed(() => this.pendingLoadCases() > 0);
   /**
    * Initialize the temporary load data by getting the selected charge case and checking the span loads,
    * then push all span loads into the Python engine via setLoads.
@@ -132,6 +137,7 @@ export class LoadFormsService {
     this.lastLoadedChargeUuid = currentChargeUuid;
     this.lastLoadedEngineStudyId = engineStudyId;
 
+    this.pendingLoadCases.update((count) => count + 1);
     try {
       // When there are no saved span loads, pass an empty array so the Python engine
       // takes its "no loads" code path instead of receiving zero-weight placeholder
@@ -148,6 +154,8 @@ export class LoadFormsService {
       this.lastLoadedChargeUuid = null; // Allow retry on next signal change
       this.plotService.error.set(TaskError.CALCULATION_ERROR);
       this.logger.error('initTemporaryLoadData failed', err);
+    } finally {
+      this.pendingLoadCases.update((count) => count - 1);
     }
   };
 

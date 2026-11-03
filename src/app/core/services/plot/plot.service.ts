@@ -279,11 +279,17 @@ export class PlotService {
       const plotOptions = this.plotOptionsService.plotOptions();
       // The engine study calculates the outputs with the cut strands it holds when the projection is requested
       const cutStrands = this.cutStrands ?? NO_CUT_STRANDS;
-      const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {
-        startSupport: plotOptions.startSupport,
-        endSupport: plotOptions.endSupport,
-        view: plotOptions.view
-      });
+      const { result, error, diagnostics } = await this.workerPythonService
+        .runTask(Task.refreshProjection, {
+          startSupport: plotOptions.startSupport,
+          endSupport: plotOptions.endSupport,
+          view: plotOptions.view
+        })
+        .catch((error_: unknown) => {
+          // The previous distances belong to a state the cable has left: unavailable, not stale
+          this.obstacleStateService.setDistances([]);
+          throw error_;
+        });
       this.litData.set(result?.sectionOutput?.current ?? null);
       this.baseLitData.set(result?.sectionOutput?.base ?? null);
       const currentLitData = result?.sectionOutput?.current ?? null;

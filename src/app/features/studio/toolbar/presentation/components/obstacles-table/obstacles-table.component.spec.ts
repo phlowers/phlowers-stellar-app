@@ -15,6 +15,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ObstaclesTableReportService } from '@features/studio/toolbar/presentation/services/obstacles-table-report/obstacles-table-report.service';
@@ -134,6 +135,7 @@ describe('ObstaclesTableComponent', () => {
   let studySignal: WritableSignal<unknown>;
   let plotLoadingSignal: WritableSignal<boolean>;
   let isCalculatingObstacleSignal: WritableSignal<boolean>;
+  let isApplyingLoadCaseSignal: WritableSignal<boolean>;
   let mockReportService: { generateReport: ReturnType<typeof vi.fn> };
   let mockLogger: {
     error: ReturnType<typeof vi.fn>;
@@ -179,6 +181,7 @@ describe('ObstaclesTableComponent', () => {
     studySignal = signal<unknown>(null);
     plotLoadingSignal = signal(false);
     isCalculatingObstacleSignal = signal(false);
+    isApplyingLoadCaseSignal = signal(false);
     mockReportService = {
       generateReport: vi.fn((_data: ObstaclesTableReportData): Promise<void> => Promise.resolve())
     };
@@ -199,6 +202,7 @@ describe('ObstaclesTableComponent', () => {
         { provide: ObstacleStateService, useValue: { distances: distancesSignal } },
         { provide: ObstaclesService, useValue: mockObstaclesService },
         { provide: ObstacleFormService, useValue: { isCalculatingObstacle: isCalculatingObstacleSignal } },
+        { provide: LoadFormsService, useValue: { isApplyingLoadCase: isApplyingLoadCaseSignal } },
         { provide: PlotService, useValue: { study: studySignal, loading: plotLoadingSignal } },
         { provide: ObstaclesTableReportService, useValue: mockReportService },
         { provide: LoggerService, useValue: mockLogger }
@@ -885,6 +889,34 @@ describe('ObstaclesTableComponent', () => {
       it('generates nothing while an obstacle calculation awaits its projection', async () => {
         setReportContext();
         isCalculatingObstacleSignal.set(true);
+
+        await component.onGenerateReport();
+
+        expect(mockReportService.generateReport).not.toHaveBeenCalled();
+      });
+
+      // The load case switch selects the charge before the engine tasks and the projection refresh start
+      it('disables the button and shows its loading state while a load case is being applied', () => {
+        setReportContext();
+        const { footerFixture, button, buttonComponent } = renderReportButtonWithComponent();
+
+        isApplyingLoadCaseSignal.set(true);
+        footerFixture.detectChanges();
+
+        expect(plotLoadingSignal()).toBe(false);
+        expect(button.disabled).toBe(true);
+        expect(buttonComponent.btnLoading()).toBe(true);
+
+        isApplyingLoadCaseSignal.set(false);
+        footerFixture.detectChanges();
+
+        expect(button.disabled).toBe(false);
+        expect(buttonComponent.btnLoading()).toBe(false);
+      });
+
+      it('generates nothing while a load case is being applied', async () => {
+        setReportContext();
+        isApplyingLoadCaseSignal.set(true);
 
         await component.onGenerateReport();
 

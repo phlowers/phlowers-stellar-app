@@ -30,6 +30,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 import { LateralDistanceType, ReferenceSupport } from '@shared/domain/models/obstacle.model';
 import { SpanOption } from '@shared/types/plot.types';
@@ -65,6 +66,7 @@ export class ObstaclesTableComponent {
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly obstacleFormService = inject(ObstacleFormService);
+  private readonly loadFormsService = inject(LoadFormsService);
   private readonly translocoService = inject(TranslocoService);
   private readonly logger = inject(LoggerService);
   private readonly destroyRef = inject(DestroyRef);
@@ -161,9 +163,14 @@ export class ObstaclesTableComponent {
 
   // The engine publishes the distances at the end of each projection refresh, while the plot is loading.
   // An obstacle calculation updates the positions first and only starts that refresh once the obstacle is
-  // registered in the worker and saved: until then the distances are still the previous ones.
+  // registered in the worker and saved: until then the distances are still the previous ones. Likewise a load
+  // case switch selects the charge first and only refreshes once the engine holds its loads and climate.
   readonly isReportLoading = computed(
-    () => this.isGeneratingReport() || this.obstacleFormService.isCalculatingObstacle() || this.plotService.loading()
+    () =>
+      this.isGeneratingReport() ||
+      this.obstacleFormService.isCalculatingObstacle() ||
+      this.loadFormsService.isApplyingLoadCase() ||
+      this.plotService.loading()
   );
 
   // Once the projection is refreshed, a point still without distances (e.g. outside its span) never gets
