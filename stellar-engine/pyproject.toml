@@ -13,10 +13,10 @@ classifiers = [
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
-requires-python = "==3.13.*"
+requires-python = "==3.14.*"
 license = "MPL-2.0"
 authors = [
     {name = "Adrien Goeller"},
@@ -39,24 +39,24 @@ Repository = "https://github.com/phlowers/phlowers-stellar-app"
 # Update them together with the `pyodide` version in package.json.
 constraint-dependencies = [
     "annotated-types==0.7.0",
-    "certifi==2026.1.4",
-    "numpy==2.2.5",
-    "packaging==26.2",
-    "pandas==2.3.3",
+    "certifi>=2026.10.19",
+    "numpy==2.4.6",
+    "packaging==26.1",
+    "pandas==3.0.2",
     "pandera==0.34.1",
-    "platformdirs==4.3.6",
+    "platformdirs==4.9.4",
     "pydantic==2.12.5",
     "pydantic-core==2.41.5",
     "pyproj==3.7.2",
     "python-dateutil==2.9.0.post0",
-    "pytz==2025.2",
-    "pyyaml==6.0.2",
+    "pytz==2026.1.post1",
+    "pyyaml==6.0.3",
     "six==1.17.0",
     "tenacity==9.2.1",
     "typing-extensions==4.15.0",
     "typing-inspection==0.4.2",
     "tzdata==2025.3",
-    "xxhash==3.5.0",
+    "xxhash==3.6.0",
 ]
 
 
@@ -95,7 +95,7 @@ allow-prereleases = true
 
 
 [tool.ruff]
-target-version = "py313"
+target-version = "py314"
 line-length = 79
 
 [tool.ruff.format]

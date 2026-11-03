@@ -1,6 +1,6 @@
 # /// script
-# requires-python = ">=3.13,<3.14"
-# dependencies = ["requests == 2.32.3"]
+# requires-python = ">=3.14,<3.15"
+# dependencies = ["requests == 2.34.0"]
 # ///
 """Build stellar-engine and prepare Python packages for the Pyodide worker.
 
@@ -291,7 +291,7 @@ def download_packages(se_wheel: Path, local_wheel: Path | None) -> dict[str, str
         cmd = [
             "uvx",
             "--python",
-            ">=3.13,<3.14",
+            ">=3.14,<3.15",
             "--from",
             f"pip=={PIP_VERSION}",
             "pip",
@@ -335,9 +335,12 @@ def replace_with_cdn(
     label = f"local CDN ({local_cdn})" if local_cdn else "CDN"
     print(f"\n[4/5] Replacing with {label} wheels...")
 
-    # Remote mode reads the lock from the integrity-checked npm tarball (extracted in step 2),
-    # so its sha256 values are trusted and the CDN only serves the files.
-    lock_path = (local_cdn or PYODIDE_DIR) / "pyodide-lock.json"
+    # The manifest always comes from the integrity-checked npm tarball (extracted in step 2),
+    # never from the CDN or the local directory, which only serve the wheel files.
+    lock_path = PYODIDE_DIR / "pyodide-lock.json"
+    if not lock_path.is_file():
+        print(f"Error: {lock_path} missing from the verified pyodide tarball")
+        raise SystemExit(1)
     lock_data = json.loads(lock_path.read_text())
 
     cdn_names: set[str] = set()
@@ -365,9 +368,9 @@ def replace_with_cdn(
                         local_cdn / v
                         for v in (
                             fname,
-                            fname.replace("-py3-none-any.whl", "-cp313-none-any.whl"),
+                            fname.replace("-py3-none-any.whl", "-cp314-none-any.whl"),
                             fname.replace(
-                                "-py2.py3-none-any.whl", "-cp313-none-any.whl"
+                                "-py2.py3-none-any.whl", "-cp314-none-any.whl"
                             ),
                         )
                         if (local_cdn / v).exists()
@@ -375,8 +378,9 @@ def replace_with_cdn(
                     None,
                 )
                 if src:
-                    check_sha256(src.read_bytes(), expected_sha, src.name)
-                    shutil.copy(src, PYODIDE_DIR / src.name)
+                    data = src.read_bytes()
+                    check_sha256(data, expected_sha, src.name)
+                    (PYODIDE_DIR / src.name).write_bytes(data)
                     cdn_names.add(src.name)
                     print(f"  ✓ {name} ({ver})")
                 else:
@@ -420,7 +424,7 @@ def deduplicate(cdn_names: set[str]) -> None:
         if len(ws) <= 1:
             continue
         # A CDN build is either compiled for wasm (pyemscripten) or pure Python (none-any);
-        # cp313 is never used as a criterion since it can change with the Python version.
+        # cp314 is never used as a criterion since it can change with the Python version.
         tags = ("pyemscripten", "none-any") if name in cdn_names else ("none-any",)
         keep = next(
             (w for tag in tags for w in ws if tag in w.lower()),
@@ -459,7 +463,7 @@ def compile_wheels(cdn_names: set[str]) -> None:
         [
             "uvx",
             "--python",
-            ">=3.13,<3.14",
+            ">=3.14,<3.15",
             "--from",
             f"pyodide-build=={PYODIDE_BUILD_VERSION}",
             "pyodide",
@@ -578,8 +582,8 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if args.local_cdn_dir and not (args.local_cdn_dir / "pyodide-lock.json").exists():
-        print(f"Error: {args.local_cdn_dir}/pyodide-lock.json not found")
+    if args.local_cdn_dir and not args.local_cdn_dir.is_dir():
+        print(f"Error: {args.local_cdn_dir} is not a directory")
         raise SystemExit(1)
 
     local_wheel = None
