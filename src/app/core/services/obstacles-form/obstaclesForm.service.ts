@@ -449,6 +449,11 @@ export class ObstacleFormService {
     try {
       // 1. Merge new/updated obstacle into the in-memory section
       this.upsertObstacleInSection(obstacle);
+      // The section already holds the new positions: the previous distances no longer match them. Dropped here,
+      // before anything can fail, so only a successful projection brings them back
+      this.obstacleStateService.setDistances(
+        this.obstacleStateService.distances().filter((distance) => distance.obstacleUuid !== obstacle.uuid)
+      );
 
       // 2. Register the current obstacle in Python worker
       await this.obstacleStateService.addSingleObstacle(obstacle, this.plotOptionsService.plotOptions());
@@ -463,10 +468,6 @@ export class ObstacleFormService {
       const lastPointIndex = obstacle.positions.length > 0 ? obstacle.positions.length - 1 : null;
       this.obstaclesService.setSelectedMeasure(obstacle.uuid, lastPointIndex);
     } catch (error) {
-      // The section already holds the new positions: the previous distances no longer match them
-      this.obstacleStateService.setDistances(
-        this.obstacleStateService.distances().filter((distance) => distance.obstacleUuid !== obstacle.uuid)
-      );
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(
         this.translocoService.translate('studio.conformity.calculation-failed-error', { errorMessage })

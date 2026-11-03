@@ -137,6 +137,9 @@ export class LoadFormsService {
     this.lastLoadedChargeUuid = currentChargeUuid;
     this.lastLoadedEngineStudyId = engineStudyId;
 
+    // The cached distances belong to the previous load case: a switch that fails before the projection must not
+    // leave them behind, and a successful projection replaces them
+    this.obstacleStateService.setDistances([]);
     this.pendingLoadCases.update((count) => count + 1);
     try {
       // When there are no saved span loads, pass an empty array so the Python engine

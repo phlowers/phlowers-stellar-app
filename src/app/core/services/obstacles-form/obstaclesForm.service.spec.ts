@@ -1196,7 +1196,7 @@ describe('ObstacleFormService', () => {
       expect(service.calculationError()).toContain('Calculation failed');
     });
 
-    describe('when the calculation fails before the projection refresh', () => {
+    describe('when the calculation fails', () => {
       const distanceFor = (obstacleUuid: string): Distance => ({
         obstacleUuid,
         points: [
@@ -1237,6 +1237,21 @@ describe('ObstacleFormService', () => {
 
         expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
         expect(mockObstacleStateService.distances()).toEqual([distanceFor('obs-other')]);
+      });
+
+      it('should keep the fresh distances when the projection refresh fails after publishing them', async () => {
+        const freshDistance = distanceFor('obs-1');
+        freshDistance.points[0].distanceDiagonal = 7;
+        // refreshProjection publishes the distances, then a later step (aspect ratio) rejects
+        mockPlotService.refreshProjection.mockImplementation(async () => {
+          mockObstacleStateService.distances.set([freshDistance, distanceFor('obs-other')]);
+          throw new Error('getAspectRatio timed out');
+        });
+
+        await service.calculateAndSave();
+
+        expect(service.calculationError()).toContain('getAspectRatio timed out');
+        expect(mockObstacleStateService.distances()).toEqual([freshDistance, distanceFor('obs-other')]);
       });
     });
   });

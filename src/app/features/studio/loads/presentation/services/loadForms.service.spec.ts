@@ -29,7 +29,7 @@ describe('LoadFormsService', () => {
   let plotOptionsServiceMock: vi.Mocked<PlotOptionsService>;
   let mockChargesService: vi.Mocked<ChargesService>;
   let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
-  let mockObstacleStateService: { syncObstacles: ReturnType<typeof vi.fn> };
+  let mockObstacleStateService: { syncObstacles: ReturnType<typeof vi.fn>; setDistances: ReturnType<typeof vi.fn> };
   let mockCableModificationsService: Pick<CableModificationsService, 'previewCableModification' | 'clearPreview'>;
 
   const mockSection: Section = {
@@ -181,7 +181,8 @@ describe('LoadFormsService', () => {
     };
 
     mockObstacleStateService = {
-      syncObstacles: vi.fn().mockResolvedValue(null)
+      syncObstacles: vi.fn().mockResolvedValue(null),
+      setDistances: vi.fn()
     };
 
     mockCableModificationsService = {
@@ -508,6 +509,31 @@ describe('LoadFormsService', () => {
         await service.initTemporaryLoadData();
 
         expect(service.isApplyingLoadCase()).toBe(false);
+      });
+
+      it('should clear the previous load case distances before the engine tasks, even when they fail', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+          task === Task.changeState
+            ? Promise.reject(new Error('Task changeState timed out after 30000ms'))
+            : Promise.resolve(engineIdle)
+        );
+
+        await service.initTemporaryLoadData();
+
+        expect(mockObstacleStateService.setDistances).toHaveBeenCalledWith([]);
+        expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
+      });
+
+      it('should keep the distances when re-entering for the same load case', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        mockWorkerPythonService.runTask.mockResolvedValue(engineIdle);
+        await service.initTemporaryLoadData();
+        mockObstacleStateService.setDistances.mockClear();
+
+        await service.initTemporaryLoadData();
+
+        expect(mockObstacleStateService.setDistances).not.toHaveBeenCalled();
       });
 
       it('should stay true until the last of two overlapping switches is projected', async () => {

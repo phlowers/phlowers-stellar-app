@@ -14,7 +14,7 @@ import { ObstaclesTableReportLabels } from './obstacles-table-report.interfaces'
 // Obstacle point metric rows (transposed table: one row per metric, one column per obstacle point)
 export const OBSTACLES_TABLE_METRICS: MetricDescriptor<ObstacleTableRow>[] = [
   { labelKey: 'studio.obstacles-table.obstacle-name-column-label', unit: null, decimals: 0, field: 'obstacleName' },
-  { labelKey: 'studio.obstacles-table.obstacle-type-column-label', unit: null, decimals: 0, field: 'obstacleType' },
+  { labelKey: 'common.obstacle-type-label', unit: null, decimals: 0, field: 'obstacleType' },
   { labelKey: 'common.span-label', unit: null, decimals: 0, field: 'spanLabel' },
   { labelKey: 'common.reference-support-label', unit: null, decimals: 0, field: 'referenceSupportLabel' },
   {
@@ -29,15 +29,10 @@ export const OBSTACLES_TABLE_METRICS: MetricDescriptor<ObstacleTableRow>[] = [
     decimals: 0,
     field: 'lateralDistanceTypeLabel'
   },
-  { labelKey: 'studio.obstacles-table.point-column-label', unit: '', decimals: 0, field: 'pointNumber' },
+  { labelKey: 'common.point-label', unit: '', decimals: 0, field: 'pointNumber' },
+  { labelKey: 'common.altitude-label', unit: PDF_UNITS.meters, decimals: 2, field: 'altitude' },
   {
-    labelKey: 'studio.obstacles-table.altitude-column-label',
-    unit: PDF_UNITS.meters,
-    decimals: 2,
-    field: 'altitude'
-  },
-  {
-    labelKey: 'studio.obstacles-table.ref-support-distance-column-label',
+    labelKey: 'common.ref-support-dist-label',
     unit: PDF_UNITS.meters,
     decimals: 2,
     field: 'distanceToRefSupport'
