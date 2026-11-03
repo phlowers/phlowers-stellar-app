@@ -13,6 +13,7 @@ Codes d'erreur <how_to_add_error_codes>
 i18n
 Obstacles, sols et distances <obstacles_floors_and_distances>
 Base de données hors ligne <offline_database>
+Rapports PDF <pdf_reports>
 Pipeline de rafraîchissement des graphiques <plot_refresh_pipeline>
 Styles et thèmes <theme_styles>
 Pipeline d'import générique <generic_import_pipeline>

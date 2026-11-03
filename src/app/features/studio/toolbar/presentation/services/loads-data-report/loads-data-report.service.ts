@@ -102,7 +102,7 @@ export class LoadsReportService extends PdfBaseService {
 
         drawResultTablesFlow(doc, date, labels.reportTitle, sections, labelColWidth);
 
-        drawPageFooters(doc, labels.pageLabel, true);
+        drawPageFooters(doc, labels.pageLabel);
 
         const filename = `${sanitizeFilenamePart(labels.reportTitle)}_${sanitizeFilenamePart(
           data.sectionName
