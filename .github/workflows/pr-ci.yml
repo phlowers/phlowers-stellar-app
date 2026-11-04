@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       logLevel:
-        description: 'Log level'     
+        description: 'Log level'
         required: true
         default: 'warning'
 
@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: "npm"
+          cache: 'npm'
       - name: ⚙️ Install JS dependencies
         run: npm ci
 
@@ -47,17 +47,17 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.sha }}
-          submodules: "recursive"
+          submodules: 'recursive'
       - name: ⚙️ Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: "npm"
+          cache: 'npm'
       - name: ⚙️ Install uv
         uses: astral-sh/setup-uv@v5
         with:
-          version: "0.5.24"
-          python-version: "3.13"
+          version: '0.13.5'
+          python-version: '3.14'
       - name: ⚙️ Install JS dependencies
         run: npm ci
       - name: 📃 Set up mechaphlowers
