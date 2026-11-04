@@ -231,3 +231,16 @@ export const buildSupportNameFilterTables = (
     supplementarySupportNames
   };
 };
+
+/**
+ * Filters support names by substring and returns the matches alphabetically.
+ * @param names - Catalog and supplementary support names
+ * @param filter - Current filter text
+ * @returns Sorted names matching the filter, case-insensitively
+ */
+export const filterSupportNames = (names: string[], filter: string): string[] => {
+  const query = filter.trim().toLocaleLowerCase();
+  return names
+    .filter((name) => name.toLocaleLowerCase().includes(query))
+    .toSorted((left, right) => left.localeCompare(right));
+};

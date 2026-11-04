@@ -19,6 +19,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@shared/types';
 import { PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
+import { Select } from 'primeng/select';
 import { Section, Support, CatalogChain } from '@shared/domain';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
@@ -37,11 +38,13 @@ import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 import {
   buildCopyColumnChanges,
   buildFieldChangeUpdates,
+  filterSupportNames,
   buildSupportNameFilterTables,
   buildSupplementaryChains,
   findSupplementaryNames,
   getSupportFieldValues
 } from './helpers';
+import { SUPPORT_NAME_OPTIONS_BATCH_SIZE } from './supportsTable.constantes';
 import { SUPPORT_FIELD_LIMITS } from '@shared/domain/helpers/support-limits.constantes';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
@@ -61,6 +64,7 @@ import { ExpandableSelectField } from './supportsTable.types';
     DecimalPipe,
     FormsModule,
     TableModule,
+    Select,
     PopoverModule,
     ButtonComponent,
     IconComponent,
@@ -108,6 +112,14 @@ export class SupportsTableComponent implements OnInit {
   supportFilterTable = signal<string[]>([]);
   supplementarySupportFilterTable = signal<string[]>([]);
   allSupportFilterTable = computed(() => [...this.supportFilterTable(), ...this.supplementarySupportFilterTable()]);
+  private readonly supportNameFilter = signal('');
+  private readonly supportNameVisibleCount = signal(SUPPORT_NAME_OPTIONS_BATCH_SIZE);
+  private readonly matchingSupportNameOptions = computed(() =>
+    filterSupportNames(this.allSupportFilterTable(), this.supportNameFilter())
+  );
+  readonly visibleSupportNameOptions = computed(() =>
+    this.matchingSupportNameOptions().slice(0, this.supportNameVisibleCount())
+  );
   private readonly attachmentSetRestrictionsBySupportUuid = signal<Record<string, number[]>>({});
   private readonly chainsService = inject(ChainsService);
   private readonly attachmentService = inject(AttachmentService);
@@ -236,7 +248,7 @@ export class SupportsTableComponent implements OnInit {
    * default action opens the picker) and `focusin` (for keyboard-driven opening), each
    * forcing a synchronous change-detection pass so the options exist before the picker paints.
    */
-  private readonly expandOptionFields = ['chainName', 'name', 'attachmentPosition'] as const;
+  private readonly expandOptionFields = ['chainName', 'attachmentPosition'] as const;
 
   private expandedSelectUuid(key: string): string {
     const field = this.expandOptionFields.find((f) => key.startsWith(f));
@@ -287,18 +299,13 @@ export class SupportsTableComponent implements OnInit {
    * Hiding options directly on the DOM (rather than through a signal) keeps a keystroke
    * from re-rendering every row of the table.
    */
-  onOptionFilterInput(event: Event, field: 'chainName' | 'name') {
+  onOptionFilterInput(event: Event) {
     const input = event.target as HTMLInputElement;
     const query = input.value.trim().toLowerCase();
     this.selectableOptions(input).forEach((option) => {
       option.hidden = !option.text.toLowerCase().includes(query);
     });
-    // Keeps a typed value that is absent from the catalog selectable, as the PrimeNG filter did.
-    if (field === 'chainName') {
-      this.onChainNameFilter({ filter: input.value });
-    } else {
-      this.onSupportNameFilter({ filter: input.value });
-    }
+    this.onChainNameFilter({ filter: input.value });
   }
 
   /**
@@ -340,13 +347,30 @@ export class SupportsTableComponent implements OnInit {
   }
 
   onSupportNameFilter(event: { filter: string }) {
+    const filter = event.filter.trim();
+    this.supportNameFilter.set(filter);
+    this.supportNameVisibleCount.set(SUPPORT_NAME_OPTIONS_BATCH_SIZE);
+
     const notFoundNames = findSupplementaryNames(
-      [...getSupportFieldValues(this.supports(), 'name'), event.filter],
+      [...getSupportFieldValues(this.supports(), 'name'), filter],
       this.supportFilterTable()
     );
-    if (notFoundNames.length) {
-      this.supplementarySupportFilterTable.set(notFoundNames);
+    this.supplementarySupportFilterTable.set(notFoundNames);
+  }
+
+  onSupportNameLazyLoad(event: { first: number; last: number }): void {
+    const visibleCount = this.supportNameVisibleCount();
+    const totalMatches = this.matchingSupportNameOptions().length;
+    if (event.first === 0 || event.last < visibleCount || visibleCount >= totalMatches) {
+      return;
     }
+
+    this.supportNameVisibleCount.set(Math.min(visibleCount + SUPPORT_NAME_OPTIONS_BATCH_SIZE, totalMatches));
+  }
+
+  resetSupportNameFilter(): void {
+    this.supportNameFilter.set('');
+    this.supportNameVisibleCount.set(SUPPORT_NAME_OPTIONS_BATCH_SIZE);
   }
 
   /** Latest derived-field resolution per support UUID, used to drop stale async results. */
