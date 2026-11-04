@@ -29,13 +29,21 @@ export const SPAN_OPTIONS: SelectOption[] = [
 /** Available wind direction option keys for field measuring. */
 export const WIND_DIRECTION_OPTION_KEYS: TranslatableSelectOption[] = [
   { labelKey: 'field-measuring.shared.wind-direction.north', value: 'North' },
+  { labelKey: 'field-measuring.shared.wind-direction.north-north-east', value: 'North-North-East' },
   { labelKey: 'field-measuring.shared.wind-direction.north-east', value: 'North-East' },
+  { labelKey: 'field-measuring.shared.wind-direction.east-north-east', value: 'East-North-East' },
   { labelKey: 'field-measuring.shared.wind-direction.east', value: 'East' },
+  { labelKey: 'field-measuring.shared.wind-direction.east-south-east', value: 'East-South-East' },
   { labelKey: 'field-measuring.shared.wind-direction.south-east', value: 'South-East' },
+  { labelKey: 'field-measuring.shared.wind-direction.south-south-east', value: 'South-South-East' },
   { labelKey: 'field-measuring.shared.wind-direction.south', value: 'South' },
+  { labelKey: 'field-measuring.shared.wind-direction.south-south-west', value: 'South-South-West' },
   { labelKey: 'field-measuring.shared.wind-direction.south-west', value: 'South-West' },
+  { labelKey: 'field-measuring.shared.wind-direction.west-south-west', value: 'West-South-West' },
   { labelKey: 'field-measuring.shared.wind-direction.west', value: 'West' },
-  { labelKey: 'field-measuring.shared.wind-direction.north-west', value: 'North-West' }
+  { labelKey: 'field-measuring.shared.wind-direction.west-north-west', value: 'West-North-West' },
+  { labelKey: 'field-measuring.shared.wind-direction.north-west', value: 'North-West' },
+  { labelKey: 'field-measuring.shared.wind-direction.north-north-west', value: 'North-North-West' }
 ];
 
 /** Time mode option keys (summer / winter). */

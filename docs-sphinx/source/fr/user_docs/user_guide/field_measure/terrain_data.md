@@ -75,7 +75,7 @@ Saisissez les conditions environnementales observées lors de la mesure :
 | **Saison** | — | Été / Hiver | Oui | {{app_name}} la détecte automatiquement à partir des règles de l'heure d'été. Vous pouvez la modifier si nécessaire. |
 | **Température ambiante** | °C | −50 à +99 | Oui | Température de l'air au point de mesure. |
 | **Vitesse du vent** | km/h ou m/s | 0 à 50 | Oui | Vitesse moyenne du vent pendant la mesure. Choisissez votre unité préférée (km/h ou m/s) via le bouton de bascule. |
-| **Direction du vent** | — | 8 points cardinaux | Oui | Direction d'où vient le vent (Nord, Nord-Est, Est, Sud-Est, Sud, Sud-Ouest, Ouest, Nord-Ouest). |
+| **Direction du vent** | — | 16 points | Oui | Direction d'où vient le vent (Nord, Nord-Nord-Est, Nord-Est, Est-Nord-Est, Est, Est-Sud-Est, Sud-Est, Sud-Sud-Est, Sud, Sud-Sud-Ouest, Sud-Ouest, Ouest-Sud-Ouest, Ouest, Ouest-Nord-Ouest, Nord-Ouest, Nord-Nord-Ouest), par pas de 22,5°. |
 | **Couverture nuageuse** | N0 à N8 (nébulosité) | 9 valeurs | Oui | Couverture nuageuse sur une échelle de N0 (ciel clair) à N8 (ciel entièrement couvert). N0, N3, N4, N7 sont non étiquetés ; N1 = Ensoleillé, N2 = Partiellement nuageux, N5 = Nuageux, N6 = Ciel couvert, N8 = Couvert / enfumé. |
 
 ```{note}

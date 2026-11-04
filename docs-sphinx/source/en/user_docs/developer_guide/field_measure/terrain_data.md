@@ -40,7 +40,7 @@ The measure data is typed as `FieldMeasure` (from `domain/types.ts`), which incl
   - `ambientTemperature` (number, °C): range -50 to 99
   - `windSpeed` (number): range 0 to 50
   - `windSpeedUnit` ('kmh' | 'ms'): km/h or m/s
-  - `windDirection` (string): one of 8 compass directions (North, North-East, …)
+  - `windDirection` (string): one of 16 compass directions (North, North-North-East, North-East, …)
   - `skyCover` (SkyCover enum N0–N8): nebulosity scale
 - **Location data** (Header, shared):
   - `span` (number[] | null): `[leftSupportIndex, rightSupportIndex]`
@@ -87,7 +87,7 @@ Additional fields exist for other tabs (parameter calculation, temperature, para
 - **Time / Season**: season toggle (Summer/Winter) + time picker (24-hour format).
 - **Ambient temperature**: number input (°C), range -50 to 99.
 - **Wind speed**: number input (0–50) + unit toggle (km/h or m/s).
-- **Wind direction**: dropdown (8 compass directions).
+- **Wind direction**: dropdown (16 compass directions).
 - **Sky cover**: dropdown (N0–N8 nebulosity scale).
 
 All fields display a mandatory-field info message (`field-measuring.field-datas.mandatory-msg`).

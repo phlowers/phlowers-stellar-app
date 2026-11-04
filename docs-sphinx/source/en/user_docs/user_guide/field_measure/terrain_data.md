@@ -75,7 +75,7 @@ Enter the environmental conditions you observed during measurement:
 | **Season** | — | Summer / Winter | Yes | {{app_name}} auto-detects this based on daylight-saving time rules. You may override it if needed. |
 | **Ambient temperature** | °C | −50 to +99 | Yes | Air temperature at the measurement location. |
 | **Wind speed** | km/h or m/s | 0 to 50 | Yes | Average wind speed during measurement. Choose your preferred unit (km/h or m/s) via the toggle. |
-| **Wind direction** | — | 8 compass points | Yes | Direction from which the wind blows (North, North-East, East, South-East, South, South-West, West, North-West). |
+| **Wind direction** | — | 16 compass points | Yes | Direction from which the wind blows (North, North-North-East, North-East, East-North-East, East, East-South-East, South-East, South-South-East, South, South-South-West, South-West, West-South-West, West, West-North-West, North-West, North-North-West). |
 | **Sky cover** | N0 to N8 (nebulosity) | 9 values | Yes | Cloud cover on a scale from N0 (clear sky) to N8 (fully covered). N0, N3, N4, N7 are unlabeled; N1 = Sunny, N2 = Partly Cloudy, N5 = Cloudy, N6 = Covered Sky, N8 = Covered/Smoky. |
 
 ```{note}

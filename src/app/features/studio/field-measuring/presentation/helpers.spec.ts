@@ -6,7 +6,13 @@
  */
 
 import { FieldMeasure, FieldMeasureOutputs } from '@features/studio/field-measuring/domain/types';
-import { buildFieldMeasureExportFilename, createTestMeasureData, getActiveParameterOutput } from './helpers';
+import { TranslocoService } from '@jsverse/transloco';
+import {
+  buildFieldMeasureExportFilename,
+  buildWindDirectionOptions,
+  createTestMeasureData,
+  getActiveParameterOutput
+} from './helpers';
 
 describe('getActiveParameterOutput', () => {
   const result = { parameter: 1200, uncertainty: 2, criterion: 1, checkValidity: true };
@@ -66,5 +72,32 @@ describe('buildFieldMeasureExportFilename', () => {
     expect(buildFieldMeasureExportFilename(measureData, null, date)).toBe(
       'Export Mesure de terrain_field-measure_field-measure_2026-09-30'
     );
+  });
+});
+
+describe('buildWindDirectionOptions', () => {
+  it('should expose the 16 compass directions ordered clockwise from North', () => {
+    const translocoService = { translate: (key: string) => key } as unknown as TranslocoService;
+    const options = buildWindDirectionOptions(translocoService);
+
+    expect(options.map((option) => option.value)).toEqual([
+      'North',
+      'North-North-East',
+      'North-East',
+      'East-North-East',
+      'East',
+      'East-South-East',
+      'South-East',
+      'South-South-East',
+      'South',
+      'South-South-West',
+      'South-West',
+      'West-South-West',
+      'West',
+      'West-North-West',
+      'North-West',
+      'North-North-West'
+    ]);
+    expect(options[1].label).toBe('field-measuring.shared.wind-direction.north-north-east');
   });
 });
