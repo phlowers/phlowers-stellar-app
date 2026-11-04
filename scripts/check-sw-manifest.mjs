@@ -11,6 +11,7 @@ const PYTHON_PACKAGES = path.join(ROOT, 'src', 'app', 'core', 'services', 'worke
 
 const REQUIRED_URLS = [
   '/index.html',
+  '/pyodide/pyodide.asm.mjs',
   '/pyodide/pyodide.asm.wasm',
   '/pyodide/python_stdlib.zip',
   '/pyodide/pyodide-lock.json'

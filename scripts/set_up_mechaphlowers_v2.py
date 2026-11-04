@@ -50,7 +50,7 @@ PIP_VERSION = "26.2.2"
 PYODIDE_BUILD_VERSION = "0.39.3"
 CORE_FILES = (
     "pyodide.asm.wasm",
-    "pyodide.asm.js",
+    "pyodide.asm.mjs",
     "python_stdlib.zip",
     "pyodide-lock.json",
 )

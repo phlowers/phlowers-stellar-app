@@ -1,6 +1,6 @@
 {
   "name": "phlowers-stellar-app",
-  "version": "1.9.2",
+  "version": "1.10.1",
   "packageManager": "npm@10.9.8",
   "scripts": {
     "ng": "ng",
@@ -15,7 +15,7 @@
     "lint-check-blocked": "eslint . --quiet",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "coverage": "vitest run --coverage",
+    "coverage": "vitest run --coverage --maxWorkers=2",
     "test:watch": "vitest",
     "e2e": "playwright test",
     "e2e:headed": "playwright test --headed",
