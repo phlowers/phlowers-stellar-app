@@ -188,9 +188,16 @@ export class PlotService {
     }
     this.plotOptionsService.plotOptionsChange(
       values,
-      () => this.loading(),
+      () => this.loading() || !this.isEngineStudyCurrent(),
       () => this.refreshProjection()
     );
+  }
+
+  // The engine study still belongs to the previous section (or none) until initSectionStudio replaces it: projecting
+  // before that would render the previous section's obstacles and floors
+  private isEngineStudyCurrent(): boolean {
+    const sectionUuid = this.spanService.section()?.uuid;
+    return !!sectionUuid && sectionUuid === this.currentSectionUuid;
   }
 
   initSectionStudio = async (section: Section) => {
@@ -212,7 +219,10 @@ export class PlotService {
       return;
     }
     this.loading.set(true);
+    // The studio may be left, or another section opened, while the awaits below are pending
+    const isSuperseded = () => this.currentSectionUuid !== section.uuid;
     const cable = await this.cableService.getCable(section.cable_name);
+    if (isSuperseded()) return;
     if (!cable) {
       this.logger.error('no cable found: ', section.cable_name);
       this.loading.set(false);
@@ -223,6 +233,7 @@ export class PlotService {
       section: alignSectionSpanLoadsToSupports(section),
       cable
     });
+    if (isSuperseded()) return;
     this.error.set(error);
     this.diagnostics.set(diagnostics);
 
@@ -234,12 +245,14 @@ export class PlotService {
 
     // A new engine study has no high safety. Read the latest section, the selected charge may have changed during initLit
     await this.applyHighSafety(untracked(() => this.selectedChargeHighSafety()));
+    if (isSuperseded()) return;
 
     // A new engine study has no cut strands either: the saved ones are part of the section, like high safety
     this.cutStrands = NO_CUT_STRANDS;
     const savedCutStrands = untracked(() => this.savedCutStrands());
     if (!isEqual(savedCutStrands, this.cutStrands)) {
       await this.applyCutStrands(savedCutStrands);
+      if (isSuperseded()) return;
     }
 
     // When no charge is selected, apply base climate so the engine reflects
@@ -248,6 +261,7 @@ export class PlotService {
     // if (!section.selected_charge_uuid) {
     const baseClimate = getBaseClimate(section);
     await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate, reload: true });
+    if (isSuperseded()) return;
     // }
 
     // Floors are registered as a specific obstacle type to reuse the obstacle worker's
@@ -264,6 +278,7 @@ export class PlotService {
         obstacles,
         untracked(() => this.plotOptionsService.plotOptions())
       );
+      if (isSuperseded()) return;
     }
 
     // initLit initializes the study — refreshProjection gets the actual render data
@@ -274,6 +289,7 @@ export class PlotService {
 
   refreshProjection = async () => {
     this.loading.set(true);
+    const sectionUuid = this.currentSectionUuid;
     // runTask rejects on timeout or when the worker is unavailable: the plot must not stay loading
     try {
       const plotOptions = this.plotOptionsService.plotOptions();
@@ -290,6 +306,8 @@ export class PlotService {
           this.obstacleStateService.setDistances([]);
           throw error_;
         });
+      // The studio was left, or another section opened, meanwhile: this output belongs to the previous section
+      if (this.currentSectionUuid !== sectionUuid) return;
       this.litData.set(result?.sectionOutput?.current ?? null);
       this.baseLitData.set(result?.sectionOutput?.base ?? null);
       const currentLitData = result?.sectionOutput?.current ?? null;
@@ -309,7 +327,9 @@ export class PlotService {
       const scalingFactors = untracked(() => this.plotOptionsService.scalingFactors());
       await this.updateAspectRatio(scalingFactors, plotOptions);
     } finally {
-      this.loading.set(false);
+      if (this.currentSectionUuid === sectionUuid) {
+        this.loading.set(false);
+      }
     }
   };
 
