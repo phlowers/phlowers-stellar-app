@@ -145,15 +145,6 @@
 
 ---
 
-## 11. `recheckSpanLoads` — `src/app/features/studio/loads/presentation/helpers.ts`
-
-- **Type**: function
-- **Reason**: `loadForms.service.ts` now imports `recheckSpanLoads` from `@shared/domain/helpers/span-loads.helpers` (the improved, immutable version). The local `helpers.ts` export is never imported anywhere. Note: `emptySpanLoad` from the same file IS still used by `load-marking.component.ts`.
-- **Detected on**: 2026-04-13
-- **Status**: ⏳ PENDING REVIEW
-
----
-
 ## 5. `ServerStatus` — `core/services/news/news.service.ts`
 
 | | |
@@ -257,6 +248,15 @@
 
 ---
 
+## 11. `recheckSpanLoads` — `src/app/features/studio/loads/presentation/helpers.ts`
+
+- **Type**: function
+- **Reason**: `loadForms.service.ts` now imports `recheckSpanLoads` from `@shared/domain/helpers/span-loads.helpers` (the improved, immutable version). The local `helpers.ts` export is never imported anywhere. Note: `emptySpanLoad` from the same file IS still used by `load-marking.component.ts`.
+- **Detected on**: 2026-04-13
+- **Status**: ⏳ PENDING REVIEW
+
+---
+
 ## 12. `clearPersistedFormData()` — `src/app/features/studio/loads/presentation/services/cableModifications.service.ts`
 - **Type**: method
 - **Reason**: No-op placeholder with no body. Called by `CableLengthChangeComponent.deleteForm()` but has no observable side effects. Component-level tests already verify the call sites; no meaningful unit test can be written for the service method itself until a real implementation is added.
@@ -289,7 +289,7 @@
 
 ---
 
-## 15 `deleteLoad()` — `src/app/features/studio/loads/presentation/services/loadForms.service.ts`
+## 15. `deleteLoad()` — `src/app/features/studio/loads/presentation/services/loadForms.service.ts`
 
 - **Type**: method
 - **Reason**: After the fix for bug #526, `deleteCharge()` in `load-marking.component.ts` no longer calls `deleteLoad()`. No other caller exists in the codebase.
@@ -365,7 +365,7 @@
 
 ---
 
-## 20. `lodash.isEqual` import — `core/services/worker_update/worker_update.service.ts` (CLEANUP)
+## 21. `lodash.isEqual` import — `core/services/worker_update/worker_update.service.ts` (CLEANUP)
 
 | | |
 |---|---|
@@ -378,7 +378,7 @@
 
 ---
 
-## 21. `isFirstUseOffline` signal — `core/services/auth/auth.service.ts`
+## 22. `isFirstUseOffline` signal — `core/services/auth/auth.service.ts`
 
 | | |
 |---|---|
@@ -391,7 +391,7 @@
 
 ---
 
-## 22. `OidcClaims` type alias — `core/services/auth/auth.service.ts` (CLEANUP)
+## 23. `OidcClaims` type alias — `core/services/auth/auth.service.ts` (CLEANUP)
 
 | | |
 |---|---|
@@ -404,7 +404,7 @@
 
 ---
 
-## 23. `checkIfAppInstalled` — `core/services/worker_update/service-worker.ts`
+## 24. `checkIfAppInstalled` — `core/services/worker_update/service-worker.ts`
 
 | | |
 |---|---|
@@ -417,7 +417,7 @@
 
 ---
 
-## 24. `noCacheHeaders` function — `core/services/worker_update/service-worker.ts` (CLEANUP)
+## 25. `noCacheHeaders` function — `core/services/worker_update/service-worker.ts` (CLEANUP)
 
 | | |
 |---|---|
@@ -430,7 +430,7 @@
 
 ---
 
-## 25. `export type { AppVersion }` re-export — `core/services/worker_update/worker_update.service.ts` (CLEANUP)
+## 26. `export type { AppVersion }` re-export — `core/services/worker_update/worker_update.service.ts` (CLEANUP)
 
 | | |
 |---|---|
@@ -443,7 +443,7 @@
 
 ---
 
-## 26. `createUser()` + `validateEmail()` + `user$` + `userSubject` — `core/services/user/user.service.ts`
+## 27. `createUser()` + `validateEmail()` + `user$` + `userSubject` — `core/services/user/user.service.ts`
 
 | | |
 |---|---|
@@ -456,7 +456,7 @@
 
 ---
 
-## 27. `mockCurrentVersion` + `mockLatestVersion` dev constants — `core/services/worker_update/worker_update.service.ts`
+## 28. `mockCurrentVersion` + `mockLatestVersion` dev constants — `core/services/worker_update/worker_update.service.ts`
 
 | | |
 |---|---|
@@ -469,7 +469,7 @@
 
 ---
 
-## 28. `buildSupportNameFilterTables` + `getUniqueSortedSupportNamesFromAttachments` — `supportsTable/helpers.ts`
+## 29. `buildSupportNameFilterTables` + `getUniqueSortedSupportNamesFromAttachments` — `supportsTable/helpers.ts`
 
 | | |
 |---|---|
@@ -483,7 +483,7 @@
 
 ---
 
-## 29. Legacy attachments flat-table API — `AttachmentService` + `catAttachments`
+## 30. Legacy attachments flat-table API — `AttachmentService` + `catAttachments`
 
 | | |
 |---|---|
@@ -497,7 +497,7 @@
 
 ---
 
-## 30. Legacy `attachment-import.worker` (attachment-only Web Worker)
+## 31. Legacy `attachment-import.worker` (attachment-only Web Worker)
 
 | | |
 |---|---|
@@ -510,7 +510,7 @@
 
 ---
 
-## 31. `obstacle_type_rte.csv` (legacy obstacle CSV catalog)
+## 32. `obstacle_type_rte.csv` (legacy obstacle CSV catalog)
 
 | | |
 |---|---|
@@ -523,7 +523,7 @@
 
 ---
 
-## 32. `ObstacleTypeCsvDto` interface
+## 33. `ObstacleTypeCsvDto` interface
 
 | | |
 |---|---|
@@ -536,7 +536,7 @@
 
 ---
 
-## 33. `applyObstacleOutputToLitData` + obstacle rendering from registration tasks
+## 34. `applyObstacleOutputToLitData` + obstacle rendering from registration tasks
 
 | | |
 |---|---|
@@ -549,7 +549,7 @@
 
 ---
 
-## 34. `integerValidator` — `src/app/shared/components/initial-condition-modal/initialConditionModal.helpers.ts`
+## 35. `integerValidator` — `src/app/shared/components/initial-condition-modal/initialConditionModal.helpers.ts`
 
 | | |
 |---|---|
@@ -562,7 +562,7 @@
 
 ---
 
-## 35. `shared.initial-condition-modal.whole-number-required` i18n key
+## 36. `shared.initial-condition-modal.whole-number-required` i18n key
 
 | | |
 |---|---|
@@ -575,7 +575,7 @@
 
 ---
 
-## 36. `studio.hanging-table.max-two-decimals-error` + `studio.hanging-table.integer-error` i18n keys
+## 37. `studio.hanging-table.max-two-decimals-error` + `studio.hanging-table.integer-error` i18n keys
 
 | | |
 |---|---|
@@ -588,7 +588,7 @@
 
 ---
 
-## 37. `FreePositioningComponent` (legacy monolith) — `core/presentation/components/free-positioning/free-positioning.component.ts`
+## 38. `FreePositioningComponent` (legacy monolith) — `core/presentation/components/free-positioning/free-positioning.component.ts`
 
 | | |
 |---|---|
@@ -602,7 +602,7 @@
 
 ---
 
-## 38. `LoadFormsService.activeSpanSupportUuid` (write-only) — `loads/presentation/services/loadForms.service.ts`
+## 39. `LoadFormsService.activeSpanSupportUuid` (write-only) — `loads/presentation/services/loadForms.service.ts`
 
 | | |
 |---|---|
@@ -613,7 +613,7 @@
 | Removal impact | Remove the signal + its `.set()` call in `load-marking.component.ts` and related spec mocks. |
 | ✅ Validated | ⏳ Pending review |
 | Detected on | 2026-09-16 |
-## 39. `maintenance_center_names` + `regional_maintenance_center_names` — `Section` model (SIG.144) — ✅ RESOLVED
+## 40. `maintenance_center_names` + `regional_maintenance_center_names` — `Section` model (SIG.144) — ✅ RESOLVED
 
 | | |
 |---|---|
@@ -626,7 +626,7 @@
 
 ---
 
-## 40. `FieldMeasure.diffuseSolarFlux` + `diffuseDirectSolarFlux` (ticket 842)
+## 41. `FieldMeasure.diffuseSolarFlux` + `diffuseDirectSolarFlux` (ticket 842)
 
 | | |
 |---|---|
@@ -639,7 +639,7 @@
 
 ---
 
-## 39. `flattenSupportManipulations` — `loads-data-report.helpers.ts` (ticket 863)
+## 42. `flattenSupportManipulations` — `loads-data-report.helpers.ts` (ticket 863)
 
 | | |
 |---|---|
@@ -652,7 +652,7 @@
 
 ---
 
-## 41. `RuleClimaticCondition.set_wind_pressure` — `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+## 43. `RuleClimaticCondition.set_wind_pressure` — `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
 
 | | |
 |---|---|
@@ -665,7 +665,7 @@
 
 ---
 
-## 42. `ConformityResult.compute_table_result` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+## 44. `ConformityResult.compute_table_result` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
 
 | | |
 |---|---|
@@ -678,7 +678,7 @@
 
 ---
 
-## 43. `ConformityTableResult.set_conformity_point` + `current_conformity_point` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+## 45. `ConformityTableResult.set_conformity_point` + `current_conformity_point` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
 
 | | |
 |---|---|
@@ -691,7 +691,7 @@
 
 ---
 
-## 44. `ConformityTableResult.add_scenario_compliance` + `scenario_compliances` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+## 46. `ConformityTableResult.add_scenario_compliance` + `scenario_compliances` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
 
 | | |
 |---|---|
@@ -704,7 +704,7 @@
 
 ---
 
-## 45. `ConformityTableResult.set_target_state` + `set_distance` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+## 47. `ConformityTableResult.set_target_state` + `set_distance` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
 
 | | |
 |---|---|
@@ -717,7 +717,7 @@
 
 ---
 
-## 46. `ConformityResult.add_zone_3d_point` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+## 48. `ConformityResult.add_zone_3d_point` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
 
 | | |
 |---|---|
@@ -730,7 +730,7 @@
 
 ---
 
-## 47. `ConformityTableResult.overhang_compliance_line_axis_distance` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
+## 49. `ConformityTableResult.overhang_compliance_line_axis_distance` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`
 
 | | |
 |---|---|
@@ -743,7 +743,7 @@
 
 ---
 
-## 48. `Point2D.from_array` + `TableResultWriter.__init__` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`, `stellar-engine/src/stellar_engine/entities/conformity.py`
+## 50. `Point2D.from_array` + `TableResultWriter.__init__` — `stellar-engine/src/stellar_engine/core/conformity/compute.py`, `stellar-engine/src/stellar_engine/entities/conformity.py`
 
 | | |
 |---|---|
@@ -756,7 +756,7 @@
 
 ---
 
-## 49. `to_dict` of the conformity inputs — `stellar-engine/src/stellar_engine/entities/conformity.py`, `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+## 51. `to_dict` of the conformity inputs — `stellar-engine/src/stellar_engine/entities/conformity.py`, `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
 
 | | |
 |---|---|
@@ -769,7 +769,7 @@
 
 ---
 
-## 50. `Scenario.to_dict` + `TargetState.to_dict` — `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
+## 52. `Scenario.to_dict` + `TargetState.to_dict` — `stellar-engine/src/stellar_engine/core/conformity/scenarios.py`
 
 | | |
 |---|---|
@@ -779,7 +779,7 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove both methods; no other change. |
 | ✅ Validated | 🗑️ REMOVED — validated in plan review — 2026-10-08 |
-## 41. `app-assets-candidate-*` cache cleanup — `features/admin/presentation/pages/admin/admin.ts`
+## 53. `app-assets-candidate-*` cache cleanup — `features/admin/presentation/pages/admin/admin.ts`
 
 | | |
 |---|---|
@@ -792,7 +792,7 @@
 
 ---
 
-## 42. `topbar.constantes.ts` — `shared/components/layout/topbar`
+## 54. `topbar.constantes.ts` — `shared/components/layout/topbar`
 
 | | |
 |---|---|
@@ -805,7 +805,7 @@
 
 ---
 
-## 43. `OnlineService.serverOnline$` health probe — `core/services/online/online.service.ts`
+## 55. `OnlineService.serverOnline$` health probe — `core/services/online/online.service.ts`
 
 | | |
 |---|---|
@@ -814,4 +814,17 @@
 | 🔍 Evidence | The home card was the only consumer of `serverOnline$`; it now relies on `online$` and the offline readiness state. There is no backend, so the probe always fails. `online$` is still used by news, changelog, admin and home. |
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the probe, `serverOnline$`, `ServerStatus`, the `HttpClient` dependency and matching tests in `online.service.spec.ts`; `environment.apiUrl` / `API_URL` become unused. |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 56. Cable adjustment `SUPPORT_OPTIONS` + `common.left` / `common.right` i18n keys
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/cable-adjustment/domain/cable-adjustment.constantes.ts` (`SUPPORT_OPTIONS`), `cable-adjustment.interfaces.ts` (`CableAdjustmentSupportOption`), `public/i18n/en.json` / `fr.json` (`common.left`, `common.right`) |
+| Code | Static "Left / Right" support list |
+| 🔍 Evidence | The support list now uses `PlotSpanService.getSupportOptions` (support numbers). Besides the cable adjustment spec translations, no `src` file references `common.left` / `common.right` anymore. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the constant, the interface, the two i18n keys and the matching entries in the cable adjustment spec translations. |
 | ✅ Validated | ⏳ Pending review |
