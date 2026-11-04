@@ -458,6 +458,8 @@ export class ConformityComponent implements OnDestroy {
     const selectedRuleTypes = this.selectedConformityValues() ?? [];
     const ruleColors = this._ruleColorsByType();
     const conformityType = this.conformityType();
+    const showLegend = this.isGraphEnlarged();
+    const ruleLabels = Object.fromEntries(this.conformityOptions().map((o) => [o.value, o.label]));
     if (!data) {
       untracked(() => {
         this.disconnectPlotResize();
@@ -468,7 +470,14 @@ export class ConformityComponent implements OnDestroy {
     afterNextRender(
       () => {
         if (this.document.getElementById(CONFORMITY_PLOT_ID)) {
-          createConformityPlot(this.document, data, { selectedRuleTypes, ruleColors, conformityType });
+          createConformityPlot(this.document, data, {
+            selectedRuleTypes,
+            ruleColors,
+            conformityType,
+            ruleLabels,
+            cablePointsLabel: this.translocoService.translate('studio.conformity.cable-points-legend'),
+            showLegend
+          });
           this.observePlotResize();
         }
       },

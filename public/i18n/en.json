@@ -966,6 +966,7 @@
       "multiple-conditions-warning-summary": "You cannot open conformity control because these conditions are not met:"
     },
     "conformity": {
+      "cable-points-legend": "Cable points",
       "obstacle-legend": "Obstacle",
       "obstacle-point-label": "Obstacle's point",
       "name-label": "Name",
