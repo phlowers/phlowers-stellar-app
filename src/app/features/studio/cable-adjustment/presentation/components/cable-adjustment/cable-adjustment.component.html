@@ -99,8 +99,8 @@
 
     @let distanceControl = form.controls.tacheometerHorizontalDistance;
     @let distanceError = distanceControl.dirty || distanceControl.touched ? getError(distanceControl) : '';
-    <div class="cable-adjustment__field cable-adjustment__field--single-line">
-      <label for="tacheometer-horizontal-distance">
+    <div class="cable-adjustment__field">
+      <label class="cable-adjustment__field-label--single-line" for="tacheometer-horizontal-distance">
         {{ 'studio.cable-adjustment.tacheometer-horizontal-distance-label' | transloco }}
       </label>
       <p-inputgroup>

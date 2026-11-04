@@ -271,8 +271,8 @@ describe('CableAdjustmentComponent', () => {
 
   describe('Tacheometer distance and adjustment parameter', () => {
     it('keeps the tacheometer distance label on one line', () => {
-      const field = getByTestId('tacheometer-horizontal-distance-input')?.closest('.cable-adjustment__field');
-      expect(field?.classList).toContain('cable-adjustment__field--single-line');
+      const label = fixture.nativeElement.querySelector('label[for="tacheometer-horizontal-distance"]');
+      expect(label?.classList).toContain('cable-adjustment__field-label--single-line');
     });
 
     const error = (id: string) => fixture.nativeElement.querySelector(`#${id}-error`)?.textContent?.trim();

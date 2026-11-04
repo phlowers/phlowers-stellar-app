@@ -37,10 +37,10 @@ h2 {
     flex-direction: column;
     gap: 0.25rem;
     margin: 0;
+  }
 
-    &--single-line label {
-      white-space: nowrap;
-    }
+  &__field-label--single-line {
+    white-space: nowrap;
   }
 
   &__separator {
