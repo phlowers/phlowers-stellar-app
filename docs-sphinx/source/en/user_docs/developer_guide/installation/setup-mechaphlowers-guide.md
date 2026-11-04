@@ -125,7 +125,7 @@ Place a mechaphlowers `.whl` file in `stellar-engine/input/`.  The script will:
 
 ```
 public/pyodide/
-├── pyodide.asm.wasm, pyodide.asm.js, python_stdlib.zip, pyodide-lock.json
+├── pyodide.asm.wasm, pyodide.asm.mjs, python_stdlib.zip, pyodide-lock.json
 ├── numpy-2.2.5-cp313-cp313-pyodide_2025_0_wasm32.whl     (CDN)
 ├── pandas-2.3.1-cp313-cp313-pyodide_2025_0_wasm32.whl    (CDN)
 ├── mechaphlowers-0.5.3-cp313-none-any.whl                (PyPI, compiled)
