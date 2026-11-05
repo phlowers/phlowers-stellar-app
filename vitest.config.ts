@@ -110,6 +110,11 @@ export default defineConfig(() => ({
     testTimeout: 15000,
     hookTimeout: 15000,
     teardownTimeout: 15000,
+    // The Angular plugin defaults the pool to `vmThreads`, whose heap grows with every test file.
+    // Vitest's default recycle threshold is a share of system RAM (~8 GB with 2 workers on CI),
+    // above V8's ~4 GB worker heap limit, so workers crashed ("Worker exited unexpectedly")
+    // before being recycled. Recycle them well below that limit instead.
+    vmMemoryLimit: '2GB',
     setupFiles: ['src/test-setup.ts'],
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', 'ops/**/*.spec.ts'],
     exclude: ['e2e/**'],
