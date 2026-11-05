@@ -321,7 +321,7 @@ export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
 
 /**
  * Returns the parameter and uncertainty produced by the calculation method currently selected for the field measure:
- * the tangent aiming (support) result for the `tangente-aiming` method, the PAPOTO result otherwise.
+ * the tangent aiming (support or exterior) result for the tangent aiming methods, the PAPOTO result otherwise.
  * @param measureData - The field measure, providing the calculation method and its outputs
  * @returns The active `parameter` and `uncertainty`, or `null` when the selected method has no result yet
  */

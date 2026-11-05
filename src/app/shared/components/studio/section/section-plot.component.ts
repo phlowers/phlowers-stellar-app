@@ -11,7 +11,8 @@ import {
 } from '@angular/core';
 
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { applyRestoreCamera, createPlot } from './helpers/createPlot';
+import { applyRestoreCamera, applyRestoreZoom2d, createPlot } from './helpers/createPlot';
+import { hidePlotlyDragMoves, isPlotlyRightClickPress } from './helpers/plotlyDragGuard';
 import Plotly from 'plotly.js-dist-min';
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
@@ -32,6 +33,7 @@ import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
+import { Support } from '@shared/domain/models/support.model';
 import {
   appendExistingObstaclesWithFormObstacle,
   getObstacleClickPayload,
@@ -226,14 +228,7 @@ export class SectionPlotComponent implements OnDestroy {
       const spanLoads = this.getSpanLoadsToDisplay(selectedDisplayOptions, plotOptions);
       const obstacles = this.buildObstacleList();
       const supports = this.spanService.section()?.supports ?? [];
-      const sectionPlotData = createPlotData(litData, plotOptions, supports);
-      let plotData: Plotly.Data[] = Array.isArray(sectionPlotData) ? sectionPlotData : [];
-
-      if (selectedDisplayOptions.baseState && this.plotService.baseLitData()) {
-        const shadowData = createShadowPlotData(this.plotService.baseLitData()!, plotOptions);
-        const safeShadowData: Plotly.Data[] = Array.isArray(shadowData) ? shadowData : [];
-        plotData = [...safeShadowData, ...plotData];
-      }
+      const plotData = this.buildPlotData(litData, plotOptions, selectedDisplayOptions, supports);
 
       const camera = this.plotOptionsService.camera();
       const currentObstacleUuid = this.obstaclesService.selectedMeasureUuid();
@@ -292,19 +287,64 @@ export class SectionPlotComponent implements OnDestroy {
       });
       if (plot) {
         this.addEventListenersToPlot(plot);
-        // If there is a saved camera pending restore (first render after back-navigation),
-        // apply it directly to bypass any layout/uirevision timing issues.
-        if (pendingCamera) {
-          if (plotOptions.view === '3d') {
-            await applyRestoreCamera(PLOT_ID, pendingCamera);
-          }
-          this.plotOptionsService.pendingCameraRestore.set(null);
-        }
+        await this.applyPendingViewRestores(plotOptions.view, pendingCamera);
       }
     } catch (error) {
       this.logger.error('Error refreshing plot:', error);
     } finally {
       this.isPlotRefreshing.set(false);
+    }
+  }
+
+  // Registered on the plot element, which sits above Plotly's inner drag layers: the press itself is not
+  // blocked (clicks keep working), only the mouse moves that follow are hidden from Plotly.
+  private readonly guardPlotlyRightClickDrag = (event: MouseEvent): void => {
+    const view = this.documentRef.defaultView;
+    if (view && this.plotOptionsService.plotOptions().view !== '3d' && isPlotlyRightClickPress(event)) {
+      hidePlotlyDragMoves(view);
+    }
+  };
+
+  /**
+   * Builds the section traces, prepended with the base-state shadow traces when enabled.
+   */
+  private buildPlotData(
+    litData: GetSectionOutput,
+    plotOptions: PlotOptions,
+    selectedDisplayOptions: SelectedDisplayOptions,
+    supports: Support[]
+  ): Plotly.Data[] {
+    const sectionPlotData = createPlotData(litData, plotOptions, supports);
+    const plotData: Plotly.Data[] = Array.isArray(sectionPlotData) ? sectionPlotData : [];
+    const baseLitData = this.plotService.baseLitData();
+    if (!selectedDisplayOptions.baseState || !baseLitData) {
+      return plotData;
+    }
+    const shadowData = createShadowPlotData(baseLitData, plotOptions);
+    const safeShadowData: Plotly.Data[] = Array.isArray(shadowData) ? shadowData : [];
+    return [...safeShadowData, ...plotData];
+  }
+
+  /**
+   * Applies the saved camera (3D) or zoom (2D) pending restore (first render after
+   * back-navigation) directly, bypassing any layout/uirevision timing issues.
+   */
+  private async applyPendingViewRestores(
+    view: PlotOptions['view'],
+    pendingCamera: ReturnType<PlotOptionsService['pendingCameraRestore']>
+  ): Promise<void> {
+    if (pendingCamera) {
+      if (view === '3d') {
+        await applyRestoreCamera(PLOT_ID, pendingCamera);
+      }
+      this.plotOptionsService.pendingCameraRestore.set(null);
+    }
+    const pendingZoom = this.plotOptionsService.pendingZoom2dRestore();
+    if (pendingZoom) {
+      if (view === '2d') {
+        await applyRestoreZoom2d(PLOT_ID, pendingZoom);
+      }
+      this.plotOptionsService.pendingZoom2dRestore.set(null);
     }
   }
 
@@ -318,6 +358,8 @@ export class SectionPlotComponent implements OnDestroy {
     // and each refresh call would otherwise accumulate a new listener, causing a memory leak.
     plotEl.removeAllListeners('plotly_clickannotation');
     plotEl.removeAllListeners('plotly_relayout');
+    plotEl.removeEventListener('mousedown', this.guardPlotlyRightClickDrag, true);
+    plotEl.addEventListener('mousedown', this.guardPlotlyRightClickDrag, true);
     plotEl.on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
       if (event?.annotation?.data?.type === 'obstacle') {
         const section = this.spanService.section();
@@ -361,6 +403,9 @@ export class SectionPlotComponent implements OnDestroy {
       if (hasCameraKey) {
         this.plotOptionsService.refreshCamera();
       }
+      if (Object.keys(eventData ?? {}).some((k) => k.startsWith('xaxis.') || k.startsWith('yaxis.'))) {
+        this.plotOptionsService.refreshZoom2d();
+      }
     });
   };
 
@@ -369,6 +414,7 @@ export class SectionPlotComponent implements OnDestroy {
     // The parent StudioPageComponent runs its ngOnDestroy after children, so
     // saveViewState() reads camera() as a fallback when getCamera() returns null.
     this.plotOptionsService.refreshCamera();
+    this.plotOptionsService.refreshZoom2d();
     this.plotService.purgePlot();
   }
 }

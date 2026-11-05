@@ -394,6 +394,57 @@ describe('PlotService', () => {
     });
   });
 
+  describe('projection refresh on a stale engine study', () => {
+    const projection = {
+      result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+      error: null
+    };
+
+    beforeEach(() => {
+      service.loading.set(false);
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(task === Task.refreshProjection ? projection : { result: null, error: null })
+      );
+    });
+
+    it('should not project a view change before the engine study belongs to the opened section', () => {
+      spanService.section.set(mockSection);
+
+      service.plotOptionsChange({ view: '2d' });
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.refreshProjection, expect.anything());
+    });
+
+    it('should project a view change once the engine study belongs to the opened section', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(task === Task.refreshProjection ? projection : { result: { success: true }, error: null })
+      );
+      await service.initSectionStudio(mockSection);
+      service.loading.set(false);
+      mockWorkerPythonService.runTask.mockClear();
+
+      service.plotOptionsChange({ view: '2d' });
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.refreshProjection, expect.anything());
+    });
+
+    it('should ignore the projection of a studio left while it was being computed', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(task === Task.refreshProjection ? projection : { result: { success: true }, error: null })
+      );
+      const init = service.initSectionStudio(mockSection);
+      service.resetAll();
+      await init;
+
+      expect(service.litData()).toBeNull();
+      expect(service.loading()).toBe(false);
+    });
+  });
+
   describe('free positioning view restore', () => {
     const savedOptions: PlotOptions = { view: '3d', side: 'face', startSupport: 2, endSupport: 6, invert: true };
     const fpOptions: PlotOptions = { view: '2d', side: 'profile', startSupport: 3, endSupport: 4, invert: false };
@@ -648,7 +699,13 @@ describe('PlotService', () => {
       name: 'Load case 1',
       personnelPresence,
       description: '',
-      data: { climate: { ...defaultClimaticCharge }, spanLoads: [], cableModifParams: [] }
+      data: {
+        climate: { ...defaultClimaticCharge },
+        spanLoads: [],
+        cableModifParams: [],
+        supportManipParams: [],
+        spanManipParams: []
+      }
     });
 
     const sectionWithStaff = (personnelPresence: boolean): Section => ({
@@ -1224,6 +1281,40 @@ describe('PlotService', () => {
     it('should set loading to false after completion', async () => {
       await service.refreshProjection();
 
+      expect(service.loading()).toBe(false);
+    });
+
+    it('should set loading to false when the projection task rejects', async () => {
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task refreshProjection timed out after 30000ms'));
+
+      await expect(service.refreshProjection()).rejects.toThrow('timed out');
+      expect(service.loading()).toBe(false);
+    });
+
+    it('should clear the previous distances when the projection task rejects', async () => {
+      obstacleStateService.setDistances([{ obstacleUuid: 'obs-uuid', points: [{ pointIndex: 0 } as DistancePoint] }]);
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task refreshProjection timed out after 30000ms'));
+
+      await expect(service.refreshProjection()).rejects.toThrow('timed out');
+
+      expect(obstacleStateService.distances()).toEqual([]);
+    });
+
+    it('should keep the new distances when only the aspect ratio task rejects', async () => {
+      const obstacleDistance = { obstacleUuid: 'obs-uuid', points: [{ pointIndex: 0 } as DistancePoint] };
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+        if (task === Task.refreshProjection) {
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [obstacleDistance] },
+            error: null
+          });
+        }
+        return Promise.reject(new Error('Task getAspectRatio timed out after 30000ms'));
+      });
+
+      await expect(service.refreshProjection()).rejects.toThrow('timed out');
+
+      expect(obstacleStateService.distances()).toEqual([obstacleDistance]);
       expect(service.loading()).toBe(false);
     });
 

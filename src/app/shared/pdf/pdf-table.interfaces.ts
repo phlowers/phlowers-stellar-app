@@ -34,3 +34,11 @@ export interface PdfResultSection {
   title: string;
   tables: PdfTableModel[];
 }
+
+/** Layout options of a result tables flow; the defaults give the layout shared by the other reports. */
+export interface PdfResultTablesFlowOptions {
+  /** Draws the compact header (app name + separator, no report title nor date) on every page. */
+  compactHeader?: boolean;
+  /** Vertical gap (mm) between two stacked tables of a section. Defaults to TABLE_VERTICAL_GAP. */
+  tableGap?: number;
+}

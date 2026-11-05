@@ -29,7 +29,7 @@ describe('LoadFormsService', () => {
   let plotOptionsServiceMock: vi.Mocked<PlotOptionsService>;
   let mockChargesService: vi.Mocked<ChargesService>;
   let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
-  let mockObstacleStateService: { syncObstacles: ReturnType<typeof vi.fn> };
+  let mockObstacleStateService: { syncObstacles: ReturnType<typeof vi.fn>; setDistances: ReturnType<typeof vi.fn> };
   let mockCableModificationsService: Pick<CableModificationsService, 'previewCableModification' | 'clearPreview'>;
 
   const mockSection: Section = {
@@ -181,7 +181,8 @@ describe('LoadFormsService', () => {
     };
 
     mockObstacleStateService = {
-      syncObstacles: vi.fn().mockResolvedValue(null)
+      syncObstacles: vi.fn().mockResolvedValue(null),
+      setDistances: vi.fn()
     };
 
     mockCableModificationsService = {
@@ -458,6 +459,102 @@ describe('LoadFormsService', () => {
       await service.initTemporaryLoadData();
       expect(changeStateCalls()).toHaveLength(2);
       expect(changeStateCalls()[1][1]).toEqual({ climate: mockChargeData.climate });
+    });
+
+    describe('isApplyingLoadCase', () => {
+      const engineIdle = { result: null, error: null };
+      const sectionWithCharge = (chargeUuid: string) =>
+        ({
+          ...mockSection,
+          selected_charge_uuid: chargeUuid,
+          charges: [mockCharge, { ...mockCharge, uuid: 'charge-uuid-2' }]
+        }) as Section;
+
+      // Keeps every changeState task pending until the test settles it, as a busy engine would
+      const holdChangeState = () => {
+        const pending: ((outcome: unknown) => void)[] = [];
+        mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+          task === Task.changeState ? new Promise((resolve) => pending.push(resolve)) : Promise.resolve(engineIdle)
+        );
+        return pending;
+      };
+
+      it('should stay true while the engine tasks before the projection are pending', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        const pending = holdChangeState();
+        expect(service.isApplyingLoadCase()).toBe(false);
+
+        const switching = service.initTemporaryLoadData();
+        await vi.waitFor(() => expect(pending).toHaveLength(1));
+
+        // The projection, which sets the plot loading, has not started yet
+        expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
+        expect(service.isApplyingLoadCase()).toBe(true);
+
+        pending[0](engineIdle);
+        await switching;
+
+        expect(mockPlotService.refreshProjection).toHaveBeenCalled();
+        expect(service.isApplyingLoadCase()).toBe(false);
+      });
+
+      it('should be false again once applying the load case failed', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+          task === Task.changeState
+            ? Promise.reject(new Error('Task changeState timed out after 30000ms'))
+            : Promise.resolve(engineIdle)
+        );
+
+        await service.initTemporaryLoadData();
+
+        expect(service.isApplyingLoadCase()).toBe(false);
+      });
+
+      it('should clear the previous load case distances before the engine tasks, even when they fail', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+          task === Task.changeState
+            ? Promise.reject(new Error('Task changeState timed out after 30000ms'))
+            : Promise.resolve(engineIdle)
+        );
+
+        await service.initTemporaryLoadData();
+
+        expect(mockObstacleStateService.setDistances).toHaveBeenCalledWith([]);
+        expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
+      });
+
+      it('should keep the distances when re-entering for the same load case', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        mockWorkerPythonService.runTask.mockResolvedValue(engineIdle);
+        await service.initTemporaryLoadData();
+        mockObstacleStateService.setDistances.mockClear();
+
+        await service.initTemporaryLoadData();
+
+        expect(mockObstacleStateService.setDistances).not.toHaveBeenCalled();
+      });
+
+      it('should stay true until the last of two overlapping switches is projected', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        const pending = holdChangeState();
+        const first = service.initTemporaryLoadData();
+        await vi.waitFor(() => expect(pending).toHaveLength(1));
+
+        // Quick switch to another load case while the first one is still being applied
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-2'));
+        const second = service.initTemporaryLoadData();
+        await vi.waitFor(() => expect(pending).toHaveLength(2));
+
+        pending[0](engineIdle);
+        await first;
+        expect(service.isApplyingLoadCase()).toBe(true);
+
+        pending[1](engineIdle);
+        await second;
+        expect(service.isApplyingLoadCase()).toBe(false);
+      });
     });
   });
 

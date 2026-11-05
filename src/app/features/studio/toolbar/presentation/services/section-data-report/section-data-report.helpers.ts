@@ -22,10 +22,9 @@ import { PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import {
   drawHeader,
-  drawSectionTitle,
   drawStudyCartoucheSection,
+  drawTitledTwoColumnBullets,
   drawTwoColumnBulletSection,
-  drawTwoColumnBullets,
   formatValue
 } from '@shared/pdf/pdf-primitives.helpers';
 
@@ -109,7 +108,6 @@ export function drawInitialConditionSection(
   if (!ic) {
     return startY;
   }
-  const y = drawSectionTitle(doc, labels.initialConditionTitle, startY);
 
   const left: PdfBulletItem[] = [
     { label: labels.baseParameter, value: formatValue(ic.baseParameter, PDF_UNITS.meters, 0) },
@@ -131,7 +129,7 @@ export function drawInitialConditionSection(
       : [])
   ];
 
-  return drawTwoColumnBullets(doc, left, right, y);
+  return drawTitledTwoColumnBullets(doc, labels.initialConditionTitle, left, right, startY);
 }
 
 /** Draws the full page 1 (portrait): header + study/canton + canton + initial condition sections. */

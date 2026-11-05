@@ -150,6 +150,59 @@ describe('PlotOptionsService', () => {
     });
   });
 
+  describe('refreshZoom2d', () => {
+    const zoomedLayout = { xaxis: { autorange: false, range: [1, 2] }, yaxis: { range: [3, 4] } };
+
+    it('should store the live ranges once the user has zoomed', () => {
+      document.getElementById = vi.fn().mockReturnValue({ _fullLayout: zoomedLayout });
+
+      service.refreshZoom2d();
+
+      expect(service.zoom2d()).toEqual({ x: [1, 2], y: [3, 4] });
+    });
+
+    it('should store null while the plot is auto-ranged', () => {
+      service.zoom2d.set({ x: [1, 2], y: [3, 4] });
+      document.getElementById = vi
+        .fn()
+        .mockReturnValue({ _fullLayout: { xaxis: { autorange: true, range: [1, 2] }, yaxis: { range: [3, 4] } } });
+
+      service.refreshZoom2d();
+
+      expect(service.zoom2d()).toBeNull();
+    });
+
+    it('should store null when ranges are not finite numbers', () => {
+      document.getElementById = vi
+        .fn()
+        .mockReturnValue({ _fullLayout: { xaxis: { autorange: false, range: [1, NaN] }, yaxis: { range: [3, 4] } } });
+
+      service.refreshZoom2d();
+
+      expect(service.zoom2d()).toBeNull();
+    });
+
+    it('should not write the signal when the value is unchanged', () => {
+      service.zoom2d.set({ x: [1, 2], y: [3, 4] });
+      document.getElementById = vi.fn().mockReturnValue({ _fullLayout: zoomedLayout });
+      const setSpy = vi.spyOn(service.zoom2d, 'set');
+
+      service.refreshZoom2d();
+
+      expect(setSpy).not.toHaveBeenCalled();
+    });
+
+    it('should clear zoom2d and pendingZoom2dRestore on reset', () => {
+      service.zoom2d.set({ x: [1, 2], y: [3, 4] });
+      service.pendingZoom2dRestore.set({ x: [1, 2], y: [3, 4] });
+
+      service.reset();
+
+      expect(service.zoom2d()).toBeNull();
+      expect(service.pendingZoom2dRestore()).toBeNull();
+    });
+  });
+
   describe('plotOptionsChange', () => {
     const loadingFalse = () => false;
     const loadingTrue = () => true;

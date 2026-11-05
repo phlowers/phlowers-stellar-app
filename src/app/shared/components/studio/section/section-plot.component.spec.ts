@@ -3,7 +3,7 @@ import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import { SectionPlotComponent } from './section-plot.component';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
-import { createPlot, applyRestoreCamera } from './helpers/createPlot';
+import { createPlot, applyRestoreCamera, applyRestoreZoom2d } from './helpers/createPlot';
 import { createPlotData } from './helpers/createPlotData';
 import { Data, PlotlyHTMLElement } from 'plotly.js-dist-min';
 import { PlotOptions, SelectedDisplayOptions } from '@shared/types/plot.types';
@@ -36,6 +36,7 @@ import { createShadowPlotData } from './helpers/createShadowPlotData';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 const mockCreatePlot = vi.mocked(createPlot);
 const mockApplyRestoreCamera = vi.mocked(applyRestoreCamera);
+const mockApplyRestoreZoom2d = vi.mocked(applyRestoreZoom2d);
 const mockCreatePlotData = vi.mocked(createPlotData);
 const mockCreateShadowPlotData = vi.mocked(createShadowPlotData);
 
@@ -230,7 +231,12 @@ describe('SectionPlotComponent', () => {
     }
   ];
 
-  const mockPlotElement = { on: vi.fn(), removeAllListeners: vi.fn() };
+  const mockPlotElement = {
+    on: vi.fn(),
+    removeAllListeners: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn()
+  };
   const noopMock = vi.fn();
 
   const litDataSignal = signal<GetSectionOutput | null>(null);
@@ -255,6 +261,7 @@ describe('SectionPlotComponent', () => {
   };
 
   const pendingCameraRestoreSignal = signal<unknown>(null);
+  const pendingZoom2dRestoreSignal = signal<unknown>(null);
 
   const plotOptionsServiceMock = {
     plotOptions: plotOptionsSignal,
@@ -264,7 +271,9 @@ describe('SectionPlotComponent', () => {
     scalingFactors: signal({ x: 1, y: 1, z: 1, aspectMode: 'data' }),
     aspectRatio: signal({ x: 1, y: 1, z: 1 }),
     refreshCamera: noopMock,
-    pendingCameraRestore: pendingCameraRestoreSignal
+    refreshZoom2d: noopMock,
+    pendingCameraRestore: pendingCameraRestoreSignal,
+    pendingZoom2dRestore: pendingZoom2dRestoreSignal
   };
 
   const mockSideTabsService = {
@@ -348,6 +357,8 @@ describe('SectionPlotComponent', () => {
     sectionSignal.set(mockSection);
     cameraSignal.set(null);
     pendingCameraRestoreSignal.set(null);
+    pendingZoom2dRestoreSignal.set(null);
+    mockApplyRestoreZoom2d.mockResolvedValue(undefined);
     mockObstacleFormService.form.get = createFormGet();
     mockObstacleFormService.form.value = { uuid: null };
 
@@ -728,6 +739,30 @@ describe('SectionPlotComponent', () => {
       expect(clearSpy).toHaveBeenCalledWith(null);
     });
 
+    it('should call applyRestoreZoom2d and clear pendingZoom2dRestore when view is 2d', async () => {
+      const zoom = { x: [1, 2], y: [3, 4] };
+      plotOptionsSignal.set({ ...mockPlotOptions, view: '2d' });
+      pendingZoom2dRestoreSignal.set(zoom);
+      litDataSignal.set(mockLitData);
+
+      const clearSpy = vi.spyOn(pendingZoom2dRestoreSignal, 'set');
+      await component.refreshPlot();
+
+      expect(mockApplyRestoreZoom2d).toHaveBeenCalledWith('plotly-output', zoom);
+      expect(clearSpy).toHaveBeenCalledWith(null);
+    });
+
+    it('should NOT call applyRestoreZoom2d when view is 3d but still clear pendingZoom2dRestore', async () => {
+      plotOptionsSignal.set({ ...mockPlotOptions, view: '3d' });
+      pendingZoom2dRestoreSignal.set({ x: [1, 2], y: [3, 4] });
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockApplyRestoreZoom2d).not.toHaveBeenCalled();
+      expect(pendingZoom2dRestoreSignal()).toBeNull();
+    });
+
     it('should NOT call applyRestoreCamera when pendingCameraRestore is null', async () => {
       plotOptionsSignal.set({ ...mockPlotOptions, view: '3d' });
       pendingCameraRestoreSignal.set(null);
@@ -1099,6 +1134,8 @@ describe('SectionPlotComponent', () => {
     const makePlotWithCapture = () => {
       const self = {
         removeAllListeners: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
           if (event === 'plotly_clickannotation') {
             capturedHandler = fn;
@@ -1165,6 +1202,8 @@ describe('SectionPlotComponent', () => {
     const makePlotWithCapture = () => {
       const self = {
         removeAllListeners: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
           if (event === 'plotly_clickannotation') {
             capturedHandler = fn;
@@ -1236,6 +1275,8 @@ describe('SectionPlotComponent', () => {
       capturedHandler = null;
       return {
         removeAllListeners: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         on: (event: string, fn: (event: { annotation?: { data?: unknown } }) => void) => {
           if (event === 'plotly_clickannotation') {
             capturedHandler = fn;
@@ -1281,6 +1322,8 @@ describe('SectionPlotComponent', () => {
       capturedRelayoutHandler = null;
       return {
         removeAllListeners: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         on: (event: string, fn: (eventData: Record<string, unknown>) => void) => {
           if (event === 'plotly_relayout') {
             capturedRelayoutHandler = fn;
@@ -1324,6 +1367,8 @@ describe('SectionPlotComponent', () => {
       const on = vi.fn();
       const plot = {
         removeAllListeners,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
         on
       } as unknown as PlotlyHTMLElement;
 
@@ -1333,6 +1378,57 @@ describe('SectionPlotComponent', () => {
       expect(removeAllListeners).toHaveBeenCalledWith('plotly_relayout');
       expect(on).toHaveBeenCalledWith('plotly_clickannotation', expect.any(Function));
       expect(on).toHaveBeenCalledWith('plotly_relayout', expect.any(Function));
+    });
+  });
+
+  describe('addEventListenersToPlot — Plotly right-click drag guard', () => {
+    const attachAndGetGuard = (): ((event: MouseEvent) => void) => {
+      const addEventListener = vi.fn();
+      const removeEventListener = vi.fn();
+      component.addEventListenersToPlot({
+        removeAllListeners: vi.fn(),
+        on: vi.fn(),
+        addEventListener,
+        removeEventListener
+      } as unknown as PlotlyHTMLElement);
+
+      expect(removeEventListener).toHaveBeenCalledWith('mousedown', addEventListener.mock.calls[0][1], true);
+      expect(addEventListener).toHaveBeenCalledWith('mousedown', expect.any(Function), true);
+      return addEventListener.mock.calls[0][1];
+    };
+
+    afterEach(() => {
+      plotOptionsSignal.set(mockPlotOptions);
+    });
+
+    const pressAndCountMoveGuards = (view: '2d' | '3d', press: Partial<MouseEvent>): number => {
+      plotOptionsSignal.set({ ...mockPlotOptions, view });
+      const addSpy = vi.spyOn(document.defaultView!, 'addEventListener');
+      const stopPropagation = vi.fn();
+
+      attachAndGetGuard()({ ...press, stopPropagation } as unknown as MouseEvent);
+
+      const guards = addSpy.mock.calls.filter(([type]) => type === 'mousemove').length;
+      addSpy.mockRestore();
+      // The press itself must always reach Plotly so that clicks keep working.
+      expect(stopPropagation).not.toHaveBeenCalled();
+      return guards;
+    };
+
+    it('should hide the following mouse moves from Plotly on a Ctrl+press in 2D', () => {
+      expect(pressAndCountMoveGuards('2d', { ctrlKey: true, buttons: 1 })).toBe(1);
+    });
+
+    it('should hide the following mouse moves from Plotly on a right-button press in 2D', () => {
+      expect(pressAndCountMoveGuards('2d', { ctrlKey: false, buttons: 2 })).toBe(1);
+    });
+
+    it('should leave a plain left-button press untouched in 2D', () => {
+      expect(pressAndCountMoveGuards('2d', { ctrlKey: false, buttons: 1 })).toBe(0);
+    });
+
+    it('should leave a Ctrl+press untouched in 3D', () => {
+      expect(pressAndCountMoveGuards('3d', { ctrlKey: true, buttons: 1 })).toBe(0);
     });
   });
 

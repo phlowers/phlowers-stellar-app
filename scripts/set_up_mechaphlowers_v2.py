@@ -1,6 +1,6 @@
 # /// script
-# requires-python = ">=3.13,<3.14"
-# dependencies = ["requests == 2.32.3"]
+# requires-python = ">=3.14,<3.15"
+# dependencies = ["requests == 2.34.0"]
 # ///
 """Build stellar-engine and prepare Python packages for the Pyodide worker.
 
@@ -19,6 +19,8 @@ Usage:
 """
 
 import argparse
+import base64
+import hashlib
 import json
 import os
 import re
@@ -35,15 +37,20 @@ import requests
 
 SCRIPTS_DIR = Path(__file__).parent
 PACKAGE_JSON = SCRIPTS_DIR.parent / "package.json"
+PACKAGE_LOCK_JSON = SCRIPTS_DIR.parent / "package-lock.json"
 PYODIDE_DIR = Path("./public/pyodide")
 PACKAGES_JSON = Path("./src/app/core/services/worker_python/python-packages.json")
 SE_DIR = Path("./stellar-engine")
 SE_DIST = SE_DIR / "dist"
 SE_INPUT = SE_DIR / "input"
-CONSTRAINTS = SCRIPTS_DIR / "constraints.in"
+# The runtime packages (versions + hashes) come from stellar-engine/uv.lock, exported on the fly.
+# pip is the downloader, so its version is pinned too.
+PIP_VERSION = "26.2.2"
+# Same for the py-compile tool: uvx would otherwise resolve the newest release on every build.
+PYODIDE_BUILD_VERSION = "0.39.3"
 CORE_FILES = (
     "pyodide.asm.wasm",
-    "pyodide.asm.js",
+    "pyodide.asm.mjs",
     "python_stdlib.zip",
     "pyodide-lock.json",
 )
@@ -127,6 +134,48 @@ def pyodide_version() -> str:
     return json.loads(PACKAGE_JSON.read_text())["dependencies"]["pyodide"].lstrip("^~")
 
 
+def fetch(url: str, timeout: int) -> bytes:
+    """Download *url* and fail on any HTTP error."""
+    resp = requests.get(url, timeout=timeout)
+    resp.raise_for_status()
+    return resp.content
+
+
+def check_sha256(data: bytes, expected: str, label: str) -> None:
+    """Raise ``ValueError`` if the sha256 of *data* differs from *expected*."""
+    actual = hashlib.sha256(data).hexdigest()
+    if actual != expected.lower():
+        raise ValueError(f"{label} sha256 mismatch (expected {expected}, got {actual})")
+
+
+def verify_npm_integrity(data: bytes, integrity: str, label: str) -> None:
+    """Check *data* against an npm SRI string (``<algo>-<base64 digest>``); exit on mismatch."""
+    algo, _, expected = integrity.partition("-")
+    if algo not in ("sha256", "sha384", "sha512") or not expected:
+        print(f"Error: unsupported integrity value for {label}: {integrity!r}")
+        raise SystemExit(1)
+    actual = base64.b64encode(hashlib.new(algo, data).digest()).decode()
+    if actual != expected:
+        print(f"Error: {label} {algo} integrity mismatch")
+        print(f"  expected {expected}")
+        print(f"  got      {actual}")
+        raise SystemExit(1)
+
+
+def pyodide_integrity(version: str) -> str:
+    """Read the pinned ``integrity`` of the pyodide tarball from ``package-lock.json``."""
+    entry = json.loads(PACKAGE_LOCK_JSON.read_text())["packages"].get(
+        "node_modules/pyodide", {}
+    )
+    if entry.get("version") != version or not entry.get("integrity"):
+        print(
+            f"Error: no integrity for pyodide {version} in {PACKAGE_LOCK_JSON.name} "
+            f"(found version {entry.get('version')!r})"
+        )
+        raise SystemExit(1)
+    return entry["integrity"]
+
+
 # ── Step 1 – Build stellar-engine ────────────────────────────────────────────
 
 
@@ -170,9 +219,9 @@ def download_pyodide(registry: str) -> None:
 
     with tempfile.TemporaryDirectory() as tmp:
         tgz = Path(tmp) / "pyodide.tgz"
-        tgz.write_bytes(
-            requests.get(f"{registry}/pyodide/-/pyodide-{ver}.tgz", timeout=60).content
-        )
+        data = fetch(f"{registry.rstrip('/')}/pyodide/-/pyodide-{ver}.tgz", 60)
+        verify_npm_integrity(data, pyodide_integrity(ver), f"pyodide-{ver}.tgz")
+        tgz.write_bytes(data)
         with tarfile.open(tgz, "r:gz") as tar:
             tar.extractall(path=PYODIDE_DIR, filter="data")
 
@@ -190,6 +239,44 @@ def download_pyodide(registry: str) -> None:
 # ── Step 3 – Download packages ───────────────────────────────────────────────
 
 
+def export_requirements(tmp: Path, local_wheel: Path | None) -> Path:
+    """Export the runtime dependencies of ``uv.lock`` as a hashed requirements file.
+
+    With *local_wheel*, mechaphlowers is replaced by the local wheel and its on-the-fly hash.
+    """
+    out = tmp / "requirements.txt"
+    run(
+        [
+            "uv",
+            "export",
+            "--project",
+            str(SE_DIR),
+            "--locked",
+            "--no-dev",
+            "--no-emit-project",
+            "--no-header",
+            "--no-annotate",
+            "--format",
+            "requirements-txt",
+            "--output-file",
+            str(out),
+        ]
+    )
+    if not local_wheel:
+        return out
+
+    name, version = parse_wheel(local_wheel.name)
+    kept = [
+        block
+        for block in re.split(r"\n(?=\S)", out.read_text())
+        if norm(re.split(r"[=<>!~;\s]", block.lstrip(), maxsplit=1)[0]) != name
+    ]
+    digest = hashlib.sha256(local_wheel.read_bytes()).hexdigest()
+    kept.append(f"{name}=={version} --hash=sha256:{digest}")
+    out.write_text("\n".join(kept) + "\n")
+    return out
+
+
 def download_packages(se_wheel: Path, local_wheel: Path | None) -> dict[str, str]:
     """Download stellar-engine's transitive dependencies via pip.
 
@@ -199,21 +286,26 @@ def download_packages(se_wheel: Path, local_wheel: Path | None) -> dict[str, str
     deps = wheel_deps(se_wheel)
     print(f"  stellar-engine requires: {', '.join(deps)}")
 
-    cmd = [
-        "uvx",
-        "--python",
-        ">=3.13,<3.14",
-        "pip",
-        "download",
-        "-d",
-        str(PYODIDE_DIR),
-        "-c",
-        str(CONSTRAINTS),
-        *deps,
-    ]
-    if local_wheel:
-        cmd.extend(["--find-links", str(SE_INPUT)])
-    run(cmd)
+    with tempfile.TemporaryDirectory() as tmp:
+        requirements = export_requirements(Path(tmp), local_wheel)
+        cmd = [
+            "uvx",
+            "--python",
+            ">=3.14,<3.15",
+            "--from",
+            f"pip=={PIP_VERSION}",
+            "pip",
+            "download",
+            "--require-hashes",
+            "--only-binary=:all:",
+            "-d",
+            str(PYODIDE_DIR),
+            "-r",
+            str(requirements),
+        ]
+        if local_wheel:
+            cmd.extend(["--find-links", str(SE_INPUT)])
+        run(cmd)
 
     shutil.copy(se_wheel, PYODIDE_DIR / se_wheel.name)
 
@@ -243,20 +335,27 @@ def replace_with_cdn(
     label = f"local CDN ({local_cdn})" if local_cdn else "CDN"
     print(f"\n[4/5] Replacing with {label} wheels...")
 
-    if local_cdn:
-        lock_data = json.loads((local_cdn / "pyodide-lock.json").read_text())
-    else:
-        resp = requests.get(f"{cdn_url}/pyodide-lock.json", timeout=30)
-        resp.raise_for_status()
-        lock_data = resp.json()
+    # The manifest always comes from the integrity-checked npm tarball (extracted in step 2),
+    # never from the CDN or the local directory, which only serve the wheel files.
+    lock_path = PYODIDE_DIR / "pyodide-lock.json"
+    if not lock_path.is_file():
+        print(f"Error: {lock_path} missing from the verified pyodide tarball")
+        raise SystemExit(1)
+    lock_data = json.loads(lock_path.read_text())
 
     cdn_names: set[str] = set()
     missing: list[tuple[str, str]] = []
+    failed: list[str] = []
 
     for pkg in lock_data.get("packages", {}).values():
         name = norm(pkg.get("name", ""))
         ver, fname = pkg.get("version", ""), pkg.get("file_name", "")
+        expected_sha = pkg.get("sha256", "")
         if name not in downloaded or downloaded[name] != ver:
+            continue
+        if not expected_sha:
+            print(f"  ✗ {name}: no sha256 in {lock_path.name}")
+            failed.append(name)
             continue
 
         for w in PYODIDE_DIR.glob(f"{name.replace('-', '_')}*.whl"):
@@ -269,9 +368,9 @@ def replace_with_cdn(
                         local_cdn / v
                         for v in (
                             fname,
-                            fname.replace("-py3-none-any.whl", "-cp313-none-any.whl"),
+                            fname.replace("-py3-none-any.whl", "-cp314-none-any.whl"),
                             fname.replace(
-                                "-py2.py3-none-any.whl", "-cp313-none-any.whl"
+                                "-py2.py3-none-any.whl", "-cp314-none-any.whl"
                             ),
                         )
                         if (local_cdn / v).exists()
@@ -279,7 +378,9 @@ def replace_with_cdn(
                     None,
                 )
                 if src:
-                    shutil.copy(src, PYODIDE_DIR / src.name)
+                    data = src.read_bytes()
+                    check_sha256(data, expected_sha, src.name)
+                    (PYODIDE_DIR / src.name).write_bytes(data)
                     cdn_names.add(src.name)
                     print(f"  ✓ {name} ({ver})")
                 else:
@@ -287,12 +388,18 @@ def replace_with_cdn(
                     print(f"  ✗ {name}: {fname} not found")
             else:
                 print(f"  ↓ Downloading {cdn_url}/{fname})...")
-                data = requests.get(f"{cdn_url}/{fname}", timeout=60).content
+                data = fetch(f"{cdn_url}/{fname}", 60)
+                check_sha256(data, expected_sha, fname)
                 (PYODIDE_DIR / fname).write_bytes(data)
                 cdn_names.add(fname)
                 print(f"  ✓ {name} ({ver})")
-        except (requests.RequestException, OSError) as exc:
+        except (requests.RequestException, OSError, ValueError) as exc:
             print(f"  ✗ {name}: {exc}")
+            failed.append(name)
+
+    if failed:
+        print(f"\n  ✗ {len(failed)} package(s) failed: {', '.join(failed)}")
+        raise SystemExit(1)
 
     if local_cdn and missing:
         print(f"\n  ✗ {len(missing)} wheel(s) missing from local CDN:")
@@ -317,7 +424,7 @@ def deduplicate(cdn_names: set[str]) -> None:
         if len(ws) <= 1:
             continue
         # A CDN build is either compiled for wasm (pyemscripten) or pure Python (none-any);
-        # cp313 is never used as a criterion since it can change with the Python version.
+        # cp314 is never used as a criterion since it can change with the Python version.
         tags = ("pyemscripten", "none-any") if name in cdn_names else ("none-any",)
         keep = next(
             (w for tag in tags for w in ws if tag in w.lower()),
@@ -356,9 +463,9 @@ def compile_wheels(cdn_names: set[str]) -> None:
         [
             "uvx",
             "--python",
-            ">=3.13,<3.14",
+            ">=3.14,<3.15",
             "--from",
-            "pyodide-build",
+            f"pyodide-build=={PYODIDE_BUILD_VERSION}",
             "pyodide",
             "py-compile",
             "--compression-level",
@@ -475,8 +582,8 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if args.local_cdn_dir and not (args.local_cdn_dir / "pyodide-lock.json").exists():
-        print(f"Error: {args.local_cdn_dir}/pyodide-lock.json not found")
+    if args.local_cdn_dir and not args.local_cdn_dir.is_dir():
+        print(f"Error: {args.local_cdn_dir} is not a directory")
         raise SystemExit(1)
 
     local_wheel = None
