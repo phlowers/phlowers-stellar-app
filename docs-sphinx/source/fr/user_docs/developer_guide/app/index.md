@@ -9,6 +9,7 @@ Mise à jour du catalogue <catalog_update>
 Composants personnalisés <custom_components>
 CRR de brins coupés <cut_strands>
 Worker moteur <engine_worker>
+Estimation <estimation>
 Codes d'erreur <how_to_add_error_codes>
 i18n
 Obstacles, sols et distances <obstacles_floors_and_distances>
