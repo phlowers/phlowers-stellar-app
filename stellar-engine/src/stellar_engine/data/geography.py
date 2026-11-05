@@ -361,7 +361,7 @@ def compute_start_from_next_support(inputs: dict) -> dict:
     raw_span_length = inputs.get("spanLength")
     try:
         span_length = float(raw_span_length)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         span_length = float("nan")
     if not np.isfinite(span_length) or span_length <= 0.0:
         raise ValueError(

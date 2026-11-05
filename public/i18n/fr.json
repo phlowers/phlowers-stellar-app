@@ -386,7 +386,11 @@
       "invalid-manipulation-range": "La plage de manipulation fournie est invalide.",
       "support-out-of-range-error": "Le support est hors de la plage valide.",
       "generated-points-none-error": "Aucun point généré n'a été trouvé après le calcul.",
-      "night-time-error": "Impossible de calculer la couverture nuageuse si l'heure saisie correspond à la nuit."
+      "night-time-error": "Impossible de calculer la couverture nuageuse si l'heure saisie correspond à la nuit.",
+      "estimate-on-split-support-error": "L'estimation est impossible sur une portée divisée par un support virtuel.",
+      "estimation-input-error": "Les données de l'estimation sont manquantes ou invalides.",
+      "estimation-not-converged-error": "La cible ne peut pas être atteinte dans les bornes de l'estimation.",
+      "estimation-warning": "La charge existante sur la portée estimée a été ignorée."
     },
     "initial-condition-modal": {
       "create-title": "Créer une condition initiale",

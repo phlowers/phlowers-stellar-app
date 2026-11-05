@@ -27,7 +27,11 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
   [PythonErrorCode.InvalidManipulationRange]: 'shared.python-errors.invalid-manipulation-range',
   [PythonErrorCode.SupportOutOfRangeError]: 'shared.python-errors.support-out-of-range-error',
   [PythonErrorCode.GeneratedPointsNoneError]: 'shared.python-errors.generated-points-none-error',
-  [PythonErrorCode.NightTimeError]: 'shared.python-errors.night-time-error'
+  [PythonErrorCode.NightTimeError]: 'shared.python-errors.night-time-error',
+  [PythonErrorCode.EstimateOnSplitSupportError]: 'shared.python-errors.estimate-on-split-support-error',
+  [PythonErrorCode.EstimationInputError]: 'shared.python-errors.estimation-input-error',
+  [PythonErrorCode.EstimationNotConvergedError]: 'shared.python-errors.estimation-not-converged-error',
+  [PythonErrorCode.EstimationWarning]: 'shared.python-errors.estimation-warning'
 };
 
 /**

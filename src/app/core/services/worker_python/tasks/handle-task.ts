@@ -187,6 +187,22 @@ const tasks: Record<
   [Task.setHighSafety]: {
     function: 'set_high_safety',
     externalPackages: []
+  },
+  [Task.estimateRope]: {
+    function: 'estimate_rope',
+    externalPackages: []
+  },
+  [Task.estimateTemperature]: {
+    function: 'estimate_temperature',
+    externalPackages: []
+  },
+  [Task.estimateLoad]: {
+    function: 'estimate_load',
+    externalPackages: []
+  },
+  [Task.estimateWind]: {
+    function: 'estimate_wind',
+    externalPackages: []
   }
 };
 

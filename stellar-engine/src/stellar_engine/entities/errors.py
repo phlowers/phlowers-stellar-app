@@ -25,22 +25,18 @@ class _Errors:
 
     @staticmethod
     def cut_strands_not_finite(layer_index: int) -> str:
-        return (
-            f"Cut strands count must be finite " f"at layer {layer_index + 1}"
-        )
+        return f"Cut strands count must be finite at layer {layer_index + 1}"
 
     @staticmethod
     def cut_strands_not_integer(layer_index: int) -> str:
         return (
-            f"Cut strands count must be an integer "
-            f"at layer {layer_index + 1}"
+            f"Cut strands count must be an integer at layer {layer_index + 1}"
         )
 
     @staticmethod
     def cut_strands_negative(layer_index: int) -> str:
         return (
-            f"Cut strands count cannot be negative "
-            f"at layer {layer_index + 1}"
+            f"Cut strands count cannot be negative at layer {layer_index + 1}"
         )
 
     @staticmethod
@@ -50,6 +46,52 @@ class _Errors:
         return (
             f"Cut strands count ({cut_count}) exceeds "
             f"number of strands ({layer_total}) in layer {layer_index + 1}"
+        )
+
+    @staticmethod
+    def estimation_missing_input(key: str) -> str:
+        return f"Missing estimation input: {key}"
+
+    @staticmethod
+    def estimation_not_finite(key: str) -> str:
+        return f"Estimation input {key} must be a finite number"
+
+    @staticmethod
+    def estimation_invalid_index(key: str, value: float) -> str:
+        return f"Estimation input {key} must be a non-negative integer, got {value}"
+
+    @staticmethod
+    def estimation_not_positive(key: str, value: float) -> str:
+        return f"Estimation input {key} must be strictly positive, got {value}"
+
+    @staticmethod
+    def estimation_invalid_obstacle_point(point: object) -> str:
+        return (
+            f"Estimation input obstaclePoint must contain 3 finite "
+            f"coordinates [x, y, z], got {point}"
+        )
+
+    @staticmethod
+    def estimation_invalid_bounds(bounds: object) -> str:
+        return (
+            f"Estimation input bounds must be [lower, upper] with finite "
+            f"values and lower < upper, got {bounds}"
+        )
+
+    @staticmethod
+    def estimation_not_converged(
+        variable: str, value: float, bounds: object
+    ) -> str:
+        return (
+            f"{variable} estimation did not converge within bounds "
+            f"{bounds} (last value: {value}): target is not reachable"
+        )
+
+    @staticmethod
+    def estimation_distance_not_computable(variable: str) -> str:
+        return (
+            f"{variable} estimation failed: distance to the obstacle "
+            "cannot be computed at the search bounds"
         )
 
 
@@ -75,3 +117,11 @@ class ConformityInputError(ValueError):
 
 class SelectorInputError(ValueError):
     """Raised when a invalid value comes out of a selector."""
+
+
+class EstimationInputError(ValueError):
+    """Raised when an estimation input is missing or invalid."""
+
+
+class EstimationNotConvergedError(ValueError):
+    """Raised when an estimation cannot reach the target within its bounds."""
