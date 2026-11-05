@@ -12,6 +12,7 @@ from mechaphlowers import BalanceEngine
 
 from stellar_engine.entities.errors import NightTimeError
 from stellar_engine.tools.temperature import (
+    DIRECTION_MAP,
     compute_diffuse_and_beam_radiations,
     compute_nebulosity,
     get_wind_attack_angle,
@@ -24,6 +25,37 @@ def test_wind_incidence():
     result = get_wind_attack_angle(inputs)
     assert "windIncidence" in result
     np.testing.assert_allclose(result["windIncidence"], 45)
+
+
+@pytest.mark.parametrize(
+    "direction, angle",
+    [
+        ("North", 0),
+        ("North-North-East", 22.5),
+        ("North-East", 45),
+        ("East-North-East", 67.5),
+        ("East", 90),
+        ("East-South-East", 112.5),
+        ("South-East", 135),
+        ("South-South-East", 157.5),
+        ("South", 180),
+        ("South-South-West", 202.5),
+        ("South-West", 225),
+        ("West-South-West", 247.5),
+        ("West", 270),
+        ("West-North-West", 292.5),
+        ("North-West", 315),
+        ("North-North-West", 337.5),
+    ],
+)
+def test_wind_direction_map(direction, angle):
+    assert DIRECTION_MAP[direction] == angle
+
+
+def test_wind_incidence_intermediate_direction():
+    inputs = {"azimuth": 90, "windDirection": "North-North-East"}
+    result = get_wind_attack_angle(inputs)
+    np.testing.assert_allclose(result["windIncidence"], 67.5)
 
 
 def test_temp_calculation(balance_engine_base: BalanceEngine):

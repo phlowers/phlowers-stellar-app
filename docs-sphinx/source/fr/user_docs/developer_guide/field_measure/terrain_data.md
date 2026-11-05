@@ -40,7 +40,7 @@ Les données de la mesure sont typées comme `FieldMeasure` (depuis `domain/type
   - `ambientTemperature` (number, °C) : plage -50 à 99
   - `windSpeed` (number) : plage 0 à 50
   - `windSpeedUnit` ('kmh' | 'ms') : km/h ou m/s
-  - `windDirection` (string) : un des 8 points cardinaux (Nord, Nord-Est, …)
+  - `windDirection` (string) : un des 16 points de la rose des vents (Nord, Nord-Nord-Est, Nord-Est, …)
   - `skyCover` (enum SkyCover N0–N8) : échelle de nébulosité
 - **Données de localisation** (en-tête partagé) :
   - `span` (number[] | null) : `[leftSupportIndex, rightSupportIndex]`
@@ -87,7 +87,7 @@ D'autres champs existent pour les autres onglets (calcul du paramètre, tempéra
 - **Heure / Saison** : bascule de saison (Été / Hiver) + sélecteur d'heure (format 24 h).
 - **Température ambiante** : champ numérique (°C), plage -50 à 99.
 - **Vitesse du vent** : champ numérique (0–50) + bascule d'unité (km/h ou m/s).
-- **Direction du vent** : liste déroulante (8 points cardinaux).
+- **Direction du vent** : liste déroulante (16 points de la rose des vents).
 - **Couverture nuageuse** : liste déroulante (échelle N0–N8 de nébulosité).
 
 Tous les champs affichent un message de champ obligatoire (`field-measuring.field-datas.mandatory-msg`).
