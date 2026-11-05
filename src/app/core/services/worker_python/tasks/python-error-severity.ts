@@ -35,5 +35,9 @@ export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> 
   [PythonErrorCode.NoIntersectionPlaneForDistanceError]: 'warning',
   [PythonErrorCode.SupportOutOfRangeError]: 'error',
   [PythonErrorCode.GeneratedPointsNoneError]: 'error',
-  [PythonErrorCode.NightTimeError]: 'error'
+  [PythonErrorCode.NightTimeError]: 'error',
+  [PythonErrorCode.EstimateOnSplitSupportError]: 'error',
+  [PythonErrorCode.EstimationInputError]: 'error',
+  [PythonErrorCode.EstimationNotConvergedError]: 'error',
+  [PythonErrorCode.EstimationWarning]: 'warning'
 };
