@@ -70,7 +70,9 @@ describe('createConformityPlot', () => {
   const defaultOptions = {
     selectedRuleTypes: ['RULE_1', 'RULE_2'],
     ruleColors: { RULE_1: '#017aa3', RULE_2: '#ff0000' },
-    conformityType: 'overhang' as ObstacleConformityType
+    conformityType: 'overhang' as ObstacleConformityType,
+    ruleLabels: { RULE_1: 'Rule one', RULE_2: 'Rule two' },
+    cablePointsLabel: 'Cable points'
   };
 
   beforeEach(() => {
@@ -199,6 +201,51 @@ describe('createConformityPlot', () => {
       const traces = (Plotly.react as Mock).mock.calls[0][1] as Data[];
       const borderTrace = traces[1] as { line: { color: string } };
       expect(borderTrace.line.color).toBe('#888888');
+    });
+  });
+
+  describe('legend', () => {
+    const legendNames = (traces: Data[]): (string | undefined)[] =>
+      (traces as { name?: string; showlegend?: boolean }[]).filter((t) => t.showlegend).map((t) => t.name);
+
+    it('should hide the legend by default', () => {
+      createConformityPlot(mockDocument, mockResponse, defaultOptions);
+
+      const [, traces, layout] = (Plotly.react as Mock).mock.calls[0] as [string, Data[], Partial<Layout>];
+      expect(layout.showlegend).toBe(false);
+      expect(legendNames(traces)).toEqual([]);
+    });
+
+    it('should show a legend in the upper left corner when requested', () => {
+      createConformityPlot(mockDocument, mockResponse, { ...defaultOptions, showLegend: true });
+
+      const [, traces, layout] = (Plotly.react as Mock).mock.calls[0] as [string, Data[], Partial<Layout>];
+      expect(layout.showlegend).toBe(true);
+      expect(layout.legend).toMatchObject({ x: 0.01, y: 0.99, xanchor: 'left', yanchor: 'top' });
+      expect(legendNames(traces)).toEqual(['Rule two', 'Rule one', 'Cable points', 'obstacle-1']);
+    });
+
+    it('should fall back to the rule type when no label is known', () => {
+      createConformityPlot(mockDocument, mockResponse, {
+        ...defaultOptions,
+        ruleLabels: undefined,
+        selectedRuleTypes: ['RULE_1'],
+        showLegend: true
+      });
+
+      const traces = (Plotly.react as Mock).mock.calls[0][1] as Data[];
+      expect(legendNames(traces)).toEqual(['RULE_1', 'Cable points', 'obstacle-1']);
+    });
+
+    it('should add a legend swatch per rule for cable_track disks', () => {
+      createConformityPlot(mockDocument, mockResponse, {
+        ...defaultOptions,
+        conformityType: 'cable_track',
+        showLegend: true
+      });
+
+      const traces = (Plotly.react as Mock).mock.calls[0][1] as Data[];
+      expect(legendNames(traces)).toEqual(['Rule two', 'Rule one', 'Cable points', 'obstacle-1']);
     });
   });
 

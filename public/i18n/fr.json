@@ -966,6 +966,7 @@
       "multiple-conditions-warning-summary": "Vous ne pouvez pas ouvrir le contrôle de conformité car ces conditions ne sont pas remplies :"
     },
     "conformity": {
+      "cable-points-legend": "Points du câble",
       "obstacle-legend": "Obstacle",
       "obstacle-point-label": "Point de l'obstacle",
       "name-label": "Nom",

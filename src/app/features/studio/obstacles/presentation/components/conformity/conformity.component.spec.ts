@@ -720,6 +720,30 @@ describe('ConformityComponent', () => {
       );
     });
 
+    it('should show the plot legend only when the graph is enlarged', async () => {
+      await createComponent();
+      vi.spyOn(document, 'getElementById').mockReturnValue(document.createElement('div'));
+      component.form.controls.conformity.setValue(['rule_a']);
+      fixture.detectChanges();
+      await component.calculate();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(mockCreateConformityPlot).toHaveBeenLastCalledWith(
+        document,
+        CONFORMITY_PLOT_MOCK,
+        expect.objectContaining({ showLegend: false })
+      );
+
+      component.toggleGraphSize();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(mockCreateConformityPlot).toHaveBeenLastCalledWith(
+        document,
+        CONFORMITY_PLOT_MOCK,
+        expect.objectContaining({ showLegend: true })
+      );
+    });
+
     it('should not render the plot when the #conformity-plot div is not present in the DOM', async () => {
       await createComponent();
       mockCreateConformityPlot.mockClear();
