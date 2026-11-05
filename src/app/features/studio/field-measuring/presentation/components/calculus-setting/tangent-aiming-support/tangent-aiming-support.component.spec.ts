@@ -248,6 +248,61 @@ describe('TangentAimingSupport component', () => {
     expect(component.isCalculating()).toBe(false);
   });
 
+  it('should discard a result when an input changes while the calculation is pending', async () => {
+    let resolveTask!: (value: { result: typeof TASK_RESULT; error: null; diagnostics: [] }) => void;
+    workerPythonService.runTask.mockReturnValueOnce(
+      new Promise<{ result: typeof TASK_RESULT; error: null; diagnostics: [] }>((resolve) => {
+        resolveTask = resolve;
+      })
+    );
+
+    const calculation = component.calculate();
+    setInput('h-acc-distance-input', '3');
+    resolveTask({ result: TASK_RESULT, error: null, diagnostics: [] });
+    await calculation;
+
+    expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
+    expect(component.canCalculate()).toBe(true);
+  });
+
+  it('should discard a result when the span changes while the calculation is pending', async () => {
+    let resolveTask!: (value: { result: typeof TASK_RESULT; error: null; diagnostics: [] }) => void;
+    workerPythonService.runTask.mockReturnValueOnce(
+      new Promise<{ result: typeof TASK_RESULT; error: null; diagnostics: [] }>((resolve) => {
+        resolveTask = resolve;
+      })
+    );
+
+    const calculation = component.calculate();
+    componentRef.setInput('measureData', { ...component.measureData(), span: [1, 2] });
+    fixture.detectChanges();
+    resolveTask({ result: TASK_RESULT, error: null, diagnostics: [] });
+    await calculation;
+
+    expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
+    expect(component.canCalculate()).toBe(true);
+  });
+
+  it('should still log and notify when a calculation fails after its context changes', async () => {
+    let resolveTask!: (value: { result: null; error: string; diagnostics: [] }) => void;
+    workerPythonService.runTask.mockReturnValueOnce(
+      new Promise<{ result: null; error: string; diagnostics: [] }>((resolve) => {
+        resolveTask = resolve;
+      })
+    );
+
+    const calculation = component.calculate();
+    setInput('h-acc-distance-input', '3');
+    resolveTask({ result: null, error: 'boom', diagnostics: [] });
+    await calculation;
+
+    expect(logger.error).toHaveBeenCalled();
+    expect(notification.error).toHaveBeenCalledWith('field-measuring.tangent-aiming-support.calculation-failed');
+    expect(component.hasError()).toBe(true);
+    expect(component.measureData().outputs.tangentAimingSupport).toBeNull();
+    expect(component.isCalculating()).toBe(false);
+  });
+
   it('should return no span length when the span is unknown', () => {
     expect(component.calculatedSpanLength()).toBeNull();
   });

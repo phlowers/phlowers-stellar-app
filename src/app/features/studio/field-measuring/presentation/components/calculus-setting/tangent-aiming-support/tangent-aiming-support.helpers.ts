@@ -9,6 +9,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { Task, TaskInputs } from '@services/worker_python/tasks/types';
+import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
 import { TANGENT_AIMING_CALCULATION_TYPE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   createNumberControl,
@@ -81,9 +82,9 @@ export function applyTangentAimingSupportDefaults(data: FieldMeasure, defaultLef
   return next;
 }
 
-/** Clears the support result. */
+/** Clears the support result and the automatic 15°C result derived from it. */
 export function invalidateTangentAimingSupportResult(data: FieldMeasure): FieldMeasure {
-  return { ...data, outputs: { ...data.outputs, tangentAimingSupport: null } };
+  return clearAutoParameter15C({ ...data, outputs: { ...data.outputs, tangentAimingSupport: null } });
 }
 
 /** Resets the numeric input hidden by the calculation type switch. */

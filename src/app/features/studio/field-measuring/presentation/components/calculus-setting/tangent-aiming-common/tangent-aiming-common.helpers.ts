@@ -7,6 +7,7 @@
 
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { TranslocoService } from '@jsverse/transloco';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
@@ -66,6 +67,11 @@ export function resolveLeftSupport(current: string | null, span: number[] | null
 /** Identifies a span, empty without span. */
 export function getSpanKey(span: number[] | null | undefined): string {
   return span?.join('-') ?? '';
+}
+
+/** Identity of a calculation request: a result is only valid for the measure, span and displayed inputs it was computed from. */
+export function getCalculationContextKey(data: FieldMeasure, displayedInputs: string): string {
+  return JSON.stringify([data.uuid, getSpanKey(data.span), displayedInputs]);
 }
 
 /**

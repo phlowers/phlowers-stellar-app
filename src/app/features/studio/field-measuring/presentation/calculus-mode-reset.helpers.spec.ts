@@ -158,14 +158,25 @@ describe('resetInactiveCalculusModes', () => {
 });
 
 describe('applyActiveTangentAimingDefaults', () => {
-  it('applies the support defaults and forces the tangente type when the support method is active', () => {
+  it('normalizes legacy support data and clears its stale results', () => {
     const data = createTestMeasureData({
       calculationMethod: 'tangente-aiming',
       calculationType: 'parametre',
       cableParameter: 1500,
+      tangentLeftSupport: null,
+      tangentSpanLength: null,
+      outputs: {
+        papoto: null,
+        cableTemperature: null,
+        parameter15C: { parameter: 1 } as never,
+        tangentAimingSupport: { parameter: 1 } as never,
+        tangentAimingExterior: null,
+        tangentAimingInterior: null
+      },
       exteriorCalculationType: 'parametre'
     });
-    expect(applyActiveTangentAimingDefaults(data, '3')).toMatchObject({
+    const result = applyActiveTangentAimingDefaults(data, '3');
+    expect(result).toMatchObject({
       calculationType: 'tangente',
       tangentLeftSupport: '3',
       tangentSpanLength: 0,
@@ -174,16 +185,29 @@ describe('applyActiveTangentAimingDefaults', () => {
       exteriorCalculationType: 'parametre',
       exteriorLeftSupport: null
     });
+    expect(result.outputs.tangentAimingSupport).toBeNull();
+    expect(result.outputs.parameter15C).toBeNull();
   });
 
-  it('applies the exterior defaults and forces the tangente type when the exterior method is active', () => {
+  it('normalizes legacy exterior data and clears its stale results', () => {
     const data = createTestMeasureData({
       calculationMethod: 'tangente-aiming-exterior',
       exteriorCalculationType: 'parametre',
       exteriorHAccDistance: 50,
-      calculationType: 'parametre'
+      exteriorLeftSupport: null,
+      exteriorSpanLength: null,
+      calculationType: 'parametre',
+      outputs: {
+        papoto: null,
+        cableTemperature: null,
+        parameter15C: { parameter: 1 } as never,
+        tangentAimingSupport: null,
+        tangentAimingExterior: { parameter: 1 } as never,
+        tangentAimingInterior: null
+      }
     });
-    expect(applyActiveTangentAimingDefaults(data, '3')).toMatchObject({
+    const result = applyActiveTangentAimingDefaults(data, '3');
+    expect(result).toMatchObject({
       exteriorCalculationType: 'tangente',
       exteriorLeftSupport: '3',
       exteriorHAccDistance: 50,
@@ -191,21 +215,57 @@ describe('applyActiveTangentAimingDefaults', () => {
       calculationType: 'parametre',
       tangentLeftSupport: null
     });
+    expect(result.exteriorSpanLength).toBe(0);
+    expect(result.outputs.tangentAimingExterior).toBeNull();
+    expect(result.outputs.parameter15C).toBeNull();
   });
 
-  it('applies the interior defaults and forces the tangente type when the interior method is active', () => {
+  it('normalizes legacy interior data and clears its stale results', () => {
     const data = createTestMeasureData({
       calculationMethod: 'tangente-aiming-interior',
       interiorCalculationType: 'parametre',
-      interiorSpanLength: 400
+      interiorLeftSupport: null,
+      interiorSpanLength: null,
+      outputs: {
+        papoto: null,
+        cableTemperature: null,
+        parameter15C: { parameter: 1 } as never,
+        tangentAimingSupport: null,
+        tangentAimingExterior: null,
+        tangentAimingInterior: { parameter: 1 } as never
+      }
     });
-    expect(applyActiveTangentAimingDefaults(data, '3')).toMatchObject({
+    const result = applyActiveTangentAimingDefaults(data, '3');
+    expect(result).toMatchObject({
       interiorCalculationType: 'tangente',
       interiorLeftSupport: '3',
-      interiorSpanLength: 400,
+      interiorSpanLength: 0,
       interiorTangentAngle: 0,
       exteriorLeftSupport: null
     });
+    expect(result.outputs.tangentAimingInterior).toBeNull();
+    expect(result.outputs.parameter15C).toBeNull();
+  });
+
+  it.each([
+    ['tangente-aiming', 'tangentAimingSupport'],
+    ['tangente-aiming-exterior', 'tangentAimingExterior'],
+    ['tangente-aiming-interior', 'tangentAimingInterior']
+  ] as const)('keeps normalized %s data and its results', (calculationMethod, outputField) => {
+    const data = applyActiveTangentAimingDefaults(createTestMeasureData({ calculationMethod }), '11');
+    const withOutputs = {
+      ...data,
+      outputs: {
+        ...data.outputs,
+        parameter15C: { parameter: 1 } as never,
+        [outputField]: { parameter: 1 } as never
+      }
+    };
+
+    const result = applyActiveTangentAimingDefaults(withOutputs, '11');
+    expect(result).toBe(withOutputs);
+    expect(result.outputs[outputField]).not.toBeNull();
+    expect(withOutputs.outputs.parameter15C).not.toBeNull();
   });
 
   it('returns the measure unchanged for the other methods', () => {

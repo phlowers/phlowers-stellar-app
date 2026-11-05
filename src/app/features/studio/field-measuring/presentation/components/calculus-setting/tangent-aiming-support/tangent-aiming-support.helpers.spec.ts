@@ -4,6 +4,7 @@ import {
   applyTangentAimingSupportDefaults,
   createTangentAimingSupportForm,
   getDisplayedInputFields,
+  invalidateTangentAimingSupportResult,
   isTangentAimingSupportDataValid,
   resetNonDisplayedParameterFields,
   toTangentAimingSupportInputs,
@@ -53,6 +54,43 @@ describe('tangent-aiming-support helpers', () => {
   it('should not override an already chosen left support', () => {
     const data = { ...createTestMeasureData(), tangentLeftSupport: '5' };
     expect(applyTangentAimingSupportDefaults(data, '2').tangentLeftSupport).toBe('5');
+  });
+
+  it('should clear the support result and automatic 15°C result without changing other outputs', () => {
+    const data = createTestMeasureData({ updateMode15C: 'auto' });
+    const withOutputs = {
+      ...data,
+      outputs: {
+        ...data.outputs,
+        tangentAimingSupport: { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true },
+        parameter15C: { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 },
+        papoto: { parameter: 4, uncertainty: 5 }
+      }
+    };
+
+    const result = invalidateTangentAimingSupportResult(withOutputs);
+
+    expect(result.outputs.tangentAimingSupport).toBeNull();
+    expect(result.outputs.parameter15C).toBeNull();
+    expect(result.outputs.papoto).toEqual({ parameter: 4, uncertainty: 5 });
+  });
+
+  it('should keep a manual 15°C result when clearing the support result', () => {
+    const data = createTestMeasureData({ updateMode15C: 'manual' });
+    const parameter15C = { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 };
+    const withOutputs = {
+      ...data,
+      outputs: {
+        ...data.outputs,
+        tangentAimingSupport: { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true },
+        parameter15C
+      }
+    };
+
+    const result = invalidateTangentAimingSupportResult(withOutputs);
+
+    expect(result.outputs.tangentAimingSupport).toBeNull();
+    expect(result.outputs.parameter15C).toBe(parameter15C);
   });
 
   it('should reset only the hidden numeric field', () => {

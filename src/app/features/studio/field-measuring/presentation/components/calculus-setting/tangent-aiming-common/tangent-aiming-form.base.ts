@@ -20,6 +20,7 @@ import { INITIAL_LEFT_SUPPORT_STATE } from '@features/studio/field-measuring/pre
 import {
   buildCalculationTypeOptions,
   buildSpanSupportOptions,
+  getCalculationContextKey,
   getCalculatedSpanLength,
   getSpanKey,
   getTangentAimingError,
@@ -154,11 +155,13 @@ export abstract class TangentAimingFormBase {
     this.isCalculating.set(true);
     this.hasError.set(false);
     try {
+      const contextKey = getCalculationContextKey(this.measureData(), this.displayedInputs());
       const { result, error } = await this.workerPythonService.runTask(
         Task.calculateTangentAiming,
         this.config.toTaskInputs(this.measureData())
       );
       if (error || !result) throw new Error(error ?? 'Empty tangent aiming result');
+      if (getCalculationContextKey(this.measureData(), this.displayedInputs()) !== contextKey) return;
       this.measureData.update((d) => ({ ...d, outputs: { ...d.outputs, [this.config.outputKey]: result } }));
       this.baselineInputs.set(this.displayedInputs());
     } catch (error) {
