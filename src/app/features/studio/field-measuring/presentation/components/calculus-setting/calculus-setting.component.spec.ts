@@ -167,7 +167,7 @@ describe('CalculusSetting component', () => {
       expect(data.calculationMethod).toBe('tangente-aiming-exterior');
       expect(data.exteriorParameter).toBe(20);
       expect(data.exteriorSpanLength).toBe(0);
-      expect(data.exteriorCalculationType).toBe('parametre');
+      expect(data.exteriorCalculationType).toBe('tangente');
       expect(data.cableParameter).toBe(before.cableParameter);
       expect(data.leftSupport).toBe(before.leftSupport);
       expect(component.selectedCalculusType()).toBe('TANGENT_AIMING_EXTERIOR');

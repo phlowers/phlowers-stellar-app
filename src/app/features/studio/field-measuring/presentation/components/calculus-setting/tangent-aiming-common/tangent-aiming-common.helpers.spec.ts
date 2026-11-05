@@ -1,11 +1,12 @@
 import { FormControl, FormGroup } from '@angular/forms';
 import { TranslocoService } from '@jsverse/transloco';
+import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { INITIAL_LEFT_SUPPORT_STATE, TANGENT_AIMING_FIELD_RULES } from './tangent-aiming-common.constantes';
 import {
   buildCalculationTypeOptions,
   buildSpanSupportOptions,
-  calculateTangentAimingMock,
   createNumberControl,
+  getCalculationContextKey,
   getCalculatedSpanLength,
   getDefaultLeftSupport,
   getSpanKey,
@@ -49,6 +50,22 @@ describe('tangent-aiming-common helpers', () => {
   it('should build a span key', () => {
     expect(getSpanKey([3, 4])).toBe('3-4');
     expect(getSpanKey(null)).toBe('');
+  });
+
+  it('should identify equal calculation contexts with the same key', () => {
+    const data = createTestMeasureData({ uuid: 'measure-1', span: [3, 4] });
+    expect(getCalculationContextKey(data, 'displayed-inputs')).toBe(
+      getCalculationContextKey({ ...data }, 'displayed-inputs')
+    );
+  });
+
+  it('should distinguish calculation contexts by measure, span, and displayed inputs', () => {
+    const data = createTestMeasureData({ uuid: 'measure-1', span: [3, 4] });
+    const contextKey = getCalculationContextKey(data, 'displayed-inputs');
+
+    expect(getCalculationContextKey({ ...data, uuid: 'measure-2' }, 'displayed-inputs')).not.toBe(contextKey);
+    expect(getCalculationContextKey({ ...data, span: [4, 5] }, 'displayed-inputs')).not.toBe(contextKey);
+    expect(getCalculationContextKey(data, 'changed-inputs')).not.toBe(contextKey);
   });
 
   it('should default the left support to the first support of the span', () => {
@@ -112,8 +129,8 @@ describe('tangent-aiming-common helpers', () => {
 
     it('should build the calculation type options', () => {
       expect(buildCalculationTypeOptions(transloco)).toEqual([
-        { label: 'common.parameter-label', value: 'parametre' },
-        { label: 'common.calculation-type-tangent', value: 'tangente' }
+        { label: 'common.parameter-label', value: 'parametre', disabled: true },
+        { label: 'common.calculation-type-tangent', value: 'tangente', disabled: false }
       ]);
     });
 
@@ -127,11 +144,5 @@ describe('tangent-aiming-common helpers', () => {
       control.setValue(100);
       expect(getTangentAimingError(control, transloco)).toBe('');
     });
-  });
-
-  it('should return a constant mock result', async () => {
-    const { result, error } = await calculateTangentAimingMock({});
-    expect(error).toBeNull();
-    expect(result?.checkValidity).toBe(true);
   });
 });

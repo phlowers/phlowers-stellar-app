@@ -8,6 +8,9 @@
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
+import { Task, TaskInputs } from '@services/worker_python/tasks/types';
+import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
+import { TANGENT_AIMING_CALCULATION_TYPE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   createNumberControl,
   syncDisplayedControls
@@ -69,9 +72,9 @@ export function isTangentAimingSupportDataValid(data: FieldMeasure): boolean {
   return form.valid;
 }
 
-/** Fills the empty (`null`/`undefined`) tangent aiming (support) inputs with their default. */
+/** Fills the empty (`null`/`undefined`) tangent aiming (support) inputs with their default; forces the supported calculation type. */
 export function applyTangentAimingSupportDefaults(data: FieldMeasure, defaultLeftSupport: string | null): FieldMeasure {
-  const next: FieldMeasure = { ...data, calculationType: data.calculationType ?? 'parametre' };
+  const next: FieldMeasure = { ...data, calculationType: TANGENT_AIMING_CALCULATION_TYPE };
   next.tangentLeftSupport ??= defaultLeftSupport;
   for (const field of Object.keys(TANGENT_AIMING_SUPPORT_FIELD_RULES) as TangentAimingSupportNumericField[]) {
     next[field] ??= TANGENT_AIMING_SUPPORT_FIELD_RULES[field].default;
@@ -79,9 +82,9 @@ export function applyTangentAimingSupportDefaults(data: FieldMeasure, defaultLef
   return next;
 }
 
-/** Clears the support result. */
+/** Clears the support result and the automatic 15°C result derived from it. */
 export function invalidateTangentAimingSupportResult(data: FieldMeasure): FieldMeasure {
-  return { ...data, outputs: { ...data.outputs, tangentAimingSupport: null } };
+  return clearAutoParameter15C({ ...data, outputs: { ...data.outputs, tangentAimingSupport: null } });
 }
 
 /** Resets the numeric input hidden by the calculation type switch. */
@@ -101,5 +104,17 @@ export function toTangentAimingSupportInputs(data: FieldMeasure): TangentAimingS
     calculationType: data.calculationType,
     parameter: data.cableParameter,
     tangentAngle: data.cableTangentAngle
+  };
+}
+
+/** Builds the `calculateTangentAiming` task inputs: sighting device right below the left support (no horizontal distance). */
+export function toTangentAimingTaskInputs(inputs: TangentAimingSupportInputs): TaskInputs[Task.calculateTangentAiming] {
+  return {
+    angleToCableTangent: inputs.tangentAngle ?? 0,
+    angleToLeftSupport: 0,
+    angleToRightSupport: inputs.verticalAccAngle ?? 0,
+    spanLength: inputs.spanLength ?? 0,
+    inputHeight: inputs.hAccDistance ?? 0,
+    distance: 0
   };
 }

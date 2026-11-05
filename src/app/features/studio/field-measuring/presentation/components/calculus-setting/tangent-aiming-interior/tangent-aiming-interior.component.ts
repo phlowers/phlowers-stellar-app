@@ -21,7 +21,8 @@ import {
   createTangentAimingInteriorForm,
   getDisplayedInputFields,
   invalidateTangentAimingInteriorResult,
-  toTangentAimingInteriorInputs
+  toTangentAimingInteriorInputs,
+  toTangentAimingInteriorTaskInputs
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
 import {
   TangentAimingInteriorCalculationType,
@@ -69,7 +70,7 @@ export class TangentAimingInteriorComponent extends TangentAimingFormBase {
       calculationFailedKey: TANGENT_AIMING_INTERIOR_CALCULATION_FAILED_KEY,
       getDisplayedInputFields,
       invalidateResult: invalidateTangentAimingInteriorResult,
-      toInputs: toTangentAimingInteriorInputs
+      toTaskInputs: (data) => toTangentAimingInteriorTaskInputs(toTangentAimingInteriorInputs(data))
     });
   }
 

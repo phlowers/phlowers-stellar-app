@@ -6,7 +6,8 @@
  */
 
 import { FormGroup } from '@angular/forms';
-import { FieldMeasure, TangentAimingSupportResult } from '@features/studio/field-measuring/domain/types';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
+import { Task, TaskInputs } from '@services/worker_python/tasks/types';
 
 /** Kind of numeric input shared by the tangent aiming forms, each kind having its own rule. */
 export type TangentAimingRuleField = 'spanLength' | 'hAccDistance' | 'verticalAccAngle' | 'parameter' | 'tangentAngle';
@@ -32,12 +33,6 @@ export interface TangentAimingNumberFieldView {
   step: number;
   /** CSS grid area class. */
   area: string;
-}
-
-/** Outcome of a tangent aiming calculation, same shape as a worker task response. */
-export interface TangentAimingCalculation {
-  result: TangentAimingSupportResult | null;
-  error: string | null;
 }
 
 /** Left support seen at the last resolution, with the span it was resolved for. */
@@ -66,5 +61,6 @@ export interface TangentAimingFormConfig {
   calculationFailedKey: string;
   getDisplayedInputFields: (calculationType: TangentAimingCalculationType) => readonly string[];
   invalidateResult: (data: FieldMeasure) => FieldMeasure;
-  toInputs: (data: FieldMeasure) => unknown;
+  /** Inputs of the `calculateTangentAiming` task run by the calculate button. */
+  toTaskInputs: (data: FieldMeasure) => TaskInputs[Task.calculateTangentAiming];
 }

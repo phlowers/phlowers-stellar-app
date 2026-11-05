@@ -7,13 +7,16 @@ import { vi } from 'vitest';
 
 import { TangentAimingInteriorComponent } from './tangent-aiming-interior.component';
 import * as helpers from './tangent-aiming-interior.helpers';
-import * as commonHelpers from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
+
+const TASK_RESULT = { parameter: 2000.2, uncertainty: 13.3, criterion: 1, checkValidity: true };
 
 const validMeasure = (overrides?: Partial<FieldMeasure>): FieldMeasure =>
   helpers.applyTangentAimingInteriorDefaults(
@@ -28,6 +31,7 @@ describe('TangentAimingInterior component', () => {
   const litData = signal<unknown>(null);
   const logger = { error: vi.fn(), warn: vi.fn(), info: vi.fn(), log: vi.fn() };
   const notification = { error: vi.fn() };
+  const workerPythonService = { runTask: vi.fn() };
 
   const getByTestId = (id: string): HTMLElement | null => fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
   const setInput = (id: string, value: string) => {
@@ -47,6 +51,7 @@ describe('TangentAimingInterior component', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    workerPythonService.runTask.mockResolvedValue({ result: TASK_RESULT, error: null, diagnostics: [] });
     litData.set(null);
     await TestBed.configureTestingModule({
       imports: [
@@ -62,6 +67,7 @@ describe('TangentAimingInterior component', () => {
         provideHttpClientTesting(),
         { provide: LoggerService, useValue: logger },
         { provide: NotificationService, useValue: notification },
+        { provide: WorkerPythonService, useValue: workerPythonService },
         {
           provide: PlotSpanService,
           useValue: { section: signal({ supports: [{ number: 'ABCDEFG' }, { number: 'S2' }] }) }
@@ -97,7 +103,7 @@ describe('TangentAimingInterior component', () => {
     expect(component.form.controls.leftSupport.value).toBe('0');
   });
 
-  it('should render the common fields, the parameter field and hide the tangent angle by default', () => {
+  it('should render the common fields, the tangent angle field and hide the parameter by default', () => {
     [
       'help-btn',
       'left-support-select',
@@ -106,36 +112,38 @@ describe('TangentAimingInterior component', () => {
       'vertical-acc-angle-left-input',
       'vertical-acc-angle-right-input',
       'calculation-type-selector',
-      'parameter-input'
+      'tangent-angle-input'
     ].forEach((id) => expect(getByTestId(id)).toBeTruthy());
-    expect(getByTestId('tangent-angle-input')).toBeNull();
-  });
-
-  it('should show the tangent angle and hide the parameter when the type is tangente', () => {
-    component.updateCalculationType('tangente');
-    fixture.detectChanges();
-    expect(getByTestId('tangent-angle-input')).toBeTruthy();
     expect(getByTestId('parameter-input')).toBeNull();
   });
 
-  it('should expose parameter and tangent calculation type options', () => {
-    expect(component.calculationTypeOptions().map((o) => o.value)).toEqual(['parametre', 'tangente']);
+  it('should show the parameter and hide the tangent angle when the type is parametre', () => {
+    component.updateCalculationType('parametre');
+    fixture.detectChanges();
+    expect(getByTestId('parameter-input')).toBeTruthy();
+    expect(getByTestId('tangent-angle-input')).toBeNull();
+  });
+
+  it('should expose parameter and tangent calculation type options with only the tangent one enabled', () => {
+    expect(component.calculationTypeOptions().map(({ value, disabled }) => ({ value, disabled }))).toEqual([
+      { value: 'parametre', disabled: true },
+      { value: 'tangente', disabled: false }
+    ]);
   });
 
   it('should only require the displayed type field', () => {
     fillCommonFields();
-    component.updateCalculationType('tangente');
-    fixture.detectChanges();
     expect(component.isFormValid()).toBe(false);
     setInput('tangent-angle-input', '10');
     expect(component.isFormValid()).toBe(true);
+    expect(component.form.controls.parameter.value).toBeNull();
   });
 
   it('should disable the calculate button until the form is valid, then enable it', () => {
     const button = () => getByTestId('calculate-tangent-aiming-interior-btn') as HTMLButtonElement;
     expect(button().disabled).toBe(true);
     fillCommonFields();
-    setInput('parameter-input', '1000');
+    setInput('tangent-angle-input', '101.4');
     expect(button().disabled).toBe(false);
   });
 
@@ -177,22 +185,18 @@ describe('TangentAimingInterior component', () => {
     fixture.detectChanges();
     await component.calculate();
     fixture.detectChanges();
-    expect(component.measureData().outputs.tangentAimingInterior).toEqual({
-      parameter: 1000,
-      uncertainty: 1.5,
-      criterion: 1,
-      checkValidity: true
-    });
-    expect(getByTestId('tangent-aiming-interior-parameter')?.textContent?.trim()).toBe('1000 m');
-    expect(getByTestId('tangent-aiming-interior-uncertainty')?.textContent?.trim()).toBe('1.5 m');
+    expect(component.measureData().outputs.tangentAimingInterior).toEqual(TASK_RESULT);
+    expect(getByTestId('tangent-aiming-interior-parameter')?.textContent?.trim()).toBe('2000 m');
+    expect(getByTestId('tangent-aiming-interior-uncertainty')?.textContent?.trim()).toBe('13.3 m');
     expect(getByTestId('tangent-aiming-interior-criterion')?.textContent).toContain('Yes');
     expect(getByTestId('tangent-aiming-interior-criterion-ok')).toBeTruthy();
   });
 
   it('should render the not respected icon when the criterion fails', async () => {
-    vi.spyOn(commonHelpers, 'calculateTangentAimingMock').mockResolvedValueOnce({
-      result: { parameter: 10, uncertainty: 2, criterion: 5, checkValidity: false },
-      error: null
+    workerPythonService.runTask.mockResolvedValueOnce({
+      result: { parameter: 2000, uncertainty: 150, criterion: 7.5, checkValidity: false },
+      error: null,
+      diagnostics: []
     });
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
@@ -215,20 +219,56 @@ describe('TangentAimingInterior component', () => {
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
     await component.calculate();
-    component.updateCalculationType('tangente');
-    expect(component.measureData().interiorCalculationType).toBe('tangente');
+    component.updateCalculationType('parametre');
+    expect(component.measureData().interiorCalculationType).toBe('parametre');
+    expect(component.measureData().outputs.tangentAimingInterior).toBeNull();
+  });
+
+  it('should run the tangent aiming task with a positive distance and store its result', async () => {
+    componentRef.setInput(
+      'measureData',
+      validMeasure({
+        interiorSpanLength: 400,
+        interiorHAccDistance: 50,
+        interiorVerticalAccAngleLeft: 93.66,
+        interiorVerticalAccAngleRight: 99.29,
+        interiorTangentAngle: 101.4
+      })
+    );
+    fixture.detectChanges();
+    await component.calculate();
+    fixture.detectChanges();
+    expect(workerPythonService.runTask).toHaveBeenCalledWith(Task.calculateTangentAiming, {
+      spanLength: 400,
+      angleToCableTangent: 101.4,
+      angleToLeftSupport: 93.66,
+      angleToRightSupport: 99.29,
+      inputHeight: 0,
+      distance: 50
+    });
+    expect(component.measureData().outputs.tangentAimingInterior).toEqual(TASK_RESULT);
+    expect(getByTestId('tangent-aiming-interior-parameter')?.textContent?.trim()).toBe('2000 m');
+  });
+
+  it('should keep the result empty when the task returns no result', async () => {
+    workerPythonService.runTask.mockResolvedValueOnce({ result: null, error: null, diagnostics: [] });
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    await component.calculate();
+    expect(logger.error).toHaveBeenCalled();
+    expect(notification.error).toHaveBeenCalled();
+    expect(component.hasError()).toBe(true);
     expect(component.measureData().outputs.tangentAimingInterior).toBeNull();
   });
 
   it('should not calculate when the form is invalid', async () => {
-    const spy = vi.spyOn(commonHelpers, 'calculateTangentAimingMock');
     await component.calculate();
-    expect(spy).not.toHaveBeenCalled();
+    expect(workerPythonService.runTask).not.toHaveBeenCalled();
     expect(component.measureData().outputs.tangentAimingInterior).toBeNull();
   });
 
   it('should log and notify when the calculation fails', async () => {
-    vi.spyOn(commonHelpers, 'calculateTangentAimingMock').mockResolvedValueOnce({ result: null, error: 'boom' });
+    workerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'boom', diagnostics: [] });
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
     await component.calculate();
@@ -260,7 +300,7 @@ describe('TangentAimingInterior component', () => {
     it('should clear it in auto mode when the calculation type changes', () => {
       componentRef.setInput('measureData', withParameter15C('auto'));
       fixture.detectChanges();
-      component.updateCalculationType('tangente');
+      component.updateCalculationType('parametre');
       expect(component.measureData().outputs.parameter15C).toBeNull();
     });
 
@@ -268,7 +308,7 @@ describe('TangentAimingInterior component', () => {
       componentRef.setInput('measureData', withParameter15C('manual'));
       fixture.detectChanges();
       setInput('h-acc-distance-input', '12');
-      component.updateCalculationType('tangente');
+      component.updateCalculationType('parametre');
       expect(component.measureData().outputs.parameter15C).toEqual(parameter15C);
     });
   });
