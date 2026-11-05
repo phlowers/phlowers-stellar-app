@@ -14,8 +14,8 @@ import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { SortEvent } from 'primeng/api';
-import { ButtonComponent } from '@shared/components/atoms/button/button.component';
+import { SplitButtonModule } from 'primeng/splitbutton';
+import { MenuItem, SortEvent } from 'primeng/api';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { PossibleIconNames } from '@shared/model/icon.model';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
@@ -34,7 +34,7 @@ import { L0Row } from './l0-sum.interfaces';
     DialogModule,
     TableModule,
     ProgressSpinnerModule,
-    ButtonComponent,
+    SplitButtonModule,
     IconComponent,
     TranslocoModule
   ],
@@ -62,6 +62,13 @@ export class L0SumComponent {
 
   readonly sortField = signal<string>('');
   readonly sortOrder = signal<number>(0);
+
+  readonly exportMenuItems = computed<MenuItem[]>(() => [
+    {
+      label: this.translocoService.translate('studio.l0-sum.export-for-excel'),
+      command: () => this.onExportForExcel()
+    }
+  ]);
 
   constructor() {
     effect(() => {
@@ -107,8 +114,17 @@ export class L0SumComponent {
     }
   }
 
-  // Downloads the table as a CSV file, the dialog stays open
+  // Downloads the table as a plain CSV file, the dialog stays open
   onExport() {
+    this.exportCsv(false);
+  }
+
+  // Same CSV, with the span labels written as text formulas so that Excel does not turn them into dates
+  onExportForExcel() {
+    this.exportCsv(true);
+  }
+
+  private exportCsv(forExcel: boolean) {
     const rows = this.l0Rows();
     if (!isL0TableExportable(rows)) {
       this.notificationService.error(this.translocoService.translate('studio.l0-sum.export-invalid-table'));
@@ -124,7 +140,8 @@ export class L0SumComponent {
         l0: translate('studio.l0-sum.csv-l0-label'),
         cumulatedL0: translate('studio.l0-sum.csv-cumulated-l0-label')
       },
-      this.translocoService.getActiveLang()
+      this.translocoService.getActiveLang(),
+      forExcel
     );
 
     const url = URL.createObjectURL(new Blob([csv], { type: L0_EXPORT_MIME_TYPE }));

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { SortEvent } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SplitButtonModule } from 'primeng/splitbutton';
 import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
 import { L0SumComponent } from './l0-sum.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
@@ -11,7 +12,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { NotificationService } from '@core/services/notification/notification.service';
-import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 
 @Component({
   selector: 'app-icon',
@@ -27,6 +27,32 @@ describe('L0SumComponent', () => {
   let fixture: ComponentFixture<L0SumComponent>;
   let toolbarDialogService: ToolbarDialogService;
   let notificationService: { error: ReturnType<typeof vi.fn> };
+  let originalMatchMedia: typeof globalThis.matchMedia;
+
+  beforeAll(() => {
+    originalMatchMedia = globalThis.matchMedia;
+    // The PrimeNG split button menu needs matchMedia
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn()
+      }))
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(globalThis, 'matchMedia', {
+      writable: true,
+      value: originalMatchMedia
+    });
+  });
 
   beforeEach(async () => {
     const mockLitData = {
@@ -70,7 +96,7 @@ describe('L0SumComponent', () => {
             TableModule,
             ProgressSpinnerModule,
             TranslocoModule,
-            ButtonComponent,
+            SplitButtonModule,
             MockIconComponent
           ]
         }
@@ -262,49 +288,142 @@ describe('L0SumComponent', () => {
       expect(lines[0]).toBe(
         'COMMON.SPAN-LABEL;STUDIO.L0-SUM.CSV-SPAN-LENGTH-LABEL;STUDIO.L0-SUM.CSV-L0-LABEL;STUDIO.L0-SUM.CSV-CUMULATED-L0-LABEL'
       );
-      expect(lines.slice(1, 3)).toEqual(['"=""1-2""";101.25;100;100', '"=""2-3""";201;200.5;300.5']);
+      expect(lines.slice(1, 3)).toEqual(['1-2;101.25;100;100', '2-3;201;200.5;300.5']);
       expect(lines).toHaveLength(7);
     });
 
-    it('should export a span built from a support number starting with "=" as text, not as a formula', async () => {
-      (TestBed.inject(PlotSpanService).section as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        supports: [{ number: '=1+1' }, { number: '2' }]
-      });
-      const formulaFixture = TestBed.createComponent(L0SumComponent);
-      formulaFixture.detectChanges();
+    it('should export the spans without the text formula wrapper', async () => {
+      component.onExport();
 
-      formulaFixture.componentInstance.onExport();
+      expect(await readBlobAsText(blobs[0])).not.toContain('="');
+    });
+
+    describe('onExportForExcel', () => {
+      it('should download the table through a temporary blob link', () => {
+        component.onExportForExcel();
+
+        expect(createdLink?.download).toMatch(/\.csv$/);
+        expect(createdLink?.href).toContain('blob:l0');
+        expect(clickSpy).toHaveBeenCalledTimes(1);
+        expect(revokeSpy).toHaveBeenCalledWith('blob:l0');
+        expect(blobs[0].type).toBe('text/csv;charset=utf-8');
+        expect(notificationService.error).not.toHaveBeenCalled();
+      });
+
+      it('should export the spans as text formulas so that Excel keeps them as text', async () => {
+        component.onExportForExcel();
+
+        const lines = (await readBlobAsText(blobs[0])).split('\r\n');
+        expect(lines.slice(1, 3)).toEqual(['"=""1-2""";101.25;100;100', '"=""2-3""";201;200.5;300.5']);
+        expect(lines).toHaveLength(7);
+      });
+
+      it('should export a span built from a support number starting with "=" as text, not as a formula', async () => {
+        (TestBed.inject(PlotSpanService).section as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+          supports: [{ number: '=1+1' }, { number: '2' }]
+        });
+        const formulaFixture = TestBed.createComponent(L0SumComponent);
+        formulaFixture.detectChanges();
+
+        formulaFixture.componentInstance.onExportForExcel();
+
+        const lines = (await readBlobAsText(blobs[0])).split('\r\n');
+        expect(lines[1]).toBe('"=""=1+1-2""";101.25;100;100');
+      });
+
+      it('should keep the dialog open', () => {
+        const closeSpy = vi.spyOn(toolbarDialogService, 'closeTool');
+
+        component.onExportForExcel();
+
+        expect(closeSpy).not.toHaveBeenCalled();
+      });
+
+      it('should notify an error and not download when the table is empty', () => {
+        component.l0Rows.set([]);
+
+        component.onExportForExcel();
+
+        expect(notificationService.error).toHaveBeenCalledWith('studio.l0-sum.export-invalid-table');
+        expect(clickSpy).not.toHaveBeenCalled();
+      });
+
+      it('should notify an error and not download when a value is not a finite number', () => {
+        component.l0Rows.update((rows) => [
+          ...rows,
+          { span: '6-7', spanLength: 1, l0: Number.POSITIVE_INFINITY, cumulatedL0: 1, index: 5 }
+        ]);
+
+        component.onExportForExcel();
+
+        expect(notificationService.error).toHaveBeenCalledWith('studio.l0-sum.export-invalid-table');
+        expect(clickSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should offer the Excel export as the only extra menu item', () => {
+      const items = component.exportMenuItems();
+
+      expect(items).toHaveLength(1);
+      expect(items[0].label).toBe('studio.l0-sum.export-for-excel');
+    });
+
+    it('should run the Excel export from the menu item', async () => {
+      component.exportMenuItems()[0].command?.({});
 
       const lines = (await readBlobAsText(blobs[0])).split('\r\n');
-      expect(lines[1]).toBe('"=""=1+1-2""";101.25;100;100');
+      expect(lines[1]).toBe('"=""1-2""";101.25;100;100');
     });
 
     // The footer is rendered by the toolbar dialog, not in the component view
-    const renderExportButton = (target: ComponentFixture<L0SumComponent>): HTMLButtonElement => {
+    const renderExportSplitButton = (target: ComponentFixture<L0SumComponent>) => {
       const view = target.componentInstance.footerTemplate()!.createEmbeddedView(null);
       view.detectChanges();
-      return view.rootNodes.find((node) => node instanceof HTMLButtonElement)!;
+      const host = view.rootNodes.find((node) => node instanceof HTMLElement && node.tagName === 'P-SPLITBUTTON');
+      return {
+        host: host as HTMLElement,
+        mainButton: host.querySelector<HTMLButtonElement>('.p-splitbutton-button')!,
+        dropdownButton: host.querySelector<HTMLButtonElement>('.p-splitbutton-dropdown')!
+      };
     };
 
-    it('should enable the export button once the data is loaded', () => {
-      const button = renderExportButton(fixture);
+    it('should render the export as a split button', () => {
+      const { host, mainButton, dropdownButton } = renderExportSplitButton(fixture);
 
-      expect(button.disabled).toBe(false);
-      expect(button.classList).not.toContain('app-btn-loading');
+      expect(host.getAttribute('data-testid')).toBe('l0-export-btn');
+      expect(mainButton.textContent).toContain('common.export');
+      expect(dropdownButton.getAttribute('aria-label')).toBe('studio.l0-sum.export-options-aria-label');
     });
 
-    it('should lock the export button while the data is recalculated', () => {
+    it('should enable both export buttons once the data is loaded', () => {
+      const { mainButton, dropdownButton } = renderExportSplitButton(fixture);
+
+      expect(mainButton.disabled).toBe(false);
+      expect(dropdownButton.disabled).toBe(false);
+    });
+
+    it('should export the plain CSV when clicking the main button', async () => {
+      const { mainButton } = renderExportSplitButton(fixture);
+
+      mainButton.click();
+
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      const lines = (await readBlobAsText(blobs[0])).split('\r\n');
+      expect(lines[1]).toBe('1-2;101.25;100;100');
+    });
+
+    it('should lock both export buttons while the data is recalculated', () => {
       // the previous litData is kept until the worker returns, so the rows are still there under the spinner
       (TestBed.inject(PlotService).loading as unknown as ReturnType<typeof vi.fn>).mockReturnValue(true);
       const loadingFixture = TestBed.createComponent(L0SumComponent);
       loadingFixture.detectChanges();
       expect(loadingFixture.componentInstance.l0Rows()).toHaveLength(5);
 
-      const button = renderExportButton(loadingFixture);
-      button.click();
+      const { mainButton, dropdownButton } = renderExportSplitButton(loadingFixture);
+      mainButton.click();
 
-      expect(button.disabled).toBe(true);
-      expect(button.classList).toContain('app-btn-loading');
+      expect(mainButton.disabled).toBe(true);
+      expect(dropdownButton.disabled).toBe(true);
       expect(clickSpy).not.toHaveBeenCalled();
       expect(blobs).toHaveLength(0);
     });
