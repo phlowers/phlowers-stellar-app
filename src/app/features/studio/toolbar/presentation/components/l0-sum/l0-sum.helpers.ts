@@ -67,14 +67,16 @@ function toCsvTextField(value: string): string {
   return `="${value.replaceAll('"', '""')}"`;
 }
 
-// Builds the L0 export: a heading row of translated upper case labels, then one row per span
-export function buildL0Csv(rows: L0Row[], labels: L0CsvLabels, locale: string): string {
+// Builds the L0 export: a heading row of translated upper case labels, then one row per span.
+// The span label is written as is, unless `forExcel` is set: it is then written as a text formula so that Excel keeps it
+// as text
+export function buildL0Csv(rows: L0Row[], labels: L0CsvLabels, locale: string, forExcel = false): string {
   const headingRow = [labels.span, labels.spanLength, labels.l0, labels.cumulatedL0].map((label) =>
     label.toLocaleUpperCase(locale)
   );
   // The lengths are left alone, a negative one legitimately starts with "-"
   const dataRows = rows.map((row) => [
-    toCsvTextField(row.span),
+    forExcel ? toCsvTextField(row.span) : row.span,
     formatCsvNumber(row.spanLength, locale),
     formatCsvNumber(row.l0, locale),
     formatCsvNumber(row.cumulatedL0, locale)
