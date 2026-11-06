@@ -36,6 +36,7 @@
     "description-label": "Description",
     "dis-symmetric": "Dissymétrique",
     "distance-label": "Distance",
+    "distance-to-reference-support-label": "Distance au support de référence",
     "duplicate": "Dupliquer",
     "edit": "Modifier",
     "eel-label": "EEL",
@@ -121,6 +122,7 @@
     "support-name-label": "Nom de supp.",
     "support-no-label": "N° de support",
     "symmetric": "Symétrique",
+    "temperature-label": "Température",
     "tools-label": "Outils",
     "uncertainty-cable-temperature-label": "Incertitude température du câble",
     "validate": "Valider",
@@ -390,7 +392,8 @@
       "estimate-on-split-support-error": "L'estimation est impossible sur une portée divisée par un support virtuel.",
       "estimation-input-error": "Les données de l'estimation sont manquantes ou invalides.",
       "estimation-not-converged-error": "La cible ne peut pas être atteinte dans les bornes de l'estimation.",
-      "estimation-warning": "La charge existante sur la portée estimée a été ignorée."
+      "estimation-warning": "La charge existante sur la portée estimée a été ignorée.",
+      "effort-position-out-of-span-error": "La distance au support de référence est en dehors de la portée."
     },
     "initial-condition-modal": {
       "create-title": "Créer une condition initiale",
@@ -899,6 +902,7 @@
       "forest-trenches-tool": "Tranchées forestières",
       "height-and-lateral-distance-tool": "Hauteur & distance latérale",
       "cable-adjustment-tool": "Réglage d'un câble",
+      "estimations-tool": "Estimations",
       "rrts-cut-strands": "CRR de brins coupés"
     },
     "section-plot-card": {
@@ -1011,7 +1015,6 @@
       "distance-to-comply-label": "Distance à respecter",
       "compliance-altitude-label": "Altitude à respecter",
       "compliance-line-axis-distance-label": "Distance axe ligne respect",
-      "temperature-label": "Température",
       "wind-pressure-label": "Pression du vent",
       "minimal-distance-label": "Distance mini"
     },
@@ -1185,6 +1188,17 @@
       "aria-help": "Aide sur le réglage d'un câble",
       "calculation-failed": "Échec du calcul de réglage du câble"
     },
+    "effort-estimation": {
+      "tab-label": "Effort déplacement vert. câble",
+      "target-displacement-label": "Dépl. cible",
+      "up": "Montée",
+      "down": "Descente",
+      "effort-label": "Traction (-) / Poids (+)",
+      "x-displacement-label": "Déplact selon axe de portée (x)",
+      "copy-effort-aria-label": "Copier l'effort",
+      "copied": "Effort copié dans le presse-papier",
+      "copy-failed": "Échec de la copie de l'effort"
+    },
     "hanging-table-report": {
       "title": "Rapport Tableau de pose",
       "hanging-calculation-title": "Calcul de pose",
@@ -1198,7 +1212,6 @@
       "layers-detail": "Détail des couches",
       "current-work-load-label": "Taux de travail max actuel",
       "staff-presence-label": "Présence du personnel",
-      "distance-support-ref-label": "Distance au support de référence",
       "add-marking-label": "Ajouter une indication \"brins coupés\"",
       "result-cable-rrts-label": "CRR du câble",
       "result-new-working-load-label": "Nouveau taux de travail max",
