@@ -87,5 +87,8 @@ export const PDF_UNITS = {
   celsius: '°C',
   cra: '%CRA',
   centimeters: 'cm',
-  squareMeters: 'm\u00B2'
+  squareMeters: 'm\u00B2',
+  metersPerSecond: 'm/s',
+  ampere: 'A',
+  wattsPerSquareMeter: 'W/m\u00B2'
 } as const;

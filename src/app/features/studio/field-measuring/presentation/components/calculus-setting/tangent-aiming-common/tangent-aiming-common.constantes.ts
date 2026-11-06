@@ -22,8 +22,8 @@ export const TANGENT_AIMING_FIELD_RULES: Record<TangentAimingRuleField, TangentA
 };
 
 /**
- * Only calculation type supported by the engine (`calculate_tangent_aiming`): the parameter is calculated from the
- * cable tangent angle. The `parametre` type is disabled until the engine handles it.
+ * Default calculation type of a tangent aiming form. The engine (`calculate_tangent_aiming`) only computes the
+ * parameter from the cable tangent angle: the `parametre` type can be selected and saved but not calculated yet.
  */
 export const TANGENT_AIMING_CALCULATION_TYPE: TangentAimingCalculationType = 'tangente';
 

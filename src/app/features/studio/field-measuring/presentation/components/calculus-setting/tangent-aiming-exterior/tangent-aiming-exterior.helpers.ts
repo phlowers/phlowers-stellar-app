@@ -68,14 +68,14 @@ export function isTangentAimingExteriorDataValid(data: FieldMeasure): boolean {
   return form.valid;
 }
 
-/** Fills the empty (`null`/`undefined`) tangent aiming (exterior) inputs with their default; forces the supported calculation type. */
+/** Fills the empty (`null`/`undefined`) tangent aiming (exterior) inputs with their default (calculation type included). */
 export function applyTangentAimingExteriorDefaults(
   data: FieldMeasure,
   defaultLeftSupport: string | null
 ): FieldMeasure {
   const next: FieldMeasure = {
     ...data,
-    exteriorCalculationType: TANGENT_AIMING_CALCULATION_TYPE,
+    exteriorCalculationType: data.exteriorCalculationType ?? TANGENT_AIMING_CALCULATION_TYPE,
     exteriorLeftSupport: data.exteriorLeftSupport ?? defaultLeftSupport
   };
   for (const field of NUMERIC_FIELDS) {

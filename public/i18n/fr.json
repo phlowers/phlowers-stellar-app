@@ -836,6 +836,32 @@
         "angle-tangent": "ANGLE_TANGENT",
         "parameter": "PARAMETRE"
       }
+    },
+    "report": {
+      "title": "Rapport Mesure de terrain",
+      "terrain-data-title": "Données terrain",
+      "measure-date": "Date de mesure",
+      "measure-time": "Heure de mesure",
+      "method": "Méthode",
+      "measured-length": "Longueur mesurée",
+      "calculated-length": "Longueur calculée",
+      "measured-elevation": "Dénivelé mesuré",
+      "calculated-elevation": "Dénivelé calculé",
+      "vertical-distance-left": "Dist. verticale appareil accr. câble G",
+      "horizontal-distance-left": "Dist. horizontale appareil accr. câble G",
+      "vertical-angle-left": "Angle vertical appareil accr. câble G",
+      "vertical-angle-right": "Angle vertical appareil accr. câble D",
+      "calculation-type": "Type de calcul",
+      "sights-length": "Longueur Visée G Visée D",
+      "sights-elevation": "Dénivelé Visée G Visée D",
+      "sight-x": "X Visée {{ index }}",
+      "sight-y": "Y Visée {{ index }}",
+      "wind-incidence": "Incidence du vent",
+      "measured-solar-flux": "Flux solaire mesuré",
+      "temperature-uncertainty": "Incertitude température",
+      "blocked-invalid-tabs": "Rapport et export indisponibles : données incomplètes ou invalides dans {{ tabs }}.",
+      "blocked-invalid-global": "Rapport et export indisponibles : nom, tronçon, longitude, latitude, altitude ou azimut incomplet ou invalide.",
+      "blocked-unsaved": "Enregistrez d'abord la mesure."
     }
   },
   "studio": {

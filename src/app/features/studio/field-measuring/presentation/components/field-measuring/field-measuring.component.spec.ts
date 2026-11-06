@@ -18,6 +18,7 @@ import { Section, SkyCover, Study } from '@shared/domain';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { TRANSIT_BOUNDS } from '../../constants';
+import { FieldMeasureReportService } from '../../services/field-measure-report/field-measure-report.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
@@ -92,6 +93,7 @@ describe('FieldMeasuringComponent', () => {
   let component: FieldMeasuringComponent;
   let fixture: ComponentFixture<FieldMeasuringComponent>;
   let toolbarDialogService: ToolbarDialogService;
+  let mockReportService: { generateReport: ReturnType<typeof vi.fn> };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -136,6 +138,8 @@ describe('FieldMeasuringComponent', () => {
       litData: signal<GetSectionOutput | null>(null)
     } as unknown as PlotService;
 
+    mockReportService = { generateReport: vi.fn().mockResolvedValue(undefined) };
+
     const mockLinesService = {
       getLines: vi.fn().mockResolvedValue([])
     } as unknown as LinesService;
@@ -177,7 +181,8 @@ describe('FieldMeasuringComponent', () => {
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: LinesService, useValue: mockLinesService },
-        { provide: CablesService, useValue: mockCablesService }
+        { provide: CablesService, useValue: mockCablesService },
+        { provide: FieldMeasureReportService, useValue: mockReportService }
       ]
     })
       .overrideComponent(FieldMeasuringComponent, {
@@ -608,62 +613,9 @@ describe('FieldMeasuringComponent', () => {
     });
   });
 
-  describe('canExport', () => {
-    it('should be false when the form is invalid', () => {
-      component.measureData.set(createTestMeasureData({ name: 'Invalid' }));
-      expect(component.canExport()).toBe(false);
-    });
-
-    it('should be true when the form is valid and the measure has computed outputs', () => {
-      component.measureData.set(
-        createTestMeasureData({
-          name: 'MT 1',
-          span: [0, 1],
-          longitude: 1,
-          latitude: 1,
-          altitude: 100,
-          azimuth: 10,
-          windSpeed: 5,
-          ambientTemperature: 20,
-          windDirection: 'N',
-          skyCover: SkyCover.N0,
-          transit: (TRANSIT_BOUNDS.min + TRANSIT_BOUNDS.max) / 2,
-          measuredDiffusedPlusDirectSolarFlux: 100,
-          leftSupport: '0',
-          spanLength: 100,
-          measuredElevationDifference: 5,
-          HL: 1,
-          H1: 2,
-          H2: 3,
-          H3: 4,
-          HR: 5,
-          VL: 1,
-          V1: 2,
-          V2: 3,
-          V3: 4,
-          VR: 5,
-          outputs: {
-            papoto: {
-              parameter: 500,
-              parameter_1_2: 1,
-              parameter_2_3: 2,
-              parameter_1_3: 3,
-              checkValidity: true,
-              uncertainty: 0.1
-            },
-            cableTemperature: null,
-            parameter15C: null,
-            tangentAimingSupport: null,
-            tangentAimingExterior: null,
-            tangentAimingInterior: null
-          }
-        })
-      );
-      expect(component.canExport()).toBe(true);
-    });
-
-    it('should be false when the form is valid but not yet computed nor saved', () => {
-      const measureData = createTestMeasureData({
+  describe('canReportOrExport', () => {
+    const validMeasure = () =>
+      createTestMeasureData({
         name: 'MT 1',
         span: [0, 1],
         longitude: 1,
@@ -673,20 +625,160 @@ describe('FieldMeasuringComponent', () => {
         windSpeed: 5,
         ambientTemperature: 20,
         windDirection: 'N',
-        skyCover: SkyCover.N0
+        skyCover: SkyCover.N0,
+        transit: (TRANSIT_BOUNDS.min + TRANSIT_BOUNDS.max) / 2,
+        measuredDiffusedPlusDirectSolarFlux: 100,
+        leftSupport: '0',
+        spanLength: 100,
+        measuredElevationDifference: 5,
+        HL: 1,
+        H1: 2,
+        H2: 3,
+        H3: 4,
+        HR: 5,
+        VL: 1,
+        V1: 2,
+        V2: 3,
+        V3: 4,
+        VR: 5
       });
-      component.measureData.set(measureData);
-      expect(component.canExport()).toBe(false);
+
+    it('should be false when the form is invalid, even once saved', async () => {
+      component.measureData.set({ ...validMeasure(), windSpeed: null });
+      await component.onSave();
+      expect(component.hasUnsavedChanges()).toBe(false);
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    it('should be false when the form is valid but not saved', () => {
+      component.measureData.set(validMeasure());
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    it('should be true when the form is valid and saved', async () => {
+      component.measureData.set(validMeasure());
+      await component.onSave();
+      expect(component.canReportOrExport()).toBe(true);
+    });
+
+    it('should stay true when opening only normalized the measure (no input edited since the save)', async () => {
+      component.measureData.set(validMeasure());
+      await component.onSave();
+      const saved = component.measureData();
+      component.measureData.set({
+        ...saved,
+        outputs: { ...saved.outputs, parameter15C: { parameter15C: 1 } as never }
+      });
+      expect(component.hasUnsavedChanges()).toBe(true);
+      expect(component.hasEditedInputs()).toBe(false);
+      expect(component.canReportOrExport()).toBe(true);
+    });
+
+    it('should be false when only the calculus method was switched since the save', async () => {
+      component.measureData.set(validMeasure());
+      await component.onSave();
+      component.measureData.set({ ...component.measureData(), calculationMethod: 'tangente-aiming' });
+      expect(component.hasEditedInputs()).toBe(false);
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    it('should explain nothing when the buttons are active', async () => {
+      component.measureData.set(validMeasure());
+      await component.onSave();
+      expect(component.reportExportBlockedReason()).toBeNull();
+    });
+
+    it('should name the invalid data as the reason of the inactive buttons', async () => {
+      component.measureData.set({ ...validMeasure(), windSpeed: null });
+      await component.onSave();
+      const reason = component.reportExportBlockedReason();
+      expect(reason).toContain('field-measuring.report.blocked-invalid-tabs');
+      expect(reason).not.toContain('field-measuring.report.blocked-unsaved');
+    });
+
+    it('should name the missing save as the reason of the inactive buttons', () => {
+      component.measureData.set(validMeasure());
+      const reason = component.reportExportBlockedReason();
+      expect(reason).toContain('field-measuring.report.blocked-unsaved');
+      expect(reason).not.toContain('field-measuring.report.blocked-invalid-tabs');
+    });
+
+    it('should become false again once an input is edited after the save', async () => {
+      component.measureData.set(validMeasure());
+      await component.onSave();
+      component.onFieldChange('windSpeed', 12);
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    it('should ignore the invalid data of a tab that is not displayed', async () => {
+      component.measureData.set({ ...validMeasure(), transit: null, windSpeed: null });
+      await component.onSave();
+      component.activeTab.set('parameterCalculation');
+      expect(component.canReportOrExport()).toBe(true);
+      component.activeTab.set('parameterAt15CWithoutWind');
+      expect(component.canReportOrExport()).toBe(true);
+    });
+
+    it('should be false on every tab when the global form is invalid, even once saved', async () => {
+      component.measureData.set({ ...validMeasure(), longitude: null });
+      await component.onSave();
+      component.activeTab.set('parameterCalculation');
+      expect(component.canReportOrExport()).toBe(false);
+      expect(component.reportExportBlockedReason()).toContain('field-measuring.report.blocked-invalid-global');
+    });
+
+    it('should be false when the displayed tab is invalid, even once saved', async () => {
+      component.measureData.set({ ...validMeasure(), transit: null });
+      await component.onSave();
+      component.activeTab.set('temperatureCalculation');
+      expect(component.canReportOrExport()).toBe(false);
+      expect(component.reportExportBlockedReason()).toContain('field-measuring.report.blocked-invalid-tabs');
+    });
+
+    it.each([
+      ['parameterCalculation', { HL: null }],
+      [
+        'parameterAt15CWithoutWind',
+        { updateMode15C: 'manual' as const, manualParameterCalculation15CWithoutWind: null }
+      ]
+    ] as const)('should be false when the displayed %s tab is invalid, even once saved', async (tab, invalid) => {
+      component.measureData.set({ ...validMeasure(), ...invalid });
+      await component.onSave();
+      component.activeTab.set(tab);
+      expect(component.canReportOrExport()).toBe(false);
     });
   });
 
   describe('onReport', () => {
-    it('should log report data', () => {
-      const consoleSpy = vi.spyOn(console, 'log');
+    it('should generate the report of the current measure with its study context', async () => {
+      component.measureData.set(createTestMeasureData({ name: 'Measure 1', span: [0, 1] }));
 
-      component.onReport();
+      await component.onReport();
 
-      expect(consoleSpy).toHaveBeenCalledWith('Report', component.measureData());
+      expect(mockReportService.generateReport).toHaveBeenCalledTimes(1);
+      const data = mockReportService.generateReport.mock.calls[0][0];
+      expect(data.measureName).toBe('Measure 1');
+      expect(data.sections).toHaveLength(4);
+    });
+
+    it('should report the saved measure, not the unsaved edits', async () => {
+      component.measureData.set(createTestMeasureData({ name: 'Saved name', calculationMethod: 'papoto' }));
+      await component.onSave();
+      component.measureData.set({ ...component.measureData(), name: 'Edited name', calculationMethod: 'pep' });
+
+      await component.onReport();
+
+      const data = mockReportService.generateReport.mock.calls[0][0];
+      expect(data.measureName).toBe('Saved name');
+      expect(data.sections[1].rows[0][0]?.value).toBe('common.papoto-label');
+    });
+
+    it('should generate the report for a tangent aiming method too', async () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming-interior' }));
+
+      await component.onReport();
+
+      expect(mockReportService.generateReport).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -836,6 +928,7 @@ describe('FieldMeasuringComponent', () => {
       const result = { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true };
       const validMeasure = () =>
         createTestMeasureData({
+          name: 'Measure 1',
           calculationMethod,
           tangentLeftSupport: '0',
           tangentSpanLength: 10,
@@ -856,8 +949,6 @@ describe('FieldMeasuringComponent', () => {
           interiorTangentAngle: 100
         });
 
-      beforeEach(() => vi.spyOn(component, 'isFormValid').mockReturnValue(true));
-
       it('should enable the save button without calculation', () => {
         component.measureData.set(validMeasure());
         expect(component.canSave()).toBe(true);
@@ -869,7 +960,7 @@ describe('FieldMeasuringComponent', () => {
         expect(component.canSave()).toBe(true);
       });
 
-      it('should disable the save button when the parameter inputs are invalid', () => {
+      it('should enable the save button even when the parameter inputs are incomplete', () => {
         const base = validMeasure();
         component.measureData.set({
           ...base,
@@ -877,12 +968,25 @@ describe('FieldMeasuringComponent', () => {
           exteriorSpanLength: null,
           interiorSpanLength: null
         });
+        expect(component.isParameterCalculationValid()).toBe(false);
+        expect(component.canSave()).toBe(true);
+      });
+
+      it('should enable the save button even when the terrain data is incomplete', () => {
+        component.measureData.set({ ...validMeasure(), windSpeed: null, longitude: null });
+        expect(component.isGlobalFormValid()).toBeFalsy();
+        expect(component.isTerrainDataValid()).toBeFalsy();
+        expect(component.canSave()).toBe(true);
+      });
+
+      it('should disable the save button when the measure has no name', () => {
+        component.measureData.set({ ...validMeasure(), name: '  ' });
         expect(component.canSave()).toBe(false);
       });
 
-      it('should keep the save button disabled when the terrain data is invalid', () => {
-        vi.spyOn(component, 'isFormValid').mockReturnValue(false);
+      it('should disable the save button when the name is already taken', () => {
         component.measureData.set(validMeasure());
+        vi.spyOn(component, 'isNameAlreadyTaken').mockReturnValue(true);
         expect(component.canSave()).toBe(false);
       });
 
@@ -1075,7 +1179,7 @@ describe('FieldMeasuringComponent', () => {
     });
   });
 
-  describe('isFormValid - transit bounds', () => {
+  describe('isTerrainDataValid - transit bounds', () => {
     const validBase = {
       name: 'Test',
       span: [1, 2],
@@ -1091,32 +1195,32 @@ describe('FieldMeasuringComponent', () => {
 
     it('should return true when transit is null (progressive save allowed)', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: null }));
-      expect(component.isFormValid()).toBeTruthy();
+      expect(component.isTerrainDataValid()).toBeTruthy();
     });
 
     it('should return true when transit is within bounds', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: 2000 }));
-      expect(component.isFormValid()).toBeTruthy();
+      expect(component.isTerrainDataValid()).toBeTruthy();
     });
 
     it('should return true when transit is at minimum boundary', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.min }));
-      expect(component.isFormValid()).toBeTruthy();
+      expect(component.isTerrainDataValid()).toBeTruthy();
     });
 
     it('should return true when transit is at maximum boundary', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.max }));
-      expect(component.isFormValid()).toBeTruthy();
+      expect(component.isTerrainDataValid()).toBeTruthy();
     });
 
     it('should return false when transit is below minimum', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.min - 1 }));
-      expect(component.isFormValid()).toBeFalsy();
+      expect(component.isTerrainDataValid()).toBeFalsy();
     });
 
     it('should return false when transit is above maximum', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.max + 1 }));
-      expect(component.isFormValid()).toBeFalsy();
+      expect(component.isTerrainDataValid()).toBeFalsy();
     });
   });
 
@@ -1294,7 +1398,7 @@ describe('FieldMeasuringComponent', () => {
       expect(component.measureData()).toMatchObject({ interiorCalculationType: 'tangente', interiorParameter: 20 });
     });
 
-    it('should open a support measure saved with the parametre type on the tangente type', async () => {
+    it('should open a support measure saved with the parametre type on the parametre type', async () => {
       const spanService = TestBed.inject(PlotSpanService);
       const sectionSignal = spanService.section as ReturnType<typeof signal<Section | null>>;
       const section = sectionSignal() as Section;
@@ -1314,7 +1418,7 @@ describe('FieldMeasuringComponent', () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       expect(component.measureData()).toMatchObject({
-        calculationType: 'tangente',
+        calculationType: 'parametre',
         cableTangentAngle: 0,
         cableParameter: 1500
       });

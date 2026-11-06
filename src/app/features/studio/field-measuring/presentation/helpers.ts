@@ -347,3 +347,11 @@ export const getActiveParameterOutput = (
  */
 export const clearAutoParameter15C = (data: FieldMeasure): FieldMeasure =>
   data.updateMode15C === 'manual' ? data : { ...data, outputs: { ...data.outputs, parameter15C: null } };
+
+/**
+ * Drops the manual 15°C inputs when the update mode is automatic: only the data of the retained mode are saved.
+ * @param data - The field measure
+ * @returns The measure without manual 15°C inputs unless the mode is manual
+ */
+export const resetInactive15CMode = (data: FieldMeasure): FieldMeasure =>
+  data.updateMode15C === 'manual' ? data : { ...data, manualParameterCalculation15CWithoutWind: null };

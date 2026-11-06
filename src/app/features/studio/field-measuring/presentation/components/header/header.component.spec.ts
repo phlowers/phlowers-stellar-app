@@ -555,6 +555,23 @@ describe('HeaderComponent', () => {
       });
     });
 
+    it('should keep the saved altitude of a measure loaded with its span, then follow later span changes', () => {
+      vi.spyOn(spanService, 'section').mockReturnValue({
+        supports: [{ attachmentHeight: 10 }, { attachmentHeight: 20 }, { attachmentHeight: 40 }]
+      } as unknown as Section);
+      const loadedFixture = TestBed.createComponent(HeaderComponent);
+      const fieldChangeSpy = vi.fn();
+      loadedFixture.componentInstance.fieldChange.subscribe(fieldChangeSpy);
+
+      loadedFixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [0, 1], altitude: 99 });
+      loadedFixture.detectChanges();
+      expect(fieldChangeSpy).not.toHaveBeenCalledWith({ field: 'altitude', value: 15 });
+
+      loadedFixture.componentRef.setInput('measureData', { ...mockMeasureData, span: [1, 2], altitude: 99 });
+      loadedFixture.detectChanges();
+      expect(fieldChangeSpy).toHaveBeenCalledWith({ field: 'altitude', value: 30 });
+    });
+
     it('should not set altitude when section is null', () => {
       const fieldChangeSpy = vi.fn();
       component.fieldChange.subscribe(fieldChangeSpy);

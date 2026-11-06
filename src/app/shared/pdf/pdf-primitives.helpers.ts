@@ -35,6 +35,13 @@ import { PdfBulletItem, StudyCartoucheData, StudyCartoucheLabels } from '@shared
  */
 const BASE64_CHUNK_SIZE = 0x8000;
 
+// Status icon (tick / cross) drawn after a bullet value: size and gap in mm, line width in mm, RGB colors
+const STATUS_ICON_SIZE = 2.2;
+const STATUS_ICON_GAP = 1.5;
+const STATUS_ICON_LINE_WIDTH = 0.35;
+const STATUS_OK_COLOR = [0, 128, 0] as const;
+const STATUS_KO_COLOR = [200, 0, 0] as const;
+
 /** Loads a file from a URL and returns its raw base64 encoding (no data URL prefix). */
 export async function loadFileAsBase64(url: string): Promise<string> {
   const response = await globalThis.fetch(url);
@@ -85,14 +92,34 @@ export function formatValue(value: number | null | undefined, unit: string, deci
   return unit ? `${formatted} ${unit}` : formatted;
 }
 
-/** Draws text with a bullet point prefix. Label is bold, value is normal (or bold when boldValue is true). */
+// Draws a tick (status true, green) or a cross (status false, red) of STATUS_ICON_SIZE mm, its baseline at `y`
+function drawStatusIcon(doc: jsPDF, status: boolean, x: number, y: number): void {
+  const top = y - STATUS_ICON_SIZE;
+  doc.setLineWidth(STATUS_ICON_LINE_WIDTH);
+  if (status) {
+    doc.setDrawColor(...STATUS_OK_COLOR);
+    doc.line(x, y - STATUS_ICON_SIZE / 2, x + STATUS_ICON_SIZE / 3, y);
+    doc.line(x + STATUS_ICON_SIZE / 3, y, x + STATUS_ICON_SIZE, top);
+  } else {
+    doc.setDrawColor(...STATUS_KO_COLOR);
+    doc.line(x, top, x + STATUS_ICON_SIZE, y);
+    doc.line(x, y, x + STATUS_ICON_SIZE, top);
+  }
+  doc.setDrawColor(0);
+}
+
+/**
+ * Draws text with a bullet point prefix. Label is bold, value is normal (or bold when boldValue is true).
+ * A defined `status` adds a tick / cross icon after the value.
+ */
 export function drawBulletItem(
   doc: jsPDF,
   label: string,
   value: string,
   x: number,
   y: number,
-  boldValue = false
+  boldValue = false,
+  status?: boolean
 ): void {
   const bulletText = `${BULLET} `;
   doc.setFont('Nunito', 'bold');
@@ -101,6 +128,9 @@ export function drawBulletItem(
   const labelWidth = doc.getTextWidth(bulletText + label + ' : ');
   doc.setFont('Nunito', boldValue ? 'bold' : 'normal');
   doc.text(value, x + labelWidth, y);
+  if (status !== undefined) {
+    drawStatusIcon(doc, status, x + labelWidth + doc.getTextWidth(value) + STATUS_ICON_GAP, y);
+  }
 }
 
 // Starts a new portrait page under the compact header. Returns the Y where its content starts
@@ -326,7 +356,7 @@ export function drawTwoColumnBullets(
   let leftY = startY;
   left.forEach((item) => {
     if (item.label) {
-      drawBulletItem(doc, item.label, item.value, leftX, leftY);
+      drawBulletItem(doc, item.label, item.value, leftX, leftY, false, item.status);
     }
     leftY += LINE_HEIGHT;
   });
@@ -334,7 +364,7 @@ export function drawTwoColumnBullets(
   let rightY = startY;
   right.forEach((item) => {
     if (item.label) {
-      drawBulletItem(doc, item.label, item.value, rightX, rightY);
+      drawBulletItem(doc, item.label, item.value, rightX, rightY, false, item.status);
     }
     rightY += LINE_HEIGHT;
   });

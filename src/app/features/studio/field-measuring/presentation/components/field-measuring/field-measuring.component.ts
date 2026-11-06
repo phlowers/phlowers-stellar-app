@@ -34,9 +34,14 @@ import {
   buildWindDirectionOptions,
   buildSkyCoverOptions,
   buildLeftSupportOptions,
-  buildFieldMeasureExportFilename
+  buildFieldMeasureExportFilename,
+  resetInactive15CMode
 } from '../../helpers';
 import { buildFieldMeasureExportJson } from '../../field-measure-export.helpers';
+import { FieldMeasureReportService } from '../../services/field-measure-report/field-measure-report.service';
+import { buildFieldMeasureReportData } from '../../services/field-measure-report/field-measure-report.helpers';
+import { getDateLocale } from '@shared/helpers/modification-date.helpers';
+import { SECTION_TITLE_KEYS } from '../../services/field-measure-report/field-measure-report.constantes';
 import {
   isTangentAimingSupportDataValid,
   resetNonDisplayedParameterFields
@@ -121,6 +126,7 @@ export class FieldMeasuringComponent implements OnDestroy {
   private readonly messageService = inject(MessageService);
   private readonly logger = inject(LoggerService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly fieldMeasureReportService = inject(FieldMeasureReportService);
   private readonly activeLang = toSignal(this.translocoService.langChanges$, {
     initialValue: this.translocoService.getActiveLang()
   });
@@ -199,7 +205,8 @@ export class FieldMeasuringComponent implements OnDestroy {
     );
   });
 
-  isFormValid = computed(() => {
+  /** Global form: the header (span, coordinates, altitude, azimuth) and the measure name, shown on every tab. */
+  isGlobalFormValid = computed(() => {
     const measureData = this.measureData();
     const isValid =
       measureData.name &&
@@ -215,7 +222,14 @@ export class FieldMeasuringComponent implements OnDestroy {
       measureData.altitude <= 9000 &&
       isNumber(measureData.azimuth) &&
       measureData.azimuth >= -180 &&
-      measureData.azimuth <= 180 &&
+      measureData.azimuth <= 180;
+    return !!isValid && !this.isNameAlreadyTaken();
+  });
+
+  /** Validity of the "Terrain data" tab. */
+  isTerrainDataValid = computed(() => {
+    const measureData = this.measureData();
+    return !!(
       isNumber(measureData.windSpeed) &&
       measureData.windSpeed >= 0 &&
       measureData.windSpeed <= 50 &&
@@ -225,8 +239,8 @@ export class FieldMeasuringComponent implements OnDestroy {
       measureData.windDirection &&
       measureData.skyCover &&
       (!isNumber(measureData.transit) ||
-        (measureData.transit >= TRANSIT_BOUNDS.min && measureData.transit <= TRANSIT_BOUNDS.max));
-    return isValid && !this.isNameAlreadyTaken();
+        (measureData.transit >= TRANSIT_BOUNDS.min && measureData.transit <= TRANSIT_BOUNDS.max))
+    );
   });
 
   /** Whether a tangent aiming (support, exterior or interior) method is selected. */
@@ -320,26 +334,66 @@ export class FieldMeasuringComponent implements OnDestroy {
   });
 
   /**
-   * The "Enregistrer" button: valid terrain data (and valid parameter inputs for the tangent aiming methods) with
-   * edited inputs, with or without a calculation (a parameter input edit clears the result, which is then saved as
-   * not calculated). Right after a save nothing is unsaved.
+   * The "Enregistrer" button: any edited input of the whole measure (whatever the tab) can be saved, even if the
+   * measure is incomplete; only its identity (a non-empty, unique name) is required. A parameter input edit clears
+   * the result, which is then saved as not calculated. Right after a save nothing is unsaved.
    */
   readonly canSave = computed(
-    () =>
-      this.isFormValid() &&
-      this.hasEditedInputs() &&
-      (!this.isTangentAimingMethod() || this.isParameterCalculationValid())
+    () => !!this.measureData().name?.trim() && !this.isNameAlreadyTaken() && this.hasEditedInputs()
   );
 
-  /** RG.MES.EXP-BTN.1: the "Exporter" button stays inactive until the measure is both valid and calculated/saved. */
-  readonly canExport = computed(
+  /**
+   * Whether the displayed measure is the saved one: same calculus method and no input edited since the last save.
+   * Unlike `hasUnsavedChanges`, it ignores the defaults and stale automatic results that opening a measure
+   * normalizes, which are not user edits.
+   */
+  private readonly isSaved = computed(
     () =>
-      this.isFormValid() &&
-      this.isParameterCalculationValid() &&
-      this.isTemperatureCalculationValid() &&
-      this.isParameter15CValid() &&
-      (this.hasComputedOutputs() || !this.hasUnsavedChanges())
+      this.lastSavedMeasureData()?.calculationMethod === this.measureData().calculationMethod && !this.hasEditedInputs()
   );
+
+  /** Validity of the displayed tab: the global form (header and name) is checked separately. */
+  private readonly isActiveTabValid = computed(() => {
+    switch (this.activeTab()) {
+      case 'parameterCalculation':
+        return this.isParameterCalculationValid();
+      case 'temperatureCalculation':
+        return this.isTemperatureCalculationValid();
+      case 'parameterAt15CWithoutWind':
+        return this.isParameter15CValid();
+      default:
+        return this.isTerrainDataValid();
+    }
+  });
+
+  /** The "Rapport" and "Exporter" buttons: active when the global form and the displayed tab are valid and saved. */
+  readonly canReportOrExport = computed(() => this.isGlobalFormValid() && this.isActiveTabValid() && this.isSaved());
+
+  /** Tells why "Rapport" and "Exporter" are inactive: the invalid data and/or the missing save; `null` when active. */
+  readonly reportExportBlockedReason = computed(() => {
+    if (this.canReportOrExport()) {
+      return null;
+    }
+    this.activeLang();
+    const t = (key: string, params?: Record<string, string>): string => this.translocoService.translate(key, params);
+    const activeTabTitleKey = {
+      terrainData: SECTION_TITLE_KEYS.terrainData,
+      parameterCalculation: SECTION_TITLE_KEYS.parameterCalculation,
+      temperatureCalculation: SECTION_TITLE_KEYS.temperatureCalculation,
+      parameterAt15CWithoutWind: SECTION_TITLE_KEYS.parameter15C
+    }[this.activeTab()];
+    const reasons: string[] = [];
+    if (!this.isGlobalFormValid()) {
+      reasons.push(t('field-measuring.report.blocked-invalid-global'));
+    }
+    if (!this.isActiveTabValid()) {
+      reasons.push(t('field-measuring.report.blocked-invalid-tabs', { tabs: t(activeTabTitleKey) }));
+    }
+    if (!this.isSaved()) {
+      reasons.push(t('field-measuring.report.blocked-unsaved'));
+    }
+    return reasons.join(' ');
+  });
 
   private async initializeMeasureData(): Promise<void> {
     const section = this.spanService.section();
@@ -421,7 +475,7 @@ export class FieldMeasuringComponent implements OnDestroy {
     this.measureData.set(updated);
   }
 
-  /** Export is always allowed, even with incomplete/invalid data (RG.MES.EXP-BTN.1): missing fields are exported as `null`. */
+  /** Exports the saved measure as JSON; missing fields are exported as `null`. */
   async onExport() {
     const measureData = this.measureData();
     const section = this.spanService.section();
@@ -460,9 +514,21 @@ export class FieldMeasuringComponent implements OnDestroy {
     URL.revokeObjectURL(url);
   }
 
-  onReport() {
-    // TODO: Implement report functionality
-    this.logger.log('Report', this.measureData());
+  /**
+   * RG.MES.RAP-BTN.2: generates the PDF report of the saved field measure (inputs and calculation results).
+   * It reads the saved snapshot, so only the method and sub-method that were saved are reported.
+   */
+  async onReport() {
+    const data = buildFieldMeasureReportData({
+      measureData: this.lastSavedMeasureData() ?? this.measureData(),
+      section: this.spanService.section(),
+      study: this.plotService.study(),
+      litData: this.plotService.litData(),
+      translocoService: this.translocoService,
+      locale: getDateLocale(this.translocoService.getActiveLang()),
+      generatedAt: new Date()
+    });
+    await this.fieldMeasureReportService.generateReport(data);
   }
 
   async onSave() {
@@ -482,9 +548,11 @@ export class FieldMeasuringComponent implements OnDestroy {
       activeMeasureData = resetNonDisplayedInteriorFields(currentMeasureData);
     }
     const measureData: FieldMeasure = {
-      ...resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {
-        defaultTangentLeftSupport: getDefaultLeftSupport(activeMeasureData.span)
-      }),
+      ...resetInactive15CMode(
+        resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {
+          defaultTangentLeftSupport: getDefaultLeftSupport(activeMeasureData.span)
+        })
+      ),
       savedTab: this.activeTab()
     };
     const isExistingMeasure = section.field_measures.some((measure) => measure.uuid === measureData.uuid);
