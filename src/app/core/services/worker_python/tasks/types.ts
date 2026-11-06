@@ -190,7 +190,9 @@ export enum PythonErrorCode {
   // Raised when an estimation cannot reach its target within the search bounds
   EstimationNotConvergedError = 'EstimationNotConvergedError',
   // Warning raised when an existing load on the estimation target span is ignored
-  EstimationWarning = 'EstimationWarning'
+  EstimationWarning = 'EstimationWarning',
+  // Raised when the load position of a cable effort estimation is outside the span
+  EffortPositionOutOfSpanError = 'EffortPositionOutOfSpanError'
 }
 
 /**

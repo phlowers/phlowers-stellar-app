@@ -6,8 +6,10 @@
  */
 
 import { EffortEstimationFormValue } from '@features/studio/estimations/domain/effort-estimation.interfaces';
+import { FormControl } from '@angular/forms';
 import {
   formatResultForClipboard,
+  maxSpanLengthValidator,
   roundResult,
   toCableEffortInputs,
   toDisplayedResults
@@ -74,6 +76,28 @@ describe('effort-estimation helpers', () => {
 
     it('should not copy a negative zero', () => {
       expect(formatResultForClipboard(-0.001)).toBe('0.00');
+    });
+  });
+
+  describe('maxSpanLengthValidator', () => {
+    const validate = (value: unknown, length: number | null) =>
+      maxSpanLengthValidator(() => length)(new FormControl(value));
+
+    it('rejects a value above the span length with the max error', () => {
+      expect(validate(310.51, 310.5)).toEqual({ max: { max: 310.5, actual: 310.51 } });
+    });
+
+    it('accepts a value up to the span length', () => {
+      expect(validate(310.5, 310.5)).toBeNull();
+      expect(validate(0, 310.5)).toBeNull();
+    });
+
+    it('accepts any value while the span length is unknown', () => {
+      expect(validate(9999, null)).toBeNull();
+    });
+
+    it.each([null, undefined, ''])('ignores the empty value %p', (value) => {
+      expect(validate(value, 310.5)).toBeNull();
     });
   });
 });

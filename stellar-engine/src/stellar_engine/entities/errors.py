@@ -15,13 +15,6 @@ class _Errors:
         return f"Unsupported symmetryType: {symmetry_type}. Expected 'dis_symmetric' or 'symmetric'"
 
     @staticmethod
-    def effort_span_split(span_index: int) -> str:
-        return (
-            f"Span {span_index} is split by a virtual support: "
-            "effort estimation is not possible on this span."
-        )
-
-    @staticmethod
     def effort_position_out_of_span(
         distance: float, span_length: float
     ) -> str:
@@ -135,8 +128,8 @@ class ConformityInputError(ValueError):
     """Raised when a conformity input is missing or invalid."""
 
 
-class EffortEstimationError(ValueError):
-    """Raised when the cable effort estimation cannot be computed for the given inputs."""
+class EffortPositionOutOfSpanError(ValueError):
+    """Raised when the load position of an effort estimation is outside the span."""
 
 
 class SelectorInputError(ValueError):

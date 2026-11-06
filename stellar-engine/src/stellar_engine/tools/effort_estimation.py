@@ -6,13 +6,17 @@
 
 import logging
 from collections.abc import Callable
-from copy import deepcopy
 
 import numpy as np
 from mechaphlowers import SectionStudy
-from mechaphlowers.core.geometry.position_engine import PositionEngine
+from mechaphlowers.entities.errors import SolverError
 
-from stellar_engine.entities.errors import EffortEstimationError, _Errors
+from stellar_engine.core.estimation import engine_span_index
+from stellar_engine.entities.errors import (
+    EffortPositionOutOfSpanError,
+    EstimationNotConvergedError,
+    _Errors,
+)
 from stellar_engine.entities.inputs import CableEffortInputs
 
 logger = logging.getLogger("stellar_engine")
@@ -26,11 +30,12 @@ MAX_MASS = 20000.0
 
 def _bracket_mass(
     objective: Callable[[float], float], sign: float
-) -> tuple[float, float]:
+) -> tuple[float, float] | None:
     """Find an interval of masses over which the objective changes sign.
 
     Very large loads make the engine solver diverge, so the interval is grown
-    progressively instead of using fixed wide bounds.
+    progressively instead of using fixed wide bounds. Returns None when no
+    sign change is found up to MAX_MASS.
     """
     reference_mass = sign * REFERENCE_MASS
     reference_value = objective(reference_mass)
@@ -42,7 +47,7 @@ def _bracket_mass(
             return min(lower_mass, sign * mass), max(lower_mass, sign * mass)
         lower_mass = sign * mass
         mass *= 2
-    raise ValueError("The target displacement is not bracketed")
+    return None
 
 
 def estimate_cable_effort(inputs: dict, study: SectionStudy) -> dict:
@@ -57,19 +62,12 @@ def estimate_cable_effort(inputs: dict, study: SectionStudy) -> dict:
     if effort_inputs.targetDisplacement == 0:
         return {"effort": 0.0, "xDisplacement": 0.0}
 
-    span_index = study.manipulation.span_index_after_virtual_support(
-        effort_inputs.spanIndex
-    )
-    if span_index is None:
-        raise EffortEstimationError(
-            _Errors.effort_span_split(effort_inputs.spanIndex)
-        )
+    span_index = engine_span_index(study, effort_inputs.spanIndex)
 
-    balance_engine = deepcopy(
-        study.balance_engine,
-        {id(study.balance_engine._observers): []},
-    )
-    position_engine = PositionEngine(balance_engine)
+    # The loads are applied on an independent copy: the study is left untouched.
+    working_study = study.copy()
+    balance_engine = working_study.balance_engine
+    position_engine = working_study.position_engine
     span_length = float(
         balance_engine.section_array.data.span_length.to_numpy()[span_index]
     )
@@ -79,7 +77,7 @@ def estimate_cable_effort(inputs: dict, study: SectionStudy) -> dict:
         else span_length - effort_inputs.distanceToReferenceSupport
     )
     if not 0 <= load_position <= span_length:
-        raise EffortEstimationError(
+        raise EffortPositionOutOfSpanError(
             _Errors.effort_position_out_of_span(
                 effort_inputs.distanceToReferenceSupport, span_length
             )
@@ -112,16 +110,24 @@ def estimate_cable_effort(inputs: dict, study: SectionStudy) -> dict:
 
     # Tractions are negative masses, weights are positive ones.
     sign = -1.0 if effort_inputs.direction == "UP" else 1.0
-    unreachable_error = EffortEstimationError(
+    unreachable_error = EstimationNotConvergedError(
         _Errors.effort_target_unreachable(effort_inputs.targetDisplacement)
     )
     try:
         bounds = _bracket_mass(objective, sign)
-        result = study.estimation_engine.estimate(objective, bounds)
-    except Exception as error:
-        logger.debug("Effort estimation failed: %s", error)
+        result = (
+            None
+            if bounds is None
+            else study.estimation_engine.estimate(objective, bounds)
+        )
+    except (SolverError, ValueError) as error:
+        # mechaphlowers raises a plain ValueError when the displacement is
+        # not computable; its typed errors (subclasses) keep their own code.
+        if isinstance(error, ValueError) and type(error) is not ValueError:
+            raise
+        logger.warning("Effort estimation failed: %s", error)
         raise unreachable_error from error
-    if not result.converged:
+    if result is None or not result.converged:
         raise unreachable_error
 
     final_point = application_point(result.value)

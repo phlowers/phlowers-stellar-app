@@ -392,7 +392,8 @@
       "estimate-on-split-support-error": "L'estimation est impossible sur une portée divisée par un support virtuel.",
       "estimation-input-error": "Les données de l'estimation sont manquantes ou invalides.",
       "estimation-not-converged-error": "La cible ne peut pas être atteinte dans les bornes de l'estimation.",
-      "estimation-warning": "La charge existante sur la portée estimée a été ignorée."
+      "estimation-warning": "La charge existante sur la portée estimée a été ignorée.",
+      "effort-position-out-of-span-error": "La distance au support de référence est en dehors de la portée."
     },
     "initial-condition-modal": {
       "create-title": "Créer une condition initiale",

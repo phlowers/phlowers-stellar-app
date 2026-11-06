@@ -5,8 +5,17 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import pytest
+from mechaphlowers.entities.errors import (
+    ConvergenceError,
+    EstimateOnSplitSupportError,
+    InvalidManipulationIndex,
+)
 
-from stellar_engine.entities.errors import EffortEstimationError
+from stellar_engine.entities.errors import (
+    EffortPositionOutOfSpanError,
+    EstimationNotConvergedError,
+)
+from stellar_engine.tools import effort_estimation
 from stellar_engine.tools.effort_estimation import estimate_cable_effort
 
 INPUTS = {
@@ -76,15 +85,105 @@ def test_study_is_left_untouched(solved_study):
 
 
 def test_distance_outside_the_span_raises(solved_study):
-    with pytest.raises(EffortEstimationError, match="outside"):
+    with pytest.raises(EffortPositionOutOfSpanError, match="outside"):
         estimate_cable_effort(
             {**INPUTS, "distanceToReferenceSupport": 600.0}, solved_study
         )
 
 
 def test_unreachable_displacement_raises(solved_study):
-    with pytest.raises(EffortEstimationError, match="No effort found"):
+    with pytest.raises(EstimationNotConvergedError, match="No effort found"):
         estimate_cable_effort(
             {**INPUTS, "targetDisplacement": 150.0, "direction": "UP"},
             solved_study,
         )
+
+
+def test_span_split_by_a_virtual_support_raises(solved_study):
+    solved_study.set_virtual_support(
+        {
+            0: {
+                "x": 100.0,
+                "y": 0.0,
+                "z": 60.0,
+                "insulator_length": 3.0,
+                "insulator_mass": 500.0,
+                "hanging_cable_point_from_left_support": 100.0,
+            }
+        }
+    )
+
+    with pytest.raises(EstimateOnSplitSupportError, match="split"):
+        estimate_cable_effort(INPUTS, solved_study)
+
+
+def test_unknown_span_raises_the_manipulation_error(solved_study):
+    with pytest.raises(InvalidManipulationIndex):
+        estimate_cable_effort({**INPUTS, "spanIndex": 99}, solved_study)
+
+
+def test_solver_failure_is_reported_as_an_unreachable_displacement(
+    solved_study, monkeypatch
+):
+    def diverging_bracket(objective, sign):
+        raise ConvergenceError("diverged")
+
+    monkeypatch.setattr(effort_estimation, "_bracket_mass", diverging_bracket)
+
+    with pytest.raises(EstimationNotConvergedError, match="No effort found"):
+        estimate_cable_effort(INPUTS, solved_study)
+
+
+def test_plain_value_error_is_reported_as_an_unreachable_displacement(
+    solved_study, monkeypatch
+):
+    def not_computable(objective, sign):
+        raise ValueError("NaN displacement")
+
+    monkeypatch.setattr(effort_estimation, "_bracket_mass", not_computable)
+
+    with pytest.raises(EstimationNotConvergedError):
+        estimate_cable_effort(INPUTS, solved_study)
+
+
+def test_typed_engine_errors_keep_their_own_error(solved_study, monkeypatch):
+    def typed_error(objective, sign):
+        raise InvalidManipulationIndex("bad index")
+
+    monkeypatch.setattr(effort_estimation, "_bracket_mass", typed_error)
+
+    with pytest.raises(InvalidManipulationIndex):
+        estimate_cable_effort(INPUTS, solved_study)
+
+
+def test_programming_errors_are_not_masked(solved_study, monkeypatch):
+    def broken(objective, sign):
+        raise KeyError("bug")
+
+    monkeypatch.setattr(effort_estimation, "_bracket_mass", broken)
+
+    with pytest.raises(KeyError):
+        estimate_cable_effort(INPUTS, solved_study)
+
+
+def test_unbracketed_target_is_reported_as_unreachable(
+    solved_study, monkeypatch
+):
+    monkeypatch.setattr(
+        effort_estimation, "_bracket_mass", lambda objective, sign: None
+    )
+
+    with pytest.raises(EstimationNotConvergedError, match="No effort found"):
+        estimate_cable_effort(INPUTS, solved_study)
+
+
+def test_bracket_mass_returns_none_without_sign_change():
+    assert effort_estimation._bracket_mass(lambda mass: 1.0, 1.0) is None
+
+
+def test_bracket_mass_finds_the_interval_of_a_traction():
+    low, high = effort_estimation._bracket_mass(
+        lambda mass: mass + 120.0, -1.0
+    )
+
+    assert low < -120.0 < high

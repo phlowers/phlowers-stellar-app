@@ -14,7 +14,7 @@ import { EffortEstimationComponent } from '@features/studio/estimations/presenta
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError } from '@services/worker_python/tasks/types';
+import { PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/types';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { Section } from '@shared/domain';
@@ -88,6 +88,9 @@ describe('EffortEstimationComponent', () => {
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}',
               'common.error-occurred-label': 'An error occurred',
+              'shared.python-errors.estimation-not-converged-error': 'The target cannot be reached.',
+              'shared.python-errors.estimate-on-split-support-error': 'Span split by a virtual support.',
+              'shared.python-errors.effort-position-out-of-span-error': 'The distance is outside the span.',
               'studio.effort-estimation.up': 'Up',
               'studio.effort-estimation.down': 'Down',
               'studio.effort-estimation.copied': 'Effort copied',
@@ -177,8 +180,8 @@ describe('EffortEstimationComponent', () => {
     });
 
     it.each([
-      ['-100.01', 'Min. value: -100'],
-      ['5000.01', 'Max. value: 5000'],
+      ['-0.01', 'Min. value: 0'],
+      ['310.51', 'Max. value: 310.5'],
       ['1.234', 'Max decimals: 2'],
       ['', 'Required']
     ])('rejects "%s" (DIS.1)', (value, message) => {
@@ -187,9 +190,46 @@ describe('EffortEstimationComponent', () => {
       expect(getByTestId('distance-input')?.getAttribute('aria-invalid')).toBe('true');
     });
 
-    it.each(['-100', '5000', '12.34', '0'])('accepts %s (DIS.1)', (value) => {
+    it.each(['0', '310.5', '12.34'])('accepts %s (DIS.1)', (value) => {
       typeIn('distance-input', value);
       expect(errorOf('effort-distance')).toBeUndefined();
+    });
+
+    it('is limited to the length of the selected span', () => {
+      expect(component.spanLength()).toBe(310.5);
+      expect(getByTestId('distance-input')?.getAttribute('max')).toBe('310.5');
+
+      component.form.controls.span.setValue({ index: 1, uuid: 'support-b' });
+      fixture.detectChanges();
+      expect(component.spanLength()).toBe(420);
+      expect(getByTestId('distance-input')?.getAttribute('max')).toBe('420');
+
+      typeIn('distance-input', '400');
+      expect(errorOf('effort-distance')).toBeUndefined();
+    });
+
+    it('is checked again against the new span when the span changes', () => {
+      typeIn('distance-input', '400');
+      expect(errorOf('effort-distance')).toBe('Max. value: 310.5');
+      expect(calculateBtn().disabled).toBe(true);
+
+      component.form.controls.span.setValue({ index: 1, uuid: 'support-b' });
+      fixture.detectChanges();
+      expect(errorOf('effort-distance')).toBeUndefined();
+      expect(calculateBtn().disabled).toBe(false);
+
+      typeIn('distance-input', '300');
+      component.form.controls.span.setValue({ index: 0, uuid: 'support-a' });
+      fixture.detectChanges();
+      expect(component.form.controls.distanceToReferenceSupport.valid).toBe(true);
+    });
+
+    it('disables the calculation when the span length is unknown', () => {
+      component.form.controls.span.setValue({ index: 2, uuid: 'support-c' });
+      fixture.detectChanges();
+
+      expect(component.spanLength()).toBeNull();
+      expect(calculateBtn().disabled).toBe(true);
     });
   });
 
@@ -262,7 +302,7 @@ describe('EffortEstimationComponent', () => {
     });
 
     it('is disabled while a field is invalid (CAL-BTN.1)', () => {
-      typeIn('distance-input', '5001');
+      typeIn('distance-input', '310.51');
       expect(calculateBtn().disabled).toBe(true);
 
       typeIn('distance-input', '10');
@@ -427,6 +467,43 @@ describe('EffortEstimationComponent', () => {
       expect(mockNotificationService.error).toHaveBeenCalledWith('An error occurred');
       expect(component.form.enabled).toBe(true);
       expect(component.isCalculating()).toBe(false);
+    });
+
+    it.each([
+      [PythonErrorCode.EstimationNotConvergedError, 'The target cannot be reached.'],
+      [PythonErrorCode.EstimateOnSplitSupportError, 'Span split by a virtual support.'],
+      [PythonErrorCode.EffortPositionOutOfSpanError, 'The distance is outside the span.']
+    ])('notifies the specific message of the Python error %s', async (code, message) => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null,
+        error: 'CALCULATION_ERROR' as unknown as TaskError,
+        diagnostics: [{ code, severity: 'error', origin: 'exception', rawText: `${code}: raw` }]
+      });
+      await calculate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith(message);
+      expect(mockLogger.error).toHaveBeenCalledWith('Failed to estimate the cable effort', expect.any(Error));
+      expect(component.results()).toBeNull();
+    });
+
+    it('falls back to the generic message when only a warning diagnostic comes with the error', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null,
+        error: 'CALCULATION_ERROR' as unknown as TaskError,
+        diagnostics: [
+          { code: PythonErrorCode.EstimationWarning, severity: 'warning', origin: 'warning', rawText: 'warning' }
+        ]
+      });
+      await calculate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith('An error occurred');
+    });
+
+    it('falls back to the generic message when the worker returns no diagnostics', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: null, error: 'CALCULATION_ERROR' });
+      await calculate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith('An error occurred');
     });
 
     it('notifies a failure of the worker', async () => {

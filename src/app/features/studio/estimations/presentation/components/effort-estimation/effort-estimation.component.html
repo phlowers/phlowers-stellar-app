@@ -49,7 +49,7 @@
           pInputText
           formControlName="distanceToReferenceSupport"
           [attr.min]="limits.distance.min"
-          [attr.max]="limits.distance.max"
+          [attr.max]="spanLength()"
           [attr.step]="limits.distance.step"
           required
           data-testid="distance-input"

@@ -191,6 +191,11 @@ describe('Task handlers', () => {
         'mechaphlowers.entities.errors.EstimateOnSplitSupportError: Span 0 is split by a virtual support',
         'EstimateOnSplitSupportError',
         'CALCULATION_ERROR'
+      ],
+      [
+        'stellar_engine.entities.errors.EffortPositionOutOfSpanError: Distance 600.0 m to the reference support is outside the span (length 500.0 m)',
+        'EffortPositionOutOfSpanError',
+        'CALCULATION_ERROR'
       ]
     ])('should extract the estimation error code from "%s"', async (rawText, code, taskError) => {
       vi.spyOn(console, 'error').mockReturnValue(undefined);

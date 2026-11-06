@@ -31,7 +31,8 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
   [PythonErrorCode.EstimateOnSplitSupportError]: 'shared.python-errors.estimate-on-split-support-error',
   [PythonErrorCode.EstimationInputError]: 'shared.python-errors.estimation-input-error',
   [PythonErrorCode.EstimationNotConvergedError]: 'shared.python-errors.estimation-not-converged-error',
-  [PythonErrorCode.EstimationWarning]: 'shared.python-errors.estimation-warning'
+  [PythonErrorCode.EstimationWarning]: 'shared.python-errors.estimation-warning',
+  [PythonErrorCode.EffortPositionOutOfSpanError]: 'shared.python-errors.effort-position-out-of-span-error'
 };
 
 /**

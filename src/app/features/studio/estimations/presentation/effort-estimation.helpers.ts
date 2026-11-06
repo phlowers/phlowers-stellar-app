@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { CableEffortInputs, CableEffortResult } from '@shared/domain';
 import { RESULT_DECIMALS } from '@features/studio/estimations/domain/effort-estimation.constantes';
 import {
@@ -51,4 +52,18 @@ export function toDisplayedResults(result: CableEffortResult): EffortEstimationD
 /** Text copied to the clipboard for a displayed result: the value as shown, without unit. */
 export function formatResultForClipboard(value: number): string {
   return roundResult(value).toFixed(RESULT_DECIMALS);
+}
+
+/**
+ * Validator rejecting values above the length of the selected span. It reports the same `max` error as
+ * `Validators.max` and does nothing while the span length is unknown.
+ */
+export function maxSpanLengthValidator(getSpanLength: () => number | null): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const max = getSpanLength();
+    if (max === null || control.value === null || control.value === undefined || control.value === '') {
+      return null;
+    }
+    return control.value > max ? { max: { max, actual: control.value } } : null;
+  };
 }

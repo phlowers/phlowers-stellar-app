@@ -8,8 +8,7 @@
 import { CableEffortDirection } from '@shared/domain';
 import { EffortEstimationDirectionOption } from '@features/studio/estimations/domain/effort-estimation.interfaces';
 
-export const DISTANCE_MIN = -100;
-export const DISTANCE_MAX = 5000;
+export const DISTANCE_MIN = 0;
 export const DISTANCE_DECIMALS = 2;
 export const DISTANCE_DEFAULT = 0;
 
@@ -28,7 +27,8 @@ export const RESULT_DECIMALS = 2;
 export const DEFAULT_DIRECTION: CableEffortDirection = 'UP';
 
 export const INPUT_LIMITS = {
-  distance: { min: DISTANCE_MIN, max: DISTANCE_MAX, step: 10 ** -DISTANCE_DECIMALS },
+  // the maximum distance is the length of the selected span
+  distance: { min: DISTANCE_MIN, step: 10 ** -DISTANCE_DECIMALS },
   temperature: { min: TEMPERATURE_MIN, max: TEMPERATURE_MAX, step: 10 ** -TEMPERATURE_DECIMALS },
   displacement: { min: DISPLACEMENT_MIN, max: DISPLACEMENT_MAX, step: 1 }
 } as const;

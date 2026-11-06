@@ -24,13 +24,17 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
+import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
+import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { CableEffortDirection, CableEffortResult } from '@shared/domain';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
+import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import {
   createNumberControl,
-  findCurrentSpanOption
+  findCurrentSpanOption,
+  getSpanLength
 } from '@features/studio/cable-adjustment/presentation/cable-adjustment.helpers';
 import {
   DEFAULT_DIRECTION,
@@ -41,7 +45,6 @@ import {
   DISPLACEMENT_MIN,
   DISTANCE_DECIMALS,
   DISTANCE_DEFAULT,
-  DISTANCE_MAX,
   DISTANCE_MIN,
   INPUT_LIMITS,
   TEMPERATURE_DECIMALS,
@@ -55,6 +58,7 @@ import {
 } from '@features/studio/estimations/domain/effort-estimation.interfaces';
 import {
   formatResultForClipboard,
+  maxSpanLengthValidator,
   toCableEffortInputs,
   toDisplayedResults
 } from '@features/studio/estimations/presentation/effort-estimation.helpers';
@@ -91,13 +95,21 @@ export class EffortEstimationComponent {
   readonly limits = INPUT_LIMITS;
   readonly directionOptions = DIRECTION_OPTIONS;
 
+  // length of the selected span: the distance to the reference support cannot exceed it
+  readonly spanLength = signal<number | null>(null);
+
   readonly form = new FormGroup({
     span: new FormControl<EffortEstimationSpan | null>(null, Validators.required),
     referenceSupport: new FormControl<EffortEstimationSupportSide | null>(
       { value: null, disabled: true },
       Validators.required
     ),
-    distanceToReferenceSupport: createNumberControl(DISTANCE_MIN, DISTANCE_MAX, DISTANCE_DECIMALS, DISTANCE_DEFAULT),
+    distanceToReferenceSupport: new FormControl<number | null>(DISTANCE_DEFAULT, [
+      Validators.required,
+      Validators.min(DISTANCE_MIN),
+      maxSpanLengthValidator(() => this.spanLength()),
+      maxDecimalsValidator(DISTANCE_DECIMALS)
+    ]),
     temperature: createNumberControl(TEMPERATURE_MIN, TEMPERATURE_MAX, TEMPERATURE_DECIMALS, TEMPERATURE_DEFAULT),
     direction: new FormControl<CableEffortDirection>(DEFAULT_DIRECTION, { nonNullable: true }),
     targetDisplacement: createNumberControl(
@@ -119,7 +131,9 @@ export class EffortEstimationComponent {
   readonly isCalculating = signal(false);
   // The displayed results match the inputs until one of them is modified
   private readonly resultsMatchInputs = signal(false);
-  readonly canCalculate = computed(() => this.formValid() && !this.isCalculating() && !this.resultsMatchInputs());
+  readonly canCalculate = computed(
+    () => this.formValid() && this.spanLength() !== null && !this.isCalculating() && !this.resultsMatchInputs()
+  );
 
   readonly results = signal<CableEffortResult | null>(null);
   readonly displayedResults = computed(() => {
@@ -131,6 +145,8 @@ export class EffortEstimationComponent {
     // the support list follows the selected span, starting on its departure support
     this.form.controls.span.valueChanges.pipe(takeUntilDestroyed()).subscribe((span) => {
       this.form.controls.referenceSupport.reset({ value: span ? 'LEFT' : null, disabled: span === null });
+      this.spanLength.set(getSpanLength(this.spanService.section(), span?.index ?? null));
+      this.form.controls.distanceToReferenceSupport.updateValueAndValidity();
     });
 
     // the results stay displayed, only the calculation is allowed again
@@ -153,15 +169,24 @@ export class EffortEstimationComponent {
     this.isCalculating.set(true);
     // No events: enabling back would otherwise allow a new calculation on unchanged inputs
     this.form.disable({ emitEvent: false });
+    let diagnostics: PythonDiagnostic[] = [];
     try {
-      const { result, error } = await this.workerPythonService.runTask(Task.estimateCableEffort, inputs);
-      if (error) throw new Error(error);
-      this.results.set(result);
+      const outcome = await this.workerPythonService.runTask(Task.estimateCableEffort, inputs);
+      diagnostics = outcome.diagnostics ?? [];
+      if (outcome.error) throw new Error(outcome.error);
+      this.results.set(outcome.result);
       this.resultsMatchInputs.set(true);
     } catch (error) {
       this.logger.error('Failed to estimate the cable effort', error);
       this.results.set(null);
-      this.notificationService.error(this.translocoService.translate('common.error-occurred-label'));
+      // Prefer the message matching the Python error raised by the task, if any
+      const pythonErrorMessage = formatPythonError(
+        diagnostics.find((diagnostic) => diagnostic.origin === 'exception')?.code ?? null,
+        this.translocoService
+      );
+      this.notificationService.error(
+        pythonErrorMessage ?? this.translocoService.translate('common.error-occurred-label')
+      );
     } finally {
       this.form.enable({ emitEvent: false });
       this.isCalculating.set(false);
