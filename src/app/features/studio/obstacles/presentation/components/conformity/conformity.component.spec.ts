@@ -822,6 +822,36 @@ describe('ConformityComponent', () => {
   });
 
   describe('getValue', () => {
+    it('should expose worker border coordinates unchanged and preserve its compliance verdict', async () => {
+      await createComponent();
+      mockWorkerPython.runTask.mockResolvedValueOnce({
+        result: {
+          obstacle: CONFORMITY_PLOT_MOCK.obstacle,
+          conformity: CONFORMITY_PLOT_MOCK.conformity,
+          results: {
+            rule_a: {
+              overhangCableAltitude: 27,
+              lateralCableAltitude: 30,
+              overhangCableLineAxisDistance: 0,
+              lateralCableLineAxisDistance: 5,
+              overhangDistanceToComply: 3,
+              lateralDistanceToComply: 2,
+              overhangComplianceAltitude: 24,
+              lateralComplianceLineAxisDistance: -7,
+              conformityCompliance: false
+            }
+          }
+        },
+        error: null
+      });
+
+      await component.calculate();
+
+      expect(component.getValue('rule_a', 'overhangComplianceAltitude')).toBe(24);
+      expect(component.getValue('rule_a', 'lateralComplianceLineAxisDistance')).toBe(-7);
+      expect(component.getConformityCompliance('rule_a')).toBe(false);
+    });
+
     it('should return null for a null key', async () => {
       await createComponent();
       await component.calculate();

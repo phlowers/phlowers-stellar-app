@@ -8,7 +8,7 @@
 
 import math
 from abc import ABC, abstractmethod
-from typing import ClassVar, Sequence
+from typing import ClassVar, Literal, Sequence
 
 from stellar_engine.core.conformity.plot_data import (
     Point2D,
@@ -39,6 +39,17 @@ class PlotStrategy(ABC):
     ) -> float | None:
         """Gap between the obstacle and the lateral cable points, None if not judged."""
         return None
+
+    @abstractmethod
+    def border_coordinate(
+        self,
+        obstacle: Point2D,
+        cable: Point2D,
+        security_distance: float,
+        zone: ZonePlot,
+        axis: Literal["x", "y"],
+    ) -> float:
+        """Boundary coordinate for the table altitude or lateral position."""
 
     @abstractmethod
     def is_compliant(
@@ -82,6 +93,26 @@ class CableTrackStrategy(PlotStrategy):
             default=None,
         )
 
+    def border_coordinate(
+        self,
+        obstacle: Point2D,
+        cable: Point2D,
+        security_distance: float,
+        zone: ZonePlot,
+        axis: Literal["x", "y"],
+    ) -> float:
+        distance = math.hypot(obstacle.x - cable.x, obstacle.y - cable.y)
+        coordinate = cable.x if axis == "x" else cable.y
+        if distance == 0:
+            # At the center, use the rightmost x and bottom y coordinates.
+            return coordinate + (
+                security_distance if axis == "x" else -security_distance
+            )
+        obstacle_coordinate = obstacle.x if axis == "x" else obstacle.y
+        return coordinate + (
+            (obstacle_coordinate - coordinate) * security_distance / distance
+        )
+
     def is_compliant(
         self,
         overhang: float | None,
@@ -106,6 +137,21 @@ class _BoxZoneStrategy(PlotStrategy):
     def overhang_gap(self, obstacle: Point2D, cable: Point2D) -> float:
         # negative when the obstacle is above the cable
         return cable.y - obstacle.y
+
+    def border_coordinate(
+        self,
+        obstacle: Point2D,
+        cable: Point2D,
+        security_distance: float,
+        zone: ZonePlot,
+        axis: Literal["x", "y"],
+    ) -> float:
+        if axis == "y":
+            return min(point.y for point in zone.zone_points)
+        return min(
+            (point.x for point in zone.zone_points),
+            key=lambda x: abs(x - obstacle.x),
+        )
 
     def zone(
         self,

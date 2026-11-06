@@ -346,12 +346,12 @@ Chaque clé est toujours présente, et une valeur non produite par les scénario
 | `overhangCableLineAxisDistance` | Distance à l’axe de la portée (`x` dans le plan, mesurée depuis l’axe de la portée) du point du câble dans le scénario `overhang`. |
 | `lateralCableLineAxisDistance` | Distance à l’axe de la portée (`x` dans le plan, mesurée depuis l’axe de la portée) du point du câble dans le scénario `lateral`. |
 | `overhangDistanceToComply`, `lateralDistanceToComply` | Distance de sécurité de la règle à la tension. |
-| `overhangComplianceAltitude` | Écart entre l’obstacle et le point `overhang` moins `overhangDistanceToComply`, négatif quand l’obstacle est trop proche. Pour `vegetation` et `overhang`, l’écart est **signé**, donc aussi négatif quand l’obstacle est **au-dessus du câble**. Rempli pour `cable_track`, `vegetation` et `overhang`. Voir [Valeurs de conformité](#conformity-compliance-values). |
-| `lateralComplianceLineAxisDistance` | Distance entre l’obstacle et le point latéral le plus proche moins `lateralDistanceToComply`, négative quand l’obstacle est trop proche. Rempli pour `cable_track` et `vegetation`. Voir [Valeurs de conformité](#conformity-compliance-values). |
+| `overhangComplianceAltitude` | Altitude (`y` dans le plan) de la limite de zone, et non marge par rapport à l’obstacle. Rempli pour `cable_track`, `vegetation` et `overhang`. Voir [Valeurs de conformité](#conformity-compliance-values). |
+| `lateralComplianceLineAxisDistance` | Coordonnée latérale (`x` dans le plan) de la limite de zone, et non marge par rapport à l’obstacle. Rempli pour `cable_track` et `vegetation`. Voir [Valeurs de conformité](#conformity-compliance-values). |
 | `overhangTemperature`, `lateralTemperature` | Température (°C) du scénario qui produit le point de surplomb / le côté latéral le plus proche. |
 | `overhangWindPressure`, `lateralWindPressure` | Pression du vent (Pa) du scénario qui produit le point de surplomb / le côté latéral le plus proche. |
 | `overhangMinimalDistance`, `lateralMinimalDistance` | Distance euclidienne, dans le plan de distance, entre l’obstacle et le point de surplomb / le côté latéral le plus proche. |
-| `conformityCompliance` | `true` / `false`, ou `null` quand aucune des valeurs de conformité ci-dessus n’est renseignée. |
+| `conformityCompliance` | `true` / `false`, ou `null` quand aucune marge de conformité interne n’est disponible. |
 
 :::{note}
 Le **côté latéral** regroupe les scénarios `lateral`, `lateral_inverse` et `intermediate`
@@ -363,36 +363,49 @@ donc `lateralWindPressure` est négative quand le point `lateral_inverse` est le
 (conformity-compliance-values)=
 #### Valeurs de conformité
 
-Les valeurs de conformité sont calculées par type de graphique à partir du point d’obstacle et
-des points projetés du câble, tous dans le plan (la `PlotStrategy` du type de graphique, appliquée
-par `ConformityTableResult.from_outcomes()`). Les *points du côté latéral* sont les points des
+Le tableau renvoie des **coordonnées de limite de zone**, et non des marges signées. Elles utilisent
+le même repère que l’obstacle et les points projetés du câble. Les *points du côté latéral* sont les points des
 scénarios `lateral`, `lateral_inverse` et `intermediate`.
 
 | Type de graphique | `overhangComplianceAltitude` | `lateralComplianceLineAxisDistance` |
 |---|---|---|
-| `cable_track` | Distance euclidienne entre l’obstacle et le point de surplomb, moins la distance à respecter. | Distance euclidienne entre l’obstacle et le point latéral le plus proche, moins la distance à respecter. |
-| `vegetation` | $y_{overhang} - y_{obstacle}$ moins la distance à respecter (signé : négatif quand l’obstacle est au-dessus du câble). | $\min \lvert x_{obstacle} - x_{side} \rvert$ sur les points du côté latéral, moins la distance à respecter. |
+| `cable_track` | `y` de la limite du cercle en direction de l’obstacle, pour le point de surplomb le plus proche. | `x` de la limite du cercle en direction de l’obstacle, pour le point du côté latéral le plus proche. |
+| `vegetation` | Plus petit `y` de la limite de zone tracée (altitude minimale des scénarios moins la distance de surplomb). | `x` de la limite extérieure gauche ou droite tracée la plus proche de l’obstacle ; la limite gauche est retenue en cas d’égalité. |
 | `overhang` | Identique à `vegetation`. | `null`. |
 
-Une valeur vaut `null` lorsque le point ou la distance dont elle a besoin manque (par exemple une
-distance latérale `null`).
+Pour un cercle centré sur le point du câble $C$, de rayon $d$, et un obstacle $O$, le point limite est
+$C + d (O-C) / \lVert O-C \rVert$. Lorsque $O=C$, on utilise le bas du cercle pour l’altitude
+et son point le plus à droite pour la coordonnée latérale.
+
+Par exemple, un obstacle à 25 m d’altitude avec une ancienne marge de surplomb de -1 m reçoit
+désormais une altitude de limite de 24 m. Le verdict de conformité reste inchangé. Une coordonnée
+négative ne signifie pas à elle seule une non-conformité.
+
+Une valeur vaut `null` lorsque le scénario ou la distance nécessaire manque (par exemple une
+distance latérale `null`), ou lorsque ce type de graphique ne juge pas le côté latéral.
 
 #### Conformité
 
-`conformityCompliance` est dérivé de ces deux valeurs, et non de verdicts par scénario
-(`PlotStrategy.is_compliant()`) :
+`conformityCompliance` utilise toujours les **marges signées internes**, indépendamment des coordonnées
+de limite renvoyées (`PlotStrategy.is_compliant()`). Ces marges ne sont pas renvoyées dans le tableau :
+
+| Type de graphique | Marge de surplomb | Marge latérale |
+|---|---|---|
+| `cable_track` | Distance euclidienne entre l’obstacle et le point de surplomb, moins la distance à respecter. | Distance euclidienne entre l’obstacle et le point latéral le plus proche, moins la distance à respecter. |
+| `vegetation` | $y_{overhang} - y_{obstacle}$ moins la distance à respecter (signé). | $\min \lvert x_{obstacle} - x_{side} \rvert$ sur les points du côté latéral, moins la distance à respecter. |
+| `overhang` | Identique à `vegetation`. | Non utilisée. |
 
 | Type de graphique | `conformityCompliance` vaut `false` quand |
 |---|---|
-| `cable_track`, `overhang` | Une valeur renseignée est négative. Une valeur exactement égale à 0 est conforme. |
+| `cable_track`, `overhang` | Une marge disponible est négative. Une marge exactement égale à 0 est conforme. |
 | `vegetation` | L’obstacle est **à l’intérieur de la U** (voir ci-dessous). |
 
-Le verdict vaut `null` quand aucune valeur n’est renseignée.
+Le verdict vaut `null` quand aucune marge n’est disponible.
 
 Pour `vegetation`, l’obstacle est à l’intérieur de la U quand il est trop proche verticalement
-(`overhangComplianceAltitude < 0`) **et** soit trop proche latéralement
-(`lateralComplianceLineAxisDistance < 0`, ou aucune valeur latérale) soit horizontalement entre
-les points du côté latéral. Sans valeur de surplomb, seule la valeur latérale est jugée. L’obstacle
+(`marge de surplomb < 0`) **et** soit trop proche latéralement
+(`marge latérale < 0`, ou aucune marge latérale) soit horizontalement entre
+les points du côté latéral. Sans marge de surplomb, seule la marge latérale est jugée. L’obstacle
 peut donc être trop proche sur un seul axe et rester conforme, tant qu’il n’est pas à l’intérieur
 de la U (`test_vegetation_u_shape_compliance_is_judged_per_rule`). La zone de la figure est un
 outil visuel ; le verdict est donné par ce test.

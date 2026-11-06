@@ -14,6 +14,7 @@ from stellar_engine.core.conformity.plot_data import (
     ObstacleOutput,
     Point2D,
     ZoneConformity,
+    ZonePlot,
 )
 from stellar_engine.core.conformity.runner import ScenarioOutcome
 from stellar_engine.core.conformity.strategies import PlotStrategy
@@ -49,6 +50,7 @@ class ConformityTableResult:
         outcomes: Sequence[ScenarioOutcome],
         obstacle: Point2D,
         strategy: PlotStrategy,
+        zone: ZonePlot,
     ) -> 'ConformityTableResult':
         """Build the table of a rule from its solved scenarios."""
 
@@ -95,6 +97,7 @@ class ConformityTableResult:
         # Populate the compliance table with the values derived from the selected
         # overhang and lateral scenario points.
         values: dict[str, float | bool | None] = {}
+        overhang_margin = None
         overhang_compliance_altitude = None
         if overhang is not None:
             # Keep the operating conditions and minimum distance for the closest
@@ -108,10 +111,18 @@ class ConformityTableResult:
                 overhang_wind_pressure=state.wind_pressure,
                 overhang_minimal_distance=distance(overhang),
             )
-            overhang_compliance_altitude = (
+            overhang_margin = (
                 strategy.overhang_gap(obstacle, overhang.point)
                 - overhang.scenario.security_distance
             )
+            overhang_compliance_altitude = strategy.border_coordinate(
+                obstacle,
+                overhang.point,
+                overhang.scenario.security_distance,
+                zone,
+                "y",
+            )
+        lateral_margin = None
         lateral_compliance_line_axis_distance = None
         if lateral is not None:
             # Record the lateral baseline point and compute the reserve margin
@@ -122,9 +133,18 @@ class ConformityTableResult:
                 lateral_distance_to_comply=lateral.scenario.security_distance,
             )
             lateral_gap = strategy.lateral_gap(obstacle, side_points)
-            if lateral_gap is not None:
-                lateral_compliance_line_axis_distance = (
+            if lateral_gap is not None and closest_side is not None:
+                lateral_margin = (
                     lateral_gap - lateral.scenario.security_distance
+                )
+                lateral_compliance_line_axis_distance = (
+                    strategy.border_coordinate(
+                        obstacle,
+                        closest_side.point,
+                        lateral.scenario.security_distance,
+                        zone,
+                        "x",
+                    )
                 )
         if closest_side is not None:
             # Store the closest lateral-side scenario used to summarize the worst
@@ -141,8 +161,8 @@ class ConformityTableResult:
             overhang_compliance_altitude=overhang_compliance_altitude,
             lateral_compliance_line_axis_distance=lateral_compliance_line_axis_distance,
             conformity_compliance_status=strategy.is_compliant(
-                overhang_compliance_altitude,
-                lateral_compliance_line_axis_distance,
+                overhang_margin,
+                lateral_margin,
                 obstacle,
                 side_points,
             ),
