@@ -30,6 +30,27 @@ Run `npm run build` to build the project. The build artifacts will be stored in 
 #### Running unit tests  
 Run `npm run test` to execute the unit tests.
 
+#### Dependency security
+
+Run `npm audit` after dependency updates; do not apply `npm audit fix --force`
+without reviewing its proposed upgrades and downgrades.
+Regenerate `package-lock.json` with the npm version bundled with the Node.js version in
+`.nvmrc` (npm 11): CI runs `npm ci` with it and rejects a lock file produced by npm 10.
+The `glob`, `minimatch`, and Vite overrides pin patched versions used by the build,
+lint, and test tools. The Nitro-specific esbuild override reuses the patched
+version declared by this project. Keep the service worker build regression test
+and the production build passing when changing these overrides.
+
+The remaining low-severity `deepmerge` advisory (GHSA-gcqx-w48m-w2h4) has no
+published patched version. Its affected development-tool parents are also
+reported by npm; these alerts must not be hidden with a downgrade to an older
+Workbox release. Recheck upstream fixes before removing this exception.
+
+TypeDoc (documentation build only) is pinned to `minimatch` 10.2.6: `minimatch` 11 removed
+`Minimatch.matchOne`, which TypeDoc 0.28 still calls. This keeps one moderate advisory
+(GHSA-g3hv-75wg-m249, fixed only in `minimatch` 11) on the trusted glob patterns of the docs build.
+Drop this nested override once a TypeDoc release supports `minimatch` 11.
+
 #### Running local documentation
 
 The documentation is built with Sphinx. First, go to the `docs-sphinx` folder and prepare the Python environment:
