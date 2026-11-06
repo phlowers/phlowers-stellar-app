@@ -46,7 +46,9 @@ def _bracket_mass(
         if value * reference_value <= 0:
             return min(lower_mass, sign * mass), max(lower_mass, sign * mass)
         lower_mass = sign * mass
-        mass *= 2
+        if mass == MAX_MASS:
+            break
+        mass = min(mass * 2, MAX_MASS)
     return None
 
 
@@ -83,9 +85,8 @@ def estimate_cable_effort(inputs: dict, study: SectionStudy) -> dict:
             )
         )
 
-    n_spans = len(balance_engine.span_loads.load_mass)
-    positions = np.zeros(n_spans)
-    masses = np.zeros(n_spans)
+    positions = balance_engine.span_loads.load_position.copy()
+    masses = balance_engine.span_loads.load_mass.copy()
     positions[span_index] = load_position
 
     def application_point(mass: float) -> np.ndarray:
@@ -126,7 +127,7 @@ def estimate_cable_effort(inputs: dict, study: SectionStudy) -> dict:
         if isinstance(error, ValueError) and type(error) is not ValueError:
             raise
         logger.warning("Effort estimation failed: %s", error)
-        raise unreachable_error from error
+        raise unreachable_error from None
     if result is None or not result.converged:
         raise unreachable_error
 
