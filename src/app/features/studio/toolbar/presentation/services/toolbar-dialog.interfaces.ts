@@ -10,6 +10,7 @@ export type Tool =
   | 'obstacles-table'
   | 'strand-rrts'
   | 'cable-adjustment'
+  | 'estimations'
   | 'other-tool';
 
 /** Phase of the toolbar dialog lifecycle. */

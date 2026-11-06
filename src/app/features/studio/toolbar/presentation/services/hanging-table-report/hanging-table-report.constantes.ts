@@ -11,7 +11,7 @@ import { HangingTableReportLabels, HangingTableResultRow } from './hanging-table
 
 /** Hanging table metric rows (units are in the labels, so values are drawn bare). */
 export const HANGING_TABLE_METRICS: MetricDescriptor<HangingTableResultRow>[] = [
-  { labelKey: 'studio.conformity.temperature-label', unit: null, decimals: 0, field: 'temperature' },
+  { labelKey: 'common.temperature-label', unit: null, decimals: 0, field: 'temperature' },
   { labelKey: 'studio.hanging-table-report.hanging-parameter-label', unit: '', decimals: 1, field: 'hangingParam' },
   {
     labelKey: 'studio.hanging-table-report.horizontal-tension-label',

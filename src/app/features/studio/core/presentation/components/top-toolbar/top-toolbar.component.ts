@@ -259,6 +259,15 @@ export class StudioTopToolbarComponent implements OnInit {
       action: () => {
         this.toolbarDialogService.openTool('cable-adjustment');
       }
+    },
+    {
+      id: 9,
+      label: this.translocoService.translate('studio.top-toolbar.estimations-tool'),
+      checked: false,
+      disabled: false,
+      action: () => {
+        this.toolbarDialogService.openTool('estimations');
+      }
     }
   ]);
 

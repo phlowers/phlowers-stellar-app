@@ -39,5 +39,6 @@ export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> 
   [PythonErrorCode.EstimateOnSplitSupportError]: 'error',
   [PythonErrorCode.EstimationInputError]: 'error',
   [PythonErrorCode.EstimationNotConvergedError]: 'error',
-  [PythonErrorCode.EstimationWarning]: 'warning'
+  [PythonErrorCode.EstimationWarning]: 'warning',
+  [PythonErrorCode.EffortPositionOutOfSpanError]: 'error'
 };

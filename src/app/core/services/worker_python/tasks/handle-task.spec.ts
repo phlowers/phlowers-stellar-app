@@ -89,6 +89,18 @@ describe('Task handlers', () => {
       expect(result.error).toBeNull();
     });
 
+    it('should call estimate_cable_effort for the estimateCableEffort task', async () => {
+      const mockResult = { effort: -12.5, xDisplacement: 3.2 };
+      const mockToJs = vi.fn().mockReturnValue(mockResult);
+      (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }));
+
+      const result = await handleTask(mockPyodide, Task.estimateCableEffort, undefined);
+
+      expect(mockPyodide.globals.get).toHaveBeenCalledWith('estimate_cable_effort');
+      expect(result.result).toEqual(mockResult);
+      expect(result.error).toBeNull();
+    });
+
     it.each([
       [Task.estimateRope, 'estimate_rope'],
       [Task.estimateTemperature, 'estimate_temperature'],
@@ -178,6 +190,11 @@ describe('Task handlers', () => {
       [
         'mechaphlowers.entities.errors.EstimateOnSplitSupportError: Span 0 is split by a virtual support',
         'EstimateOnSplitSupportError',
+        'CALCULATION_ERROR'
+      ],
+      [
+        'stellar_engine.entities.errors.EffortPositionOutOfSpanError: Distance 600.0 m to the reference support is outside the span (length 500.0 m)',
+        'EffortPositionOutOfSpanError',
         'CALCULATION_ERROR'
       ]
     ])('should extract the estimation error code from "%s"', async (rawText, code, taskError) => {

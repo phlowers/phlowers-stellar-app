@@ -16,7 +16,7 @@ L'énumération `Task` et ses correspondances `TaskInputs`/`TaskOutputs` sont d�
 
 ## Entrées des tâches
 
-Tous les champs utilisent le camelCase à la frontière du worker. Chaque tâche reçoit `spanIndex`, `obstaclePoint` et, facultativement, `bounds` et `iceThickness`. `spanIndex` est l'index **avant manipulation**. `obstaclePoint` est `[x, y, z]` en mètres. Si `bounds` est fourni, il représente `[lower, upper]` dans les unités de la variable estimée ; les deux valeurs doivent être finies et `lower < upper`. En l'absence de bornes, les valeurs par défaut de l'estimateur mechaphlowers sont utilisées. `iceThickness` est exprimé en centimètres à la frontière de l'API TypeScript/Python et converti en mètres avant l'appel à mechaphlowers.
+Tous les champs utilisent le camelCase à la frontière du worker. Chaque tâche reçoit `spanIndex`, `obstaclePoint` et, facultativement, `bounds` et `iceThickness`. `spanIndex` est l'index **avant manipulation**. `obstaclePoint` est `[x, y, z]` en mètres ; à sa place, `obstacleUuid` et `pointIndex` (base 0) peuvent désigner un point d'un obstacle enregistré dans l'étude, que le moteur résout dans son propre repère (un UUID inconnu déclenche `ObstacleNotFoundError`). Si `bounds` est fourni, il représente `[lower, upper]` dans les unités de la variable estimée ; les deux valeurs doivent être finies et `lower < upper`. En l'absence de bornes, les valeurs par défaut de l'estimateur mechaphlowers sont utilisées. `iceThickness` est exprimé en centimètres à la frontière de l'API TypeScript/Python et converti en mètres avant l'appel à mechaphlowers.
 
 | Tâche | Variable estimée | Entrées propres à la tâche |
 |---|---|---|

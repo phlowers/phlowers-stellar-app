@@ -259,6 +259,16 @@ class GuyingInputs:
 
 
 @dataclass
+class CableEffortInputs:
+    spanIndex: int
+    referenceSupport: Literal['LEFT', 'RIGHT']
+    distanceToReferenceSupport: float
+    temperature: float
+    targetDisplacement: float
+    direction: Literal['UP', 'DOWN']
+
+
+@dataclass
 class ParameterCalibrationInputs:
     parameterUncertaintyPapoto: float
     cableTemperatureCalibration: float

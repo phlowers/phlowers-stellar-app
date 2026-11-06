@@ -1,0 +1,114 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="calculate()"
+  class="temperature-estimation"
+  [attr.aria-busy]="isCalculating()"
+  data-testid="temperature-estimation-form"
+>
+  @if (!hasObstacle()) {
+    <p-message severity="info" size="small" variant="simple" data-testid="select-obstacle-info">
+      {{ 'studio.temperature-estimation.select-obstacle-info' | transloco }}
+    </p-message>
+  }
+
+  <div class="temperature-estimation__grid">
+    <div class="temperature-estimation__field">
+      <label for="temperature-obstacle">{{ 'common.obstacle-name-label' | transloco }}</label>
+      <p-select
+        inputId="temperature-obstacle"
+        [options]="obstacleOptions()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="obstacleUuid"
+        [filter]="true"
+        filterBy="label"
+        appendTo="body"
+        fluid
+        data-testid="obstacle-select"
+      />
+    </div>
+
+    <div class="temperature-estimation__field">
+      <label for="temperature-point">{{ 'common.point-label' | transloco }}</label>
+      <p-select
+        inputId="temperature-point"
+        [options]="pointOptions()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="pointIndex"
+        appendTo="body"
+        fluid
+        data-testid="point-select"
+      />
+    </div>
+  </div>
+
+  @let distanceControl = form.controls.targetDistance;
+  @let distanceError = distanceControl.dirty || distanceControl.touched ? getError(distanceControl) : '';
+  <div class="temperature-estimation__field temperature-estimation__field--distance">
+    <label for="temperature-target-distance">{{
+      'studio.temperature-estimation.target-distance-label' | transloco
+    }}</label>
+    <p-inputgroup>
+      <input
+        id="temperature-target-distance"
+        type="number"
+        pInputText
+        formControlName="targetDistance"
+        [attr.min]="limits.targetDistance.min"
+        [attr.max]="limits.targetDistance.max"
+        [attr.step]="limits.targetDistance.step"
+        required
+        data-testid="target-distance-input"
+        [attr.aria-invalid]="distanceError ? 'true' : null"
+        [attr.aria-errormessage]="distanceError ? 'temperature-target-distance-error' : null"
+      />
+      <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
+    </p-inputgroup>
+    @if (distanceError) {
+      <p-message id="temperature-target-distance-error" severity="error" size="small" variant="simple" role="alert">
+        {{ distanceError }}
+      </p-message>
+    }
+  </div>
+
+  <div class="temperature-estimation__calculate">
+    <button
+      type="submit"
+      app-btn
+      [disabled]="!canCalculate()"
+      [btnLoading]="isCalculating()"
+      data-testid="calculate-btn"
+    >
+      <app-icon icon="rocket_launch" aria-hidden="true" />
+      {{ 'common.calculate' | transloco }}
+    </button>
+  </div>
+</form>
+
+<!-- Always on the page: screen readers only announce results added to a live region that is already there -->
+<output class="temperature-estimation__results" data-testid="results">
+  @let temperature = displayedTemperature();
+  @if (temperature !== null) {
+    <div class="temperature-estimation__results-content" animate.enter="anim-expand-height" data-testid="results-frame">
+      <h2>{{ 'common.results' | transloco }}</h2>
+      <dl>
+        <dt>{{ 'studio.temperature-estimation.conformity-temperature-label' | transloco }}</dt>
+        <dd class="temperature-estimation__result-value">
+          <span data-testid="temperature-value">{{ temperature | number: '1.2-2' }}&nbsp;°C</span>
+          <button
+            type="button"
+            app-btn
+            btnStyle="text"
+            btnSize="s"
+            [attr.aria-label]="'studio.temperature-estimation.copy-temperature-aria-label' | transloco"
+            (click)="copyToClipboard(temperature)"
+            data-testid="copy-temperature-btn"
+          >
+            <app-icon icon="content_copy" aria-hidden="true" />
+          </button>
+        </dd>
+      </dl>
+    </div>
+  }
+</output>
