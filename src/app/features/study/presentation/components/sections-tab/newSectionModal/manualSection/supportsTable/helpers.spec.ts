@@ -8,6 +8,7 @@ import {
   calculateSupportFootAltitude,
   calculateSupportNumber,
   createEmptyChain,
+  filterSupportNames,
   findSupplementaryNames,
   getSupportFieldValues
 } from './helpers';
@@ -303,6 +304,16 @@ describe('helpers', () => {
     it('should return names not present in the catalog (case-insensitive)', () => {
       const result = findSupplementaryNames(['Alpha', 'beta', 'Gamma'], ['ALPHA', 'GAMMA']);
       expect(result).toEqual(['beta']);
+    });
+
+    describe('filterSupportNames', () => {
+      it('should filter by case-insensitive substring and sort matches alphabetically', () => {
+        expect(filterSupportNames(['Zeta', 'alphabet', 'Alpha', 'Beta'], 'ALP')).toEqual(['Alpha', 'alphabet']);
+      });
+
+      it('should sort all names when the filter is empty', () => {
+        expect(filterSupportNames(['Zeta', 'Beta', 'Alpha'], '')).toEqual(['Alpha', 'Beta', 'Zeta']);
+      });
     });
 
     it('should return an empty array when all names are in the catalog', () => {
