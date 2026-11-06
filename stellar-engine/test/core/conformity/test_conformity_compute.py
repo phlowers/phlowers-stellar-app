@@ -12,7 +12,11 @@ from stellar_engine.core.conformity.compute import ConformityTableResult
 from stellar_engine.core.conformity.plot_data import Point2D
 from stellar_engine.core.conformity.runner import ScenarioOutcome
 from stellar_engine.core.conformity.scenarios import Scenario, TargetState
-from stellar_engine.core.conformity.strategies import get_strategy
+from stellar_engine.core.conformity.strategies import (
+    OVERHANG_ZONE_HEIGHT_RATIO,
+    OverhangStrategy,
+    get_strategy,
+)
 from stellar_engine.entities.conformity import (
     ConformityPlot,
     ScenarioPoint,
@@ -102,21 +106,31 @@ def test_vegetation_zone_border_is_four_vertex_polyline():
 
 
 @pytest.mark.parametrize("lateral", [None, 1.0])
-def test_overhang_zone_is_flat_rectangle_below_lowest_point(lateral):
+def test_overhang_zone_is_plain_zone_above_border_line(lateral):
     zone = _zone("overhang", [Point2D(0, 2), Point2D(4, 3)], lateral=lateral)
 
     corners = _corners(zone)
-    expected_y = 2 - 1.5
-    assert corners["LowerLeft"]["y"] == expected_y
-    assert corners["LowerRight"]["y"] == expected_y
-    assert corners["UpperRight"]["y"] == expected_y
-    assert corners["UpperLeft"]["y"] == expected_y
-    assert zone.zone_border == [
-        corners["LowerLeft"],
-        corners["LowerRight"],
-        corners["UpperRight"],
-        corners["UpperLeft"],
-    ]
+    lower_y = 2 - 1.5
+    line_length = corners["LowerRight"]["x"] - corners["LowerLeft"]["x"]
+    upper_y = lower_y + OVERHANG_ZONE_HEIGHT_RATIO * line_length
+    assert corners["LowerLeft"]["y"] == lower_y
+    assert corners["LowerRight"]["y"] == lower_y
+    assert corners["UpperRight"]["y"] == pytest.approx(upper_y)
+    assert corners["UpperLeft"]["y"] == pytest.approx(upper_y)
+    assert corners["UpperLeft"]["x"] == corners["LowerLeft"]["x"]
+    assert corners["UpperRight"]["x"] == corners["LowerRight"]["x"]
+    assert zone.zone_border == [corners["LowerLeft"], corners["LowerRight"]]
+
+
+def test_overhang_zone_height_follows_ratio(monkeypatch):
+    monkeypatch.setattr(OverhangStrategy, "plain_zone_height_ratio", 0.5)
+
+    zone = _zone("overhang", [Point2D(0, 2), Point2D(4, 3)], lateral=None)
+
+    corners = _corners(zone)
+    assert corners["UpperLeft"]["y"] - corners["LowerLeft"]["y"] == (
+        pytest.approx(2.0)
+    )
 
 
 @pytest.mark.parametrize("conformity_plot", ["vegetation", "overhang"])

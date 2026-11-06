@@ -19,6 +19,9 @@ from stellar_engine.entities.conformity import ConformityPlot, TensionRules
 
 DEFAULT_RADIUS = 1.0
 DEFAULT_ZONE_WIDTH = 10.0
+# Height of the overhang plain zone above its border, as a ratio of the
+# border line length.
+OVERHANG_ZONE_HEIGHT_RATIO = 1.0
 
 
 class PlotStrategy(ABC):
@@ -129,8 +132,9 @@ class CableTrackStrategy(PlotStrategy):
 class _BoxZoneStrategy(PlotStrategy):
     """Shared box-shaped plots: vertical overhang gap and zone geometry."""
 
-    # Flat box: a single line below the lowest point.
-    flat: ClassVar[bool] = False
+    # Plain zone above a single border line below the lowest point, its
+    # height being this ratio of the line length. None: box around the points.
+    plain_zone_height_ratio: ClassVar[float | None] = None
     # Corner names in border drawing order.
     border: ClassVar[tuple[str, ...]]
 
@@ -173,7 +177,10 @@ class _BoxZoneStrategy(PlotStrategy):
             max_x = center_x + width / 2
 
         min_y = min(p.y for p in points) - overhang
-        max_y = min_y if self.flat else max(p.y for p in points) + overhang
+        if self.plain_zone_height_ratio is None:
+            max_y = max(p.y for p in points) + overhang
+        else:
+            max_y = min_y + self.plain_zone_height_ratio * (max_x - min_x)
 
         coordinates = {
             "LowerLeft": (min_x, min_y),
@@ -239,10 +246,10 @@ class VegetationStrategy(_BoxZoneStrategy):
 
 
 class OverhangStrategy(_BoxZoneStrategy):
-    """Overhang: flat zone judged only by the vertical gap to the obstacle."""
+    """Overhang: border line with a plain zone above, judged only by the vertical gap."""
 
-    flat = True
-    border = ("LowerLeft", "LowerRight", "UpperRight", "UpperLeft")
+    plain_zone_height_ratio = OVERHANG_ZONE_HEIGHT_RATIO
+    border = ("LowerLeft", "LowerRight")
 
     def is_compliant(
         self,
