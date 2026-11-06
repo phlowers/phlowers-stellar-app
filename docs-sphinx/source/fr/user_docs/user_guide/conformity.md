@@ -72,7 +72,8 @@ Récapitulatif de l’obstacle : **Nom**, **Type**, **Portée**, **Support de r�
 **Distance axe ligne** du point. Ces champs ne sont pas modifiables ici.
 
 Quand l’obstacle a plusieurs points, choisissez celui à vérifier dans **Point de l’obstacle**. Le choix est
-obligatoire pour calculer.
+obligatoire pour calculer. À l’ouverture, le point sélectionné dans l’onglet **Obstacles** est présélectionné,
+sauf si un point a déjà été enregistré pour la conformité de l’obstacle : celui-ci est alors conservé.
 
 :::{note}
 Le calcul mesure les distances depuis le **point sélectionné**, et le graphique montre sa position sous la
@@ -146,6 +147,9 @@ surplomb, une colonne **Latéral**.
 
 Une cellule est vide lorsque la valeur ne s’applique pas.
 
+Pour le type de graphique `overhang`, la ligne **Distance axe ligne respect** n’est pas affichée : la bordure
+est une ligne horizontale, seule son altitude est pertinente.
+
 #### Cas distance minimale
 
 Pour le tracé de conformité `cable_track`, un bloc **Cas distance minimale** ajoute, pour les colonnes
@@ -189,7 +193,8 @@ L’affectation ci-dessous correspond au catalogue par défaut.
 #### `overhang` : ligne horizontale
 
 Pour les obstacles avec une distance de surplomb uniquement. Chaque règle dessine une ligne horizontale,
-à l’altitude de la position du câble moins la distance de surplomb. L’obstacle doit rester **sous** la ligne.
+à l’altitude de la position du câble moins la distance de surplomb, surmontée d’une zone pleine. La hauteur de
+cette zone est égale à la longueur de la ligne. L’obstacle doit rester **sous** la ligne, donc hors de la zone pleine.
 
 #### `vegetation` : tranchée (rectangle)
 

@@ -33,6 +33,7 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputText } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import {
@@ -85,6 +86,7 @@ import { Task, TaskInputs } from '@services/worker_python/tasks/types';
 export class ConformityComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   readonly obstacleFormService = inject(ObstacleFormService);
+  private readonly obstaclesService = inject(ObstaclesService);
   private readonly spanService = inject(PlotSpanService);
   private readonly storageService = inject(StorageService);
   private readonly notificationService = inject(NotificationService);
@@ -403,6 +405,13 @@ export class ConformityComponent implements OnDestroy {
     return !this.hasMultiplePoints() || this.selectedPointValue() !== null;
   });
 
+  /** Point selected in the obstacle tab, null when the obstacle has a single point or no valid selection. */
+  private activeObstaclePointIndex(): number | null {
+    const index = this.obstaclesService.activePointIndex();
+    if (!this.hasMultiplePoints() || index === null || index >= this.positions().length) return null;
+    return index;
+  }
+
   /** Tracks which obstacle the form was last fully populated for, so async config/options arriving
    * later only fill still-empty fields instead of clobbering user edits. */
   private lastPopulatedUuid: string | null | undefined = undefined;
@@ -434,7 +443,7 @@ export class ConformityComponent implements OnDestroy {
       };
 
       const c = this.form.controls;
-      fill(c.selectedPoint, saved?.selectedPoint ?? null);
+      fill(c.selectedPoint, saved?.selectedPoint ?? this.activeObstaclePointIndex());
       fill(c.windZone, saved?.windZone ?? defaults.windZone);
       fill(c.repartitionTemperature, saved?.repartitionTemperature ?? defaults.repartitionTemperature);
       fill(c.lateralDistanceTemperature, saved?.lateralDistanceTemperature ?? defaults.lateralDistanceTemperature);
@@ -443,6 +452,16 @@ export class ConformityComponent implements OnDestroy {
         c.windMinus.setValue(saved?.windMinus ?? false);
         c.redZonePresence.setValue(saved?.redZonePresence ?? false);
       }
+    });
+  });
+
+  /** Preselect the point selected in the obstacle tab when opening, unless a saved point exists. */
+  private readonly selectActivePointOnOpen = effect(() => {
+    if (!this.isOpen()) return;
+    untracked(() => {
+      if (this.savedConformityData()?.selectedPoint != null) return;
+      const index = this.activeObstaclePointIndex();
+      if (index !== null) this.form.controls.selectedPoint.setValue(index);
     });
   });
 

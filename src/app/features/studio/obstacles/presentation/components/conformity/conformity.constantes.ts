@@ -12,12 +12,11 @@ export const OVERHANG_HIDDEN_RESULT_KEYS: readonly (keyof ConformityRuleResult)[
 ];
 
 /** Result keys whose rows are masked, per conformity chart type. */
-export const HIDDEN_RESULT_KEYS_BY_CONFORMITY_TYPE: Readonly<
-  Record<string, readonly (keyof ConformityRuleResult)[]>
-> = {
-  cable_track: CABLE_TRACK_HIDDEN_RESULT_KEYS,
-  overhang: OVERHANG_HIDDEN_RESULT_KEYS
-};
+export const HIDDEN_RESULT_KEYS_BY_CONFORMITY_TYPE: Readonly<Record<string, readonly (keyof ConformityRuleResult)[]>> =
+  {
+    cable_track: CABLE_TRACK_HIDDEN_RESULT_KEYS,
+    overhang: OVERHANG_HIDDEN_RESULT_KEYS
+  };
 
 export const CONFORMITY_BOUNDS = {
   repartitionTemperature: { step: 0.01, min: 0, max: 250 },

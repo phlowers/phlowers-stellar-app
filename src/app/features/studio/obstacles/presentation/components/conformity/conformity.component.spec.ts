@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 
 import { ConformityComponent } from './conformity.component';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
@@ -267,6 +268,7 @@ describe('ConformityComponent', () => {
       ],
       providers: [
         { provide: ObstacleFormService, useValue: mockFormService },
+        { provide: ObstaclesService, useValue: { activePointIndex: signal<number | null>(null) } },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: StorageService, useValue: { db: buildDb(dbData) } },
         { provide: NotificationService, useValue: mockNotification },
@@ -948,6 +950,60 @@ describe('ConformityComponent', () => {
       const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
       expect(tableText).toContain('Compliance altitude');
       expect(tableText).not.toContain('Compliance line axis distance');
+    });
+  });
+
+  describe('default obstacle point', () => {
+    const twoPoints = [
+      { x: 1, y: 1, z: 1 },
+      { x: 2, y: 2, z: 2 }
+    ];
+
+    async function openWithActivePoint(activeIndex: number | null): Promise<void> {
+      await createComponent();
+      TestBed.inject(ObstaclesService).activePointIndex.set(activeIndex);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+
+    it('should preselect the point selected in the obstacle tab when opening', async () => {
+      obstacle = { ...defaultObstacle(), positions: twoPoints };
+      await openWithActivePoint(1);
+
+      expect(component.form.controls.selectedPoint.value).toBe(1);
+    });
+
+    it('should keep the saved point over the obstacle tab selection', async () => {
+      obstacle = {
+        ...defaultObstacle(),
+        positions: twoPoints,
+        conformityData: {
+          selectedPoint: 0,
+          windZone: 'Z1',
+          windMinus: false,
+          redZonePresence: false,
+          repartitionTemperature: 15,
+          lateralDistanceTemperature: 5,
+          conformity: ['rule_a']
+        }
+      };
+      await openWithActivePoint(1);
+
+      expect(component.form.controls.selectedPoint.value).toBe(0);
+    });
+
+    it.each([null, 5])('should leave the point empty for the obstacle tab selection %s', async (activeIndex) => {
+      obstacle = { ...defaultObstacle(), positions: twoPoints };
+      await openWithActivePoint(activeIndex);
+
+      expect(component.form.controls.selectedPoint.value).toBeNull();
+    });
+
+    it('should not preselect a point for a single-point obstacle', async () => {
+      await openWithActivePoint(0);
+
+      expect(component.form.controls.selectedPoint.value).toBeNull();
     });
   });
 

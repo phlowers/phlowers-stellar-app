@@ -72,7 +72,9 @@ and the **Altitude point**, **Reference support distance** and **Distance to lin
 point. These fields cannot be edited here.
 
 When the obstacle has several points, choose the one to check in **Obstacle's point**. The
-choice is mandatory to calculate.
+choice is mandatory to calculate. When the dialog opens, the point selected in the **Obstacles**
+tab is preselected, unless a point was already saved for the conformity of the obstacle: that
+one is then kept.
 
 :::{note}
 The calculation measures the distances from the **selected point**, and the graph shows its
@@ -148,6 +150,9 @@ distance, an *overhang* and a *lateral* column.
 
 A cell is empty when the value does not apply.
 
+For the `overhang` conformity plot, the **Compliance line axis distance** row is not displayed:
+the border is a horizontal line, only its altitude is relevant.
+
 #### Minimum distance case
 
 For the `cable_track` conformity plot, a **Minimum distance case** block adds, for the overhang
@@ -204,7 +209,9 @@ The graph depends on the **conformity plot** of the obstacle type: `overhang`, `
 #### `overhang`: horizontal line
 
 For obstacles with an overhang distance only. Each rule draws a horizontal line, at the altitude
-of the cable position minus the overhang distance. The obstacle must stay **below** the line.
+of the cable position minus the overhang distance, topped by a plain zone. The height of this
+zone is equal to the length of the line. The obstacle must stay **below** the line, so outside
+the plain zone.
 
 #### `vegetation`: trench (rectangle)
 
