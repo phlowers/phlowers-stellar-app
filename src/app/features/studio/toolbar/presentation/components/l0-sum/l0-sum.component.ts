@@ -9,6 +9,7 @@ import {
   signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { DialogModule } from 'primeng/dialog';
@@ -63,9 +64,15 @@ export class L0SumComponent {
   readonly sortField = signal<string>('');
   readonly sortOrder = signal<number>(0);
 
+  // Re-emits once the translations are loaded and on every language change
+  private readonly exportForExcelLabel = toSignal(
+    this.translocoService.selectTranslate('studio.l0-sum.export-for-excel'),
+    { initialValue: '' }
+  );
+
   readonly exportMenuItems = computed<MenuItem[]>(() => [
     {
-      label: this.translocoService.translate('studio.l0-sum.export-for-excel'),
+      label: this.exportForExcelLabel(),
       command: () => this.onExportForExcel()
     }
   ]);

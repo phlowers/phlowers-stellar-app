@@ -71,6 +71,7 @@
     [expandAriaLabel]="'studio.l0-sum.export-options-aria-label' | transloco"
     (onClick)="onExport()"
     data-testid="l0-export-btn"
+    appendTo="body"
   >
     <ng-template #content>
       <app-icon icon="download" aria-hidden="true" />

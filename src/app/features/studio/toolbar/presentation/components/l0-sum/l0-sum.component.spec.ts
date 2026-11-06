@@ -5,7 +5,7 @@ import { SortEvent } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SplitButtonModule } from 'primeng/splitbutton';
-import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
+import { TranslocoModule, TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 import { L0SumComponent } from './l0-sum.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -84,8 +84,8 @@ describe('L0SumComponent', () => {
       ],
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {} },
-          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' }
+          langs: { en: {}, fr: { 'studio.l0-sum.export-for-excel': 'Exporter pour Excel' } },
+          translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' }
         })
       ]
     })
@@ -368,6 +368,12 @@ describe('L0SumComponent', () => {
       expect(items[0].label).toBe('studio.l0-sum.export-for-excel');
     });
 
+    it('should update the menu item label when the language changes', () => {
+      TestBed.inject(TranslocoService).setActiveLang('fr');
+
+      expect(component.exportMenuItems()[0].label).toBe('Exporter pour Excel');
+    });
+
     it('should run the Excel export from the menu item', async () => {
       component.exportMenuItems()[0].command?.({});
 
@@ -379,9 +385,11 @@ describe('L0SumComponent', () => {
     const renderExportSplitButton = (target: ComponentFixture<L0SumComponent>) => {
       const view = target.componentInstance.footerTemplate()!.createEmbeddedView(null);
       view.detectChanges();
-      const host = view.rootNodes.find((node) => node instanceof HTMLElement && node.tagName === 'P-SPLITBUTTON');
+      const host = view.rootNodes.find(
+        (node): node is HTMLElement => node instanceof HTMLElement && node.tagName === 'P-SPLITBUTTON'
+      )!;
       return {
-        host: host as HTMLElement,
+        host,
         mainButton: host.querySelector<HTMLButtonElement>('.p-splitbutton-button')!,
         dropdownButton: host.querySelector<HTMLButtonElement>('.p-splitbutton-dropdown')!
       };
