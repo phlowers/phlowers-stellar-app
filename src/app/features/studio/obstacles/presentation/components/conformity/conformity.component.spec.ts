@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 
 import { ConformityComponent } from './conformity.component';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
@@ -267,6 +268,7 @@ describe('ConformityComponent', () => {
       ],
       providers: [
         { provide: ObstacleFormService, useValue: mockFormService },
+        { provide: ObstaclesService, useValue: { activePointIndex: signal<number | null>(null) } },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: StorageService, useValue: { db: buildDb(dbData) } },
         { provide: NotificationService, useValue: mockNotification },
@@ -822,6 +824,36 @@ describe('ConformityComponent', () => {
   });
 
   describe('getValue', () => {
+    it('should expose worker border coordinates unchanged and preserve its compliance verdict', async () => {
+      await createComponent();
+      mockWorkerPython.runTask.mockResolvedValueOnce({
+        result: {
+          obstacle: CONFORMITY_PLOT_MOCK.obstacle,
+          conformity: CONFORMITY_PLOT_MOCK.conformity,
+          results: {
+            rule_a: {
+              overhangCableAltitude: 27,
+              lateralCableAltitude: 30,
+              overhangCableLineAxisDistance: 0,
+              lateralCableLineAxisDistance: 5,
+              overhangDistanceToComply: 3,
+              lateralDistanceToComply: 2,
+              overhangComplianceAltitude: 24,
+              lateralComplianceLineAxisDistance: -7,
+              conformityCompliance: false
+            }
+          }
+        },
+        error: null
+      });
+
+      await component.calculate();
+
+      expect(component.getValue('rule_a', 'overhangComplianceAltitude')).toBe(24);
+      expect(component.getValue('rule_a', 'lateralComplianceLineAxisDistance')).toBe(-7);
+      expect(component.getConformityCompliance('rule_a')).toBe(false);
+    });
+
     it('should return null for a null key', async () => {
       await createComponent();
       await component.calculate();
@@ -881,6 +913,97 @@ describe('ConformityComponent', () => {
       expect(fixture.nativeElement.querySelector('.results')).toBeTruthy();
       expect(fixture.nativeElement.querySelector('.results__table')).toBeTruthy();
       expect(fixture.nativeElement.querySelector('.compliance')).toBeTruthy();
+    });
+
+    it('should hide compliance border rows for the cable-track conformity type', async () => {
+      await createComponent();
+      await component.calculate();
+      fixture.detectChanges();
+
+      const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
+      expect(component.commonRows.map((row) => row.label)).toEqual([
+        'Cable altitude',
+        'Cable line axis distance',
+        'Distance to comply'
+      ]);
+      expect(tableText).not.toContain('Compliance altitude');
+      expect(tableText).not.toContain('Compliance line axis distance');
+    });
+
+    it('should keep compliance border rows for the vegetation conformity type', async () => {
+      dbData.configurations = [{ obstacle_type: 'House', red_zone: false, conformity: 'vegetation' }];
+      await createComponent();
+      await component.calculate();
+      fixture.detectChanges();
+
+      const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
+      expect(tableText).toContain('Compliance altitude');
+      expect(tableText).toContain('Compliance line axis distance');
+    });
+
+    it('should only hide the compliance line axis distance row for the overhang conformity type', async () => {
+      dbData.configurations = [{ obstacle_type: 'House', red_zone: false, conformity: 'overhang' }];
+      await createComponent();
+      await component.calculate();
+      fixture.detectChanges();
+
+      const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
+      expect(tableText).toContain('Compliance altitude');
+      expect(tableText).not.toContain('Compliance line axis distance');
+    });
+  });
+
+  describe('default obstacle point', () => {
+    const twoPoints = [
+      { x: 1, y: 1, z: 1 },
+      { x: 2, y: 2, z: 2 }
+    ];
+
+    async function openWithActivePoint(activeIndex: number | null): Promise<void> {
+      await createComponent();
+      TestBed.inject(ObstaclesService).activePointIndex.set(activeIndex);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+
+    it('should preselect the point selected in the obstacle tab when opening', async () => {
+      obstacle = { ...defaultObstacle(), positions: twoPoints };
+      await openWithActivePoint(1);
+
+      expect(component.form.controls.selectedPoint.value).toBe(1);
+    });
+
+    it('should keep the saved point over the obstacle tab selection', async () => {
+      obstacle = {
+        ...defaultObstacle(),
+        positions: twoPoints,
+        conformityData: {
+          selectedPoint: 0,
+          windZone: 'Z1',
+          windMinus: false,
+          redZonePresence: false,
+          repartitionTemperature: 15,
+          lateralDistanceTemperature: 5,
+          conformity: ['rule_a']
+        }
+      };
+      await openWithActivePoint(1);
+
+      expect(component.form.controls.selectedPoint.value).toBe(0);
+    });
+
+    it.each([null, 5])('should leave the point empty for the obstacle tab selection %s', async (activeIndex) => {
+      obstacle = { ...defaultObstacle(), positions: twoPoints };
+      await openWithActivePoint(activeIndex);
+
+      expect(component.form.controls.selectedPoint.value).toBeNull();
+    });
+
+    it('should not preselect a point for a single-point obstacle', async () => {
+      await openWithActivePoint(0);
+
+      expect(component.form.controls.selectedPoint.value).toBeNull();
     });
   });
 

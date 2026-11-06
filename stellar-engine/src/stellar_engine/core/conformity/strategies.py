@@ -8,7 +8,7 @@
 
 import math
 from abc import ABC, abstractmethod
-from typing import ClassVar, Sequence
+from typing import ClassVar, Literal, Sequence
 
 from stellar_engine.core.conformity.plot_data import (
     Point2D,
@@ -19,6 +19,9 @@ from stellar_engine.entities.conformity import ConformityPlot, TensionRules
 
 DEFAULT_RADIUS = 1.0
 DEFAULT_ZONE_WIDTH = 10.0
+# Height of the overhang plain zone above its border, as a ratio of the
+# border line length.
+OVERHANG_ZONE_HEIGHT_RATIO = 1.0
 
 
 class PlotStrategy(ABC):
@@ -39,6 +42,17 @@ class PlotStrategy(ABC):
     ) -> float | None:
         """Gap between the obstacle and the lateral cable points, None if not judged."""
         return None
+
+    @abstractmethod
+    def border_coordinate(
+        self,
+        obstacle: Point2D,
+        cable: Point2D,
+        security_distance: float,
+        zone: ZonePlot,
+        axis: Literal["x", "y"],
+    ) -> float:
+        """Boundary coordinate for the table altitude or lateral position."""
 
     @abstractmethod
     def is_compliant(
@@ -82,6 +96,26 @@ class CableTrackStrategy(PlotStrategy):
             default=None,
         )
 
+    def border_coordinate(
+        self,
+        obstacle: Point2D,
+        cable: Point2D,
+        security_distance: float,
+        zone: ZonePlot,
+        axis: Literal["x", "y"],
+    ) -> float:
+        distance = math.hypot(obstacle.x - cable.x, obstacle.y - cable.y)
+        coordinate = cable.x if axis == "x" else cable.y
+        if distance == 0:
+            # At the center, use the rightmost x and bottom y coordinates.
+            return coordinate + (
+                security_distance if axis == "x" else -security_distance
+            )
+        obstacle_coordinate = obstacle.x if axis == "x" else obstacle.y
+        return coordinate + (
+            (obstacle_coordinate - coordinate) * security_distance / distance
+        )
+
     def is_compliant(
         self,
         overhang: float | None,
@@ -98,14 +132,30 @@ class CableTrackStrategy(PlotStrategy):
 class _BoxZoneStrategy(PlotStrategy):
     """Shared box-shaped plots: vertical overhang gap and zone geometry."""
 
-    # Flat box: a single line below the lowest point.
-    flat: ClassVar[bool] = False
+    # Plain zone above a single border line below the lowest point, its
+    # height being this ratio of the line length. None: box around the points.
+    plain_zone_height_ratio: ClassVar[float | None] = None
     # Corner names in border drawing order.
     border: ClassVar[tuple[str, ...]]
 
     def overhang_gap(self, obstacle: Point2D, cable: Point2D) -> float:
         # negative when the obstacle is above the cable
         return cable.y - obstacle.y
+
+    def border_coordinate(
+        self,
+        obstacle: Point2D,
+        cable: Point2D,
+        security_distance: float,
+        zone: ZonePlot,
+        axis: Literal["x", "y"],
+    ) -> float:
+        if axis == "y":
+            return min(point.y for point in zone.zone_points)
+        return min(
+            (point.x for point in zone.zone_points),
+            key=lambda x: abs(x - obstacle.x),
+        )
 
     def zone(
         self,
@@ -127,7 +177,10 @@ class _BoxZoneStrategy(PlotStrategy):
             max_x = center_x + width / 2
 
         min_y = min(p.y for p in points) - overhang
-        max_y = min_y if self.flat else max(p.y for p in points) + overhang
+        if self.plain_zone_height_ratio is None:
+            max_y = max(p.y for p in points) + overhang
+        else:
+            max_y = min_y + self.plain_zone_height_ratio * (max_x - min_x)
 
         coordinates = {
             "LowerLeft": (min_x, min_y),
@@ -193,10 +246,10 @@ class VegetationStrategy(_BoxZoneStrategy):
 
 
 class OverhangStrategy(_BoxZoneStrategy):
-    """Overhang: flat zone judged only by the vertical gap to the obstacle."""
+    """Overhang: border line with a plain zone above, judged only by the vertical gap."""
 
-    flat = True
-    border = ("LowerLeft", "LowerRight", "UpperRight", "UpperLeft")
+    plain_zone_height_ratio = OVERHANG_ZONE_HEIGHT_RATIO
+    border = ("LowerLeft", "LowerRight")
 
     def is_compliant(
         self,

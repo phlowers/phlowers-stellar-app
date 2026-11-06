@@ -158,7 +158,7 @@ def test_non_cable_track_plots_ignore_intermediate_points(
     assert len(points) == 3  # 1 overhang + 2 lateral
 
 
-def test_overhang_zone_is_a_flat_polyline(
+def test_overhang_zone_is_a_border_line_with_plain_zone_above(
     run_conformity, make_python_inputs, make_form, make_rule, make_distances
 ):
     python_inputs = make_python_inputs(
@@ -172,11 +172,18 @@ def test_overhang_zone_is_a_flat_polyline(
 
     assert len(zone_plot["zonePoints"]) == 4
     zone_border = zone_plot["zoneBorder"]
-    assert len(zone_border) == 4
+    assert len(zone_border) == 2
     assert len({vertex["y"] for vertex in zone_border}) == 1
     xs = [vertex["x"] for vertex in zone_border]
     # A zero-width zone gets a minimum width of 10.
     assert max(xs) - min(xs) == pytest.approx(10)
+    ys = [
+        corner["y"]
+        for point in zone_plot["zonePoints"]
+        for corner in point.values()
+    ]
+    assert min(ys) == zone_border[0]["y"]
+    assert max(ys) - min(ys) == pytest.approx(10)
 
 
 def test_vegetation_zone_is_a_u_shaped_polyline(
