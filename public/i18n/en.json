@@ -80,6 +80,7 @@
     "next": "Next",
     "no": "No",
     "number-of-points-per-range": "Number of points per range",
+    "obstacle-name-label": "Obstacle name",
     "obstacle-type-label": "Obstacle type",
     "obstacles-label": "Obstacles",
     "out-of-bound-error": "Value must be between {{ min }} and {{ max }}",
@@ -969,7 +970,6 @@
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Create new obstacle",
-      "obstacle-name-label": "Obstacle name",
       "obstacle-altitude-type-label": "Obstacle altitude type",
       "free-positioning-forced-frame-warning": "Free positioning mode is only available with a left reference support, an absolute altitude type and a span-axis lateral distance type. The current obstacle settings differ, so the results may be inaccurate.",
       "delete-point-aria-label": "delete point",
@@ -1187,6 +1187,15 @@
       "vertical-sight-angle-label": "V vertical sighting angle at mid-span sag",
       "aria-help": "Cable adjustment help",
       "calculation-failed": "Failed to calculate the cable adjustment"
+    },
+    "temperature-estimation": {
+      "tab-label": "Conformity temperature",
+      "select-obstacle-info": "To use the estimation tool, first choose an obstacle",
+      "target-distance-label": "Target vertical distance",
+      "conformity-temperature-label": "Conformity temperature",
+      "copy-temperature-aria-label": "Copy the conformity temperature",
+      "copied": "Conformity temperature copied to the clipboard",
+      "copy-failed": "Failed to copy the conformity temperature"
     },
     "effort-estimation": {
       "tab-label": "Cable vert. displacement effort",

@@ -11,12 +11,13 @@ import { TabsModule } from 'primeng/tabs';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { EffortEstimationComponent } from '@features/studio/estimations/presentation/components/effort-estimation/effort-estimation.component';
+import { TemperatureEstimationComponent } from '@features/studio/estimations/presentation/components/temperature-estimation/temperature-estimation.component';
 import { EstimationTab } from '@features/studio/estimations/domain/estimations.interfaces';
 
 @Component({
   selector: 'app-estimations',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TabsModule, TranslocoModule, IconComponent, EffortEstimationComponent],
+  imports: [TabsModule, TranslocoModule, IconComponent, TemperatureEstimationComponent, EffortEstimationComponent],
   templateUrl: './estimations.component.html'
 })
 /** Dialog gathering the estimation tools of the studio, one per tab. */
@@ -25,7 +26,7 @@ export class EstimationsComponent {
 
   private readonly toolbarDialogService = inject(ToolbarDialogService);
 
-  readonly activeTab = signal<EstimationTab>('effort');
+  readonly activeTab = signal<EstimationTab>('temperature');
 
   constructor() {
     effect(() => {

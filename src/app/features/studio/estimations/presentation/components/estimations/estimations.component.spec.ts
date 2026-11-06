@@ -11,8 +11,12 @@ import { By } from '@angular/platform-browser';
 import { Component } from '@angular/core';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { EstimationsComponent } from '@features/studio/estimations/presentation/components/estimations/estimations.component';
+import { TemperatureEstimationComponent } from '@features/studio/estimations/presentation/components/temperature-estimation/temperature-estimation.component';
 import { EffortEstimationComponent } from '@features/studio/estimations/presentation/components/effort-estimation/effort-estimation.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
+
+@Component({ selector: 'app-temperature-estimation', template: '' })
+class TemperatureEstimationStubComponent {}
 
 @Component({ selector: 'app-effort-estimation', template: '' })
 class EffortEstimationStubComponent {}
@@ -32,6 +36,7 @@ describe('EstimationsComponent', () => {
           langs: {
             en: {
               'studio.top-toolbar.estimations-tool': 'Estimations',
+              'studio.temperature-estimation.tab-label': 'Conformity temperature',
               'studio.effort-estimation.tab-label': 'Cable vert. displacement effort'
             }
           },
@@ -41,8 +46,8 @@ describe('EstimationsComponent', () => {
       providers: [{ provide: ToolbarDialogService, useValue: mockToolbarDialogService }]
     })
       .overrideComponent(EstimationsComponent, {
-        remove: { imports: [EffortEstimationComponent] },
-        add: { imports: [EffortEstimationStubComponent] }
+        remove: { imports: [TemperatureEstimationComponent, EffortEstimationComponent] },
+        add: { imports: [TemperatureEstimationStubComponent, EffortEstimationStubComponent] }
       })
       .compileComponents();
 
@@ -61,10 +66,17 @@ describe('EstimationsComponent', () => {
     expect(view.rootNodes[0].textContent).toContain('Estimations');
   });
 
-  it('opens on the effort tab', () => {
-    expect(component.activeTab()).toBe('effort');
-    const tab = fixture.nativeElement.querySelector('[data-testid="effort-tab"]');
-    expect(tab?.textContent?.trim()).toBe('Cable vert. displacement effort');
+  it('opens on the temperature tab, listed first', () => {
+    expect(component.activeTab()).toBe('temperature');
+    const tabs = fixture.nativeElement.querySelectorAll('p-tab');
+    expect(tabs[0].getAttribute('data-testid')).toBe('temperature-tab');
+    expect(tabs[0].textContent?.trim()).toBe('Conformity temperature');
+    expect(tabs[1].getAttribute('data-testid')).toBe('effort-tab');
+    expect(tabs[1].textContent?.trim()).toBe('Cable vert. displacement effort');
+  });
+
+  it('shows the temperature estimation in the temperature tab', () => {
+    expect(fixture.debugElement.query(By.directive(TemperatureEstimationStubComponent))).not.toBeNull();
   });
 
   it('shows the effort estimation in the effort tab', () => {

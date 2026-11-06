@@ -7,8 +7,15 @@
 
 <p-tabs [(value)]="activeTab" data-testid="estimations-tabs">
   <p-tablist>
+    <p-tab value="temperature" data-testid="temperature-tab">{{
+      'studio.temperature-estimation.tab-label' | transloco
+    }}</p-tab>
     <p-tab value="effort" data-testid="effort-tab">{{ 'studio.effort-estimation.tab-label' | transloco }}</p-tab>
   </p-tablist>
+
+  <p-tabpanel value="temperature">
+    <app-temperature-estimation />
+  </p-tabpanel>
 
   <p-tabpanel value="effort">
     <app-effort-estimation />

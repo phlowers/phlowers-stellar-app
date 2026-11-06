@@ -13,6 +13,8 @@ returns a JSON-serializable dictionary. The study is left untouched.
 Common inputs:
     spanIndex: Index of the span (before manipulation) holding the obstacle.
     obstaclePoint: Obstacle coordinates ``[x, y, z]`` in meters.
+    obstacleUuid, pointIndex: Alternative to ``obstaclePoint``: the point of an
+        obstacle registered in the study, looked up by its UUID.
     bounds: Optional ``[lower, upper]`` search interval of the estimated
         variable. Defaults to the mechaphlowers defaults.
     temperature: Optional fixed cable temperature in °C.
@@ -37,6 +39,7 @@ from mechaphlowers import SectionStudy, units
 from mechaphlowers.core.numeric import EstimationResult
 from mechaphlowers.entities.errors import EstimateOnSplitSupportError
 
+from stellar_engine.core.conformity.runner import find_obstacle_point
 from stellar_engine.entities.errors import (
     EstimationInputError,
     EstimationNotConvergedError,
@@ -85,8 +88,12 @@ def _index(inputs: dict, key: str) -> int:
     return int(value)
 
 
-def _obstacle_point(inputs: dict) -> np.ndarray:
+def _obstacle_point(inputs: dict, study: SectionStudy) -> np.ndarray:
     point = inputs.get("obstaclePoint")
+    if point is None and inputs.get("obstacleUuid") is not None:
+        return find_obstacle_point(
+            study, str(inputs["obstacleUuid"]), _index(inputs, "pointIndex")
+        )
     if point is None:
         raise EstimationInputError(
             _Errors.estimation_missing_input("obstaclePoint")
@@ -181,7 +188,7 @@ def estimate_temperature(inputs: dict, study: SectionStudy) -> dict:
     ``iceThickness``.
     """
     span_index = engine_span_index(study, _index(inputs, "spanIndex"))
-    obstacle_point = _obstacle_point(inputs)
+    obstacle_point = _obstacle_point(inputs, study)
     target_distance = _positive_float(inputs, "targetDistance")
     wind_pressure = _optional_float(inputs, "windPressure")
     ice_thickness = _ice_thickness_meters(inputs)
@@ -206,7 +213,7 @@ def estimate_wind(inputs: dict, study: SectionStudy) -> dict:
     ``iceThickness``.
     """
     span_index = engine_span_index(study, _index(inputs, "spanIndex"))
-    obstacle_point = _obstacle_point(inputs)
+    obstacle_point = _obstacle_point(inputs, study)
     target_distance = _positive_float(inputs, "targetDistance")
     new_temperature = _optional_float(inputs, "temperature")
     ice_thickness = _ice_thickness_meters(inputs)
@@ -232,7 +239,7 @@ def estimate_load(inputs: dict, study: SectionStudy) -> dict:
     and ``iceThickness``. Loads on other spans are kept.
     """
     span_index = _index(inputs, "spanIndex")
-    obstacle_point = _obstacle_point(inputs)
+    obstacle_point = _obstacle_point(inputs, study)
     target_distance = _positive_float(inputs, "targetDistance")
     load_position_distance = _positive_float(inputs, "loadPositionDistance")
     new_temperature = _optional_float(inputs, "temperature")
@@ -264,7 +271,7 @@ def estimate_rope(inputs: dict, study: SectionStudy) -> dict:
     """
     support_index = _index(inputs, "supportIndex")
     span_index = _index(inputs, "spanIndex")
-    obstacle_point = _obstacle_point(inputs)
+    obstacle_point = _obstacle_point(inputs, study)
     target_vertical_distance = _required_float(
         inputs, "targetVerticalDistance"
     )

@@ -18,7 +18,9 @@ from stellar_engine.core import estimation
 from stellar_engine.entities.errors import (
     EstimationInputError,
     EstimationNotConvergedError,
+    ObstacleNotFoundError,
 )
+from stellar_engine.plot.obstacles import add_single_obstacle
 
 N_SPANS = 4
 SPAN_LENGTH = 500.0
@@ -65,6 +67,75 @@ def assert_study_untouched(study: SectionStudy, dxdydz_before: np.ndarray):
     np.testing.assert_array_equal(
         study.balance_engine.balance_model.nodes.dxdydz, dxdydz_before
     )
+
+
+def test_estimate_temperature_on_obstacle_point_found_by_uuid(
+    study: SectionStudy,
+):
+    obstacle_uuid = "00000000-0000-4000-8000-000000000001"
+    add_single_obstacle(
+        {
+            "obstacles": [
+                {
+                    "uuid": obstacle_uuid,
+                    "supportIndex": SPAN_INDEX,
+                    "type": "accessible_building",
+                    "altitudeType": "absolute",
+                    "lateralDistanceType": "SPAN_AXIS",
+                    "referenceSupport": "LEFT",
+                    "engineReferenceSupport": "LEFT",
+                    "positions": [
+                        {"x": 100.0, "y": 0.0, "z": 5.0},
+                        {"x": 250.0, "y": 10.0, "z": 20.0},
+                    ],
+                }
+            ]
+        },
+        study,
+        support_index=SPAN_INDEX,
+    )
+    obstacle_point = estimation._obstacle_point(
+        {"obstacleUuid": obstacle_uuid, "pointIndex": 1}, study
+    )
+    target = float(
+        study.copy()
+        .position_engine.point_distance(SPAN_INDEX, obstacle_point)
+        .distance_3d
+    )
+
+    by_uuid = estimation.estimate_temperature(
+        {
+            "spanIndex": SPAN_INDEX,
+            "obstacleUuid": obstacle_uuid,
+            "pointIndex": 1,
+            "targetDistance": target,
+        },
+        study,
+    )
+    by_point = estimation.estimate_temperature(
+        {
+            "spanIndex": SPAN_INDEX,
+            "obstaclePoint": obstacle_point.tolist(),
+            "targetDistance": target,
+        },
+        study,
+    )
+
+    assert by_uuid == by_point
+    assert by_uuid["converged"] is True
+
+
+def test_estimate_unknown_obstacle_uuid_raises(study: SectionStudy):
+    with pytest.raises(ObstacleNotFoundError):
+        estimation.estimate_temperature(
+            {
+                "spanIndex": SPAN_INDEX,
+                "obstacleUuid": "00000000-0000-4000-8000-000000000002",
+                "pointIndex": 0,
+                "targetDistance": 30.0,
+            },
+            study,
+        )
 
 
 def test_estimate_temperature(study: SectionStudy):

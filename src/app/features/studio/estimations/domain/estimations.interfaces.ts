@@ -6,4 +6,4 @@
  */
 
 /** Tab of the estimations dialog. */
-export type EstimationTab = 'effort';
+export type EstimationTab = 'temperature' | 'effort';

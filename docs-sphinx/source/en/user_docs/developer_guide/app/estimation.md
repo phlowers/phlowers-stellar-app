@@ -16,7 +16,7 @@ The `Task` enum and its `TaskInputs`/`TaskOutputs` mappings are defined in `src/
 
 ## Task inputs
 
-All fields use camelCase at the worker boundary. Every task has `spanIndex`, `obstaclePoint`, and optional `bounds` and `iceThickness` in common. `spanIndex` is the index **before manipulation**. `obstaclePoint` is `[x, y, z]` in metres. If supplied, `bounds` is `[lower, upper]` in the estimated variable's units; both values must be finite and `lower < upper`. When omitted, the mechaphlowers estimator's defaults are used. `iceThickness` is in centimetres at the TypeScript/Python API boundary and is converted to metres before calling mechaphlowers.
+All fields use camelCase at the worker boundary. Every task has `spanIndex`, `obstaclePoint`, and optional `bounds` and `iceThickness` in common. `spanIndex` is the index **before manipulation**. `obstaclePoint` is `[x, y, z]` in metres; instead of it, `obstacleUuid` and `pointIndex` (0-based) can designate a point of an obstacle registered in the study, which the engine resolves in its own frame (an unknown UUID raises `ObstacleNotFoundError`). If supplied, `bounds` is `[lower, upper]` in the estimated variable's units; both values must be finite and `lower < upper`. When omitted, the mechaphlowers estimator's defaults are used. `iceThickness` is in centimetres at the TypeScript/Python API boundary and is converted to metres before calling mechaphlowers.
 
 | Task | Estimated variable | Task-specific inputs |
 |---|---|---|
