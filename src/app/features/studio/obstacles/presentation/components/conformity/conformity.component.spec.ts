@@ -912,6 +912,35 @@ describe('ConformityComponent', () => {
       expect(fixture.nativeElement.querySelector('.results__table')).toBeTruthy();
       expect(fixture.nativeElement.querySelector('.compliance')).toBeTruthy();
     });
+
+    it('should hide compliance border rows for the cable-track conformity type', async () => {
+      await createComponent();
+      await component.calculate();
+      fixture.detectChanges();
+
+      const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
+      expect(component.commonRows.map((row) => row.label)).toEqual([
+        'Cable altitude',
+        'Cable line axis distance',
+        'Distance to comply'
+      ]);
+      expect(tableText).not.toContain('Compliance altitude');
+      expect(tableText).not.toContain('Compliance line axis distance');
+    });
+
+    it.each(['vegetation', 'overhang'])(
+      'should keep compliance border rows for the %s conformity type',
+      async (conformity) => {
+        dbData.configurations = [{ obstacle_type: 'House', red_zone: false, conformity }];
+        await createComponent();
+        await component.calculate();
+        fixture.detectChanges();
+
+        const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
+        expect(tableText).toContain('Compliance altitude');
+        expect(tableText).toContain('Compliance line axis distance');
+      }
+    );
   });
 
   describe('isOpen auto-calculate and reset', () => {

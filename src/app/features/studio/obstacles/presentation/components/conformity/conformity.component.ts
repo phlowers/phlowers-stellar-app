@@ -42,8 +42,8 @@ import {
   getConformityCommonRows,
   getLateralDistanceTypeLabels
 } from './conformity.constantes';
-import { ConformityOption, ConformityRuleResult } from './conformity.model';
-import { computeOverhangZoneWidth } from './conformity.helpers';
+import { ConformityOption, ConformityRuleResult, ResultRow } from './conformity.model';
+import { computeOverhangZoneWidth, getVisibleConformityCommonRows } from './conformity.helpers';
 import { ConformityPlotResponse } from './conformity-plot.model';
 import {
   createConformityPlot,
@@ -243,7 +243,16 @@ export class ConformityComponent implements OnDestroy {
     return this.obstacleFormService.supportsOptions().find((o) => o.value === ref)?.label ?? ref;
   });
 
-  readonly commonRows = getConformityCommonRows(this.translocoService);
+  private readonly allCommonRows = getConformityCommonRows(this.translocoService);
+  private readonly visibleCommonRows = computed(() =>
+    getVisibleConformityCommonRows(this.allCommonRows, this.conformityType())
+  );
+
+  /** Signal-backed accessor that keeps the template binding unchanged. */
+  get commonRows(): ResultRow[] {
+    return this.visibleCommonRows();
+  }
+
   readonly cableTrackRows = getConformityCableTrackRows(this.translocoService);
 
   readonly BOUNDS = CONFORMITY_BOUNDS;
