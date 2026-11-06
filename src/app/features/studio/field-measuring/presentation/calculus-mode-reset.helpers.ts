@@ -5,15 +5,18 @@ import { TANGENT_AIMING_EXTERIOR_FIELD_RULES as EXTERIOR_RULES } from './compone
 import { TANGENT_AIMING_INTERIOR_FIELD_RULES as INTERIOR_RULES } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.constantes';
 import {
   applyTangentAimingSupportDefaults,
-  invalidateTangentAimingSupportResult
+  invalidateTangentAimingSupportResult,
+  resetNonDisplayedParameterFields
 } from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
 import {
   applyTangentAimingExteriorDefaults,
-  invalidateTangentAimingExteriorResult
+  invalidateTangentAimingExteriorResult,
+  resetNonDisplayedExteriorFields
 } from './components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.helpers';
 import {
   applyTangentAimingInteriorDefaults,
-  invalidateTangentAimingInteriorResult
+  invalidateTangentAimingInteriorResult,
+  resetNonDisplayedInteriorFields
 } from './components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
 import { TANGENT_AIMING_CALCULATION_TYPE } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import { clearAutoParameter15C, PAPOTO_INPUT_DEFAULTS, PEP_INPUT_DEFAULTS } from './helpers';
@@ -95,7 +98,7 @@ export const resetInactiveCalculusModes = (
 
 /**
  * Applies the defaults of the active tangent aiming mode (other modes are untouched), so a persisted measure missing
- * inputs or saved with a calculation type no longer supported opens on the supported one. The active method's result
+ * inputs or calculation type opens complete. The active method's result
  * and automatic 15°C result are cleared when its calculation type or inputs had to be normalized.
  * @param measureData - The measure to complete
  * @param defaultLeftSupport - Default left support of the tangent aiming modes
@@ -105,19 +108,36 @@ export const applyActiveTangentAimingDefaults = (
   measureData: FieldMeasure,
   defaultLeftSupport: string | null
 ): FieldMeasure => {
+  // A saved measure holds null in its hidden input (reset on save): refilling it with its default is not a
+  // normalization, the result stays valid.
+  const complete = (
+    apply: (data: FieldMeasure, support: string | null) => FieldMeasure,
+    resetHidden: (data: FieldMeasure) => FieldMeasure,
+    invalidate: (data: FieldMeasure) => FieldMeasure
+  ): FieldMeasure => {
+    const normalized = apply(measureData, defaultLeftSupport);
+    if (isEqual(normalized, measureData)) return measureData;
+    return isEqual(resetHidden(normalized), resetHidden(measureData)) ? normalized : invalidate(normalized);
+  };
   switch (measureData.calculationMethod) {
-    case 'tangente-aiming': {
-      const normalized = applyTangentAimingSupportDefaults(measureData, defaultLeftSupport);
-      return isEqual(normalized, measureData) ? measureData : invalidateTangentAimingSupportResult(normalized);
-    }
-    case 'tangente-aiming-exterior': {
-      const normalized = applyTangentAimingExteriorDefaults(measureData, defaultLeftSupport);
-      return isEqual(normalized, measureData) ? measureData : invalidateTangentAimingExteriorResult(normalized);
-    }
-    case 'tangente-aiming-interior': {
-      const normalized = applyTangentAimingInteriorDefaults(measureData, defaultLeftSupport);
-      return isEqual(normalized, measureData) ? measureData : invalidateTangentAimingInteriorResult(normalized);
-    }
+    case 'tangente-aiming':
+      return complete(
+        applyTangentAimingSupportDefaults,
+        resetNonDisplayedParameterFields,
+        invalidateTangentAimingSupportResult
+      );
+    case 'tangente-aiming-exterior':
+      return complete(
+        applyTangentAimingExteriorDefaults,
+        resetNonDisplayedExteriorFields,
+        invalidateTangentAimingExteriorResult
+      );
+    case 'tangente-aiming-interior':
+      return complete(
+        applyTangentAimingInteriorDefaults,
+        resetNonDisplayedInteriorFields,
+        invalidateTangentAimingInteriorResult
+      );
     default:
       return measureData;
   }

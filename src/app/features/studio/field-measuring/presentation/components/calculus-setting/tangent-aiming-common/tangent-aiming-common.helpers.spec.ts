@@ -129,8 +129,8 @@ describe('tangent-aiming-common helpers', () => {
 
     it('should build the calculation type options', () => {
       expect(buildCalculationTypeOptions(transloco)).toEqual([
-        { label: 'common.parameter-label', value: 'parametre', disabled: true },
-        { label: 'common.calculation-type-tangent', value: 'tangente', disabled: false }
+        { label: 'common.parameter-label', value: 'parametre' },
+        { label: 'common.calculation-type-tangent', value: 'tangente' }
       ]);
     });
 

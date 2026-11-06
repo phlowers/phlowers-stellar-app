@@ -828,3 +828,16 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the constant, the interface, the two i18n keys and the matching entries in the cable adjustment spec translations. |
 | ✅ Validated | ⏳ Pending review |
+
+---
+
+## 57. Tangent aiming `baselineInputs` (calculate button baseline)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-form.base.ts` (`baselineInputs`) |
+| Code | Signal storing the displayed inputs as of the last calculation |
+| 🔍 Evidence | `canCalculate` no longer compares the inputs with this baseline (the calculate button is enabled whenever the form is valid); the signal is now only written, never read. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the signal and its three writes (constructor effects, `calculate()`); `displayedInputs` stays used by the calculation context key. |
+| ✅ Validated | ⏳ Pending review |

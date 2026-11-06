@@ -16,7 +16,10 @@ import { Task } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
-import { INITIAL_LEFT_SUPPORT_STATE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
+import {
+  INITIAL_LEFT_SUPPORT_STATE,
+  TANGENT_AIMING_CALCULATION_TYPE
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   buildCalculationTypeOptions,
   buildSpanSupportOptions,
@@ -65,17 +68,13 @@ export abstract class TangentAimingFormBase {
     ]);
   });
 
-  /** The calculate button is only usable on a valid form whose inputs changed since the last calculation (or opening). */
-  readonly canCalculate = computed(() => {
-    const baseline = this.baselineInputs();
-    return (
+  /** The calculate button is usable on a valid form; only the tangent type can be calculated by the engine. */
+  readonly canCalculate = computed(
+    () =>
       this.isFormValid() &&
       !this.isCalculating() &&
-      this.measureData().outputs[this.config.outputKey] === null &&
-      baseline !== null &&
-      baseline !== this.displayedInputs()
-    );
-  });
+      (this.measureData()[this.config.calculationTypeKey] ?? TANGENT_AIMING_CALCULATION_TYPE) === 'tangente'
+  );
 
   /** Both supports of the selected span, empty without span. */
   readonly supportOptions = computed(() =>
@@ -150,7 +149,7 @@ export abstract class TangentAimingFormBase {
 
   async calculate(): Promise<void> {
     this.config.form.markAllAsTouched();
-    if (!this.isFormValid() || this.isCalculating()) return;
+    if (!this.canCalculate()) return;
 
     this.isCalculating.set(true);
     this.hasError.set(false);

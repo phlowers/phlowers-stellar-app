@@ -11,8 +11,34 @@ import {
   buildFieldMeasureExportFilename,
   buildWindDirectionOptions,
   createTestMeasureData,
-  getActiveParameterOutput
+  getActiveParameterOutput,
+  resetInactive15CMode
 } from './helpers';
+
+describe('resetInactive15CMode', () => {
+  const manualInputs = {
+    parameterPapoto: 1,
+    parameterUncertaintyPapoto: 2,
+    cableTemperatureCalibration: 3,
+    cableTemperatureCalibrationUncertainty: 4
+  };
+
+  it('should drop the manual inputs in auto mode', () => {
+    const data = createTestMeasureData({
+      updateMode15C: 'auto',
+      manualParameterCalculation15CWithoutWind: manualInputs
+    });
+    expect(resetInactive15CMode(data).manualParameterCalculation15CWithoutWind).toBeNull();
+  });
+
+  it('should keep the manual inputs in manual mode', () => {
+    const data = createTestMeasureData({
+      updateMode15C: 'manual',
+      manualParameterCalculation15CWithoutWind: manualInputs
+    });
+    expect(resetInactive15CMode(data)).toBe(data);
+  });
+});
 
 describe('getActiveParameterOutput', () => {
   const result = { parameter: 1200, uncertainty: 2, criterion: 1, checkValidity: true };

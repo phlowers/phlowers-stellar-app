@@ -55,6 +55,7 @@ function createMockDoc(): jsPDF {
     setFont: vi.fn(),
     setFontSize: vi.fn(),
     setLineWidth: vi.fn(),
+    setDrawColor: vi.fn(),
     text: vi.fn(),
     line: vi.fn(),
     addFileToVFS: vi.fn(),
@@ -203,6 +204,32 @@ describe('pdf-primitives helpers', () => {
       drawBulletItem(doc, 'Tension', '2000 daN', 15, 30);
 
       expect(doc.text).toHaveBeenCalledTimes(2);
+    });
+
+    it('should draw no icon when status is undefined', () => {
+      const doc = createMockDoc();
+      drawBulletItem(doc, 'Critère', 'Oui', 15, 30);
+
+      expect(doc.line).not.toHaveBeenCalled();
+      expect(doc.setDrawColor).not.toHaveBeenCalled();
+    });
+
+    it('should draw a green tick of two strokes when status is true, then reset the draw color', () => {
+      const doc = createMockDoc();
+      drawBulletItem(doc, 'Critère', 'Oui', 15, 30, false, true);
+
+      expect(doc.line).toHaveBeenCalledTimes(2);
+      expect(doc.setDrawColor).toHaveBeenNthCalledWith(1, 0, 128, 0);
+      expect(doc.setDrawColor).toHaveBeenLastCalledWith(0);
+    });
+
+    it('should draw a red cross of two strokes when status is false, then reset the draw color', () => {
+      const doc = createMockDoc();
+      drawBulletItem(doc, 'Critère', 'Non', 15, 30, false, false);
+
+      expect(doc.line).toHaveBeenCalledTimes(2);
+      expect(doc.setDrawColor).toHaveBeenNthCalledWith(1, 200, 0, 0);
+      expect(doc.setDrawColor).toHaveBeenLastCalledWith(0);
     });
   });
 
@@ -571,6 +598,13 @@ describe('pdf-primitives helpers', () => {
       );
 
       expect(nextY).toBe(40 + 2 * LINE_HEIGHT);
+    });
+
+    it('should draw the status icon of an item with a status', () => {
+      const doc = createMockDoc();
+      drawTwoColumnBullets(doc, [{ label: 'Critère', value: 'Oui', status: true }], [], 40);
+
+      expect(doc.line).toHaveBeenCalledTimes(2);
     });
 
     it('should skip drawing an item whose label is empty', () => {

@@ -119,8 +119,8 @@ export const buildGeneralExport = (section: Section | null, study: Study | null)
   loadCase: section?.charges.find((charge) => charge.uuid === section.selected_charge_uuid)?.name ?? null
 });
 
-// The legacy French span type 'garde' maps to the 'guard' translation key.
-const getSectionTypeKey = (spanType: string): string => {
+/** Transloco key of a section type; the legacy French span type 'garde' maps to the 'guard' key. */
+export const getSectionTypeKey = (spanType: string): string => {
   const keySuffix = spanType.toLowerCase() === 'garde' ? 'guard' : spanType;
   return `common.section-type.${keySuffix}`;
 };
