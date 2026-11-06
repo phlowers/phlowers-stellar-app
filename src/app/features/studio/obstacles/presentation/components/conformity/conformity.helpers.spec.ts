@@ -40,7 +40,11 @@ describe('getVisibleConformityCommonRows', () => {
     expect(getVisibleConformityCommonRows(rows, 'cable_track')).toEqual([rows[0]]);
   });
 
-  it.each(['vegetation', 'overhang', null, undefined])('keeps every row for %s charts', (conformityType) => {
+  it('hides only the compliance line axis distance row for overhang charts', () => {
+    expect(getVisibleConformityCommonRows(rows, 'overhang')).toEqual([rows[0], rows[1]]);
+  });
+
+  it.each(['vegetation', 'unknown', null, undefined])('keeps every row for %s charts', (conformityType) => {
     expect(getVisibleConformityCommonRows(rows, conformityType)).toEqual(rows);
   });
 });

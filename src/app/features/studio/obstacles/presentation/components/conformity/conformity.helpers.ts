@@ -1,16 +1,15 @@
 import { Support } from '@shared/domain/models/support.model';
-import { CABLE_TRACK_HIDDEN_RESULT_KEYS } from './conformity.constantes';
+import { HIDDEN_RESULT_KEYS_BY_CONFORMITY_TYPE } from './conformity.constantes';
 import { ResultRow } from './conformity.model';
 
-/** Hides the compliance border rows, which are not displayed for cable-track charts. */
+/** Hides the rows not displayed for the chart type (compliance border rows for cable-track and overhang). */
 export function getVisibleConformityCommonRows(
   rows: readonly ResultRow[],
   conformityType: string | null | undefined
 ): ResultRow[] {
-  if (conformityType !== 'cable_track') return [...rows];
-  return rows.filter(
-    (row) => !CABLE_TRACK_HIDDEN_RESULT_KEYS.some((key) => key === row.overhangKey || key === row.lateralKey)
-  );
+  const hiddenKeys = conformityType ? HIDDEN_RESULT_KEYS_BY_CONFORMITY_TYPE[conformityType] : undefined;
+  if (!hiddenKeys) return [...rows];
+  return rows.filter((row) => !hiddenKeys.some((key) => key === row.overhangKey || key === row.lateralKey));
 }
 
 /**

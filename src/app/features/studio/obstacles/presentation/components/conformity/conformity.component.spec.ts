@@ -928,19 +928,27 @@ describe('ConformityComponent', () => {
       expect(tableText).not.toContain('Compliance line axis distance');
     });
 
-    it.each(['vegetation', 'overhang'])(
-      'should keep compliance border rows for the %s conformity type',
-      async (conformity) => {
-        dbData.configurations = [{ obstacle_type: 'House', red_zone: false, conformity }];
-        await createComponent();
-        await component.calculate();
-        fixture.detectChanges();
+    it('should keep compliance border rows for the vegetation conformity type', async () => {
+      dbData.configurations = [{ obstacle_type: 'House', red_zone: false, conformity: 'vegetation' }];
+      await createComponent();
+      await component.calculate();
+      fixture.detectChanges();
 
-        const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
-        expect(tableText).toContain('Compliance altitude');
-        expect(tableText).toContain('Compliance line axis distance');
-      }
-    );
+      const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
+      expect(tableText).toContain('Compliance altitude');
+      expect(tableText).toContain('Compliance line axis distance');
+    });
+
+    it('should only hide the compliance line axis distance row for the overhang conformity type', async () => {
+      dbData.configurations = [{ obstacle_type: 'House', red_zone: false, conformity: 'overhang' }];
+      await createComponent();
+      await component.calculate();
+      fixture.detectChanges();
+
+      const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
+      expect(tableText).toContain('Compliance altitude');
+      expect(tableText).not.toContain('Compliance line axis distance');
+    });
   });
 
   describe('isOpen auto-calculate and reset', () => {
