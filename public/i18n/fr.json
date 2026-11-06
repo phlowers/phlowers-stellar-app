@@ -1013,7 +1013,7 @@
       "compliance-line-axis-distance-label": "Distance axe ligne respect",
       "temperature-label": "Température",
       "wind-pressure-label": "Pression du vent",
-      "minimal-distance-label": "Distance mini"
+      "minimal-distance-label": "Distance câble min."
     },
     "distance-measuring": {
       "never-saved-hint": "Les données de ce formulaire ne sont jamais enregistrées",
