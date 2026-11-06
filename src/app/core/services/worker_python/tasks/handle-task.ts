@@ -48,6 +48,10 @@ const tasks: Record<
     function: 'calculate_cable_adjustment',
     externalPackages: []
   },
+  [Task.estimateCableEffort]: {
+    function: 'estimate_cable_effort',
+    externalPackages: []
+  },
   [Task.setLogLevel]: {
     function: 'set_log_level',
     externalPackages: []

@@ -181,9 +181,9 @@ describe('StudioTopToolbarComponent', () => {
       ]);
     });
 
-    it('should initialize toolsItems with 7 items', () => {
+    it('should initialize toolsItems with 8 items', () => {
       const items = component.toolsItems();
-      expect(items).toHaveLength(7);
+      expect(items).toHaveLength(8);
       expect(items.every((item) => item.checked === false)).toBe(true);
     });
   });
@@ -263,7 +263,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should initialize toolsDropdown from toolsItems', () => {
       component.ngOnInit();
       const tools = component.toolsDropdown();
-      expect(tools).toHaveLength(7);
+      expect(tools).toHaveLength(8);
       expect(tools?.[0].label).toBeDefined();
       expect(tools?.[0].command).toBeDefined();
     });
@@ -343,7 +343,7 @@ describe('StudioTopToolbarComponent', () => {
       expect(saved).toBeDefined();
 
       const parsed = JSON.parse(saved!);
-      expect(parsed).toHaveLength(7);
+      expect(parsed).toHaveLength(8);
       expect(parsed[0].checked).toBe(true);
       expect(parsed[1].checked).toBe(false);
       expect(parsed[2].checked).toBe(true);
@@ -508,17 +508,24 @@ describe('StudioTopToolbarComponent', () => {
       expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('cable-adjustment');
     });
 
+    it('should execute action for tool item 8 - Estimations', () => {
+      const items = component.toolsItems();
+
+      items[7].action();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('estimations');
+    });
+
     it('should execute all actions through toolsDropdown commands', () => {
       const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       component.ngOnInit();
       const tools = component.toolsDropdown();
 
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 8; i++) {
         tools?.[i].command?.({});
       }
 
-      // Field measurements, VTL & Guying, Strand RRTS and Cable adjustment open a dialog, the other 3 call alert
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(4);
+      // Field measurements, VTL & Guying, Strand RRTS, Cable adjustment and Estimations open a dialog, the other 3 call alert
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(5);
       expect(alertSpy).toHaveBeenCalledTimes(3);
       alertSpy.mockRestore();
     });

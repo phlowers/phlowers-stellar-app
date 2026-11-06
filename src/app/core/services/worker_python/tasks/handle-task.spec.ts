@@ -89,6 +89,18 @@ describe('Task handlers', () => {
       expect(result.error).toBeNull();
     });
 
+    it('should call estimate_cable_effort for the estimateCableEffort task', async () => {
+      const mockResult = { effort: -12.5, xDisplacement: 3.2 };
+      const mockToJs = vi.fn().mockReturnValue(mockResult);
+      (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }));
+
+      const result = await handleTask(mockPyodide, Task.estimateCableEffort, undefined);
+
+      expect(mockPyodide.globals.get).toHaveBeenCalledWith('estimate_cable_effort');
+      expect(result.result).toEqual(mockResult);
+      expect(result.error).toBeNull();
+    });
+
     it('should handle unknown task', async () => {
       // Setup
       vi.spyOn(console, 'error').mockReturnValue(undefined);

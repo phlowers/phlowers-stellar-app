@@ -8,6 +8,8 @@
 import {
   CableAdjustmentInputs,
   CableAdjustmentResult,
+  CableEffortInputs,
+  CableEffortResult,
   CableSpanManipulation,
   CableSupportManipItem,
   CatalogCable,
@@ -45,6 +47,8 @@ export enum Task {
   calculateGuying = 'calculateGuying',
   // Calculate sighting angles at mid-span sag for cable adjustment
   calculateCableAdjustment = 'calculateCableAdjustment',
+  // Estimate the effort (traction or weight) displacing the cable by a target vertical distance
+  estimateCableEffort = 'estimateCableEffort',
   // Set Python logging level
   setLogLevel = 'setLogLevel',
   // Calculate cable temperature from ambient conditions
@@ -366,6 +370,8 @@ export interface TaskInputs {
   };
   // Inputs for calculateCableAdjustment task
   [Task.calculateCableAdjustment]: CableAdjustmentInputs;
+  // Inputs for estimateCableEffort task
+  [Task.estimateCableEffort]: CableEffortInputs;
   // Inputs for setLogLevel task
   [Task.setLogLevel]: {
     activateDebugLogs: boolean;
@@ -798,6 +804,8 @@ export interface TaskOutputs {
   };
   // Output from calculateCableAdjustment task
   [Task.calculateCableAdjustment]: CableAdjustmentResult;
+  // Output from estimateCableEffort task
+  [Task.estimateCableEffort]: CableEffortResult;
   // Output from setLogLevel task
   [Task.setLogLevel]: { success: boolean };
   // Output from temperatureCalculation task
