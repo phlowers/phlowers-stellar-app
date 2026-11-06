@@ -191,7 +191,7 @@ describe('buildL0Csv for Excel', () => {
     ['@', '@A-B'],
     ['a space then =', ' =1+1-2'],
     ['a tab then =', '\t=1+1-2'],
-    ['a non breaking space then =', ' =1+1-2'],
+    ['a non breaking space then =', '\u00A0=1+1-2'],
     ['a tab then a letter', '\tA-B']
   ])('should keep a span label starting with %s inside the text formula', (_start, span) => {
     const line = excelCsv([row({ span })]).split('\r\n')[1];
