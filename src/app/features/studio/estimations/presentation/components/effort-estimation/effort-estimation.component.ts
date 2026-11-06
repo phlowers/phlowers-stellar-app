@@ -45,6 +45,7 @@ import {
   DISTANCE_MIN,
   INPUT_LIMITS,
   TEMPERATURE_DECIMALS,
+  TEMPERATURE_DEFAULT,
   TEMPERATURE_MAX,
   TEMPERATURE_MIN
 } from '@features/studio/estimations/domain/effort-estimation.constantes';
@@ -97,7 +98,7 @@ export class EffortEstimationComponent {
       Validators.required
     ),
     distanceToReferenceSupport: createNumberControl(DISTANCE_MIN, DISTANCE_MAX, DISTANCE_DECIMALS, DISTANCE_DEFAULT),
-    temperature: createNumberControl(TEMPERATURE_MIN, TEMPERATURE_MAX, TEMPERATURE_DECIMALS),
+    temperature: createNumberControl(TEMPERATURE_MIN, TEMPERATURE_MAX, TEMPERATURE_DECIMALS, TEMPERATURE_DEFAULT),
     direction: new FormControl<CableEffortDirection>(DEFAULT_DIRECTION, { nonNullable: true }),
     targetDisplacement: createNumberControl(
       DISPLACEMENT_MIN,

@@ -68,8 +68,6 @@ describe('EffortEstimationComponent', () => {
     fixture.detectChanges();
   };
 
-  const fillTemperature = (): void => typeIn('temperature-input', '15');
-
   beforeEach(async () => {
     mockWorkerPythonService = {
       runTask: vi.fn().mockResolvedValue({ result: ENGINE_RESULT, error: null, diagnostics: [] })
@@ -196,8 +194,9 @@ describe('EffortEstimationComponent', () => {
   });
 
   describe('Temperature (RG.PDS-TRA.TEM)', () => {
-    it('has no default value (TEM.2)', () => {
-      expect(component.form.controls.temperature.value).toBeNull();
+    it('defaults to 15 (TEM.2)', () => {
+      expect(component.form.controls.temperature.value).toBe(15);
+      expect((getByTestId('temperature-input') as HTMLInputElement).value).toBe('15');
     });
 
     it.each([
@@ -250,15 +249,19 @@ describe('EffortEstimationComponent', () => {
   });
 
   describe('Calculate button (RG.PDS-TRA.CAL-BTN)', () => {
+    it('is enabled once every field holds its default value (CAL-BTN.1)', () => {
+      expect(calculateBtn().disabled).toBe(false);
+    });
+
     it('is disabled while a field is not filled (CAL-BTN.1)', () => {
+      typeIn('temperature-input', '');
       expect(calculateBtn().disabled).toBe(true);
 
-      fillTemperature();
+      typeIn('temperature-input', '15');
       expect(calculateBtn().disabled).toBe(false);
     });
 
     it('is disabled while a field is invalid (CAL-BTN.1)', () => {
-      fillTemperature();
       typeIn('distance-input', '5001');
       expect(calculateBtn().disabled).toBe(true);
 
@@ -267,14 +270,12 @@ describe('EffortEstimationComponent', () => {
     });
 
     it('is disabled without span', () => {
-      fillTemperature();
       component.form.controls.span.setValue(null);
       fixture.detectChanges();
       expect(calculateBtn().disabled).toBe(true);
     });
 
     it('runs the estimation with every field (CAL-BTN.2)', async () => {
-      fillTemperature();
       typeIn('distance-input', '120.5');
       typeIn('target-displacement-input', '3');
       component.form.controls.direction.setValue('DOWN');
@@ -293,25 +294,23 @@ describe('EffortEstimationComponent', () => {
     });
 
     it('does not run the estimation while the button is disabled', async () => {
+      typeIn('temperature-input', '');
       await calculate();
       expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
     });
 
     it('does not run the estimation when the span is unknown', async () => {
-      fillTemperature();
       component.form.controls.span.setValue(null);
       await calculate();
       expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
     });
 
     it('keeps the fields editable after the calculation (CAL-BTN.2)', async () => {
-      fillTemperature();
       await calculate();
       expect(component.form.enabled).toBe(true);
     });
 
     it('is disabled until an input is modified once the results are displayed', async () => {
-      fillTemperature();
       await calculate();
       expect(calculateBtn().disabled).toBe(true);
 
@@ -320,7 +319,6 @@ describe('EffortEstimationComponent', () => {
     });
 
     it('is disabled while the calculation is running', async () => {
-      fillTemperature();
       let release!: (value: unknown) => void;
       mockWorkerPythonService.runTask.mockReturnValueOnce(new Promise((resolve) => (release = resolve)));
 
@@ -346,13 +344,11 @@ describe('EffortEstimationComponent', () => {
     });
 
     it('is displayed after the calculation', async () => {
-      fillTemperature();
       await calculate();
       expect(getByTestId('results-frame')).not.toBeNull();
     });
 
     it('stays displayed when an input is modified (daily of 4 November)', async () => {
-      fillTemperature();
       await calculate();
 
       typeIn('temperature-input', '20');
@@ -366,7 +362,6 @@ describe('EffortEstimationComponent', () => {
         error: 'Solver error' as unknown as TaskError,
         diagnostics: []
       });
-      fillTemperature();
       await calculate();
 
       expect(getByTestId('results-frame')).toBeNull();
@@ -375,7 +370,6 @@ describe('EffortEstimationComponent', () => {
 
   describe('Results (RG.PDS-TRA.EFF-RES, RG.PDS-TRA.DEP-RES)', () => {
     beforeEach(async () => {
-      fillTemperature();
       await calculate();
     });
 
@@ -427,7 +421,6 @@ describe('EffortEstimationComponent', () => {
         error: 'Solver error' as unknown as TaskError,
         diagnostics: []
       });
-      fillTemperature();
       await calculate();
 
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to estimate the cable effort', expect.any(Error));
@@ -438,7 +431,6 @@ describe('EffortEstimationComponent', () => {
 
     it('notifies a failure of the worker', async () => {
       mockWorkerPythonService.runTask.mockRejectedValue(new Error('worker crashed'));
-      fillTemperature();
       await calculate();
 
       expect(mockNotificationService.error).toHaveBeenCalledWith('An error occurred');
@@ -446,7 +438,6 @@ describe('EffortEstimationComponent', () => {
     });
 
     it('clears the previous results when a new calculation fails', async () => {
-      fillTemperature();
       await calculate();
       expect(component.results()).not.toBeNull();
 

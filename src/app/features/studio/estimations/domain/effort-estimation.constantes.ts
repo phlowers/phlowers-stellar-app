@@ -16,6 +16,7 @@ export const DISTANCE_DEFAULT = 0;
 export const TEMPERATURE_MIN = -50;
 export const TEMPERATURE_MAX = 250;
 export const TEMPERATURE_DECIMALS = 2;
+export const TEMPERATURE_DEFAULT = 15;
 
 export const DISPLACEMENT_MIN = 0;
 export const DISPLACEMENT_MAX = 150;
