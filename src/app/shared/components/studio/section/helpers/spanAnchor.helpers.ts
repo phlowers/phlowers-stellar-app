@@ -98,6 +98,15 @@ export const resolveAnchorCoord = (
 };
 
 /**
+ * Returns the highest point of a support polyline: the one its number is written on.
+ * @category Studio
+ * @param support - The `[x, y, z]` points of the support, from `litData.coords.supports`.
+ * @returns The highest point, or `null` when the support has no points.
+ */
+export const findSupportTop = (support: number[][] | undefined): number[] | null =>
+  support?.length ? support.reduce((top, point) => (point[2] > top[2] ? point : top), support[0]) : null;
+
+/**
  * Maps a 3D anchor `[x,y,z]` to the active 2D/3D plot axes.
  * @category Studio
  */

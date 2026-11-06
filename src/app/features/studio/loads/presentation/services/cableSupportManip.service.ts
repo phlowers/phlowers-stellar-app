@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -19,6 +19,20 @@ export class CableSupportManipService {
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   private readonly studiesService = inject(StudiesService);
+
+  // UUID of the support to pre-select in `CableSupportManipComponent`, set when the manipulation icon is clicked on the
+  // section plot. The form calls `clearSelectedSupport` once it has consumed it, so the same support can be re-selected.
+  readonly selectedSupportUuid = signal<string | null>(null);
+
+  /** Pre-select a support in the cable support manipulation form (called from the plot click handler). */
+  selectSupport = (supportUuid: string): void => {
+    this.selectedSupportUuid.set(supportUuid);
+  };
+
+  /** Clear the pre-selection signal so the same support can be re-selected later. */
+  clearSelectedSupport = (): void => {
+    this.selectedSupportUuid.set(null);
+  };
 
   /**
    * Persist a cable support manipulation in the current section.

@@ -12,8 +12,8 @@ The goal is that the look of the app's plots is changed in one place, and that n
 ## What it is
 
 A single `as const` object, grouped by **drawn object** (`span`, `support`, `insulator`, `loadPunctual`,
-`cableModification`, `cutStrands`, `obstacle`, `floor`, `distance`, `freePositioning`, `conformity`, `supportPlot`,
-…), plus a `plot` group for what every plot shares (font, backgrounds, grid).
+`cableModification`, `cableSupportManip`, `cutStrands`, `obstacle`, `floor`, `distance`, `freePositioning`,
+`conformity`, `supportPlot`, …), plus a `plot` group for what every plot shares (font, backgrounds, grid).
 
 ```typescript
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
@@ -37,7 +37,7 @@ Read it directly where it is needed. Do not re-export it through an intermediate
   plain numbers.
 - **Selection looks**: a drawing whose look changes with the selection declares `unselected` and `selected`. An object
   made of several points (obstacle, floor) also declares `inactivePoint`, the look of the other points of the selected
-  object. The icons (loads, cable modification, cut strands) only declare `unselected`.
+  object. The icons (loads, cable modification, cable support manipulation, cut strands) only declare `unselected`.
 - **Pixels, not data units**: offsets such as `arrowYOffset` or `cutStrands.offsetY` are in pixels, so the gap stays
   the same at any zoom level.
 - **Comment the why**: when a value looks arbitrary (a 40 px gap between two icons, an opacity used instead of an

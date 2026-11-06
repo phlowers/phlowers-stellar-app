@@ -20,6 +20,7 @@ import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/
 import { LoadType } from './helpers/createLoadAnnotations';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
+import { CableSupportManipService } from '@features/studio/loads/presentation/services/cableSupportManip.service';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
 import { FloorFormService } from '@services/floor-form/floor-form.service';
@@ -293,6 +294,12 @@ describe('SectionPlotComponent', () => {
     clearPreview: vi.fn(() => mockCableModificationsService.previewCableModification.set(null))
   };
 
+  const mockCableSupportManipService = {
+    selectedSupportUuid: signal<string | null>(null),
+    selectSupport: vi.fn((uuid: string) => mockCableSupportManipService.selectedSupportUuid.set(uuid)),
+    clearSelectedSupport: vi.fn(() => mockCableSupportManipService.selectedSupportUuid.set(null))
+  };
+
   const mockObstaclesService = {
     selectedMeasureUuid: signal<string | null>(null),
     activePointIndex: signal<number | null>(null),
@@ -380,6 +387,7 @@ describe('SectionPlotComponent', () => {
         { provide: ObstaclesService, useValue: mockObstaclesService },
         { provide: LoadFormsService, useValue: mockLoadFormsService },
         { provide: CableModificationsService, useValue: mockCableModificationsService },
+        { provide: CableSupportManipService, useValue: mockCableSupportManipService },
         { provide: ObstacleStateService, useValue: mockObstacleStateService },
         { provide: DistanceMeasuringService, useValue: mockDistanceMeasuringService },
         { provide: FloorFormService, useValue: mockFloorFormService },
@@ -550,6 +558,36 @@ describe('SectionPlotComponent', () => {
       await component.refreshPlot();
 
       expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cutStrands: null }));
+    });
+
+    it('should pass the saved cable support manipulations of the selected load case to createPlot', async () => {
+      const manipOfSelectedCharge = { uuid: 'm1', supportUuid: 's0', chargeUuid: 'charge-1' };
+      const manipOfOtherCharge = { uuid: 'm2', supportUuid: 's0', chargeUuid: 'charge-2' };
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-1',
+        cable_support_manipulations: [manipOfSelectedCharge, manipOfOtherCharge]
+      } as unknown as Section);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(
+        expect.objectContaining({ cableSupportManips: [manipOfSelectedCharge] })
+      );
+    });
+
+    it('should pass no cable support manipulations to createPlot without a selected load case', async () => {
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: null,
+        cable_support_manipulations: [{ uuid: 'm1', supportUuid: 's0', chargeUuid: 'charge-1' }]
+      } as unknown as Section);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cableSupportManips: [] }));
     });
 
     it('should include distanceMeasuringPoints when the selected measurement support is within the visible span window', async () => {
@@ -1197,6 +1235,8 @@ describe('SectionPlotComponent', () => {
       mockSideTabsService.sideTabs.set(null);
       mockCableModificationsService.selectedSpanUuid.set(null);
       mockCableModificationsService.selectSpan.mockClear();
+      mockCableSupportManipService.selectedSupportUuid.set(null);
+      mockCableSupportManipService.selectSupport.mockClear();
     });
 
     const makePlotWithCapture = () => {
@@ -1227,6 +1267,21 @@ describe('SectionPlotComponent', () => {
       expect(mockSideTabsService.sideTabs()).toBe(0);
       expect(mockLoadFormsService.activeLoadTab()).toBe('2');
       expect(mockCableModificationsService.selectSpan).toHaveBeenCalledWith('s0');
+    });
+
+    it('should open Charges side tab, switch to cable support manipulation tab and pre-select the support', () => {
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({
+        annotation: {
+          data: { type: 'cableSupportManip', supportUuid: 's1', cableSupportManipUuid: 'manip-1' }
+        }
+      });
+
+      expect(mockSideTabsService.sideTabs()).toBe(0);
+      expect(mockLoadFormsService.activeLoadTab()).toBe('3');
+      expect(mockCableSupportManipService.selectSupport).toHaveBeenCalledWith('s1');
+      expect(mockCableModificationsService.selectSpan).not.toHaveBeenCalled();
     });
 
     it('should open the RRTS tool when the cut strands marking is clicked', () => {
@@ -1265,6 +1320,7 @@ describe('SectionPlotComponent', () => {
       capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 's0' } } });
 
       expect(mockCableModificationsService.selectSpan).not.toHaveBeenCalled();
+      expect(mockCableSupportManipService.selectSupport).not.toHaveBeenCalled();
     });
   });
 

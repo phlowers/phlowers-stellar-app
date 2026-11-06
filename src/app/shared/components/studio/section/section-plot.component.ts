@@ -28,6 +28,7 @@ import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SpanLoad } from '@shared/domain';
 import { LoadType } from './helpers/createLoadAnnotations';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
+import { CableSupportManipService } from '@features/studio/loads/presentation/services/cableSupportManip.service';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -77,6 +78,7 @@ export class SectionPlotComponent implements OnDestroy {
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly loadFormsService = inject(LoadFormsService);
   private readonly cableModificationsService = inject(CableModificationsService);
+  private readonly cableSupportManipService = inject(CableSupportManipService);
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly distanceMeasuringService = inject(DistanceMeasuringService);
@@ -108,6 +110,14 @@ export class SectionPlotComponent implements OnDestroy {
     { initialValue: null }
   );
 
+  // Saved cable support manipulations of the displayed load case: each (support, load case) pair has its own
+  private readonly savedCableSupportManips = computed(() => {
+    const section = this.spanService.section();
+    return (section?.cable_support_manipulations ?? []).filter(
+      (manip) => manip.chargeUuid === section?.selected_charge_uuid
+    );
+  });
+
   // Computed state
   private readonly plotState = computed(() => ({
     litData: this.litData(),
@@ -128,6 +138,7 @@ export class SectionPlotComponent implements OnDestroy {
     distanceMeasuringPoints: this.plotService.distanceMeasuringPoints(),
     measureSupportUuid: this.distanceMeasuringService.selectedSupportUuid(),
     cableModifications: this.plotService.temporaryLoadData?.cableModifParams ?? [],
+    cableSupportManips: this.savedCableSupportManips(),
     floors: this.spanService.section()?.floors ?? [],
     selectedFloorUuid: this.floorFormService.savedFloorUuid(),
     selectedFloorPointIndex: this.floorFormService.activeSavedPointIndex(),
@@ -282,6 +293,7 @@ export class SectionPlotComponent implements OnDestroy {
         selectedDisplayOptions,
         cableModifications,
         spanUuidToIndex,
+        cableSupportManips: this.savedCableSupportManips(),
         cutStrands: section?.rrts_cut_strands ?? null,
         translocoService: this.translocoService
       });
@@ -387,6 +399,11 @@ export class SectionPlotComponent implements OnDestroy {
         this.sideTabsService.sideTabs.set(0);
         this.loadFormsService.activeLoadTab.set('2');
         this.cableModificationsService.selectSpan(data.spanUuid);
+      } else if (event?.annotation?.data?.type === 'cableSupportManip') {
+        const data = event.annotation.data;
+        this.sideTabsService.sideTabs.set(0);
+        this.loadFormsService.activeLoadTab.set('3');
+        this.cableSupportManipService.selectSupport(data.supportUuid);
       } else if (event?.annotation?.data?.type === 'cutStrands') {
         // The preview edits a copy of the section: the saved entry is only shown there
         this.toolbarDialogService.openTool('strand-rrts', { mode: this.isPreview() ? 'view' : 'edit' });
