@@ -4,8 +4,8 @@
 //   (free positioning, conformity: 2D, support: 3D) use plain numbers
 // - drawings whose look changes with the selection declare their `unselected` and `selected` looks (obstacle, floor,
 //   free-positioning points); objects made of several points (obstacle, floor) also declare `inactivePoint`,
-//   the look of the other points of the selected object. The icons (loads, cable modification, cut strands) only
-//   declare `unselected`, plus the tooltip of the cut strands
+//   the look of the other points of the selected object. The icons (loads, cable modification, cable support
+//   manipulation, cut strands) only declare `unselected`, plus the tooltip of the cut strands
 // Conformity rule zone colors are excluded: they come from the catalog json config.
 export const PlotlyDrawings = {
   plot: {
@@ -35,9 +35,13 @@ export const PlotlyDrawings = {
     lineWidth: { '2d': 4, '3d': 8 },
     markerSize: { '2d': 6, '3d': 4 }
   },
-  // shared by loadPunctual, loadMarking, cableModification and cutStrands
+  // shared by loadPunctual, loadMarking, cableModification, cableSupportManip and cutStrands
   clickableIconAnnotation: {
-    fontFamily: 'FontAwesome',
+    // The solid face of FontAwesome, drawn by weight 900. Not the 'FontAwesome' alias: it serves some glyphs, such as
+    // the hand-back-fist, from the regular (outline) face. The inner quotes are needed by the digit of the name, and
+    // the name follows the major version of @fortawesome/fontawesome-free
+    fontFamily: "'Font Awesome 7 Free'",
+    fontWeight: 900,
     arrowHead: 0
   },
   loadPunctual: {
@@ -71,7 +75,15 @@ export const PlotlyDrawings = {
     },
     unselected: { color: '#4A355A' }
   },
-
+  // saved cable support manipulation: icon above the top of the support it applies to, joined to it by an arrow line
+  cableSupportManip: {
+    icon: '&#xf255;', // FontAwesome hand-back-fist
+    iconSize: { '2d': 8, '3d': 8 },
+    borderPad: { '2d': 6, '3d': 6 },
+    arrowWidth: { '2d': 1, '3d': 1 },
+    arrowYOffset: -50,
+    unselected: { color: '#5B3A75' }
+  },
   // RRTS marking: scissors icon above the cut span, joined to it by a dashed line
   cutStrands: {
     icon: '&#xf0c4;', // FontAwesome scissors

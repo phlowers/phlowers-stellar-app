@@ -51,10 +51,13 @@ describe('CableSupportManipComponent', () => {
       section: signal<Partial<Section> | null>(mockSection)
     } as unknown as vi.Mocked<PlotSpanService>;
 
+    const selectedSupportUuid = signal<string | null>(null);
     mockCableSupportManipService = {
       save: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
-      reloadSection: vi.fn().mockResolvedValue(undefined)
+      reloadSection: vi.fn().mockResolvedValue(undefined),
+      selectedSupportUuid,
+      clearSelectedSupport: vi.fn(() => selectedSupportUuid.set(null))
     } as unknown as vi.Mocked<CableSupportManipService>;
 
     mockNotificationService = {
@@ -620,6 +623,70 @@ describe('CableSupportManipComponent', () => {
       expect(component.isCrane()).toBe(false);
       expect(component.isRope()).toBe(false);
       expect(component.isShifting()).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // support pre-selected from the section plot
+  // ---------------------------------------------------------------------------
+  describe('support pre-selected from the section plot', () => {
+    const savedManipulation = {
+      uuid: 'manip-uuid-2',
+      supportUuid: 'support-uuid-2',
+      chargeUuid: 'charge-uuid-1',
+      manip1: {
+        type: 'rope',
+        vertDisplacement: null,
+        anchoring: null,
+        lateralDistance: null,
+        ropeLength: 7,
+        shiftingClampLength: null
+      },
+      manip2: null
+    };
+
+    it('should select the support and load its saved manipulation', () => {
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        cable_support_manipulations: [savedManipulation]
+      } as unknown as Section);
+
+      mockCableSupportManipService.selectedSupportUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(component.form.controls.support.value).toBe('support-uuid-2');
+      expect(component.hasSavedManipulation()).toBe(true);
+      expect(component.form.controls.manip1Type.value).toBe('rope');
+      expect(component.form.controls.ropeLength.value).toBe(7);
+    });
+
+    it('should clear the pre-selection once consumed', () => {
+      mockCableSupportManipService.selectedSupportUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(mockCableSupportManipService.clearSelectedSupport).toHaveBeenCalledOnce();
+      expect(mockCableSupportManipService.selectedSupportUuid()).toBeNull();
+    });
+
+    it('should select the same support again after a clear', () => {
+      mockCableSupportManipService.selectedSupportUuid.set('support-uuid-2');
+      fixture.detectChanges();
+      component.onSupportChange('support-uuid-1');
+      expect(component.form.controls.support.value).toBe('support-uuid-1');
+
+      mockCableSupportManipService.selectedSupportUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(component.form.controls.support.value).toBe('support-uuid-2');
+    });
+
+    it('should leave the form untouched without a pre-selection', () => {
+      component.form.controls.support.setValue('support-uuid-1');
+      fixture.detectChanges();
+
+      expect(component.form.controls.support.value).toBe('support-uuid-1');
+      expect(mockCableSupportManipService.clearSelectedSupport).not.toHaveBeenCalled();
     });
   });
 

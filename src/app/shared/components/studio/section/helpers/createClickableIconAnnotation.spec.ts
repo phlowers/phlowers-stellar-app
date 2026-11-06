@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
 import {
   ClickableIconWithArrowParams,
@@ -77,9 +78,10 @@ describe('buildClickableIconAnnotation', () => {
       expect(result.captureevents).toBe(true);
     });
 
-    it('should set font.family to FontAwesome', () => {
+    it('should draw the icon with the solid face of FontAwesome', () => {
       const result = buildClickableIconAnnotation(makeParams());
-      expect(result.font?.family).toBe('FontAwesome');
+      expect(result.font?.family).toBe(PlotlyDrawings.clickableIconAnnotation.fontFamily);
+      expect((result.font as { weight?: number }).weight).toBe(900);
     });
   });
 

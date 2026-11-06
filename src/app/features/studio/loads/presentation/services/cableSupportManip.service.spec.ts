@@ -132,6 +132,29 @@ describe('CableSupportManipService', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // support pre-selection
+  // ---------------------------------------------------------------------------
+  describe('support pre-selection', () => {
+    it('should have no support selected initially', () => {
+      expect(service.selectedSupportUuid()).toBeNull();
+    });
+
+    it('should select a support', () => {
+      service.selectSupport('support-uuid-1');
+      expect(service.selectedSupportUuid()).toBe('support-uuid-1');
+    });
+
+    it('should clear the selection so the same support can be selected again', () => {
+      service.selectSupport('support-uuid-1');
+      service.clearSelectedSupport();
+      expect(service.selectedSupportUuid()).toBeNull();
+
+      service.selectSupport('support-uuid-1');
+      expect(service.selectedSupportUuid()).toBe('support-uuid-1');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // save()
   // ---------------------------------------------------------------------------
   describe('save()', () => {

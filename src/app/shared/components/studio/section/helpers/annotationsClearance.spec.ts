@@ -6,9 +6,10 @@
  */
 import { describe, it, expect } from 'vitest';
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
-import { CableModification, SpanLoad } from '@shared/domain';
+import { CableModification, CableSupportManipulation, SpanLoad } from '@shared/domain';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
+import { createCableSupportManipAnnotations } from './createCableSupportManipAnnotations';
 import { createCutStrandsAnnotations } from './createCutStrandsAnnotations';
 import { createLoadAnnotations, LoadType } from './createLoadAnnotations';
 import { CreatePlotParams } from './createPlot';
@@ -39,8 +40,8 @@ const around = (center: number, halfHeight: number): Band => ({
   top: center + halfHeight
 });
 
-// Every annotation sits on this single point, the worst case: a load, a cable modification and a cut strand marking
-// sharing the same anchor
+// Every annotation sits on this single point, the worst case: a load, a cable modification, a cable support
+// manipulation and a cut strand marking sharing the same anchor
 const makePlotParams = (view: CreatePlotParams['view']): CreatePlotParams => {
   const cutStrands: RrtsCutStrandsData = {
     spanUuid: 'span-1',
@@ -69,6 +70,7 @@ const makePlotParams = (view: CreatePlotParams['view']): CreatePlotParams => {
     spanUuidToIndex: new Map([['span-1', 0]]),
     litData: {
       coords: {
+        supports: [[[0, 0, 0]]],
         spans: [
           [
             [0, 0, 0],
@@ -91,6 +93,22 @@ const cableModification: CableModification = {
   distanceSupportRef: 0
 };
 
+// A support manipulation icon stands above the top of its support, where the cut strands marking can also stand
+const cableSupportManip: CableSupportManipulation = {
+  uuid: 'manip-1',
+  supportUuid: 'span-1',
+  chargeUuid: 'charge-1',
+  manip1: {
+    type: 'rope',
+    vertDisplacement: null,
+    anchoring: null,
+    lateralDistance: null,
+    ropeLength: 2,
+    shiftingClampLength: null
+  },
+  manip2: null
+};
+
 // The annotations stacked above the anchor, as the plot draws them
 const stackAt = (view: CreatePlotParams['view']) => {
   const params = makePlotParams(view);
@@ -100,8 +118,13 @@ const stackAt = (view: CreatePlotParams['view']) => {
     [cableModification],
     params.spanUuidToIndex!
   );
+  const [cableSupportManipIcon] = createCableSupportManipAnnotations(
+    params,
+    [cableSupportManip],
+    params.spanUuidToIndex!
+  );
   const scissors = createCutStrandsAnnotations(params).at(-1)!;
-  return { load, cableModificationIcon, cableModificationLabel, scissors };
+  return { load, cableModificationIcon, cableModificationLabel, cableSupportManipIcon, scissors };
 };
 
 describe('stacking of the annotations sharing an anchor point', () => {
@@ -111,7 +134,12 @@ describe('stacking of the annotations sharing an anchor point', () => {
 
     expect(PlotlyDrawings.cutStrands.iconSize).toEqual(both(scissors.iconSize));
     expect(PlotlyDrawings.cutStrands.borderPad).toEqual(both(scissors.borderPad));
-    [PlotlyDrawings.loadPunctual, PlotlyDrawings.loadMarking, PlotlyDrawings.cableModification].forEach((drawing) => {
+    [
+      PlotlyDrawings.loadPunctual,
+      PlotlyDrawings.loadMarking,
+      PlotlyDrawings.cableModification,
+      PlotlyDrawings.cableSupportManip
+    ].forEach((drawing) => {
       expect(drawing.iconSize).toEqual(both(loadOrCableModificationIcon.iconSize));
       expect(drawing.borderPad).toEqual(both(loadOrCableModificationIcon.borderPad));
     });
@@ -119,16 +147,17 @@ describe('stacking of the annotations sharing an anchor point', () => {
   });
 
   it.each(['2d', '3d'] as const)(
-    `should leave at least ${MIN_GAP} px between the scissors and the load, cable modification and label in %s`,
+    `should leave at least ${MIN_GAP} px between the scissors and the load, cable modification, label and cable support manipulation in %s`,
     (view) => {
-      const { load, cableModificationIcon, cableModificationLabel, scissors } = stackAt(view);
+      const { load, cableModificationIcon, cableModificationLabel, cableSupportManipIcon, scissors } = stackAt(view);
 
       // Icons joined to their anchor by an arrow sit |ay| px above it; the label and the scissors are shifted by yshift
       const scissorsBox = around(scissors.yshift as number, HALF_HEIGHT.scissors);
       const below: Record<string, Band> = {
         load: around(-load.ay!, HALF_HEIGHT.loadOrCableModificationIcon),
         cableModificationIcon: around(-cableModificationIcon.ay!, HALF_HEIGHT.loadOrCableModificationIcon),
-        cableModificationLabel: around(cableModificationLabel.yshift as number, HALF_HEIGHT.label)
+        cableModificationLabel: around(cableModificationLabel.yshift as number, HALF_HEIGHT.label),
+        cableSupportManipIcon: around(-cableSupportManipIcon.ay!, HALF_HEIGHT.loadOrCableModificationIcon)
       };
 
       Object.entries(below).forEach(([name, band]) => {
