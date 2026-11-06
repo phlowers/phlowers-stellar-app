@@ -8,6 +8,8 @@
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
+import { Task, TaskInputs } from '@services/worker_python/tasks/types';
+import { TANGENT_AIMING_CALCULATION_TYPE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   createNumberControl,
   syncDisplayedControls
@@ -66,14 +68,14 @@ export function isTangentAimingExteriorDataValid(data: FieldMeasure): boolean {
   return form.valid;
 }
 
-/** Fills the empty (`null`/`undefined`) tangent aiming (exterior) inputs with their default. */
+/** Fills the empty (`null`/`undefined`) tangent aiming (exterior) inputs with their default; forces the supported calculation type. */
 export function applyTangentAimingExteriorDefaults(
   data: FieldMeasure,
   defaultLeftSupport: string | null
 ): FieldMeasure {
   const next: FieldMeasure = {
     ...data,
-    exteriorCalculationType: data.exteriorCalculationType ?? 'parametre',
+    exteriorCalculationType: TANGENT_AIMING_CALCULATION_TYPE,
     exteriorLeftSupport: data.exteriorLeftSupport ?? defaultLeftSupport
   };
   for (const field of NUMERIC_FIELDS) {
@@ -106,5 +108,19 @@ export function toTangentAimingExteriorInputs(data: FieldMeasure): TangentAiming
     calculationType: data.exteriorCalculationType,
     parameter: data.exteriorParameter,
     tangentAngle: data.exteriorTangentAngle
+  };
+}
+
+/** Builds the `calculateTangentAiming` task inputs: sighting device outside the span, left of the left support. */
+export function toTangentAimingExteriorTaskInputs(
+  inputs: TangentAimingExteriorInputs
+): TaskInputs[Task.calculateTangentAiming] {
+  return {
+    angleToCableTangent: inputs.tangentAngle ?? 0,
+    angleToLeftSupport: inputs.verticalAccAngleLeft ?? 0,
+    angleToRightSupport: inputs.verticalAccAngleRight ?? 0,
+    spanLength: inputs.spanLength ?? 0,
+    inputHeight: 0,
+    distance: -(inputs.hAccDistance ?? 0)
   };
 }

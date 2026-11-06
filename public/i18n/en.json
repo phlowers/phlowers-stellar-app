@@ -388,7 +388,11 @@
       "invalid-manipulation-range": "The manipulation range provided is invalid.",
       "support-out-of-range-error": "The support is out of the valid range.",
       "generated-points-none-error": "No generated points were found after computation.",
-      "night-time-error": "Sky cover cannot be estimated because the provided time is during the night."
+      "night-time-error": "Sky cover cannot be estimated because the provided time is during the night.",
+      "estimate-on-split-support-error": "Estimation is not possible on a span split by a virtual support.",
+      "estimation-input-error": "The estimation inputs are missing or invalid.",
+      "estimation-not-converged-error": "The target cannot be reached within the estimation bounds.",
+      "estimation-warning": "The existing load on the estimated span was ignored."
     },
     "initial-condition-modal": {
       "create-title": "Create an initial condition",

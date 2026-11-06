@@ -38,7 +38,13 @@ describe('formatPythonError', () => {
               'shared.python-errors.invalid-manipulation-keys': 'The manipulation keys provided are invalid.',
               'shared.python-errors.invalid-manipulation-range': 'The manipulation range provided is invalid.',
               'shared.python-errors.support-out-of-range-error': 'The support is out of the valid range.',
-              'shared.python-errors.generated-points-none-error': 'No generated points were found after computation.'
+              'shared.python-errors.generated-points-none-error': 'No generated points were found after computation.',
+              'shared.python-errors.estimate-on-split-support-error':
+                'Estimation is not possible on a span split by a virtual support.',
+              'shared.python-errors.estimation-input-error': 'The estimation inputs are missing or invalid.',
+              'shared.python-errors.estimation-not-converged-error':
+                'The target cannot be reached within the estimation bounds.',
+              'shared.python-errors.estimation-warning': 'The existing load on the estimated span was ignored.'
             }
           },
           translocoConfig: {
@@ -59,6 +65,15 @@ describe('formatPythonError', () => {
 
   it('should return the localized message for a known code', () => {
     expect(formatPythonError(PythonErrorCode.SolverError, translocoService)).toBe('A solver error occurred.');
+  });
+
+  it.each([
+    [PythonErrorCode.EstimateOnSplitSupportError, 'Estimation is not possible on a span split by a virtual support.'],
+    [PythonErrorCode.EstimationInputError, 'The estimation inputs are missing or invalid.'],
+    [PythonErrorCode.EstimationNotConvergedError, 'The target cannot be reached within the estimation bounds.'],
+    [PythonErrorCode.EstimationWarning, 'The existing load on the estimated span was ignored.']
+  ])('should return the localized estimation message for %s', (code, expected) => {
+    expect(formatPythonError(code, translocoService)).toBe(expected);
   });
 
   it.each(Object.values(PythonErrorCode))('should format code %s to a non-null, non-empty message', (code) => {

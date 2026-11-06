@@ -8,6 +8,8 @@
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
+import { Task, TaskInputs } from '@services/worker_python/tasks/types';
+import { TANGENT_AIMING_CALCULATION_TYPE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   createNumberControl,
   syncDisplayedControls
@@ -62,18 +64,18 @@ export function isTangentAimingInteriorDataValid(data: FieldMeasure): boolean {
     Object.fromEntries(INPUT_FIELDS.map((field) => [field, data[TANGENT_AIMING_INTERIOR_MODEL_FIELDS[field]] ?? null])),
     { emitEvent: false }
   );
-  syncDisplayedControls(form, getDisplayedInputFields(data.interiorCalculationType ?? 'parametre'));
+  syncDisplayedControls(form, getDisplayedInputFields(data.interiorCalculationType ?? TANGENT_AIMING_CALCULATION_TYPE));
   return form.valid;
 }
 
-/** Fills the empty (`null`/`undefined`) tangent aiming (interior) inputs with their default. */
+/** Fills the empty (`null`/`undefined`) tangent aiming (interior) inputs with their default; forces the supported calculation type. */
 export function applyTangentAimingInteriorDefaults(
   data: FieldMeasure,
   defaultLeftSupport: string | null
 ): FieldMeasure {
   const next: FieldMeasure = {
     ...data,
-    interiorCalculationType: data.interiorCalculationType ?? 'parametre',
+    interiorCalculationType: TANGENT_AIMING_CALCULATION_TYPE,
     interiorLeftSupport: data.interiorLeftSupport ?? defaultLeftSupport
   };
   for (const field of NUMERIC_FIELDS) {
@@ -103,8 +105,22 @@ export function toTangentAimingInteriorInputs(data: FieldMeasure): TangentAiming
     hAccDistance: data.interiorHAccDistance ?? null,
     verticalAccAngleLeft: data.interiorVerticalAccAngleLeft ?? null,
     verticalAccAngleRight: data.interiorVerticalAccAngleRight ?? null,
-    calculationType: data.interiorCalculationType ?? 'parametre',
+    calculationType: data.interiorCalculationType ?? TANGENT_AIMING_CALCULATION_TYPE,
     parameter: data.interiorParameter ?? null,
     tangentAngle: data.interiorTangentAngle ?? null
+  };
+}
+
+/** Builds the `calculateTangentAiming` task inputs: sighting device inside the span, right of the left support. */
+export function toTangentAimingInteriorTaskInputs(
+  inputs: TangentAimingInteriorInputs
+): TaskInputs[Task.calculateTangentAiming] {
+  return {
+    angleToCableTangent: inputs.tangentAngle ?? 0,
+    angleToLeftSupport: inputs.verticalAccAngleLeft ?? 0,
+    angleToRightSupport: inputs.verticalAccAngleRight ?? 0,
+    spanLength: inputs.spanLength ?? 0,
+    inputHeight: 0,
+    distance: inputs.hAccDistance ?? 0
   };
 }

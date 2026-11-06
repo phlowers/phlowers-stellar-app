@@ -11,6 +11,8 @@ import { AbstractControl } from '@angular/forms';
 import { TranslocoService } from '@jsverse/transloco';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
@@ -18,7 +20,7 @@ import { INITIAL_LEFT_SUPPORT_STATE } from '@features/studio/field-measuring/pre
 import {
   buildCalculationTypeOptions,
   buildSpanSupportOptions,
-  calculateTangentAimingMock,
+  getCalculationContextKey,
   getCalculatedSpanLength,
   getSpanKey,
   getTangentAimingError,
@@ -35,6 +37,7 @@ export abstract class TangentAimingFormBase {
 
   protected readonly plotService = inject(PlotService);
   protected readonly spanService = inject(PlotSpanService);
+  protected readonly workerPythonService = inject(WorkerPythonService);
   protected readonly logger = inject(LoggerService);
   protected readonly notificationService = inject(NotificationService);
   protected readonly translocoService = inject(TranslocoService);
@@ -152,8 +155,13 @@ export abstract class TangentAimingFormBase {
     this.isCalculating.set(true);
     this.hasError.set(false);
     try {
-      const { result, error } = await calculateTangentAimingMock(this.config.toInputs(this.measureData()));
+      const contextKey = getCalculationContextKey(this.measureData(), this.displayedInputs());
+      const { result, error } = await this.workerPythonService.runTask(
+        Task.calculateTangentAiming,
+        this.config.toTaskInputs(this.measureData())
+      );
       if (error || !result) throw new Error(error ?? 'Empty tangent aiming result');
+      if (getCalculationContextKey(this.measureData(), this.displayedInputs()) !== contextKey) return;
       this.measureData.update((d) => ({ ...d, outputs: { ...d.outputs, [this.config.outputKey]: result } }));
       this.baselineInputs.set(this.displayedInputs());
     } catch (error) {

@@ -7,16 +7,17 @@
 
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { TranslocoService } from '@jsverse/transloco';
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import {
   LeftSupportSnapshot,
   LeftSupportState,
-  TangentAimingCalculation,
   TangentAimingCalculationType,
   TangentAimingFieldRule
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
+import { TANGENT_AIMING_CALCULATION_TYPE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 
 /** Creates a required numeric control bound to the given rule. */
 export function createNumberControl({ min, max, decimals }: TangentAimingFieldRule): FormControl<number | null> {
@@ -68,6 +69,11 @@ export function getSpanKey(span: number[] | null | undefined): string {
   return span?.join('-') ?? '';
 }
 
+/** Identity of a calculation request: a result is only valid for the measure, span and displayed inputs it was computed from. */
+export function getCalculationContextKey(data: FieldMeasure, displayedInputs: string): string {
+  return JSON.stringify([data.uuid, getSpanKey(data.span), displayedInputs]);
+}
+
 /**
  * Left support to apply: on a span change (the left support is still the one of the previous span), the support
  * the user had chosen for that span, else its departure support; otherwise the current one if it belongs to the span.
@@ -109,14 +115,20 @@ export function getCalculatedSpanLength(
   return span?.length === 2 ? (spanLengths?.[span[0]] ?? null) : null;
 }
 
-/** Options of the parameter / tangent calculation type switch. */
+/** Options of the parameter / tangent calculation type switch; only the type supported by the engine is enabled. */
 export function buildCalculationTypeOptions(
   translocoService: TranslocoService
-): { label: string; value: TangentAimingCalculationType }[] {
-  return [
-    { label: translocoService.translate('common.parameter-label'), value: 'parametre' },
-    { label: translocoService.translate('common.calculation-type-tangent'), value: 'tangente' }
-  ];
+): { label: string; value: TangentAimingCalculationType; disabled: boolean }[] {
+  return (
+    [
+      { labelKey: 'common.parameter-label', value: 'parametre' },
+      { labelKey: 'common.calculation-type-tangent', value: 'tangente' }
+    ] as const
+  ).map(({ labelKey, value }) => ({
+    label: translocoService.translate(labelKey),
+    value,
+    disabled: value !== TANGENT_AIMING_CALCULATION_TYPE
+  }));
 }
 
 /** Message of the active error of a control, once it has been touched. */
@@ -125,15 +137,4 @@ export function getTangentAimingError(control: AbstractControl, translocoService
   if (control.errors?.['required']) return translocoService.translate('common.required');
   const numberError = getNumberInputErrorParams(control);
   return numberError ? translocoService.translate(numberError.key, numberError.params) : '';
-}
-
-/**
- * Temporary mock: the engine has no tangent aiming Task yet, constant value on purpose.
- * TODO: replace with workerPythonService.runTask(Task.<tangent aiming>) once the Task exists.
- */
-export function calculateTangentAimingMock(_inputs: unknown): Promise<TangentAimingCalculation> {
-  return Promise.resolve({
-    result: { parameter: 1000, uncertainty: 1.5, criterion: 1, checkValidity: true },
-    error: null
-  });
 }

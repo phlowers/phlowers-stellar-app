@@ -17,7 +17,8 @@ import {
   PapotoResult,
   Section,
   SkyCover,
-  SpanLoad
+  SpanLoad,
+  TangentAimingSupportResult
 } from '@shared/domain';
 import { View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
@@ -43,6 +44,8 @@ export enum Task {
   getSupportCoordinates = 'getSupportCoordinates',
   // Calculate PAPOTO (field measurement) parameters
   calculatePapoto = 'calculatePapoto',
+  // Calculate the parameter by tangent aiming (ground measurement)
+  calculateTangentAiming = 'calculateTangentAiming',
   // Calculate guying forces and angles
   calculateGuying = 'calculateGuying',
   // Calculate sighting angles at mid-span sag for cable adjustment
@@ -116,7 +119,15 @@ export enum Task {
   // Get the cable utilization rate per span
   getUtilizationRate = 'getUtilizationRate',
   // Set the high-safety flag on the cable
-  setHighSafety = 'setHighSafety'
+  setHighSafety = 'setHighSafety',
+  // Estimate the rope length giving a target vertical distance above an obstacle
+  estimateRope = 'estimateRope',
+  // Estimate the cable temperature giving a target distance to an obstacle
+  estimateTemperature = 'estimateTemperature',
+  // Estimate the load mass giving a target distance to an obstacle
+  estimateLoad = 'estimateLoad',
+  // Estimate the wind pressure giving a target distance to an obstacle
+  estimateWind = 'estimateWind'
 }
 
 /**
@@ -171,7 +182,15 @@ export enum PythonErrorCode {
   // Raised when generated points (spans, supports, insulators, others) are None after computation.
   GeneratedPointsNoneError = 'GeneratedPointsNoneError',
   // Raised when the provided time is during the night but the computation requires daytime.
-  NightTimeError = 'NightTimeError'
+  NightTimeError = 'NightTimeError',
+  // Raised when an estimation is requested on a span split by a virtual support
+  EstimateOnSplitSupportError = 'EstimateOnSplitSupportError',
+  // Raised when an estimation input is missing or invalid
+  EstimationInputError = 'EstimationInputError',
+  // Raised when an estimation cannot reach its target within the search bounds
+  EstimationNotConvergedError = 'EstimationNotConvergedError',
+  // Warning raised when an existing load on the estimation target span is ignored
+  EstimationWarning = 'EstimationWarning'
 }
 
 /**
@@ -359,6 +378,15 @@ export interface TaskInputs {
     V2: number;
     V3: number;
     VR: number;
+  };
+  // Inputs for calculateTangentAiming task (angles in grad, lengths in meters)
+  [Task.calculateTangentAiming]: {
+    angleToCableTangent: number;
+    angleToLeftSupport: number;
+    angleToRightSupport: number;
+    spanLength: number;
+    inputHeight: number;
+    distance: number;
   };
   // Inputs for calculateGuying task
   [Task.calculateGuying]: {
@@ -549,6 +577,104 @@ export interface TaskInputs {
   [Task.setHighSafety]: {
     highSafety: boolean;
   };
+  // Inputs for estimateRope task
+  [Task.estimateRope]: EstimateRopeInputs;
+  // Inputs for estimateTemperature task
+  [Task.estimateTemperature]: EstimateTemperatureInputs;
+  // Inputs for estimateLoad task
+  [Task.estimateLoad]: EstimateLoadInputs;
+  // Inputs for estimateWind task
+  [Task.estimateWind]: EstimateWindInputs;
+}
+
+/**
+ * Inputs shared by every estimation task.
+ *
+ * @category Worker Types
+ */
+export interface EstimationBaseInputs {
+  // Index of the span (before manipulation) where the obstacle is located
+  spanIndex: number;
+  // Obstacle coordinates [x, y, z] in meters
+  obstaclePoint: [number, number, number];
+  // Search interval [lower, upper] of the estimated variable; engine defaults when omitted
+  bounds?: [number, number] | null;
+  // Fixed ice thickness in cm
+  iceThickness?: number | null;
+}
+
+/**
+ * Inputs for the estimateTemperature task (estimated value in °C).
+ *
+ * @category Worker Types
+ */
+export interface EstimateTemperatureInputs extends EstimationBaseInputs {
+  // Target distance between cable and obstacle in meters
+  targetDistance: number;
+  // Fixed wind pressure in Pa
+  windPressure?: number | null;
+}
+
+/**
+ * Inputs for the estimateWind task (estimated value in Pa).
+ *
+ * @category Worker Types
+ */
+export interface EstimateWindInputs extends EstimationBaseInputs {
+  // Target distance between cable and obstacle in meters
+  targetDistance: number;
+  // Fixed cable temperature in °C
+  temperature?: number | null;
+}
+
+/**
+ * Inputs for the estimateLoad task (estimated value in kg).
+ *
+ * @category Worker Types
+ */
+export interface EstimateLoadInputs extends EstimationBaseInputs {
+  // Target distance between cable and obstacle in meters
+  targetDistance: number;
+  // Load position from the left support of the span in meters
+  loadPositionDistance: number;
+  // Fixed cable temperature in °C
+  temperature?: number | null;
+  // Fixed wind pressure in Pa
+  windPressure?: number | null;
+}
+
+/**
+ * Inputs for the estimateRope task (estimated value in m).
+ *
+ * @category Worker Types
+ */
+export interface EstimateRopeInputs extends EstimationBaseInputs {
+  // Index of the support (before manipulation) where the rope is set
+  supportIndex: number;
+  // Target vertical distance (cable altitude minus obstacle altitude) in meters
+  targetVerticalDistance: number;
+  // Rope linear mass in kg/m; study or default value when omitted
+  ropeLineicMass?: number | null;
+  // Fixed cable temperature in °C
+  temperature?: number | null;
+  // Fixed wind pressure in Pa
+  windPressure?: number | null;
+}
+
+/**
+ * Output of every estimation task.
+ *
+ * @category Worker Types
+ */
+export interface EstimationResult {
+  // Estimated value (°C, Pa, kg or m depending on the task)
+  value: number;
+  // Final residual of the objective function
+  residual: number;
+  // Number of solver iterations
+  iterations: number;
+  // Whether the solver converged within tolerance
+  converged: boolean;
 }
 
 /**
@@ -794,6 +920,8 @@ export interface TaskOutputs {
   };
   // Output from calculatePapoto task
   [Task.calculatePapoto]: PapotoResult;
+  // Output from calculateTangentAiming task
+  [Task.calculateTangentAiming]: TangentAimingSupportResult;
   // Output from calculateGuying task
   [Task.calculateGuying]: {
     tensionInGuy: number;
@@ -902,4 +1030,12 @@ export interface TaskOutputs {
   [Task.getUtilizationRate]: { utilizationRate: number[] };
   // Output from setHighSafety task
   [Task.setHighSafety]: { success: boolean };
+  // Output from estimateRope task: rope length in m
+  [Task.estimateRope]: EstimationResult;
+  // Output from estimateTemperature task: cable temperature in °C
+  [Task.estimateTemperature]: EstimationResult;
+  // Output from estimateLoad task: load mass in kg
+  [Task.estimateLoad]: EstimationResult;
+  // Output from estimateWind task: wind pressure in Pa
+  [Task.estimateWind]: EstimationResult;
 }
