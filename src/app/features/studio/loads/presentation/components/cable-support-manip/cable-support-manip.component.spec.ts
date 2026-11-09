@@ -55,6 +55,7 @@ describe('CableSupportManipComponent', () => {
     mockCableSupportManipService = {
       save: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
+      deleteFromCharge: vi.fn().mockResolvedValue(false),
       reloadSection: vi.fn().mockResolvedValue(undefined),
       selectedSupportUuid,
       clearSelectedSupport: vi.fn(() => selectedSupportUuid.set(null))
@@ -1024,6 +1025,46 @@ describe('CableSupportManipComponent', () => {
       component.form.controls.support.setValue('support-uuid-1');
       await component.deleteForm();
       expect(mockCableSupportManipService.delete).not.toHaveBeenCalled();
+    });
+
+    it('should remove a manipulation saved only with the load case, then reload and notify', async () => {
+      mockCableSupportManipService.deleteFromCharge.mockResolvedValue(true);
+      component.form.controls.support.setValue('support-uuid-1');
+
+      await component.deleteForm();
+
+      expect(mockCableSupportManipService.delete).not.toHaveBeenCalled();
+      expect(mockCableSupportManipService.deleteFromCharge).toHaveBeenCalledWith('support-uuid-1', 'charge-uuid-1');
+      expect(mockCableSupportManipService.reloadSection).toHaveBeenCalled();
+      expect(mockNotificationService.success).toHaveBeenCalled();
+    });
+
+    it('should neither reload nor notify when the load case holds no manipulation either', async () => {
+      mockCableSupportManipService.deleteFromCharge.mockResolvedValue(false);
+      component.form.controls.support.setValue('support-uuid-1');
+
+      await component.deleteForm();
+
+      expect(mockCableSupportManipService.reloadSection).not.toHaveBeenCalled();
+      expect(mockNotificationService.success).not.toHaveBeenCalled();
+    });
+
+    it('should not look into the load case without a selected support', async () => {
+      component.form.controls.support.setValue(null);
+
+      await component.deleteForm();
+
+      expect(mockCableSupportManipService.deleteFromCharge).not.toHaveBeenCalled();
+    });
+
+    it('should call notificationService.error when removing from the load case rejects', async () => {
+      mockCableSupportManipService.deleteFromCharge.mockRejectedValue(new Error('fail'));
+      component.form.controls.support.setValue('support-uuid-1');
+
+      await component.deleteForm();
+
+      expect(mockNotificationService.error).toHaveBeenCalled();
+      expect(component.isLoading()).toBe(false);
     });
 
     it('should set hasSavedManipulation to false after deletion', async () => {

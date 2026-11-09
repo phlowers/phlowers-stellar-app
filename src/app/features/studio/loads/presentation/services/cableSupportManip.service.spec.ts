@@ -494,6 +494,171 @@ describe('CableSupportManipService', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // saved load case parameters
+  // ---------------------------------------------------------------------------
+  describe('manipulations saved with the load case', () => {
+    const buildManip = (uuid: string, supportUuid: string, chargeUuid: string) => ({
+      uuid,
+      supportUuid,
+      chargeUuid,
+      manip1: {
+        type: 'shifting' as const,
+        vertDisplacement: null,
+        anchoring: null,
+        lateralDistance: null,
+        ropeLength: null,
+        shiftingClampLength: 1
+      },
+      manip2: null
+    });
+    const buildCharge = (uuid: string, supportManipParams: ReturnType<typeof buildManip>[]) =>
+      ({ uuid, data: { supportManipParams } }) as unknown as Section['charges'][0];
+    const updatedSection = () => {
+      const updated = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      return updated.sections.find((s) => s?.uuid === 'section-uuid-1');
+    };
+
+    describe('delete()', () => {
+      it('should also remove the copy saved with the load case, even under another uuid', async () => {
+        mockStudiesService.getStudy.mockResolvedValue({
+          ...mockStudy,
+          sections: [
+            {
+              ...mockSectionBase,
+              charges: [buildCharge('charge-uuid-1', [buildManip('charge-copy', 'support-uuid-1', 'charge-uuid-1')])],
+              cable_support_manipulations: [buildManip('section-copy', 'support-uuid-1', 'charge-uuid-1')]
+            }
+          ]
+        });
+
+        await service.delete('section-copy');
+
+        expect(updatedSection()?.cable_support_manipulations).toHaveLength(0);
+        expect(updatedSection()?.charges[0].data.supportManipParams).toEqual([]);
+      });
+
+      it('should keep the other supports and the other load cases saved parameters', async () => {
+        const otherSupport = buildManip('other-support', 'support-uuid-2', 'charge-uuid-1');
+        const otherCharge = buildManip('other-charge', 'support-uuid-1', 'charge-uuid-2');
+        mockStudiesService.getStudy.mockResolvedValue({
+          ...mockStudy,
+          sections: [
+            {
+              ...mockSectionBase,
+              charges: [
+                buildCharge('charge-uuid-1', [
+                  buildManip('charge-copy', 'support-uuid-1', 'charge-uuid-1'),
+                  otherSupport
+                ]),
+                buildCharge('charge-uuid-2', [otherCharge])
+              ],
+              cable_support_manipulations: [buildManip('section-copy', 'support-uuid-1', 'charge-uuid-1')]
+            }
+          ]
+        });
+
+        await service.delete('section-copy');
+
+        expect(updatedSection()?.charges[0].data.supportManipParams).toEqual([otherSupport]);
+        expect(updatedSection()?.charges[1].data.supportManipParams).toEqual([otherCharge]);
+      });
+
+      it('should delete a manipulation of a load case that is no longer in the section', async () => {
+        mockStudiesService.getStudy.mockResolvedValue({
+          ...mockStudy,
+          sections: [
+            {
+              ...mockSectionBase,
+              charges: [],
+              cable_support_manipulations: [buildManip('section-copy', 'support-uuid-1', 'charge-uuid-1')]
+            }
+          ]
+        });
+
+        await service.delete('section-copy');
+
+        expect(updatedSection()?.cable_support_manipulations).toHaveLength(0);
+      });
+    });
+
+    describe('deleteFromCharge()', () => {
+      it('should remove the manipulation of the pair from the load case and save the study', async () => {
+        const otherSupport = buildManip('other-support', 'support-uuid-2', 'charge-uuid-1');
+        mockStudiesService.getStudy.mockResolvedValue({
+          ...mockStudy,
+          sections: [
+            {
+              ...mockSectionBase,
+              charges: [
+                buildCharge('charge-uuid-1', [
+                  buildManip('charge-copy', 'support-uuid-1', 'charge-uuid-1'),
+                  otherSupport
+                ])
+              ]
+            }
+          ]
+        });
+
+        const removed = await service.deleteFromCharge('support-uuid-1', 'charge-uuid-1');
+
+        expect(removed).toBe(true);
+        expect(updatedSection()?.charges[0].data.supportManipParams).toEqual([otherSupport]);
+      });
+
+      it('should leave the section manipulations untouched', async () => {
+        const sectionManip = buildManip('section-copy', 'support-uuid-1', 'charge-uuid-1');
+        mockStudiesService.getStudy.mockResolvedValue({
+          ...mockStudy,
+          sections: [
+            {
+              ...mockSectionBase,
+              charges: [buildCharge('charge-uuid-1', [buildManip('charge-copy', 'support-uuid-1', 'charge-uuid-1')])],
+              cable_support_manipulations: [sectionManip]
+            }
+          ]
+        });
+
+        await service.deleteFromCharge('support-uuid-1', 'charge-uuid-1');
+
+        expect(updatedSection()?.cable_support_manipulations).toEqual([sectionManip]);
+      });
+
+      it('should not save the study when the load case has no manipulation for the pair', async () => {
+        mockStudiesService.getStudy.mockResolvedValue({
+          ...mockStudy,
+          sections: [
+            {
+              ...mockSectionBase,
+              charges: [buildCharge('charge-uuid-1', [buildManip('other', 'support-uuid-2', 'charge-uuid-1')])]
+            }
+          ]
+        });
+
+        const removed = await service.deleteFromCharge('support-uuid-1', 'charge-uuid-1');
+
+        expect(removed).toBe(false);
+        expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+      });
+
+      it('should not save the study when the load case is not in the section', async () => {
+        const removed = await service.deleteFromCharge('support-uuid-1', 'unknown-charge');
+
+        expect(removed).toBe(false);
+        expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+      });
+
+      it('should return false when the section cannot be fetched', async () => {
+        mockPlotService.study.mockReturnValue(null);
+
+        const removed = await service.deleteFromCharge('support-uuid-1', 'charge-uuid-1');
+
+        expect(removed).toBe(false);
+        expect(mockStudiesService.getStudy).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // reloadSection()
   // ---------------------------------------------------------------------------
   describe('reloadSection()', () => {

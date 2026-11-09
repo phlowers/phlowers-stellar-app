@@ -577,6 +577,77 @@ describe('SectionPlotComponent', () => {
       );
     });
 
+    describe('cable support manipulations saved with the load case', () => {
+      const chargeWithManips = (uuid: string, supportManipParams: unknown[]) => ({
+        uuid,
+        data: { supportManipParams }
+      });
+
+      it('should pass a manipulation saved only with the load case, with no section entry', async () => {
+        const chargeManip = { uuid: 'm1', supportUuid: 's0', chargeUuid: 'charge-1' };
+        sectionSignal.set({
+          ...mockSection,
+          selected_charge_uuid: 'charge-1',
+          charges: [chargeWithManips('charge-1', [chargeManip])],
+          cable_support_manipulations: []
+        } as unknown as Section);
+        litDataSignal.set(mockLitData);
+
+        await component.refreshPlot();
+
+        expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cableSupportManips: [chargeManip] }));
+      });
+
+      it('should complete the load case manipulations with the section ones, one per support', async () => {
+        const chargeManip = { uuid: 'charge-copy', supportUuid: 's0', chargeUuid: 'charge-1' };
+        const sectionDuplicate = { uuid: 'section-copy', supportUuid: 's0', chargeUuid: 'charge-1' };
+        const sectionOnly = { uuid: 'section-only', supportUuid: 's1', chargeUuid: 'charge-1' };
+        sectionSignal.set({
+          ...mockSection,
+          selected_charge_uuid: 'charge-1',
+          charges: [chargeWithManips('charge-1', [chargeManip])],
+          cable_support_manipulations: [sectionDuplicate, sectionOnly]
+        } as unknown as Section);
+        litDataSignal.set(mockLitData);
+
+        await component.refreshPlot();
+
+        expect(mockCreatePlot).toHaveBeenCalledWith(
+          expect.objectContaining({ cableSupportManips: [chargeManip, sectionOnly] })
+        );
+      });
+
+      it('should ignore the manipulations of the other load cases', async () => {
+        const otherChargeManip = { uuid: 'm2', supportUuid: 's0', chargeUuid: 'charge-2' };
+        sectionSignal.set({
+          ...mockSection,
+          selected_charge_uuid: 'charge-1',
+          charges: [chargeWithManips('charge-1', [otherChargeManip]), chargeWithManips('charge-2', [otherChargeManip])],
+          cable_support_manipulations: [otherChargeManip]
+        } as unknown as Section);
+        litDataSignal.set(mockLitData);
+
+        await component.refreshPlot();
+
+        expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cableSupportManips: [] }));
+      });
+
+      it('should fall back on the section entries when the selected load case is not in the section', async () => {
+        const sectionManip = { uuid: 'm1', supportUuid: 's0', chargeUuid: 'charge-1' };
+        sectionSignal.set({
+          ...mockSection,
+          selected_charge_uuid: 'charge-1',
+          charges: [],
+          cable_support_manipulations: [sectionManip]
+        } as unknown as Section);
+        litDataSignal.set(mockLitData);
+
+        await component.refreshPlot();
+
+        expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cableSupportManips: [sectionManip] }));
+      });
+    });
+
     it('should pass no cable support manipulations to createPlot without a selected load case', async () => {
       sectionSignal.set({
         ...mockSection,
@@ -1284,6 +1355,22 @@ describe('SectionPlotComponent', () => {
       expect(mockCableModificationsService.selectSpan).not.toHaveBeenCalled();
     });
 
+    it('should ignore the cable support manipulation icon in the preview, with no Loads panel to consume the selection', () => {
+      fixture.componentRef.setInput('isPreview', true);
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({
+        annotation: {
+          data: { type: 'cableSupportManip', supportUuid: 's1', cableSupportManipUuid: 'manip-1' }
+        }
+      });
+
+      expect(mockCableSupportManipService.selectSupport).not.toHaveBeenCalled();
+      expect(mockCableSupportManipService.selectedSupportUuid()).toBeNull();
+      expect(mockSideTabsService.sideTabs()).toBeNull();
+      expect(mockLoadFormsService.activeLoadTab()).toBe('0');
+    });
+
     it('should open the RRTS tool when the cut strands marking is clicked', () => {
       component.addEventListenersToPlot(makePlotWithCapture());
 
@@ -1464,7 +1551,7 @@ describe('SectionPlotComponent', () => {
 
       attachAndGetGuard()({ ...press, stopPropagation } as unknown as MouseEvent);
 
-      const guards = addSpy.mock.calls.filter(([type]) => type === 'mousemove').length;
+      const guards = addSpy.mock.calls.filter(([type]) => (type as string) === 'mousemove').length;
       addSpy.mockRestore();
       // The press itself must always reach Plotly so that clicks keep working.
       expect(stopPropagation).not.toHaveBeenCalled();

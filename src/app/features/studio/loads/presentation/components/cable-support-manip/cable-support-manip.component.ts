@@ -379,8 +379,15 @@ export class CableSupportManipComponent {
 
     this.isLoading.set(true);
     try {
+      let deleted = false;
       if (uuid) {
         await this.cableSupportManipService.delete(uuid);
+        deleted = true;
+      } else if (supportUuid && chargeUuid) {
+        // Applied then saved with the load case only: no section entry, but the plot still shows it
+        deleted = await this.cableSupportManipService.deleteFromCharge(supportUuid, chargeUuid);
+      }
+      if (deleted) {
         await this.cableSupportManipService.reloadSection();
         this.notificationService.success(
           this.translocoService.translate('loads.cable-support-manip.deleted-notification')

@@ -26,6 +26,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SpanLoad } from '@shared/domain';
+import { mergeCableSupportManips } from '@shared/domain/helpers/cable-support-manip.helpers';
 import { LoadType } from './helpers/createLoadAnnotations';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
 import { CableSupportManipService } from '@features/studio/loads/presentation/services/cableSupportManip.service';
@@ -110,12 +111,14 @@ export class SectionPlotComponent implements OnDestroy {
     { initialValue: null }
   );
 
-  // Saved cable support manipulations of the displayed load case: each (support, load case) pair has its own
+  // Saved cable support manipulations of the displayed load case, resolved like the engine load initialization does
   private readonly savedCableSupportManips = computed(() => {
     const section = this.spanService.section();
-    return (section?.cable_support_manipulations ?? []).filter(
-      (manip) => manip.chargeUuid === section?.selected_charge_uuid
-    );
+    const chargeUuid = section?.selected_charge_uuid;
+    if (!section || !chargeUuid) return [];
+
+    const charge = section.charges?.find((c) => c?.uuid === chargeUuid);
+    return mergeCableSupportManips(charge?.data?.supportManipParams, section.cable_support_manipulations, chargeUuid);
   });
 
   // Computed state
@@ -400,10 +403,14 @@ export class SectionPlotComponent implements OnDestroy {
         this.loadFormsService.activeLoadTab.set('2');
         this.cableModificationsService.selectSpan(data.spanUuid);
       } else if (event?.annotation?.data?.type === 'cableSupportManip') {
-        const data = event.annotation.data;
-        this.sideTabsService.sideTabs.set(0);
-        this.loadFormsService.activeLoadTab.set('3');
-        this.cableSupportManipService.selectSupport(data.supportUuid);
+        // The preview has no Loads panel to consume the selection: it would stay pending in the root service and be
+        // applied to the support form of the next studio opened
+        if (!this.isPreview()) {
+          const data = event.annotation.data;
+          this.sideTabsService.sideTabs.set(0);
+          this.loadFormsService.activeLoadTab.set('3');
+          this.cableSupportManipService.selectSupport(data.supportUuid);
+        }
       } else if (event?.annotation?.data?.type === 'cutStrands') {
         // The preview edits a copy of the section: the saved entry is only shown there
         this.toolbarDialogService.openTool('strand-rrts', { mode: this.isPreview() ? 'view' : 'edit' });
