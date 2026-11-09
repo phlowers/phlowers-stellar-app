@@ -185,6 +185,7 @@
     "tangent-aiming-h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
     "tangent-aiming-vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support",
     "criterion-label": "Criterion",
+    "criterion-one-percent-label": "1% criterion",
     "criterion-respected": "Criterion respected",
     "criterion-not-respected": "Criterion not respected"
   },

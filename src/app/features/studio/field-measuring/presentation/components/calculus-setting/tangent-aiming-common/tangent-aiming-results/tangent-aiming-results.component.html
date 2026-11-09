@@ -34,13 +34,11 @@
         </div>
 
         <div class="crit">
-          <dt>{{ 'common.criterion-label' | transloco }}</dt>
+          <dt [attr.data-testid]="prefix + '-criterion-label'">
+            {{ 'common.criterion-one-percent-label' | transloco }}
+          </dt>
           <dd class="crit__result" [attr.data-testid]="prefix + '-criterion'">
-            @if (format() === 'percent') {
-              {{ result.criterion.toFixed(0) }} %
-            } @else {
-              {{ (result.checkValidity ? 'common.yes' : 'common.no') | transloco }}
-            }
+            {{ (result.checkValidity ? 'common.yes' : 'common.no') | transloco }}
             @if (result.checkValidity) {
               <app-icon
                 icon="check"

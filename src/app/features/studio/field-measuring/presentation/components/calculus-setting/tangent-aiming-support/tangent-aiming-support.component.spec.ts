@@ -47,7 +47,7 @@ describe('TangentAimingSupport component', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: { 'common.meter': 'm', 'common.grade-unit': 'gr' } },
+          langs: { en: { 'common.meter': 'm', 'common.grade-unit': 'gr', 'common.yes': 'Yes', 'common.no': 'No' } },
           translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
           preloadLangs: true
         }),
@@ -197,7 +197,7 @@ describe('TangentAimingSupport component', () => {
     fixture.detectChanges();
     expect(getByTestId('tangent-aiming-support-parameter')?.textContent?.trim()).toBe('2000 m');
     expect(getByTestId('tangent-aiming-support-uncertainty')?.textContent?.trim()).toBe('13 m');
-    expect(getByTestId('tangent-aiming-support-criterion')?.textContent).toContain('1 %');
+    expect(getByTestId('tangent-aiming-support-criterion')?.textContent).toContain('Yes');
     expect(getByTestId('tangent-aiming-support-criterion-ok')).toBeTruthy();
     expect(getByTestId('tangent-angle-input')).toBeTruthy();
   });
@@ -210,6 +210,7 @@ describe('TangentAimingSupport component', () => {
     });
     await component.calculate();
     fixture.detectChanges();
+    expect(getByTestId('tangent-aiming-support-criterion')?.textContent).toContain('No');
     expect(getByTestId('tangent-aiming-support-criterion-ko')).toBeTruthy();
   });
 

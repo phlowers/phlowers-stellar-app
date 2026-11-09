@@ -185,6 +185,7 @@
     "tangent-aiming-h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
     "tangent-aiming-vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
     "criterion-label": "Critère",
+    "criterion-one-percent-label": "Critère 1 %",
     "criterion-respected": "Critère respecté",
     "criterion-not-respected": "Critère non respecté"
   },
