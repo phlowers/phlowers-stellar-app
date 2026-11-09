@@ -4,135 +4,169 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-import logging
+"""Effort (traction or weight) estimation on a span of a section study.
+
+Built on ``stellar_engine.core.estimation``: same input validation, span
+index mapping, solver wrapper, result format (``EstimationResult``) and
+errors. Unlike ``estimate_load``, the target is the vertical displacement of
+the load application point instead of a distance to an obstacle: the
+mechaphlowers distance to an obstacle cannot be computed near a traction.
+
+Common inputs:
+    spanIndex: Index of the span (before manipulation) holding the load.
+    loadPositionDistance: Load position from the left support of the span
+        (m).
+    temperature: Fixed cable temperature in °C.
+
+The study is left untouched: the loads are applied on a copy of its balance
+engine. An existing load on ``spanIndex`` is replaced, as in
+``estimate_load``.
+"""
+
 from collections.abc import Callable
+from copy import deepcopy
 
 import numpy as np
 from mechaphlowers import SectionStudy
+from mechaphlowers.core.geometry.position_engine import PositionEngine
+from mechaphlowers.core.numeric import EstimationResult
 from mechaphlowers.entities.errors import SolverError
+from mechaphlowers.utils import arr
 
-from stellar_engine.core.estimation import engine_span_index
+from stellar_engine.core.estimation import (
+    _engine_span_index,
+    _index,
+    _positive_float,
+    _required_float,
+    _solve,
+    _to_finite_float,
+)
 from stellar_engine.entities.errors import (
-    EffortPositionOutOfSpanError,
+    EstimationInputError,
     EstimationNotConvergedError,
     _Errors,
 )
-from stellar_engine.entities.inputs import CableEffortInputs
 
-logger = logging.getLogger("stellar_engine")
-
-# Mass (kg) used to locate the unloaded application point: a null load is ignored by the engine.
+# A null mass is ignored by the engine: this mass locates the unloaded point.
 REFERENCE_MASS = 1e-6
-# The bracketing of the searched load starts at this mass (kg) and doubles up to MAX_MASS.
+# Very large loads make the engine solver diverge: the search interval of
+# the mass (kg) starts at INITIAL_MASS and doubles up to MAX_MASS.
 INITIAL_MASS = 50.0
 MAX_MASS = 20000.0
+
+
+def _load_point_function(
+    inputs: dict, study: SectionStudy
+) -> Callable[[float], np.ndarray]:
+    """Return ``f(mass) -> [x, y, z]`` of the load application point (m)."""
+    span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
+    load_position_distance = _positive_float(inputs, "loadPositionDistance")
+    temperature = _required_float(inputs, "temperature")
+
+    original_balance_engine = study.balance_engine
+    # Drop observers so the study's downstream engines are not copied
+    balance_engine = deepcopy(
+        original_balance_engine,
+        {id(original_balance_engine._observers): []},
+    )
+    position_engine = PositionEngine(balance_engine)
+    span_length = arr.decr(
+        balance_engine.section_array.data.span_length.to_numpy()
+    )
+    load_positions = balance_engine.span_loads.load_position * span_length
+    load_masses = balance_engine.span_loads.load_mass.copy()
+    load_positions[span_index] = load_position_distance
+
+    def load_point(mass: float) -> np.ndarray:
+        load_masses[span_index] = mass if mass != 0 else REFERENCE_MASS
+        balance_engine.set_loads(load_positions, load_masses)
+        # set_loads resets the nodes: a cold solve may diverge
+        balance_engine.solve_change_state()
+        balance_engine.solve_change_state(new_temperature=temperature)
+        return position_engine.get_loads_coords()[span_index]
+
+    return load_point
 
 
 def _bracket_mass(
     objective: Callable[[float], float], sign: float
 ) -> tuple[float, float] | None:
-    """Find an interval of masses over which the objective changes sign.
+    """Find masses of ``sign`` over which the objective changes sign.
 
-    Very large loads make the engine solver diverge, so the interval is grown
-    progressively instead of using fixed wide bounds. Returns None when no
-    sign change is found up to MAX_MASS.
+    Returns None when no sign change is found up to MAX_MASS or when the
+    engine solver fails before.
     """
-    reference_mass = sign * REFERENCE_MASS
-    reference_value = objective(reference_mass)
-    lower_mass = reference_mass
+    lower_mass = sign * REFERENCE_MASS
+    reference_value = objective(lower_mass)
     mass = INITIAL_MASS
-    while mass <= MAX_MASS:
-        value = objective(sign * mass)
+    while True:
+        try:
+            value = objective(sign * mass)
+        except SolverError:
+            return None
         if value * reference_value <= 0:
             return min(lower_mass, sign * mass), max(lower_mass, sign * mass)
+        if mass >= MAX_MASS:
+            return None
         lower_mass = sign * mass
-        if mass == MAX_MASS:
-            break
         mass = min(mass * 2, MAX_MASS)
-    return None
 
 
-def estimate_cable_effort(inputs: dict, study: SectionStudy) -> dict:
-    """Estimate the load applied on a span to displace the cable vertically.
+def estimate_effort(inputs: dict, study: SectionStudy) -> dict:
+    """Estimate the load mass (kg) moving the load point by a vertical target.
 
-    The load is applied at ``distanceToReferenceSupport`` from the reference support, at the
-    given temperature. The returned effort is in daN (1 daN = 1 kg under the 10 m/s² convention):
-    negative for a traction (upward displacement), positive for a weight (downward displacement).
-    ``xDisplacement`` is the absolute displacement of the application point along the span axis.
+    Specific input: ``targetVerticalDisplacement`` (m), positive upward. The
+    estimated value is negative for a traction (upward displacement) and
+    positive for a weight (downward displacement).
     """
-    effort_inputs = CableEffortInputs(**inputs)
-    if effort_inputs.targetDisplacement == 0:
-        return {"effort": 0.0, "xDisplacement": 0.0}
-
-    span_index = engine_span_index(study, effort_inputs.spanIndex)
-
-    # The loads are applied on an independent copy: the study is left untouched.
-    working_study = study.copy()
-    balance_engine = working_study.balance_engine
-    position_engine = working_study.position_engine
-    span_length = float(
-        balance_engine.section_array.data.span_length.to_numpy()[span_index]
-    )
-    load_position = (
-        effort_inputs.distanceToReferenceSupport
-        if effort_inputs.referenceSupport == "LEFT"
-        else span_length - effort_inputs.distanceToReferenceSupport
-    )
-    if not 0 <= load_position <= span_length:
-        raise EffortPositionOutOfSpanError(
-            _Errors.effort_position_out_of_span(
-                effort_inputs.distanceToReferenceSupport, span_length
-            )
-        )
-
-    positions = balance_engine.span_loads.load_position.copy()
-    masses = balance_engine.span_loads.load_mass.copy()
-    positions[span_index] = load_position
-
-    def application_point(mass: float) -> np.ndarray:
-        masses[span_index] = mass
-        balance_engine.set_loads(positions, masses)
-        # a cold solve right after set_loads may diverge
-        balance_engine.solve_change_state()
-        balance_engine.solve_change_state(
-            new_temperature=effort_inputs.temperature
-        )
-        return position_engine.get_loads_coords()[span_index]
-
-    reference_point = application_point(REFERENCE_MASS)
-    signed_target = (
-        effort_inputs.targetDisplacement
-        if effort_inputs.direction == "UP"
-        else -effort_inputs.targetDisplacement
-    )
+    target = _required_float(inputs, "targetVerticalDisplacement")
+    load_point = _load_point_function(inputs, study)
+    if target == 0:
+        return {
+            "value": 0.0,
+            "residual": 0.0,
+            "iterations": 0,
+            "converged": True,
+        }
+    reference_altitude = load_point(REFERENCE_MASS)[2]
 
     def objective(mass: float) -> float:
-        return application_point(mass)[2] - reference_point[2] - signed_target
+        return load_point(mass)[2] - reference_altitude - target
 
     # Tractions are negative masses, weights are positive ones.
-    sign = -1.0 if effort_inputs.direction == "UP" else 1.0
-    unreachable_error = EstimationNotConvergedError(
-        _Errors.effort_target_unreachable(effort_inputs.targetDisplacement)
-    )
-    try:
-        bounds = _bracket_mass(objective, sign)
-        result = (
-            None
-            if bounds is None
-            else study.estimation_engine.estimate(objective, bounds)
-        )
-    except (SolverError, ValueError) as error:
-        # mechaphlowers raises a plain ValueError when the displacement is
-        # not computable; its typed errors (subclasses) keep their own code.
-        if isinstance(error, ValueError) and type(error) is not ValueError:
-            raise
-        logger.warning("Effort estimation failed: %s", error)
-        raise unreachable_error from None
-    if result is None or not result.converged:
-        raise unreachable_error
+    sign = -1.0 if target > 0 else 1.0
 
-    final_point = application_point(result.value)
+    def solve(kwargs: dict) -> EstimationResult:
+        bounds = _bracket_mass(objective, sign)
+        if bounds is None:
+            raise EstimationNotConvergedError(
+                _Errors.estimation_not_converged(
+                    "Effort",
+                    sign * MAX_MASS,
+                    tuple(sorted((0.0, sign * MAX_MASS))),
+                )
+            )
+        return study.estimation_engine.estimate(objective, bounds)
+
+    return _solve("Effort", solve, None)
+
+
+def get_load_points(inputs: dict, study: SectionStudy) -> dict:
+    """Return the load application point for each mass of ``loadMasses``.
+
+    Specific input: ``loadMasses`` (kg). A null mass gives the unloaded
+    point. Output: ``{"points": [[x, y, z], ...]}`` in meters.
+    """
+    masses = inputs.get("loadMasses")
+    if masses is None:
+        raise EstimationInputError(
+            _Errors.estimation_missing_input("loadMasses")
+        )
+    masses = [_to_finite_float(mass, "loadMasses") for mass in masses]
+    load_point = _load_point_function(inputs, study)
     return {
-        "effort": float(result.value),
-        "xDisplacement": float(abs(final_point[0] - reference_point[0])),
+        "points": [
+            [float(coordinate) for coordinate in load_point(mass)]
+            for mass in masses
+        ]
     }

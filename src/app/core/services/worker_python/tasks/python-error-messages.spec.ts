@@ -44,9 +44,7 @@ describe('formatPythonError', () => {
               'shared.python-errors.estimation-input-error': 'The estimation inputs are missing or invalid.',
               'shared.python-errors.estimation-not-converged-error':
                 'The target cannot be reached within the estimation bounds.',
-              'shared.python-errors.estimation-warning': 'The existing load on the estimated span was ignored.',
-              'shared.python-errors.effort-position-out-of-span-error':
-                'The distance to the reference support is outside the span.'
+              'shared.python-errors.estimation-warning': 'The existing load on the estimated span was ignored.'
             }
           },
           translocoConfig: {
@@ -73,8 +71,7 @@ describe('formatPythonError', () => {
     [PythonErrorCode.EstimateOnSplitSupportError, 'Estimation is not possible on a span split by a virtual support.'],
     [PythonErrorCode.EstimationInputError, 'The estimation inputs are missing or invalid.'],
     [PythonErrorCode.EstimationNotConvergedError, 'The target cannot be reached within the estimation bounds.'],
-    [PythonErrorCode.EstimationWarning, 'The existing load on the estimated span was ignored.'],
-    [PythonErrorCode.EffortPositionOutOfSpanError, 'The distance to the reference support is outside the span.']
+    [PythonErrorCode.EstimationWarning, 'The existing load on the estimated span was ignored.']
   ])('should return the localized estimation message for %s', (code, expected) => {
     expect(formatPythonError(code, translocoService)).toBe(expected);
   });

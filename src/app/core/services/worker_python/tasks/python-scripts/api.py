@@ -61,12 +61,6 @@ def calculate_cable_adjustment(js_inputs):
 
 
 @debug_log
-def estimate_cable_effort(js_inputs):
-    global study
-    return effort_estimation.estimate_cable_effort(js_inputs.to_py(), study)
-
-
-@debug_log
 def get_support_coordinates(js_inputs):
     return supports_coords.get_support_coordinates(js_to_python(js_inputs))
 
@@ -393,6 +387,18 @@ def estimate_load(js_inputs):
 def estimate_wind(js_inputs):
     global study
     return estimation.estimate_wind(js_to_python(js_inputs), study)
+
+
+@debug_log
+def estimate_effort(js_inputs):
+    global study
+    return effort_estimation.estimate_effort(js_to_python(js_inputs), study)
+
+
+@debug_log
+def get_load_points(js_inputs):
+    global study
+    return effort_estimation.get_load_points(js_to_python(js_inputs), study)
 
 
 # ---------------------------conformity----------------

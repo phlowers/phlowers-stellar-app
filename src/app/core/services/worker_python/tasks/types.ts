@@ -8,8 +8,6 @@
 import {
   CableAdjustmentInputs,
   CableAdjustmentResult,
-  CableEffortInputs,
-  CableEffortResult,
   CableSpanManipulation,
   CableSupportManipItem,
   CatalogCable,
@@ -50,8 +48,6 @@ export enum Task {
   calculateGuying = 'calculateGuying',
   // Calculate sighting angles at mid-span sag for cable adjustment
   calculateCableAdjustment = 'calculateCableAdjustment',
-  // Estimate the effort (traction or weight) displacing the cable by a target vertical distance
-  estimateCableEffort = 'estimateCableEffort',
   // Set Python logging level
   setLogLevel = 'setLogLevel',
   // Calculate cable temperature from ambient conditions
@@ -127,7 +123,11 @@ export enum Task {
   // Estimate the load mass giving a target distance to an obstacle
   estimateLoad = 'estimateLoad',
   // Estimate the wind pressure giving a target distance to an obstacle
-  estimateWind = 'estimateWind'
+  estimateWind = 'estimateWind',
+  // Estimate the load mass (traction or weight) giving a target vertical displacement of its application point
+  estimateEffort = 'estimateEffort',
+  // Get the load application point for each given load mass
+  getLoadPoints = 'getLoadPoints'
 }
 
 /**
@@ -190,9 +190,7 @@ export enum PythonErrorCode {
   // Raised when an estimation cannot reach its target within the search bounds
   EstimationNotConvergedError = 'EstimationNotConvergedError',
   // Warning raised when an existing load on the estimation target span is ignored
-  EstimationWarning = 'EstimationWarning',
-  // Raised when the load position of a cable effort estimation is outside the span
-  EffortPositionOutOfSpanError = 'EffortPositionOutOfSpanError'
+  EstimationWarning = 'EstimationWarning'
 }
 
 /**
@@ -400,8 +398,6 @@ export interface TaskInputs {
   };
   // Inputs for calculateCableAdjustment task
   [Task.calculateCableAdjustment]: CableAdjustmentInputs;
-  // Inputs for estimateCableEffort task
-  [Task.estimateCableEffort]: CableEffortInputs;
   // Inputs for setLogLevel task
   [Task.setLogLevel]: {
     activateDebugLogs: boolean;
@@ -587,6 +583,10 @@ export interface TaskInputs {
   [Task.estimateLoad]: EstimateLoadInputs;
   // Inputs for estimateWind task
   [Task.estimateWind]: EstimateWindInputs;
+  // Inputs for estimateEffort task
+  [Task.estimateEffort]: EstimateEffortInputs;
+  // Inputs for getLoadPoints task
+  [Task.getLoadPoints]: GetLoadPointsInputs;
 }
 
 /**
@@ -661,6 +661,40 @@ export interface EstimateRopeInputs extends EstimationBaseInputs {
   temperature?: number | null;
   // Fixed wind pressure in Pa
   windPressure?: number | null;
+}
+
+/**
+ * Inputs shared by the effort estimation tasks (estimateEffort, getLoadPoints).
+ *
+ * @category Worker Types
+ */
+export interface LoadPointBaseInputs {
+  // Index of the span (before manipulation) holding the load
+  spanIndex: number;
+  // Load position from the left support of the span in meters
+  loadPositionDistance: number;
+  // Fixed cable temperature in °C
+  temperature: number;
+}
+
+/**
+ * Inputs for the estimateEffort task (estimated value in kg: negative for a traction, positive for a weight).
+ *
+ * @category Worker Types
+ */
+export interface EstimateEffortInputs extends LoadPointBaseInputs {
+  // Target vertical displacement of the load application point in meters, positive upward
+  targetVerticalDisplacement: number;
+}
+
+/**
+ * Inputs for the getLoadPoints task.
+ *
+ * @category Worker Types
+ */
+export interface GetLoadPointsInputs extends LoadPointBaseInputs {
+  // Load masses in kg; a null mass gives the unloaded point
+  loadMasses: number[];
 }
 
 /**
@@ -934,8 +968,6 @@ export interface TaskOutputs {
   };
   // Output from calculateCableAdjustment task
   [Task.calculateCableAdjustment]: CableAdjustmentResult;
-  // Output from estimateCableEffort task
-  [Task.estimateCableEffort]: CableEffortResult;
   // Output from setLogLevel task
   [Task.setLogLevel]: { success: boolean };
   // Output from temperatureCalculation task
@@ -1040,4 +1072,8 @@ export interface TaskOutputs {
   [Task.estimateLoad]: EstimationResult;
   // Output from estimateWind task: wind pressure in Pa
   [Task.estimateWind]: EstimationResult;
+  // Output from estimateEffort task: load mass in kg
+  [Task.estimateEffort]: EstimationResult;
+  // Output from getLoadPoints task: load application point [x, y, z] in meters, one per load mass
+  [Task.getLoadPoints]: { points: [number, number, number][] };
 }

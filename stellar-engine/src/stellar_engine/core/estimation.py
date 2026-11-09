@@ -126,20 +126,22 @@ def _ice_thickness_meters(inputs: dict) -> float | None:
     return float(units(ice_thickness_cm, "cm").to("m").magnitude)
 
 
-def engine_span_index(study: SectionStudy, span_index: int) -> int:
+def _engine_span_index(study: SectionStudy, span_index: int) -> int:
     """Map a span index before manipulation to the balance engine one.
 
     Raises:
         InvalidManipulationIndex: If ``span_index`` is out of range.
         EstimateOnSplitSupportError: If the span is split by a virtual support.
     """
-    index = study.manipulation.span_index_after_virtual_support(span_index)
-    if index is None:
+    engine_span_index = study.manipulation.span_index_after_virtual_support(
+        span_index
+    )
+    if engine_span_index is None:
         raise EstimateOnSplitSupportError(
             f"Span {span_index} is split by a virtual support: "
             "estimation is not possible on this span."
         )
-    return index
+    return engine_span_index
 
 
 def _solve(
@@ -180,7 +182,7 @@ def estimate_temperature(inputs: dict, study: SectionStudy) -> dict:
     Specific inputs: ``targetDistance`` (m), optional ``windPressure`` and
     ``iceThickness``.
     """
-    span_index = engine_span_index(study, _index(inputs, "spanIndex"))
+    span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
     obstacle_point = _obstacle_point(inputs)
     target_distance = _positive_float(inputs, "targetDistance")
     wind_pressure = _optional_float(inputs, "windPressure")
@@ -205,7 +207,7 @@ def estimate_wind(inputs: dict, study: SectionStudy) -> dict:
     Specific inputs: ``targetDistance`` (m), optional ``temperature`` and
     ``iceThickness``.
     """
-    span_index = engine_span_index(study, _index(inputs, "spanIndex"))
+    span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
     obstacle_point = _obstacle_point(inputs)
     target_distance = _positive_float(inputs, "targetDistance")
     new_temperature = _optional_float(inputs, "temperature")

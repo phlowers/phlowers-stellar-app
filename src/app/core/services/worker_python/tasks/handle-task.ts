@@ -52,10 +52,6 @@ const tasks: Record<
     function: 'calculate_cable_adjustment',
     externalPackages: []
   },
-  [Task.estimateCableEffort]: {
-    function: 'estimate_cable_effort',
-    externalPackages: []
-  },
   [Task.setLogLevel]: {
     function: 'set_log_level',
     externalPackages: []
@@ -206,6 +202,14 @@ const tasks: Record<
   },
   [Task.estimateWind]: {
     function: 'estimate_wind',
+    externalPackages: []
+  },
+  [Task.estimateEffort]: {
+    function: 'estimate_effort',
+    externalPackages: []
+  },
+  [Task.getLoadPoints]: {
+    function: 'get_load_points',
     externalPackages: []
   }
 };

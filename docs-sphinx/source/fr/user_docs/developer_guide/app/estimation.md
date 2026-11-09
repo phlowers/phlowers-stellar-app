@@ -68,6 +68,25 @@ Le nom de la classe d'exception Python (ou le texte de l'avertissement) est rech
 
 Pour une nouvelle erreur ou un nouvel avertissement Python, ajoutez le nom de la classe d'exception comme valeur dans `PythonErrorCode`, définissez sa sévérité dans `python-error-severity.ts`, ajoutez la correspondance `shared.python-errors.*` dans `python-error-messages.ts`, puis ajoutez les traductions anglaise et française correspondantes dans `public/i18n/en.json` et `public/i18n/fr.json`. Vérifiez que le texte de l'exception ou de l'avertissement contient exactement la valeur de l'énumération. La recherche est fondée sur les sous-chaînes et la première correspondance dans l'ordre de déclaration de l'énumération est retenue ; évitez donc les codes qui se chevauchent et placez les valeurs les plus spécifiques avant les valeurs plus générales. Consultez [Ajouter des codes d'erreur et d'avertissement](how_to_add_error_codes.md) pour connaître le pipeline de diagnostic complet.
 
+## Estimation d'effort (traction ou poids)
+
+La fenêtre **Estimations** de la barre d'outils du Studio (`src/app/features/studio/estimations`) estime l'effort qui déplace verticalement le câble d'une portée d'une distance cible. Elle s'appuie sur deux tâches construites au-dessus du module d'estimation décrit ci-dessus, dans `stellar-engine/src/stellar_engine/tools/effort_estimation.py`. Elles réutilisent sa validation des entrées, sa conversion d'index de portée, le wrapper `_solve`, la sortie `EstimationResult` et les codes d'erreur, et ne modifient pas l'étude (les charges sont appliquées sur une copie du moteur d'équilibre).
+
+| Tâche | Fonction Python | Entrées | Sortie |
+|---|---|---|---|
+| `estimateEffort` | `estimate_effort` | `spanIndex`, `loadPositionDistance` (m depuis le support gauche de la portée, strictement positive), `temperature` (°C), `targetVerticalDisplacement` (m, positif vers le haut) | `EstimationResult` ; `value` est la masse de la charge en kg : négative pour une traction, positive pour un poids. |
+| `getLoadPoints` | `get_load_points` | `spanIndex`, `loadPositionDistance`, `temperature`, `loadMasses` (kg, une masse nulle donne le point sans charge) | `{ points: [x, y, z][] }` en mètres, un point d'application de la charge par masse. |
+
+`estimateLoad` n'est pas utilisée ici : elle vise une distance à un obstacle, et le calcul de distance de mechaphlowers échoue quand le plan de l'obstacle est proche du nœud de charge, systématiquement pour une traction (masse négative). `estimateEffort` vise à la place l'altitude du point d'application de la charge. Les masses élevées font diverger le solveur d'équilibre : l'intervalle de recherche s'élargit donc progressivement à partir de 50 kg, en doublant jusqu'à 20 000 kg. Une cible non atteinte dans cette plage, ou un échec du solveur pendant l'élargissement, déclenche `EstimationNotConvergedError`. Une charge déjà présente sur la portée est remplacée, comme pour `estimateLoad`.
+
+Le frontend convertit le formulaire avant d'appeler les tâches : une distance mesurée depuis le support droit devient `longueur de portée - distance`, et un déplacement vers le bas devient un `targetVerticalDisplacement` négatif. L'effort affiché (daN) est la masse estimée (1 daN = 1 kg avec la convention 10 m/s²). Le déplacement selon l'axe de la portée vaut `|x(masse) - x(0)|`, calculé avec `getLoadPoints` et `loadMasses: [0, masse]`.
+
+Test Python ciblé :
+
+```bash
+cd stellar-engine && uv run pytest test/tools/test_effort_estimation.py -q -p no:logging
+```
+
 ## Limitation connue : direction du vent
 
 Stellar configure la direction du vent en `clockwise`, mais l'estimateur mechaphlowers applique actuellement toujours le vent en `anticlockwise`. Cela peut affecter les résultats de l'estimation du vent. Lorsque l'implémentation du moteur mechaphlowers sera mise à jour pour corriger cette divergence, reconstruisez le wheel du moteur local et les assets associés avec :

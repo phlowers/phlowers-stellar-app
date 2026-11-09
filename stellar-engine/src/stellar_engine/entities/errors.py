@@ -15,19 +15,6 @@ class _Errors:
         return f"Unsupported symmetryType: {symmetry_type}. Expected 'dis_symmetric' or 'symmetric'"
 
     @staticmethod
-    def effort_position_out_of_span(
-        distance: float, span_length: float
-    ) -> str:
-        return (
-            f"Distance {distance} m to the reference support is outside "
-            f"the span (length {span_length} m)"
-        )
-
-    @staticmethod
-    def effort_target_unreachable(displacement: float) -> str:
-        return f"No effort found for a displacement of {displacement} m"
-
-    @staticmethod
     def cut_strands_layer_count_mismatch(
         input_count: int, layer_count: int
     ) -> str:
@@ -126,10 +113,6 @@ class NightTimeError(ValueError):
 
 class ConformityInputError(ValueError):
     """Raised when a conformity input is missing or invalid."""
-
-
-class EffortPositionOutOfSpanError(ValueError):
-    """Raised when the load position of an effort estimation is outside the span."""
 
 
 class SelectorInputError(ValueError):

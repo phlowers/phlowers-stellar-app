@@ -23,12 +23,11 @@ import { ButtonComponent } from '@shared/components/atoms/button/button.componen
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@services/worker_python/tasks/types';
+import { Task, TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
 import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { CableEffortDirection, CableEffortResult } from '@shared/domain';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import {
@@ -53,14 +52,18 @@ import {
   TEMPERATURE_MIN
 } from '@features/studio/estimations/domain/effort-estimation.constantes';
 import {
+  EffortEstimationDirection,
+  EffortEstimationResults,
   EffortEstimationSpan,
   EffortEstimationSupportSide
 } from '@features/studio/estimations/domain/effort-estimation.interfaces';
 import {
   formatResultForClipboard,
   maxSpanLengthValidator,
-  toCableEffortInputs,
-  toDisplayedResults
+  toDisplayedResults,
+  toEffortEstimationResults,
+  toEstimateEffortInputs,
+  toGetLoadPointsInputs
 } from '@features/studio/estimations/presentation/effort-estimation.helpers';
 
 @Component({
@@ -111,7 +114,7 @@ export class EffortEstimationComponent {
       maxDecimalsValidator(DISTANCE_DECIMALS)
     ]),
     temperature: createNumberControl(TEMPERATURE_MIN, TEMPERATURE_MAX, TEMPERATURE_DECIMALS, TEMPERATURE_DEFAULT),
-    direction: new FormControl<CableEffortDirection>(DEFAULT_DIRECTION, { nonNullable: true }),
+    direction: new FormControl<EffortEstimationDirection>(DEFAULT_DIRECTION, { nonNullable: true }),
     targetDisplacement: createNumberControl(
       DISPLACEMENT_MIN,
       DISPLACEMENT_MAX,
@@ -135,7 +138,7 @@ export class EffortEstimationComponent {
     () => this.formValid() && this.spanLength() !== null && !this.isCalculating() && !this.resultsMatchInputs()
   );
 
-  readonly results = signal<CableEffortResult | null>(null);
+  readonly results = signal<EffortEstimationResults | null>(null);
   readonly displayedResults = computed(() => {
     const results = this.results();
     return results ? toDisplayedResults(results) : null;
@@ -163,18 +166,23 @@ export class EffortEstimationComponent {
 
   async calculate(): Promise<void> {
     this.form.markAllAsTouched();
-    const inputs = this.canCalculate() ? toCableEffortInputs(this.form.getRawValue()) : null;
+    const inputs = this.canCalculate() ? toEstimateEffortInputs(this.form.getRawValue(), this.spanLength()) : null;
     if (!inputs) return;
 
     this.isCalculating.set(true);
     // No events: enabling back would otherwise allow a new calculation on unchanged inputs
     this.form.disable({ emitEvent: false });
     let diagnostics: PythonDiagnostic[] = [];
-    try {
-      const outcome = await this.workerPythonService.runTask(Task.estimateCableEffort, inputs);
+    const run = async <T extends Task>(task: T, taskInputs: TaskInputs[T]): Promise<TaskOutputs[T]> => {
+      const outcome = await this.workerPythonService.runTask(task, taskInputs);
       diagnostics = outcome.diagnostics ?? [];
       if (outcome.error) throw new Error(outcome.error);
-      this.results.set(outcome.result);
+      return outcome.result;
+    };
+    try {
+      const estimation = await run(Task.estimateEffort, inputs);
+      const loadPoints = await run(Task.getLoadPoints, toGetLoadPointsInputs(inputs, estimation.value));
+      this.results.set(toEffortEstimationResults(estimation, loadPoints));
       this.resultsMatchInputs.set(true);
     } catch (error) {
       this.logger.error('Failed to estimate the cable effort', error);

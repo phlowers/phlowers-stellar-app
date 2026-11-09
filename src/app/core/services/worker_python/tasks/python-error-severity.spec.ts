@@ -27,7 +27,6 @@ describe('PYTHON_ERROR_SEVERITY', () => {
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimateOnSplitSupportError]).toBe('error');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationInputError]).toBe('error');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationNotConvergedError]).toBe('error');
-    expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EffortPositionOutOfSpanError]).toBe('error');
   });
 
   it('should classify warning-like codes as warning', () => {

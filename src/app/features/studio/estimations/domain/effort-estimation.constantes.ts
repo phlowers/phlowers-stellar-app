@@ -5,8 +5,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { CableEffortDirection } from '@shared/domain';
-import { EffortEstimationDirectionOption } from '@features/studio/estimations/domain/effort-estimation.interfaces';
+import {
+  EffortEstimationDirection,
+  EffortEstimationDirectionOption
+} from '@features/studio/estimations/domain/effort-estimation.interfaces';
 
 export const DISTANCE_MIN = 0;
 export const DISTANCE_DECIMALS = 2;
@@ -24,7 +26,7 @@ export const DISPLACEMENT_DEFAULT = 0;
 
 export const RESULT_DECIMALS = 2;
 
-export const DEFAULT_DIRECTION: CableEffortDirection = 'UP';
+export const DEFAULT_DIRECTION: EffortEstimationDirection = 'UP';
 
 export const INPUT_LIMITS = {
   // the maximum distance is the length of the selected span

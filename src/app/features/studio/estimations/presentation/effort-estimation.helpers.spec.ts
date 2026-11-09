@@ -11,8 +11,10 @@ import {
   formatResultForClipboard,
   maxSpanLengthValidator,
   roundResult,
-  toCableEffortInputs,
-  toDisplayedResults
+  toDisplayedResults,
+  toEffortEstimationResults,
+  toEstimateEffortInputs,
+  toGetLoadPointsInputs
 } from '@features/studio/estimations/presentation/effort-estimation.helpers';
 
 const FORM_VALUE: EffortEstimationFormValue = {
@@ -24,17 +26,19 @@ const FORM_VALUE: EffortEstimationFormValue = {
   targetDisplacement: 3
 };
 
+const SPAN_LENGTH = 400;
+const EFFORT_INPUTS = { spanIndex: 2, loadPositionDistance: 279.5, temperature: 15, targetVerticalDisplacement: -3 };
+
 describe('effort-estimation helpers', () => {
-  describe('toCableEffortInputs', () => {
-    it('should map the form value to the engine inputs', () => {
-      expect(toCableEffortInputs(FORM_VALUE)).toEqual({
-        spanIndex: 2,
-        referenceSupport: 'RIGHT',
-        distanceToReferenceSupport: 120.5,
-        temperature: 15,
-        targetDisplacement: 3,
-        direction: 'DOWN'
-      });
+  describe('toEstimateEffortInputs', () => {
+    it('should measure the load position from the left support and the displacement downward', () => {
+      expect(toEstimateEffortInputs(FORM_VALUE, SPAN_LENGTH)).toEqual(EFFORT_INPUTS);
+    });
+
+    it('should keep the distance from the left support and the displacement upward', () => {
+      expect(toEstimateEffortInputs({ ...FORM_VALUE, referenceSupport: 'LEFT', direction: 'UP' }, SPAN_LENGTH)).toEqual(
+        { ...EFFORT_INPUTS, loadPositionDistance: 120.5, targetVerticalDisplacement: 3 }
+      );
     });
 
     it.each([
@@ -44,7 +48,36 @@ describe('effort-estimation helpers', () => {
       ['temperature', { temperature: null }],
       ['targetDisplacement', { targetDisplacement: null }]
     ])('should return null while %s is missing', (_name, missing) => {
-      expect(toCableEffortInputs({ ...FORM_VALUE, ...missing })).toBeNull();
+      expect(toEstimateEffortInputs({ ...FORM_VALUE, ...missing }, SPAN_LENGTH)).toBeNull();
+    });
+
+    it('should return null while the span length is unknown', () => {
+      expect(toEstimateEffortInputs(FORM_VALUE, null)).toBeNull();
+    });
+  });
+
+  describe('toGetLoadPointsInputs', () => {
+    it('should locate the application point without load and with the estimated mass', () => {
+      expect(toGetLoadPointsInputs(EFFORT_INPUTS, 92.3)).toEqual({
+        spanIndex: 2,
+        loadPositionDistance: 279.5,
+        temperature: 15,
+        loadMasses: [0, 92.3]
+      });
+    });
+  });
+
+  describe('toEffortEstimationResults', () => {
+    it('should give the mass as effort and the absolute move of the point along the span axis', () => {
+      const estimation = { value: -45.678, residual: 0.001, iterations: 6, converged: true };
+      const loadPoints = {
+        points: [
+          [103.5, 10, 50],
+          [100.25, 10, 52]
+        ] as [number, number, number][]
+      };
+
+      expect(toEffortEstimationResults(estimation, loadPoints)).toEqual({ effort: -45.678, xDisplacement: 3.25 });
     });
   });
 

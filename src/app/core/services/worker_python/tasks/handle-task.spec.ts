@@ -89,18 +89,6 @@ describe('Task handlers', () => {
       expect(result.error).toBeNull();
     });
 
-    it('should call estimate_cable_effort for the estimateCableEffort task', async () => {
-      const mockResult = { effort: -12.5, xDisplacement: 3.2 };
-      const mockToJs = vi.fn().mockReturnValue(mockResult);
-      (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }));
-
-      const result = await handleTask(mockPyodide, Task.estimateCableEffort, undefined);
-
-      expect(mockPyodide.globals.get).toHaveBeenCalledWith('estimate_cable_effort');
-      expect(result.result).toEqual(mockResult);
-      expect(result.error).toBeNull();
-    });
-
     it.each([
       [Task.estimateRope, 'estimate_rope'],
       [Task.estimateTemperature, 'estimate_temperature'],
@@ -111,6 +99,22 @@ describe('Task handlers', () => {
       const mockToJs = vi.fn().mockReturnValue(mockResult);
       (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }));
       const inputs = { spanIndex: 0, obstaclePoint: [250, 10, 20], targetDistance: 30 };
+
+      const result = await handleTask(mockPyodide, task, inputs as never);
+
+      expect(mockPyodide.globals.set).toHaveBeenCalledWith('js_inputs', inputs);
+      expect(mockPyodide.globals.get).toHaveBeenCalledWith(pythonFunction);
+      expect(result.result).toEqual(mockResult);
+      expect(result.error).toBeNull();
+    });
+
+    it.each([
+      [Task.estimateEffort, 'estimate_effort', { value: -12.5, residual: 0.001, iterations: 6, converged: true }],
+      [Task.getLoadPoints, 'get_load_points', { points: [[250, 10, 60]] }]
+    ])('should call the matching Python function for the %s task', async (task, pythonFunction, mockResult) => {
+      const mockToJs = vi.fn().mockReturnValue(mockResult);
+      (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }));
+      const inputs = { spanIndex: 0, loadPositionDistance: 250, temperature: 15 };
 
       const result = await handleTask(mockPyodide, task, inputs as never);
 
@@ -190,11 +194,6 @@ describe('Task handlers', () => {
       [
         'mechaphlowers.entities.errors.EstimateOnSplitSupportError: Span 0 is split by a virtual support',
         'EstimateOnSplitSupportError',
-        'CALCULATION_ERROR'
-      ],
-      [
-        'stellar_engine.entities.errors.EffortPositionOutOfSpanError: Distance 600.0 m to the reference support is outside the span (length 500.0 m)',
-        'EffortPositionOutOfSpanError',
         'CALCULATION_ERROR'
       ]
     ])('should extract the estimation error code from "%s"', async (rawText, code, taskError) => {

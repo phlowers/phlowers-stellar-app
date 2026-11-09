@@ -4,6 +4,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import math
+
 import pytest
 from mechaphlowers.entities.errors import (
     ConvergenceError,
@@ -12,19 +14,31 @@ from mechaphlowers.entities.errors import (
 )
 
 from stellar_engine.entities.errors import (
-    EffortPositionOutOfSpanError,
+    EstimationInputError,
     EstimationNotConvergedError,
 )
 from stellar_engine.tools import effort_estimation
-from stellar_engine.tools.effort_estimation import estimate_cable_effort
+from stellar_engine.tools.effort_estimation import (
+    estimate_effort,
+    get_load_points,
+)
 
-INPUTS = {
+RESULT_KEYS = {"value", "residual", "iterations", "converged"}
+LOAD_INPUTS = {
     "spanIndex": 0,
-    "referenceSupport": "LEFT",
-    "distanceToReferenceSupport": 250.0,
+    "loadPositionDistance": 250.0,
     "temperature": 15.0,
-    "targetDisplacement": 2.0,
-    "direction": "DOWN",
+}
+INPUTS = {**LOAD_INPUTS, "targetVerticalDisplacement": -2.0}
+VIRTUAL_SUPPORT_ON_FIRST_SPAN = {
+    0: {
+        "x": 100.0,
+        "y": 0.0,
+        "z": 60.0,
+        "insulator_length": 3.0,
+        "insulator_mass": 500.0,
+        "hanging_cable_point_from_left_support": 100.0,
+    }
 }
 
 
@@ -35,115 +49,141 @@ def solved_study(study_base):
     return study_base
 
 
-def test_down_displacement_gives_a_positive_weight(solved_study):
-    result = estimate_cable_effort(INPUTS, solved_study)
+def vertical_displacement(study, mass: float) -> float:
+    unloaded, loaded = get_load_points(
+        {**LOAD_INPUTS, "loadMasses": [0.0, mass]}, study
+    )["points"]
+    return loaded[2] - unloaded[2]
 
-    assert set(result.keys()) == {"effort", "xDisplacement"}
-    assert result["effort"] > 0
-    assert result["xDisplacement"] >= 0
+
+def test_downward_displacement_gives_a_positive_weight(solved_study):
+    result = estimate_effort(INPUTS, solved_study)
+
+    assert set(result.keys()) == RESULT_KEYS
+    assert result["converged"] is True
+    assert result["value"] > 0
+    assert vertical_displacement(solved_study, result["value"]) == (
+        pytest.approx(-2.0, abs=0.01)
+    )
 
 
-def test_up_displacement_gives_a_negative_traction(solved_study):
-    result = estimate_cable_effort({**INPUTS, "direction": "UP"}, solved_study)
+def test_upward_displacement_gives_a_negative_traction(solved_study):
+    result = estimate_effort(
+        {**INPUTS, "targetVerticalDisplacement": 2.0}, solved_study
+    )
 
-    assert result["effort"] < 0
-    assert result["xDisplacement"] >= 0
+    assert result["value"] < 0
+    assert vertical_displacement(solved_study, result["value"]) == (
+        pytest.approx(2.0, abs=0.01)
+    )
 
 
 def test_larger_displacement_needs_a_larger_effort(solved_study):
-    small = estimate_cable_effort(INPUTS, solved_study)
-    large = estimate_cable_effort(
-        {**INPUTS, "targetDisplacement": 4.0}, solved_study
+    small = estimate_effort(INPUTS, solved_study)
+    large = estimate_effort(
+        {**INPUTS, "targetVerticalDisplacement": -4.0}, solved_study
     )
 
-    assert abs(large["effort"]) > abs(small["effort"])
+    assert large["value"] > small["value"]
 
 
 def test_zero_displacement_needs_no_effort(solved_study):
-    result = estimate_cable_effort(
-        {**INPUTS, "targetDisplacement": 0.0}, solved_study
+    result = estimate_effort(
+        {**INPUTS, "targetVerticalDisplacement": 0.0}, solved_study
     )
 
-    assert result == {"effort": 0.0, "xDisplacement": 0.0}
-
-
-def test_right_reference_support_mirrors_the_left_one(solved_study):
-    from_left = estimate_cable_effort(INPUTS, solved_study)
-    from_right = estimate_cable_effort(
-        {**INPUTS, "referenceSupport": "RIGHT"}, solved_study
-    )
-
-    assert from_left["effort"] == pytest.approx(from_right["effort"], rel=0.1)
+    assert result == {
+        "value": 0.0,
+        "residual": 0.0,
+        "iterations": 0,
+        "converged": True,
+    }
 
 
 def test_study_is_left_untouched(solved_study):
     before = solved_study.balance_engine.span_loads.load_mass.copy()
 
-    estimate_cable_effort(INPUTS, solved_study)
+    estimate_effort(INPUTS, solved_study)
+    get_load_points({**LOAD_INPUTS, "loadMasses": [100.0]}, solved_study)
 
     assert (solved_study.balance_engine.span_loads.load_mass == before).all()
 
 
-def test_distance_outside_the_span_raises(solved_study):
-    with pytest.raises(EffortPositionOutOfSpanError, match="outside"):
-        estimate_cable_effort(
-            {**INPUTS, "distanceToReferenceSupport": 600.0}, solved_study
+def test_load_points_follow_the_masses(solved_study):
+    points = get_load_points(
+        {**LOAD_INPUTS, "loadMasses": [0.0, 100.0, -100.0]}, solved_study
+    )["points"]
+
+    assert len(points) == 3
+    assert all(len(point) == 3 for point in points)
+    assert all(isinstance(value, float) for point in points for value in point)
+    unloaded, weighted, pulled = points
+    assert weighted[2] < unloaded[2] < pulled[2]
+
+
+def test_no_load_mass_gives_no_point(solved_study):
+    assert get_load_points(
+        {**LOAD_INPUTS, "loadMasses": []}, solved_study
+    ) == {"points": []}
+
+
+@pytest.mark.parametrize(
+    "inputs",
+    [
+        {**INPUTS, "spanIndex": None},
+        {**INPUTS, "spanIndex": -1},
+        {**INPUTS, "loadPositionDistance": 0.0},
+        {**INPUTS, "temperature": None},
+        {**INPUTS, "targetVerticalDisplacement": None},
+        {**INPUTS, "targetVerticalDisplacement": math.nan},
+    ],
+)
+def test_invalid_effort_inputs_raise_estimation_input_error(
+    solved_study, inputs: dict
+):
+    with pytest.raises(EstimationInputError):
+        estimate_effort(inputs, solved_study)
+
+
+@pytest.mark.parametrize(
+    "inputs",
+    [
+        LOAD_INPUTS,
+        {**LOAD_INPUTS, "loadMasses": [math.inf]},
+        {**LOAD_INPUTS, "loadMasses": ["heavy"]},
+    ],
+)
+def test_invalid_load_points_inputs_raise_estimation_input_error(
+    solved_study, inputs: dict
+):
+    with pytest.raises(EstimationInputError):
+        get_load_points(inputs, solved_study)
+
+
+def test_unreachable_displacement_raises_not_converged(solved_study):
+    with pytest.raises(EstimationNotConvergedError, match="did not converge"):
+        estimate_effort(
+            {**INPUTS, "targetVerticalDisplacement": 150.0}, solved_study
         )
 
 
-def test_unreachable_displacement_raises(solved_study):
-    with pytest.raises(EstimationNotConvergedError, match="No effort found"):
-        estimate_cable_effort(
-            {**INPUTS, "targetDisplacement": 150.0, "direction": "UP"},
-            solved_study,
-        )
-
-
-def test_span_split_by_a_virtual_support_raises(solved_study):
-    solved_study.set_virtual_support(
-        {
-            0: {
-                "x": 100.0,
-                "y": 0.0,
-                "z": 60.0,
-                "insulator_length": 3.0,
-                "insulator_mass": 500.0,
-                "hanging_cable_point_from_left_support": 100.0,
-            }
-        }
+def test_unbracketed_target_raises_not_converged(solved_study, monkeypatch):
+    monkeypatch.setattr(
+        effort_estimation, "_bracket_mass", lambda objective, sign: None
     )
 
-    with pytest.raises(EstimateOnSplitSupportError, match="split"):
-        estimate_cable_effort(INPUTS, solved_study)
+    with pytest.raises(EstimationNotConvergedError, match="did not converge"):
+        estimate_effort(INPUTS, solved_study)
 
 
-def test_unknown_span_raises_the_manipulation_error(solved_study):
-    with pytest.raises(InvalidManipulationIndex):
-        estimate_cable_effort({**INPUTS, "spanIndex": 99}, solved_study)
-
-
-def test_solver_failure_is_reported_as_an_unreachable_displacement(
-    solved_study, monkeypatch
-):
-    def diverging_bracket(objective, sign):
-        raise ConvergenceError("diverged")
-
-    monkeypatch.setattr(effort_estimation, "_bracket_mass", diverging_bracket)
-
-    with pytest.raises(EstimationNotConvergedError, match="No effort found"):
-        estimate_cable_effort(INPUTS, solved_study)
-
-
-def test_plain_value_error_is_reported_as_an_unreachable_displacement(
-    solved_study, monkeypatch
-):
+def test_plain_value_error_raises_not_converged(solved_study, monkeypatch):
     def not_computable(objective, sign):
         raise ValueError("NaN displacement")
 
     monkeypatch.setattr(effort_estimation, "_bracket_mass", not_computable)
 
     with pytest.raises(EstimationNotConvergedError):
-        estimate_cable_effort(INPUTS, solved_study)
+        estimate_effort(INPUTS, solved_study)
 
 
 def test_typed_engine_errors_keep_their_own_error(solved_study, monkeypatch):
@@ -153,32 +193,28 @@ def test_typed_engine_errors_keep_their_own_error(solved_study, monkeypatch):
     monkeypatch.setattr(effort_estimation, "_bracket_mass", typed_error)
 
     with pytest.raises(InvalidManipulationIndex):
-        estimate_cable_effort(INPUTS, solved_study)
+        estimate_effort(INPUTS, solved_study)
 
 
-def test_programming_errors_are_not_masked(solved_study, monkeypatch):
-    def broken(objective, sign):
-        raise KeyError("bug")
-
-    monkeypatch.setattr(effort_estimation, "_bracket_mass", broken)
-
-    with pytest.raises(KeyError):
-        estimate_cable_effort(INPUTS, solved_study)
+def test_span_out_of_range_raises_invalid_manipulation_index(solved_study):
+    with pytest.raises(InvalidManipulationIndex):
+        estimate_effort({**INPUTS, "spanIndex": 99}, solved_study)
 
 
-def test_unbracketed_target_is_reported_as_unreachable(
-    solved_study, monkeypatch
+@pytest.mark.parametrize(
+    "run, inputs",
+    [
+        (estimate_effort, INPUTS),
+        (get_load_points, {**LOAD_INPUTS, "loadMasses": [0.0]}),
+    ],
+)
+def test_split_span_raises_estimate_on_split_support_error(
+    solved_study, run, inputs: dict
 ):
-    monkeypatch.setattr(
-        effort_estimation, "_bracket_mass", lambda objective, sign: None
-    )
+    solved_study.set_virtual_support(VIRTUAL_SUPPORT_ON_FIRST_SPAN)
 
-    with pytest.raises(EstimationNotConvergedError, match="No effort found"):
-        estimate_cable_effort(INPUTS, solved_study)
-
-
-def test_bracket_mass_returns_none_without_sign_change():
-    assert effort_estimation._bracket_mass(lambda mass: 1.0, 1.0) is None
+    with pytest.raises(EstimateOnSplitSupportError, match="split"):
+        run(inputs, solved_study)
 
 
 def test_bracket_mass_finds_the_interval_of_a_traction():
@@ -187,3 +223,16 @@ def test_bracket_mass_finds_the_interval_of_a_traction():
     )
 
     assert low < -120.0 < high
+
+
+def test_bracket_mass_returns_none_without_sign_change():
+    assert effort_estimation._bracket_mass(lambda mass: 1.0, 1.0) is None
+
+
+def test_bracket_mass_returns_none_when_the_solver_fails():
+    def objective(mass: float) -> float:
+        if abs(mass) > 1.0:
+            raise ConvergenceError("diverged")
+        return 1.0
+
+    assert effort_estimation._bracket_mass(objective, 1.0) is None

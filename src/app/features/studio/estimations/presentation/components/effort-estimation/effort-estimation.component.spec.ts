@@ -30,7 +30,20 @@ const makeSection = (): Section =>
     ]
   }) as unknown as Section;
 
-const ENGINE_RESULT = { effort: -45.678, xDisplacement: 3.2149 };
+const ESTIMATION_RESULT = { value: -45.678, residual: 0.001, iterations: 6, converged: true };
+// The application point moves by 3.2149 m along the span axis
+const LOAD_POINTS = {
+  points: [
+    [100, 10, 50],
+    [103.2149, 10, 52]
+  ]
+};
+
+const taskOutcome = (task: Task, value = ESTIMATION_RESULT.value) => ({
+  result: task === Task.estimateEffort ? { ...ESTIMATION_RESULT, value } : LOAD_POINTS,
+  error: null,
+  diagnostics: []
+});
 
 describe('EffortEstimationComponent', () => {
   let component: EffortEstimationComponent;
@@ -70,7 +83,7 @@ describe('EffortEstimationComponent', () => {
 
   beforeEach(async () => {
     mockWorkerPythonService = {
-      runTask: vi.fn().mockResolvedValue({ result: ENGINE_RESULT, error: null, diagnostics: [] })
+      runTask: vi.fn().mockImplementation(async (task: Task) => taskOutcome(task))
     };
     mockNotificationService = { error: vi.fn(), success: vi.fn() };
     mockLogger = { error: vi.fn() };
@@ -90,7 +103,7 @@ describe('EffortEstimationComponent', () => {
               'common.error-occurred-label': 'An error occurred',
               'shared.python-errors.estimation-not-converged-error': 'The target cannot be reached.',
               'shared.python-errors.estimate-on-split-support-error': 'Span split by a virtual support.',
-              'shared.python-errors.effort-position-out-of-span-error': 'The distance is outside the span.',
+              'shared.python-errors.estimation-input-error': 'The estimation inputs are invalid.',
               'studio.effort-estimation.up': 'Up',
               'studio.effort-estimation.down': 'Down',
               'studio.effort-estimation.copied': 'Effort copied',
@@ -315,7 +328,7 @@ describe('EffortEstimationComponent', () => {
       expect(calculateBtn().disabled).toBe(true);
     });
 
-    it('runs the estimation with every field (CAL-BTN.2)', async () => {
+    it('runs the estimation with every field, measured from the right support downward (CAL-BTN.2)', async () => {
       typeIn('distance-input', '120.5');
       typeIn('target-displacement-input', '3');
       component.form.controls.direction.setValue('DOWN');
@@ -323,13 +336,38 @@ describe('EffortEstimationComponent', () => {
 
       await calculate();
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.estimateCableEffort, {
+      expect(mockWorkerPythonService.runTask).toHaveBeenNthCalledWith(1, Task.estimateEffort, {
         spanIndex: 0,
-        referenceSupport: 'RIGHT',
-        distanceToReferenceSupport: 120.5,
+        loadPositionDistance: 190,
         temperature: 15,
-        targetDisplacement: 3,
-        direction: 'DOWN'
+        targetVerticalDisplacement: -3
+      });
+    });
+
+    it('runs the estimation from the left support upward', async () => {
+      typeIn('distance-input', '120.5');
+      typeIn('target-displacement-input', '3');
+
+      await calculate();
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenNthCalledWith(1, Task.estimateEffort, {
+        spanIndex: 0,
+        loadPositionDistance: 120.5,
+        temperature: 15,
+        targetVerticalDisplacement: 3
+      });
+    });
+
+    it('locates the application point without load and with the estimated mass', async () => {
+      typeIn('distance-input', '120.5');
+
+      await calculate();
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenNthCalledWith(2, Task.getLoadPoints, {
+        spanIndex: 0,
+        loadPositionDistance: 120.5,
+        temperature: 15,
+        loadMasses: [0, ESTIMATION_RESULT.value]
       });
     });
 
@@ -367,7 +405,7 @@ describe('EffortEstimationComponent', () => {
       expect(calculateBtn().disabled).toBe(true);
       expect(getByTestId('effort-estimation-form')?.getAttribute('aria-busy')).toBe('true');
 
-      release({ result: ENGINE_RESULT, error: null, diagnostics: [] });
+      release(taskOutcome(Task.estimateEffort));
       await pending;
       fixture.detectChanges();
       expect(getByTestId('effort-estimation-form')?.getAttribute('aria-busy')).toBe('false');
@@ -418,11 +456,7 @@ describe('EffortEstimationComponent', () => {
     });
 
     it('shows the effort as a weight when positive (EFF-RES.1)', async () => {
-      mockWorkerPythonService.runTask.mockResolvedValue({
-        result: { effort: 120, xDisplacement: 0 },
-        error: null,
-        diagnostics: []
-      });
+      mockWorkerPythonService.runTask.mockImplementation(async (task: Task) => taskOutcome(task, 120));
       typeIn('temperature-input', '20');
       await calculate();
       expect(textOf('effort-value')).toBe('120.00 daN');
@@ -472,7 +506,7 @@ describe('EffortEstimationComponent', () => {
     it.each([
       [PythonErrorCode.EstimationNotConvergedError, 'The target cannot be reached.'],
       [PythonErrorCode.EstimateOnSplitSupportError, 'Span split by a virtual support.'],
-      [PythonErrorCode.EffortPositionOutOfSpanError, 'The distance is outside the span.']
+      [PythonErrorCode.EstimationInputError, 'The estimation inputs are invalid.']
     ])('notifies the specific message of the Python error %s', async (code, message) => {
       mockWorkerPythonService.runTask.mockResolvedValue({
         result: null,
@@ -484,6 +518,19 @@ describe('EffortEstimationComponent', () => {
       expect(mockNotificationService.error).toHaveBeenCalledWith(message);
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to estimate the cable effort', expect.any(Error));
       expect(component.results()).toBeNull();
+    });
+
+    it('notifies a failure while locating the application point', async () => {
+      mockWorkerPythonService.runTask.mockImplementation(async (task: Task) =>
+        task === Task.estimateEffort
+          ? taskOutcome(task)
+          : { result: null, error: 'CALCULATION_ERROR' as unknown as TaskError, diagnostics: [] }
+      );
+      await calculate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith('An error occurred');
+      expect(component.results()).toBeNull();
+      expect(getByTestId('results-frame')).toBeNull();
     });
 
     it('falls back to the generic message when only a warning diagnostic comes with the error', async () => {
