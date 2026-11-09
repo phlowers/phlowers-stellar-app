@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { TranslocoService } from '@jsverse/transloco';
+import { isNumber } from 'lodash';
 import { isDaylightSavingTime } from '@shared/domain/helpers/field-measure.helpers';
 import {
   SelectOption,
@@ -14,7 +15,8 @@ import {
   TIME_MODE_OPTION_KEYS,
   SKY_COVER_OPTION_SOURCES,
   LEFT_SUPPORT_OPTION_KEYS,
-  MEASURED_SOLAR_FLUX_BOUNDS
+  MEASURED_SOLAR_FLUX_BOUNDS,
+  TRANSIT_BOUNDS
 } from './constants';
 import { TANGENT_AIMING_CALCULATION_TYPE } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 
@@ -133,22 +135,22 @@ export const getSpanLocalization = (
  * @param name - The raw measure name
  * @returns A sanitized, filename-safe string (falls back to `field-measure` when empty after sanitizing)
  */
-const sanitizeFilename = (name: string): string =>
+export const sanitizeFilename = (name: string): string =>
   name
     .trim()
     // eslint-disable-next-line no-control-regex
     .replace(/[\\/:*?"<>|\x00-\x1f]/g, '') || 'field-measure';
 
 /**
- * Formats a generation date as `YYYY-MM-DD` in local time.
- * @param date - The generation date
+ * Formats a date as `YYYY-MM-DD` (or `YYYY-MM-DD HH-mm` with `withTime`) in local time.
+ * @param date - The date to format
+ * @param withTime - Appends the hours and minutes (`-` separated, usable in a file name)
  * @returns The formatted date segment
  */
-const formatGenerationDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+export const formatGenerationDate = (date: Date, withTime = false): string => {
+  const pad = (value: number): string => String(value).padStart(2, '0');
+  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return withTime ? `${day} ${pad(date.getHours())}-${pad(date.getMinutes())}` : day;
 };
 
 /**
@@ -355,3 +357,61 @@ export const clearAutoParameter15C = (data: FieldMeasure): FieldMeasure =>
  */
 export const resetInactive15CMode = (data: FieldMeasure): FieldMeasure =>
   data.updateMode15C === 'manual' ? data : { ...data, manualParameterCalculation15CWithoutWind: null };
+
+/**
+ * Whether every PAPOTO input is filled.
+ * @param data - The field measure
+ * @returns `true` when the PAPOTO form can be calculated
+ */
+export const isPapotoDataValid = (data: FieldMeasure): boolean =>
+  !!(
+    data.leftSupport &&
+    data.spanLength != null &&
+    data.measuredElevationDifference != null &&
+    data.HL != null &&
+    data.H1 != null &&
+    data.H2 != null &&
+    data.H3 != null &&
+    data.HR != null &&
+    data.VL != null &&
+    data.V1 != null &&
+    data.V2 != null &&
+    data.V3 != null &&
+    data.VR != null
+  );
+
+/**
+ * Whether the "Temperature calculation" inputs are filled and within their bounds.
+ * @param data - The field measure
+ * @returns `true` when the temperature calculation form is valid
+ */
+export const isTemperatureDataValid = (data: FieldMeasure): boolean => {
+  const { transit, measuredDiffusedPlusDirectSolarFlux: solarFlux } = data;
+  const isTransitOutOfBounds = isNumber(transit) && (transit < TRANSIT_BOUNDS.min || transit > TRANSIT_BOUNDS.max);
+  const isSolarFluxOutOfBounds =
+    isNumber(solarFlux) && (solarFlux < MEASURED_SOLAR_FLUX_BOUNDS.min || solarFlux > MEASURED_SOLAR_FLUX_BOUNDS.max);
+  return (
+    data.cableName !== null &&
+    transit !== null &&
+    data.skyCover !== null &&
+    !isTransitOutOfBounds &&
+    !isSolarFluxOutOfBounds
+  );
+};
+
+/**
+ * Whether the manual "Parameter at 15°C without wind" inputs are filled, uncertainties being positive.
+ * @param data - The field measure
+ * @returns `true` when the manual inputs are valid
+ */
+export const isManual15CDataValid = (data: FieldMeasure): boolean => {
+  const manualData = data.manualParameterCalculation15CWithoutWind;
+  return (
+    isNumber(manualData?.cableTemperatureCalibration) &&
+    isNumber(manualData?.parameterPapoto) &&
+    isNumber(manualData?.parameterUncertaintyPapoto) &&
+    manualData.parameterUncertaintyPapoto >= 0 &&
+    isNumber(manualData?.cableTemperatureCalibrationUncertainty) &&
+    manualData.cableTemperatureCalibrationUncertainty >= 0
+  );
+};

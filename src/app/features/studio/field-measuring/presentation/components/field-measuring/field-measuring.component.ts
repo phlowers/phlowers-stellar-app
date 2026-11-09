@@ -18,7 +18,7 @@ import { TabList, TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from '../header/header.component';
 import { FieldMeasure, FieldMeasureTab } from '@features/studio/field-measuring/domain/types';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
-import { SelectOption, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS } from '../../constants';
+import { SelectOption, TRANSIT_BOUNDS } from '../../constants';
 import { FieldDatasComponent } from '../field-datas/field-datas.component';
 import { CalculusSettingComponent } from '../calculus-setting/calculus-setting.component';
 import { PlotService } from '@services/plot/plot.service';
@@ -35,26 +35,18 @@ import {
   buildSkyCoverOptions,
   buildLeftSupportOptions,
   buildFieldMeasureExportFilename,
-  resetInactive15CMode
+  resetInactive15CMode,
+  isPapotoDataValid,
+  isTemperatureDataValid,
+  isManual15CDataValid
 } from '../../helpers';
 import { buildFieldMeasureExportJson } from '../../field-measure-export.helpers';
 import { FieldMeasureReportService } from '../../services/field-measure-report/field-measure-report.service';
 import { buildFieldMeasureReportData } from '../../services/field-measure-report/field-measure-report.helpers';
 import { getDateLocale } from '@shared/helpers/modification-date.helpers';
 import { SECTION_TITLE_KEYS } from '../../services/field-measure-report/field-measure-report.constantes';
-import {
-  isTangentAimingSupportDataValid,
-  resetNonDisplayedParameterFields
-} from '../calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
 import { getDefaultLeftSupport } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
-import {
-  isTangentAimingExteriorDataValid,
-  resetNonDisplayedExteriorFields
-} from '../calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.helpers';
-import {
-  isTangentAimingInteriorDataValid,
-  resetNonDisplayedInteriorFields
-} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
+import { TANGENT_AIMING_MODES } from '../../tangent-aiming-modes.constantes';
 import {
   applyActiveTangentAimingDefaults,
   resetInactiveCalculusModes,
@@ -244,11 +236,7 @@ export class FieldMeasuringComponent implements OnDestroy {
   });
 
   /** Whether a tangent aiming (support, exterior or interior) method is selected. */
-  readonly isTangentAimingMethod = computed(() =>
-    ['tangente-aiming', 'tangente-aiming-exterior', 'tangente-aiming-interior'].includes(
-      this.measureData().calculationMethod
-    )
-  );
+  readonly isTangentAimingMethod = computed(() => !!TANGENT_AIMING_MODES[this.measureData().calculationMethod]);
 
   /**
    * Validity of the "Parameter calculation" tab (RG.MES.EXP-BTN.2). Only the PAPOTO method has an
@@ -256,81 +244,31 @@ export class FieldMeasuringComponent implements OnDestroy {
    */
   readonly isParameterCalculationValid = computed(() => {
     const measureData = this.measureData();
-    if (measureData.calculationMethod === 'tangente-aiming') {
-      return isTangentAimingSupportDataValid(measureData);
+    const mode = TANGENT_AIMING_MODES[measureData.calculationMethod];
+    if (mode) {
+      return mode.isDataValid(measureData);
     }
-    if (measureData.calculationMethod === 'tangente-aiming-exterior') {
-      return isTangentAimingExteriorDataValid(measureData);
-    }
-    if (measureData.calculationMethod === 'tangente-aiming-interior') {
-      return isTangentAimingInteriorDataValid(measureData);
-    }
-    if (measureData.calculationMethod !== 'papoto') {
-      return true;
-    }
-    return !!(
-      measureData.leftSupport &&
-      measureData.spanLength != null &&
-      measureData.measuredElevationDifference != null &&
-      measureData.HL != null &&
-      measureData.H1 != null &&
-      measureData.H2 != null &&
-      measureData.H3 != null &&
-      measureData.HR != null &&
-      measureData.VL != null &&
-      measureData.V1 != null &&
-      measureData.V2 != null &&
-      measureData.V3 != null &&
-      measureData.VR != null
-    );
+    return measureData.calculationMethod !== 'papoto' || isPapotoDataValid(measureData);
   });
 
-  /** Validity of the "Temperature calculation" tab (RG.MES.EXP-BTN.2), mirroring `TemperatureCalculationComponent.isFormValid`. */
-  readonly isTemperatureCalculationValid = computed(() => {
-    const measureData = this.measureData();
-    const isTransitOutOfBounds =
-      isNumber(measureData.transit) &&
-      (measureData.transit < TRANSIT_BOUNDS.min || measureData.transit > TRANSIT_BOUNDS.max);
-    const isMeasuredSolarFluxOutOfBounds =
-      isNumber(measureData.measuredDiffusedPlusDirectSolarFlux) &&
-      (measureData.measuredDiffusedPlusDirectSolarFlux < MEASURED_SOLAR_FLUX_BOUNDS.min ||
-        measureData.measuredDiffusedPlusDirectSolarFlux > MEASURED_SOLAR_FLUX_BOUNDS.max);
-    return (
-      measureData.cableName !== null &&
-      measureData.transit !== null &&
-      measureData.skyCover !== null &&
-      !isTransitOutOfBounds &&
-      !isMeasuredSolarFluxOutOfBounds
-    );
-  });
+  /** Validity of the "Temperature calculation" tab (RG.MES.EXP-BTN.2). */
+  readonly isTemperatureCalculationValid = computed(() => isTemperatureDataValid(this.measureData()));
 
   /**
    * Validity of the "Parameter at 15°C without wind" tab (RG.MES.EXP-BTN.2). In manual mode the user-entered
-   * fields must be filled. In auto mode the tab has no editable input (it only displays computed values), so
-   * it is always valid for export purposes — the export contract already supports an uncomputed
-   * `zeroWindCalculation` (see `buildZeroWindCalculationExport`), matching RG.MES.EXP-BTN.1 allowing export
-   * once the measure is calculated *or* saved (not necessarily both calculated).
+   * fields must be valid (same rule as the tab form). In auto mode the tab has no editable input (it only
+   * displays computed values), so it is always valid for export purposes — the export contract already supports
+   * an uncomputed `zeroWindCalculation` (see `buildZeroWindCalculationExport`), matching RG.MES.EXP-BTN.1 allowing
+   * export once the measure is calculated *or* saved (not necessarily both calculated).
    */
-  readonly isParameter15CValid = computed(() => {
-    const measureData = this.measureData();
-    if (measureData.updateMode15C !== 'manual') {
-      return true;
-    }
-    const manualData = measureData.manualParameterCalculation15CWithoutWind;
-    return (
-      isNumber(manualData?.cableTemperatureCalibration) &&
-      isNumber(manualData?.parameterPapoto) &&
-      isNumber(manualData?.cableTemperatureCalibrationUncertainty)
-    );
-  });
+  readonly isParameter15CValid = computed(
+    () => this.measureData().updateMode15C !== 'manual' || isManual15CDataValid(this.measureData())
+  );
 
   /** Whether the measure has been computed at least once (PAPOTO is currently the only implemented method). */
   readonly hasComputedOutputs = computed(() => {
     const { calculationMethod, outputs } = this.measureData();
-    if (calculationMethod === 'tangente-aiming') return outputs.tangentAimingSupport !== null;
-    if (calculationMethod === 'tangente-aiming-exterior') return outputs.tangentAimingExterior !== null;
-    if (calculationMethod === 'tangente-aiming-interior') return outputs.tangentAimingInterior !== null;
-    return outputs.papoto !== null;
+    return outputs[TANGENT_AIMING_MODES[calculationMethod]?.outputKey ?? 'papoto'] !== null;
   });
 
   /**
@@ -539,14 +477,8 @@ export class FieldMeasuringComponent implements OnDestroy {
     }
     // Only the displayed inputs are persisted (RG.VIS-SUP.ENR-BTN.2, RG.ENR-BTN.2)
     const { calculationMethod } = currentMeasureData;
-    let activeMeasureData = currentMeasureData;
-    if (calculationMethod === 'tangente-aiming') {
-      activeMeasureData = resetNonDisplayedParameterFields(currentMeasureData);
-    } else if (calculationMethod === 'tangente-aiming-exterior') {
-      activeMeasureData = resetNonDisplayedExteriorFields(currentMeasureData);
-    } else if (calculationMethod === 'tangente-aiming-interior') {
-      activeMeasureData = resetNonDisplayedInteriorFields(currentMeasureData);
-    }
+    const activeMeasureData =
+      TANGENT_AIMING_MODES[calculationMethod]?.resetNonDisplayedFields(currentMeasureData) ?? currentMeasureData;
     const measureData: FieldMeasure = {
       ...resetInactive15CMode(
         resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {

@@ -3,21 +3,7 @@ import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TANGENT_AIMING_SUPPORT_FIELD_RULES as RULES } from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.constantes';
 import { TANGENT_AIMING_EXTERIOR_FIELD_RULES as EXTERIOR_RULES } from './components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.constantes';
 import { TANGENT_AIMING_INTERIOR_FIELD_RULES as INTERIOR_RULES } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.constantes';
-import {
-  applyTangentAimingSupportDefaults,
-  invalidateTangentAimingSupportResult,
-  resetNonDisplayedParameterFields
-} from './components/calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
-import {
-  applyTangentAimingExteriorDefaults,
-  invalidateTangentAimingExteriorResult,
-  resetNonDisplayedExteriorFields
-} from './components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.helpers';
-import {
-  applyTangentAimingInteriorDefaults,
-  invalidateTangentAimingInteriorResult,
-  resetNonDisplayedInteriorFields
-} from './components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
+import { TANGENT_AIMING_MODES } from './tangent-aiming-modes.constantes';
 import { TANGENT_AIMING_CALCULATION_TYPE } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import { clearAutoParameter15C, PAPOTO_INPUT_DEFAULTS, PEP_INPUT_DEFAULTS } from './helpers';
 import { CalculusModeResetContext } from './calculus-mode-reset.interfaces';
@@ -110,37 +96,15 @@ export const applyActiveTangentAimingDefaults = (
 ): FieldMeasure => {
   // A saved measure holds null in its hidden input (reset on save): refilling it with its default is not a
   // normalization, the result stays valid.
-  const complete = (
-    apply: (data: FieldMeasure, support: string | null) => FieldMeasure,
-    resetHidden: (data: FieldMeasure) => FieldMeasure,
-    invalidate: (data: FieldMeasure) => FieldMeasure
-  ): FieldMeasure => {
-    const normalized = apply(measureData, defaultLeftSupport);
-    if (isEqual(normalized, measureData)) return measureData;
-    return isEqual(resetHidden(normalized), resetHidden(measureData)) ? normalized : invalidate(normalized);
-  };
-  switch (measureData.calculationMethod) {
-    case 'tangente-aiming':
-      return complete(
-        applyTangentAimingSupportDefaults,
-        resetNonDisplayedParameterFields,
-        invalidateTangentAimingSupportResult
-      );
-    case 'tangente-aiming-exterior':
-      return complete(
-        applyTangentAimingExteriorDefaults,
-        resetNonDisplayedExteriorFields,
-        invalidateTangentAimingExteriorResult
-      );
-    case 'tangente-aiming-interior':
-      return complete(
-        applyTangentAimingInteriorDefaults,
-        resetNonDisplayedInteriorFields,
-        invalidateTangentAimingInteriorResult
-      );
-    default:
-      return measureData;
-  }
+  const mode = TANGENT_AIMING_MODES[measureData.calculationMethod];
+  if (!mode) return measureData;
+  const normalized = mode.applyDefaults(measureData, defaultLeftSupport);
+  if (isEqual(normalized, measureData)) return measureData;
+  const isOnlyHiddenInputRefilled = isEqual(
+    mode.resetNonDisplayedFields(normalized),
+    mode.resetNonDisplayedFields(measureData)
+  );
+  return isOnlyHiddenInputRefilled ? normalized : mode.invalidateResult(normalized);
 };
 
 /**
@@ -153,17 +117,13 @@ export const applyActiveTangentAimingDefaults = (
 export const toUnsavedChangesComparable = (
   measureData: FieldMeasure,
   defaultLeftSupport: string | null
-): Omit<FieldMeasure, 'calculationMethod'> => {
-  return omit(
+): Omit<FieldMeasure, 'calculationMethod'> =>
+  omit(
     clearAutoParameter15C(
-      applyTangentAimingInteriorDefaults(
-        applyTangentAimingExteriorDefaults(
-          applyTangentAimingSupportDefaults(measureData, defaultLeftSupport),
-          defaultLeftSupport
-        ),
-        defaultLeftSupport
+      Object.values(TANGENT_AIMING_MODES).reduce(
+        (data, mode) => mode.applyDefaults(data, defaultLeftSupport),
+        measureData
       )
     ),
     'calculationMethod'
   );
-};

@@ -21,6 +21,7 @@ import { Task } from '@services/worker_python/tasks/types';
 import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
+import { isTemperatureDataValid } from '@features/studio/field-measuring/presentation/helpers';
 @Component({
   selector: 'app-temperature-calculation',
   imports: [
@@ -155,16 +156,7 @@ export class TemperatureCalculationComponent {
     return null;
   });
 
-  isFormValid = computed(() => {
-    const data = this.measureData();
-    return (
-      data.cableName !== null &&
-      data.transit !== null &&
-      data.skyCover !== null &&
-      !this.isTransitOutOfBounds() &&
-      !this.isMeasuredSolarFluxOutOfBounds()
-    );
-  });
+  isFormValid = computed(() => isTemperatureDataValid(this.measureData()));
 
   localizedWindDirection = computed(() => {
     const windDirection = this.measureData().windDirection;

@@ -747,6 +747,36 @@ describe('FieldMeasuringComponent', () => {
       component.activeTab.set(tab);
       expect(component.canReportOrExport()).toBe(false);
     });
+
+    describe('manual 15°C tab (RG: all four fields required, uncertainties positive, cable temperature signed)', () => {
+      const manual15C = {
+        parameterPapoto: 1000,
+        parameterUncertaintyPapoto: 10,
+        cableTemperatureCalibration: -5,
+        cableTemperatureCalibrationUncertainty: 2
+      };
+
+      it.each([
+        ['accept a negative cable temperature', manual15C, true],
+        ['reject a missing parameter uncertainty', { ...manual15C, parameterUncertaintyPapoto: undefined }, false],
+        ['reject a negative parameter uncertainty', { ...manual15C, parameterUncertaintyPapoto: -1 }, false],
+        [
+          'reject a negative temperature uncertainty',
+          { ...manual15C, cableTemperatureCalibrationUncertainty: -1 },
+          false
+        ]
+      ] as const)('should %s', async (_label, manualData, expected) => {
+        component.measureData.set({
+          ...validMeasure(),
+          updateMode15C: 'manual',
+          manualParameterCalculation15CWithoutWind: manualData
+        });
+        await component.onSave();
+        component.activeTab.set('parameterAt15CWithoutWind');
+        expect(component.isParameter15CValid()).toBe(expected);
+        expect(component.canReportOrExport()).toBe(expected);
+      });
+    });
   });
 
   describe('onReport', () => {

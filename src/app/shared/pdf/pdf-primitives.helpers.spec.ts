@@ -10,9 +10,11 @@ import jsPDF from 'jspdf';
 
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { Section, Study } from '@shared/domain';
 
 import {
   buildReportLabels,
+  buildStudyCartouche,
   drawBulletItem,
   drawBulletList,
   drawCompactHeader,
@@ -525,6 +527,44 @@ describe('pdf-primitives helpers', () => {
       // Only the title underline
       expect(doc.line).toHaveBeenCalledTimes(1);
       expect(nextY).toBe(CONTENT_BOTTOM);
+    });
+  });
+
+  describe('buildStudyCartouche', () => {
+    const section = {
+      name: 'Section A',
+      comment: 'Section comment',
+      initial_conditions: [{ uuid: 'ic-1', name: 'IC 1' }],
+      selected_initial_condition_uuid: 'ic-1',
+      charges: [{ uuid: 'ch-1', name: 'Load 1', description: 'Load description' }],
+      selected_charge_uuid: 'ch-1'
+    } as unknown as Section;
+    const study = { author_email: 'author@example.test', title: 'Study 1', description: 'Study description' } as Study;
+
+    it('should resolve the selected initial condition and load case', () => {
+      expect(buildStudyCartouche(study, section)).toEqual({
+        author: 'author@example.test',
+        studyTitle: 'Study 1',
+        studyDescription: 'Study description',
+        cantonName: 'Section A',
+        comment: 'Section comment',
+        icName: 'IC 1',
+        chargeName: 'Load 1',
+        chargeDescription: 'Load description'
+      });
+    });
+
+    it('should fall back to dashes and empty texts without study and section', () => {
+      expect(buildStudyCartouche(null, null)).toEqual({
+        author: '-',
+        studyTitle: '-',
+        studyDescription: '',
+        cantonName: '-',
+        comment: '',
+        icName: '-',
+        chargeName: '-',
+        chargeDescription: ''
+      });
     });
   });
 

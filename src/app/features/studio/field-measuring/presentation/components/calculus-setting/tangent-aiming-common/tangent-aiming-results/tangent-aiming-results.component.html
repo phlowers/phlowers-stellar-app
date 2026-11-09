@@ -1,6 +1,13 @@
 <output class="block" [attr.aria-busy]="isCalculating()">
   @if (hasError()) {
-    <p-message severity="error" size="small" role="alert" aria-live="assertive" data-testid="calculation-error">
+    <p-message
+      class="block mt-2"
+      severity="error"
+      size="small"
+      role="alert"
+      aria-live="assertive"
+      data-testid="calculation-error"
+    >
       {{ errorKey() | transloco }}
     </p-message>
   }

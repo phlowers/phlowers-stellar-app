@@ -17,7 +17,6 @@ import { Section, Study } from '@shared/domain';
 
 import { LABEL_KEYS } from './field-measure-report.constantes';
 import {
-  buildCartoucheData,
   buildFieldMeasureReportData,
   buildFieldMeasureReportFilename,
   buildParameter15CRows,
@@ -25,7 +24,6 @@ import {
   buildTemperatureCalculationRows,
   buildTerrainDataRows,
   drawFieldMeasureSection,
-  formatFileDate,
   splitRowsIntoColumns
 } from './field-measure-report.helpers';
 import { FieldMeasureReportRow } from './field-measure-report.interfaces';
@@ -507,39 +505,7 @@ describe('field-measure-report helpers', () => {
     });
   });
 
-  describe('buildCartoucheData', () => {
-    it('should resolve the selected initial condition and load case', () => {
-      expect(buildCartoucheData(section, study)).toEqual({
-        author: 'author@example.test',
-        studyTitle: 'Study 1',
-        studyDescription: 'Study description',
-        cantonName: 'Section A',
-        comment: 'Section comment',
-        icName: 'IC 1',
-        chargeName: 'Load 1',
-        chargeDescription: 'Load description'
-      });
-    });
-
-    it('should fall back to dashes and empty texts without study and section', () => {
-      expect(buildCartoucheData(null, null)).toEqual({
-        author: '-',
-        studyTitle: '-',
-        studyDescription: '',
-        cantonName: '-',
-        comment: '',
-        icName: '-',
-        chargeName: '-',
-        chargeDescription: ''
-      });
-    });
-  });
-
   describe('file name', () => {
-    it('should format the generation date with hours and minutes', () => {
-      expect(formatFileDate(new Date(2026, 10, 6, 9, 5))).toBe('2026-11-06 09-05');
-    });
-
     it('should build the file name from the title, measure, canton and generation date, sanitized', () => {
       const data = buildFieldMeasureReportData({
         measureData: measure({ name: 'Measure/1' }),
@@ -552,7 +518,7 @@ describe('field-measure-report helpers', () => {
       });
 
       expect(buildFieldMeasureReportFilename('Rapport Mesure de terrain', data)).toBe(
-        'Rapport Mesure de terrain_Measure-1_Section A_2026-11-06 14-39.pdf'
+        'Rapport Mesure de terrain_Measure1_Section A_2026-11-06 14-39.pdf'
       );
     });
   });

@@ -26,6 +26,7 @@ import {
   SEPARATOR_MARGIN_Y,
   VALUE_LINE_SPACING
 } from '@shared/pdf/pdf-layout.constantes';
+import { Section, Study } from '@shared/domain';
 import { PdfBulletItem, StudyCartoucheData, StudyCartoucheLabels } from '@shared/pdf/pdf-report.interfaces';
 
 /**
@@ -318,6 +319,21 @@ export function drawTitledBulletSection(doc: jsPDF, title: string, items: PdfBul
   const wrapWidth = CONTENT_WIDTH - PARAGRAPH_INDENT;
   return drawSectionEndSeparator(doc, drawBulletList(doc, items, y, leftX, wrapWidth));
 }
+
+/** Builds the study & canton cartouche values; missing study or section fall back to dashes and empty texts. */
+export const buildStudyCartouche = (study: Study | null, section: Section | null): StudyCartoucheData => {
+  const charge = section?.charges.find((c) => c.uuid === section.selected_charge_uuid);
+  return {
+    author: study?.author_email ?? '-',
+    studyTitle: study?.title ?? '-',
+    studyDescription: study?.description ?? '',
+    cantonName: section?.name ?? '-',
+    comment: section?.comment ?? '',
+    icName: section?.initial_conditions.find((ic) => ic.uuid === section.selected_initial_condition_uuid)?.name ?? '-',
+    chargeName: charge?.name ?? '-',
+    chargeDescription: charge?.description ?? ''
+  };
+};
 
 /** Draws the study & canton metadata cartouche (1 column, all values wrapping). Returns the next Y. */
 export function drawStudyCartoucheSection(

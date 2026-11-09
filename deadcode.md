@@ -841,3 +841,16 @@
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the signal and its three writes (constructor effects, `calculate()`); `displayedInputs` stays used by the calculation context key. |
 | ✅ Validated | ⏳ Pending review |
+
+---
+
+## 58. `FieldMeasuringComponent.isTangentAimingMethod` and `hasComputedOutputs`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.ts` (`isTangentAimingMethod`, `hasComputedOutputs`) |
+| Code | Two public computed signals telling whether a tangent aiming method is selected and whether the measure has a result |
+| 🔍 Evidence | No template or other source file reads them since the Report / Export buttons use `canReportOrExport()`; only their own specs do. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both computed signals and their spec cases in `field-measuring.component.spec.ts`. |
+| ✅ Validated | ⏳ Pending review |

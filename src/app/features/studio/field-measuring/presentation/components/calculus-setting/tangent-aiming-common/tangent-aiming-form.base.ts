@@ -30,7 +30,10 @@ import {
   nextLeftSupportState,
   syncDisplayedControls
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
-import { TangentAimingFormConfig } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
+import {
+  TangentAimingCalculationType,
+  TangentAimingFormConfig
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
 
 /** Logic shared by the tangent aiming forms (support, interior, exterior); each one only provides its config. */
 @Directive()
@@ -53,6 +56,8 @@ export abstract class TangentAimingFormBase {
   readonly hasError = signal(false);
   /** Transloco key of the calculation failure message of this form. */
   readonly calculationFailedKey: string;
+  /** Id of the mandatory fields legend, specific to each form. */
+  readonly mandatoryId: string;
   private readonly leftSupportState = signal(INITIAL_LEFT_SUPPORT_STATE);
 
   /** Displayed inputs as of the last calculation, or of the opening of the form while nothing was calculated. */
@@ -91,9 +96,18 @@ export abstract class TangentAimingFormBase {
     return buildCalculationTypeOptions(this.translocoService);
   });
 
+  readonly showParameterField = computed(() => this.measureData()[this.config.calculationTypeKey] === 'parametre');
+  readonly showTangentAngleField = computed(() => this.measureData()[this.config.calculationTypeKey] === 'tangente');
+
+  updateCalculationType(calculationType: TangentAimingCalculationType): void {
+    const { calculationTypeKey, invalidateResult } = this.config;
+    this.measureData.update((d) => invalidateResult({ ...d, [calculationTypeKey]: calculationType }));
+  }
+
   protected constructor(protected readonly config: TangentAimingFormConfig) {
     const { form, modelFields, leftSupportKey, calculationTypeKey } = config;
     this.calculationFailedKey = config.calculationFailedKey;
+    this.mandatoryId = `mandatory-tangent-aiming-${config.logLabel}`;
 
     // A span change must not leave a left support outside the span, nor a result computed for another span.
     effect(() => {

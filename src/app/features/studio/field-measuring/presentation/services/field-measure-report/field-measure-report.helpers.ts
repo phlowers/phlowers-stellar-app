@@ -32,13 +32,16 @@ import {
   formatExportTime,
   getSectionTypeKey
 } from '@features/studio/field-measuring/presentation/field-measure-export.helpers';
-import { formatSpanLabel } from '@features/studio/field-measuring/presentation/helpers';
+import {
+  formatGenerationDate,
+  formatSpanLabel,
+  sanitizeFilename
+} from '@features/studio/field-measuring/presentation/helpers';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Section, Study } from '@shared/domain';
 import { PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
-import { PdfBulletItem, StudyCartoucheData } from '@shared/pdf/pdf-report.interfaces';
-import { drawTwoColumnBulletSection, formatValue } from '@shared/pdf/pdf-primitives.helpers';
-import { sanitizeFilenamePart } from '@shared/helpers/filename.helpers';
+import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
+import { buildStudyCartouche, drawTwoColumnBulletSection, formatValue } from '@shared/pdf/pdf-primitives.helpers';
 
 import {
   CALCULATION_TYPE_VALUE_KEYS,
@@ -410,24 +413,6 @@ export const buildParameter15CRows = (
   ];
 };
 
-/** Builds the study & canton cartouche values. */
-export const buildCartoucheData = (section: Section | null, study: Study | null): StudyCartoucheData => ({
-  author: study?.author_email ?? '-',
-  studyTitle: study?.title ?? '-',
-  studyDescription: study?.description ?? '',
-  cantonName: section?.name ?? '-',
-  comment: section?.comment ?? '',
-  icName: section?.initial_conditions.find((ic) => ic.uuid === section.selected_initial_condition_uuid)?.name ?? '-',
-  chargeName: section?.charges.find((charge) => charge.uuid === section.selected_charge_uuid)?.name ?? '-',
-  chargeDescription: section?.charges.find((charge) => charge.uuid === section.selected_charge_uuid)?.description ?? ''
-});
-
-/** Formats a date as `YYYY-MM-DD HH-mm` (local time), usable in a file name. */
-export const formatFileDate = (date: Date): string => {
-  const pad = (value: number): string => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}-${pad(date.getMinutes())}`;
-};
-
 /** Builds the report data from the saved field measure and its study context. */
 export const buildFieldMeasureReportData = ({
   measureData,
@@ -439,10 +424,10 @@ export const buildFieldMeasureReportData = ({
   generatedAt
 }: FieldMeasureReportInput): FieldMeasureReportData => ({
   date: generatedAt.toLocaleDateString(locale),
-  fileDate: formatFileDate(generatedAt),
+  fileDate: formatGenerationDate(generatedAt, true),
   measureName: measureData.name,
   sectionName: section?.name ?? '',
-  cartouche: buildCartoucheData(section, study),
+  cartouche: buildStudyCartouche(study, section),
   sections: [
     {
       title: translocoService.translate(SECTION_TITLE_KEYS.terrainData),
@@ -465,7 +450,7 @@ export const buildFieldMeasureReportData = ({
 
 /** Builds the report file name: "<title>_<measure name>_<canton name>_<generation date, hours and minutes>.pdf". */
 export const buildFieldMeasureReportFilename = (reportTitle: string, data: FieldMeasureReportData): string =>
-  [reportTitle, data.measureName, data.sectionName, data.fileDate].map(sanitizeFilenamePart).join('_') + '.pdf';
+  [reportTitle, sanitizeFilename(data.measureName), sanitizeFilename(data.sectionName), data.fileDate].join('_') + '.pdf';
 
 /** Splits the rows into the left and right bullet columns, empty cells leaving an empty line. */
 export const splitRowsIntoColumns = (
