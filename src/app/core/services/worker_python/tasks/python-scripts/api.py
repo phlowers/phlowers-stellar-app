@@ -14,6 +14,7 @@ from stellar_engine.core.conformity import simulation as conformity_simulation
 from stellar_engine.data import geography
 from stellar_engine.tools import (
     cable_adjustment,
+    effort_estimation,
     guying,
     param_calibration,
     temperature,
@@ -386,6 +387,18 @@ def estimate_load(js_inputs):
 def estimate_wind(js_inputs):
     global study
     return estimation.estimate_wind(js_to_python(js_inputs), study)
+
+
+@debug_log
+def estimate_effort(js_inputs):
+    global study
+    return effort_estimation.estimate_effort(js_to_python(js_inputs), study)
+
+
+@debug_log
+def get_load_points(js_inputs):
+    global study
+    return effort_estimation.get_load_points(js_to_python(js_inputs), study)
 
 
 # ---------------------------conformity----------------

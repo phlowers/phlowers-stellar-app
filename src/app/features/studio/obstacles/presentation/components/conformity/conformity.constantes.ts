@@ -78,7 +78,7 @@ export function getConformityCommonRows(transloco: TranslocoService): ResultRow[
 export function getConformityCableTrackRows(transloco: TranslocoService): ResultRow[] {
   return [
     {
-      label: transloco.translate('studio.conformity.temperature-label'),
+      label: transloco.translate('common.temperature-label'),
       overhangKey: 'overhangTemperature',
       lateralKey: 'lateralTemperature',
       unit: '°C'

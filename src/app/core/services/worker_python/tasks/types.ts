@@ -123,7 +123,11 @@ export enum Task {
   // Estimate the load mass giving a target distance to an obstacle
   estimateLoad = 'estimateLoad',
   // Estimate the wind pressure giving a target distance to an obstacle
-  estimateWind = 'estimateWind'
+  estimateWind = 'estimateWind',
+  // Estimate the load mass (traction or weight) giving a target vertical displacement of its application point
+  estimateEffort = 'estimateEffort',
+  // Get the load application point for each given load mass
+  getLoadPoints = 'getLoadPoints'
 }
 
 /**
@@ -579,6 +583,10 @@ export interface TaskInputs {
   [Task.estimateLoad]: EstimateLoadInputs;
   // Inputs for estimateWind task
   [Task.estimateWind]: EstimateWindInputs;
+  // Inputs for estimateEffort task
+  [Task.estimateEffort]: EstimateEffortInputs;
+  // Inputs for getLoadPoints task
+  [Task.getLoadPoints]: GetLoadPointsInputs;
 }
 
 /**
@@ -653,6 +661,40 @@ export interface EstimateRopeInputs extends EstimationBaseInputs {
   temperature?: number | null;
   // Fixed wind pressure in Pa
   windPressure?: number | null;
+}
+
+/**
+ * Inputs shared by the effort estimation tasks (estimateEffort, getLoadPoints).
+ *
+ * @category Worker Types
+ */
+export interface LoadPointBaseInputs {
+  // Index of the span (before manipulation) holding the load
+  spanIndex: number;
+  // Load position from the left support of the span in meters
+  loadPositionDistance: number;
+  // Fixed cable temperature in °C
+  temperature: number;
+}
+
+/**
+ * Inputs for the estimateEffort task (estimated value in kg: negative for a traction, positive for a weight).
+ *
+ * @category Worker Types
+ */
+export interface EstimateEffortInputs extends LoadPointBaseInputs {
+  // Target vertical displacement of the load application point in meters, positive upward
+  targetVerticalDisplacement: number;
+}
+
+/**
+ * Inputs for the getLoadPoints task.
+ *
+ * @category Worker Types
+ */
+export interface GetLoadPointsInputs extends LoadPointBaseInputs {
+  // Load masses in kg; a null mass gives the unloaded point
+  loadMasses: number[];
 }
 
 /**
@@ -1030,4 +1072,8 @@ export interface TaskOutputs {
   [Task.estimateLoad]: EstimationResult;
   // Output from estimateWind task: wind pressure in Pa
   [Task.estimateWind]: EstimationResult;
+  // Output from estimateEffort task: load mass in kg
+  [Task.estimateEffort]: EstimationResult;
+  // Output from getLoadPoints task: load application point [x, y, z] in meters, one per load mass
+  [Task.getLoadPoints]: { points: [number, number, number][] };
 }

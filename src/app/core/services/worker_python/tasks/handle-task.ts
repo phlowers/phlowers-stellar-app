@@ -203,6 +203,14 @@ const tasks: Record<
   [Task.estimateWind]: {
     function: 'estimate_wind',
     externalPackages: []
+  },
+  [Task.estimateEffort]: {
+    function: 'estimate_effort',
+    externalPackages: []
+  },
+  [Task.getLoadPoints]: {
+    function: 'get_load_points',
+    externalPackages: []
   }
 };
 

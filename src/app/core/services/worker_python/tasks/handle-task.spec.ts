@@ -108,6 +108,22 @@ describe('Task handlers', () => {
       expect(result.error).toBeNull();
     });
 
+    it.each([
+      [Task.estimateEffort, 'estimate_effort', { value: -12.5, residual: 0.001, iterations: 6, converged: true }],
+      [Task.getLoadPoints, 'get_load_points', { points: [[250, 10, 60]] }]
+    ])('should call the matching Python function for the %s task', async (task, pythonFunction, mockResult) => {
+      const mockToJs = vi.fn().mockReturnValue(mockResult);
+      (mockPyodide.globals.get as vi.Mock).mockReturnValueOnce(() => ({ toJs: mockToJs, destroy: vi.fn() }));
+      const inputs = { spanIndex: 0, loadPositionDistance: 250, temperature: 15 };
+
+      const result = await handleTask(mockPyodide, task, inputs as never);
+
+      expect(mockPyodide.globals.set).toHaveBeenCalledWith('js_inputs', inputs);
+      expect(mockPyodide.globals.get).toHaveBeenCalledWith(pythonFunction);
+      expect(result.result).toEqual(mockResult);
+      expect(result.error).toBeNull();
+    });
+
     it('should handle unknown task', async () => {
       // Setup
       vi.spyOn(console, 'error').mockReturnValue(undefined);

@@ -1,0 +1,16 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2 items-center">
+    <app-icon icon="calculate" aria-hidden="true" />
+    <span>{{ 'studio.top-toolbar.estimations-tool' | transloco }}</span>
+  </p>
+</ng-template>
+
+<p-tabs [(value)]="activeTab" data-testid="estimations-tabs">
+  <p-tablist>
+    <p-tab value="effort" data-testid="effort-tab">{{ 'studio.effort-estimation.tab-label' | transloco }}</p-tab>
+  </p-tablist>
+
+  <p-tabpanel value="effort">
+    <app-effort-estimation />
+  </p-tabpanel>
+</p-tabs>

@@ -7,6 +7,10 @@
 """Tools package: Computation functions for cable and guying calculations."""
 
 from stellar_engine.tools.cable_adjustment import calculate_cable_adjustment
+from stellar_engine.tools.effort_estimation import (
+    estimate_effort,
+    get_load_points,
+)
 from stellar_engine.tools.guying import calculate_guying
 from stellar_engine.tools.papoto import calculate_papoto
 from stellar_engine.tools.param_calibration import parameter_15_without_wind
@@ -19,6 +23,8 @@ from stellar_engine.tools.temperature import (
 __all__ = [
     "calculate_cable_adjustment",
     "calculate_guying",
+    "estimate_effort",
+    "get_load_points",
     "parameter_15_without_wind",
     "calculate_papoto",
     "calculate_tangent_aiming",

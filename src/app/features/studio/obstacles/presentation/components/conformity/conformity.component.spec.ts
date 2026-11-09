@@ -216,7 +216,7 @@ describe('ConformityComponent', () => {
               'studio.conformity.distance-to-comply-label': 'Distance to comply',
               'studio.conformity.compliance-altitude-label': 'Compliance altitude',
               'studio.conformity.compliance-line-axis-distance-label': 'Compliance line axis distance',
-              'studio.conformity.temperature-label': 'Temperature',
+              'common.temperature-label': 'Temperature',
               'studio.conformity.wind-pressure-label': 'Wind pressure',
               'studio.conformity.minimal-distance-label': 'Minimal distance',
               'studio.conformity.altitude-point-label': 'Altitude point',

@@ -36,6 +36,7 @@
     "description-label": "Description",
     "dis-symmetric": "Dissymmetric",
     "distance-label": "Distance",
+    "distance-to-reference-support-label": "Distance to reference support",
     "duplicate": "Duplicate",
     "edit": "Edit",
     "eel-label": "EEL",
@@ -121,6 +122,7 @@
     "support-name-label": "Support name",
     "support-no-label": "Support no.",
     "symmetric": "Symmetric",
+    "temperature-label": "Temperature",
     "tools-label": "Tools",
     "uncertainty-cable-temperature-label": "Uncertainty cable temperature",
     "validate": "Validate",
@@ -899,6 +901,7 @@
       "forest-trenches-tool": "Forest trenches",
       "height-and-lateral-distance-tool": "Height & lateral distance",
       "cable-adjustment-tool": "Cable adjustment",
+      "estimations-tool": "Estimations",
       "rrts-cut-strands": "RRTS cut strands"
     },
     "section-plot-card": {
@@ -1011,7 +1014,6 @@
       "distance-to-comply-label": "Distance to comply",
       "compliance-altitude-label": "Compliance altitude",
       "compliance-line-axis-distance-label": "Compliance line axis distance",
-      "temperature-label": "Temperature",
       "wind-pressure-label": "Wind pressure",
       "minimal-distance-label": "Minimal distance"
     },
@@ -1187,6 +1189,17 @@
       "aria-help": "Cable adjustment help",
       "calculation-failed": "Failed to calculate the cable adjustment"
     },
+    "effort-estimation": {
+      "tab-label": "Cable vert. displacement effort",
+      "target-displacement-label": "Target displ.",
+      "up": "Up",
+      "down": "Down",
+      "effort-label": "Traction (-) / Weight (+)",
+      "x-displacement-label": "Displ. along span axis (x)",
+      "copy-effort-aria-label": "Copy the effort",
+      "copied": "Effort copied to the clipboard",
+      "copy-failed": "Failed to copy the effort"
+    },
     "hanging-table-report": {
       "title": "Hanging Table Report",
       "hanging-calculation-title": "Hanging calculation",
@@ -1200,7 +1213,6 @@
       "layers-detail": "Layers detail",
       "current-work-load-label": "Current max working load",
       "staff-presence-label": "Staff presence",
-      "distance-support-ref-label": "Distance to reference support",
       "add-marking-label": "Add an indication \"cut strands\"",
       "result-cable-rrts-label": "Cable's RRTS",
       "result-new-working-load-label": "New max working load",

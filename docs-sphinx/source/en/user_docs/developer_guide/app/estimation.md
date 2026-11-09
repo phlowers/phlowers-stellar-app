@@ -68,6 +68,25 @@ The Python exception class name (or warning text) is matched against `PythonErro
 
 For a new Python error or warning, add the exception class name as a value in `PythonErrorCode`, add its severity in `python-error-severity.ts`, add the corresponding `shared.python-errors.*` mapping in `python-error-messages.ts`, and add matching English and French strings in `public/i18n/en.json` and `public/i18n/fr.json`. Ensure the exception or warning text contains the exact enum value. Matching is substring-based and the first match in enum declaration order wins, so avoid codes that overlap and order more specific values before broader ones. See [How to Add Error/Warning Codes](how_to_add_error_codes.md) for the full diagnostic pipeline.
 
+## Effort estimation (traction or weight)
+
+The **Estimations** dialog of the Studio toolbar (`src/app/features/studio/estimations`) estimates the effort that moves the cable of a span vertically by a target distance. It relies on two tasks built on top of the estimation module above, in `stellar-engine/src/stellar_engine/tools/effort_estimation.py`. They reuse its input validation, span index mapping, `_solve` wrapper, `EstimationResult` output and error codes, and leave the study untouched (the loads are applied on a copy of the balance engine).
+
+| Task | Python function | Inputs | Output |
+|---|---|---|---|
+| `estimateEffort` | `estimate_effort` | `spanIndex`, `loadPositionDistance` (m from the left support of the span, strictly positive), `temperature` (°C), `targetVerticalDisplacement` (m, positive upward) | `EstimationResult`; `value` is the load mass in kg: negative for a traction, positive for a weight. |
+| `getLoadPoints` | `get_load_points` | `spanIndex`, `loadPositionDistance`, `temperature`, `loadMasses` (kg, a null mass gives the unloaded point) | `{ points: [x, y, z][] }` in meters, one load application point per mass. |
+
+`estimateLoad` is not used here: it targets a distance to an obstacle, and the mechaphlowers distance computation fails when the obstacle plane is close to the load node, systematically for a traction (negative mass). `estimateEffort` targets the altitude of the load application point instead. Large masses make the balance solver diverge, so the search interval grows progressively from 50 kg, doubling up to 20,000 kg; a target not reached within this range, or a solver failure while growing it, raises `EstimationNotConvergedError`. An existing load on the span is replaced, as in `estimateLoad`.
+
+The frontend converts the form before calling the tasks: a distance measured from the right support becomes `span length - distance`, and a downward displacement becomes a negative `targetVerticalDisplacement`. The displayed effort (daN) is the estimated mass (1 daN = 1 kg under the 10 m/s² convention). The displacement along the span axis is `|x(mass) - x(0)|`, computed from `getLoadPoints` with `loadMasses: [0, mass]`.
+
+Targeted Python test:
+
+```bash
+cd stellar-engine && uv run pytest test/tools/test_effort_estimation.py -q -p no:logging
+```
+
 ## Known limitation: wind direction
 
 Stellar configures wind direction as `clockwise`, but the mechaphlowers estimator currently always applies wind `anticlockwise`. This can affect wind estimation results. When the mechaphlowers engine implementation is updated to resolve the mismatch, rebuild the local engine wheel and its bundled assets with:

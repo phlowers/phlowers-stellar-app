@@ -8,6 +8,7 @@ import { HangingTableComponent } from '../components/hanging-table/hanging-table
 import { ObstaclesTableComponent } from '../components/obstacles-table/obstacles-table.component';
 import { StrandRrtsComponent } from '../components/strand-rrts/strand-rrts.component';
 import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
+import { EstimationsComponent } from '@features/studio/estimations/presentation/components/estimations/estimations.component';
 import {
   DialogPhase,
   LoadTableContext,
@@ -69,6 +70,10 @@ export class ToolbarDialogService {
     },
     'cable-adjustment': {
       component: CableAdjustmentComponent,
+      dialogStyle: { width: '43.5rem', 'max-width': '90%' }
+    },
+    estimations: {
+      component: EstimationsComponent,
       dialogStyle: { width: '43.5rem', 'max-width': '90%' }
     },
     'other-tool': {
