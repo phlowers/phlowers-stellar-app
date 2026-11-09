@@ -144,7 +144,7 @@ describe('TangentAimingSupport component', () => {
   it.each([
     ['tangent-angle-input', '201', 'cableTangentAngle'],
     ['tangent-angle-input', '-201', 'cableTangentAngle'],
-    ['tangent-angle-input', '1.234', 'cableTangentAngle'],
+    ['tangent-angle-input', '1.2345', 'cableTangentAngle'],
     ['span-length-input', '-1', 'tangentSpanLength'],
     ['span-length-input', '1.234', 'tangentSpanLength'],
     ['h-acc-distance-input', '1001', 'cableHAccDistance'],
@@ -166,8 +166,8 @@ describe('TangentAimingSupport component', () => {
     expect(getByTestId('left-support-select')?.classList).toContain('p-invalid');
   });
 
-  it('should accept a negative angle with two decimals', () => {
-    setInput('vertical-acc-angle-input', '-12.34');
+  it('should accept a negative angle with three decimals', () => {
+    setInput('vertical-acc-angle-input', '-12.345');
     expect((getByTestId('vertical-acc-angle-input') as HTMLInputElement).getAttribute('aria-invalid')).toBeNull();
     expect(component.isFormValid()).toBe(true);
   });

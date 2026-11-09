@@ -45,8 +45,8 @@ describe('TangentAimingExterior component', () => {
     component.form.controls.leftSupport.setValue('0');
     setInput('span-length-input', '100');
     setInput('h-acc-distance-input', '10');
-    setInput('vertical-acc-angle-left-input', '5');
-    setInput('vertical-acc-angle-right-input', '6');
+    setInput('vertical-acc-angle-left-input', '5.123');
+    setInput('vertical-acc-angle-right-input', '6.123');
   };
 
   beforeEach(async () => {
@@ -132,7 +132,7 @@ describe('TangentAimingExterior component', () => {
     const button = () => getByTestId('calculate-tangent-aiming-exterior-btn') as HTMLButtonElement;
     expect(button().disabled).toBe(true);
     fillCommonFields();
-    setInput('tangent-angle-input', '101.4');
+    setInput('tangent-angle-input', '101.456');
     expect(button().disabled).toBe(false);
   });
 

@@ -16,9 +16,9 @@ import {
 export const TANGENT_AIMING_FIELD_RULES: Record<TangentAimingRuleField, TangentAimingFieldRule> = {
   spanLength: { min: 0, max: 5000, decimals: 2, default: 0 },
   hAccDistance: { min: 0, max: 1000, decimals: 2, default: 0 },
-  verticalAccAngle: { min: -200, max: 200, decimals: 2, default: 0 },
+  verticalAccAngle: { min: -200, max: 200, decimals: 3, default: 0 },
   parameter: { min: 20, max: 5000, decimals: 0, default: 20 },
-  tangentAngle: { min: -200, max: 200, decimals: 2, default: 0 }
+  tangentAngle: { min: -200, max: 200, decimals: 3, default: 0 }
 };
 
 /**

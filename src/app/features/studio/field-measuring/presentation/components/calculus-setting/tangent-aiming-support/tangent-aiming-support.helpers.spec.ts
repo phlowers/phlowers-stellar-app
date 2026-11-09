@@ -124,7 +124,8 @@ describe('tangent-aiming-support helpers', () => {
 
     it('should reject out-of-bound or too precise values', () => {
       expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 201 })).toBe(false);
-      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 1.234 })).toBe(false);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 1.234 })).toBe(true);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 1.2345 })).toBe(false);
       expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'parametre', cableParameter: 19 })).toBe(
         false
       );
