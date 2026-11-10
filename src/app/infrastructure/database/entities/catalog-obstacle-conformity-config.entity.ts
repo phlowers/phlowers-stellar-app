@@ -34,4 +34,25 @@ export interface CatalogObstacleConformityConfigEntity {
   wind_zone_default: string;
   /** Multipliers used to position intermediate reference cable points along the span. */
   intermediate_point_positions: number[];
+  /** Available point counts for forest-trenches ground slicing. */
+  forest_trenches_n_points_choices: number[];
+  /** Default overhang rules for the forest-trenches tool. */
+  forest_trenches_overhang_rules: string[];
+  /** Default lateral rules for the forest-trenches tool. */
+  forest_trenches_lateral_rules: string[];
+  /** Base climatic case for the forest-trenches tool. */
+  forest_trenches_base_case: {
+    name: string;
+    temperature: number;
+    wind: number;
+  };
+  /** Whether the mandatory forest-trenches floor obstacle is in the red zone. */
+  floor_obstacle_red_zone: boolean;
+  /** Rule distances for the mandatory forest-trenches floor obstacle. */
+  floor_obstacle_distances: {
+    rule_type: string;
+    active: boolean;
+    overhang: Record<string, number> | null;
+    lateral: Record<string, number> | null;
+  }[];
 }

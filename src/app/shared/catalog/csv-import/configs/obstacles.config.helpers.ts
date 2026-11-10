@@ -19,6 +19,7 @@ import { OBSTACLE_CONFORMITY_CONFIG_KEY } from '@infrastructure/database';
 import type {
   ObstacleConfigurationJsonDto,
   ObstacleDistanceJsonDto,
+  ForestTrenchesFloorObstacleJsonDto,
   ObstacleJsonDto,
   ObstacleRuleJsonDto,
   ObstacleRulePointJsonDto,
@@ -51,30 +52,35 @@ function isFiniteNumber(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }
 
-function assertObstacleDistanceEntry(value: unknown, obstacleIndex: number, distanceIndex: number): void {
+function assertObstacleDistanceEntry(
+  value: unknown,
+  obstacleIndex: number,
+  distanceIndex: number,
+  collection = 'obstacles'
+): void {
   if (!isObject(value)) {
     throw new Error(
-      `Obstacle configuration: obstacles[${obstacleIndex}].distances[${distanceIndex}] must be an object`
+      `Obstacle configuration: ${collection}[${obstacleIndex}].distances[${distanceIndex}] must be an object`
     );
   }
   if (typeof value['ruleType'] !== 'string') {
     throw new TypeError(
-      `Obstacle configuration: obstacles[${obstacleIndex}].distances[${distanceIndex}].ruleType must be a string`
+      `Obstacle configuration: ${collection}[${obstacleIndex}].distances[${distanceIndex}].ruleType must be a string`
     );
   }
   if (typeof value['active'] !== 'boolean') {
     throw new TypeError(
-      `Obstacle configuration: obstacles[${obstacleIndex}].distances[${distanceIndex}].active must be a boolean`
+      `Obstacle configuration: ${collection}[${obstacleIndex}].distances[${distanceIndex}].active must be a boolean`
     );
   }
   if (value['overhang'] !== null && !isObject(value['overhang'])) {
     throw new Error(
-      `Obstacle configuration: obstacles[${obstacleIndex}].distances[${distanceIndex}].overhang must be an object or null`
+      `Obstacle configuration: ${collection}[${obstacleIndex}].distances[${distanceIndex}].overhang must be an object or null`
     );
   }
   if (value['lateral'] !== null && !isObject(value['lateral'])) {
     throw new Error(
-      `Obstacle configuration: obstacles[${obstacleIndex}].distances[${distanceIndex}].lateral must be an object or null`
+      `Obstacle configuration: ${collection}[${obstacleIndex}].distances[${distanceIndex}].lateral must be an object or null`
     );
   }
 }
@@ -152,6 +158,64 @@ function assertWindZoneValueEntry(value: unknown, index: number): void {
   }
 }
 
+function assertForestTrenchesConfig(value: unknown): void {
+  if (!isObject(value)) {
+    throw new Error('Obstacle configuration: `forest_trenches` must be an object');
+  }
+
+  const choices = value['ground_n_slicing_points_choices'];
+  if (
+    !Array.isArray(choices) ||
+    choices.length === 0 ||
+    !choices.every((choice) => Number.isInteger(choice) && choice >= 2)
+  ) {
+    throw new Error(
+      'Obstacle configuration: `forest_trenches.ground_n_slicing_points_choices` must be a non-empty array of integers >= 2'
+    );
+  }
+
+  for (const key of ['overhang_rules_selected', 'lateral_rules_selected'] as const) {
+    const rules = value[key];
+    if (!Array.isArray(rules) || !rules.every((rule) => typeof rule === 'string')) {
+      throw new Error(`Obstacle configuration: \`forest_trenches.${key}\` must be an array of strings`);
+    }
+  }
+
+  const baseCase = value['base_case'];
+  if (!isObject(baseCase)) {
+    throw new Error('Obstacle configuration: `forest_trenches.base_case` must be an object');
+  }
+  if (typeof baseCase['name'] !== 'string') {
+    throw new Error('Obstacle configuration: `forest_trenches.base_case.name` must be a string');
+  }
+  if (!isFiniteNumber(baseCase['temperature']) || !isFiniteNumber(baseCase['wind'])) {
+    throw new Error('Obstacle configuration: `forest_trenches.base_case` temperature and wind must be finite numbers');
+  }
+}
+
+function assertForestTrenchesFloorObstacle(value: unknown): asserts value is ForestTrenchesFloorObstacleJsonDto {
+  if (!isObject(value)) {
+    throw new Error('Obstacle configuration: `floor_obstacle` must be an object');
+  }
+  for (const key of ['obstacleType', 'obstacleName', 'details'] as const) {
+    if (typeof value[key] !== 'string') {
+      throw new Error(`Obstacle configuration: \`floor_obstacle.${key}\` must be a string`);
+    }
+  }
+  if (typeof value['redZone'] !== 'boolean') {
+    throw new Error('Obstacle configuration: `floor_obstacle.redZone` must be a boolean');
+  }
+  if (value['conformity'] !== 'forest_trenches') {
+    throw new Error('Obstacle configuration: `floor_obstacle.conformity` must be "forest_trenches"');
+  }
+  if (!Array.isArray(value['distances'])) {
+    throw new Error('Obstacle configuration: `floor_obstacle.distances` must be an array');
+  }
+  value['distances'].forEach((distance, distanceIndex) => {
+    assertObstacleDistanceEntry(distance, 0, distanceIndex, 'floor_obstacle');
+  });
+}
+
 /**
  * Type guard validating the expected top-level shape and the basic
  * nested-entry shape of `obstacle_configuration.json`. Throws a
@@ -187,6 +251,8 @@ export function assertObstacleConfigurationJson(value: unknown): asserts value i
   if (!Array.isArray(value['intermediatePointPositions'])) {
     throw new TypeError('Obstacle configuration: `intermediatePointPositions` must be an array');
   }
+  assertForestTrenchesConfig(value['forest_trenches']);
+  assertForestTrenchesFloorObstacle(value['floor_obstacle']);
 
   obstacles.forEach((obstacle, index) => {
     assertObstacleEntry(obstacle, index);
@@ -221,13 +287,19 @@ export function mapObstacleConfiguration(json: ObstacleJsonDto): CatalogObstacle
   };
 }
 
+function mapDistanceFields(distance: ObstacleDistanceJsonDto) {
+  return {
+    rule_type: distance.ruleType,
+    active: distance.active,
+    overhang: distance.overhang === null ? null : { ...distance.overhang },
+    lateral: distance.lateral === null ? null : { ...distance.lateral }
+  };
+}
+
 function mapDistance(obstacleType: string, distance: ObstacleDistanceJsonDto): CatalogObstacleDistanceEntity {
   return {
     obstacle_type: obstacleType,
-    rule_type: distance.ruleType,
-    active: distance.active,
-    overhang: distance.overhang,
-    lateral: distance.lateral
+    ...mapDistanceFields(distance)
   };
 }
 
@@ -277,6 +349,12 @@ export function buildConformityConfig(payload: ObstacleConfigurationJsonDto): Ca
     lateral_temperature_rule_type: payload.lateralTemperatureFields.ruleType,
     lateral_temperature_message: payload.lateralTemperatureFields.message,
     wind_zone_default: payload.windZone.default,
-    intermediate_point_positions: [...payload.intermediatePointPositions]
+    intermediate_point_positions: [...payload.intermediatePointPositions],
+    forest_trenches_n_points_choices: [...payload.forest_trenches.ground_n_slicing_points_choices],
+    forest_trenches_overhang_rules: [...payload.forest_trenches.overhang_rules_selected],
+    forest_trenches_lateral_rules: [...payload.forest_trenches.lateral_rules_selected],
+    forest_trenches_base_case: { ...payload.forest_trenches.base_case },
+    floor_obstacle_red_zone: payload.floor_obstacle.redZone,
+    floor_obstacle_distances: payload.floor_obstacle.distances.map(mapDistanceFields)
   };
 }

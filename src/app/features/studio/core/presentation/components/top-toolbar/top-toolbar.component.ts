@@ -237,9 +237,9 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 6,
       label: this.translocoService.translate('studio.top-toolbar.forest-trenches-tool'),
       checked: false,
-      disabled: true,
+      disabled: false,
       action: () => {
-        alert('click Forest trenches');
+        this.toolbarDialogService.openTool('forest-trenches');
       }
     },
     {

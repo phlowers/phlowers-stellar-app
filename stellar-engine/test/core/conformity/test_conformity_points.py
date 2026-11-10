@@ -6,10 +6,84 @@
 
 """Conformity points, radius and zone structure of the result dictionary."""
 
+import numpy as np
 import pytest
+
+from stellar_engine.core.conformity.runner import (
+    MultiStateRunner,
+    SpanPointsProjector,
+)
+from stellar_engine.core.conformity.scenarios import TargetState
 
 LATERAL_D = 2.5
 OVERHANG_D = 3.5
+
+
+def _span_points(supports, span_index):
+    start = supports[span_index]
+    end = supports[span_index + 1]
+    return np.array([start, (start + end) / 2, end])
+
+
+def test_span_points_projector_uses_curve_extremities_at_supports(
+    solved_study,
+):
+    supports = solved_study.position_engine.get_group_points().supports.coords[
+        :, 0, :
+    ]
+    projector = SpanPointsProjector(
+        supports, 0, _span_points(supports, 0)[[0, -1]]
+    )
+    curves = solved_study.position_engine.get_group_points().spans.coords[0]
+
+    result = projector.measure(curves)
+
+    assert result == [
+        projector._project(curves[0], projector._planes[0]),
+        projector._project(curves[-1], projector._planes[1]),
+    ]
+
+
+def test_multi_state_runner_solves_each_unique_state_once(
+    solved_study, monkeypatch
+):
+    study_type = type(solved_study)
+    original_solve_change_state = study_type.solve_change_state
+    solved_states = []
+
+    def track_solve_change_state(study, **kwargs):
+        solved_states.append(
+            (kwargs["wind_pressure"], kwargs["new_temperature"])
+        )
+        return original_solve_change_state(study, **kwargs)
+
+    monkeypatch.setattr(
+        study_type, "solve_change_state", track_solve_change_state
+    )
+    supports = solved_study.position_engine.get_group_points().supports.coords[
+        :, 0, :
+    ]
+    projectors = {
+        span_index: SpanPointsProjector(
+            supports, span_index, _span_points(supports, span_index)
+        )
+        for span_index in (0, 1)
+    }
+    states = [
+        TargetState(new_temperature=15, wind_pressure=0),
+        TargetState(new_temperature=20, wind_pressure=200),
+        TargetState(new_temperature=15, wind_pressure=0),
+    ]
+
+    results = MultiStateRunner(solved_study, projectors).run(states)
+
+    assert solved_states == [(0, 15), (200, 20)]
+    assert set(results) == {(0, 15), (200, 20)}
+    assert all(
+        len(points) == 3
+        for spans in results.values()
+        for points in spans.values()
+    )
 
 
 @pytest.mark.parametrize(

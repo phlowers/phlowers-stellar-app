@@ -93,7 +93,9 @@ describe('Task handlers', () => {
       [Task.estimateRope, 'estimate_rope'],
       [Task.estimateTemperature, 'estimate_temperature'],
       [Task.estimateLoad, 'estimate_load'],
-      [Task.estimateWind, 'estimate_wind']
+      [Task.estimateWind, 'estimate_wind'],
+      [Task.sliceGround, 'slice_ground'],
+      [Task.getForestTrenches, 'get_forest_trenches']
     ])('should call the matching Python function for the %s task', async (task, pythonFunction) => {
       const mockResult = { value: 60, residual: 0.01, iterations: 7, converged: true };
       const mockToJs = vi.fn().mockReturnValue(mockResult);

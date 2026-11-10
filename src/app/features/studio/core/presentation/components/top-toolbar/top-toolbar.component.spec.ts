@@ -482,13 +482,10 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 5 - Forest trenches', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[4].action();
-      expect(alertSpy).toHaveBeenCalledWith('click Forest trenches');
-
-      alertSpy.mockRestore();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('forest-trenches');
     });
 
     it('should execute action for tool item 6 - Height & lateral distance', () => {
@@ -517,9 +514,9 @@ describe('StudioTopToolbarComponent', () => {
         tools?.[i].command?.({});
       }
 
-      // Field measurements, VTL & Guying, Strand RRTS and Cable adjustment open a dialog, the other 3 call alert
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(4);
-      expect(alertSpy).toHaveBeenCalledTimes(3);
+      // Five tools open a dialog; only Cable marking and Height & lateral distance remain placeholders.
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(5);
+      expect(alertSpy).toHaveBeenCalledTimes(2);
       alertSpy.mockRestore();
     });
   });

@@ -8,6 +8,7 @@ import { HangingTableComponent } from '../components/hanging-table/hanging-table
 import { ObstaclesTableComponent } from '../components/obstacles-table/obstacles-table.component';
 import { StrandRrtsComponent } from '../components/strand-rrts/strand-rrts.component';
 import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
+import { ForestTrenchesComponent } from '@features/studio/forest-trenches/presentation/components/forest-trenches/forest-trenches.component';
 import {
   DialogPhase,
   LoadTableContext,
@@ -70,6 +71,10 @@ export class ToolbarDialogService {
     'cable-adjustment': {
       component: CableAdjustmentComponent,
       dialogStyle: { width: '43.5rem', 'max-width': '90%' }
+    },
+    'forest-trenches': {
+      component: ForestTrenchesComponent,
+      dialogStyle: { width: '86.5625rem', 'max-width': '90%' }
     },
     'other-tool': {
       component: null!
