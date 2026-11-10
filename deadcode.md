@@ -7,10 +7,10 @@
 ### Unused `hasUnsavedChanges` signal (field measuring)
 
 - **Source**: `src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.ts` (`hasUnsavedChanges`).
-- **Evidence**: no template or component consumer in `src`; only its own spec block in `field-measuring.component.spec.ts` reads it (PR #1357 review). The save/report gating uses `isSaved` and `hasEditedInputs` instead.
-- **Removal impact**: Remove the signal and its spec assertions; check that `isEqual` stays used elsewhere in the component.
+- **Evidence**: no template or component consumer in `src`; it is read only by about 17 assertions in `field-measuring.component.spec.ts` (the `hasUnsavedChanges` describe block and several `onSave`/`canReportOrExport` tests). The save/report gating uses `isSaved` and `hasEditedInputs` instead (PR #1357 review).
+- **Removal impact**: Remove the signal, its spec assertions and the `hasUnsavedChanges` describe block; `isEqual` stays used by `hasEditedInputs`; the doc comment at line 289 references it and must be updated.
 - **Detected on**: 2026-11-10.
-- **Status**: PENDING REVIEW; deletion requires user validation.
+- **Status**: 🗑️ REMOVED — 2026-11-10, validated by the user (PR #1357 review). Signal, its spec assertions and the doc-comment reference were removed; the former `hasUnsavedChanges` spec block now covers `hasEditedInputs`.
 
 ### Unused `StartLocation` interface
 

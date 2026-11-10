@@ -665,7 +665,6 @@ describe('FieldMeasuringComponent', () => {
     it('should be false when the form is invalid, even once saved', async () => {
       component.measureData.set({ ...validMeasure(), windSpeed: null });
       await component.onSave();
-      expect(component.hasUnsavedChanges()).toBe(false);
       expect(component.canReportOrExport()).toBe(false);
     });
 
@@ -692,7 +691,6 @@ describe('FieldMeasuringComponent', () => {
       await component.onSave();
       const saved = component.measureData();
       component.measureData.set({ ...saved, outputs: { ...saved.outputs, parameter15C: null } });
-      expect(component.hasUnsavedChanges()).toBe(true);
       expect(component.hasEditedInputs()).toBe(false);
       expect(component.canReportOrExport()).toBe(true);
     });
@@ -905,7 +903,6 @@ describe('FieldMeasuringComponent', () => {
       expect(saved?.cableParameter).toBe(100);
       expect(saved?.cableTangentAngle).toBeNull();
       expect(component.measureData().cableTangentAngle).toBeNull();
-      expect(component.hasUnsavedChanges()).toBe(false);
     });
 
     it('should persist the default span length when it is left empty', async () => {
@@ -956,7 +953,6 @@ describe('FieldMeasuringComponent', () => {
       expect(saved?.HL).toBe(5);
       expect(saved?.tangentSpanLength).not.toBe(12);
       expect(saved?.cableTangentAngle).not.toBe(5);
-      expect(component.hasUnsavedChanges()).toBe(false);
     });
 
     it('should validate the tab through the tangent aiming rules', () => {
@@ -1086,7 +1082,6 @@ describe('FieldMeasuringComponent', () => {
           (method) => method !== calculationMethod
         )!;
         component.measureData.set({ ...saved, calculationMethod: otherMethod });
-        expect(component.hasUnsavedChanges()).toBe(true);
         expect(component.hasEditedInputs()).toBe(false);
         expect(component.canSave()).toBe(false);
       });
@@ -1122,7 +1117,6 @@ describe('FieldMeasuringComponent', () => {
       expect(saved?.exteriorParameter).toBe(100);
       expect(saved?.exteriorTangentAngle).toBeNull();
       expect(saved?.HL).toBeNull();
-      expect(component.hasUnsavedChanges()).toBe(false);
     });
 
     it('should validate the tab through the exterior rules and gate the report/export buttons', () => {
@@ -1180,7 +1174,6 @@ describe('FieldMeasuringComponent', () => {
       expect(saved?.interiorHAccDistance).toBe(4000);
       expect(saved?.HL).toBeNull();
       expect(saved?.exteriorSpanLength).toBe(0);
-      expect(component.hasUnsavedChanges()).toBe(false);
     });
 
     it('should validate the tab through the interior rules and gate the report/export buttons', () => {
@@ -1216,7 +1209,7 @@ describe('FieldMeasuringComponent', () => {
     });
   });
 
-  describe('hasUnsavedChanges', () => {
+  describe('hasEditedInputs', () => {
     it('should be false right after initialization and true after an edit', async () => {
       toolbarDialogService.openTool('field-measuring');
       toolbarDialogService.proceedToMainComponent();
@@ -1225,11 +1218,11 @@ describe('FieldMeasuringComponent', () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       fixture.detectChanges();
 
-      expect(component.hasUnsavedChanges()).toBe(false);
+      expect(component.hasEditedInputs()).toBe(false);
 
       component.onFieldChange('windSpeed', 12);
 
-      expect(component.hasUnsavedChanges()).toBe(true);
+      expect(component.hasEditedInputs()).toBe(true);
     });
 
     it('should become false again after a successful save', async () => {
@@ -1244,11 +1237,11 @@ describe('FieldMeasuringComponent', () => {
       fixture.detectChanges();
 
       component.onFieldChange('windSpeed', 12);
-      expect(component.hasUnsavedChanges()).toBe(true);
+      expect(component.hasEditedInputs()).toBe(true);
 
       await component.onSave();
 
-      expect(component.hasUnsavedChanges()).toBe(false);
+      expect(component.hasEditedInputs()).toBe(false);
     });
 
     it('should count a new automatic 15°C result as an edit, and a cleared one as neutral', async () => {
@@ -1533,7 +1526,6 @@ describe('FieldMeasuringComponent', () => {
 
       expect(modifySectionSpy.mock.calls[0][0].field_measures?.at(-1)?.savedTab).toBe('parameterCalculation');
       expect(component.measureData().savedTab).toBe('parameterCalculation');
-      expect(component.hasUnsavedChanges()).toBe(false);
     });
 
     it.each(['parameterCalculation', 'temperatureCalculation', 'parameterAt15CWithoutWind'] as const)(
@@ -1593,7 +1585,6 @@ describe('FieldMeasuringComponent', () => {
 
       expect(component.measureData().outputs.tangentAimingInterior).toBeNull();
       expect(component.hasComputedOutputs()).toBe(false);
-      expect(component.hasUnsavedChanges()).toBe(false);
     });
   });
 

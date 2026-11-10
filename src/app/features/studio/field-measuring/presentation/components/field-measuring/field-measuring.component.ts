@@ -138,9 +138,6 @@ export class FieldMeasuringComponent implements OnDestroy {
     return buildLeftSupportOptions(this.translocoService);
   });
 
-  /** Whether `measureData` differs from the last saved snapshot. */
-  readonly hasUnsavedChanges = computed(() => !isEqual(this.measureData(), this.lastSavedMeasureData()));
-
   /** Whether an input differs from the last saved snapshot: selecting a calculus mode is a choice, not an edit. */
   readonly hasEditedInputs = computed(() => {
     const current = this.measureData();
@@ -286,8 +283,7 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   /**
    * Whether the displayed measure is the saved one: same calculus method and no input edited since the last save.
-   * Unlike `hasUnsavedChanges`, it ignores the defaults and stale automatic results that opening a measure
-   * normalizes, which are not user edits.
+   * It ignores the defaults and stale automatic results that opening a measure normalizes, which are not user edits.
    */
   private readonly isSaved = computed(
     () =>
