@@ -405,9 +405,13 @@ export class ConformityComponent implements OnDestroy {
     return !this.hasMultiplePoints() || this.selectedPointValue() !== null;
   });
 
-  /** Point selected in the obstacle tab, null when the obstacle has a single point or no valid selection. */
+  /**
+   * Point selected in the obstacle tab, null when the obstacle has a single point or no valid selection.
+   * The index is shared with floors, so it only applies when the selected measure is this obstacle.
+   */
   private activeObstaclePointIndex(): number | null {
     const index = this.obstaclesService.activePointIndex();
+    if (this.obstacleUuid() !== this.obstaclesService.selectedMeasureUuid()) return null;
     if (!this.hasMultiplePoints() || index === null || index >= this.positions().length) return null;
     return index;
   }
@@ -455,13 +459,15 @@ export class ConformityComponent implements OnDestroy {
     });
   });
 
-  /** Preselect the point selected in the obstacle tab when opening, unless a saved point exists. */
+  /**
+   * Preselect the point selected in the obstacle tab when opening, unless a saved point exists.
+   * Without a valid active point the selection is cleared so a reopen never keeps a stale point.
+   */
   private readonly selectActivePointOnOpen = effect(() => {
     if (!this.isOpen()) return;
     untracked(() => {
       if (this.savedConformityData()?.selectedPoint != null) return;
-      const index = this.activeObstaclePointIndex();
-      if (index !== null) this.form.controls.selectedPoint.setValue(index);
+      this.form.controls.selectedPoint.setValue(this.activeObstaclePointIndex());
     });
   });
 

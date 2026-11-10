@@ -268,7 +268,10 @@ describe('ConformityComponent', () => {
       ],
       providers: [
         { provide: ObstacleFormService, useValue: mockFormService },
-        { provide: ObstaclesService, useValue: { activePointIndex: signal<number | null>(null) } },
+        {
+          provide: ObstaclesService,
+          useValue: { activePointIndex: signal<number | null>(null), selectedMeasureUuid: signal<string | null>(null) }
+        },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: StorageService, useValue: { db: buildDb(dbData) } },
         { provide: NotificationService, useValue: mockNotification },
@@ -959,9 +962,24 @@ describe('ConformityComponent', () => {
       { x: 2, y: 2, z: 2 }
     ];
 
-    async function openWithActivePoint(activeIndex: number | null): Promise<void> {
+    async function openWithActivePoint(
+      activeIndex: number | null,
+      selectedMeasureUuid: string | null = obstacle.uuid
+    ): Promise<void> {
       await createComponent();
+      const obstaclesService = TestBed.inject(ObstaclesService);
+      obstaclesService.selectedMeasureUuid.set(selectedMeasureUuid);
+      obstaclesService.activePointIndex.set(activeIndex);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+
+    async function reopenWithActivePoint(activeIndex: number | null): Promise<void> {
       TestBed.inject(ObstaclesService).activePointIndex.set(activeIndex);
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+      await fixture.whenStable();
       fixture.componentRef.setInput('isOpen', true);
       fixture.detectChanges();
       await fixture.whenStable();
@@ -998,6 +1016,24 @@ describe('ConformityComponent', () => {
       await openWithActivePoint(activeIndex);
 
       expect(component.form.controls.selectedPoint.value).toBeNull();
+    });
+
+    it('should ignore the active index when the selected measure is another obstacle or a floor', async () => {
+      obstacle = { ...defaultObstacle(), positions: twoPoints };
+      await openWithActivePoint(1, 'floor-1');
+
+      expect(component.form.controls.selectedPoint.value).toBeNull();
+    });
+
+    it.each([null, 5])('should clear a stale point when reopening with the active index %s', async (activeIndex) => {
+      obstacle = { ...defaultObstacle(), positions: twoPoints };
+      await openWithActivePoint(1);
+      expect(component.form.controls.selectedPoint.value).toBe(1);
+
+      await reopenWithActivePoint(activeIndex);
+
+      expect(component.form.controls.selectedPoint.value).toBeNull();
+      expect(component.canCalculate()).toBe(false);
     });
 
     it('should not preselect a point for a single-point obstacle', async () => {
