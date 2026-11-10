@@ -21,6 +21,7 @@ import { LoadType } from './helpers/createLoadAnnotations';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
 import { CableSupportManipService } from '@features/studio/loads/presentation/services/cableSupportManip.service';
+import { LOAD_TAB } from '@features/studio/loads/presentation/load-tabs.constantes';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
 import { FloorFormService } from '@services/floor-form/floor-form.service';
@@ -1262,7 +1263,7 @@ describe('SectionPlotComponent', () => {
       capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 's0' } } });
 
       expect(mockSideTabsService.sideTabs()).toBe(0);
-      expect(mockLoadFormsService.activeLoadTab()).toBe('1');
+      expect(mockLoadFormsService.activeLoadTab()).toBe(LOAD_TAB.SPAN_LOAD);
       expect(mockLoadFormsService.selectedSpanSupportUuid()).toBe('s0');
     });
 
@@ -1282,7 +1283,7 @@ describe('SectionPlotComponent', () => {
       capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 'unknown-uuid' } } });
 
       expect(mockSideTabsService.sideTabs()).toBe(0);
-      expect(mockLoadFormsService.activeLoadTab()).toBe('1');
+      expect(mockLoadFormsService.activeLoadTab()).toBe(LOAD_TAB.SPAN_LOAD);
       expect(mockLoadFormsService.selectedSpanSupportUuid()).toBe('unknown-uuid');
     });
 
@@ -1336,7 +1337,7 @@ describe('SectionPlotComponent', () => {
       });
 
       expect(mockSideTabsService.sideTabs()).toBe(0);
-      expect(mockLoadFormsService.activeLoadTab()).toBe('2');
+      expect(mockLoadFormsService.activeLoadTab()).toBe(LOAD_TAB.CABLE_MODIFICATION);
       expect(mockCableModificationsService.selectSpan).toHaveBeenCalledWith('s0');
     });
 
@@ -1350,7 +1351,7 @@ describe('SectionPlotComponent', () => {
       });
 
       expect(mockSideTabsService.sideTabs()).toBe(0);
-      expect(mockLoadFormsService.activeLoadTab()).toBe('3');
+      expect(mockLoadFormsService.activeLoadTab()).toBe(LOAD_TAB.CABLE_SUPPORT_MANIP);
       expect(mockCableSupportManipService.selectSupport).toHaveBeenCalledWith('s1');
       expect(mockCableModificationsService.selectSpan).not.toHaveBeenCalled();
     });
