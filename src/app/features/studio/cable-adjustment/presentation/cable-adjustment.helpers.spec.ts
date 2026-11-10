@@ -9,7 +9,6 @@ import { Section } from '@shared/domain';
 import { CableAdjustmentFormValue } from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
 import {
   createAngleControl,
-  createNumberControl,
   findCurrentSpanOption,
   getSpanLength,
   toCableAdjustmentInputs,
@@ -30,29 +29,6 @@ const makeFormValue = (overrides: Partial<CableAdjustmentFormValue> = {}): Cable
 });
 
 describe('cable-adjustment helpers', () => {
-  describe('createNumberControl', () => {
-    it('defaults to null', () => {
-      expect(createNumberControl(0, 10, 1).value).toBeNull();
-    });
-
-    it.each([0, 10, 5.5])('accepts %s', (value) => {
-      const control = createNumberControl(0, 10, 1);
-      control.setValue(value);
-      expect(control.valid).toBe(true);
-    });
-
-    it.each([
-      [-0.1, 'min'],
-      [10.1, 'max'],
-      [1.23, 'maxDecimals'],
-      [null, 'required']
-    ])('rejects %s with a %s error', (value, errorKey) => {
-      const control = createNumberControl(0, 10, 1);
-      control.setValue(value);
-      expect(control.hasError(errorKey)).toBe(true);
-    });
-  });
-
   describe('createAngleControl', () => {
     it('defaults to 0', () => {
       expect(createAngleControl().value).toBe(0);

@@ -181,9 +181,9 @@ describe('StudioTopToolbarComponent', () => {
       ]);
     });
 
-    it('should initialize toolsItems with 7 items', () => {
+    it('should initialize toolsItems with 6 items', () => {
       const items = component.toolsItems();
-      expect(items).toHaveLength(7);
+      expect(items).toHaveLength(6);
       expect(items.every((item) => item.checked === false)).toBe(true);
     });
   });
@@ -263,7 +263,7 @@ describe('StudioTopToolbarComponent', () => {
     it('should initialize toolsDropdown from toolsItems', () => {
       component.ngOnInit();
       const tools = component.toolsDropdown();
-      expect(tools).toHaveLength(7);
+      expect(tools).toHaveLength(6);
       expect(tools?.[0].label).toBeDefined();
       expect(tools?.[0].command).toBeDefined();
     });
@@ -343,17 +343,17 @@ describe('StudioTopToolbarComponent', () => {
       expect(saved).toBeDefined();
 
       const parsed = JSON.parse(saved!);
-      expect(parsed).toHaveLength(7);
+      expect(parsed).toHaveLength(6);
       expect(parsed[0].checked).toBe(true);
       expect(parsed[1].checked).toBe(false);
       expect(parsed[2].checked).toBe(true);
     });
 
-    it('should save all 7 items state correctly', () => {
+    it('should save all 6 items state correctly', () => {
       const items = component.toolsItems();
       items[0].checked = true;
       items[2].checked = true;
-      items[6].checked = true;
+      items[5].checked = true;
       component.toolsItems.set([...items]);
 
       component.updateCheckedCount();
@@ -362,19 +362,18 @@ describe('StudioTopToolbarComponent', () => {
       const parsed = JSON.parse(saved!);
 
       expect(parsed[0]).toEqual({ id: 1, checked: true });
-      expect(parsed[2]).toEqual({ id: 4, checked: true });
-      expect(parsed[6]).toEqual({ id: 8, checked: true });
+      expect(parsed[2]).toEqual({ id: 5, checked: true });
+      expect(parsed[5]).toEqual({ id: 9, checked: true });
     });
 
     it('should load checked items from localStorage on init', () => {
       const mockState = [
         { id: 1, checked: true },
         { id: 3, checked: false },
-        { id: 4, checked: true },
-        { id: 5, checked: false },
-        { id: 6, checked: true },
-        { id: 7, checked: false },
-        { id: 8, checked: false }
+        { id: 5, checked: true },
+        { id: 6, checked: false },
+        { id: 8, checked: true },
+        { id: 9, checked: false }
       ];
       localStorage.setItem('toolsItemsState', JSON.stringify(mockState));
 
@@ -385,6 +384,20 @@ describe('StudioTopToolbarComponent', () => {
       expect(items[1].checked).toBe(false);
       expect(items[2].checked).toBe(true);
       expect(items[4].checked).toBe(true);
+    });
+
+    it('should ignore the saved state of the removed tools', () => {
+      localStorage.setItem(
+        'toolsItemsState',
+        JSON.stringify([
+          { id: 4, checked: true },
+          { id: 7, checked: true }
+        ])
+      );
+
+      component.ngOnInit();
+
+      expect(component.toolsItems().every((item) => !item.checked)).toBe(true);
     });
 
     it('should handle missing localStorage gracefully', () => {
@@ -464,48 +477,42 @@ describe('StudioTopToolbarComponent', () => {
       expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('vtl-and-guying');
     });
 
-    it('should execute action for tool item 3 - Cable marking', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
+    it('should execute action for tool item 3 - Strand RRTS', () => {
       const items = component.toolsItems();
 
       items[2].action();
-      expect(alertSpy).toHaveBeenCalledWith('click Cable marking');
-
-      alertSpy.mockRestore();
-    });
-
-    it('should execute action for tool item 4 - Strand RRTS', () => {
-      const items = component.toolsItems();
-
-      items[3].action();
       expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('strand-rrts');
     });
 
-    it('should execute action for tool item 5 - Forest trenches', () => {
+    it('should execute action for tool item 4 - Forest trenches', () => {
       const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
-      items[4].action();
+      items[3].action();
       expect(alertSpy).toHaveBeenCalledWith('click Forest trenches');
 
       alertSpy.mockRestore();
     });
 
-    it('should execute action for tool item 6 - Height & lateral distance', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
+    it('should execute action for tool item 5 - Cable adjustment', () => {
       const items = component.toolsItems();
 
-      items[5].action();
-      expect(alertSpy).toHaveBeenCalledWith('click Height & lateral distance');
-
-      alertSpy.mockRestore();
+      items[4].action();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('cable-adjustment');
     });
 
-    it('should execute action for tool item 7 - Cable adjustment', () => {
+    it('should execute action for tool item 6 - Estimations', () => {
       const items = component.toolsItems();
 
-      items[6].action();
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('cable-adjustment');
+      expect(items[5].label).toBe('studio.estimations.title');
+      expect(items[5].disabled).toBe(false);
+      items[5].action();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('estimations');
+    });
+
+    it('should not list the obsolete Cable marking and Height & lateral distance tools', () => {
+      const ids = component.toolsItems().map((item) => item.id);
+      expect(ids).toEqual([1, 3, 5, 6, 8, 9]);
     });
 
     it('should execute all actions through toolsDropdown commands', () => {
@@ -513,13 +520,13 @@ describe('StudioTopToolbarComponent', () => {
       component.ngOnInit();
       const tools = component.toolsDropdown();
 
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 6; i++) {
         tools?.[i].command?.({});
       }
 
-      // Field measurements, VTL & Guying, Strand RRTS and Cable adjustment open a dialog, the other 3 call alert
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(4);
-      expect(alertSpy).toHaveBeenCalledTimes(3);
+      // Every tool opens a dialog, except Forest trenches which calls alert
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(5);
+      expect(alertSpy).toHaveBeenCalledTimes(1);
       alertSpy.mockRestore();
     });
   });

@@ -4,6 +4,7 @@ import { ToolbarDialogService } from './toolbar-dialog.service';
 import { FieldMeasuringComponent } from '@features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component';
 import { InitComponent } from '@features/studio/field-measuring/presentation/components/init/init.component';
 import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
+import { EstimationsComponent } from '@features/studio/estimations/presentation/components/estimations/estimations.component';
 
 describe('ToolbarDialogService', () => {
   let service: ToolbarDialogService;
@@ -211,6 +212,15 @@ describe('ToolbarDialogService', () => {
       expect(service.isOpen()).toBe(true);
       expect(service.phase()).toBe('main');
       expect(service.getComponent()).toBe(CableAdjustmentComponent);
+      expect(service.getDialogStyle()).toEqual({ width: '43.5rem', 'max-width': '90%' });
+    });
+
+    it('should open estimations directly in main phase with its dialog style', () => {
+      service.openTool('estimations');
+      expect(service.currentTool()).toBe('estimations');
+      expect(service.isOpen()).toBe(true);
+      expect(service.phase()).toBe('main');
+      expect(service.getComponent()).toBe(EstimationsComponent);
       expect(service.getDialogStyle()).toEqual({ width: '43.5rem', 'max-width': '90%' });
     });
 

@@ -16,8 +16,10 @@ from mechaphlowers.entities.errors import (
 
 from stellar_engine.core import estimation
 from stellar_engine.entities.errors import (
+    ConformityInputError,
     EstimationInputError,
     EstimationNotConvergedError,
+    ObstacleNotFoundError,
 )
 
 N_SPANS = 4
@@ -414,3 +416,112 @@ def test_estimate_load_on_span_with_existing_load_warns(study: SectionStudy):
         )
 
     assert result["value"] == pytest.approx(50.0, abs=1.0)
+
+
+# ---------------------------obstacle of the study----------------
+
+OBSTACLE_UUID = "obstacle-uuid"
+
+
+@pytest.fixture
+def study_with_obstacle(study: SectionStudy) -> SectionStudy:
+    study.position_engine.add_obstacle(
+        name=OBSTACLE_UUID,
+        span_index=SPAN_INDEX,
+        coords=np.array([OBSTACLE, [300.0, 5.0, 15.0]]),
+    )
+    return study
+
+
+def study_obstacle_point(study: SectionStudy, point_index: int) -> list:
+    coords = study.position_engine.get_group_points().obstacles.dict_coords()
+    return coords[OBSTACLE_UUID][point_index].tolist()
+
+
+def test_estimate_temperature_on_study_obstacle_point(
+    study_with_obstacle: SectionStudy,
+):
+    point = study_obstacle_point(study_with_obstacle, 1)
+    reference = study_with_obstacle.copy()
+    reference.solve_change_state(new_temperature=60.0)
+    target = reference.position_engine.point_distance(
+        SPAN_INDEX, np.array(point)
+    ).distance_3d
+
+    by_uuid = estimation.estimate_temperature(
+        {
+            "spanIndex": SPAN_INDEX,
+            "obstacleUuid": OBSTACLE_UUID,
+            "pointIndex": 1,
+            # ignored: the study obstacle point wins
+            "obstaclePoint": [0.0, 0.0, 0.0],
+            "targetDistance": target,
+            "bounds": [-50.0, 250.0],
+        },
+        study_with_obstacle,
+    )
+    by_point = estimation.estimate_temperature(
+        {
+            "spanIndex": SPAN_INDEX,
+            "obstaclePoint": point,
+            "targetDistance": target,
+            "bounds": [-50.0, 250.0],
+        },
+        study_with_obstacle,
+    )
+
+    assert by_uuid["value"] == pytest.approx(60.0, abs=0.5)
+    assert by_uuid["value"] == pytest.approx(by_point["value"])
+
+
+@pytest.mark.parametrize(
+    "overrides, message",
+    [
+        ({"pointIndex": None}, "Missing estimation input: pointIndex"),
+        ({"pointIndex": -1}, "pointIndex must be a non-negative integer"),
+    ],
+)
+def test_estimate_invalid_study_obstacle_point_raises_input_error(
+    study_with_obstacle: SectionStudy, overrides: dict, message: str
+):
+    inputs = {
+        "spanIndex": SPAN_INDEX,
+        "obstacleUuid": OBSTACLE_UUID,
+        "pointIndex": 0,
+        "targetDistance": 30.0,
+    }
+
+    with pytest.raises(EstimationInputError, match=message):
+        estimation.estimate_temperature(
+            {**inputs, **overrides}, study_with_obstacle
+        )
+
+
+def test_estimate_unknown_study_obstacle_raises_obstacle_not_found(
+    study_with_obstacle: SectionStudy,
+):
+    with pytest.raises(ObstacleNotFoundError):
+        estimation.estimate_temperature(
+            {
+                "spanIndex": SPAN_INDEX,
+                "obstacleUuid": "unknown-uuid",
+                "pointIndex": 0,
+                "targetDistance": 30.0,
+            },
+            study_with_obstacle,
+        )
+
+
+def test_estimate_out_of_range_study_obstacle_point_raises(
+    study_with_obstacle: SectionStudy,
+):
+    with pytest.raises(ConformityInputError, match="Point index 2 out of"):
+        estimation.estimate_temperature(
+            {
+                "spanIndex": SPAN_INDEX,
+                "obstacleUuid": OBSTACLE_UUID,
+                "pointIndex": 2,
+                "targetDistance": 30.0,
+            },
+            study_with_obstacle,
+        )

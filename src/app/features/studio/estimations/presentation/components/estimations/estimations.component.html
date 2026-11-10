@@ -1,0 +1,22 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2 items-center">
+    <app-icon icon="calculate" aria-hidden="true" />
+    <span>{{ 'studio.estimations.title' | transloco }}</span>
+  </p>
+</ng-template>
+
+<p-tabs [(value)]="activeTab" data-testid="estimations-tabs">
+  <p-tablist>
+    @for (tab of tabs; track tab.value) {
+      <p-tab [value]="tab.value" [disabled]="tab.disabled" [attr.data-testid]="tab.testId">
+        {{ tab.labelKey | transloco }}
+      </p-tab>
+    }
+  </p-tablist>
+
+  <p-tabpanels>
+    <p-tabpanel value="temperature" data-testid="temperature-panel">
+      <app-temperature-estimation />
+    </p-tabpanel>
+  </p-tabpanels>
+</p-tabs>
