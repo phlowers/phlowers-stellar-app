@@ -1,4 +1,5 @@
 import { Support } from '@shared/domain/models/support.model';
+import type { CatalogObstacleWindZoneEntity } from '@infrastructure/database/entities/catalog-obstacle-wind-zone.entity';
 import { HIDDEN_RESULT_KEYS_BY_CONFORMITY_TYPE } from './conformity.constantes';
 import { ResultRow } from './conformity.model';
 
@@ -20,4 +21,18 @@ export function computeOverhangZoneWidth(supports: readonly Support[], supportUu
   const armLength = supports.find((s) => s.uuid === supportUuid)?.armLength;
   if (!armLength) return undefined;
   return 2 * Math.abs(armLength);
+}
+
+export function getEffectiveWindPressure(
+  windZones: readonly CatalogObstacleWindZoneEntity[],
+  windZoneLabel: string | null | undefined,
+  redZonePresence: boolean
+): number | null {
+  const zone = windZones.find((windZone) => windZone.label === windZoneLabel);
+  return zone ? (redZonePresence ? zone.red_zone : zone.normal) : null;
+}
+
+/** Read-only electric tension shown in the conformity-style forms; "-" when the section has none. */
+export function getElectricTensionLabel(voltage: string | null | undefined): string {
+  return voltage ?? '-';
 }

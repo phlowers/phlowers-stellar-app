@@ -91,7 +91,28 @@ const validPayload: ObstacleConfigurationJsonDto = {
       { label: 'ZVF', normal: 360, redZone: 480 }
     ]
   },
-  intermediatePointPositions: [0.33, 0.66]
+  intermediatePointPositions: [0.33, 0.66],
+  forest_trenches: {
+    ground_n_slicing_points_choices: [5, 9],
+    overhang_rules_selected: ['AT'],
+    lateral_rules_selected: ['AT', 'CCG-LA'],
+    base_case: { name: '15°C without wind', temperature: 15, wind: 0 }
+  },
+  floor_obstacle: {
+    obstacleType: 'floor',
+    obstacleName: 'floor',
+    details: '',
+    redZone: true,
+    conformity: 'forest_trenches',
+    distances: [
+      {
+        ruleType: 'AT',
+        active: true,
+        overhang: { '63': 0 },
+        lateral: { '63': 0 }
+      }
+    ]
+  }
 };
 
 describe('obstacles.config - pure helpers', () => {
@@ -187,12 +208,39 @@ describe('obstacles.config - pure helpers', () => {
       expect(config.lateral_temperature_message).toBe('msg');
       expect(config.wind_zone_default).toBe('ZVN');
       expect(config.intermediate_point_positions).toEqual([0.33, 0.66]);
+      expect(config.forest_trenches_n_points_choices).toEqual([5, 9]);
+      expect(config.forest_trenches_overhang_rules).toEqual(['AT']);
+      expect(config.forest_trenches_lateral_rules).toEqual(['AT', 'CCG-LA']);
+      expect(config.forest_trenches_base_case).toEqual({
+        name: '15°C without wind',
+        temperature: 15,
+        wind: 0
+      });
+      expect(config.floor_obstacle_red_zone).toBe(true);
+      expect(config.floor_obstacle_distances).toEqual([
+        {
+          rule_type: 'AT',
+          active: true,
+          overhang: { '63': 0 },
+          lateral: { '63': 0 }
+        }
+      ]);
     });
 
     it('returns a defensive copy of intermediatePointPositions', () => {
       const config = buildConformityConfig(validPayload);
       config.intermediate_point_positions.push(0.99);
       expect(validPayload.intermediatePointPositions).toEqual([0.33, 0.66]);
+    });
+
+    it('returns defensive copies of forest-trenches configuration', () => {
+      const config = buildConformityConfig(validPayload);
+      config.forest_trenches_n_points_choices.push(17);
+      config.forest_trenches_base_case.temperature = 20;
+      config.floor_obstacle_distances[0].overhang!['63'] = 7;
+      expect(validPayload.forest_trenches.ground_n_slicing_points_choices).toEqual([5, 9]);
+      expect(validPayload.forest_trenches.base_case.temperature).toBe(15);
+      expect(validPayload.floor_obstacle.distances[0].overhang).toEqual({ '63': 0 });
     });
   });
 
@@ -229,6 +277,25 @@ describe('obstacles.config - pure helpers', () => {
       ]
     ])('throws when payload is %#', (payload, expectedMessage) => {
       expect(() => assertObstacleConfigurationJson(payload)).toThrow(expectedMessage as string);
+    });
+
+    it('rejects invalid forest-trenches slicing choices', () => {
+      const payload = {
+        ...validPayload,
+        forest_trenches: {
+          ...validPayload.forest_trenches,
+          ground_n_slicing_points_choices: [1, 5]
+        }
+      };
+      expect(() => assertObstacleConfigurationJson(payload)).toThrow(/integers >= 2/);
+    });
+
+    it('rejects a floor obstacle without distance entries', () => {
+      const payload = {
+        ...validPayload,
+        floor_obstacle: { ...validPayload.floor_obstacle, distances: null }
+      };
+      expect(() => assertObstacleConfigurationJson(payload)).toThrow(/floor_obstacle\.distances/);
     });
   });
 });

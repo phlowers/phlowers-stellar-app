@@ -5,6 +5,7 @@ import { FieldMeasuringComponent } from '@features/studio/field-measuring/presen
 import { InitComponent } from '@features/studio/field-measuring/presentation/components/init/init.component';
 import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
 import { EstimationsComponent } from '@features/studio/estimations/presentation/components/estimations/estimations.component';
+import { ForestTrenchesComponent } from '@features/studio/forest-trenches/presentation/components/forest-trenches/forest-trenches.component';
 
 describe('ToolbarDialogService', () => {
   let service: ToolbarDialogService;
@@ -184,6 +185,13 @@ describe('ToolbarDialogService', () => {
       service.proceedToMainComponent();
       service.completePendingTransition();
       expect(service.getComponent()).toBe(FieldMeasuringComponent);
+    });
+
+    it('should return the Forest Trenches component after opening the tool', () => {
+      service.openTool('forest-trenches');
+
+      expect(service.getComponent()).toBe(ForestTrenchesComponent);
+      expect(service.getDialogStyle()).toEqual({ width: '86.5625rem', 'max-width': '90%' });
     });
 
     it('should return null for other-tool in init phase check', () => {

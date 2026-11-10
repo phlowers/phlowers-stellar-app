@@ -43,6 +43,28 @@ export interface ObstacleJsonDto {
   distances: ObstacleDistanceJsonDto[];
 }
 
+/** Forest-trenches-specific rule selections and base-case parameters. */
+export interface ForestTrenchesJsonDto {
+  ground_n_slicing_points_choices: number[];
+  overhang_rules_selected: string[];
+  lateral_rules_selected: string[];
+  base_case: {
+    name: string;
+    temperature: number;
+    wind: number;
+  };
+}
+
+/** Mandatory floor obstacle, kept out of the regular obstacle list. */
+export interface ForestTrenchesFloorObstacleJsonDto {
+  obstacleType: string;
+  obstacleName: string;
+  details: string;
+  redZone: boolean;
+  conformity: 'forest_trenches';
+  distances: ObstacleDistanceJsonDto[];
+}
+
 /** Wind zone entry as serialized in JSON (`windZone.values[]`). */
 export interface WindZoneValueJsonDto {
   label: string;
@@ -83,4 +105,6 @@ export interface ObstacleConfigurationJsonDto {
   lateralTemperatureFields: LateralTemperatureFieldsJsonDto;
   windZone: WindZoneJsonDto;
   intermediatePointPositions: number[];
+  forest_trenches: ForestTrenchesJsonDto;
+  floor_obstacle: ForestTrenchesFloorObstacleJsonDto;
 }

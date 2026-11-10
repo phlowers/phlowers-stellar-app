@@ -11,6 +11,7 @@ export type Tool =
   | 'strand-rrts'
   | 'cable-adjustment'
   | 'estimations'
+  | 'forest-trenches'
   | 'other-tool';
 
 /** Phase of the toolbar dialog lifecycle. */

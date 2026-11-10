@@ -161,6 +161,13 @@ def test_cable_track_has_no_zone():
     assert zone.to_dict() == {"zonePoints": [], "zoneBorder": []}
 
 
+def test_forest_trenches_uses_overhang_strategy():
+    strategy = get_strategy(ConformityPlot.FOREST_TRENCHES)
+
+    assert isinstance(strategy, OverhangStrategy)
+    assert not strategy.uses_intermediate_points
+
+
 # ============================================================================
 # COMPLIANCE
 # ============================================================================

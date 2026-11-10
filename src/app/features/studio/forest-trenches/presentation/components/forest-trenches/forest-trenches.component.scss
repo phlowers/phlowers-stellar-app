@@ -1,0 +1,259 @@
+@use 'abstract.extracts' as app;
+
+%_mb-3 {
+  @apply mb-3;
+}
+
+%_self-end {
+  align-self: end;
+}
+
+dl,
+fieldset {
+  @apply contents;
+}
+
+dt {
+  @extend %label-style;
+}
+
+dd {
+  @extend %read-only-info;
+}
+
+legend {
+  @extend %heading-xs;
+}
+
+.forest-trenches {
+  min-width: 0;
+}
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.form {
+  @apply grid gap-x-8 grid-cols-5 mb-3;
+  align-items: start;
+
+  grid-template-areas:
+    'titleSpan titleSpan titleSpan titleSpan titleSpan'
+    'firstLabel lastLabel . . nPointsLabel'
+    'firstInput lastInput . . nPointsInput'
+    'titleForm titleForm titleForm titleForm titleForm'
+    'tensionLabel windLabel distribTempLabel latTempLabel conformitySelectLabel'
+    'tensionInput windInput distribTempInput latTempInput conformitySelectInput'
+    '. windComplement distribTempComplement latTempComplement .'
+    'configError configError configError configError configError'
+    'submit submit submit submit submit';
+
+  &__title-span {
+    @apply justify-self-start;
+    grid-area: titleSpan;
+  }
+  &__first-support-label {
+    grid-area: firstLabel;
+    @extend %_self-end;
+  }
+  &__first-support-input {
+    grid-area: firstInput;
+    @extend %_mb-3;
+  }
+  &__last-support-label {
+    grid-area: lastLabel;
+    @extend %_self-end;
+  }
+  &__last-support-input {
+    grid-area: lastInput;
+    @extend %_mb-3;
+  }
+  &__n-points-label {
+    grid-area: nPointsLabel;
+    @extend %_self-end;
+  }
+  &__n-points-input {
+    grid-area: nPointsInput;
+    @extend %_mb-3;
+  }
+  &__title-form {
+    @apply justify-self-start;
+    grid-area: titleForm;
+  }
+  &__electric-tension-label {
+    grid-area: tensionLabel;
+    @extend %_self-end;
+  }
+  &__electric-tension-input {
+    grid-area: tensionInput;
+  }
+  &__wind-label {
+    grid-area: windLabel;
+    @extend %_self-end;
+  }
+  &__wind-input {
+    grid-area: windInput;
+  }
+  &__wind-compl {
+    grid-area: windComplement;
+    @apply grid gap-x-1 gap-y-3 items-center mt-3;
+    grid-template-columns: repeat(2, max-content);
+    @extend %_mb-3;
+  }
+  &__distrib-temp-label {
+    grid-area: distribTempLabel;
+    @extend %_self-end;
+  }
+  &__distrib-temp-input {
+    grid-area: distribTempInput;
+  }
+  &__distrib-temp-error {
+    grid-area: distribTempComplement;
+    @extend %_mb-3;
+  }
+  &__lat-temp-label {
+    grid-area: latTempLabel;
+    @extend %_self-end;
+  }
+  &__lat-temp-input {
+    grid-area: latTempInput;
+  }
+  &__lat-temp-compl {
+    grid-area: latTempComplement;
+    @extend %_mb-3;
+  }
+  &__conformity-select-label {
+    grid-area: conformitySelectLabel;
+    @extend %_self-end;
+  }
+  &__conformity-select-input {
+    grid-area: conformitySelectInput;
+  }
+  &__config-error {
+    grid-area: configError;
+    @extend %_mb-3;
+  }
+  &__submit {
+    @apply justify-self-end;
+    grid-area: submit;
+  }
+}
+
+.results {
+  @apply flex flex-wrap gap-x-8;
+
+  &__separator {
+    @apply flex-1 min-w-full border-t my-3;
+    border-top-color: var(--star-dust-300);
+  }
+
+  &__title {
+    @apply flex-1 min-w-full mt-0 mb-3;
+    @extend %heading-s;
+    color: var(--star-dust-950);
+  }
+
+  &__span {
+    @apply flex flex-col gap-1 min-w-full mb-3;
+    max-width: 24rem;
+  }
+
+  &__span-label {
+    @extend %label-style;
+  }
+
+  &__figure {
+    @apply flex flex-col m-0 min-w-full;
+    height: 24rem;
+    transition: height 0.3s ease-in-out;
+  }
+
+  &__figure-toggle {
+    align-self: flex-end;
+  }
+
+  &__plot {
+    @apply flex-1;
+    min-height: 0;
+  }
+
+  &__median {
+    @apply min-w-full my-3;
+  }
+
+  &__table-wrapper {
+    @apply min-w-full;
+    overflow-x: auto;
+  }
+
+  &__table {
+    width: 100%;
+    color: var(--star-dust-950);
+    border: 1px solid var(--star-dust-300);
+  }
+}
+
+/* Enlarged graph: the form is removed with its collapse animation and the table is not rendered. */
+:host(.graph-enlarged) {
+  .results__separator,
+  .results__title {
+    display: none;
+  }
+
+  .results__figure {
+    height: 75vh;
+  }
+}
+
+th {
+  @apply text-left;
+  @extend %text-m-600;
+  background-color: var(--primary-50);
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+
+  &[scope='col'] {
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+
+  &[scope='row'] {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  &[scope='colgroup'] {
+    @apply text-center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--star-dust-300);
+}
+
+td {
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+
+  &[colspan='2'] {
+    @apply text-center;
+  }
+}
+
+tr:has(td) {
+  &:nth-child(even) {
+    td {
+      background-color: var(--grey-white);
+    }
+  }
+
+  &:nth-child(odd) {
+    td {
+      background-color: var(--star-dust-50);
+    }
+  }
+}
