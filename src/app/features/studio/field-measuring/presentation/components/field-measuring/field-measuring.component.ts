@@ -419,7 +419,7 @@ export class FieldMeasuringComponent implements OnDestroy {
 
   /** Exports the saved measure as JSON; missing fields are exported as `null`. */
   async onExport() {
-    const measureData = this.measureData();
+    const measureData = this.lastSavedMeasureData() ?? this.measureData();
     const section = this.spanService.section();
     const study = this.plotService.study();
     const litData = this.plotService.litData();
@@ -479,10 +479,15 @@ export class FieldMeasuringComponent implements OnDestroy {
     if (!section || !currentMeasureData) {
       return;
     }
-    // Only the displayed inputs are persisted (RG.VIS-SUP.ENR-BTN.2, RG.ENR-BTN.2)
+    // Only the displayed inputs are persisted (RG.VIS-SUP.ENR-BTN.2, RG.ENR-BTN.2); empty ones take their default first,
+    // so the saved measure matches what is shown when reopened
     const { calculationMethod } = currentMeasureData;
-    const activeMeasureData =
-      TANGENT_AIMING_MODES[calculationMethod]?.resetNonDisplayedFields(currentMeasureData) ?? currentMeasureData;
+    const tangentAimingMode = TANGENT_AIMING_MODES[calculationMethod];
+    const activeMeasureData = tangentAimingMode
+      ? tangentAimingMode.resetNonDisplayedFields(
+          tangentAimingMode.applyDefaults(currentMeasureData, getDefaultLeftSupport(currentMeasureData.span))
+        )
+      : currentMeasureData;
     const measureData: FieldMeasure = {
       ...resetInactive15CMode(
         resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {

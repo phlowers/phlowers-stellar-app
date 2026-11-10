@@ -566,6 +566,25 @@ describe('FieldMeasuringComponent', () => {
       delete (globalThis as typeof globalThis & { showSaveFilePicker?: unknown }).showSaveFilePicker;
     });
 
+    it('should export the saved snapshot, not the unsaved live data', async () => {
+      component.measureData.set(createFullyValidMeasureData());
+      await component.onSave();
+      const saved = component.measureData();
+      component.measureData.set({ ...saved, outputs: { ...saved.outputs, parameter15C: null } });
+      const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+      const revokeObjectUrlSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+      const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+      await component.onExport();
+
+      const blobArg = createObjectUrlSpy.mock.calls[0][0] as Blob;
+      expect(await blobArg.text()).toContain('480');
+
+      createObjectUrlSpy.mockRestore();
+      revokeObjectUrlSpy.mockRestore();
+      clickSpy.mockRestore();
+    });
+
     it('should not fall back to the Blob download when the user cancels the save picker', async () => {
       component.measureData.set(createFullyValidMeasureData());
 
@@ -887,6 +906,26 @@ describe('FieldMeasuringComponent', () => {
       expect(saved?.cableTangentAngle).toBeNull();
       expect(component.measureData().cableTangentAngle).toBeNull();
       expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('should persist the default span length when it is left empty', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming',
+          calculationType: 'parametre',
+          tangentLeftSupport: '0',
+          tangentSpanLength: null,
+          cableParameter: 100
+        })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.tangentSpanLength).toBe(0);
+      expect(component.measureData().tangentSpanLength).toBe(0);
     });
 
     it('should reset the papoto inputs when tangent aiming is active', async () => {

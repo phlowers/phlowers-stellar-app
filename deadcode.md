@@ -4,6 +4,14 @@
 
 ## Pending review
 
+### Unused `hasUnsavedChanges` signal (field measuring)
+
+- **Source**: `src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.ts` (`hasUnsavedChanges`).
+- **Evidence**: no template or component consumer in `src`; only its own spec block in `field-measuring.component.spec.ts` reads it (PR #1357 review). The save/report gating uses `isSaved` and `hasEditedInputs` instead.
+- **Removal impact**: Remove the signal and its spec assertions; check that `isEqual` stays used elsewhere in the component.
+- **Detected on**: 2026-11-10.
+- **Status**: PENDING REVIEW; deletion requires user validation.
+
 ### Unused `StartLocation` interface
 
 - **Source**: `src/app/features/study/application/services/section-import.interfaces.ts` (whole file).
