@@ -105,6 +105,7 @@ describe('ObstaclesFormComponent', () => {
   let mockPlotService: { loading: ReturnType<typeof signal<boolean>> };
   let obstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
+    selectedMeasureUuid: ReturnType<typeof signal<string | null>>;
     setCurrentPointIndex: vi.Mock;
     resetCurrentPointIndex: vi.Mock;
   };
@@ -140,6 +141,7 @@ describe('ObstaclesFormComponent', () => {
     const indexSignal = signal<number | null>(null);
     obstaclesService = {
       activePointIndex: indexSignal,
+      selectedMeasureUuid: signal<string | null>(null),
       setCurrentPointIndex: vi.fn((i: unknown) => indexSignal.set(i as number)),
       resetCurrentPointIndex: vi.fn()
     };
