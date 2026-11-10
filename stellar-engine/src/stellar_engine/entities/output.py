@@ -70,7 +70,7 @@ def get_coordinates(
         additional_points = projected_group_points.additional_points
 
     else:
-        all_points_dict = projected_group_points.all_points_virtual_separated()
+        all_points_dict = base_group_points.all_points_virtual_separated()
         span, supports, insulators = (
             all_points_dict["spans"],
             all_points_dict["supports"],
