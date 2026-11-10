@@ -144,8 +144,8 @@ distance, an *overhang* and a *lateral* column.
 | **Cable altitude** | Altitude of the cable in the case, in the graph. |
 | **Cable line axis distance** | Position of the cable in the case, as a distance to the line axis, in the graph. |
 | **Distance to comply** | The distance required by the rule, at the electric tension of the study. |
-| **Compliance altitude** | *Overhang* only. Vertical gap between the obstacle and the cable in the overhang case, minus the distance to comply. A negative value means the obstacle is too close **or above the cable**. |
-| **Compliance line axis distance** | *Lateral* only. Distance between the obstacle and the closest cable position of the lateral side (both wind directions and intermediate positions), minus the distance to comply. A negative value means the obstacle is too close. |
+| **Compliance altitude** | *Overhang* only. Altitude of the zone border above the cable, as plotted in the graph. This is a coordinate, not a margin: a negative value does not mean non-compliance (see [Conformity compliance](#conformity-user-compliance)). |
+| **Compliance line axis distance** | *Lateral* only. Distance to the line axis of the zone border on the lateral side, as plotted in the graph. This is a coordinate, not a margin: a negative value does not mean non-compliance (see [Conformity compliance](#conformity-user-compliance)). |
 | **Conformity compliance** | The verdict for the rule: **Yes**, **No** or **Unknown**. |
 
 A cell is empty when the value does not apply.
@@ -172,22 +172,29 @@ pressure** are those of the scenario that produced it. It tells in which climati
 obstacle is the closest to the cable. The wind pressure of the lateral column is negative when
 the closest position is the one of the opposite wind direction.
 
+(conformity-user-compliance)=
 ### Conformity compliance
 
-The verdict is computed from the two compliance values of the table, and depends on the
+The two compliance rows of the table are **coordinates of the zone border** drawn in the graph. They
+are not the margins used for the verdict, so they can be negative (for example a border on the left of
+the line axis) while the obstacle complies, or positive while it does not. Compare the obstacle with
+the border in the graph, or read the **Conformity compliance** row.
+
+The verdict is computed from internal **margins**, the gap between the obstacle and the cable
+position minus the distance to comply, and depends on the
 **conformity plot** of the obstacle type (see [Graph](#conformity-user-graph)):
 
-- `cable_track`: the obstacle is compared to **radius zones**. The overhang value is the distance
-  to the overhang position and the lateral value the distance to the closest lateral position,
+- `cable_track`: the obstacle is compared to **radius zones**. The overhang margin is the distance
+  to the overhang position and the lateral margin the distance to the closest lateral position,
   each minus its distance to comply. The verdict is **Yes** when the obstacle is outside the
-  radius zones, that is when no value is negative (a value of 0 complies).
-- `vegetation`: the obstacle is compared to a **rectangle**. The overhang value is the vertical
-  gap to the overhang position and the lateral value the horizontal gap to the closest lateral
+  radius zones, that is when no margin is negative (a margin of 0 complies).
+- `vegetation`: the obstacle is compared to a **rectangle**. The overhang margin is the vertical
+  gap to the overhang position and the lateral margin the horizontal gap to the closest lateral
   position, each minus its distance to comply. The verdict is **No** only when the obstacle is
   **inside the rectangle**: too close vertically (or above the cable), and either too close
   laterally or horizontally between the lateral positions. Being too close on a single axis is
   not enough.
-- `overhang`: the obstacle is compared to a **line**. Only the overhang value exists: the vertical
+- `overhang`: the obstacle is compared to a **line**. Only the overhang margin exists: the vertical
   gap to the overhang position minus the overhang distance. The verdict is **Yes** when it is not
   negative, so it is **No** when the obstacle is too close or above the cable.
 
