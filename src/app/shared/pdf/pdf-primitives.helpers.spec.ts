@@ -44,6 +44,7 @@ import {
   LINE_HEIGHT,
   PAGE_MARGIN,
   PAGE_SIZE,
+  PARAGRAPH_INDENT,
   SECTION_TITLE_HEIGHT,
   SEPARATOR_HEIGHT,
   SEPARATOR_MARGIN_Y,
@@ -654,6 +655,33 @@ describe('pdf-primitives helpers', () => {
       const calls = (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
       expect(calls.some((call) => call[0] === 'hidden')).toBe(false);
     });
+
+    it('should wrap a value that does not fit its column onto continuation lines aligned under the value', () => {
+      const doc = createMockDoc();
+      (doc.getTextWidth as ReturnType<typeof vi.fn>).mockImplementation((text: string) => text.length * 2);
+      (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockReturnValue(['first line', 'second line', 'third line']);
+      const value = 'x'.repeat(300);
+
+      const nextY = drawTwoColumnBullets(doc, [{ label: 'L1', value }], [], 40);
+
+      const labelWidth = `${BULLET} L1 : `.length * 2;
+      expect(doc.splitTextToSize).toHaveBeenCalledWith(value, expect.any(Number));
+      expect(doc.text).toHaveBeenCalledWith(
+        ['first line', 'second line', 'third line'],
+        PAGE_MARGIN.left + PARAGRAPH_INDENT + labelWidth,
+        40
+      );
+      expect(nextY).toBeCloseTo(40 + 2 * VALUE_LINE_SPACING + LINE_HEIGHT);
+    });
+
+    it('should keep a value that fits its column on one line', () => {
+      const doc = createMockDoc();
+
+      const nextY = drawTwoColumnBullets(doc, [{ label: 'L1', value: 'short' }], [], 40);
+
+      expect(doc.splitTextToSize).not.toHaveBeenCalled();
+      expect(nextY).toBe(40 + LINE_HEIGHT);
+    });
   });
 
   describe('drawTwoColumnBulletSection', () => {
@@ -706,6 +734,18 @@ describe('pdf-primitives helpers', () => {
       // Only the title underline
       expect(doc.line).toHaveBeenCalledTimes(1);
       expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + 2 * LINE_HEIGHT);
+    });
+
+    it('should move the section to a new page when the wrapped lines of its last row would pass the bottom margin', () => {
+      const doc = createMockDoc();
+      (doc.getTextWidth as ReturnType<typeof vi.fn>).mockImplementation((text: string) => text.length * 2);
+      (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockReturnValue(['line 1', 'line 2', 'line 3']);
+      // The title and the first line of the wrapped row fit, not its two continuation lines
+      const startY = CONTENT_BOTTOM - SECTION_TITLE_HEIGHT - 2 * VALUE_LINE_SPACING + 1;
+
+      drawTitledTwoColumnBullets(doc, 'Two columns', [{ label: 'L1', value: 'x'.repeat(300) }], [], startY);
+
+      expect(doc.addPage).toHaveBeenCalledExactlyOnceWith('a4', 'portrait');
     });
   });
 

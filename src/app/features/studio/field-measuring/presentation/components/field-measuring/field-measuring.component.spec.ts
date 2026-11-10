@@ -661,14 +661,18 @@ describe('FieldMeasuringComponent', () => {
       expect(component.canReportOrExport()).toBe(true);
     });
 
-    it('should stay true when opening only normalized the measure (no input edited since the save)', async () => {
-      component.measureData.set(validMeasure());
+    it('should stay true when opening only cleared a stale automatic 15°C result (no input edited since the save)', async () => {
+      const base = validMeasure();
+      component.measureData.set({
+        ...base,
+        outputs: {
+          ...base.outputs,
+          parameter15C: { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 }
+        }
+      });
       await component.onSave();
       const saved = component.measureData();
-      component.measureData.set({
-        ...saved,
-        outputs: { ...saved.outputs, parameter15C: { parameter15C: 1 } as never }
-      });
+      component.measureData.set({ ...saved, outputs: { ...saved.outputs, parameter15C: null } });
       expect(component.hasUnsavedChanges()).toBe(true);
       expect(component.hasEditedInputs()).toBe(false);
       expect(component.canReportOrExport()).toBe(true);
@@ -1206,6 +1210,30 @@ describe('FieldMeasuringComponent', () => {
       await component.onSave();
 
       expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('should count a new automatic 15°C result as an edit, and a cleared one as neutral', async () => {
+      const plotService = TestBed.inject(PlotService);
+      vi.spyOn(plotService, 'modifySection').mockResolvedValue(undefined);
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      fixture.detectChanges();
+
+      component.onFieldChange('windSpeed', 12);
+      await component.onSave();
+      const saved = component.measureData();
+      expect(component.canSave()).toBe(false);
+
+      const parameter15C = { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 };
+      component.measureData.set({ ...saved, outputs: { ...saved.outputs, parameter15C } });
+      expect(component.hasEditedInputs()).toBe(true);
+
+      component.measureData.set({ ...saved, outputs: { ...saved.outputs, parameter15C: null } });
+      expect(component.hasEditedInputs()).toBe(false);
     });
   });
 

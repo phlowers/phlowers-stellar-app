@@ -24,6 +24,7 @@ import {
   PARAGRAPH_INDENT,
   SECTION_TITLE_HEIGHT,
   SEPARATOR_MARGIN_Y,
+  TWO_COLUMN_WIDTH,
   VALUE_LINE_SPACING
 } from '@shared/pdf/pdf-layout.constantes';
 import { Section, Study } from '@shared/domain';
@@ -356,9 +357,56 @@ export function drawStudyCartoucheSection(
   return drawTitledBulletSection(doc, title, items, startY);
 }
 
+/** Layout of a two-column item: label width, the value lines once wrapped to its column, and the height it takes. */
+interface TwoColumnItemLayout {
+  labelWidth: number;
+  lines: string[];
+  height: number;
+}
+
+// Values that do not fit their column are wrapped; the others keep a single line
+function layoutTwoColumnItem(doc: jsPDF, item: PdfBulletItem): TwoColumnItemLayout {
+  doc.setFont('Nunito', 'bold');
+  doc.setFontSize(FONT_SIZES.label);
+  const labelWidth = doc.getTextWidth(`${BULLET} ${item.label} : `);
+  doc.setFont('Nunito', 'normal');
+  const availableWidth = TWO_COLUMN_WIDTH - labelWidth;
+  const lines =
+    doc.getTextWidth(item.value) <= availableWidth ? [item.value] : doc.splitTextToSize(item.value, availableWidth);
+  return { labelWidth, lines, height: (lines.length - 1) * VALUE_LINE_SPACING + LINE_HEIGHT };
+}
+
+function drawTwoColumnItem(doc: jsPDF, item: PdfBulletItem, layout: TwoColumnItemLayout, x: number, y: number): void {
+  if (layout.lines.length <= 1) {
+    drawBulletItem(doc, item.label, item.value, x, y, false, item.status);
+    return;
+  }
+  doc.setFont('Nunito', 'bold');
+  doc.setFontSize(FONT_SIZES.label);
+  doc.text(`${BULLET} ${item.label} : `, x, y);
+  doc.setFont('Nunito', 'normal');
+  doc.text(layout.lines, x + layout.labelWidth, y);
+  if (item.status !== undefined) {
+    const lastLine = layout.lines[layout.lines.length - 1];
+    const lastLineY = y + (layout.lines.length - 1) * VALUE_LINE_SPACING;
+    drawStatusIcon(doc, item.status, x + layout.labelWidth + doc.getTextWidth(lastLine) + STATUS_ICON_GAP, lastLineY);
+  }
+}
+
+// Draws one column from `x` and returns the Y below its last item
+function drawTwoColumnItems(doc: jsPDF, items: PdfBulletItem[], x: number, startY: number): number {
+  return items.reduce((y, item) => {
+    const layout = layoutTwoColumnItem(doc, item);
+    if (item.label) {
+      drawTwoColumnItem(doc, item, layout, x, y);
+    }
+    return y + layout.height;
+  }, startY);
+}
+
 /**
- * Draws two columns of bullet items side by side, each column advancing independently.
- * Returns the Y position below the taller column.
+ * Draws two columns of bullet items side by side, each column advancing independently by the height of its items
+ * (values wrapping inside their column). Returns the Y position below the taller column.
  */
 export function drawTwoColumnBullets(
   doc: jsPDF,
@@ -369,22 +417,8 @@ export function drawTwoColumnBullets(
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const rightX = PAGE_MARGIN.left + PARAGRAPH_INDENT + CONTENT_WIDTH / 2;
 
-  let leftY = startY;
-  left.forEach((item) => {
-    if (item.label) {
-      drawBulletItem(doc, item.label, item.value, leftX, leftY, false, item.status);
-    }
-    leftY += LINE_HEIGHT;
-  });
-
-  let rightY = startY;
-  right.forEach((item) => {
-    if (item.label) {
-      drawBulletItem(doc, item.label, item.value, rightX, rightY, false, item.status);
-    }
-    rightY += LINE_HEIGHT;
-  });
-
+  const leftY = drawTwoColumnItems(doc, left, leftX, startY);
+  const rightY = drawTwoColumnItems(doc, right, rightX, startY);
   return Math.max(leftY, rightY);
 }
 
@@ -400,7 +434,10 @@ export function drawTitledTwoColumnBullets(
   right: PdfBulletItem[],
   startY: number
 ): number {
-  const lastRowOffset = SECTION_TITLE_HEIGHT + (Math.max(left.length, right.length, 1) - 1) * LINE_HEIGHT;
+  const columnHeight = (items: PdfBulletItem[]) =>
+    items.reduce((height, item) => height + layoutTwoColumnItem(doc, item).height, 0);
+  const tallestColumnHeight = Math.max(columnHeight(left), columnHeight(right));
+  const lastRowOffset = SECTION_TITLE_HEIGHT + Math.max(tallestColumnHeight - LINE_HEIGHT, 0);
   const y = drawSectionTitle(doc, title, ensurePortraitSpace(doc, startY, lastRowOffset));
   return drawTwoColumnBullets(doc, left, right, y);
 }

@@ -146,6 +146,10 @@ export class FieldMeasuringComponent implements OnDestroy {
     const current = this.measureData();
     const lastSaved = this.lastSavedMeasureData();
     if (!lastSaved) return true;
+    // A fresh automatic 15°C result is an edit: the comparable projection below erases it.
+    const hasNewParameter15C =
+      current.outputs.parameter15C !== null && !isEqual(current.outputs.parameter15C, lastSaved.outputs.parameter15C);
+    if (hasNewParameter15C) return true;
     return !isEqual(
       toUnsavedChangesComparable(current, getDefaultLeftSupport(current.span)),
       toUnsavedChangesComparable(lastSaved, getDefaultLeftSupport(lastSaved.span))
