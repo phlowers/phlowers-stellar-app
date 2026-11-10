@@ -55,23 +55,31 @@ def apply_manipulations(
 
     # Do not run manipulations if empty dict in input + no manip stored
     manip = study.manipulation
+    manipulation_added = False
     if (
-        len(support_dict) > 0 or manip._support_overlay
+        len(support_dict) > 0 or manip.has_modified_support
     ):  # should be replaced by a property has_modified_supports
-        manip.modify_support(support_dict)
-    if len(rope_chain_dict) > 0 or manip._rope_or_chain_overlay:
-        manip.set_rope_or_chain(rope_chain_dict)
+        study.modify_support(support_dict, apply=False)
+        manipulation_added = True
+    if len(rope_chain_dict) > 0 or manip.has_rope_or_chain:
+        study.set_rope_or_chain(rope_chain_dict, apply=False)
+        manipulation_added = True
     if (
         len(shorten_span_dict) > 0
         or len(shift_dict) > 0
-        or manip.has_manipulations
+        or manip.has_modified_cable
     ):
-        manip.modify_cable(
-            shorten_span=shorten_span_dict, shift_support=shift_dict
+        study.modify_cable(
+            shorten_span=shorten_span_dict,
+            shift_support=shift_dict,
+            apply=False,
         )
+        manipulation_added = True
     if len(virtual_support_dict) > 0 or manip.has_virtual_support:
-        manip.set_virtual_support(virtual_support_dict)
-    if manip.has_manipulations:
+        study.set_virtual_support(virtual_support_dict, apply=False)
+        manipulation_added = True
+
+    if manipulation_added:
         study.apply_manipulations()
 
     return {"success": True}

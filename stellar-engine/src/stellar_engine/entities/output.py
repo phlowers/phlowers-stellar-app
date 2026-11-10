@@ -61,9 +61,11 @@ def get_coordinates(
         )
 
         span, supports, insulators = (
-            projected_group_points.spans,
-            projected_group_points.supports,
-            projected_group_points.insulators,
+            projected_group_points.all_points_virtual_separated()["spans"],
+            projected_group_points.all_points_virtual_separated()["supports"],
+            projected_group_points.all_points_virtual_separated()[
+                "insulators"
+            ],
         )
         obstacles = projected_group_points.obstacles
         distances = projected_group_points.distances
@@ -71,9 +73,9 @@ def get_coordinates(
 
     else:
         span, supports, insulators = (
-            base_group_points.spans,
-            base_group_points.supports,
-            base_group_points.insulators,
+            base_group_points.all_points_virtual_separated()["spans"],
+            base_group_points.all_points_virtual_separated()["supports"],
+            base_group_points.all_points_virtual_separated()["insulators"],
         )
         obstacles = base_group_points.obstacles
         distances = base_group_points.distances
