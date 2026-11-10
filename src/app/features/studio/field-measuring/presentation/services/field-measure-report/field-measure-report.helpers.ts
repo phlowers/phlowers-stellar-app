@@ -450,7 +450,8 @@ export const buildFieldMeasureReportData = ({
 
 /** Builds the report file name: "<title>_<measure name>_<canton name>_<generation date, hours and minutes>.pdf". */
 export const buildFieldMeasureReportFilename = (reportTitle: string, data: FieldMeasureReportData): string =>
-  [reportTitle, sanitizeFilename(data.measureName), sanitizeFilename(data.sectionName), data.fileDate].join('_') + '.pdf';
+  [reportTitle, sanitizeFilename(data.measureName), sanitizeFilename(data.sectionName), data.fileDate].join('_') +
+  '.pdf';
 
 /** Splits the rows into the left and right bullet columns, empty cells leaving an empty line. */
 export const splitRowsIntoColumns = (

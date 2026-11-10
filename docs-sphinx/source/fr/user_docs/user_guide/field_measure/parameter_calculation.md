@@ -15,8 +15,9 @@ Trois méthodes sont disponibles dans un sélecteur radio :
   - Plus précise avec 3 points de mesure ; fournit un contrôle de validité
   - C'est la méthode que vous utiliserez
 
-- **Visée tangentielle** (désactivée)
-  - Pas encore disponible dans {{app_name}}
+- **Visées tangentes** (Support, Intérieur ou Extérieur)
+  - Calcule le paramètre à partir de l'angle de la tangente au câble, selon la position de l'appareil
+  - Voir {doc}`tangent_aiming`
 
 - **PEP** (désactivée)
   - Pas encore disponible dans {{app_name}}
