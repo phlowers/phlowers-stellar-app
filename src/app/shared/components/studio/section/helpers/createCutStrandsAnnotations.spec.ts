@@ -263,8 +263,13 @@ describe('createCutStrandsAnnotations', () => {
     it('should start at the anchor point and stop before the icon', () => {
       const dashes = dashesOf(createCutStrandsAnnotations(makePlotParams()) as Annotation[]);
 
+      const lineLength = getCutStrandsLineLength('3d');
+      const top = Math.max(...dashes.map((dash) => -dash.ay!));
+
       expect(dashes[0].standoff).toBe(0);
-      expect(Math.max(...dashes.map((dash) => -dash.ay!))).toBe(getCutStrandsLineLength('3d'));
+      // The last dash is cut at the icon, or stops short of it when the line ends in a gap between two dashes
+      expect(top).toBeLessThanOrEqual(lineLength);
+      expect(lineLength - top).toBeLessThanOrEqual(PlotlyDrawings.cutStrands.dashGap);
     });
 
     it('should draw dashes of the same length, spaced by the same gap', () => {

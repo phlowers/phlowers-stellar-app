@@ -4,8 +4,8 @@
 //   (free positioning, conformity: 2D, support: 3D) use plain numbers
 // - drawings whose look changes with the selection declare their `unselected` and `selected` looks (obstacle, floor,
 //   free-positioning points); objects made of several points (obstacle, floor) also declare `inactivePoint`,
-//   the look of the other points of the selected object. The icons (loads, cable modification, cut strands) only
-//   declare `unselected`, plus the tooltip of the cut strands
+//   the look of the other points of the selected object. The icons (loads, cable modification, cable support
+//   manipulation, cut strands) only declare `unselected`, plus the tooltip of the cut strands
 // Conformity rule zone colors are excluded: they come from the catalog json config.
 export const PlotlyDrawings = {
   plot: {
@@ -35,9 +35,13 @@ export const PlotlyDrawings = {
     lineWidth: { '2d': 4, '3d': 8 },
     markerSize: { '2d': 6, '3d': 4 }
   },
-  // shared by loadPunctual, loadMarking, cableModification and cutStrands
+  // shared by loadPunctual, loadMarking, cableModification, cableSupportManip and cutStrands
   clickableIconAnnotation: {
-    fontFamily: 'FontAwesome',
+    // The solid face of FontAwesome, drawn by weight 900. Not the 'FontAwesome' alias: it serves some glyphs, such as
+    // the hand-back-fist, from the regular (outline) face. The inner quotes are needed by the digit of the name, and
+    // the name follows the major version of @fortawesome/fontawesome-free
+    fontFamily: "'Font Awesome 7 Free'",
+    fontWeight: 900,
     arrowHead: 0
   },
   loadPunctual: {
@@ -45,7 +49,7 @@ export const PlotlyDrawings = {
     iconSize: { '2d': 8, '3d': 8 },
     borderPad: { '2d': 6, '3d': 6 },
     arrowWidth: { '2d': 1, '3d': 1 },
-    arrowYOffset: -50,
+    arrowYOffset: -40,
     unselected: { color: '#5B3A75' }
   },
   loadMarking: {
@@ -56,31 +60,36 @@ export const PlotlyDrawings = {
     arrowYOffset: -50,
     unselected: { color: '#5B3A75' }
   },
-
   cableModification: {
     icon: '&#xe4ba;', // FontAwesome arrows-left-right-to-line
     iconSize: { '2d': 8, '3d': 8 },
     borderPad: { '2d': 6, '3d': 6 },
     arrowWidth: { '2d': 1, '3d': 1 },
-    // 40 px above the load icon (-50) so both never overlap when they share an anchor point
-    arrowYOffset: -90,
+    // 40 px above the load icon
+    arrowYOffset: -80,
     label: {
       size: { '2d': 11, '3d': 11 },
-      // ~20 px gap above the icon (|arrowYOffset| = 90), whatever the zoom
-      yShift: 110
+      // 17 px gap above the icon
+      yShift: 97
     },
     unselected: { color: '#4A355A' }
   },
-
-  // RRTS marking: scissors icon above the cut span, joined to it by a dashed line
+  cableSupportManip: {
+    icon: '&#xf047;', // FontAwesome arrows-up-down-left-right
+    iconSize: { '2d': 8, '3d': 8 },
+    borderPad: { '2d': 6, '3d': 6 },
+    arrowWidth: { '2d': 1, '3d': 1 },
+    arrowYOffset: -160,
+    unselected: { color: '#5B3A75' }
+  },
   cutStrands: {
     icon: '&#xf0c4;', // FontAwesome scissors
     iconSize: { '2d': 12, '3d': 12 },
     borderPad: { '2d': 6, '3d': 6 },
     // pixels, never data units: the gap stays the same at any zoom level. The dashed line stops at the bottom edge of
     // the icon box, worked out from iconSize and borderPad (see getCutStrandsLineLength). Clears the cable modification
-    // label (top at ~118 px) by at least 4 px, see annotationsClearance.spec.ts
-    offsetY: 135,
+    // label (top at ~105 px) by at least 4 px, see annotationsClearance.spec.ts
+    offsetY: 122,
     lineWidth: { '2d': 1, '3d': 1 },
     dashLength: 6,
     dashGap: 4,

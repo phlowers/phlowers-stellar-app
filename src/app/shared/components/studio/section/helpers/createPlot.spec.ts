@@ -307,7 +307,8 @@ describe('createPlot', () => {
                 virtualPointVertical: [10, 0, 40] as [number, number, number],
                 distanceDiagonal: 35,
                 distanceHorizontal: 0,
-                distanceVertical: 35
+                distanceVertical: 35,
+                signedDistanceVertical: 35
               }
             ]
           }
@@ -784,6 +785,69 @@ describe('createPlot', () => {
       };
       const annotations = layoutArg.annotations ?? layoutArg.scene?.annotations ?? [];
       expect(annotations.filter(isMarkingIcon)).toHaveLength(0);
+    });
+  });
+
+  describe('cable support manipulation icons', () => {
+    const cableSupportManips = [
+      {
+        uuid: 'manip-1',
+        supportUuid: 's0',
+        chargeUuid: 'charge-1',
+        manip1: {
+          type: 'rope' as const,
+          vertDisplacement: null,
+          anchoring: null,
+          lateralDistance: null,
+          ropeLength: 2,
+          shiftingClampLength: null
+        },
+        manip2: null
+      }
+    ];
+    const manipParams = () => ({
+      ...createDefaultParams(),
+      spanUuidToIndex: new Map([['s0', 0]]),
+      cableSupportManips
+    });
+    const isManipIcon = (a: { data?: { type?: string } }) => a.data?.type === 'cableSupportManip';
+
+    it('should draw the icon in the 3D scene', () => {
+      createPlot({ ...manipParams(), view: '3d' });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as {
+        scene: { annotations: { data?: { type?: string } }[] };
+      };
+      expect(layoutArg.scene.annotations.filter(isManipIcon)).toHaveLength(1);
+    });
+
+    it('should draw the icon in the 2D layout', () => {
+      createPlot({ ...manipParams(), view: '2d' });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as { annotations: { data?: { type?: string } }[] };
+      expect(layoutArg.annotations.filter(isManipIcon)).toHaveLength(1);
+    });
+
+    it.each(['2d', '3d'] as const)('should draw no icon in %s without a saved manipulation', (view) => {
+      createPlot({ ...manipParams(), view, cableSupportManips: undefined });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as {
+        annotations?: { data?: { type?: string } }[];
+        scene?: { annotations: { data?: { type?: string } }[] };
+      };
+      const annotations = layoutArg.annotations ?? layoutArg.scene?.annotations ?? [];
+      expect(annotations.filter(isManipIcon)).toHaveLength(0);
+    });
+
+    it.each(['2d', '3d'] as const)('should draw no icon in %s for a support outside the visible window', (view) => {
+      createPlot({ ...manipParams(), view, spanUuidToIndex: new Map([['s0', 3]]) });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as {
+        annotations?: { data?: { type?: string } }[];
+        scene?: { annotations: { data?: { type?: string } }[] };
+      };
+      const annotations = layoutArg.annotations ?? layoutArg.scene?.annotations ?? [];
+      expect(annotations.filter(isManipIcon)).toHaveLength(0);
     });
   });
 
