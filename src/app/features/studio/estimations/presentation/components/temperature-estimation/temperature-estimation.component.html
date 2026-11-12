@@ -12,7 +12,9 @@
 
   <div class="temperature-estimation__grid">
     <div class="temperature-estimation__field">
-      <label for="estimation-obstacle">{{ 'common.obstacle-name-label' | transloco }}</label>
+      <label class="temperature-estimation__label" for="estimation-obstacle">{{
+        'common.obstacle-name-label' | transloco
+      }}</label>
       <p-select
         inputId="estimation-obstacle"
         [options]="obstacleOptions()"
@@ -28,7 +30,7 @@
     </div>
 
     <div class="temperature-estimation__field">
-      <label for="estimation-point">{{ 'common.point-label' | transloco }}</label>
+      <label class="temperature-estimation__label" for="estimation-point">{{ 'common.point-label' | transloco }}</label>
       <p-select
         inputId="estimation-point"
         [options]="pointOptions()"
@@ -44,7 +46,7 @@
     @let distanceControl = form.controls.targetDistance;
     @let distanceError = distanceControl.dirty || distanceControl.touched ? getError(distanceControl) : '';
     <div class="temperature-estimation__field">
-      <label for="estimation-target-distance">
+      <label class="temperature-estimation__label" for="estimation-target-distance">
         {{ 'studio.estimations.target-vertical-distance-label' | transloco }}
       </label>
       <p-inputgroup>
@@ -99,7 +101,9 @@
           >
           <button
             type="button"
-            class="temperature-estimation__copy-btn"
+            app-btn
+            btnSize="s"
+            btnStyle="text"
             [attr.aria-label]="'studio.estimations.copy-temperature-aria-label' | transloco"
             (click)="copyTemperature()"
             data-testid="copy-temperature-btn"

@@ -9,9 +9,13 @@ import pandas as pd
 import pytest
 from mechaphlowers import CableArray, SectionArray, SectionStudy
 from mechaphlowers.entities.errors import (
+    BalanceEngineWarning,
+    ConvergenceError,
     EstimateOnSplitSupportError,
     EstimationWarning,
     InvalidManipulationIndex,
+    SolverError,
+    SuspectedChainReversal,
 )
 
 from stellar_engine.core import estimation
@@ -29,8 +33,8 @@ OBSTACLE = [250.0, 10.0, 20.0]
 RESULT_KEYS = {"value", "residual", "iterations", "converged"}
 
 
-@pytest.fixture
-def study(cable_array_AM600: CableArray) -> SectionStudy:
+def build_study(cable_array: CableArray) -> SectionStudy:
+    """Build the test section study, without adjustment."""
     section_array = SectionArray(
         pd.DataFrame(
             {
@@ -48,9 +52,12 @@ def study(cable_array_AM600: CableArray) -> SectionStudy:
         sagging_temperature=15,
     )
     section_array.add_units({"line_angle": "grad"})
-    section_study = SectionStudy(
-        cable_array=cable_array_AM600, section_array=section_array
-    )
+    return SectionStudy(cable_array=cable_array, section_array=section_array)
+
+
+@pytest.fixture
+def study(cable_array_AM600: CableArray) -> SectionStudy:
+    section_study = build_study(cable_array_AM600)
     section_study.solve_adjustment()
     return section_study
 
@@ -332,6 +339,45 @@ def test_estimate_nan_distance_raises_not_converged(
         EstimationNotConvergedError, match="distance to the obstacle"
     ):
         estimation.estimate_wind(VALID_TEMPERATURE_INPUTS, study)
+
+
+@pytest.mark.parametrize(
+    "solver_error", [SolverError, ConvergenceError, SuspectedChainReversal]
+)
+def test_estimate_temperature_forwards_solver_errors(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch, solver_error
+):
+    def raise_solver_error(**_kwargs):
+        raise solver_error("trial temperature did not balance")
+
+    monkeypatch.setattr(
+        study.estimation_engine, "estimate_temperature", raise_solver_error
+    )
+
+    # the frontend maps the class name found in the traceback
+    with pytest.raises(solver_error) as error:
+        estimation.estimate_temperature(VALID_TEMPERATURE_INPUTS, study)
+    assert type(error.value) is solver_error
+
+
+def test_estimate_temperature_on_unadjusted_study_warns(
+    cable_array_AM600: CableArray, study: SectionStudy
+):
+    target = reference_distance(study, new_temperature=60.0)
+    unadjusted = build_study(cable_array_AM600)
+
+    with pytest.warns(BalanceEngineWarning):
+        result = estimation.estimate_temperature(
+            {
+                **VALID_TEMPERATURE_INPUTS,
+                "targetDistance": target,
+                "bounds": [0.0, 120.0],
+            },
+            unadjusted,
+        )
+
+    assert result["converged"] is True
+    assert result["value"] == pytest.approx(60.0, abs=0.5)
 
 
 def test_estimate_span_out_of_range_raises_invalid_manipulation_index(

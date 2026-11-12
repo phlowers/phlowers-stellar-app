@@ -50,7 +50,11 @@ describe('TemperatureEstimationComponent', () => {
   let component: TemperatureEstimationComponent;
   let fixture: ComponentFixture<TemperatureEstimationComponent>;
   let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
-  let mockNotificationService: { error: ReturnType<typeof vi.fn>; success: ReturnType<typeof vi.fn> };
+  let mockNotificationService: {
+    error: ReturnType<typeof vi.fn>;
+    success: ReturnType<typeof vi.fn>;
+    warning: ReturnType<typeof vi.fn>;
+  };
   let mockLogger: { error: ReturnType<typeof vi.fn> };
   let writeText: ReturnType<typeof vi.fn>;
   let studioSelectedUuid: ReturnType<typeof signal<string | null>>;
@@ -99,7 +103,7 @@ describe('TemperatureEstimationComponent', () => {
     mockWorkerPythonService = {
       runTask: vi.fn().mockResolvedValue({ result: ENGINE_RESULT, error: null, diagnostics: [] })
     };
-    mockNotificationService = { error: vi.fn(), success: vi.fn() };
+    mockNotificationService = { error: vi.fn(), success: vi.fn(), warning: vi.fn() };
     mockLogger = { error: vi.fn() };
     writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
@@ -124,6 +128,10 @@ describe('TemperatureEstimationComponent', () => {
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}',
               'shared.python-errors.estimation-not-converged-error': 'The target cannot be reached',
+              'shared.python-errors.solver-error': 'A solver error occurred.',
+              'shared.python-errors.convergence-error': 'The solver failed to converge.',
+              'shared.python-errors.suspected-chain-reversal': 'The insulator chain is suspected to have reversed.',
+              'shared.python-errors.balance-engine-warning': 'A balance engine warning was raised.',
               'studio.estimations.choose-obstacle-info': 'Choose an obstacle first',
               'studio.estimations.target-vertical-distance-label': 'Target vertical distance',
               'studio.estimations.conformity-temperature-label': 'Conformity temperature',
@@ -392,6 +400,72 @@ describe('TemperatureEstimationComponent', () => {
       expect(mockNotificationService.error).toHaveBeenCalledWith('The target cannot be reached');
       expect(getByTestId('results-frame')).toBeNull();
       expect(calculateBtn().disabled).toBe(false);
+    });
+
+    it.each([
+      [PythonErrorCode.SolverError, 'A solver error occurred.'],
+      [PythonErrorCode.ConvergenceError, 'The solver failed to converge.'],
+      [PythonErrorCode.SuspectedChainReversal, 'The insulator chain is suspected to have reversed.']
+    ])('shows the %s message when a trial temperature fails to balance', async (code, message) => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null,
+        error: TaskError.CALCULATION_ERROR,
+        diagnostics: [{ code, severity: 'error', origin: 'exception', rawText: `${code}: boom` }]
+      });
+      fillForm();
+
+      await calculate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith(message);
+      expect(getByTestId('results-frame')).toBeNull();
+    });
+
+    it('shows the BalanceEngineWarning once, along with the result', async () => {
+      const warning = {
+        code: PythonErrorCode.BalanceEngineWarning,
+        severity: 'warning',
+        origin: 'warning',
+        rawText: 'BalanceEngineWarning: not adjusted'
+      };
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: ENGINE_RESULT,
+        error: null,
+        diagnostics: [warning, warning]
+      });
+      fillForm();
+
+      await calculate();
+
+      expect(mockNotificationService.warning).toHaveBeenCalledExactlyOnceWith('A balance engine warning was raised.');
+      expect(mockNotificationService.error).not.toHaveBeenCalled();
+      expect(textOf('conformity-temperature-value')).toBe('12.35 °C');
+    });
+
+    it('shows the warnings raised before the engine error', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null,
+        error: TaskError.CALCULATION_ERROR,
+        diagnostics: [
+          {
+            code: PythonErrorCode.ConvergenceError,
+            severity: 'error',
+            origin: 'exception',
+            rawText: 'ConvergenceError: boom'
+          },
+          {
+            code: PythonErrorCode.BalanceEngineWarning,
+            severity: 'warning',
+            origin: 'warning',
+            rawText: 'BalanceEngineWarning: not adjusted'
+          }
+        ]
+      });
+      fillForm();
+
+      await calculate();
+
+      expect(mockNotificationService.warning).toHaveBeenCalledWith('A balance engine warning was raised.');
+      expect(mockNotificationService.error).toHaveBeenCalledWith('The solver failed to converge.');
     });
 
     it('falls back to a generic message without engine diagnostic', async () => {

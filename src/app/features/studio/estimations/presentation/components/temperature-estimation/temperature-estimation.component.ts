@@ -22,7 +22,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
-import { formatPythonError } from '@services/worker_python/tasks/python-error-messages';
+import { formatPythonError, formatPythonWarnings } from '@services/worker_python/tasks/python-error-messages';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
@@ -132,6 +132,11 @@ export class TemperatureEstimationComponent {
     this.isCalculating.set(true);
     try {
       const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.estimateTemperature, inputs);
+      if (this.inputs() !== inputs) return;
+      // e.g. BalanceEngineWarning when the study had to be adjusted on the engine side
+      for (const warning of formatPythonWarnings(diagnostics, this.translocoService)) {
+        this.notificationService.warning(warning);
+      }
       if (error || !result) {
         this.logger.error('Failed to estimate the conformity temperature', error);
         this.temperature.set(null);

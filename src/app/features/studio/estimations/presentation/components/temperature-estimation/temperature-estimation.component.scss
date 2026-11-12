@@ -30,14 +30,21 @@ h2 {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     column-gap: 2rem;
-    row-gap: 0.75rem;
+    // Added to the 0.25rem gap above the (possibly empty) error row: 0.75rem between fields
+    row-gap: 0.5rem;
   }
 
+  // Rows label / control / error: subgrid keeps them aligned across columns when a label wraps
   &__field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    row-gap: 0.25rem;
     margin: 0;
+  }
+
+  &__label {
+    align-self: end;
   }
 
   &__calculate {
@@ -60,25 +67,5 @@ h2 {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-  }
-
-  &__copy-btn {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.125rem;
-    border: none;
-    border-radius: 0.25rem;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-
-    &:hover {
-      background: var(--star-dust-100);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--primary-color);
-      outline-offset: 1px;
-    }
   }
 }

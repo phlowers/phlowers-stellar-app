@@ -31,6 +31,14 @@ Raises (each class name is a ``PythonErrorCode`` on the frontend side):
         range (mechaphlowers).
     EstimateOnSplitSupportError: ``spanIndex`` is split by a virtual
         support (mechaphlowers).
+    SolverError: The balance solver fails for a trial value; its subclasses
+        (``ConvergenceError``, ``SuspectedChainReversal``) are forwarded
+        unchanged so the frontend shows the most specific message
+        (mechaphlowers).
+
+Warns (forwarded to the frontend through the captured Python warnings):
+    BalanceEngineWarning: The study had not been adjusted yet; mechaphlowers
+        then runs the adjustment on its internal copy (mechaphlowers).
 """
 
 import logging
@@ -160,7 +168,14 @@ def _solve(
     solve: Callable[[dict], EstimationResult],
     bounds: tuple[float, float] | None,
 ) -> dict:
-    """Run the estimation and convert mechaphlowers failures to Stellar errors."""
+    """Run the estimation and convert mechaphlowers failures to Stellar errors.
+
+    Raises:
+        EstimationNotConvergedError: If the target is not reached, or if the
+            objective is NaN at the bounds (plain ``ValueError``).
+        SolverError: Forwarded unchanged, like the typed ``ValueError``
+            subclasses of mechaphlowers, to keep their own frontend code.
+    """
     kwargs = {} if bounds is None else {"bounds": bounds}
     try:
         result = solve(kwargs)
@@ -192,6 +207,15 @@ def estimate_temperature(inputs: dict, study: SectionStudy) -> dict:
 
     Specific inputs: ``targetDistance`` (m), optional ``windPressure`` and
     ``iceThickness``.
+
+    Raises:
+        SolverError: If the balance solver fails for a trial temperature
+            (``ConvergenceError``, ``SuspectedChainReversal``).
+        EstimationNotConvergedError: If the target is not reachable within
+            the bounds, or the distance is NaN at the bounds.
+
+    Warns:
+        BalanceEngineWarning: If the study has not been adjusted yet.
     """
     span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
     obstacle_point = _obstacle_point(inputs, study)

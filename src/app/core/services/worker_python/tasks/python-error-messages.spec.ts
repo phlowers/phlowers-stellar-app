@@ -7,7 +7,8 @@
 
 import { TestBed } from '@angular/core/testing';
 import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
-import { formatPythonError } from './python-error-messages';
+import { formatPythonError, formatPythonWarnings } from './python-error-messages';
+import { PythonDiagnostic } from './python-diagnostic.interfaces';
 import { PythonErrorCode } from './types';
 
 describe('formatPythonError', () => {
@@ -81,5 +82,36 @@ describe('formatPythonError', () => {
     expect(message).not.toBeNull();
     expect(typeof message).toBe('string');
     expect(message?.length).toBeGreaterThan(0);
+  });
+
+  describe('formatPythonWarnings', () => {
+    const diagnostic = (code: PythonErrorCode, origin: PythonDiagnostic['origin']): PythonDiagnostic => ({
+      code,
+      severity: 'warning',
+      origin,
+      rawText: `${code}: raw`
+    });
+
+    it('returns one message per captured warning code, in order', () => {
+      const messages = formatPythonWarnings(
+        [
+          diagnostic(PythonErrorCode.BalanceEngineWarning, 'warning'),
+          diagnostic(PythonErrorCode.EstimationWarning, 'warning'),
+          diagnostic(PythonErrorCode.BalanceEngineWarning, 'warning')
+        ],
+        translocoService
+      );
+
+      expect(messages).toEqual([
+        'A balance engine warning was raised.',
+        'The existing load on the estimated span was ignored.'
+      ]);
+    });
+
+    it('ignores exception diagnostics', () => {
+      expect(
+        formatPythonWarnings([diagnostic(PythonErrorCode.ConvergenceError, 'exception')], translocoService)
+      ).toEqual([]);
+    });
   });
 });
