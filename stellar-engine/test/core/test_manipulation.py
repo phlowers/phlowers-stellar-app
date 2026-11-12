@@ -12,6 +12,7 @@ from stellar_engine.entities.inputs import (
     SupportManipElement,
     SupportManipInputs,
 )
+from stellar_engine.plot.plot_2d import refresh_projection
 
 
 def test_apply_manipulations_all_manips(study_base: SectionStudy):
@@ -108,9 +109,9 @@ def test_apply_manipulations_span_manip(study_base: SectionStudy):
                 'distanceToRefSupport': 100,
                 'cableManipType': 'with_a_crane',
                 'cableManipMethod': 'clamp',
-                'longitudinalDistance': 1,
+                'longitudinalDistance': 100,
                 'lateralDistance': 2,
-                'altitude': 3,
+                'altitude': 30,
                 'anchoring': 'with_sling',
                 'chainLength': None,
                 'chainWeight': None,
@@ -123,6 +124,10 @@ def test_apply_manipulations_span_manip(study_base: SectionStudy):
     }
 
     manipulations.apply_manipulations(inputs, study_base)
+    study_base.solve_change_state()
+    refresh_projection(
+        {'startSupport': 0, 'endSupport': 3, 'view': '3d'}, study_base
+    )
     assert len(study_base.balance_engine.section_array.data["name"]) == 5
 
 

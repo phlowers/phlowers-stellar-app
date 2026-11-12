@@ -221,6 +221,10 @@ export interface SectionCoords {
   obstacles: Record<string, number[][]> | null;
   // Distance data from position engine keyed by obstacle UUID (null if none computed)
   distances: Record<string, unknown> | null;
+  // Coordinates of virtual supports
+  virtual_supports: number[][][] | null;
+  // Coordinates of the insulators of the virtual support
+  virtual_insulators: number[][][] | null;
   // Coordinates of applied loads by support UUID
   loads: Record<string, number[]>;
 }
