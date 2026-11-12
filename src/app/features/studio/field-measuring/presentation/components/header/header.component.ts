@@ -112,7 +112,13 @@ export class HeaderComponent {
       if (!Array.isArray(span) || span.length !== 2 || isEqual(span, this.previousSpan())) {
         return;
       }
+      const isFirstSpan = this.previousSpan() === null;
       this.previousSpan.set(span);
+      // A measure loaded with its span keeps its saved altitude: opening it must not count as an edit.
+      // A missing altitude is filled by the effect above.
+      if (isFirstSpan) {
+        return;
+      }
       // Only recalculate if the span actually changed (not just a re-render)
       // This prevents unnecessary recalculations
       this.calculateAltitude(span);

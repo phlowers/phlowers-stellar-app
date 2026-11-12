@@ -72,9 +72,9 @@ export function isTangentAimingSupportDataValid(data: FieldMeasure): boolean {
   return form.valid;
 }
 
-/** Fills the empty (`null`/`undefined`) tangent aiming (support) inputs with their default; forces the supported calculation type. */
+/** Fills the empty (`null`/`undefined`) tangent aiming (support) inputs with their default (calculation type included). */
 export function applyTangentAimingSupportDefaults(data: FieldMeasure, defaultLeftSupport: string | null): FieldMeasure {
-  const next: FieldMeasure = { ...data, calculationType: TANGENT_AIMING_CALCULATION_TYPE };
+  const next: FieldMeasure = { ...data, calculationType: data.calculationType ?? TANGENT_AIMING_CALCULATION_TYPE };
   next.tangentLeftSupport ??= defaultLeftSupport;
   for (const field of Object.keys(TANGENT_AIMING_SUPPORT_FIELD_RULES) as TangentAimingSupportNumericField[]) {
     next[field] ??= TANGENT_AIMING_SUPPORT_FIELD_RULES[field].default;

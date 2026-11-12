@@ -16,7 +16,10 @@ import { Task } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
-import { INITIAL_LEFT_SUPPORT_STATE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
+import {
+  INITIAL_LEFT_SUPPORT_STATE,
+  TANGENT_AIMING_CALCULATION_TYPE
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   buildCalculationTypeOptions,
   buildSpanSupportOptions,
@@ -27,7 +30,10 @@ import {
   nextLeftSupportState,
   syncDisplayedControls
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
-import { TangentAimingFormConfig } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
+import {
+  TangentAimingCalculationType,
+  TangentAimingFormConfig
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.interfaces';
 
 /** Logic shared by the tangent aiming forms (support, interior, exterior); each one only provides its config. */
 @Directive()
@@ -50,6 +56,8 @@ export abstract class TangentAimingFormBase {
   readonly hasError = signal(false);
   /** Transloco key of the calculation failure message of this form. */
   readonly calculationFailedKey: string;
+  /** Id of the mandatory fields legend, specific to each form. */
+  readonly mandatoryId: string;
   private readonly leftSupportState = signal(INITIAL_LEFT_SUPPORT_STATE);
 
   /** Displayed inputs as of the last calculation, or of the opening of the form while nothing was calculated. */
@@ -65,17 +73,13 @@ export abstract class TangentAimingFormBase {
     ]);
   });
 
-  /** The calculate button is only usable on a valid form whose inputs changed since the last calculation (or opening). */
-  readonly canCalculate = computed(() => {
-    const baseline = this.baselineInputs();
-    return (
+  /** The calculate button is usable on a valid form; only the tangent type can be calculated by the engine. */
+  readonly canCalculate = computed(
+    () =>
       this.isFormValid() &&
       !this.isCalculating() &&
-      this.measureData().outputs[this.config.outputKey] === null &&
-      baseline !== null &&
-      baseline !== this.displayedInputs()
-    );
-  });
+      (this.measureData()[this.config.calculationTypeKey] ?? TANGENT_AIMING_CALCULATION_TYPE) === 'tangente'
+  );
 
   /** Both supports of the selected span, empty without span. */
   readonly supportOptions = computed(() =>
@@ -92,9 +96,18 @@ export abstract class TangentAimingFormBase {
     return buildCalculationTypeOptions(this.translocoService);
   });
 
+  readonly showParameterField = computed(() => this.measureData()[this.config.calculationTypeKey] === 'parametre');
+  readonly showTangentAngleField = computed(() => this.measureData()[this.config.calculationTypeKey] === 'tangente');
+
+  updateCalculationType(calculationType: TangentAimingCalculationType): void {
+    const { calculationTypeKey, invalidateResult } = this.config;
+    this.measureData.update((d) => invalidateResult({ ...d, [calculationTypeKey]: calculationType }));
+  }
+
   protected constructor(protected readonly config: TangentAimingFormConfig) {
     const { form, modelFields, leftSupportKey, calculationTypeKey } = config;
     this.calculationFailedKey = config.calculationFailedKey;
+    this.mandatoryId = `mandatory-tangent-aiming-${config.logLabel}`;
 
     // A span change must not leave a left support outside the span, nor a result computed for another span.
     effect(() => {
@@ -150,7 +163,7 @@ export abstract class TangentAimingFormBase {
 
   async calculate(): Promise<void> {
     this.config.form.markAllAsTouched();
-    if (!this.isFormValid() || this.isCalculating()) return;
+    if (!this.canCalculate()) return;
 
     this.isCalculating.set(true);
     this.hasError.set(false);

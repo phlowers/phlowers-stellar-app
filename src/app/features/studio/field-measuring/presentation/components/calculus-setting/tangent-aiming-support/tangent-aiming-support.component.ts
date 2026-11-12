@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { SelectModule } from 'primeng/select';
@@ -7,7 +7,6 @@ import { MessageModule } from 'primeng/message';
 import { TranslocoModule } from '@jsverse/transloco';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
-import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TangentAimingFormBase } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-form.base';
 import { TangentAimingHeaderComponent } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-header/tangent-aiming-header.component';
 import { TangentAimingNumberFieldComponent } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-number-field/tangent-aiming-number-field.component';
@@ -49,13 +48,9 @@ import { TangentAimingSupportForm } from '@features/studio/field-measuring/prese
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TangentAimingSupportComponent extends TangentAimingFormBase {
-  readonly mandatoryId = 'mandatory-tangent-aiming-support';
   readonly fields = TANGENT_AIMING_SUPPORT_NUMBER_FIELDS;
   readonly rules = TANGENT_AIMING_SUPPORT_FIELD_RULES;
   readonly form = this.config.form as TangentAimingSupportForm;
-
-  readonly showParameterField = computed(() => this.measureData().calculationType === 'parametre');
-  readonly showTangentAngleField = computed(() => this.measureData().calculationType === 'tangente');
 
   constructor() {
     super({
@@ -70,9 +65,5 @@ export class TangentAimingSupportComponent extends TangentAimingFormBase {
       invalidateResult: invalidateTangentAimingSupportResult,
       toTaskInputs: (data) => toTangentAimingTaskInputs(toTangentAimingSupportInputs(data))
     });
-  }
-
-  updateCalculationType(calculationType: FieldMeasure['calculationType']): void {
-    this.measureData.update((d) => invalidateTangentAimingSupportResult({ ...d, calculationType }));
   }
 }

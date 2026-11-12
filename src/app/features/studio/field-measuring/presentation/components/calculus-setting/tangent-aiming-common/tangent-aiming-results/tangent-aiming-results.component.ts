@@ -21,6 +21,6 @@ export class TangentAimingResultsComponent {
   readonly isCalculating = input(false);
   /** Prefix of the result `data-testid`s, e.g. `tangent-aiming-support`. */
   readonly testIdPrefix = input.required<string>();
-  /** `percent`: rounded uncertainty and criterion in % (support); `validity`: 1-decimal uncertainty and yes/no criterion. */
+  /** Uncertainty display: `percent` rounds to whole meters (support); `validity` keeps one decimal. */
   readonly format = input<'percent' | 'validity'>('validity');
 }

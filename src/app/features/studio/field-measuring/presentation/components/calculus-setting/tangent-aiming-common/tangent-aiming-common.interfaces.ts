@@ -47,6 +47,16 @@ export interface LeftSupportState {
   memory: Record<string, string>;
 }
 
+/** Per-mode behaviour of a tangent aiming calculation method, looked up by `FieldMeasure['calculationMethod']`. */
+export interface TangentAimingMode {
+  outputKey: TangentAimingFormConfig['outputKey'];
+  isDataValid: (data: FieldMeasure) => boolean;
+  applyDefaults: (data: FieldMeasure, defaultLeftSupport: string | null) => FieldMeasure;
+  invalidateResult: (data: FieldMeasure) => FieldMeasure;
+  /** Resets the numeric input hidden by the calculation type switch. */
+  resetNonDisplayedFields: (data: FieldMeasure) => FieldMeasure;
+}
+
 /** Per-form differences of the tangent aiming forms, consumed by `TangentAimingFormBase`. */
 export interface TangentAimingFormConfig {
   form: FormGroup;

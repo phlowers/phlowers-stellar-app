@@ -88,17 +88,17 @@ As you type, {{app_name}} validates your entries:
 
 - **Measure name duplicate**: If your name matches an existing measure, an error message appears below the name field: **Measure name must be unique.** Edit the name to resolve it.
 - **Invalid ranges**: If a number field (e.g., wind speed) falls outside its allowed range, {{app_name}} may highlight the field when you try to save.
-- **Empty mandatory field**: If you leave any required field blank, the **Save** and **Export** buttons remain disabled.
+- **Empty mandatory field**: The **Save** button only requires a name that is not empty and not already used by another measure.
 
-Once all fields are valid and you have made changes, the **Save** button becomes enabled. If all four tabs (Terrain Data, Parameter Calculation, Temperature Calculation, Parameter at 15°C without Wind) are valid, the **Export** button also becomes enabled.
+As soon as you edit any input of the measure (whatever the tab), the **Save** button becomes enabled, even if the measure is incomplete. The **Report** and **Export** buttons are enabled only when the global form (name, span, longitude, latitude, altitude, azimuth) and the displayed tab (Terrain Data, Parameter Calculation, Temperature Calculation or Parameter at 15°C without Wind) are valid and saved.
 
 ## Dialog Actions
 
 At the bottom of the dialog, three buttons control the measurement session:
 
-- **Report** (disabled in current version): Reserved for future reporting functionality.
-- **Export**: Generates a JSON file with all measurement data and computed results. Enabled only when all tabs are valid. The file name follows the pattern: `Export Mesure de terrain_<measure name>_<section name>_<date>.json`.
-- **Save**: Persists your entries to the database. Enabled when the form is valid and you have made unsaved changes.
+- **Report**: generates a PDF file (A4 portrait) listing the data of the four tabs of the saved measure: only the retained parameter calculation method (and sub-method) and the values displayed for the "Update values" choice are reported. It is enabled when the form data are valid and saved. The file name follows the pattern: `Rapport Mesure de terrain_<measure name>_<section name>_<generation date and time>.pdf`.
+- **Export**: Generates a JSON file with all measurement data and computed results. Enabled when the form data are valid and saved. The file name follows the pattern: `Export Mesure de terrain_<measure name>_<section name>_<date>.json`.
+- **Save**: Persists your entries to the database. Enabled when the measure has a valid name and you have edited an input since the last save.
 
 ## Tips
 

@@ -114,6 +114,17 @@ describe('tangent-aiming-common helpers', () => {
     expect(control.valid).toBe(true);
   });
 
+  it('should accept angles with three decimals and reject a fourth', () => {
+    expect(TANGENT_AIMING_FIELD_RULES.verticalAccAngle.decimals).toBe(3);
+    expect(TANGENT_AIMING_FIELD_RULES.tangentAngle.decimals).toBe(3);
+
+    const control = createNumberControl(TANGENT_AIMING_FIELD_RULES.tangentAngle);
+    control.setValue(1.234);
+    expect(control.valid).toBe(true);
+    control.setValue(1.2345);
+    expect(control.hasError('maxDecimals')).toBe(true);
+  });
+
   it('should enable only the displayed controls', () => {
     const form = new FormGroup({ a: new FormControl(1), b: new FormControl(2) });
     syncDisplayedControls(form, ['a']);
@@ -129,8 +140,8 @@ describe('tangent-aiming-common helpers', () => {
 
     it('should build the calculation type options', () => {
       expect(buildCalculationTypeOptions(transloco)).toEqual([
-        { label: 'common.parameter-label', value: 'parametre', disabled: true },
-        { label: 'common.calculation-type-tangent', value: 'tangente', disabled: false }
+        { label: 'common.parameter-label', value: 'parametre' },
+        { label: 'common.calculation-type-tangent', value: 'tangente' }
       ]);
     });
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { SelectModule } from 'primeng/select';
@@ -24,10 +24,7 @@ import {
   toTangentAimingExteriorInputs,
   toTangentAimingExteriorTaskInputs
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.helpers';
-import {
-  TangentAimingExteriorCalculationType,
-  TangentAimingExteriorForm
-} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.interfaces';
+import { TangentAimingExteriorForm } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.interfaces';
 
 /** Form for the tangent aiming (exterior) parameter calculation. */
 @Component({
@@ -51,13 +48,9 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TangentAimingExteriorComponent extends TangentAimingFormBase {
-  readonly mandatoryId = 'mandatory-tangent-aiming-exterior';
   readonly fields = TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS;
   readonly rules = TANGENT_AIMING_EXTERIOR_FIELD_RULES;
   readonly form = this.config.form as TangentAimingExteriorForm;
-
-  readonly showParameterField = computed(() => this.measureData().exteriorCalculationType === 'parametre');
-  readonly showTangentAngleField = computed(() => this.measureData().exteriorCalculationType === 'tangente');
 
   constructor() {
     super({
@@ -72,9 +65,5 @@ export class TangentAimingExteriorComponent extends TangentAimingFormBase {
       invalidateResult: invalidateTangentAimingExteriorResult,
       toTaskInputs: (data) => toTangentAimingExteriorTaskInputs(toTangentAimingExteriorInputs(data))
     });
-  }
-
-  updateCalculationType(exteriorCalculationType: TangentAimingExteriorCalculationType): void {
-    this.measureData.update((d) => invalidateTangentAimingExteriorResult({ ...d, exteriorCalculationType }));
   }
 }

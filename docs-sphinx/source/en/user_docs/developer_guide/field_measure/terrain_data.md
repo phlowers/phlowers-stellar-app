@@ -16,15 +16,17 @@ The terrain data tab is implemented by the following components and support file
 - **Helpers**: `presentation/helpers.ts` (e.g., `createInitialMeasureData`, `buildTimeModeOptions`, option builders)
 - **Constants**: `presentation/constants.ts` (field bounds, option keys, export mappings)
 - **Export helpers**: `presentation/field-measure-export.helpers.ts` (JSON export structure)
+- **PDF report**: `presentation/services/field-measure-report/` (`*.helpers.ts` for the data and drawing, `*.service.ts` for the generation)
 
 ## Workflow
 
 1. **Init Phase**: User opens the Field Measuring tool. The `InitComponent` allows creating a new measurement (with auto-generated name) or selecting an existing one.
 2. **Main Phase**: Once a measure is selected or created, `FieldMeasuringComponent` displays a dialog with four tabs. The **Terrain Data** tab is shown by default.
 3. **Data Entry**: User fills in location and environmental fields via `HeaderComponent` (shared) and `FieldDatasComponent` (tab-specific).
-4. **Validation**: `FieldMeasuringComponent` computes `isFormValid` by checking all mandatory fields and their bounds.
+4. **Validation**: `FieldMeasuringComponent` computes `isGlobalFormValid` (name and header) and `isTerrainDataValid` (Terrain Data tab) by checking all mandatory fields and their bounds.
 5. **Save**: Calls `PlotService.modifySection()` to persist the measure to the section's `field_measures` array.
 6. **Export**: Calls `buildFieldMeasureExportJson()` to generate a JSON export (if all tabs pass validation).
+7. **Report**: Calls `buildFieldMeasureReportData()` then `FieldMeasureReportService.generateReport()` to generate a PDF report of the saved measure.
 
 ## Data Model
 
@@ -106,7 +108,7 @@ All fields display a mandatory-field info message (`field-measuring.field-datas.
 
 ## Validation Rules
 
-### Field Bounds (FieldMeasuringComponent.isFormValid)
+### Field Bounds (FieldMeasuringComponent.isGlobalFormValid / isTerrainDataValid)
 
 All fields are mandatory and checked for range:
 - `name`: non-empty, unique
@@ -120,7 +122,7 @@ All fields are mandatory and checked for range:
 - `windDirection`, `skyCover`: required
 - `transit` (optional field in other tabs): if present, 0–4000 Amperes
 
-**Export Validation:** The export button is enabled only if `isFormValid()` AND all other tabs (Parameter Calculation, Temperature Calculation, Parameter at 15°C) are also valid.
+**Export and report:** both buttons are enabled only when `canReportOrExport()` is true: the global form (`isGlobalFormValid`: name, span, longitude, latitude, altitude, azimuth) valid, the displayed tab valid (`isTerrainDataValid`, `isParameterCalculationValid`, `isTemperatureCalculationValid` or `isParameter15CValid`, the other tabs are ignored) and no unsaved change.
 
 **Uniqueness Check:** `isNameAlreadyTaken` computed property checks if `measureData().name` matches any existing measure (excluding self by UUID).
 
@@ -129,16 +131,24 @@ All fields are mandatory and checked for range:
 ### Save
 
 - **Handler**: `FieldMeasuringComponent.onSave()`
-- **Condition**: enabled when `isFormValid() && hasUnsavedChanges()`
+- **Condition**: enabled when `canSave()`: non-empty, unique name and `hasEditedInputs()` (any edited input, whatever the tab; field validity is not required)
 - **Action**: calls `PlotService.modifySection({ field_measures: [...updated...] })` to persist
 - **Snapshot**: `lastSavedMeasureData` signal is updated; `hasUnsavedChanges` is recomputed
 
 ### Export
 
 - **Handler**: `FieldMeasuringComponent.onExport()`
-- **Condition**: enabled when `isFormValid() && isParameterCalculationValid && isTemperatureCalculationValid && isParameterAt15CValid`
+- **Condition**: enabled when `canReportOrExport()`
 - **Output**: JSON file (via `buildFieldMeasureExportJson()`) with study/section metadata and measure data
 - **Filename**: `Export Mesure de terrain_<measure name>_<section name>_<date>.json`
+
+### Report
+
+- **Handler**: `FieldMeasuringComponent.onReport()`
+- **Condition**: enabled when `canReportOrExport()` (all calculation methods, including tangent aiming)
+- **Output**: A4 portrait PDF (jsPDF, Nunito font): study / section cartouche then one paragraph per tab. Only the retained parameter calculation method (and sub-method) and the values of the retained "Update values" mode are reported; conditional data (phase number, parameter or tangent angle) are present only when their condition is met
+- **Units**: those of US.MES.RAP (sight angles in `gr`, wind speed in m/s, etc.), defined in `field-measure-report.constantes.ts`
+- **Filename**: `Rapport Mesure de terrain_<measure name>_<section name>_<generation date and time>.pdf`
 
 ## Mermaid Diagram: Workflow
 

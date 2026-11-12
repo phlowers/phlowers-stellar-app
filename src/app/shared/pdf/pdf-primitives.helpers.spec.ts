@@ -10,9 +10,11 @@ import jsPDF from 'jspdf';
 
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
+import { Section, Study } from '@shared/domain';
 
 import {
   buildReportLabels,
+  buildStudyCartouche,
   drawBulletItem,
   drawBulletList,
   drawCompactHeader,
@@ -42,6 +44,7 @@ import {
   LINE_HEIGHT,
   PAGE_MARGIN,
   PAGE_SIZE,
+  PARAGRAPH_INDENT,
   SECTION_TITLE_HEIGHT,
   SEPARATOR_HEIGHT,
   SEPARATOR_MARGIN_Y,
@@ -55,6 +58,7 @@ function createMockDoc(): jsPDF {
     setFont: vi.fn(),
     setFontSize: vi.fn(),
     setLineWidth: vi.fn(),
+    setDrawColor: vi.fn(),
     text: vi.fn(),
     line: vi.fn(),
     addFileToVFS: vi.fn(),
@@ -203,6 +207,32 @@ describe('pdf-primitives helpers', () => {
       drawBulletItem(doc, 'Tension', '2000 daN', 15, 30);
 
       expect(doc.text).toHaveBeenCalledTimes(2);
+    });
+
+    it('should draw no icon when status is undefined', () => {
+      const doc = createMockDoc();
+      drawBulletItem(doc, 'Critère', 'Oui', 15, 30);
+
+      expect(doc.line).not.toHaveBeenCalled();
+      expect(doc.setDrawColor).not.toHaveBeenCalled();
+    });
+
+    it('should draw a green tick of two strokes when status is true, then reset the draw color', () => {
+      const doc = createMockDoc();
+      drawBulletItem(doc, 'Critère', 'Oui', 15, 30, false, true);
+
+      expect(doc.line).toHaveBeenCalledTimes(2);
+      expect(doc.setDrawColor).toHaveBeenNthCalledWith(1, 0, 128, 0);
+      expect(doc.setDrawColor).toHaveBeenLastCalledWith(0);
+    });
+
+    it('should draw a red cross of two strokes when status is false, then reset the draw color', () => {
+      const doc = createMockDoc();
+      drawBulletItem(doc, 'Critère', 'Non', 15, 30, false, false);
+
+      expect(doc.line).toHaveBeenCalledTimes(2);
+      expect(doc.setDrawColor).toHaveBeenNthCalledWith(1, 200, 0, 0);
+      expect(doc.setDrawColor).toHaveBeenLastCalledWith(0);
     });
   });
 
@@ -501,6 +531,44 @@ describe('pdf-primitives helpers', () => {
     });
   });
 
+  describe('buildStudyCartouche', () => {
+    const section = {
+      name: 'Section A',
+      comment: 'Section comment',
+      initial_conditions: [{ uuid: 'ic-1', name: 'IC 1' }],
+      selected_initial_condition_uuid: 'ic-1',
+      charges: [{ uuid: 'ch-1', name: 'Load 1', description: 'Load description' }],
+      selected_charge_uuid: 'ch-1'
+    } as unknown as Section;
+    const study = { author_email: 'author@example.test', title: 'Study 1', description: 'Study description' } as Study;
+
+    it('should resolve the selected initial condition and load case', () => {
+      expect(buildStudyCartouche(study, section)).toEqual({
+        author: 'author@example.test',
+        studyTitle: 'Study 1',
+        studyDescription: 'Study description',
+        cantonName: 'Section A',
+        comment: 'Section comment',
+        icName: 'IC 1',
+        chargeName: 'Load 1',
+        chargeDescription: 'Load description'
+      });
+    });
+
+    it('should fall back to dashes and empty texts without study and section', () => {
+      expect(buildStudyCartouche(null, null)).toEqual({
+        author: '-',
+        studyTitle: '-',
+        studyDescription: '',
+        cantonName: '-',
+        comment: '',
+        icName: '-',
+        chargeName: '-',
+        chargeDescription: ''
+      });
+    });
+  });
+
   describe('drawStudyCartoucheSection', () => {
     const labels = {
       author: 'Author',
@@ -573,12 +641,46 @@ describe('pdf-primitives helpers', () => {
       expect(nextY).toBe(40 + 2 * LINE_HEIGHT);
     });
 
+    it('should draw the status icon of an item with a status', () => {
+      const doc = createMockDoc();
+      drawTwoColumnBullets(doc, [{ label: 'Critère', value: 'Oui', status: true }], [], 40);
+
+      expect(doc.line).toHaveBeenCalledTimes(2);
+    });
+
     it('should skip drawing an item whose label is empty', () => {
       const doc = createMockDoc();
       drawTwoColumnBullets(doc, [{ label: '', value: 'hidden' }], [], 40);
 
       const calls = (doc.text as unknown as { mock: { calls: unknown[][] } }).mock.calls;
       expect(calls.some((call) => call[0] === 'hidden')).toBe(false);
+    });
+
+    it('should wrap a value that does not fit its column onto continuation lines aligned under the value', () => {
+      const doc = createMockDoc();
+      (doc.getTextWidth as ReturnType<typeof vi.fn>).mockImplementation((text: string) => text.length * 2);
+      (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockReturnValue(['first line', 'second line', 'third line']);
+      const value = 'x'.repeat(300);
+
+      const nextY = drawTwoColumnBullets(doc, [{ label: 'L1', value }], [], 40);
+
+      const labelWidth = `${BULLET} L1 : `.length * 2;
+      expect(doc.splitTextToSize).toHaveBeenCalledWith(value, expect.any(Number));
+      expect(doc.text).toHaveBeenCalledWith(
+        ['first line', 'second line', 'third line'],
+        PAGE_MARGIN.left + PARAGRAPH_INDENT + labelWidth,
+        40
+      );
+      expect(nextY).toBeCloseTo(40 + 2 * VALUE_LINE_SPACING + LINE_HEIGHT);
+    });
+
+    it('should keep a value that fits its column on one line', () => {
+      const doc = createMockDoc();
+
+      const nextY = drawTwoColumnBullets(doc, [{ label: 'L1', value: 'short' }], [], 40);
+
+      expect(doc.splitTextToSize).not.toHaveBeenCalled();
+      expect(nextY).toBe(40 + LINE_HEIGHT);
     });
   });
 
@@ -632,6 +734,18 @@ describe('pdf-primitives helpers', () => {
       // Only the title underline
       expect(doc.line).toHaveBeenCalledTimes(1);
       expect(nextY).toBe(40 + SECTION_TITLE_HEIGHT + 2 * LINE_HEIGHT);
+    });
+
+    it('should move the section to a new page when the wrapped lines of its last row would pass the bottom margin', () => {
+      const doc = createMockDoc();
+      (doc.getTextWidth as ReturnType<typeof vi.fn>).mockImplementation((text: string) => text.length * 2);
+      (doc.splitTextToSize as ReturnType<typeof vi.fn>).mockReturnValue(['line 1', 'line 2', 'line 3']);
+      // The title and the first line of the wrapped row fit, not its two continuation lines
+      const startY = CONTENT_BOTTOM - SECTION_TITLE_HEIGHT - 2 * VALUE_LINE_SPACING + 1;
+
+      drawTitledTwoColumnBullets(doc, 'Two columns', [{ label: 'L1', value: 'x'.repeat(300) }], [], startY);
+
+      expect(doc.addPage).toHaveBeenCalledExactlyOnceWith('a4', 'portrait');
     });
   });
 
