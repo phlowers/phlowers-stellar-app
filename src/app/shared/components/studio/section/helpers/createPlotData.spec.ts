@@ -251,6 +251,8 @@ describe('createPlotData', () => {
           spans: [],
           obstacles: null,
           distances: null,
+          virtual_supports: null,
+          virtual_insulators: null,
           loads: {}
         },
         output_parameters: {
