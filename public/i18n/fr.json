@@ -829,6 +829,10 @@
         "kmh": "KM/H",
         "ms": "M/S"
       },
+      "season": {
+        "summer": "ETE",
+        "winter": "HIVER"
+      },
       "update-mode-15c": {
         "auto": "AUTO",
         "manual": "MANUELLE"

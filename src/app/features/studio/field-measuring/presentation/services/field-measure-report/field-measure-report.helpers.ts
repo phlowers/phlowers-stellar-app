@@ -35,6 +35,7 @@ import {
 import {
   formatGenerationDate,
   formatSpanLabel,
+  readNumber,
   sanitizeFilename
 } from '@features/studio/field-measuring/presentation/helpers';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
@@ -94,10 +95,6 @@ const optionLabel = (
 };
 
 const isPhaseSection = (spanType: string | null): boolean => spanType?.toLowerCase() === 'phase';
-
-/** Reads a numeric field of the measure by key. */
-const readNumber = (measureData: FieldMeasure, key: keyof FieldMeasure): number | null =>
-  measureData[key] as number | null;
 
 /** Number of the left support of a tangent aiming form, which stores the support index. */
 const tangentLeftSupportLabel = (measureData: FieldMeasure, section: Section | null, key: keyof FieldMeasure): string =>

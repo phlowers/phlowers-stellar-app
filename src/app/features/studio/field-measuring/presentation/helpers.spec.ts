@@ -13,12 +13,26 @@ import {
   buildWindDirectionOptions,
   createTestMeasureData,
   formatGenerationDate,
+  formatLeftSupportLabel,
   getActiveParameterOutput,
   isManual15CDataValid,
   isPapotoDataValid,
   isTemperatureDataValid,
   resetInactive15CMode
 } from './helpers';
+
+describe('formatLeftSupportLabel', () => {
+  it('should return the 1-based label of a stored support index', () => {
+    expect(formatLeftSupportLabel('0')).toBe('1');
+    expect(formatLeftSupportLabel('12')).toBe('13');
+  });
+
+  it('should return null for a missing or non-index support', () => {
+    expect(formatLeftSupportLabel(null)).toBeNull();
+    expect(formatLeftSupportLabel('')).toBeNull();
+    expect(formatLeftSupportLabel('support1')).toBeNull();
+  });
+});
 
 describe('isPapotoDataValid', () => {
   const filled = createTestMeasureData({
