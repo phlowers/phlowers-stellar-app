@@ -65,17 +65,15 @@
 }
 
 <ng-template #footer>
-  <p-splitbutton
-    [model]="exportMenuItems()"
+  <button
+    app-btn
+    type="button"
+    [btnLoading]="loading()"
     [disabled]="loading()"
-    [expandAriaLabel]="'studio.l0-sum.export-options-aria-label' | transloco"
-    (onClick)="onExport()"
+    (click)="onExport()"
     data-testid="l0-export-btn"
-    appendTo="body"
   >
-    <ng-template #content>
-      <app-icon icon="download" aria-hidden="true" />
-      <span>{{ 'common.export' | transloco }}</span>
-    </ng-template>
-  </p-splitbutton>
+    <app-icon icon="download" aria-hidden="true" />
+    <span>{{ 'common.export' | transloco }}</span>
+  </button>
 </ng-template>

@@ -1080,8 +1080,6 @@
       "csv-l0-label": "Longueur_L0_portée",
       "csv-cumulated-l0-label": "Longueur_L0_cumulée_portée",
       "export-invalid-table": "Export impossible : le tableau L0 est vide ou contient des valeurs invalides",
-      "export-for-excel": "Exporter pour Excel",
-      "export-options-aria-label": "Plus d'options d'export",
       "loading-data-text": "Chargement des données L0…",
       "current-page-report": "{currentPage} sur {totalPages}"
     },
