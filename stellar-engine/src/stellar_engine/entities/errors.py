@@ -61,12 +61,11 @@ class _Errors:
         return f"Estimation input {key} must be a non-negative integer, got {value}"
 
     @staticmethod
-    def estimation_negative(key: str, value: float) -> str:
-        return f"Estimation input {key} must be positive or zero, got {value}"
-
-    @staticmethod
-    def estimation_not_positive(key: str, value: float) -> str:
-        return f"Estimation input {key} must be strictly positive, got {value}"
+    def estimation_not_positive(
+        key: str, value: float, allow_zero: bool = False
+    ) -> str:
+        constraint = "positive or zero" if allow_zero else "strictly positive"
+        return f"Estimation input {key} must be {constraint}, got {value}"
 
     @staticmethod
     def estimation_invalid_obstacle_point(point: object) -> str:
