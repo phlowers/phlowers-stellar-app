@@ -85,7 +85,7 @@ def _optional_float(inputs: dict, key: str) -> float | None:
 
 def _positive_float(inputs: dict, key: str) -> float:
     value = _required_float(inputs, key)
-    if value <= 0:
+    if value < 0:
         raise EstimationInputError(_Errors.estimation_not_positive(key, value))
     return value
 
