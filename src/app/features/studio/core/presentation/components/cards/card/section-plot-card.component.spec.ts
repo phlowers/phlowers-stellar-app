@@ -15,6 +15,8 @@ const mockLitData: GetSectionOutput = {
     spans: [[[7, 8, 9]]],
     obstacles: null,
     distances: null,
+    virtual_supports: null,
+    virtual_insulators: null,
     loads: { 0: [1, 2, 3] }
   },
   output_parameters: {
