@@ -7,7 +7,7 @@
 
 import { ChangeDetectionStrategy, Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
 import { DecimalPipe, DOCUMENT, formatNumber } from '@angular/common';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -25,7 +25,7 @@ import { Task } from '@services/worker_python/tasks/types';
 import { formatPythonError, formatPythonWarnings } from '@services/worker_python/tasks/python-error-messages';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
+import { getRequiredNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { createNumberControl } from '@shared/helpers/numberValidators';
 import {
   CONFORMITY_TEMPERATURE_FORMAT,
@@ -34,6 +34,7 @@ import {
   TARGET_DISTANCE_MAX,
   TARGET_DISTANCE_MIN
 } from '@features/studio/estimations/domain/estimations.constantes';
+import { TemperatureEstimation } from '@features/studio/estimations/domain/estimations.interfaces';
 import {
   getDefaultPointIndex,
   getEstimableObstacles,
@@ -43,6 +44,7 @@ import {
   toTemperatureEstimationInputs
 } from '@features/studio/estimations/presentation/estimations.helpers';
 
+/** "Conformity temperature" tab: estimates the cable temperature reaching a target distance to an obstacle point (US.EST.TCO). */
 @Component({
   selector: 'app-temperature-estimation',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,7 +63,6 @@ import {
   templateUrl: './temperature-estimation.component.html',
   styleUrl: './temperature-estimation.component.scss'
 })
-/** "Conformity temperature" tab: estimates the cable temperature reaching a target distance to an obstacle point (US.EST.TCO). */
 export class TemperatureEstimationComponent {
   private readonly spanService = inject(PlotSpanService);
   private readonly obstaclesService = inject(ObstaclesService);
@@ -89,6 +90,20 @@ export class TemperatureEstimationComponent {
     initialValue: this.form.valid
   });
 
+  /** Error of the target distance, once edited or touched. */
+  readonly targetDistanceError = toSignal(
+    this.form.controls.targetDistance.events.pipe(
+      map(() => {
+        const control = this.form.controls.targetDistance;
+        return control.dirty || control.touched ? getRequiredNumberInputErrorParams(control) : null;
+      })
+    ),
+    { initialValue: null }
+  );
+
+  /** The hint asking to choose an obstacle is only shown while none is selected. */
+  readonly hasObstacle = computed(() => this.formValue().obstacleUuid !== null);
+
   private readonly obstacles = computed(() => getEstimableObstacles(this.spanService.section()?.obstacles));
   readonly obstacleOptions = computed(() => toObstacleOptions(this.obstacles()));
   private readonly selectedObstacle = computed(
@@ -105,8 +120,16 @@ export class TemperatureEstimationComponent {
   readonly isCalculating = signal(false);
   readonly canCalculate = computed(() => this.formValid() && this.inputs() !== null && !this.isCalculating());
 
-  /** Estimated conformity temperature (°C); null hides the results frame. */
-  readonly temperature = signal<number | null>(null);
+  private readonly estimation = signal<TemperatureEstimation | null>(null);
+
+  /**
+   * Estimated conformity temperature (°C); null hides the results frame. The engine study follows the section:
+   * a result calculated on a previous section is not shown.
+   */
+  readonly temperature = computed(() => {
+    const estimation = this.estimation();
+    return estimation && estimation.section === this.spanService.section() ? estimation.value : null;
+  });
 
   constructor() {
     // the point list follows the selected obstacle, starting on its first point
@@ -116,7 +139,7 @@ export class TemperatureEstimationComponent {
     });
 
     // results only match the inputs they were calculated from
-    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.temperature.set(null));
+    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.estimation.set(null));
 
     // the obstacle selected in the Studio is preselected, once the point list follows it
     this.form.controls.obstacleUuid.setValue(
@@ -129,29 +152,32 @@ export class TemperatureEstimationComponent {
     const inputs = this.canCalculate() ? this.inputs() : null;
     if (!inputs) return;
 
+    const section = this.spanService.section();
     this.isCalculating.set(true);
+    // the result must match the inputs it is calculated from
+    this.setInputsLocked(true);
     try {
       const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.estimateTemperature, inputs);
-      if (this.inputs() !== inputs) return;
       // e.g. BalanceEngineWarning when the study had to be adjusted on the engine side
       for (const warning of formatPythonWarnings(diagnostics, this.translocoService)) {
         this.notificationService.warning(warning);
       }
       if (error || !result) {
         this.logger.error('Failed to estimate the conformity temperature', error);
-        this.temperature.set(null);
+        this.estimation.set(null);
         this.notificationService.error(
           formatPythonError(diagnostics.find((d) => d.origin === 'exception')?.code ?? null, this.translocoService) ??
             this.translocoService.translate('studio.estimations.calculation-failed')
         );
         return;
       }
-      this.temperature.set(result.value);
+      this.estimation.set({ value: result.value, section });
     } catch (error) {
       this.logger.error('Failed to estimate the conformity temperature', error);
-      this.temperature.set(null);
+      this.estimation.set(null);
       this.notificationService.error(this.translocoService.translate('studio.estimations.calculation-failed'));
     } finally {
+      this.setInputsLocked(false);
       this.isCalculating.set(false);
     }
   }
@@ -171,9 +197,14 @@ export class TemperatureEstimationComponent {
     }
   }
 
-  getError(control: AbstractControl): string {
-    if (control.errors?.['required']) return this.translocoService.translate('common.required');
-    const numberError = getNumberInputErrorParams(control);
-    return numberError ? this.translocoService.translate(numberError.key, numberError.params) : '';
+  // without event: the form value and validity are unchanged, and the point stays read-only
+  private setInputsLocked(locked: boolean): void {
+    for (const control of [this.form.controls.obstacleUuid, this.form.controls.targetDistance]) {
+      if (locked) {
+        control.disable({ emitEvent: false });
+      } else {
+        control.enable({ emitEvent: false });
+      }
+    }
   }
 }

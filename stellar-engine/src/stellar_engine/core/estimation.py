@@ -22,10 +22,12 @@ Common inputs:
     windPressure: Optional fixed wind pressure in Pa.
     iceThickness: Optional fixed ice thickness in cm.
 
-Raises (each class name is a ``PythonErrorCode`` on the frontend side):
+Raises (each class name is a ``PythonErrorCode`` on the frontend side, except
+``ConformityInputError`` which falls back to the caller's generic message):
     EstimationInputError: An input is missing or invalid.
     ObstacleNotFoundError: ``obstacleUuid`` is not registered in the study.
-    ConformityInputError: ``pointIndex`` is out of the obstacle points.
+    ConformityInputError: ``pointIndex`` is out of the obstacle points (not
+        reachable from the UI).
     EstimationNotConvergedError: The target is not reachable within bounds.
     InvalidManipulationIndex: ``spanIndex`` or ``supportIndex`` is out of
         range (mechaphlowers).
@@ -83,10 +85,12 @@ def _optional_float(inputs: dict, key: str) -> float | None:
     return None if value is None else _to_finite_float(value, key)
 
 
-def _positive_float(inputs: dict, key: str) -> float:
+def _non_negative_float(inputs: dict, key: str) -> float:
     value = _required_float(inputs, key)
     if value < 0:
-        raise EstimationInputError(_Errors.estimation_not_positive(key, value))
+        raise EstimationInputError(
+            _Errors.estimation_not_positive(key, value, allow_zero=True)
+        )
     return value
 
 
@@ -219,7 +223,7 @@ def estimate_temperature(inputs: dict, study: SectionStudy) -> dict:
     """
     span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
     obstacle_point = _obstacle_point(inputs, study)
-    target_distance = _positive_float(inputs, "targetDistance")
+    target_distance = _non_negative_float(inputs, "targetDistance")
     wind_pressure = _optional_float(inputs, "windPressure")
     ice_thickness = _ice_thickness_meters(inputs)
     return _solve(
@@ -244,7 +248,7 @@ def estimate_wind(inputs: dict, study: SectionStudy) -> dict:
     """
     span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
     obstacle_point = _obstacle_point(inputs, study)
-    target_distance = _positive_float(inputs, "targetDistance")
+    target_distance = _non_negative_float(inputs, "targetDistance")
     new_temperature = _optional_float(inputs, "temperature")
     ice_thickness = _ice_thickness_meters(inputs)
     return _solve(
@@ -270,8 +274,10 @@ def estimate_load(inputs: dict, study: SectionStudy) -> dict:
     """
     span_index = _index(inputs, "spanIndex")
     obstacle_point = _obstacle_point(inputs, study)
-    target_distance = _positive_float(inputs, "targetDistance")
-    load_position_distance = _positive_float(inputs, "loadPositionDistance")
+    target_distance = _non_negative_float(inputs, "targetDistance")
+    load_position_distance = _non_negative_float(
+        inputs, "loadPositionDistance"
+    )
     new_temperature = _optional_float(inputs, "temperature")
     wind_pressure = _optional_float(inputs, "windPressure")
     ice_thickness = _ice_thickness_meters(inputs)
