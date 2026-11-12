@@ -13,6 +13,7 @@ import { Select } from 'primeng/select';
 import { WindPressureEstimationComponent } from '@features/studio/estimations/presentation/components/wind-pressure-estimation/wind-pressure-estimation.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/types';
 import { NotificationService } from '@core/services/notification/notification.service';
@@ -54,6 +55,8 @@ describe('WindPressureEstimationComponent', () => {
   let mockLogger: { error: ReturnType<typeof vi.fn> };
   let writeText: ReturnType<typeof vi.fn>;
   let studioSelectedUuid: ReturnType<typeof signal<string | null>>;
+  let engineSynchronized: ReturnType<typeof signal<boolean>>;
+  let engineRevision: ReturnType<typeof signal<string>>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -104,6 +107,8 @@ describe('WindPressureEstimationComponent', () => {
 
   beforeEach(async () => {
     studioSelectedUuid = signal<string | null>(null);
+    engineSynchronized = signal(true);
+    engineRevision = signal('1:0');
     mockWorkerPythonService = {
       runTask: vi.fn().mockResolvedValue({ result: ENGINE_RESULT, error: null, diagnostics: [] })
     };
@@ -148,7 +153,11 @@ describe('WindPressureEstimationComponent', () => {
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: NotificationService, useValue: mockNotificationService },
         { provide: LoggerService, useValue: mockLogger },
-        { provide: ObstaclesService, useValue: { selectedMeasureUuid: studioSelectedUuid } }
+        { provide: ObstaclesService, useValue: { selectedMeasureUuid: studioSelectedUuid } },
+        {
+          provide: LoadFormsService,
+          useValue: { isEngineSynchronized: engineSynchronized, engineRevision: engineRevision }
+        }
       ]
     }).compileComponents();
 

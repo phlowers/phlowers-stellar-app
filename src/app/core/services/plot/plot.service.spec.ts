@@ -536,17 +536,21 @@ describe('PlotService', () => {
 
       const firstInit = service.initSectionStudio(mockSection);
       expect(service.engineStudyId()).toBe(0);
+      expect(service.engineStudySectionUuid()).toBeNull();
       await firstInit;
       const firstId = service.engineStudyId();
       expect(firstId).toBeGreaterThan(0);
+      expect(service.engineStudySectionUuid()).toBe(mockSection.uuid);
 
       const secondInit = service.initSectionStudio(mockSection);
       expect(service.engineStudyId()).toBe(0);
+      expect(service.engineStudySectionUuid()).toBeNull();
       await secondInit;
       expect(service.engineStudyId()).toBeGreaterThan(firstId);
 
       service.resetAll();
       expect(service.engineStudyId()).toBe(0);
+      expect(service.engineStudySectionUuid()).toBeNull();
     });
 
     it('should set error when workerPythonService is not ready', async () => {

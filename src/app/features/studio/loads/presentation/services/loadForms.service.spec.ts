@@ -155,6 +155,7 @@ describe('LoadFormsService', () => {
       pythonErrorCode: createSignalMock(null),
       workerReady: createSignalMock(false),
       engineStudyId: createSignalMock(0),
+      engineStudySectionUuid: createSignalMock<string | null>(null),
       isStudioActive: createSignalMock(true),
       refreshProjection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<PlotService>;
@@ -614,6 +615,84 @@ describe('LoadFormsService', () => {
         await second;
         expect(service.isApplyingLoadCase()).toBe(false);
       });
+    });
+  });
+
+  describe('engine synchronization', () => {
+    const sectionWithCharge = (chargeUuid: string | null) =>
+      ({ ...mockSection, selected_charge_uuid: chargeUuid, charges: [mockCharge] }) as Section;
+
+    // The mocks are not reactive: set them before the first read of the service computeds
+    const setEngineStudy = (studyId: number, sectionUuid: string | null = mockSection.uuid) => {
+      mockPlotService.engineStudyId.mockReturnValue(studyId);
+      mockPlotService.engineStudySectionUuid.mockReturnValue(sectionUuid);
+    };
+
+    it('should not be synchronized while the engine study is not built', () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge(null));
+      setEngineStudy(0, null);
+
+      expect(service.isEngineSynchronized()).toBe(false);
+    });
+
+    it('should not be synchronized while the engine study belongs to another section', () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge(null));
+      setEngineStudy(1, 'previous-section-uuid');
+
+      expect(service.isEngineSynchronized()).toBe(false);
+    });
+
+    it('should be synchronized without selected load case once the engine study is built', () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge(null));
+      setEngineStudy(1);
+
+      expect(service.isEngineSynchronized()).toBe(true);
+    });
+
+    it('should wait for the selected load case to be pushed to the engine study', async () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+      setEngineStudy(1);
+      let resolveChangeState!: (outcome: unknown) => void;
+      mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+        task === Task.changeState
+          ? new Promise((resolve) => (resolveChangeState = resolve))
+          : Promise.resolve({ result: null, error: null })
+      );
+      expect(service.isEngineSynchronized()).toBe(false);
+
+      const applying = service.initTemporaryLoadData();
+      await vi.waitFor(() => expect(resolveChangeState).toBeDefined());
+      expect(service.isEngineSynchronized()).toBe(false);
+
+      resolveChangeState({ result: null, error: null });
+      await applying;
+
+      expect(service.isEngineSynchronized()).toBe(true);
+    });
+
+    it('should not be synchronized once applying the load case failed', async () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+      setEngineStudy(1);
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task setLoads timed out'));
+
+      await service.initTemporaryLoadData();
+
+      expect(service.isEngineSynchronized()).toBe(false);
+    });
+
+    it('should change the engine revision when a load case is applied, calculated or deleted', async () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+      setEngineStudy(1);
+      const revisions = [service.engineRevision()];
+
+      await service.initTemporaryLoadData();
+      revisions.push(service.engineRevision());
+      await service.calculateLoad();
+      revisions.push(service.engineRevision());
+      await service.deleteLoad();
+      revisions.push(service.engineRevision());
+
+      expect(new Set(revisions).size).toBe(revisions.length);
     });
   });
 
