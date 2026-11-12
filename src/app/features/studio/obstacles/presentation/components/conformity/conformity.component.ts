@@ -38,6 +38,7 @@ import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import {
   CONFORMITY_BOUNDS,
+  CONFORMITY_TASK_TIMEOUT_MS,
   getAltitudeTypeLabels,
   getConformityCableTrackRows,
   getConformityCommonRows,
@@ -616,10 +617,12 @@ export class ConformityComponent implements OnDestroy {
         }))
       };
 
-      const { result: conformityTaskOutput, error: conformityTaskError } = await this.workerPythonService.runTask(
-        Task.getConformity,
-        conformityInputs
-      );
+      const { result: conformityTaskOutput, error: conformityTaskError } =
+        await this.workerPythonService.runTaskWithTimeout(
+          Task.getConformity,
+          conformityInputs,
+          CONFORMITY_TASK_TIMEOUT_MS
+        );
       if (conformityTaskError || !conformityTaskOutput) {
         throw new Error(conformityTaskError ?? 'Conformity task failed');
       }
