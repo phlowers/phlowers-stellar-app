@@ -59,8 +59,9 @@ export interface EstimationObstaclePointInputs {
   pointIndex: number;
 }
 
-/** Engine result of an estimation, with the section it was calculated on. */
+/** Engine result of an estimation, with the section and engine revision it was calculated on. */
 export interface EstimationOutcome<TResult> {
   result: TResult;
   section: Section | null;
+  engineRevision: string;
 }

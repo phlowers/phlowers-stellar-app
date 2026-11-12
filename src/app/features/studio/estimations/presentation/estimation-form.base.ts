@@ -13,6 +13,7 @@ import { map } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task, TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
 import { formatPythonError, formatPythonWarnings } from '@services/worker_python/tasks/python-error-messages';
@@ -38,6 +39,7 @@ import {
 export abstract class EstimationFormBase<TTask extends Task, TValueKey extends string> {
   protected readonly spanService = inject(PlotSpanService);
   private readonly obstaclesService = inject(ObstaclesService);
+  private readonly loadFormsService = inject(LoadFormsService);
   private readonly workerPythonService = inject(WorkerPythonService);
   protected readonly translocoService = inject(TranslocoService);
   private readonly notificationService = inject(NotificationService);
@@ -89,17 +91,29 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
   private readonly inputs = computed(() => this.toInputs(this.formValue(), this.selectedObstacle()));
 
   readonly isCalculating = signal(false);
-  readonly canCalculate = computed(() => this.formValid() && this.inputs() !== null && !this.isCalculating());
+  // The section is published before the engine holds its study and load case: calculating then would use the previous
+  // (or a partially updated) study
+  readonly canCalculate = computed(
+    () =>
+      this.loadFormsService.isEngineSynchronized() &&
+      this.formValid() &&
+      this.inputs() !== null &&
+      !this.isCalculating()
+  );
 
   private readonly outcome = signal<EstimationOutcome<TaskOutputs[TTask]> | null>(null);
 
   /**
-   * Engine result; null hides the results frame. The engine study follows the section: a result calculated on a
-   * previous section is not shown.
+   * Engine result; null hides the results frame. The engine study follows the section and the load case: a result
+   * calculated on a previous section, or before the engine study or load case changed, is not shown.
    */
   protected readonly result = computed(() => {
     const outcome = this.outcome();
-    return outcome && outcome.section === this.spanService.section() ? outcome.result : null;
+    return outcome &&
+      outcome.section === this.spanService.section() &&
+      outcome.engineRevision === this.loadFormsService.engineRevision()
+      ? outcome.result
+      : null;
   });
 
   constructor() {
@@ -133,6 +147,7 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
     if (!inputs) return;
 
     const section = this.spanService.section();
+    const engineRevision = this.loadFormsService.engineRevision();
     this.isCalculating.set(true);
     // the result must match the inputs it is calculated from
     this.setInputsLocked(true);
@@ -151,7 +166,7 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
         );
         return;
       }
-      this.outcome.set({ result, section });
+      this.outcome.set({ result, section, engineRevision });
     } catch (error) {
       this.logger.error(this.calculationFailedLog, error);
       this.outcome.set(null);

@@ -13,6 +13,7 @@ import { Select } from 'primeng/select';
 import { TemperatureEstimationComponent } from '@features/studio/estimations/presentation/components/temperature-estimation/temperature-estimation.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
+import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/types';
 import { NotificationService } from '@core/services/notification/notification.service';
@@ -58,6 +59,8 @@ describe('TemperatureEstimationComponent', () => {
   let mockLogger: { error: ReturnType<typeof vi.fn> };
   let writeText: ReturnType<typeof vi.fn>;
   let studioSelectedUuid: ReturnType<typeof signal<string | null>>;
+  let engineSynchronized: ReturnType<typeof signal<boolean>>;
+  let engineRevision: ReturnType<typeof signal<string>>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -106,6 +109,8 @@ describe('TemperatureEstimationComponent', () => {
 
   beforeEach(async () => {
     studioSelectedUuid = signal<string | null>(null);
+    engineSynchronized = signal(true);
+    engineRevision = signal('1:0');
     mockWorkerPythonService = {
       runTask: vi.fn().mockResolvedValue({ result: ENGINE_RESULT, error: null, diagnostics: [] })
     };
@@ -152,7 +157,11 @@ describe('TemperatureEstimationComponent', () => {
         { provide: WorkerPythonService, useValue: mockWorkerPythonService },
         { provide: NotificationService, useValue: mockNotificationService },
         { provide: LoggerService, useValue: mockLogger },
-        { provide: ObstaclesService, useValue: { selectedMeasureUuid: studioSelectedUuid } }
+        { provide: ObstaclesService, useValue: { selectedMeasureUuid: studioSelectedUuid } },
+        {
+          provide: LoadFormsService,
+          useValue: { isEngineSynchronized: engineSynchronized, engineRevision: engineRevision }
+        }
       ]
     }).compileComponents();
 
@@ -455,6 +464,44 @@ describe('TemperatureEstimationComponent', () => {
       fixture.detectChanges();
 
       expect(getByTestId('results-frame')).toBeNull();
+    });
+
+    it('hides the results once the engine study or load case changes', async () => {
+      fillForm();
+      await calculate();
+
+      engineRevision.set('2:0');
+      fixture.detectChanges();
+
+      expect(getByTestId('results-frame')).toBeNull();
+    });
+
+    it('does not show a result calculated while the engine was changing', async () => {
+      let resolveTask!: (value: unknown) => void;
+      mockWorkerPythonService.runTask.mockReturnValue(new Promise((resolve) => (resolveTask = resolve)));
+      fillForm();
+
+      const calculation = component.calculate();
+      engineRevision.set('1:1');
+      resolveTask({ result: ENGINE_RESULT, error: null, diagnostics: [] });
+      await calculation;
+      fixture.detectChanges();
+
+      expect(getByTestId('results-frame')).toBeNull();
+    });
+
+    it('does not calculate while the engine study and load case are not synchronized', async () => {
+      engineSynchronized.set(false);
+      fillForm();
+      fixture.detectChanges();
+
+      expect(calculateBtn().disabled).toBe(true);
+      await calculate();
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+
+      engineSynchronized.set(true);
+      fixture.detectChanges();
+      expect(calculateBtn().disabled).toBe(false);
     });
 
     it('shows the engine error message and no result when the estimation fails', async () => {

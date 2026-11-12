@@ -1,7 +1,7 @@
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
 import { cloneDeep, omit } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
@@ -68,14 +68,44 @@ export class LoadFormsService {
   }
 
   /** UUID of the charge case last pushed to the Python engine — prevents redundant setLoads on section updates. */
-  private lastLoadedChargeUuid: string | null = null;
+  private readonly lastLoadedChargeUuid = signal<string | null>(null);
   /** Engine study the charge case was last pushed to — a rebuilt study (studio reopened) needs it again. */
-  private lastLoadedEngineStudyId = 0;
+  private readonly lastLoadedEngineStudyId = signal(0);
   // Load case switches in flight, counted because a quick switch overlaps the previous one. The engine outputs
   // (distances…) still belong to the previous load case until the last one is projected, and `plotService.loading`
   // only covers the final projection, not the engine tasks before it
   private readonly pendingLoadCases = signal(0);
   readonly isApplyingLoadCase = computed(() => this.pendingLoadCases() > 0);
+  // Bumped each time a load case change leaves the engine, whatever its outcome
+  private readonly loadCaseRevision = signal(0);
+
+  /**
+   * Whether the engine holds the study of the current section with its selected load case applied: the section is
+   * published before the study is built and the load case pushed, so it alone does not tell the engine is ready.
+   */
+  readonly isEngineSynchronized = computed(() => {
+    const studyId = this.plotService.engineStudyId();
+    const section = this.spanService.section();
+    if (!studyId || !section || this.plotService.engineStudySectionUuid() !== section.uuid) return false;
+    if (this.isApplyingLoadCase()) return false;
+    const chargeUuid = section.selected_charge_uuid;
+    // Without a (known) selected charge there is no load case to push: the base climate of the study applies
+    if (!chargeUuid || !section.charges?.some((charge) => charge.uuid === chargeUuid)) return true;
+    return this.lastLoadedChargeUuid() === chargeUuid && this.lastLoadedEngineStudyId() === studyId;
+  });
+
+  /** Identifies the state of the engine study and load case: engine results of another revision are outdated. */
+  readonly engineRevision = computed(() => `${this.plotService.engineStudyId()}:${this.loadCaseRevision()}`);
+
+  private beginLoadCaseChange(): void {
+    this.pendingLoadCases.update((count) => count + 1);
+  }
+
+  private endLoadCaseChange(): void {
+    this.pendingLoadCases.update((count) => count - 1);
+    this.loadCaseRevision.update((revision) => revision + 1);
+  }
+
   /**
    * Initialize the temporary load data by getting the selected charge case and checking the span loads,
    * then push all span loads into the Python engine via setLoads.
@@ -85,14 +115,17 @@ export class LoadFormsService {
     const currentChargeUuid = section?.selected_charge_uuid;
     if (!currentChargeUuid) {
       this.plotService.temporaryLoadData = null;
-      this.lastLoadedChargeUuid = null;
+      this.lastLoadedChargeUuid.set(null);
       return;
     }
 
     // Skip entirely when re-entering for the same charge case
     // (e.g. after save writes back to IndexedDB and liveQuery re-fires).
     const engineStudyId = this.plotService.engineStudyId();
-    if (currentChargeUuid === this.lastLoadedChargeUuid && engineStudyId === this.lastLoadedEngineStudyId) return;
+    const isAlreadyLoaded = untracked(
+      () => currentChargeUuid === this.lastLoadedChargeUuid() && engineStudyId === this.lastLoadedEngineStudyId()
+    );
+    if (isAlreadyLoaded) return;
 
     const charge = section?.charges?.find((c) => c.uuid === currentChargeUuid);
     if (!charge) {
@@ -128,13 +161,13 @@ export class LoadFormsService {
     this.plotService.temporaryLoadData = newData;
     // Set before async calls so the effect guard prevents concurrent re-entrant
     // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
-    this.lastLoadedChargeUuid = currentChargeUuid;
-    this.lastLoadedEngineStudyId = engineStudyId;
+    this.lastLoadedChargeUuid.set(currentChargeUuid);
+    this.lastLoadedEngineStudyId.set(engineStudyId);
 
     // The cached distances belong to the previous load case: a switch that fails before the projection must not
     // leave them behind, and a successful projection replaces them
     this.obstacleStateService.setDistances([]);
-    this.pendingLoadCases.update((count) => count + 1);
+    this.beginLoadCaseChange();
     try {
       // When there are no saved span loads, pass an empty array so the Python engine
       // takes its "no loads" code path instead of receiving zero-weight placeholder
@@ -148,11 +181,11 @@ export class LoadFormsService {
       await this.resyncObstacles(section);
       await this.plotService.refreshProjection();
     } catch (err) {
-      this.lastLoadedChargeUuid = null; // Allow retry on next signal change
+      this.lastLoadedChargeUuid.set(null); // Allow retry on next signal change
       this.plotService.error.set(TaskError.CALCULATION_ERROR);
       this.logger.error('initTemporaryLoadData failed', err);
     } finally {
-      this.pendingLoadCases.update((count) => count - 1);
+      this.endLoadCaseChange();
     }
   };
 
@@ -252,6 +285,7 @@ export class LoadFormsService {
     }
     this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
+    this.beginLoadCaseChange();
     try {
       const currentSection = this.spanService.section();
       const checkedSpanLoads = recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? []);
@@ -290,6 +324,7 @@ export class LoadFormsService {
       await this.plotService.refreshProjection();
       this.pendingLoadAlongSpan.set(null);
     } finally {
+      this.endLoadCaseChange();
       this.plotService.loading.set(false);
     }
   };
@@ -311,10 +346,12 @@ export class LoadFormsService {
     if (supportIndex === -1) return;
 
     this.plotService.loading.set(true);
+    this.beginLoadCaseChange();
     try {
       await this.workerPythonService.runTask(Task.deleteLoad, { supportIndex });
       await this.plotService.refreshProjection();
     } finally {
+      this.endLoadCaseChange();
       this.plotService.loading.set(false);
     }
   }
@@ -325,11 +362,16 @@ export class LoadFormsService {
    * The caller is responsible for deleting the charge from the database.
    */
   async deleteLoad(): Promise<void> {
-    await this.workerPythonService.runTask(Task.deleteAllLoads, undefined);
-    const baseClimate = getBaseClimate(this.spanService.section());
-    await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate });
-    this.plotService.temporaryLoadData = null;
-    this.lastLoadedChargeUuid = null;
-    await this.plotService.refreshProjection();
+    this.beginLoadCaseChange();
+    try {
+      await this.workerPythonService.runTask(Task.deleteAllLoads, undefined);
+      const baseClimate = getBaseClimate(this.spanService.section());
+      await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate });
+      this.plotService.temporaryLoadData = null;
+      this.lastLoadedChargeUuid.set(null);
+      await this.plotService.refreshProjection();
+    } finally {
+      this.endLoadCaseChange();
+    }
   }
 }
