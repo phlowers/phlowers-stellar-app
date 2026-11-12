@@ -20,6 +20,8 @@ import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/
 import { LoadType } from './helpers/createLoadAnnotations';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
+import { CableSupportManipService } from '@features/studio/loads/presentation/services/cableSupportManip.service';
+import { LOAD_TAB } from '@features/studio/loads/presentation/load-tabs.constantes';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
 import { FloorFormService } from '@services/floor-form/floor-form.service';
@@ -293,6 +295,12 @@ describe('SectionPlotComponent', () => {
     clearPreview: vi.fn(() => mockCableModificationsService.previewCableModification.set(null))
   };
 
+  const mockCableSupportManipService = {
+    selectedSupportUuid: signal<string | null>(null),
+    selectSupport: vi.fn((uuid: string) => mockCableSupportManipService.selectedSupportUuid.set(uuid)),
+    clearSelectedSupport: vi.fn(() => mockCableSupportManipService.selectedSupportUuid.set(null))
+  };
+
   const mockObstaclesService = {
     selectedMeasureUuid: signal<string | null>(null),
     activePointIndex: signal<number | null>(null),
@@ -380,6 +388,7 @@ describe('SectionPlotComponent', () => {
         { provide: ObstaclesService, useValue: mockObstaclesService },
         { provide: LoadFormsService, useValue: mockLoadFormsService },
         { provide: CableModificationsService, useValue: mockCableModificationsService },
+        { provide: CableSupportManipService, useValue: mockCableSupportManipService },
         { provide: ObstacleStateService, useValue: mockObstacleStateService },
         { provide: DistanceMeasuringService, useValue: mockDistanceMeasuringService },
         { provide: FloorFormService, useValue: mockFloorFormService },
@@ -550,6 +559,107 @@ describe('SectionPlotComponent', () => {
       await component.refreshPlot();
 
       expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cutStrands: null }));
+    });
+
+    it('should pass the saved cable support manipulations of the selected load case to createPlot', async () => {
+      const manipOfSelectedCharge = { uuid: 'm1', supportUuid: 's0', chargeUuid: 'charge-1' };
+      const manipOfOtherCharge = { uuid: 'm2', supportUuid: 's0', chargeUuid: 'charge-2' };
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-1',
+        cable_support_manipulations: [manipOfSelectedCharge, manipOfOtherCharge]
+      } as unknown as Section);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(
+        expect.objectContaining({ cableSupportManips: [manipOfSelectedCharge] })
+      );
+    });
+
+    describe('cable support manipulations saved with the load case', () => {
+      const chargeWithManips = (uuid: string, supportManipParams: unknown[]) => ({
+        uuid,
+        data: { supportManipParams }
+      });
+
+      it('should pass a manipulation saved only with the load case, with no section entry', async () => {
+        const chargeManip = { uuid: 'm1', supportUuid: 's0', chargeUuid: 'charge-1' };
+        sectionSignal.set({
+          ...mockSection,
+          selected_charge_uuid: 'charge-1',
+          charges: [chargeWithManips('charge-1', [chargeManip])],
+          cable_support_manipulations: []
+        } as unknown as Section);
+        litDataSignal.set(mockLitData);
+
+        await component.refreshPlot();
+
+        expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cableSupportManips: [chargeManip] }));
+      });
+
+      it('should complete the load case manipulations with the section ones, one per support', async () => {
+        const chargeManip = { uuid: 'charge-copy', supportUuid: 's0', chargeUuid: 'charge-1' };
+        const sectionDuplicate = { uuid: 'section-copy', supportUuid: 's0', chargeUuid: 'charge-1' };
+        const sectionOnly = { uuid: 'section-only', supportUuid: 's1', chargeUuid: 'charge-1' };
+        sectionSignal.set({
+          ...mockSection,
+          selected_charge_uuid: 'charge-1',
+          charges: [chargeWithManips('charge-1', [chargeManip])],
+          cable_support_manipulations: [sectionDuplicate, sectionOnly]
+        } as unknown as Section);
+        litDataSignal.set(mockLitData);
+
+        await component.refreshPlot();
+
+        expect(mockCreatePlot).toHaveBeenCalledWith(
+          expect.objectContaining({ cableSupportManips: [chargeManip, sectionOnly] })
+        );
+      });
+
+      it('should ignore the manipulations of the other load cases', async () => {
+        const otherChargeManip = { uuid: 'm2', supportUuid: 's0', chargeUuid: 'charge-2' };
+        sectionSignal.set({
+          ...mockSection,
+          selected_charge_uuid: 'charge-1',
+          charges: [chargeWithManips('charge-1', [otherChargeManip]), chargeWithManips('charge-2', [otherChargeManip])],
+          cable_support_manipulations: [otherChargeManip]
+        } as unknown as Section);
+        litDataSignal.set(mockLitData);
+
+        await component.refreshPlot();
+
+        expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cableSupportManips: [] }));
+      });
+
+      it('should fall back on the section entries when the selected load case is not in the section', async () => {
+        const sectionManip = { uuid: 'm1', supportUuid: 's0', chargeUuid: 'charge-1' };
+        sectionSignal.set({
+          ...mockSection,
+          selected_charge_uuid: 'charge-1',
+          charges: [],
+          cable_support_manipulations: [sectionManip]
+        } as unknown as Section);
+        litDataSignal.set(mockLitData);
+
+        await component.refreshPlot();
+
+        expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cableSupportManips: [sectionManip] }));
+      });
+    });
+
+    it('should pass no cable support manipulations to createPlot without a selected load case', async () => {
+      sectionSignal.set({
+        ...mockSection,
+        selected_charge_uuid: null,
+        cable_support_manipulations: [{ uuid: 'm1', supportUuid: 's0', chargeUuid: 'charge-1' }]
+      } as unknown as Section);
+      litDataSignal.set(mockLitData);
+
+      await component.refreshPlot();
+
+      expect(mockCreatePlot).toHaveBeenCalledWith(expect.objectContaining({ cableSupportManips: [] }));
     });
 
     it('should include distanceMeasuringPoints when the selected measurement support is within the visible span window', async () => {
@@ -1153,7 +1263,7 @@ describe('SectionPlotComponent', () => {
       capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 's0' } } });
 
       expect(mockSideTabsService.sideTabs()).toBe(0);
-      expect(mockLoadFormsService.activeLoadTab()).toBe('1');
+      expect(mockLoadFormsService.activeLoadTab()).toBe(LOAD_TAB.SPAN_LOAD);
       expect(mockLoadFormsService.selectedSpanSupportUuid()).toBe('s0');
     });
 
@@ -1173,7 +1283,7 @@ describe('SectionPlotComponent', () => {
       capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 'unknown-uuid' } } });
 
       expect(mockSideTabsService.sideTabs()).toBe(0);
-      expect(mockLoadFormsService.activeLoadTab()).toBe('1');
+      expect(mockLoadFormsService.activeLoadTab()).toBe(LOAD_TAB.SPAN_LOAD);
       expect(mockLoadFormsService.selectedSpanSupportUuid()).toBe('unknown-uuid');
     });
 
@@ -1197,6 +1307,8 @@ describe('SectionPlotComponent', () => {
       mockSideTabsService.sideTabs.set(null);
       mockCableModificationsService.selectedSpanUuid.set(null);
       mockCableModificationsService.selectSpan.mockClear();
+      mockCableSupportManipService.selectedSupportUuid.set(null);
+      mockCableSupportManipService.selectSupport.mockClear();
     });
 
     const makePlotWithCapture = () => {
@@ -1225,8 +1337,39 @@ describe('SectionPlotComponent', () => {
       });
 
       expect(mockSideTabsService.sideTabs()).toBe(0);
-      expect(mockLoadFormsService.activeLoadTab()).toBe('2');
+      expect(mockLoadFormsService.activeLoadTab()).toBe(LOAD_TAB.CABLE_MODIFICATION);
       expect(mockCableModificationsService.selectSpan).toHaveBeenCalledWith('s0');
+    });
+
+    it('should open Charges side tab, switch to cable support manipulation tab and pre-select the support', () => {
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({
+        annotation: {
+          data: { type: 'cableSupportManip', supportUuid: 's1', cableSupportManipUuid: 'manip-1' }
+        }
+      });
+
+      expect(mockSideTabsService.sideTabs()).toBe(0);
+      expect(mockLoadFormsService.activeLoadTab()).toBe(LOAD_TAB.CABLE_SUPPORT_MANIP);
+      expect(mockCableSupportManipService.selectSupport).toHaveBeenCalledWith('s1');
+      expect(mockCableModificationsService.selectSpan).not.toHaveBeenCalled();
+    });
+
+    it('should ignore the cable support manipulation icon in the preview, with no Loads panel to consume the selection', () => {
+      fixture.componentRef.setInput('isPreview', true);
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({
+        annotation: {
+          data: { type: 'cableSupportManip', supportUuid: 's1', cableSupportManipUuid: 'manip-1' }
+        }
+      });
+
+      expect(mockCableSupportManipService.selectSupport).not.toHaveBeenCalled();
+      expect(mockCableSupportManipService.selectedSupportUuid()).toBeNull();
+      expect(mockSideTabsService.sideTabs()).toBeNull();
+      expect(mockLoadFormsService.activeLoadTab()).toBe('0');
     });
 
     it('should open the RRTS tool when the cut strands marking is clicked', () => {
@@ -1265,6 +1408,7 @@ describe('SectionPlotComponent', () => {
       capturedHandler!({ annotation: { data: { type: 'spanLoad', supportUuid: 's0' } } });
 
       expect(mockCableModificationsService.selectSpan).not.toHaveBeenCalled();
+      expect(mockCableSupportManipService.selectSupport).not.toHaveBeenCalled();
     });
   });
 
@@ -1408,7 +1552,7 @@ describe('SectionPlotComponent', () => {
 
       attachAndGetGuard()({ ...press, stopPropagation } as unknown as MouseEvent);
 
-      const guards = addSpy.mock.calls.filter(([type]) => type === 'mousemove').length;
+      const guards = addSpy.mock.calls.filter(([type]) => (type as string) === 'mousemove').length;
       addSpy.mockRestore();
       // The press itself must always reach Plotly so that clicks keep working.
       expect(stopPropagation).not.toHaveBeenCalled();

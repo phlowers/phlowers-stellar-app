@@ -15,6 +15,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
+import { isPapotoDataValid } from '@features/studio/field-measuring/presentation/helpers';
 import { TranslocoModule } from '@jsverse/transloco';
 
 @Component({
@@ -91,24 +92,7 @@ export class PapotoComponent {
   papotoError = signal<boolean>(false);
   readonly isCalculating = signal(false);
 
-  isFormValid = computed(() => {
-    const data = this.measureData();
-    return !!(
-      data.leftSupport &&
-      data.spanLength != null &&
-      data.measuredElevationDifference != null &&
-      data.HL != null &&
-      data.H1 != null &&
-      data.H2 != null &&
-      data.H3 != null &&
-      data.HR != null &&
-      data.VL != null &&
-      data.V1 != null &&
-      data.V2 != null &&
-      data.V3 != null &&
-      data.VR != null
-    );
-  });
+  isFormValid = computed(() => isPapotoDataValid(this.measureData()));
 
   updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
     this.measureData.update((d) => ({ ...d, [field]: value }));

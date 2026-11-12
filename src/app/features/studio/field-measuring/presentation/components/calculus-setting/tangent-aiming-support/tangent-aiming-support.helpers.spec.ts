@@ -1,3 +1,4 @@
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { syncDisplayedControls } from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import {
@@ -43,12 +44,17 @@ describe('tangent-aiming-support helpers', () => {
     });
   });
 
-  it('should force the tangente calculation type, the only one supported', () => {
+  it('should keep the chosen calculation type', () => {
     const data = { ...createTestMeasureData(), calculationType: 'parametre' as const, cableParameter: 1500 };
     expect(applyTangentAimingSupportDefaults(data, '0')).toMatchObject({
-      calculationType: 'tangente',
+      calculationType: 'parametre',
       cableParameter: 1500
     });
+  });
+
+  it('should default the calculation type to tangente when missing', () => {
+    const data = { ...createTestMeasureData(), calculationType: undefined } as unknown as FieldMeasure;
+    expect(applyTangentAimingSupportDefaults(data, '0').calculationType).toBe('tangente');
   });
 
   it('should not override an already chosen left support', () => {
@@ -118,7 +124,8 @@ describe('tangent-aiming-support helpers', () => {
 
     it('should reject out-of-bound or too precise values', () => {
       expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 201 })).toBe(false);
-      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 1.234 })).toBe(false);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 1.234 })).toBe(true);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 1.2345 })).toBe(false);
       expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'parametre', cableParameter: 19 })).toBe(
         false
       );

@@ -88,17 +88,17 @@ Pendant que vous saisissez, {{app_name}} valide vos entrées :
 
 - **Nom de mesure en double** : si votre nom correspond à une mesure existante, un message d'erreur apparaît sous le champ du nom : **Le nom de la mesure doit être unique.** Modifiez le nom pour corriger le problème.
 - **Plages invalides** : si un champ numérique (par exemple, la vitesse du vent) sort de la plage autorisée, {{app_name}} peut mettre le champ en surbrillance lorsque vous essayez d'enregistrer.
-- **Champ obligatoire vide** : si vous laissez un champ requis vide, les boutons **Enregistrer** et **Exporter** restent désactivés.
+- **Champ obligatoire vide** : le bouton **Enregistrer** exige seulement un nom non vide et non déjà utilisé par une autre mesure.
 
-Dès que tous les champs sont valides et que vous avez apporté des modifications, le bouton **Enregistrer** devient actif. Si les quatre onglets (Données terrain, Calcul du paramètre, Calcul de la température, Paramètre à 15 °C sans vent) sont valides, le bouton **Exporter** devient également actif.
+Dès que vous modifiez une saisie de la mesure (quel que soit l'onglet), le bouton **Enregistrer** devient actif, même si la mesure est incomplète. Les boutons **Rapport** et **Exporter** ne sont actifs que lorsque le formulaire global (nom, tronçon, longitude, latitude, altitude, azimut) et l'onglet affiché (Données terrain, Calcul du paramètre, Calcul de la température ou Paramètre à 15 °C sans vent) sont valides et enregistrés.
 
 ## Actions de la boîte de dialogue
 
 Au bas de la boîte de dialogue, trois boutons contrôlent la session de mesure :
 
-- **Rapport** (désactivé dans la version actuelle) : réservé à une future fonctionnalité de reporting.
-- **Exporter** : génère un fichier JSON avec toutes les données de mesure et les résultats calculés. Il est activé uniquement lorsque tous les onglets sont valides. Le nom du fichier suit le motif : `Export Mesure de terrain_<nom de mesure>_<nom de section>_<date>.json`.
-- **Enregistrer** : enregistre vos saisies dans la base de données. Il est activé quand le formulaire est valide et que des modifications non enregistrées sont présentes.
+- **Rapport** : génère un fichier PDF (A4 portrait) listant les données des quatre onglets de la mesure enregistrée : seules la méthode (et la sous-méthode) de calcul du paramètre retenues et les valeurs affichées selon le choix « Mise à jour des valeurs » sont reportées. Il est activé quand les données du formulaire sont valides et enregistrées. Le nom du fichier suit le motif : `Rapport Mesure de terrain_<nom de mesure>_<nom de canton>_<date et heure de génération>.pdf`.
+- **Exporter** : génère un fichier JSON avec toutes les données de mesure et les résultats calculés. Il est activé quand les données du formulaire sont valides et enregistrées. Le nom du fichier suit le motif : `Export Mesure de terrain_<nom de mesure>_<nom de section>_<date>.json`.
+- **Enregistrer** : enregistre vos saisies dans la base de données. Il est activé quand la mesure a un nom valide et qu'une saisie a été modifiée depuis le dernier enregistrement.
 
 ## Conseils
 

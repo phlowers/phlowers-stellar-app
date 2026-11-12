@@ -57,6 +57,8 @@ export const buildClickableIconAnnotation = (params: ClickableIconAnnotationPara
     borderpad: params.borderPad,
     font: {
       family: PlotlyDrawings.clickableIconAnnotation.fontFamily,
+      // Plotly applies it, but its typings do not list it
+      weight: PlotlyDrawings.clickableIconAnnotation.fontWeight,
       color: params.color,
       size: params.iconSize
     },

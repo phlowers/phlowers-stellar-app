@@ -93,16 +93,21 @@ describe('tangent-aiming-interior helpers', () => {
       });
     });
 
-    it('should force the tangente calculation type, the only one supported', () => {
+    it('should keep the chosen calculation type', () => {
       const data = {
         ...createTestMeasureData(),
         interiorCalculationType: 'parametre' as const,
         interiorParameter: 1500
       };
       expect(applyTangentAimingInteriorDefaults(data, '0')).toMatchObject({
-        interiorCalculationType: 'tangente',
+        interiorCalculationType: 'parametre',
         interiorParameter: 1500
       });
+    });
+
+    it('should default the calculation type to tangente when missing', () => {
+      const data = { ...createTestMeasureData(), interiorCalculationType: undefined } as unknown as FieldMeasure;
+      expect(applyTangentAimingInteriorDefaults(data, '0').interiorCalculationType).toBe('tangente');
     });
 
     it('should not override an already chosen left support', () => {

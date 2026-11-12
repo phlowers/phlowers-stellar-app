@@ -43,7 +43,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
     labelKey: 'common.tangent-aiming-vertical-acc-angle-left-label',
     unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-left-input',
-    step: 0.01,
+    step: 0.001,
     area: 'vAngleLeft'
   },
   verticalAccAngleRight: {
@@ -51,7 +51,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
     labelKey: 'common.vertical-angle-right-support-label',
     unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-right-input',
-    step: 0.01,
+    step: 0.001,
     area: 'vAngleRight'
   },
   parameter: {
@@ -67,7 +67,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
     labelKey: 'common.tangent-angle-label',
     unitKey: 'common.grade-unit',
     testId: 'tangent-angle-input',
-    step: 0.01,
+    step: 0.001,
     area: 'tangentAngle'
   }
 };

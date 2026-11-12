@@ -26,19 +26,18 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
 import { SpanLoad } from '@shared/domain';
+import { mergeCableSupportManips } from '@shared/domain/helpers/cable-support-manip.helpers';
 import { LoadType } from './helpers/createLoadAnnotations';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
+import { CableSupportManipService } from '@features/studio/loads/presentation/services/cableSupportManip.service';
+import { LOAD_TAB } from '@features/studio/loads/presentation/load-tabs.constantes';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { debounceTime, tap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { Support } from '@shared/domain/models/support.model';
-import {
-  appendExistingObstaclesWithFormObstacle,
-  getObstacleClickPayload,
-  ObstacleAnnotationData
-} from './helpers/obstacles';
+import { appendExistingObstaclesWithFormObstacle, getObstacleClickPayload } from './helpers/obstacles';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -77,6 +76,7 @@ export class SectionPlotComponent implements OnDestroy {
   private readonly obstaclesService = inject(ObstaclesService);
   private readonly loadFormsService = inject(LoadFormsService);
   private readonly cableModificationsService = inject(CableModificationsService);
+  private readonly cableSupportManipService = inject(CableSupportManipService);
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly distanceMeasuringService = inject(DistanceMeasuringService);
@@ -108,6 +108,16 @@ export class SectionPlotComponent implements OnDestroy {
     { initialValue: null }
   );
 
+  // Saved cable support manipulations of the displayed load case, resolved like the engine load initialization does
+  private readonly savedCableSupportManips = computed(() => {
+    const section = this.spanService.section();
+    const chargeUuid = section?.selected_charge_uuid;
+    if (!section || !chargeUuid) return [];
+
+    const charge = section.charges?.find((c) => c?.uuid === chargeUuid);
+    return mergeCableSupportManips(charge?.data?.supportManipParams, section.cable_support_manipulations, chargeUuid);
+  });
+
   // Computed state
   private readonly plotState = computed(() => ({
     litData: this.litData(),
@@ -128,6 +138,7 @@ export class SectionPlotComponent implements OnDestroy {
     distanceMeasuringPoints: this.plotService.distanceMeasuringPoints(),
     measureSupportUuid: this.distanceMeasuringService.selectedSupportUuid(),
     cableModifications: this.plotService.temporaryLoadData?.cableModifParams ?? [],
+    cableSupportManips: this.savedCableSupportManips(),
     floors: this.spanService.section()?.floors ?? [],
     selectedFloorUuid: this.floorFormService.savedFloorUuid(),
     selectedFloorPointIndex: this.floorFormService.activeSavedPointIndex(),
@@ -282,6 +293,7 @@ export class SectionPlotComponent implements OnDestroy {
         selectedDisplayOptions,
         cableModifications,
         spanUuidToIndex,
+        cableSupportManips: this.savedCableSupportManips(),
         cutStrands: section?.rrts_cut_strands ?? null,
         translocoService: this.translocoService
       });
@@ -361,35 +373,44 @@ export class SectionPlotComponent implements OnDestroy {
     plotEl.removeEventListener('mousedown', this.guardPlotlyRightClickDrag, true);
     plotEl.addEventListener('mousedown', this.guardPlotlyRightClickDrag, true);
     plotEl.on('plotly_clickannotation', (event: ClickAnnotationEvent) => {
-      if (event?.annotation?.data?.type === 'obstacle') {
-        const section = this.spanService.section();
-        const payload = getObstacleClickPayload(
-          event?.annotation?.data as ObstacleAnnotationData,
-          section?.obstacles ?? [],
-          section?.supports ?? []
-        );
-        if (!payload) return;
-        this.sideTabsService.sideTabs.set(1);
-        this.obstaclesService.setSelectedMeasure(payload.obstacle.uuid, payload.obstaclePositionIndex);
-        this.obstacleFormService.setExistingObstacle(payload.obstacle, payload.obstaclePositionIndex);
-      } else if (event?.annotation?.data?.type === 'floor') {
-        const { floorUuid, pointIndex } = event.annotation.data;
-        // Floor is the third side tab (Charges=0, Obstacles=1, Floor=2).
-        this.sideTabsService.sideTabs.set(2);
-        this.floorFormService.selectFloorPoint(floorUuid, pointIndex);
-      } else if (event?.annotation?.data?.type === 'spanLoad') {
-        const data = event.annotation.data;
-        this.sideTabsService.sideTabs.set(0);
-        this.loadFormsService.activeLoadTab.set('1');
-        this.loadFormsService.selectedSpanSupportUuid.set(data.supportUuid);
-      } else if (event?.annotation?.data?.type === 'cableModification') {
-        const data = event.annotation.data;
-        this.sideTabsService.sideTabs.set(0);
-        this.loadFormsService.activeLoadTab.set('2');
-        this.cableModificationsService.selectSpan(data.spanUuid);
-      } else if (event?.annotation?.data?.type === 'cutStrands') {
-        // The preview edits a copy of the section: the saved entry is only shown there
-        this.toolbarDialogService.openTool('strand-rrts', { mode: this.isPreview() ? 'view' : 'edit' });
+      const data = event?.annotation?.data;
+      switch (data?.type) {
+        case 'obstacle': {
+          const section = this.spanService.section();
+          const payload = getObstacleClickPayload(data, section?.obstacles ?? [], section?.supports ?? []);
+          if (!payload) return;
+          this.sideTabsService.sideTabs.set(1);
+          this.obstaclesService.setSelectedMeasure(payload.obstacle.uuid, payload.obstaclePositionIndex);
+          this.obstacleFormService.setExistingObstacle(payload.obstacle, payload.obstaclePositionIndex);
+          break;
+        }
+        case 'floor':
+          // Floor is the third side tab (Charges=0, Obstacles=1, Floor=2).
+          this.sideTabsService.sideTabs.set(2);
+          this.floorFormService.selectFloorPoint(data.floorUuid, data.pointIndex);
+          break;
+        case 'spanLoad':
+          this.sideTabsService.sideTabs.set(0);
+          this.loadFormsService.activeLoadTab.set(LOAD_TAB.SPAN_LOAD);
+          this.loadFormsService.selectedSpanSupportUuid.set(data.supportUuid);
+          break;
+        case 'cableModification':
+          this.sideTabsService.sideTabs.set(0);
+          this.loadFormsService.activeLoadTab.set(LOAD_TAB.CABLE_MODIFICATION);
+          this.cableModificationsService.selectSpan(data.spanUuid);
+          break;
+        case 'cableSupportManip':
+          // The preview has no Loads panel to consume the selection: it would stay pending in the root service and be
+          // applied to the support form of the next studio opened
+          if (this.isPreview()) break;
+          this.sideTabsService.sideTabs.set(0);
+          this.loadFormsService.activeLoadTab.set(LOAD_TAB.CABLE_SUPPORT_MANIP);
+          this.cableSupportManipService.selectSupport(data.supportUuid);
+          break;
+        case 'cutStrands':
+          // The preview edits a copy of the section: the saved entry is only shown there
+          this.toolbarDialogService.openTool('strand-rrts', { mode: this.isPreview() ? 'view' : 'edit' });
+          break;
       }
     });
 

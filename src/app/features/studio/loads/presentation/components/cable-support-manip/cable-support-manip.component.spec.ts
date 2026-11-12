@@ -51,10 +51,14 @@ describe('CableSupportManipComponent', () => {
       section: signal<Partial<Section> | null>(mockSection)
     } as unknown as vi.Mocked<PlotSpanService>;
 
+    const selectedSupportUuid = signal<string | null>(null);
     mockCableSupportManipService = {
       save: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
-      reloadSection: vi.fn().mockResolvedValue(undefined)
+      deleteFromCharge: vi.fn().mockResolvedValue(false),
+      reloadSection: vi.fn().mockResolvedValue(undefined),
+      selectedSupportUuid,
+      clearSelectedSupport: vi.fn(() => selectedSupportUuid.set(null))
     } as unknown as vi.Mocked<CableSupportManipService>;
 
     mockNotificationService = {
@@ -624,6 +628,70 @@ describe('CableSupportManipComponent', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // support pre-selected from the section plot
+  // ---------------------------------------------------------------------------
+  describe('support pre-selected from the section plot', () => {
+    const savedManipulation = {
+      uuid: 'manip-uuid-2',
+      supportUuid: 'support-uuid-2',
+      chargeUuid: 'charge-uuid-1',
+      manip1: {
+        type: 'rope',
+        vertDisplacement: null,
+        anchoring: null,
+        lateralDistance: null,
+        ropeLength: 7,
+        shiftingClampLength: null
+      },
+      manip2: null
+    };
+
+    it('should select the support and load its saved manipulation', () => {
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        cable_support_manipulations: [savedManipulation]
+      } as unknown as Section);
+
+      mockCableSupportManipService.selectedSupportUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(component.form.controls.support.value).toBe('support-uuid-2');
+      expect(component.hasSavedManipulation()).toBe(true);
+      expect(component.form.controls.manip1Type.value).toBe('rope');
+      expect(component.form.controls.ropeLength.value).toBe(7);
+    });
+
+    it('should clear the pre-selection once consumed', () => {
+      mockCableSupportManipService.selectedSupportUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(mockCableSupportManipService.clearSelectedSupport).toHaveBeenCalledOnce();
+      expect(mockCableSupportManipService.selectedSupportUuid()).toBeNull();
+    });
+
+    it('should select the same support again after a clear', () => {
+      mockCableSupportManipService.selectedSupportUuid.set('support-uuid-2');
+      fixture.detectChanges();
+      component.onSupportChange('support-uuid-1');
+      expect(component.form.controls.support.value).toBe('support-uuid-1');
+
+      mockCableSupportManipService.selectedSupportUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(component.form.controls.support.value).toBe('support-uuid-2');
+    });
+
+    it('should leave the form untouched without a pre-selection', () => {
+      component.form.controls.support.setValue('support-uuid-1');
+      fixture.detectChanges();
+
+      expect(component.form.controls.support.value).toBe('support-uuid-1');
+      expect(mockCableSupportManipService.clearSelectedSupport).not.toHaveBeenCalled();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // resetForm()
   // ---------------------------------------------------------------------------
   describe('resetForm()', () => {
@@ -957,6 +1025,46 @@ describe('CableSupportManipComponent', () => {
       component.form.controls.support.setValue('support-uuid-1');
       await component.deleteForm();
       expect(mockCableSupportManipService.delete).not.toHaveBeenCalled();
+    });
+
+    it('should remove a manipulation saved only with the load case, then reload and notify', async () => {
+      mockCableSupportManipService.deleteFromCharge.mockResolvedValue(true);
+      component.form.controls.support.setValue('support-uuid-1');
+
+      await component.deleteForm();
+
+      expect(mockCableSupportManipService.delete).not.toHaveBeenCalled();
+      expect(mockCableSupportManipService.deleteFromCharge).toHaveBeenCalledWith('support-uuid-1', 'charge-uuid-1');
+      expect(mockCableSupportManipService.reloadSection).toHaveBeenCalled();
+      expect(mockNotificationService.success).toHaveBeenCalled();
+    });
+
+    it('should neither reload nor notify when the load case holds no manipulation either', async () => {
+      mockCableSupportManipService.deleteFromCharge.mockResolvedValue(false);
+      component.form.controls.support.setValue('support-uuid-1');
+
+      await component.deleteForm();
+
+      expect(mockCableSupportManipService.reloadSection).not.toHaveBeenCalled();
+      expect(mockNotificationService.success).not.toHaveBeenCalled();
+    });
+
+    it('should not look into the load case without a selected support', async () => {
+      component.form.controls.support.setValue(null);
+
+      await component.deleteForm();
+
+      expect(mockCableSupportManipService.deleteFromCharge).not.toHaveBeenCalled();
+    });
+
+    it('should call notificationService.error when removing from the load case rejects', async () => {
+      mockCableSupportManipService.deleteFromCharge.mockRejectedValue(new Error('fail'));
+      component.form.controls.support.setValue('support-uuid-1');
+
+      await component.deleteForm();
+
+      expect(mockNotificationService.error).toHaveBeenCalled();
+      expect(component.isLoading()).toBe(false);
     });
 
     it('should set hasSavedManipulation to false after deletion', async () => {

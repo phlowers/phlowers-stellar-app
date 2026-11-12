@@ -360,6 +360,65 @@ describe('LoadFormsService', () => {
       expect(mockPlotService.temporaryLoadData?.climate).toEqual(mockChargeData.climate);
     });
 
+    describe('support manipulations', () => {
+      const buildSupportManip = (uuid: string, chargeUuid: string, shiftingClampLength: number) => ({
+        uuid,
+        supportUuid: 'support-uuid-1',
+        chargeUuid,
+        manip1: {
+          type: 'shifting' as const,
+          vertDisplacement: null,
+          anchoring: null,
+          lateralDistance: null,
+          ropeLength: null,
+          shiftingClampLength
+        },
+        manip2: null
+      });
+      const initWith = (chargeManips: ReturnType<typeof buildSupportManip>[], sectionManips: typeof chargeManips) => {
+        mockSpanService.section.mockReturnValue({
+          ...mockSection,
+          selected_charge_uuid: 'charge-uuid-1',
+          charges: [{ ...mockCharge, data: { ...mockChargeData, supportManipParams: chargeManips } }],
+          cable_support_manipulations: sectionManips
+        } as unknown as Section);
+        return service.initTemporaryLoadData();
+      };
+      const appliedSupportManips = () => {
+        const call = mockWorkerPythonService.runTask.mock.calls.find(([task]) => task === Task.applyManipulations);
+        return call?.[1].supportManipParams as { manip1: { shiftingClampLength: number } }[];
+      };
+
+      it('should complete the saved parameters with the section manipulations of the selected load case', async () => {
+        const sectionOnly = { ...buildSupportManip('section-only', 'charge-uuid-1', 3), supportUuid: 'support-uuid-2' };
+
+        await initWith([buildSupportManip('charge-copy', 'charge-uuid-1', 1)], [sectionOnly]);
+
+        expect(mockPlotService.temporaryLoadData?.supportManipParams.map((m) => m.uuid)).toEqual([
+          'charge-copy',
+          'section-only'
+        ]);
+      });
+
+      it('should keep the manipulation saved with the load case over the section one on the same support', async () => {
+        await initWith(
+          [buildSupportManip('charge-copy', 'charge-uuid-1', 1)],
+          [buildSupportManip('section-copy', 'charge-uuid-1', 2)]
+        );
+
+        expect(mockPlotService.temporaryLoadData?.supportManipParams.map((m) => m.uuid)).toEqual(['charge-copy']);
+        expect(appliedSupportManips()).toHaveLength(1);
+        expect(appliedSupportManips()[0].manip1.shiftingClampLength).toBe(1);
+      });
+
+      it('should not apply the section manipulations of the other load cases to the engine', async () => {
+        await initWith([], [buildSupportManip('other-case', 'charge-uuid-2', 7)]);
+
+        expect(mockPlotService.temporaryLoadData?.supportManipParams).toEqual([]);
+        expect(appliedSupportManips()).toEqual([]);
+      });
+    });
+
     it('should use empty array as fallback when charge spanLoads is null', () => {
       const chargeWithNullSpanLoads = {
         ...mockCharge,

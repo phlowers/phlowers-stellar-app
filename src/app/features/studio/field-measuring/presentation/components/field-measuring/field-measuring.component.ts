@@ -18,7 +18,7 @@ import { TabList, TabsModule } from 'primeng/tabs';
 import { HeaderComponent } from '../header/header.component';
 import { FieldMeasure, FieldMeasureTab } from '@features/studio/field-measuring/domain/types';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
-import { SelectOption, TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS } from '../../constants';
+import { SelectOption, TRANSIT_BOUNDS } from '../../constants';
 import { FieldDatasComponent } from '../field-datas/field-datas.component';
 import { CalculusSettingComponent } from '../calculus-setting/calculus-setting.component';
 import { PlotService } from '@services/plot/plot.service';
@@ -34,22 +34,19 @@ import {
   buildWindDirectionOptions,
   buildSkyCoverOptions,
   buildLeftSupportOptions,
-  buildFieldMeasureExportFilename
+  buildFieldMeasureExportFilename,
+  resetInactive15CMode,
+  isPapotoDataValid,
+  isTemperatureDataValid,
+  isManual15CDataValid
 } from '../../helpers';
 import { buildFieldMeasureExportJson } from '../../field-measure-export.helpers';
-import {
-  isTangentAimingSupportDataValid,
-  resetNonDisplayedParameterFields
-} from '../calculus-setting/tangent-aiming-support/tangent-aiming-support.helpers';
+import { FieldMeasureReportService } from '../../services/field-measure-report/field-measure-report.service';
+import { buildFieldMeasureReportData } from '../../services/field-measure-report/field-measure-report.helpers';
+import { getDateLocale } from '@shared/helpers/modification-date.helpers';
+import { SECTION_TITLE_KEYS } from '../../services/field-measure-report/field-measure-report.constantes';
 import { getDefaultLeftSupport } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
-import {
-  isTangentAimingExteriorDataValid,
-  resetNonDisplayedExteriorFields
-} from '../calculus-setting/tangent-aiming-exterior/tangent-aiming-exterior.helpers';
-import {
-  isTangentAimingInteriorDataValid,
-  resetNonDisplayedInteriorFields
-} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.helpers';
+import { TANGENT_AIMING_MODES } from '../../tangent-aiming-modes.constantes';
 import {
   applyActiveTangentAimingDefaults,
   resetInactiveCalculusModes,
@@ -121,6 +118,7 @@ export class FieldMeasuringComponent implements OnDestroy {
   private readonly messageService = inject(MessageService);
   private readonly logger = inject(LoggerService);
   private readonly translocoService = inject(TranslocoService);
+  private readonly fieldMeasureReportService = inject(FieldMeasureReportService);
   private readonly activeLang = toSignal(this.translocoService.langChanges$, {
     initialValue: this.translocoService.getActiveLang()
   });
@@ -140,14 +138,15 @@ export class FieldMeasuringComponent implements OnDestroy {
     return buildLeftSupportOptions(this.translocoService);
   });
 
-  /** Whether `measureData` differs from the last saved snapshot. */
-  readonly hasUnsavedChanges = computed(() => !isEqual(this.measureData(), this.lastSavedMeasureData()));
-
   /** Whether an input differs from the last saved snapshot: selecting a calculus mode is a choice, not an edit. */
   readonly hasEditedInputs = computed(() => {
     const current = this.measureData();
     const lastSaved = this.lastSavedMeasureData();
     if (!lastSaved) return true;
+    // A fresh automatic 15°C result is an edit: the comparable projection below erases it.
+    const hasNewParameter15C =
+      current.outputs.parameter15C !== null && !isEqual(current.outputs.parameter15C, lastSaved.outputs.parameter15C);
+    if (hasNewParameter15C) return true;
     return !isEqual(
       toUnsavedChangesComparable(current, getDefaultLeftSupport(current.span)),
       toUnsavedChangesComparable(lastSaved, getDefaultLeftSupport(lastSaved.span))
@@ -199,7 +198,8 @@ export class FieldMeasuringComponent implements OnDestroy {
     );
   });
 
-  isFormValid = computed(() => {
+  /** Global form: the header (span, coordinates, altitude, azimuth) and the measure name, shown on every tab. */
+  isGlobalFormValid = computed(() => {
     const measureData = this.measureData();
     const isValid =
       measureData.name &&
@@ -215,7 +215,14 @@ export class FieldMeasuringComponent implements OnDestroy {
       measureData.altitude <= 9000 &&
       isNumber(measureData.azimuth) &&
       measureData.azimuth >= -180 &&
-      measureData.azimuth <= 180 &&
+      measureData.azimuth <= 180;
+    return !!isValid && !this.isNameAlreadyTaken();
+  });
+
+  /** Validity of the "Terrain data" tab. */
+  isTerrainDataValid = computed(() => {
+    const measureData = this.measureData();
+    return !!(
       isNumber(measureData.windSpeed) &&
       measureData.windSpeed >= 0 &&
       measureData.windSpeed <= 50 &&
@@ -225,16 +232,12 @@ export class FieldMeasuringComponent implements OnDestroy {
       measureData.windDirection &&
       measureData.skyCover &&
       (!isNumber(measureData.transit) ||
-        (measureData.transit >= TRANSIT_BOUNDS.min && measureData.transit <= TRANSIT_BOUNDS.max));
-    return isValid && !this.isNameAlreadyTaken();
+        (measureData.transit >= TRANSIT_BOUNDS.min && measureData.transit <= TRANSIT_BOUNDS.max))
+    );
   });
 
   /** Whether a tangent aiming (support, exterior or interior) method is selected. */
-  readonly isTangentAimingMethod = computed(() =>
-    ['tangente-aiming', 'tangente-aiming-exterior', 'tangente-aiming-interior'].includes(
-      this.measureData().calculationMethod
-    )
-  );
+  readonly isTangentAimingMethod = computed(() => !!TANGENT_AIMING_MODES[this.measureData().calculationMethod]);
 
   /**
    * Validity of the "Parameter calculation" tab (RG.MES.EXP-BTN.2). Only the PAPOTO method has an
@@ -242,104 +245,93 @@ export class FieldMeasuringComponent implements OnDestroy {
    */
   readonly isParameterCalculationValid = computed(() => {
     const measureData = this.measureData();
-    if (measureData.calculationMethod === 'tangente-aiming') {
-      return isTangentAimingSupportDataValid(measureData);
+    const mode = TANGENT_AIMING_MODES[measureData.calculationMethod];
+    if (mode) {
+      return mode.isDataValid(measureData);
     }
-    if (measureData.calculationMethod === 'tangente-aiming-exterior') {
-      return isTangentAimingExteriorDataValid(measureData);
-    }
-    if (measureData.calculationMethod === 'tangente-aiming-interior') {
-      return isTangentAimingInteriorDataValid(measureData);
-    }
-    if (measureData.calculationMethod !== 'papoto') {
-      return true;
-    }
-    return !!(
-      measureData.leftSupport &&
-      measureData.spanLength != null &&
-      measureData.measuredElevationDifference != null &&
-      measureData.HL != null &&
-      measureData.H1 != null &&
-      measureData.H2 != null &&
-      measureData.H3 != null &&
-      measureData.HR != null &&
-      measureData.VL != null &&
-      measureData.V1 != null &&
-      measureData.V2 != null &&
-      measureData.V3 != null &&
-      measureData.VR != null
-    );
+    return measureData.calculationMethod !== 'papoto' || isPapotoDataValid(measureData);
   });
 
-  /** Validity of the "Temperature calculation" tab (RG.MES.EXP-BTN.2), mirroring `TemperatureCalculationComponent.isFormValid`. */
-  readonly isTemperatureCalculationValid = computed(() => {
-    const measureData = this.measureData();
-    const isTransitOutOfBounds =
-      isNumber(measureData.transit) &&
-      (measureData.transit < TRANSIT_BOUNDS.min || measureData.transit > TRANSIT_BOUNDS.max);
-    const isMeasuredSolarFluxOutOfBounds =
-      isNumber(measureData.measuredDiffusedPlusDirectSolarFlux) &&
-      (measureData.measuredDiffusedPlusDirectSolarFlux < MEASURED_SOLAR_FLUX_BOUNDS.min ||
-        measureData.measuredDiffusedPlusDirectSolarFlux > MEASURED_SOLAR_FLUX_BOUNDS.max);
-    return (
-      measureData.cableName !== null &&
-      measureData.transit !== null &&
-      measureData.skyCover !== null &&
-      !isTransitOutOfBounds &&
-      !isMeasuredSolarFluxOutOfBounds
-    );
-  });
+  /** Validity of the "Temperature calculation" tab (RG.MES.EXP-BTN.2). */
+  readonly isTemperatureCalculationValid = computed(() => isTemperatureDataValid(this.measureData()));
 
   /**
    * Validity of the "Parameter at 15°C without wind" tab (RG.MES.EXP-BTN.2). In manual mode the user-entered
-   * fields must be filled. In auto mode the tab has no editable input (it only displays computed values), so
-   * it is always valid for export purposes — the export contract already supports an uncomputed
-   * `zeroWindCalculation` (see `buildZeroWindCalculationExport`), matching RG.MES.EXP-BTN.1 allowing export
-   * once the measure is calculated *or* saved (not necessarily both calculated).
+   * fields must be valid (same rule as the tab form). In auto mode the tab has no editable input (it only
+   * displays computed values), so it is always valid for export purposes — the export contract already supports
+   * an uncomputed `zeroWindCalculation` (see `buildZeroWindCalculationExport`), matching RG.MES.EXP-BTN.1 allowing
+   * export once the measure is calculated *or* saved (not necessarily both calculated).
    */
-  readonly isParameter15CValid = computed(() => {
-    const measureData = this.measureData();
-    if (measureData.updateMode15C !== 'manual') {
-      return true;
-    }
-    const manualData = measureData.manualParameterCalculation15CWithoutWind;
-    return (
-      isNumber(manualData?.cableTemperatureCalibration) &&
-      isNumber(manualData?.parameterPapoto) &&
-      isNumber(manualData?.cableTemperatureCalibrationUncertainty)
-    );
-  });
+  readonly isParameter15CValid = computed(
+    () => this.measureData().updateMode15C !== 'manual' || isManual15CDataValid(this.measureData())
+  );
 
   /** Whether the measure has been computed at least once (PAPOTO is currently the only implemented method). */
   readonly hasComputedOutputs = computed(() => {
     const { calculationMethod, outputs } = this.measureData();
-    if (calculationMethod === 'tangente-aiming') return outputs.tangentAimingSupport !== null;
-    if (calculationMethod === 'tangente-aiming-exterior') return outputs.tangentAimingExterior !== null;
-    if (calculationMethod === 'tangente-aiming-interior') return outputs.tangentAimingInterior !== null;
-    return outputs.papoto !== null;
+    return outputs[TANGENT_AIMING_MODES[calculationMethod]?.outputKey ?? 'papoto'] !== null;
   });
 
   /**
-   * The "Enregistrer" button: valid terrain data (and valid parameter inputs for the tangent aiming methods) with
-   * edited inputs, with or without a calculation (a parameter input edit clears the result, which is then saved as
-   * not calculated). Right after a save nothing is unsaved.
+   * The "Enregistrer" button: any edited input of the whole measure (whatever the tab) can be saved, even if the
+   * measure is incomplete; only its identity (a non-empty, unique name) is required. A parameter input edit clears
+   * the result, which is then saved as not calculated. Right after a save nothing is unsaved.
    */
   readonly canSave = computed(
-    () =>
-      this.isFormValid() &&
-      this.hasEditedInputs() &&
-      (!this.isTangentAimingMethod() || this.isParameterCalculationValid())
+    () => !!this.measureData().name?.trim() && !this.isNameAlreadyTaken() && this.hasEditedInputs()
   );
 
-  /** RG.MES.EXP-BTN.1: the "Exporter" button stays inactive until the measure is both valid and calculated/saved. */
-  readonly canExport = computed(
+  /**
+   * Whether the displayed measure is the saved one: same calculus method and no input edited since the last save.
+   * It ignores the defaults and stale automatic results that opening a measure normalizes, which are not user edits.
+   */
+  private readonly isSaved = computed(
     () =>
-      this.isFormValid() &&
-      this.isParameterCalculationValid() &&
-      this.isTemperatureCalculationValid() &&
-      this.isParameter15CValid() &&
-      (this.hasComputedOutputs() || !this.hasUnsavedChanges())
+      this.lastSavedMeasureData()?.calculationMethod === this.measureData().calculationMethod && !this.hasEditedInputs()
   );
+
+  /** Validity of the displayed tab: the global form (header and name) is checked separately. */
+  private readonly isActiveTabValid = computed(() => {
+    switch (this.activeTab()) {
+      case 'parameterCalculation':
+        return this.isParameterCalculationValid();
+      case 'temperatureCalculation':
+        return this.isTemperatureCalculationValid();
+      case 'parameterAt15CWithoutWind':
+        return this.isParameter15CValid();
+      default:
+        return this.isTerrainDataValid();
+    }
+  });
+
+  /** The "Rapport" and "Exporter" buttons: active when the global form and the displayed tab are valid and saved. */
+  readonly canReportOrExport = computed(() => this.isGlobalFormValid() && this.isActiveTabValid() && this.isSaved());
+
+  /** Tells why "Rapport" and "Exporter" are inactive: the invalid data and/or the missing save; `null` when active. */
+  readonly reportExportBlockedReason = computed(() => {
+    if (this.canReportOrExport()) {
+      return null;
+    }
+    this.activeLang();
+    const t = (key: string, params?: Record<string, string>): string => this.translocoService.translate(key, params);
+    const activeTabTitleKey = {
+      terrainData: SECTION_TITLE_KEYS.terrainData,
+      parameterCalculation: SECTION_TITLE_KEYS.parameterCalculation,
+      temperatureCalculation: SECTION_TITLE_KEYS.temperatureCalculation,
+      parameterAt15CWithoutWind: SECTION_TITLE_KEYS.parameter15C
+    }[this.activeTab()];
+    const reasons: string[] = [];
+    if (!this.isGlobalFormValid()) {
+      reasons.push(t('field-measuring.report.blocked-invalid-global'));
+    }
+    if (!this.isActiveTabValid()) {
+      reasons.push(t('field-measuring.report.blocked-invalid-tabs', { tabs: t(activeTabTitleKey) }));
+    }
+    if (!this.isSaved()) {
+      reasons.push(t('field-measuring.report.blocked-unsaved'));
+    }
+    return reasons.join(' ');
+  });
 
   private async initializeMeasureData(): Promise<void> {
     const section = this.spanService.section();
@@ -421,9 +413,9 @@ export class FieldMeasuringComponent implements OnDestroy {
     this.measureData.set(updated);
   }
 
-  /** Export is always allowed, even with incomplete/invalid data (RG.MES.EXP-BTN.1): missing fields are exported as `null`. */
+  /** Exports the saved measure as JSON; missing fields are exported as `null`. */
   async onExport() {
-    const measureData = this.measureData();
+    const measureData = this.lastSavedMeasureData() ?? this.measureData();
     const section = this.spanService.section();
     const study = this.plotService.study();
     const litData = this.plotService.litData();
@@ -460,9 +452,21 @@ export class FieldMeasuringComponent implements OnDestroy {
     URL.revokeObjectURL(url);
   }
 
-  onReport() {
-    // TODO: Implement report functionality
-    this.logger.log('Report', this.measureData());
+  /**
+   * RG.MES.RAP-BTN.2: generates the PDF report of the saved field measure (inputs and calculation results).
+   * It reads the saved snapshot, so only the method and sub-method that were saved are reported.
+   */
+  async onReport() {
+    const data = buildFieldMeasureReportData({
+      measureData: this.lastSavedMeasureData() ?? this.measureData(),
+      section: this.spanService.section(),
+      study: this.plotService.study(),
+      litData: this.plotService.litData(),
+      translocoService: this.translocoService,
+      locale: getDateLocale(this.translocoService.getActiveLang()),
+      generatedAt: new Date()
+    });
+    await this.fieldMeasureReportService.generateReport(data);
   }
 
   async onSave() {
@@ -471,20 +475,21 @@ export class FieldMeasuringComponent implements OnDestroy {
     if (!section || !currentMeasureData) {
       return;
     }
-    // Only the displayed inputs are persisted (RG.VIS-SUP.ENR-BTN.2, RG.ENR-BTN.2)
+    // Only the displayed inputs are persisted (RG.VIS-SUP.ENR-BTN.2, RG.ENR-BTN.2); empty ones take their default first,
+    // so the saved measure matches what is shown when reopened
     const { calculationMethod } = currentMeasureData;
-    let activeMeasureData = currentMeasureData;
-    if (calculationMethod === 'tangente-aiming') {
-      activeMeasureData = resetNonDisplayedParameterFields(currentMeasureData);
-    } else if (calculationMethod === 'tangente-aiming-exterior') {
-      activeMeasureData = resetNonDisplayedExteriorFields(currentMeasureData);
-    } else if (calculationMethod === 'tangente-aiming-interior') {
-      activeMeasureData = resetNonDisplayedInteriorFields(currentMeasureData);
-    }
+    const tangentAimingMode = TANGENT_AIMING_MODES[calculationMethod];
+    const activeMeasureData = tangentAimingMode
+      ? tangentAimingMode.resetNonDisplayedFields(
+          tangentAimingMode.applyDefaults(currentMeasureData, getDefaultLeftSupport(currentMeasureData.span))
+        )
+      : currentMeasureData;
     const measureData: FieldMeasure = {
-      ...resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {
-        defaultTangentLeftSupport: getDefaultLeftSupport(activeMeasureData.span)
-      }),
+      ...resetInactive15CMode(
+        resetInactiveCalculusModes(activeMeasureData, activeMeasureData.calculationMethod, {
+          defaultTangentLeftSupport: getDefaultLeftSupport(activeMeasureData.span)
+        })
+      ),
       savedTab: this.activeTab()
     };
     const isExistingMeasure = section.field_measures.some((measure) => measure.uuid === measureData.uuid);

@@ -158,7 +158,7 @@ describe('resetInactiveCalculusModes', () => {
 });
 
 describe('applyActiveTangentAimingDefaults', () => {
-  it('normalizes legacy support data and clears its stale results', () => {
+  it('completes support data keeping its calculation type and clears its stale results', () => {
     const data = createTestMeasureData({
       calculationMethod: 'tangente-aiming',
       calculationType: 'parametre',
@@ -177,7 +177,7 @@ describe('applyActiveTangentAimingDefaults', () => {
     });
     const result = applyActiveTangentAimingDefaults(data, '3');
     expect(result).toMatchObject({
-      calculationType: 'tangente',
+      calculationType: 'parametre',
       tangentLeftSupport: '3',
       tangentSpanLength: 0,
       cableTangentAngle: 0,
@@ -189,7 +189,7 @@ describe('applyActiveTangentAimingDefaults', () => {
     expect(result.outputs.parameter15C).toBeNull();
   });
 
-  it('normalizes legacy exterior data and clears its stale results', () => {
+  it('completes exterior data keeping its calculation type and clears its stale results', () => {
     const data = createTestMeasureData({
       calculationMethod: 'tangente-aiming-exterior',
       exteriorCalculationType: 'parametre',
@@ -208,7 +208,7 @@ describe('applyActiveTangentAimingDefaults', () => {
     });
     const result = applyActiveTangentAimingDefaults(data, '3');
     expect(result).toMatchObject({
-      exteriorCalculationType: 'tangente',
+      exteriorCalculationType: 'parametre',
       exteriorLeftSupport: '3',
       exteriorHAccDistance: 50,
       exteriorTangentAngle: 0,
@@ -220,7 +220,7 @@ describe('applyActiveTangentAimingDefaults', () => {
     expect(result.outputs.parameter15C).toBeNull();
   });
 
-  it('normalizes legacy interior data and clears its stale results', () => {
+  it('completes interior data keeping its calculation type and clears its stale results', () => {
     const data = createTestMeasureData({
       calculationMethod: 'tangente-aiming-interior',
       interiorCalculationType: 'parametre',
@@ -237,7 +237,7 @@ describe('applyActiveTangentAimingDefaults', () => {
     });
     const result = applyActiveTangentAimingDefaults(data, '3');
     expect(result).toMatchObject({
-      interiorCalculationType: 'tangente',
+      interiorCalculationType: 'parametre',
       interiorLeftSupport: '3',
       interiorSpanLength: 0,
       interiorTangentAngle: 0,
@@ -267,6 +267,23 @@ describe('applyActiveTangentAimingDefaults', () => {
     expect(result.outputs[outputField]).not.toBeNull();
     expect(withOutputs.outputs.parameter15C).not.toBeNull();
   });
+
+  it.each([
+    ['tangente-aiming', 'tangentAimingSupport', 'cableParameter'],
+    ['tangente-aiming-exterior', 'tangentAimingExterior', 'exteriorParameter'],
+    ['tangente-aiming-interior', 'tangentAimingInterior', 'interiorParameter']
+  ] as const)(
+    'keeps the %s result of a saved measure whose hidden input was reset on save',
+    (calculationMethod, outputField, hiddenField) => {
+      const result = { parameter: 1500, uncertainty: 10, criterion: 1, checkValidity: true };
+      const base = applyActiveTangentAimingDefaults(createTestMeasureData({ calculationMethod }), '11');
+      const saved = { ...base, [hiddenField]: null, outputs: { ...base.outputs, [outputField]: result } };
+
+      const reopened = applyActiveTangentAimingDefaults(saved, '11');
+
+      expect(reopened.outputs[outputField]).toEqual(result);
+    }
+  );
 
   it('returns the measure unchanged for the other methods', () => {
     const data = createTestMeasureData({ calculationMethod: 'papoto', calculationType: 'parametre' });

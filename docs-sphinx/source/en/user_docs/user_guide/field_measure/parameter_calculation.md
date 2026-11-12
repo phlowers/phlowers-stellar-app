@@ -15,8 +15,9 @@ Three methods are available in a radio button selector:
   - Most accurate with 3 measurement points; provides validity check
   - This is the method you will use
   
-- **Tangent aiming** (disabled)
-  - Not yet available in {{app_name}}
+- **Tangent aiming** (Support, Interior or Exterior)
+  - Computes the parameter from the cable tangent angle, depending on the device position
+  - See {doc}`tangent_aiming`
   
 - **PEP** (disabled)
   - Not yet available in {{app_name}}

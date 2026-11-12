@@ -16,15 +16,17 @@ L'onglet Données terrain est implémenté par les composants et fichiers suivan
 - **Helpers** : `presentation/helpers.ts` (par exemple `createInitialMeasureData`, `buildTimeModeOptions`, générateurs d'options)
 - **Constantes** : `presentation/constants.ts` (bornes, clés d'options, correspondances d'export)
 - **Helpers d'export** : `presentation/field-measure-export.helpers.ts` (structure JSON d'export)
+- **Rapport PDF** : `presentation/services/field-measure-report/` (`*.helpers.ts` pour les données et le dessin, `*.service.ts` pour la génération)
 
 ## Flux de travail
 
 1. **Phase d'initialisation** : l'utilisateur ouvre l'outil de mesure de terrain. `InitComponent` permet de créer une nouvelle mesure (avec un nom généré automatiquement) ou de sélectionner une mesure existante.
 2. **Phase principale** : une fois une mesure sélectionnée ou créée, `FieldMeasuringComponent` affiche une boîte de dialogue avec quatre onglets. L'onglet **Données terrain** est affiché par défaut.
 3. **Saisie des données** : l'utilisateur remplit les champs de localisation et environnementaux via `HeaderComponent` (partagé) et `FieldDatasComponent` (spécifique à l'onglet).
-4. **Validation** : `FieldMeasuringComponent` calcule `isFormValid` en contrôlant tous les champs obligatoires et leurs bornes.
+4. **Validation** : `FieldMeasuringComponent` calcule `isGlobalFormValid` (nom et en-tête) et `isTerrainDataValid` (onglet Données terrain) en contrôlant les champs obligatoires et leurs bornes.
 5. **Sauvegarde** : appelle `PlotService.modifySection()` pour enregistrer la mesure dans le tableau `field_measures` de la section.
 6. **Export** : appelle `buildFieldMeasureExportJson()` pour générer un export JSON (si tous les onglets passent la validation).
+7. **Rapport** : appelle `buildFieldMeasureReportData()` puis `FieldMeasureReportService.generateReport()` pour générer un rapport PDF de la mesure enregistrée.
 
 ## Modèle de données
 
@@ -106,7 +108,7 @@ Tous les champs affichent un message de champ obligatoire (`field-measuring.fiel
 
 ## Règles de validation
 
-### Bornes des champs (`FieldMeasuringComponent.isFormValid`)
+### Bornes des champs (`FieldMeasuringComponent.isGlobalFormValid` / `isTerrainDataValid`)
 
 Tous les champs sont obligatoires et sont contrôlés pour leurs plages :
 - `name` : non vide, unique
@@ -120,7 +122,7 @@ Tous les champs sont obligatoires et sont contrôlés pour leurs plages :
 - `windDirection`, `skyCover` : requis
 - `transit` (champ optionnel dans d'autres onglets) : si présent, 0–4000 ampères
 
-**Validation d'export** : le bouton d'export n'est activé que si `isFormValid()` ET tous les autres onglets (Calcul du paramètre, Calcul de la température, Paramètre à 15 °C) sont également valides.
+**Export et rapport** : les deux boutons ne sont activés que lorsque `canReportOrExport()` est vrai : le formulaire global (`isGlobalFormValid` : nom, tronçon, longitude, latitude, altitude, azimut) valide, l'onglet affiché valide (`isTerrainDataValid`, `isParameterCalculationValid`, `isTemperatureCalculationValid` ou `isParameter15CValid`, les autres onglets sont ignorés) et aucune modification non enregistrée.
 
 **Contrôle d'unicité** : la propriété calculée `isNameAlreadyTaken` vérifie si `measureData().name` correspond à une mesure existante (en excluant l'élément courant par UUID).
 
@@ -129,16 +131,24 @@ Tous les champs sont obligatoires et sont contrôlés pour leurs plages :
 ### Sauvegarde
 
 - **Gestionnaire** : `FieldMeasuringComponent.onSave()`
-- **Condition** : activé lorsque `isFormValid() && hasUnsavedChanges()`
+- **Condition** : activé lorsque `canSave()` : nom non vide et unique, et `hasEditedInputs()` (toute saisie modifiée, quel que soit l'onglet ; la validité des champs n'est pas exigée)
 - **Action** : appelle `PlotService.modifySection({ field_measures: [...updated...] })` pour enregistrer
 - **Instantané** : `lastSavedMeasureData` est mis à jour ; `hasUnsavedChanges` est recalculé
 
 ### Export
 
 - **Gestionnaire** : `FieldMeasuringComponent.onExport()`
-- **Condition** : activé lorsque `isFormValid() && isParameterCalculationValid && isTemperatureCalculationValid && isParameterAt15CValid`
+- **Condition** : activé lorsque `canReportOrExport()`
 - **Sortie** : fichier JSON (via `buildFieldMeasureExportJson()`) contenant les métadonnées de l'étude / section et les données de mesure
 - **Nom du fichier** : `Export Mesure de terrain_<measure name>_<section name>_<date>.json`
+
+### Rapport
+
+- **Gestionnaire** : `FieldMeasuringComponent.onReport()`
+- **Condition** : activé lorsque `canReportOrExport()` (toutes les méthodes de calcul, y compris les visées tangentes)
+- **Sortie** : PDF A4 portrait (jsPDF, police Nunito) : cartouche étude / canton puis un paragraphe par onglet. Seules la méthode (et sous-méthode) de calcul du paramètre et les valeurs du mode « Mise à jour des valeurs » retenus sont reportés ; les données conditionnelles (n° de phase, paramètre ou angle tangent) ne sont présentes que si la condition est remplie
+- **Unités** : celles de l'US.MES.RAP (angles de visée en `gr`, vitesse du vent en m/s, etc.), définies dans `field-measure-report.constantes.ts`
+- **Nom du fichier** : `Rapport Mesure de terrain_<measure name>_<section name>_<date et heure de génération>.pdf`
 
 ## Diagramme Mermaid : flux de travail
 

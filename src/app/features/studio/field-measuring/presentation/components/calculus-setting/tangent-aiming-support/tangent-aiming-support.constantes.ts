@@ -44,7 +44,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
     labelKey: 'common.vertical-angle-right-support-label',
     unitKey: 'common.grade-unit',
     testId: 'vertical-acc-angle-input',
-    step: 0.01,
+    step: 0.001,
     area: 'vAngle'
   },
   cableParameter: {
@@ -60,7 +60,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
     labelKey: 'common.tangent-angle-label',
     unitKey: 'common.grade-unit',
     testId: 'tangent-angle-input',
-    step: 0.01,
+    step: 0.001,
     area: 'tangentAngle'
   }
 };

@@ -154,9 +154,14 @@ describe('createLoadAnnotations', () => {
       expect(result[0].arrowwidth).toBe(PlotlyDrawings.loadPunctual.arrowWidth[view]);
     });
 
-    it('should set ay to -50', () => {
+    it('should set ay to the arrow offset of the punctual load icon', () => {
       const result = createLoadAnnotations(makePlotParams({ spanLoads: [makeSpanLoad()] }));
-      expect(result[0].ay).toBe(-50);
+      expect(result[0].ay).toBe(PlotlyDrawings.loadPunctual.arrowYOffset);
+    });
+
+    it('should set ay to the arrow offset of the marking icon', () => {
+      const result = createLoadAnnotations(makePlotParams({ spanLoads: [makeSpanLoad({ type: LoadType.MARKING })] }));
+      expect(result[0].ay).toBe(PlotlyDrawings.loadMarking.arrowYOffset);
     });
 
     it('should set ax to 0', () => {

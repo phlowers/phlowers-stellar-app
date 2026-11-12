@@ -5,6 +5,7 @@ import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import { cloneDeep, omit } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
+import { mergeCableSupportManips } from '@shared/domain/helpers/cable-support-manip.helpers';
 import { emptySpanLoad } from '../helpers';
 import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
@@ -101,9 +102,6 @@ export class LoadFormsService {
     const newData = cloneDeep(charge.data);
     const rawSpanLoads = newData.spanLoads || [];
     const rawCableModif = newData.cableModifParams || [];
-    const supportManipParams = (newData.supportManipParams || []).filter(
-      (manip) => manip.chargeUuid === currentChargeUuid
-    );
     const spanManipParams = (newData.spanManipParams || []).filter((manip) => manip.chargeUuid === currentChargeUuid);
     newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
 
@@ -115,15 +113,11 @@ export class LoadFormsService {
       ...rawCableModif,
       ...(section?.cable_modifications?.filter((mod) => !rawCableModif.some((p) => p.spanUuid === mod.spanUuid)) ?? [])
     ];
-    newData.supportManipParams = [
-      ...supportManipParams,
-      ...(section?.cable_support_manipulations?.filter(
-        (suppManip) =>
-          !supportManipParams.some(
-            (p) => p.supportUuid === suppManip.supportUuid && suppManip.chargeUuid === currentChargeUuid
-          )
-      ) ?? [])
-    ];
+    newData.supportManipParams = mergeCableSupportManips(
+      newData.supportManipParams,
+      section?.cable_support_manipulations,
+      currentChargeUuid
+    );
     newData.spanManipParams = [
       ...spanManipParams,
       ...(section?.cable_span_manipulations?.filter(

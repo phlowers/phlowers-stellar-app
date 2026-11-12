@@ -4,6 +4,14 @@
 
 ## Pending review
 
+### Unused `hasUnsavedChanges` signal (field measuring)
+
+- **Source**: `src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.ts` (`hasUnsavedChanges`).
+- **Evidence**: no template or component consumer in `src`; it is read only by about 17 assertions in `field-measuring.component.spec.ts` (the `hasUnsavedChanges` describe block and several `onSave`/`canReportOrExport` tests). The save/report gating uses `isSaved` and `hasEditedInputs` instead (PR #1357 review).
+- **Removal impact**: Remove the signal, its spec assertions and the `hasUnsavedChanges` describe block; `isEqual` stays used by `hasEditedInputs`; the doc comment at line 289 references it and must be updated.
+- **Detected on**: 2026-11-10.
+- **Status**: 🗑️ REMOVED — 2026-11-10, validated by the user (PR #1357 review). Signal, its spec assertions and the doc-comment reference were removed; the former `hasUnsavedChanges` spec block now covers `hasEditedInputs`.
+
 ### Unused `StartLocation` interface
 
 - **Source**: `src/app/features/study/application/services/section-import.interfaces.ts` (whole file).
@@ -827,4 +835,30 @@
 | 🔍 Evidence | The support list now uses `PlotSpanService.getSupportOptions` (support numbers). Besides the cable adjustment spec translations, no `src` file references `common.left` / `common.right` anymore. |
 | ⚠️ Confidence | **HIGH** |
 | Removal impact | Remove the constant, the interface, the two i18n keys and the matching entries in the cable adjustment spec translations. |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 57. Tangent aiming `baselineInputs` (calculate button baseline)
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-form.base.ts` (`baselineInputs`) |
+| Code | Signal storing the displayed inputs as of the last calculation |
+| 🔍 Evidence | `canCalculate` no longer compares the inputs with this baseline (the calculate button is enabled whenever the form is valid); the signal is now only written, never read. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove the signal and its three writes (constructor effects, `calculate()`); `displayedInputs` stays used by the calculation context key. |
+| ✅ Validated | ⏳ Pending review |
+
+---
+
+## 58. `FieldMeasuringComponent.isTangentAimingMethod` and `hasComputedOutputs`
+
+| | |
+|---|---|
+| 📍 Source | `src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.ts` (`isTangentAimingMethod`, `hasComputedOutputs`) |
+| Code | Two public computed signals telling whether a tangent aiming method is selected and whether the measure has a result |
+| 🔍 Evidence | No template or other source file reads them since the Report / Export buttons use `canReportOrExport()`; only their own specs do. |
+| ⚠️ Confidence | **HIGH** |
+| Removal impact | Remove both computed signals and their spec cases in `field-measuring.component.spec.ts`. |
 | ✅ Validated | ⏳ Pending review |
