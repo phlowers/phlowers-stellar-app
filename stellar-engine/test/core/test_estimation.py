@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from mechaphlowers import CableArray, SectionArray, SectionStudy
+from mechaphlowers.core.numeric import EstimationResult
 from mechaphlowers.entities.errors import (
     BalanceEngineWarning,
     ConvergenceError,
@@ -257,7 +258,7 @@ VALID_TEMPERATURE_INPUTS = {
         ({"obstaclePoint": None}, "Missing estimation input: obstaclePoint"),
         ({"targetDistance": float("nan")}, "targetDistance must be a finite"),
         ({"targetDistance": "abc"}, "targetDistance must be a finite"),
-        ({"targetDistance": 0.0}, "targetDistance must be strictly positive"),
+        ({"targetDistance": -1.0}, "targetDistance must be strictly positive"),
         ({"spanIndex": -1}, "spanIndex must be a non-negative integer"),
         ({"spanIndex": 0.5}, "spanIndex must be a non-negative integer"),
         ({"obstaclePoint": [1.0, 2.0]}, "obstaclePoint must contain 3"),
@@ -306,6 +307,95 @@ def test_estimate_load_and_rope_invalid_inputs(
     with pytest.raises(EstimationInputError, match=message):
         estimate(
             {"spanIndex": SPAN_INDEX, "obstaclePoint": OBSTACLE, **inputs},
+            study,
+        )
+
+
+ZERO_TARGET_CASES = [
+    (estimation.estimate_temperature, "estimate_temperature", {}),
+    (estimation.estimate_wind, "estimate_wind", {}),
+    (
+        estimation.estimate_load,
+        "estimate_load",
+        {"loadPositionDistance": 100.0},
+    ),
+]
+
+
+@pytest.mark.parametrize("estimate, engine_method, inputs", ZERO_TARGET_CASES)
+def test_estimate_zero_target_distance_is_delegated_to_the_engine(
+    study: SectionStudy,
+    monkeypatch: pytest.MonkeyPatch,
+    estimate,
+    engine_method: str,
+    inputs: dict,
+):
+    received: dict = {}
+
+    def record(**kwargs):
+        received.update(kwargs)
+        return EstimationResult(
+            value=1.0, residual=0.0, iterations=1, converged=True
+        )
+
+    monkeypatch.setattr(study.estimation_engine, engine_method, record)
+
+    estimate(
+        {
+            "spanIndex": SPAN_INDEX,
+            "obstaclePoint": OBSTACLE,
+            "targetDistance": 0.0,
+            **inputs,
+        },
+        study,
+    )
+
+    assert received["target_distance"] == 0.0
+
+
+@pytest.mark.parametrize(
+    "estimate, inputs, expected_error",
+    [
+        (estimation.estimate_temperature, {}, EstimationNotConvergedError),
+        (
+            estimation.estimate_load,
+            {"loadPositionDistance": 100.0},
+            EstimationNotConvergedError,
+        ),
+        # the wind pushes the cable until the chain reverses before reaching 0
+        (estimation.estimate_wind, {}, SolverError),
+    ],
+)
+def test_estimate_zero_target_distance_is_answered_by_the_engine(
+    study: SectionStudy, estimate, inputs: dict, expected_error
+):
+    with pytest.raises(expected_error):
+        estimate(
+            {
+                "spanIndex": SPAN_INDEX,
+                "obstaclePoint": OBSTACLE,
+                "targetDistance": 0.0,
+                **inputs,
+            },
+            study,
+        )
+
+
+def test_estimate_load_on_the_support_does_not_move_the_cable(
+    study: SectionStudy,
+):
+    # a zero load position puts the load on the left support of the span
+    with pytest.raises(
+        EstimationNotConvergedError, match="target is not reachable"
+    ):
+        estimation.estimate_load(
+            {
+                "spanIndex": SPAN_INDEX,
+                "obstaclePoint": OBSTACLE,
+                "targetDistance": reference_distance(study) - 1.0,
+                "loadPositionDistance": 0.0,
+                "bounds": [0.0, 1000.0],
+            },
             study,
         )
 
