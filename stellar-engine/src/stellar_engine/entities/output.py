@@ -59,21 +59,22 @@ def get_coordinates(
         projected_group_points = base_group_points.change_frame(
             frame_index=middle_span
         )
-
+        all_points_dict = projected_group_points.all_points_virtual_separated()
         span, supports, insulators = (
-            projected_group_points.spans,
-            projected_group_points.supports,
-            projected_group_points.insulators,
+            all_points_dict["spans"],
+            all_points_dict["supports"],
+            all_points_dict["insulators"],
         )
         obstacles = projected_group_points.obstacles
         distances = projected_group_points.distances
         additional_points = projected_group_points.additional_points
 
     else:
+        all_points_dict = base_group_points.all_points_virtual_separated()
         span, supports, insulators = (
-            base_group_points.spans,
-            base_group_points.supports,
-            base_group_points.insulators,
+            all_points_dict["spans"],
+            all_points_dict["supports"],
+            all_points_dict["insulators"],
         )
         obstacles = base_group_points.obstacles
         distances = base_group_points.distances

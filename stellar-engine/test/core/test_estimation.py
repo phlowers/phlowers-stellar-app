@@ -184,7 +184,7 @@ def test_estimate_rope(study: SectionStudy):
     assert set(result) == RESULT_KEYS
     assert result["converged"] is True
     assert result["value"] == pytest.approx(5.0, abs=0.05)
-    assert study.manipulation._rope_or_chain_overlay is None
+    assert len(study.manipulation._rope_or_chain_overlay) == 0
     assert_study_untouched(study, dxdydz_before)
 
 
