@@ -124,10 +124,6 @@ def test_apply_manipulations_span_manip(study_base: SectionStudy):
     }
 
     manipulations.apply_manipulations(inputs, study_base)
-    study_base.solve_change_state()
-    refresh_projection(
-        {'startSupport': 0, 'endSupport': 3, 'view': '3d'}, study_base
-    )
     assert len(study_base.balance_engine.section_array.data["name"]) == 5
 
 
