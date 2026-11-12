@@ -5,9 +5,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { FormControl, Validators } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { CableAdjustmentInputs, CableAdjustmentResult, Section } from '@shared/domain';
-import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
+import { createNumberControl } from '@shared/helpers/numberValidators';
 import {
   ANGLE_DECIMALS,
   ANGLE_DEFAULT,
@@ -19,21 +19,6 @@ import {
   CableAdjustmentFormValue,
   CableAdjustmentSpan
 } from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
-
-/** Creates a required number control bounded to [min; max] with at most `decimals` decimals. */
-export function createNumberControl(
-  min: number,
-  max: number,
-  decimals: number,
-  value: number | null = null
-): FormControl<number | null> {
-  return new FormControl<number | null>(value, [
-    Validators.required,
-    Validators.min(min),
-    Validators.max(max),
-    maxDecimalsValidator(decimals)
-  ]);
-}
 
 /** Creates a support angle control: required, in [-200; 200] grades, 2 decimals, 0 by default. */
 export function createAngleControl(): FormControl<number | null> {

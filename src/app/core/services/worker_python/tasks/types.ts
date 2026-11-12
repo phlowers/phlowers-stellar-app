@@ -589,8 +589,12 @@ export interface TaskInputs {
 export interface EstimationBaseInputs {
   // Index of the span (before manipulation) where the obstacle is located
   spanIndex: number;
-  // Obstacle coordinates [x, y, z] in meters
-  obstaclePoint: [number, number, number];
+  // Obstacle coordinates [x, y, z] in meters (section frame); ignored when obstacleUuid is set
+  obstaclePoint?: [number, number, number] | null;
+  // Uuid of an obstacle registered in the engine: its point pointIndex is the obstacle point
+  obstacleUuid?: string | null;
+  // Index of the obstacle point, required with obstacleUuid
+  pointIndex?: number | null;
   // Search interval [lower, upper] of the estimated variable; engine defaults when omitted
   bounds?: [number, number] | null;
   // Fixed ice thickness in cm

@@ -36,6 +36,7 @@ import { NotificationService } from '@core/services/notification/notification.se
 import { LoggerService } from '@core/services/logger/logger.service';
 import { CableAdjustmentResult } from '@shared/domain';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
+import { createNumberControl } from '@shared/helpers/numberValidators';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import {
   ANGLE_FIELDS,
@@ -53,7 +54,6 @@ import {
 } from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
 import {
   createAngleControl,
-  createNumberControl,
   findCurrentSpanOption,
   getSpanLength,
   toCableAdjustmentInputs,

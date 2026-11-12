@@ -187,7 +187,11 @@
     "criterion-label": "Criterion",
     "criterion-one-percent-label": "1% criterion",
     "criterion-respected": "Criterion respected",
-    "criterion-not-respected": "Criterion not respected"
+    "criterion-not-respected": "Criterion not respected",
+    "obstacle-name-label": "Obstacle name",
+    "celsius-unit": "°C",
+    "copied-to-clipboard": "Copied to clipboard",
+    "copy-to-clipboard-failed": "Failed to copy to the clipboard"
   },
   "auth": {
     "login-page": {
@@ -921,12 +925,20 @@
       "measurement-points-option": "Measurement points",
       "field-measurements-tool": "Field measurements",
       "vtl-and-guying-tool": "VTL & Guying",
-      "cable-marking-tool": "Cable marking",
       "strand-rrts-tool": "Strand RRTS",
       "forest-trenches-tool": "Forest trenches",
-      "height-and-lateral-distance-tool": "Height & lateral distance",
       "cable-adjustment-tool": "Cable adjustment",
       "rrts-cut-strands": "RRTS cut strands"
+    },
+    "estimations": {
+      "title": "Estimations",
+      "conformity-temperature-label": "Conformity temperature",
+      "wind-pressure-tab": "Wind pressure for min. distance",
+      "vertical-effort-tab": "Vertical cable displacement effort",
+      "choose-obstacle-info": "To use the estimation tool, you must first choose an obstacle",
+      "target-vertical-distance-label": "Target vertical distance",
+      "copy-temperature-aria-label": "Copy the conformity temperature",
+      "calculation-failed": "Failed to estimate the conformity temperature"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Expand details",
@@ -992,7 +1004,6 @@
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Create new obstacle",
-      "obstacle-name-label": "Obstacle name",
       "obstacle-altitude-type-label": "Obstacle altitude type",
       "free-positioning-forced-frame-warning": "Free positioning mode is only available with a left reference support, an absolute altitude type and a span-axis lateral distance type. The current obstacle settings differ, so the results may be inaccurate.",
       "delete-point-aria-label": "delete point",

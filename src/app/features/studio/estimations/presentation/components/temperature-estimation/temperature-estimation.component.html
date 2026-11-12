@@ -1,0 +1,117 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="calculate()"
+  class="temperature-estimation"
+  [attr.aria-busy]="isCalculating()"
+  data-testid="temperature-estimation-form"
+>
+  <p class="temperature-estimation__info" data-testid="choose-obstacle-info">
+    <app-icon icon="info" aria-hidden="true" />
+    {{ 'studio.estimations.choose-obstacle-info' | transloco }}
+  </p>
+
+  <div class="temperature-estimation__grid">
+    <div class="temperature-estimation__field">
+      <label class="temperature-estimation__label" for="estimation-obstacle">{{
+        'common.obstacle-name-label' | transloco
+      }}</label>
+      <p-select
+        inputId="estimation-obstacle"
+        [options]="obstacleOptions()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="obstacleUuid"
+        [filter]="true"
+        filterBy="label"
+        appendTo="body"
+        fluid
+        data-testid="obstacle-select"
+      />
+    </div>
+
+    <div class="temperature-estimation__field">
+      <label class="temperature-estimation__label" for="estimation-point">{{ 'common.point-label' | transloco }}</label>
+      <p-select
+        inputId="estimation-point"
+        [options]="pointOptions()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="pointIndex"
+        appendTo="body"
+        fluid
+        data-testid="point-select"
+      />
+    </div>
+
+    @let distanceControl = form.controls.targetDistance;
+    @let distanceError = distanceControl.dirty || distanceControl.touched ? getError(distanceControl) : '';
+    <div class="temperature-estimation__field">
+      <label class="temperature-estimation__label" for="estimation-target-distance">
+        {{ 'studio.estimations.target-vertical-distance-label' | transloco }}
+      </label>
+      <p-inputgroup>
+        <input
+          id="estimation-target-distance"
+          type="number"
+          pInputText
+          formControlName="targetDistance"
+          [attr.min]="limits.min"
+          [attr.max]="limits.max"
+          [attr.step]="limits.step"
+          required
+          data-testid="target-distance-input"
+          [attr.aria-invalid]="distanceError ? 'true' : null"
+          [attr.aria-errormessage]="distanceError ? 'estimation-target-distance-error' : null"
+        />
+        <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (distanceError) {
+        <p-message id="estimation-target-distance-error" severity="error" size="small" variant="simple" role="alert">
+          {{ distanceError }}
+        </p-message>
+      }
+    </div>
+  </div>
+
+  <div class="temperature-estimation__calculate">
+    <button
+      type="submit"
+      app-btn
+      [disabled]="!canCalculate()"
+      [btnLoading]="isCalculating()"
+      data-testid="calculate-btn"
+    >
+      <app-icon icon="rocket_launch" aria-hidden="true" />
+      {{ 'common.calculate' | transloco }}
+    </button>
+  </div>
+</form>
+
+<!-- Always on the page: screen readers only announce results added to a live region that is already there -->
+<output class="temperature-estimation__results" data-testid="results">
+  @let value = temperature();
+  @if (value !== null) {
+    <div class="temperature-estimation__results-content" animate.enter="anim-expand-height" data-testid="results-frame">
+      <h2>{{ 'common.results' | transloco }}</h2>
+      <dl class="temperature-estimation__field">
+        <dt>{{ 'studio.estimations.conformity-temperature-label' | transloco }}</dt>
+        <dd class="temperature-estimation__result">
+          <span data-testid="conformity-temperature-value"
+            >{{ value | number: temperatureFormat }}&nbsp;{{ 'common.celsius-unit' | transloco }}</span
+          >
+          <button
+            type="button"
+            app-btn
+            btnSize="s"
+            btnStyle="text"
+            [attr.aria-label]="'studio.estimations.copy-temperature-aria-label' | transloco"
+            (click)="copyTemperature()"
+            data-testid="copy-temperature-btn"
+          >
+            <app-icon icon="content_copy" aria-hidden="true" />
+          </button>
+        </dd>
+      </dl>
+    </div>
+  }
+</output>
