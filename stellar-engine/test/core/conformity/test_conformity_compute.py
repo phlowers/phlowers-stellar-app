@@ -12,7 +12,11 @@ from stellar_engine.core.conformity.compute import ConformityTableResult
 from stellar_engine.core.conformity.plot_data import Point2D
 from stellar_engine.core.conformity.runner import ScenarioOutcome
 from stellar_engine.core.conformity.scenarios import Scenario, TargetState
-from stellar_engine.core.conformity.strategies import get_strategy
+from stellar_engine.core.conformity.strategies import (
+    OVERHANG_ZONE_HEIGHT_RATIO,
+    OverhangStrategy,
+    get_strategy,
+)
 from stellar_engine.entities.conformity import (
     ConformityPlot,
     ScenarioPoint,
@@ -44,8 +48,30 @@ def _outcome(conformity_point, xy, temperature=17.0, wind=200.0, distance=1.0):
 def _from_outcomes(
     outcomes, conformity_plot="vegetation", obstacle=(0.0, 0.0)
 ):
+    distances = TensionRules(
+        lateral=next(
+            (
+                o.scenario.security_distance
+                for o in outcomes
+                if o.scenario.conformity_point == ScenarioPoint.LATERAL
+            ),
+            None,
+        ),
+        overhang=next(
+            (
+                o.scenario.security_distance
+                for o in outcomes
+                if o.scenario.conformity_point == ScenarioPoint.OVERHANG
+            ),
+            None,
+        ),
+    )
+    strategy = get_strategy(conformity_plot)
     return ConformityTableResult.from_outcomes(
-        outcomes, Point2D(*obstacle), get_strategy(conformity_plot)
+        outcomes,
+        Point2D(*obstacle),
+        strategy,
+        strategy.zone([o.point for o in outcomes], distances),
     )
 
 
@@ -80,21 +106,31 @@ def test_vegetation_zone_border_is_four_vertex_polyline():
 
 
 @pytest.mark.parametrize("lateral", [None, 1.0])
-def test_overhang_zone_is_flat_rectangle_below_lowest_point(lateral):
+def test_overhang_zone_is_plain_zone_above_border_line(lateral):
     zone = _zone("overhang", [Point2D(0, 2), Point2D(4, 3)], lateral=lateral)
 
     corners = _corners(zone)
-    expected_y = 2 - 1.5
-    assert corners["LowerLeft"]["y"] == expected_y
-    assert corners["LowerRight"]["y"] == expected_y
-    assert corners["UpperRight"]["y"] == expected_y
-    assert corners["UpperLeft"]["y"] == expected_y
-    assert zone.zone_border == [
-        corners["LowerLeft"],
-        corners["LowerRight"],
-        corners["UpperRight"],
-        corners["UpperLeft"],
-    ]
+    lower_y = 2 - 1.5
+    line_length = corners["LowerRight"]["x"] - corners["LowerLeft"]["x"]
+    upper_y = lower_y + OVERHANG_ZONE_HEIGHT_RATIO * line_length
+    assert corners["LowerLeft"]["y"] == lower_y
+    assert corners["LowerRight"]["y"] == lower_y
+    assert corners["UpperRight"]["y"] == pytest.approx(upper_y)
+    assert corners["UpperLeft"]["y"] == pytest.approx(upper_y)
+    assert corners["UpperLeft"]["x"] == corners["LowerLeft"]["x"]
+    assert corners["UpperRight"]["x"] == corners["LowerRight"]["x"]
+    assert zone.zone_border == [corners["LowerLeft"], corners["LowerRight"]]
+
+
+def test_overhang_zone_height_follows_ratio(monkeypatch):
+    monkeypatch.setattr(OverhangStrategy, "plain_zone_height_ratio", 0.5)
+
+    zone = _zone("overhang", [Point2D(0, 2), Point2D(4, 3)], lateral=None)
+
+    corners = _corners(zone)
+    assert corners["UpperLeft"]["y"] - corners["LowerLeft"]["y"] == (
+        pytest.approx(2.0)
+    )
 
 
 @pytest.mark.parametrize("conformity_plot", ["vegetation", "overhang"])
@@ -197,7 +233,7 @@ def test_vegetation_obstacle_between_lateral_points_is_inside_u(
 ):
     table = _table("vegetation", overhang_d=overhang_d)
 
-    assert table.lateral_compliance_line_axis_distance > 0
+    assert table.lateral_compliance_line_axis_distance == pytest.approx(-6.0)
     assert table.conformity_compliance_status is expected
 
 
@@ -230,8 +266,14 @@ def test_compliance_value_of_zero_is_compliant(conformity_plot):
         overhang_d=10.0,
     )
 
-    assert table.overhang_compliance_altitude == pytest.approx(0.0)
-    assert table.lateral_compliance_line_axis_distance == pytest.approx(0.0)
+    expected_altitude = 0.0 if conformity_plot == "cable_track" else -10.0
+    assert table.overhang_compliance_altitude == pytest.approx(
+        expected_altitude
+    )
+    expected_lateral = 0.0 if conformity_plot == "cable_track" else -5.0
+    assert table.lateral_compliance_line_axis_distance == pytest.approx(
+        expected_lateral
+    )
     assert table.conformity_compliance_status is True
 
 
@@ -239,6 +281,92 @@ def test_compliance_none_without_point():
     table = _from_outcomes([])
 
     assert all(value is None for value in dataclasses.asdict(table).values())
+
+
+@pytest.mark.parametrize("conformity_plot", ["vegetation", "overhang"])
+@pytest.mark.parametrize(
+    ("altitude", "compliant"), [(23.0, True), (24.0, True), (25.0, False)]
+)
+def test_overhang_table_returns_border_altitude_not_obstacle_margin(
+    conformity_plot, altitude, compliant
+):
+    table = _from_outcomes(
+        [_outcome("overhang", (0.0, 27.0), distance=3.0)],
+        conformity_plot,
+        obstacle=(0.0, altitude),
+    )
+
+    assert table.overhang_compliance_altitude == pytest.approx(24.0)
+    assert table.conformity_compliance_status is compliant
+
+
+@pytest.mark.parametrize("conformity_plot", ["vegetation", "overhang"])
+def test_box_table_altitude_matches_lowest_plotted_zone_border(
+    conformity_plot,
+):
+    points = [Point2D(0.0, 27.0), Point2D(10.0, 20.0)]
+    table = _from_outcomes(
+        [
+            _outcome("overhang", (0.0, 27.0), distance=3.0),
+            _outcome("lateral", (10.0, 20.0), distance=2.0),
+        ],
+        conformity_plot,
+        obstacle=(0.0, 25.0),
+    )
+    zone = _zone(conformity_plot, points, lateral=2.0, overhang=3.0)
+
+    assert table.overhang_compliance_altitude == min(
+        point["y"] for point in zone.zone_border
+    )
+
+
+@pytest.mark.parametrize(
+    ("obstacle_x", "border_x"),
+    [(-12.0, -7.0), (-6.0, -7.0), (0.0, -7.0), (6.0, 7.0), (12.0, 7.0)],
+)
+def test_vegetation_table_returns_nearest_outer_lateral_border(
+    obstacle_x, border_x
+):
+    table = _from_outcomes(
+        [
+            _outcome("lateral", (5.0, 30.0), distance=2.0),
+            _outcome("lateral_inverse", (-5.0, 30.0), distance=2.0),
+            _outcome("overhang", (0.0, 27.0), distance=3.0),
+        ],
+        obstacle=(obstacle_x, 25.0),
+    )
+
+    assert table.lateral_compliance_line_axis_distance == pytest.approx(
+        border_x
+    )
+
+
+@pytest.mark.parametrize(
+    ("obstacle", "altitude", "lateral", "compliant"),
+    [
+        ((16.0, 18.0), 14.0, 11.5, True),
+        ((4.0, 2.0), 6.0, 8.5, True),
+        ((10.6, 10.8), 14.0, 11.5, False),
+        ((10.0, 10.0), 5.0, 12.5, False),
+    ],
+)
+def test_cable_track_table_returns_circle_boundary_coordinates(
+    obstacle, altitude, lateral, compliant
+):
+    table = _from_outcomes(
+        [
+            _outcome("overhang", (10.0, 10.0), distance=5.0),
+            _outcome("lateral", (10.0, 10.0), distance=2.5),
+        ],
+        "cable_track",
+        obstacle=obstacle,
+    )
+
+    assert table.overhang_compliance_altitude == pytest.approx(altitude)
+    assert table.lateral_compliance_line_axis_distance == pytest.approx(
+        lateral
+    )
+    assert table.conformity_compliance_status is compliant
 
 
 # ============================================================================

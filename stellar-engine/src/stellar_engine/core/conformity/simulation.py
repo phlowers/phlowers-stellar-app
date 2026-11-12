@@ -146,7 +146,7 @@ def get_conformity(python_inputs: dict, study: SectionStudy) -> dict:
 
         # calculus
         table_results[rule_type] = ConformityTableResult.from_outcomes(
-            outcomes, runner.obstacle, strategy
+            outcomes, runner.obstacle, strategy, zone
         )
 
     result = ConformityResult(
