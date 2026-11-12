@@ -6,12 +6,18 @@
  */
 
 import { Obstacle } from '@shared/domain/models/obstacle.model';
-import { EstimateTemperatureInputs } from '@services/worker_python/tasks/types';
-import { CONFORMITY_TEMPERATURE_BOUNDS } from '@features/studio/estimations/domain/estimations.constantes';
+import { EstimateMinimumDistanceWindInputs, EstimateTemperatureInputs } from '@services/worker_python/tasks/types';
 import {
+  CONFORMITY_TEMPERATURE_BOUNDS,
+  MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS
+} from '@features/studio/estimations/domain/estimations.constantes';
+import {
+  EstimationObstacleFormValue,
   EstimationObstacleOption,
+  EstimationObstaclePointInputs,
   EstimationPointOption,
-  TemperatureEstimationFormValue
+  TemperatureEstimationFormValue,
+  WindPressureEstimationFormValue
 } from '@features/studio/estimations/domain/estimations.interfaces';
 
 /** Obstacles of the section holding at least one point, in the section order. */
@@ -49,22 +55,40 @@ export function getPreselectedObstacleUuid(
 }
 
 /**
- * Maps the form value to the engine inputs, or null while a value is missing. The engine resolves the
+ * Maps the chosen obstacle point to the engine inputs, or null while it is missing. The engine resolves the
  * point from the obstacle registered in the study, in the section frame.
  */
+export function toObstaclePointInputs(
+  value: EstimationObstacleFormValue,
+  obstacle: Obstacle | null
+): EstimationObstaclePointInputs | null {
+  const { obstacleUuid, pointIndex } = value;
+  if (!obstacle || obstacle.uuid !== obstacleUuid || pointIndex === null) {
+    return null;
+  }
+  return { spanIndex: obstacle.supportIndex, obstacleUuid, pointIndex };
+}
+
+/** Maps the temperature estimation form value to the engine inputs, or null while a value is missing. */
 export function toTemperatureEstimationInputs(
   value: TemperatureEstimationFormValue,
   obstacle: Obstacle | null
 ): EstimateTemperatureInputs | null {
-  const { obstacleUuid, pointIndex, targetDistance } = value;
-  if (!obstacle || obstacle.uuid !== obstacleUuid || pointIndex === null || targetDistance === null) {
+  const point = toObstaclePointInputs(value, obstacle);
+  if (!point || value.targetDistance === null) {
     return null;
   }
-  return {
-    spanIndex: obstacle.supportIndex,
-    obstacleUuid,
-    pointIndex,
-    targetDistance,
-    bounds: [...CONFORMITY_TEMPERATURE_BOUNDS]
-  };
+  return { ...point, targetDistance: value.targetDistance, bounds: [...CONFORMITY_TEMPERATURE_BOUNDS] };
+}
+
+/** Maps the wind pressure estimation form value to the engine inputs, or null while a value is missing. */
+export function toWindPressureEstimationInputs(
+  value: WindPressureEstimationFormValue,
+  obstacle: Obstacle | null
+): EstimateMinimumDistanceWindInputs | null {
+  const point = toObstaclePointInputs(value, obstacle);
+  if (!point || value.temperature === null) {
+    return null;
+  }
+  return { ...point, temperature: value.temperature, bounds: [...MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS] };
 }

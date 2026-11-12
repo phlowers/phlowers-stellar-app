@@ -123,7 +123,9 @@ export enum Task {
   // Estimate the load mass giving a target distance to an obstacle
   estimateLoad = 'estimateLoad',
   // Estimate the wind pressure giving a target distance to an obstacle
-  estimateWind = 'estimateWind'
+  estimateWind = 'estimateWind',
+  // Estimate the wind pressure bringing the cable closest to an obstacle
+  estimateMinimumDistanceWind = 'estimateMinimumDistanceWind'
 }
 
 /**
@@ -581,6 +583,8 @@ export interface TaskInputs {
   [Task.estimateLoad]: EstimateLoadInputs;
   // Inputs for estimateWind task
   [Task.estimateWind]: EstimateWindInputs;
+  // Inputs for estimateMinimumDistanceWind task
+  [Task.estimateMinimumDistanceWind]: EstimateMinimumDistanceWindInputs;
 }
 
 /**
@@ -625,6 +629,17 @@ export interface EstimateWindInputs extends EstimationBaseInputs {
   targetDistance: number;
   // Fixed cable temperature in °C
   temperature?: number | null;
+}
+
+/**
+ * Inputs for the estimateMinimumDistanceWind task: no target distance, the distance to the obstacle is minimized
+ * over the wind pressure `bounds` (Pa).
+ *
+ * @category Worker Types
+ */
+export interface EstimateMinimumDistanceWindInputs extends EstimationBaseInputs {
+  // Fixed cable temperature in °C
+  temperature: number;
 }
 
 /**
@@ -675,6 +690,20 @@ export interface EstimationResult {
   iterations: number;
   // Whether the solver converged within tolerance
   converged: boolean;
+}
+
+/**
+ * Output of the estimateMinimumDistanceWind task.
+ *
+ * @category Worker Types
+ */
+export interface MinimumDistanceWindEstimationResult {
+  // Wind pressure (Pa) bringing the cable closest to the obstacle
+  value: number;
+  // Minimum oblique (3D) distance between cable and obstacle in meters
+  distance: number;
+  // Number of distance evaluations
+  iterations: number;
 }
 
 /**
@@ -1036,4 +1065,6 @@ export interface TaskOutputs {
   [Task.estimateLoad]: EstimationResult;
   // Output from estimateWind task: wind pressure in Pa
   [Task.estimateWind]: EstimationResult;
+  // Output from estimateMinimumDistanceWind task: wind pressure in Pa with the minimum distance in m
+  [Task.estimateMinimumDistanceWind]: MinimumDistanceWindEstimationResult;
 }

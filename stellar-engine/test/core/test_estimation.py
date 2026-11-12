@@ -492,6 +492,7 @@ def test_estimate_span_out_of_range_raises_invalid_manipulation_index(
             estimation.estimate_rope,
             {"supportIndex": 1, "targetVerticalDistance": 30.0},
         ),
+        (estimation.estimate_minimum_distance_wind, {"temperature": 15.0}),
     ],
 )
 def test_estimate_on_split_span_raises_estimate_on_split_support_error(
@@ -661,3 +662,139 @@ def test_estimate_out_of_range_study_obstacle_point_raises(
             },
             study_with_obstacle,
         )
+
+
+# ---------------------------minimum distance wind----------------
+
+# the cable swings towards this obstacle: closest at about 830 Pa
+SWUNG_OBSTACLE = [250.0, 30.0, 60.0]
+WIND_BOUNDS = [-3000.0, 3000.0]
+MINIMUM_DISTANCE_WIND_KEYS = {"value", "distance", "iterations"}
+
+
+def minimum_distance_wind(study: SectionStudy, obstacle: list, **inputs):
+    return estimation.estimate_minimum_distance_wind(
+        {
+            "spanIndex": SPAN_INDEX,
+            "obstaclePoint": obstacle,
+            "temperature": 15.0,
+            "bounds": WIND_BOUNDS,
+            **inputs,
+        },
+        study,
+    )
+
+
+def wind_distance(study: SectionStudy, obstacle: list, pressure: float):
+    reference = study.copy()
+    reference.solve_change_state(new_temperature=15.0, wind_pressure=pressure)
+    return reference.position_engine.point_distance(
+        SPAN_INDEX, np.array(obstacle)
+    ).distance_3d
+
+
+@pytest.mark.parametrize(
+    "obstacle, expected_pressure",
+    [
+        (SWUNG_OBSTACLE, 831.0),
+        # mirrored side: the wind blows the other way
+        ([250.0, -10.0, 20.0], -237.0),
+        # right under the cable: any wind moves the cable away
+        (OBSTACLE, 0.0),
+    ],
+)
+def test_estimate_minimum_distance_wind(
+    study: SectionStudy, obstacle: list, expected_pressure: float
+):
+    dxdydz_before = study.balance_engine.balance_model.nodes.dxdydz.copy()
+
+    result = minimum_distance_wind(study, obstacle)
+
+    assert set(result) == MINIMUM_DISTANCE_WIND_KEYS
+    assert result["value"] == pytest.approx(expected_pressure, abs=2.0)
+    assert result["distance"] == pytest.approx(
+        wind_distance(study, obstacle, result["value"]), abs=1e-6
+    )
+    for neighbour in (result["value"] - 20.0, result["value"] + 20.0):
+        assert result["distance"] < wind_distance(study, obstacle, neighbour)
+    assert_study_untouched(study, dxdydz_before)
+
+
+def test_estimate_minimum_distance_wind_stops_at_the_bound(
+    study: SectionStudy,
+):
+    result = minimum_distance_wind(study, SWUNG_OBSTACLE, bounds=[0.0, 500.0])
+
+    assert result["value"] == 500.0
+    assert result["distance"] == pytest.approx(
+        wind_distance(study, SWUNG_OBSTACLE, 500.0), abs=1e-6
+    )
+
+
+def test_estimate_minimum_distance_wind_with_chains_reversing_first(
+    study: SectionStudy,
+):
+    # the distance still decreases when the chains reverse
+    with pytest.raises(SuspectedChainReversal):
+        minimum_distance_wind(study, [250.0, 80.0, 70.0])
+
+
+def test_estimate_minimum_distance_wind_requires_temperature(
+    study: SectionStudy,
+):
+    with pytest.raises(
+        EstimationInputError, match="Missing estimation input: temperature"
+    ):
+        minimum_distance_wind(study, SWUNG_OBSTACLE, temperature=None)
+
+
+def patch_wind_distance(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch, distance
+):
+    monkeypatch.setattr(
+        study.estimation_engine,
+        "_build_distance_objective__climatic_case",
+        lambda *_args: distance,
+    )
+
+
+def test_estimate_minimum_distance_wind_nan_distance_raises_not_converged(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
+):
+    patch_wind_distance(study, monkeypatch, lambda _pressure: float("nan"))
+
+    with pytest.raises(
+        EstimationNotConvergedError, match="distance to the obstacle"
+    ):
+        minimum_distance_wind(study, SWUNG_OBSTACLE)
+
+
+def test_estimate_minimum_distance_wind_nan_before_minimum_raises(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
+):
+    patch_wind_distance(
+        study,
+        monkeypatch,
+        lambda pressure: float("nan") if pressure > 500.0 else -pressure,
+    )
+
+    with pytest.raises(
+        EstimationNotConvergedError, match="beyond 500.0, before reaching"
+    ):
+        minimum_distance_wind(study, SWUNG_OBSTACLE)
+
+
+def test_estimate_minimum_distance_wind_keeps_scan_when_refinement_fails(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
+):
+    def distance(pressure: float) -> float:
+        if pressure % estimation.MINIMUM_DISTANCE_WIND_STEP:
+            raise ConvergenceError("trial pressure did not balance")
+        return abs(pressure - 520.0)
+
+    patch_wind_distance(study, monkeypatch, distance)
+
+    result = minimum_distance_wind(study, SWUNG_OBSTACLE)
+
+    assert result["value"] == 500.0
+    assert result["distance"] == 20.0
