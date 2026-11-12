@@ -98,6 +98,14 @@ class _Errors:
             "cannot be computed at the search bounds"
         )
 
+    @staticmethod
+    def estimation_minimum_not_reached(variable: str, value: float) -> str:
+        return (
+            f"{variable} estimation did not converge: the distance to the "
+            f"obstacle cannot be computed beyond {value}, before reaching "
+            "its minimum"
+        )
+
 
 class GeneratedPointsNoneError(ValueError):
     """Raised when generated points (spans, supports, insulators, others) are None."""
