@@ -125,7 +125,7 @@ describe('buildL0Csv', () => {
   });
 
   it.each(['1-2', '2-3', '12-13', '1-31', 'A1-B2', '=1+1-2', '-1-2', 'A+B-C@D'])(
-    'should write the span label "%s" as is, without any text formula',
+    'should write the span label "%s" as is',
     (span) => {
       const line = buildL0Csv([row({ span })], frLabels, 'en').split('\r\n')[1];
       expect(line).toBe(`${span};101.25;100;100`);
@@ -155,80 +155,5 @@ describe('buildL0Csv', () => {
   it('should keep the lengths as bare numbers, a negative one included', () => {
     const line = buildL0Csv([row({ spanLength: -101.25, l0: -5, cumulatedL0: -5 })], frLabels, 'en').split('\r\n')[1];
     expect(line).toBe('1-2;-101.25;-5;-5');
-  });
-});
-
-describe('buildL0Csv for Excel', () => {
-  const excelCsv = (rows: L0Row[], locale = 'en') => buildL0Csv(rows, frLabels, locale, true);
-
-  it('should keep the same heading, byte order mark and line layout as the plain export', () => {
-    const rows = [row(), row({ span: '2-3', spanLength: 201, l0: 200.5, cumulatedL0: 300.5, index: 1 })];
-    const lines = excelCsv(rows, 'fr').split('\r\n');
-
-    expect(lines[0]).toBe('\uFEFFPORTÉE;LONGUEUR DE PORTÉE;LONGUEUR NATURELLE L0;LONGUEUR NATURELLE L0 CUMULÉE');
-    expect(lines.slice(1)).toEqual(['"=""1-2""";101,25;100;100', '"=""2-3""";201;200,5;300,5', '']);
-  });
-
-  it('should write the plain export when the Excel flag is omitted or false', () => {
-    const plain = buildL0Csv([row()], frLabels, 'en');
-    expect(buildL0Csv([row()], frLabels, 'en', false)).toBe(plain);
-    expect(plain).not.toBe(excelCsv([row()]));
-  });
-
-  // Spreadsheet software turns a bare "1-2" into a date, so a span label is written as a text formula: ="1-2"
-  it.each(['1-2', '2-3', '12-13', '1-31', 'A1-B2', '1-=2', 'A+B-C@D'])(
-    'should write the span label "%s" as a text formula',
-    (span) => {
-      const line = excelCsv([row({ span })]).split('\r\n')[1];
-      expect(line).toBe(`"=""${span}""";101.25;100;100`);
-    }
-  );
-
-  it.each([
-    ['=', '=1+1-2'],
-    ['+', '+1-2'],
-    ['-', '-1-2'],
-    ['@', '@A-B'],
-    ['a space then =', ' =1+1-2'],
-    ['a tab then =', '\t=1+1-2'],
-    ['a non breaking space then =', '\u00A0=1+1-2'],
-    ['a tab then a letter', '\tA-B']
-  ])('should keep a span label starting with %s inside the text formula', (_start, span) => {
-    const line = excelCsv([row({ span })]).split('\r\n')[1];
-    expect(line).toBe(`"=""${span}""";101.25;100;100`);
-  });
-
-  it('should double the quotes of a span label holding the separator or a quote', () => {
-    const line = (span: string) => excelCsv([row({ span })]).split('\r\n')[1];
-    expect(line('A;1-B')).toBe('"=""A;1-B""";101.25;100;100');
-    expect(line('A"1-B')).toBe('"=""A""""1-B""";101.25;100;100');
-  });
-
-  // The text formula must hold the whole label as one string literal, with every inner quote doubled
-  it.each([
-    '1-2',
-    "=cmd|' /C calc'!A0-1",
-    '"&HYPERLINK("http://example.com","x")&"-2',
-    '1-2"; DROP',
-    'A;1-B',
-    'line\nbreak-1',
-    '\r=1+1-2',
-    '"',
-    '""'
-  ])('should read the span label %j back from the CSV as a single string literal', (span) => {
-    const csv = excelCsv([row({ span })]).replace('\uFEFF', '');
-    const { data, errors } = Papa.parse<string[]>(csv, { delimiter: ';', skipEmptyLines: true });
-
-    expect(errors).toEqual([]);
-    expect(data).toHaveLength(2);
-    expect(data[1]).toHaveLength(4);
-    const literal = /^="((?:[^"]|"")*)"$/.exec(data[1][0]);
-    expect(literal).not.toBeNull();
-    expect(literal![1].replaceAll('""', '"')).toBe(span);
-  });
-
-  it('should keep the lengths as bare numbers, a negative one included', () => {
-    const line = excelCsv([row({ spanLength: -101.25, l0: -5, cumulatedL0: -5 })]).split('\r\n')[1];
-    expect(line).toBe('"=""1-2""";-101.25;-5;-5');
   });
 });

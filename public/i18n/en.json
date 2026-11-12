@@ -1069,8 +1069,6 @@
       "csv-l0-label": "L0_span_length",
       "csv-cumulated-l0-label": "Cumulated_L0_span_length",
       "export-invalid-table": "Export failed: the L0 table is empty or contains invalid values",
-      "export-for-excel": "Export for Excel",
-      "export-options-aria-label": "More export options",
       "loading-data-text": "Loading L0 data…",
       "current-page-report": "{currentPage} of {totalPages}"
     },
