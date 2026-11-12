@@ -8,7 +8,8 @@
 import { EstimationTab, EstimationTabValue } from '@features/studio/estimations/domain/estimations.interfaces';
 
 export const TARGET_DISTANCE_DECIMALS = 2;
-// Strictly positive: the smallest value with 2 decimals (the engine rejects a zero distance)
+// Strictly positive: the smallest value with 2 decimals. The engine accepts a zero distance but never
+// reaches it (the cable cannot touch the obstacle point): it answers EstimationNotConvergedError.
 export const TARGET_DISTANCE_MIN = 10 ** -TARGET_DISTANCE_DECIMALS;
 export const TARGET_DISTANCE_MAX = 150;
 

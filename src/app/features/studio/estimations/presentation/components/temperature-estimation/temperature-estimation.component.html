@@ -5,10 +5,12 @@
   [attr.aria-busy]="isCalculating()"
   data-testid="temperature-estimation-form"
 >
-  <p class="temperature-estimation__info" data-testid="choose-obstacle-info">
-    <app-icon icon="info" aria-hidden="true" />
-    {{ 'studio.estimations.choose-obstacle-info' | transloco }}
-  </p>
+  @if (!hasObstacle()) {
+    <p class="temperature-estimation__info" data-testid="choose-obstacle-info">
+      <app-icon icon="info" aria-hidden="true" />
+      {{ 'studio.estimations.choose-obstacle-info' | transloco }}
+    </p>
+  }
 
   <div class="temperature-estimation__grid">
     <div class="temperature-estimation__field">
@@ -43,8 +45,7 @@
       />
     </div>
 
-    @let distanceControl = form.controls.targetDistance;
-    @let distanceError = distanceControl.dirty || distanceControl.touched ? getError(distanceControl) : '';
+    @let distanceError = targetDistanceError();
     <div class="temperature-estimation__field">
       <label class="temperature-estimation__label" for="estimation-target-distance">
         {{ 'studio.estimations.target-vertical-distance-label' | transloco }}
@@ -67,7 +68,7 @@
       </p-inputgroup>
       @if (distanceError) {
         <p-message id="estimation-target-distance-error" severity="error" size="small" variant="simple" role="alert">
-          {{ distanceError }}
+          {{ distanceError.key | transloco: distanceError.params }}
         </p-message>
       }
     </div>

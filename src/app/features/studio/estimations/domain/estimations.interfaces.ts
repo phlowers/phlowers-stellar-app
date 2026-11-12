@@ -5,6 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import type { Section } from '@shared/domain';
+
 /** Tabs of the estimations dialog. */
 export type EstimationTabValue = 'temperature' | 'wind-pressure' | 'vertical-effort';
 
@@ -34,4 +36,11 @@ export interface TemperatureEstimationFormValue {
   obstacleUuid: string | null;
   pointIndex: number | null;
   targetDistance: number | null;
+}
+
+/** Estimated conformity temperature, with the section it was calculated on. */
+export interface TemperatureEstimation {
+  /** Conformity temperature (°C). */
+  value: number;
+  section: Section | null;
 }

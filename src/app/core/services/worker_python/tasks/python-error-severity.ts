@@ -36,6 +36,7 @@ export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> 
   [PythonErrorCode.SupportOutOfRangeError]: 'error',
   [PythonErrorCode.GeneratedPointsNoneError]: 'error',
   [PythonErrorCode.NightTimeError]: 'error',
+  [PythonErrorCode.ObstacleNotFoundError]: 'error',
   [PythonErrorCode.EstimateOnSplitSupportError]: 'error',
   [PythonErrorCode.EstimationInputError]: 'error',
   [PythonErrorCode.EstimationNotConvergedError]: 'error',
