@@ -31,16 +31,36 @@ export interface EstimationPointOption {
   value: number;
 }
 
-/** Raw value of the temperature estimation form. */
-export interface TemperatureEstimationFormValue {
+/** Obstacle point chosen in an estimation form. */
+export interface EstimationObstacleFormValue {
   obstacleUuid: string | null;
   pointIndex: number | null;
+}
+
+/** Raw value of an estimation form: the obstacle point and the numeric values specific to the estimation. */
+export type EstimationFormValue<TValueKey extends string> = EstimationObstacleFormValue &
+  Record<TValueKey, number | null>;
+
+/** Raw value of the temperature estimation form. */
+export interface TemperatureEstimationFormValue extends EstimationObstacleFormValue {
   targetDistance: number | null;
 }
 
-/** Estimated conformity temperature, with the section it was calculated on. */
-export interface TemperatureEstimation {
-  /** Conformity temperature (°C). */
-  value: number;
+/** Raw value of the minimum distance wind pressure estimation form. */
+export interface WindPressureEstimationFormValue extends EstimationObstacleFormValue {
+  /** Cable temperature (°C). */
+  temperature: number | null;
+}
+
+/** Obstacle point of the engine inputs of an estimation. */
+export interface EstimationObstaclePointInputs {
+  spanIndex: number;
+  obstacleUuid: string;
+  pointIndex: number;
+}
+
+/** Engine result of an estimation, with the section it was calculated on. */
+export interface EstimationOutcome<TResult> {
+  result: TResult;
   section: Section | null;
 }

@@ -388,6 +388,14 @@ def estimate_wind(js_inputs):
     return estimation.estimate_wind(js_to_python(js_inputs), study)
 
 
+@debug_log
+def estimate_minimum_distance_wind(js_inputs):
+    global study
+    return estimation.estimate_minimum_distance_wind(
+        js_to_python(js_inputs), study
+    )
+
+
 # ---------------------------conformity----------------
 
 
