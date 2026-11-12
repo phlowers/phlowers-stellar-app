@@ -23,13 +23,13 @@ import { DEFAULT_ESTIMATION_TAB, ESTIMATION_TABS } from '@features/studio/estima
 import { EstimationTabValue } from '@features/studio/estimations/domain/estimations.interfaces';
 import { TemperatureEstimationComponent } from '@features/studio/estimations/presentation/components/temperature-estimation/temperature-estimation.component';
 
+/** "Estimations" studio tool dialog: one tab per estimation (US.EST). */
 @Component({
   selector: 'app-estimations',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslocoModule, TabsModule, IconComponent, TemperatureEstimationComponent],
   templateUrl: './estimations.component.html'
 })
-/** "Estimations" studio tool dialog: one tab per estimation (US.EST). */
 export class EstimationsComponent {
   readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
 

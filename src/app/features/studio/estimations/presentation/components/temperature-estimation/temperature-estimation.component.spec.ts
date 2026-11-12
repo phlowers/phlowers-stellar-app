@@ -85,6 +85,12 @@ describe('TemperatureEstimationComponent', () => {
     typeIn('target-distance-input', '12');
   };
 
+  // e.g. a cable change: the obstacles, hence the estimation inputs, are unchanged
+  const changeSectionKeepingObstacles = (): void => {
+    const spanService = TestBed.inject(PlotSpanService);
+    spanService.section.set({ ...spanService.section()!, cable_name: 'other-cable' });
+  };
+
   const calculateBtn = (): HTMLButtonElement => getByTestId('calculate-btn') as HTMLButtonElement;
 
   const calculate = async (): Promise<void> => {
@@ -163,6 +169,23 @@ describe('TemperatureEstimationComponent', () => {
       expect(getByTestId('temperature-estimation-form')?.tagName).toBe('FORM');
       expect(textOf('choose-obstacle-info')).toContain('Choose an obstacle first');
       expect(getByTestId('choose-obstacle-info')?.querySelector('app-icon')?.getAttribute('aria-hidden')).toBe('true');
+    });
+
+    it('hides the obstacle choice hint once an obstacle is selected', () => {
+      selectObstacle('obstacle-a');
+      expect(getByTestId('choose-obstacle-info')).toBeNull();
+
+      selectObstacle(null);
+      expect(getByTestId('choose-obstacle-info')).not.toBeNull();
+    });
+
+    it('hides the obstacle choice hint when an obstacle is preselected', () => {
+      fixture.destroy();
+      studioSelectedUuid.set('obstacle-b');
+
+      createComponent();
+
+      expect(getByTestId('choose-obstacle-info')).toBeNull();
     });
 
     it('labels every field', () => {
@@ -274,6 +297,16 @@ describe('TemperatureEstimationComponent', () => {
       );
     });
 
+    it('shows the required error once the calculation is requested without distance', async () => {
+      selectObstacle('obstacle-a');
+
+      await calculate();
+
+      expect(fixture.nativeElement.querySelector('#estimation-target-distance-error')?.textContent?.trim()).toBe(
+        'Required'
+      );
+    });
+
     it('uses the meter unit with a 0.01 step', () => {
       const input = getByTestId('target-distance-input');
       expect(input?.getAttribute('step')).toBe('0.01');
@@ -328,6 +361,26 @@ describe('TemperatureEstimationComponent', () => {
 
       expect(component.form.controls.obstacleUuid.enabled).toBe(true);
       expect(component.form.controls.targetDistance.enabled).toBe(true);
+      expect(component.form.controls.pointIndex.disabled).toBe(true);
+    });
+
+    it('locks the inputs during the calculation, so that the result matches them', async () => {
+      let resolveTask!: (value: unknown) => void;
+      mockWorkerPythonService.runTask.mockReturnValue(new Promise((resolve) => (resolveTask = resolve)));
+      fillForm();
+
+      const calculation = component.calculate();
+      fixture.detectChanges();
+
+      expect(component.form.controls.obstacleUuid.disabled).toBe(true);
+      expect((getByTestId('target-distance-input') as HTMLInputElement).disabled).toBe(true);
+
+      resolveTask({ result: ENGINE_RESULT, error: null, diagnostics: [] });
+      await calculation;
+      fixture.detectChanges();
+
+      expect((getByTestId('target-distance-input') as HTMLInputElement).disabled).toBe(false);
+      expect(textOf('conformity-temperature-value')).toBe('12.35 °C');
     });
   });
 
@@ -376,6 +429,30 @@ describe('TemperatureEstimationComponent', () => {
       await calculate();
 
       typeIn('target-distance-input', '13');
+
+      expect(getByTestId('results-frame')).toBeNull();
+    });
+
+    it('hides the results once the section changes', async () => {
+      fillForm();
+      await calculate();
+
+      changeSectionKeepingObstacles();
+      fixture.detectChanges();
+
+      expect(getByTestId('results-frame')).toBeNull();
+    });
+
+    it('does not show a result calculated on a section changed meanwhile', async () => {
+      let resolveTask!: (value: unknown) => void;
+      mockWorkerPythonService.runTask.mockReturnValue(new Promise((resolve) => (resolveTask = resolve)));
+      fillForm();
+
+      const calculation = component.calculate();
+      changeSectionKeepingObstacles();
+      resolveTask({ result: ENGINE_RESULT, error: null, diagnostics: [] });
+      await calculation;
+      fixture.detectChanges();
 
       expect(getByTestId('results-frame')).toBeNull();
     });

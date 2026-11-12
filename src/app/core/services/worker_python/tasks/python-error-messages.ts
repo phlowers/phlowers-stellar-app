@@ -29,6 +29,7 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
   [PythonErrorCode.SupportOutOfRangeError]: 'shared.python-errors.support-out-of-range-error',
   [PythonErrorCode.GeneratedPointsNoneError]: 'shared.python-errors.generated-points-none-error',
   [PythonErrorCode.NightTimeError]: 'shared.python-errors.night-time-error',
+  [PythonErrorCode.ObstacleNotFoundError]: 'shared.python-errors.obstacle-not-found-error',
   [PythonErrorCode.EstimateOnSplitSupportError]: 'shared.python-errors.estimate-on-split-support-error',
   [PythonErrorCode.EstimationInputError]: 'shared.python-errors.estimation-input-error',
   [PythonErrorCode.EstimationNotConvergedError]: 'shared.python-errors.estimation-not-converged-error',

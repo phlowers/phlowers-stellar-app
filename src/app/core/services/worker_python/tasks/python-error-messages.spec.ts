@@ -40,6 +40,8 @@ describe('formatPythonError', () => {
               'shared.python-errors.invalid-manipulation-range': 'The manipulation range provided is invalid.',
               'shared.python-errors.support-out-of-range-error': 'The support is out of the valid range.',
               'shared.python-errors.generated-points-none-error': 'No generated points were found after computation.',
+              'shared.python-errors.obstacle-not-found-error':
+                'The obstacle is not registered in the calculation engine.',
               'shared.python-errors.estimate-on-split-support-error':
                 'Estimation is not possible on a span split by a virtual support.',
               'shared.python-errors.estimation-input-error': 'The estimation inputs are missing or invalid.',
@@ -72,7 +74,8 @@ describe('formatPythonError', () => {
     [PythonErrorCode.EstimateOnSplitSupportError, 'Estimation is not possible on a span split by a virtual support.'],
     [PythonErrorCode.EstimationInputError, 'The estimation inputs are missing or invalid.'],
     [PythonErrorCode.EstimationNotConvergedError, 'The target cannot be reached within the estimation bounds.'],
-    [PythonErrorCode.EstimationWarning, 'The existing load on the estimated span was ignored.']
+    [PythonErrorCode.EstimationWarning, 'The existing load on the estimated span was ignored.'],
+    [PythonErrorCode.ObstacleNotFoundError, 'The obstacle is not registered in the calculation engine.']
   ])('should return the localized estimation message for %s', (code, expected) => {
     expect(formatPythonError(code, translocoService)).toBe(expected);
   });

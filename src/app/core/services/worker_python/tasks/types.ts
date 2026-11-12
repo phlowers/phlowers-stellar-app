@@ -179,6 +179,8 @@ export enum PythonErrorCode {
   GeneratedPointsNoneError = 'GeneratedPointsNoneError',
   // Raised when the provided time is during the night but the computation requires daytime.
   NightTimeError = 'NightTimeError',
+  // Raised when an obstacle uuid is not registered in the engine study
+  ObstacleNotFoundError = 'ObstacleNotFoundError',
   // Raised when an estimation is requested on a span split by a virtual support
   EstimateOnSplitSupportError = 'EstimateOnSplitSupportError',
   // Raised when an estimation input is missing or invalid

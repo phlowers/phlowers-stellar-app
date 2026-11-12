@@ -258,7 +258,7 @@ VALID_TEMPERATURE_INPUTS = {
         ({"obstaclePoint": None}, "Missing estimation input: obstaclePoint"),
         ({"targetDistance": float("nan")}, "targetDistance must be a finite"),
         ({"targetDistance": "abc"}, "targetDistance must be a finite"),
-        ({"targetDistance": -1.0}, "targetDistance must be strictly positive"),
+        ({"targetDistance": -1.0}, "targetDistance must be positive or zero"),
         ({"spanIndex": -1}, "spanIndex must be a non-negative integer"),
         ({"spanIndex": 0.5}, "spanIndex must be a non-negative integer"),
         ({"obstaclePoint": [1.0, 2.0]}, "obstaclePoint must contain 3"),
@@ -283,7 +283,7 @@ def test_estimate_invalid_inputs_raise_estimation_input_error(
         (
             estimation.estimate_load,
             {"targetDistance": 30.0, "loadPositionDistance": -1.0},
-            "loadPositionDistance must be strictly positive",
+            "loadPositionDistance must be positive or zero",
         ),
         (
             estimation.estimate_rope,
