@@ -12,7 +12,6 @@ from stellar_engine.entities.inputs import (
     SupportManipElement,
     SupportManipInputs,
 )
-from stellar_engine.plot.plot_2d import refresh_projection
 
 
 def test_apply_manipulations_all_manips(study_base: SectionStudy):
