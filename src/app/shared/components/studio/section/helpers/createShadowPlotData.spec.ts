@@ -17,6 +17,8 @@ describe('createShadowPlotData', () => {
       insulators: [[[16, 17, 18]], [[19, 20, 21]], [[22, 23, 24]]],
       obstacles: null,
       distances: null,
+      virtual_supports: null,
+      virtual_insulators: null,
       loads: {}
     },
     output_parameters: {
