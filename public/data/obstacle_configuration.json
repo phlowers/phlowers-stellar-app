@@ -253,7 +253,7 @@
       { "label": "300-400", "normal": 300, "redZone": 400 }
     ]
   },
-  "intermediatePointPositions": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+  "intermediatePointPositions": [0.2, 0.4, 0.6, 0.8],
   "forest_trenches": {
     "ground_n_slicing_points_choices": [5, 9, 17],
     "overhang_rules_selected": ["RULE_1"],
