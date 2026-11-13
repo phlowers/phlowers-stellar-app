@@ -143,12 +143,22 @@ export class ObstaclesTableComponent {
       )
   );
 
+  // Position of each span, from left to right, keyed by the uuid of its start support
+  private readonly spanOrderByUuid = computed<Map<string, number>>(
+    () => new Map(this.realSpanOptions().flatMap((option, index) => (option.value ? [[option.value, index]] : [])))
+  );
+
   readonly rows = computed<ObstacleTableRow[]>(() => {
     const spanUuid = this.selectedSpanUuid();
     const isAllSpans = spanUuid === ALL_SPANS_OPTION_VALUE;
-    const obstacles = (this.spanService.section()?.obstacles ?? []).filter(
-      (obstacle) => isAllSpans || obstacle.supportUuid === spanUuid
-    );
+    const spanOrder = this.spanOrderByUuid();
+    // From the left span to the right one, in creation order within a span (the sort is stable);
+    // an obstacle whose span no longer exists goes last
+    const obstacles = (this.spanService.section()?.obstacles ?? [])
+      .filter((obstacle) => isAllSpans || obstacle.supportUuid === spanUuid)
+      .sort(
+        (a, b) => (spanOrder.get(a.supportUuid) ?? spanOrder.size) - (spanOrder.get(b.supportUuid) ?? spanOrder.size)
+      );
 
     return buildObstacleTableRows(
       obstacles,
@@ -165,17 +175,18 @@ export class ObstaclesTableComponent {
   // An obstacle calculation updates the positions first and only starts that refresh once the obstacle is
   // registered in the worker and saved: until then the distances are still the previous ones. Likewise a load
   // case switch selects the charge first and only refreshes once the engine holds its loads and climate.
-  readonly isReportLoading = computed(
-    () =>
-      this.isGeneratingReport() ||
-      this.obstacleFormService.isCalculatingObstacle() ||
-      this.loadFormsService.isApplyingLoadCase() ||
-      this.plotService.loading()
-  );
-
+  // The button is disabled meanwhile (and while a report is being generated, against click spasms); only the
+  // report generation itself shows the loading state.
   // Once the projection is refreshed, a point still without distances (e.g. outside its span) never gets
   // any: the report prints '-' for it, as the table does, rather than blocking the whole report
-  readonly canGenerateReport = computed(() => !this.isReportLoading() && this.rows().length > 0);
+  readonly canGenerateReport = computed(
+    () =>
+      !this.isGeneratingReport() &&
+      !this.obstacleFormService.isCalculatingObstacle() &&
+      !this.loadFormsService.isApplyingLoadCase() &&
+      !this.plotService.loading() &&
+      this.rows().length > 0
+  );
 
   constructor() {
     effect(() => {
@@ -186,8 +197,8 @@ export class ObstaclesTableComponent {
       }
     });
 
-    // Default the span filter to the first available span (never to "all spans"), keeping the
-    // current selection when it is still valid for the section (e.g. after supports change).
+    // Default the span filter to "all spans", keeping the current selection when it is still valid
+    // for the section (e.g. after supports change).
     effect(() => {
       const options = this.realSpanOptions();
       const current = untracked(() => this.selectedSpanUuid());
@@ -197,7 +208,7 @@ export class ObstaclesTableComponent {
       }
       const isCurrentValid = current === ALL_SPANS_OPTION_VALUE || options.some((option) => option.value === current);
       if (!current || !isCurrentValid) {
-        this.selectedSpanUuid.set(options[0].value);
+        this.selectedSpanUuid.set(ALL_SPANS_OPTION_VALUE);
       }
     });
 
