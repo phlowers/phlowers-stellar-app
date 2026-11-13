@@ -513,7 +513,6 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute all actions through toolsDropdown commands', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       component.ngOnInit();
       const tools = component.toolsDropdown();
 
@@ -521,10 +520,7 @@ describe('StudioTopToolbarComponent', () => {
         tools?.[i].command?.({});
       }
 
-      // Five tools open a dialog; only Cable marking and Height & lateral distance remain placeholders.
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(5);
-      expect(alertSpy).toHaveBeenCalledTimes(2);
-      alertSpy.mockRestore();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(6);
     });
   });
 
