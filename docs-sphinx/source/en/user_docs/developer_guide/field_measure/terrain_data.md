@@ -25,8 +25,8 @@ The terrain data tab is implemented by the following components and support file
 3. **Data Entry**: User fills in location and environmental fields via `HeaderComponent` (shared) and `FieldDatasComponent` (tab-specific).
 4. **Validation**: `FieldMeasuringComponent` computes `isGlobalFormValid` (name and header) and `isTerrainDataValid` (Terrain Data tab) by checking all mandatory fields and their bounds.
 5. **Save**: Calls `PlotService.modifySection()` to persist the measure to the section's `field_measures` array.
-6. **Export**: Calls `buildFieldMeasureExportJson()` to generate a JSON export (if all tabs pass validation).
-7. **Report**: Calls `buildFieldMeasureReportData()` then `FieldMeasureReportService.generateReport()` to generate a PDF report of the saved measure.
+6. **Export**: `onExport()` calls `buildFieldMeasureExportJson()` on the last saved snapshot (`lastSavedMeasureData`), once `canReportOrExport()` is true (global form valid, displayed tab valid, no unsaved change), then saves the file (see the Export section below).
+7. **Report**: Calls `buildFieldMeasureReportData()` then `FieldMeasureReportService.generateReport()` to generate a PDF report of the saved measure (same enabling condition as the export).
 
 ## Data Model
 
@@ -50,7 +50,7 @@ The measure data is typed as `FieldMeasure` (from `domain/types.ts`), which incl
   - `latitude` (number, degrees): range -90 to 90
   - `altitude` (number, m): range -100 to 9000; auto-calculated from span's support heights
   - `azimuth` (number, degrees): range -180 to 180
-- **Outputs** (computed): `papoto` (PapotoResult | null), `cableTemperature` (TemperatureCalculationResult | null), `parameter15C` (Parameter15CResult | null)
+- **Outputs** (computed): `papoto` (PapotoResult | null), `cableTemperature` (TemperatureCalculationResult | null), `parameter15C` (Parameter15CResult | null), `tangentAimingSupport` / `tangentAimingExterior` / `tangentAimingInterior` (TangentAimingSupportResult | null, see {doc}`tangent_aiming`)
 
 Additional fields exist for other tabs (parameter calculation, temperature, parameter at 15°C); see the model for full details.
 
@@ -122,7 +122,13 @@ All fields are mandatory and checked for range:
 - `windDirection`, `skyCover`: required
 - `transit` (optional field in other tabs): if present, 0–4000 Amperes
 
-**Export and report:** both buttons are enabled only when `canReportOrExport()` is true: the global form (`isGlobalFormValid`: name, span, longitude, latitude, altitude, azimuth) valid, the displayed tab valid (`isTerrainDataValid`, `isParameterCalculationValid`, `isTemperatureCalculationValid` or `isParameter15CValid`, the other tabs are ignored) and no unsaved change.
+**Export and report:** both buttons are enabled only when `canReportOrExport()` is true: the global form (`isGlobalFormValid`: name, span, longitude, latitude, altitude, azimuth) valid, the displayed tab valid (`isTerrainDataValid`, `isParameterCalculationValid`, `isTemperatureCalculationValid` or `isParameter15CValid`, the other tabs are ignored) and no unsaved change (`isSaved`: same calculation method as the last saved snapshot and no edited input, see `hasEditedInputs`).
+
+- `isParameterCalculationValid` delegates to `TANGENT_AIMING_MODES[method].isDataValid` for the three tangent aiming variants, to `isPapotoDataValid` for PAPOTO, and is always true for the PEP placeholder.
+- `isParameter15CValid` is always true in `auto` mode (the tab has no editable input) and uses `isManual15CDataValid` in `manual` mode.
+- While the buttons are disabled, `reportExportBlockedReason()` computes the message displayed in the footer (`data-testid="report-export-blocked-reason"`), built from the `field-measuring.report.blocked-invalid-global`, `blocked-invalid-tabs` and `blocked-unsaved` keys.
+
+**Calculate buttons:** each tab disables its own button until its inputs are valid: `isPapotoDataValid` (PAPOTO), `canCalculate()` of `TangentAimingFormBase` (valid form, `tangente` calculation type, no calculation running), `isTemperatureDataValid` (temperature), and `isFormValid()` (15°C: in `auto` mode a parameter, its uncertainty and a cable temperature with its uncertainty must exist in `outputs`; in `manual` mode `isManual15CDataValid`). The temperature **Estimate** button also requires the worker to be ready (`canEstimateSkyCover`).
 
 **Uniqueness Check:** `isNameAlreadyTaken` computed property checks if `measureData().name` matches any existing measure (excluding self by UUID).
 
@@ -139,8 +145,17 @@ All fields are mandatory and checked for range:
 
 - **Handler**: `FieldMeasuringComponent.onExport()`
 - **Condition**: enabled when `canReportOrExport()`
+- **Source**: `lastSavedMeasureData()` (the saved snapshot), with the current section (`SpanService`), study and `litData` (`PlotService`)
 - **Output**: JSON file (via `buildFieldMeasureExportJson()`) with study/section metadata and measure data
-- **Filename**: `Export Mesure de terrain_<measure name>_<section name>_<date>.json`
+- **Saving**: `saveExportFile()` uses `showSaveFilePicker` when available (typed in `field-measure-export.window.d.ts`; a user cancellation, `AbortError`, is silently ignored; other errors are logged through `LoggerService` and fall back to the download), otherwise downloads the file through a temporary `<a download>` link
+- **Filename**: `Export Mesure de terrain_<measure name>_<section name>_<date>.json` (`buildFieldMeasureExportFilename()`)
+- **Structure**: `{ groundMeasurement: [ { general, measure, span, temperatureCalculation, parameterCalculation, zeroWindCalculation } ] }`, typed in `field-measure-export.interfaces.ts`
+- **`measure`**: `season` is translated (`ETE`/`HIVER` in French, `SUMMER`/`WINTER` in English, keys `field-measuring.export-labels.season.*`); `time` carries seconds and the timezone offset (`HH:mm:ss.SSS±HH:MM`), like `general.date`
+- **`parameterCalculation`**: only the block of the retained method is present in `method`.
+  - `leftSupport` is the label shown by the PAPOTO form (support index + 1, see `formatLeftSupportLabel()`), for PAPOTO and tangent aiming.
+  - Tangent aiming exports `methodName: "VISEES_TANGENTES"` and `subMethodName` `SUPPORT` / `EXTERIEUR` / `INTERIEUR`. The `tangentialSights` block reads the fields of the retained variant through `TANGENT_AIMING_REPORT_CONFIGS`. In the Support variant the entered distance is exported as `leftSupportMeasures.verticalDistance` (no left vertical angle); the other variants export `horizontalDistance` and `verticalAngle`.
+  - `calculatedParameter.criterion` is `{ threshold, unit: "%", status }`, with `threshold` = `0.5` for PAPOTO and `1` for tangent aiming (`PAPOTO_VALIDITY_CRITERION_PERCENT`, `TANGENT_AIMING_VALIDITY_CRITERION_PERCENT`). It is absent while the method is not calculated.
+  - The PEP block is still a placeholder.
 
 ### Report
 
@@ -180,6 +195,7 @@ The following spec files cover the terrain data functionality:
 - `presentation/components/init/init.component.spec.ts` – Init screen (create/select)
 - `presentation/components/field-measuring/field-measuring.component.spec.ts` – Dialog, validation, save/export
 - `presentation/field-measure-export.helpers.spec.ts` – JSON export structure
+- `presentation/helpers.spec.ts` – shared helpers (validity, `formatLeftSupportLabel`, filename)
 - `presentation/components/temperature-calculation/temperature-calculation.component.spec.ts` – Linked tab
 - `presentation/components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component.spec.ts` – Linked tab
 - `presentation/components/calculus-setting/calculus-setting.component.spec.ts` – Linked tab

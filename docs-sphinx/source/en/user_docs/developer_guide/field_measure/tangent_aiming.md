@@ -57,6 +57,28 @@ A negative `distance` places the device on the outer side of the left support (E
 Only the `tangente` calculation type is computed. The `parametre` type can be selected and saved, but the engine only deduces the parameter from the cable tangent angle.
 ```
 
+The **Calculate** button (`canCalculate()`) is enabled when the form is valid (`isFormValid`), no calculation is running and the calculation type is `tangente` (`TANGENT_AIMING_CALCULATION_TYPE`). A failure sets `hasError()` and shows the variant `calculationFailedKey` message.
+
+## Report and export
+
+The three variants are reported through the shared `TANGENT_AIMING_REPORT_CONFIGS` (`services/field-measure-report/field-measure-report.constantes.ts`), which maps each `calculationMethod` to the `FieldMeasure` fields it reads (left support, span length, distance, left and right vertical angles, calculation type, parameter, tangent angle) and to its `outputs` key. Both the PDF report (`buildTangentAimingRows`) and the JSON export (`buildTangentialSightsMethodExport`) read these fields through it, so a variant's inputs are declared once.
+
+JSON export (`presentation/field-measure-export.helpers.ts`):
+
+| Export field | Support | Interior / Exterior |
+|---|---|---|
+| `subMethodName` | `SUPPORT` | `INTERIEUR` / `EXTERIEUR` (`TANGENTIAL_SIGHTS_SUB_METHOD_NAME_EXPORT_VALUES`) |
+| `measuredLength` | `tangentSpanLength` | `interiorSpanLength` / `exteriorSpanLength` |
+| `calculatedLength` | engine span length of the selected span (`getCalculatedSpanLength`) | same |
+| `leftSupportMeasures.verticalDistance` | `cableHAccDistance` (vertical distance) | `null` |
+| `leftSupportMeasures.horizontalDistance` | `null` | `…HAccDistance` |
+| `leftSupportMeasures.verticalAngle` | `null` (no left angle in the form) | `…VerticalAccAngleLeft` |
+| `rightSupportMeasures.verticalAngle` | `cableVerticalAccAngle` | `…VerticalAccAngleRight` |
+| `calculationType` | `type` (`PARAMETRE` / `ANGLE_TANGENT`) and `value` (the entered parameter or tangent angle) | same |
+| `calculatedParameter` | from `outputs.tangentAimingSupport` | from `outputs.tangentAimingInterior` / `…Exterior` |
+
+`calculatedParameter` is `{ parameter: { value, unit: "m", uncertainty }, criterion: { threshold: 1, unit: "%", status } }` (`TANGENT_AIMING_VALIDITY_CRITERION_PERCENT`, `status` = `checkValidity`), and `undefined` until the variant is calculated. `parameterCalculation.leftSupport` is the label of the variant's left support (`formatLeftSupportLabel`).
+
 ## Validation and invalidation
 
 - Numeric inputs are validated by Angular form validators built from `TANGENT_AIMING_FIELD_RULES` (e.g. span length 0–5000 m, angles −200–200 gr); `is…DataValid` rebuilds the form to reuse these validators on a persisted measure.

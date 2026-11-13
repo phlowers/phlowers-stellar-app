@@ -25,8 +25,8 @@ L'onglet Données terrain est implémenté par les composants et fichiers suivan
 3. **Saisie des données** : l'utilisateur remplit les champs de localisation et environnementaux via `HeaderComponent` (partagé) et `FieldDatasComponent` (spécifique à l'onglet).
 4. **Validation** : `FieldMeasuringComponent` calcule `isGlobalFormValid` (nom et en-tête) et `isTerrainDataValid` (onglet Données terrain) en contrôlant les champs obligatoires et leurs bornes.
 5. **Sauvegarde** : appelle `PlotService.modifySection()` pour enregistrer la mesure dans le tableau `field_measures` de la section.
-6. **Export** : appelle `buildFieldMeasureExportJson()` pour générer un export JSON (si tous les onglets passent la validation).
-7. **Rapport** : appelle `buildFieldMeasureReportData()` puis `FieldMeasureReportService.generateReport()` pour générer un rapport PDF de la mesure enregistrée.
+6. **Export** : `onExport()` appelle `buildFieldMeasureExportJson()` sur la dernière version enregistrée (`lastSavedMeasureData`), dès que `canReportOrExport()` est vrai (formulaire global valide, onglet affiché valide, aucune modification non enregistrée), puis enregistre le fichier (voir la section Export ci-dessous).
+7. **Rapport** : appelle `buildFieldMeasureReportData()` puis `FieldMeasureReportService.generateReport()` pour générer un rapport PDF de la mesure enregistrée (même condition d'activation que l'export).
 
 ## Modèle de données
 
@@ -50,7 +50,7 @@ Les données de la mesure sont typées comme `FieldMeasure` (depuis `domain/type
   - `latitude` (number, degrés) : plage -90 à 90
   - `altitude` (number, m) : plage -100 à 9000 ; calculée automatiquement à partir des hauteurs des supports de la portée
   - `azimuth` (number, degrés) : plage -180 à 180
-- **Sorties** (calculées) : `papoto` (PapotoResult | null), `cableTemperature` (TemperatureCalculationResult | null), `parameter15C` (Parameter15CResult | null)
+- **Sorties** (calculées) : `papoto` (PapotoResult | null), `cableTemperature` (TemperatureCalculationResult | null), `parameter15C` (Parameter15CResult | null), `tangentAimingSupport` / `tangentAimingExterior` / `tangentAimingInterior` (TangentAimingSupportResult | null, voir {doc}`tangent_aiming`)
 
 D'autres champs existent pour les autres onglets (calcul du paramètre, température, paramètre à 15 °C) ; voir le modèle complet pour le détail.
 
@@ -122,7 +122,13 @@ Tous les champs sont obligatoires et sont contrôlés pour leurs plages :
 - `windDirection`, `skyCover` : requis
 - `transit` (champ optionnel dans d'autres onglets) : si présent, 0–4000 ampères
 
-**Export et rapport** : les deux boutons ne sont activés que lorsque `canReportOrExport()` est vrai : le formulaire global (`isGlobalFormValid` : nom, tronçon, longitude, latitude, altitude, azimut) valide, l'onglet affiché valide (`isTerrainDataValid`, `isParameterCalculationValid`, `isTemperatureCalculationValid` ou `isParameter15CValid`, les autres onglets sont ignorés) et aucune modification non enregistrée.
+**Export et rapport** : les deux boutons ne sont activés que lorsque `canReportOrExport()` est vrai : le formulaire global (`isGlobalFormValid` : nom, tronçon, longitude, latitude, altitude, azimut) valide, l'onglet affiché valide (`isTerrainDataValid`, `isParameterCalculationValid`, `isTemperatureCalculationValid` ou `isParameter15CValid`, les autres onglets sont ignorés) et aucune modification non enregistrée (`isSaved` : même méthode de calcul que la dernière version enregistrée et aucune saisie modifiée, voir `hasEditedInputs`).
+
+- `isParameterCalculationValid` délègue à `TANGENT_AIMING_MODES[method].isDataValid` pour les trois variantes de visées tangentes, à `isPapotoDataValid` pour PAPOTO, et vaut toujours vrai pour l'espace réservé PEP.
+- `isParameter15CValid` vaut toujours vrai en mode `auto` (l'onglet n'a aucune saisie modifiable) et utilise `isManual15CDataValid` en mode `manual`.
+- Tant que les boutons sont désactivés, `reportExportBlockedReason()` calcule le message affiché dans le pied de la boîte de dialogue (`data-testid="report-export-blocked-reason"`), construit à partir des clés `field-measuring.report.blocked-invalid-global`, `blocked-invalid-tabs` et `blocked-unsaved`.
+
+**Boutons Calculer** : chaque onglet désactive son propre bouton tant que ses saisies ne sont pas valides : `isPapotoDataValid` (PAPOTO), `canCalculate()` de `TangentAimingFormBase` (formulaire valide, type de calcul `tangente`, aucun calcul en cours), `isTemperatureDataValid` (température) et `isFormValid()` (15 °C : en mode `auto`, un paramètre, son incertitude, une température du câble et son incertitude doivent exister dans `outputs` ; en mode `manual`, `isManual15CDataValid`). Le bouton **Estimer** de l'onglet température exige aussi que le worker soit prêt (`canEstimateSkyCover`).
 
 **Contrôle d'unicité** : la propriété calculée `isNameAlreadyTaken` vérifie si `measureData().name` correspond à une mesure existante (en excluant l'élément courant par UUID).
 
@@ -139,8 +145,17 @@ Tous les champs sont obligatoires et sont contrôlés pour leurs plages :
 
 - **Gestionnaire** : `FieldMeasuringComponent.onExport()`
 - **Condition** : activé lorsque `canReportOrExport()`
+- **Source** : `lastSavedMeasureData()` (la version enregistrée), avec le canton courant (`SpanService`), l'étude et `litData` (`PlotService`)
 - **Sortie** : fichier JSON (via `buildFieldMeasureExportJson()`) contenant les métadonnées de l'étude / section et les données de mesure
-- **Nom du fichier** : `Export Mesure de terrain_<measure name>_<section name>_<date>.json`
+- **Enregistrement** : `saveExportFile()` utilise `showSaveFilePicker` lorsqu'il est disponible (typé dans `field-measure-export.window.d.ts` ; une annulation par l'utilisateur, `AbortError`, est ignorée silencieusement ; les autres erreurs sont consignées via `LoggerService` puis basculent sur le téléchargement), sinon télécharge le fichier via un lien `<a download>` temporaire
+- **Nom du fichier** : `Export Mesure de terrain_<measure name>_<section name>_<date>.json` (`buildFieldMeasureExportFilename()`)
+- **Structure** : `{ groundMeasurement: [ { general, measure, span, temperatureCalculation, parameterCalculation, zeroWindCalculation } ] }`, typée dans `field-measure-export.interfaces.ts`
+- **`measure`** : `season` est traduit (`ETE`/`HIVER` en français, `SUMMER`/`WINTER` en anglais, clés `field-measuring.export-labels.season.*`) ; `time` contient les secondes et le décalage horaire (`HH:mm:ss.SSS±HH:MM`), comme `general.date`
+- **`parameterCalculation`** : seul le bloc de la méthode retenue est présent dans `method`.
+  - `leftSupport` est le libellé affiché par le formulaire PAPOTO (index du support + 1, voir `formatLeftSupportLabel()`), pour PAPOTO et les visées tangentes.
+  - Les visées tangentes exportent `methodName: "VISEES_TANGENTES"` et `subMethodName` `SUPPORT` / `EXTERIEUR` / `INTERIEUR`. Le bloc `tangentialSights` lit les champs de la variante retenue via `TANGENT_AIMING_REPORT_CONFIGS`. Pour la variante Support, la distance saisie est exportée dans `leftSupportMeasures.verticalDistance` (pas d'angle vertical gauche) ; les autres variantes exportent `horizontalDistance` et `verticalAngle`.
+  - `calculatedParameter.criterion` vaut `{ threshold, unit: "%", status }`, avec `threshold` = `0.5` pour PAPOTO et `1` pour les visées tangentes (`PAPOTO_VALIDITY_CRITERION_PERCENT`, `TANGENT_AIMING_VALIDITY_CRITERION_PERCENT`). Il est absent tant que la méthode n'est pas calculée.
+  - Le bloc PEP reste un emplacement réservé.
 
 ### Rapport
 
@@ -180,6 +195,7 @@ Les fichiers de spécification suivants couvrent la fonctionnalité des données
 - `presentation/components/init/init.component.spec.ts` – écran d'initialisation (créer/sélectionner)
 - `presentation/components/field-measuring/field-measuring.component.spec.ts` – boîte de dialogue, validation, sauvegarde/export
 - `presentation/field-measure-export.helpers.spec.ts` – structure de l'export JSON
+- `presentation/helpers.spec.ts` – helpers partagés (validité, `formatLeftSupportLabel`, nom de fichier)
 - `presentation/components/temperature-calculation/temperature-calculation.component.spec.ts` – onglet lié
 - `presentation/components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component.spec.ts` – onglet lié
 - `presentation/components/calculus-setting/calculus-setting.component.spec.ts` – onglet lié

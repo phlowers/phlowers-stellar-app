@@ -96,9 +96,48 @@ Dès que vous modifiez une saisie de la mesure (quel que soit l'onglet), le bout
 
 Au bas de la boîte de dialogue, trois boutons contrôlent la session de mesure :
 
-- **Rapport** : génère un fichier PDF (A4 portrait) listant les données des quatre onglets de la mesure enregistrée : seules la méthode (et la sous-méthode) de calcul du paramètre retenues et les valeurs affichées selon le choix « Mise à jour des valeurs » sont reportées. Il est activé quand les données du formulaire sont valides et enregistrées. Le nom du fichier suit le motif : `Rapport Mesure de terrain_<nom de mesure>_<nom de canton>_<date et heure de génération>.pdf`.
-- **Exporter** : génère un fichier JSON avec toutes les données de mesure et les résultats calculés. Il est activé quand les données du formulaire sont valides et enregistrées. Le nom du fichier suit le motif : `Export Mesure de terrain_<nom de mesure>_<nom de section>_<date>.json`.
-- **Enregistrer** : enregistre vos saisies dans la base de données. Il est activé quand la mesure a un nom valide et qu'une saisie a été modifiée depuis le dernier enregistrement.
+| Bouton | Actif quand… | Action |
+|---|---|---|
+| **Enregistrer** | la mesure a un nom non vide et unique, et au moins une saisie a été modifiée depuis le dernier enregistrement (même si la mesure est incomplète) | Enregistre vos saisies dans l'étude |
+| **Rapport** | le formulaire global et l'onglet affiché sont valides **et** la mesure est enregistrée (aucune modification en attente) | Génère un PDF |
+| **Exporter** | mêmes conditions que **Rapport** | Génère un fichier JSON |
+
+Tant que **Rapport** et **Exporter** sont inactifs, un message au-dessus des boutons en donne la raison :
+
+- « Rapport et export indisponibles : nom, tronçon, longitude, latitude, altitude ou azimut incomplet ou invalide. » ;
+- « Rapport et export indisponibles : données incomplètes ou invalides dans *l'onglet affiché*. » ;
+- « Enregistrez d'abord la mesure. »
+
+```{note}
+Seul l'onglet **affiché** est contrôlé : pour vérifier un autre onglet, affichez-le. Dans l'onglet **Paramètre à 15 °C sans vent**, le mode **Auto** est toujours considéré comme valide (il n'a aucune saisie) ; en mode **Manuel**, les quatre valeurs doivent être valides. Cliquer sur **Rapport** ou **Exporter** ne ferme pas la boîte de dialogue.
+```
+
+### Rapport
+
+**Rapport** génère un fichier PDF (A4 portrait) listant les données des quatre onglets de la mesure enregistrée : seules la méthode (et la sous-méthode) de calcul du paramètre retenues et les valeurs affichées selon le choix « Mise à jour des valeurs » sont reportées. Le nom du fichier suit le motif : `Rapport Mesure de terrain_<nom de mesure>_<nom de canton>_<date et heure de génération>.pdf`.
+
+### Export JSON
+
+**Exporter** génère un fichier JSON destiné à une application tierce. Il reprend la **dernière version enregistrée** de la mesure : les champs non renseignés ou non calculés sont exportés vides (`null`) ou absents.
+
+- **Nom du fichier** : `Export Mesure de terrain_<nom de mesure>_<nom de canton>_<date>.json`.
+- **Enregistrement** : si votre navigateur le permet, une fenêtre « Enregistrer sous » vous laisse choisir le dossier et le nom ; fermer cette fenêtre annule l'export. Sinon, le fichier est téléchargé dans le dossier de téléchargements du navigateur.
+- **Contenu** :
+
+| Bloc | Contenu |
+|---|---|
+| `general` | auteur, date de l'étude, nom de l'étude, code et nom de la LIT, canton, condition initiale et cas de charges de l'état courant |
+| `measure` | nom, date (`AAAA-MM-JJ`), heure avec secondes et fuseau horaire (par exemple `14:30:00.000+01:00`), saison (`ETE` / `HIVER` en français), tension, type de canton, câble, nombre de câbles, numéro de phase |
+| `span` | portée, longitude, latitude, altitude, azimut |
+| `temperatureCalculation` | conditions de température (ambiante, vent, flux solaire, transit) et résultats (température et flux solaire du câble) |
+| `parameterCalculation` | méthode retenue, sous-méthode, support de gauche, saisies et résultats de la méthode retenue uniquement |
+| `zeroWindCalculation` | mode (auto ou manuel), paramètre et température d'entrée, paramètre à 15 °C et bornes |
+
+Pour la méthode **Visées tangentes**, `methodName` vaut `VISEES_TANGENTES` et `subMethodName` vaut `SUPPORT`, `INTERIEUR` ou `EXTERIEUR`. Le paramètre calculé est accompagné de son critère (`threshold` : 0,5 % pour PAPOTO, 1 % pour les visées tangentes ; `status` : critère respecté ou non). Le support de gauche est exporté avec le libellé affiché dans le formulaire.
+
+```{note}
+La méthode **PEP** n'est pas encore disponible : son export sera ajouté avec la méthode.
+```
 
 ## Conseils
 

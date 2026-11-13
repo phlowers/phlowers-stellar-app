@@ -101,13 +101,13 @@ The function uses a finite-difference derivative to estimate the cable's sensiti
 - **Auto mode**: all four values must be numbers (no null, no undefined)
 - **Manual mode**: all four manually entered fields must be numbers
 
-Invalid state is checked by `isFormValid()` signal.
+Invalid state is checked by `isFormValid()` signal, which also disables the **Calculate** button. In `auto` mode the parameter and uncertainty come from `getActiveParameterOutput()`, i.e. the result of the retained method (PAPOTO or one of the tangent aiming variants), so the button stays disabled until that method and the temperature calculation have been run.
 
 ### Error Handling
 
 - **`parameter15CError` signal**: set to `true` on validation failure or Python computation error
 - **`isCalculating` signal**: set to `true` while the worker task runs; prevents concurrent clicks
-- **User notification**: when validation fails, the UI displays the message "All fields are mandatory for parameter calculation at 15°C"
+- **User notification**: a permanent note above the form displays "All fields are mandatory for parameter calculation at 15°C" (`field-measuring.parameter-calculation-15.mandatory-msg`)
 
 ## Initial Condition Creation
 

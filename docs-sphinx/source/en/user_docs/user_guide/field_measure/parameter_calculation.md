@@ -109,6 +109,10 @@ This can happen if:
 
 Check your entered values and try again. If the error persists, review your field measurements.
 
+## Report and export
+
+Once the measure is saved, **Report** and **Export** include the inputs and results of the PAPOTO method (see {doc}`terrain_data`). In the JSON export, `parameterCalculation.method.papoto` contains the measured and calculated lengths and elevations, the horizontal and vertical angles, the parameters 1-2, 2-3 and 1-3, then the calculated parameter with its uncertainty and its criterion (`threshold` of 0.5%, `status`: criterion met or not). The left support is exported with the label displayed in the form.
+
 ## Next Step
 
 Once you have a valid PAPOTO result, proceed to the **Temperature calculation** tab to measure the cable's surface temperature and solar radiation. Then move to the **Parameter at 15°C without wind** tab (where the PAPOTO parameter is automatically pre-filled in "auto" mode) to generate the initial condition for simulation.

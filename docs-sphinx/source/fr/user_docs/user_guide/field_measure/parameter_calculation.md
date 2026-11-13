@@ -109,6 +109,10 @@ Cela peut se produire si :
 
 Vérifiez les valeurs saisies et réessayez. Si l'erreur persiste, examinez vos mesures de terrain.
 
+## Rapport et export
+
+Une fois la mesure enregistrée, **Rapport** et **Exporter** reprennent les saisies et les résultats de la méthode PAPOTO (voir {doc}`terrain_data`). Dans l'export JSON, `parameterCalculation.method.papoto` contient les longueurs et dénivelés mesurés et calculés, les angles horizontaux et verticaux, les paramètres 1-2, 2-3 et 1-3, puis le paramètre calculé avec son incertitude et son critère (`threshold` de 0,5 %, `status` : critère respecté ou non). Le support de gauche est exporté avec le libellé affiché dans le formulaire.
+
 ## Étape suivante
 
 Une fois un résultat PAPOTO valide obtenu, passez à l'onglet **Calcul de la température** pour mesurer la température de surface du câble et le rayonnement solaire. Puis passez à l'onglet **Paramètre à 15 °C sans vent** (où le paramètre PAPOTO est prérempli automatiquement en mode « auto ») pour générer la condition initiale de simulation.
