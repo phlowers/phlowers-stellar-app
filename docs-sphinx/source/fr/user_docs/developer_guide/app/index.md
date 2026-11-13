@@ -11,6 +11,7 @@ CRR de brins coupés <cut_strands>
 date_time_format
 Worker moteur <engine_worker>
 Estimation <estimation>
+Tranchées forestières <forest_trenches>
 Codes d'erreur <how_to_add_error_codes>
 i18n
 Obstacles, sols et distances <obstacles_floors_and_distances>
