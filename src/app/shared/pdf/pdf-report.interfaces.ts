@@ -25,6 +25,8 @@ export interface PdfBulletItem {
   value: string;
   /** When true, the value wraps across multiple lines (drawWrappingBulletItem); otherwise a single line. */
   wrap?: boolean;
+  /** When defined, a vector tick (true) or cross (false) is drawn right after the value. */
+  status?: boolean;
 }
 
 /** Labels of the study & canton cartouche shared by the canton-based reports. */

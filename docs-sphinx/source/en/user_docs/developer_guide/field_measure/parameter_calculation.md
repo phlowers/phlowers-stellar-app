@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The **Parameter Calculation** tab provides field measurement methods to compute the electrical sag parameter from on-site angle and distance observations. Currently, only the **PAPOTO** method is implemented; the Tangent Aiming and PEP methods are placeholder components (disabled radio buttons).
+The **Parameter Calculation** tab provides field measurement methods to compute the electrical sag parameter from on-site angle and distance observations. The **PAPOTO** and **Tangent Aiming** methods (Support, Interior and Exterior variants; see {doc}`tangent_aiming`) are implemented; the PEP method is a placeholder component (disabled radio button).
 
 The computed parameter feeds the **Parameter at 15°C without wind** tab in "auto" mode, which uses `outputs.papoto.parameter` and `outputs.papoto.uncertainty` to perform subsequent thermal calculations.
 
@@ -11,14 +11,13 @@ The computed parameter feeds the **Parameter at 15°C without wind** tab in "aut
 The parameter calculation tab is implemented by the following components (relative paths from `src/app/features/studio/field-measuring/`):
 
 - **Method selector & container**: `presentation/components/calculus-setting/calculus-setting.component.ts` and `.html`
-  - Radio buttons for PAPOTO, Tangent Aiming (disabled), PEP (disabled)
+  - Radio buttons for PAPOTO, Tangent Aiming (Support, Interior, Exterior), PEP (disabled)
   - Conditional rendering of child component based on selection
 - **PAPOTO measurement form**: `presentation/components/calculus-setting/papoto/papoto.component.ts` and `.html`
   - Input fields for span length, elevation difference, and 12 angles (HL, H1–H3, HR, VL, V1–V3, VR)
   - Help dialog with visual guidance (`papoto-help.webp` image)
   - Results section (parameter, uncertainty, parameters 1–2, 2–3, 1–3, 0.5% validity criterion)
   - **Placeholder components** (no logic):
-    - `presentation/components/calculus-setting/tangent-aiming/tangent-aiming.component.ts` (disabled)
     - `presentation/components/calculus-setting/pep/pep.component.ts` (disabled)
 - **Domain model**: `domain/types.ts` (exports `FieldMeasure` interface with PAPOTO fields and `PapotoResult`)
 - **Helpers**: `presentation/helpers.ts` and `presentation/constants.ts`

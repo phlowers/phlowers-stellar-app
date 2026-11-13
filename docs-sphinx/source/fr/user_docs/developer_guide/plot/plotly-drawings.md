@@ -12,8 +12,9 @@ tracé ne contienne de `'#2563eb'` ou de `size: 14` codés en dur.
 ## Ce que c'est
 
 Un unique objet `as const`, regroupé par **objet dessiné** (`span`, `support`, `insulator`, `loadPunctual`,
-`cableModification`, `cutStrands`, `obstacle`, `floor`, `distance`, `freePositioning`, `conformity`, `supportPlot`,
-…), plus un groupe `plot` pour ce que tous les tracés partagent (police, arrière-plans, grille).
+`cableModification`, `cableSupportManip`, `cutStrands`, `obstacle`, `floor`, `distance`, `freePositioning`,
+`conformity`, `supportPlot`, …), plus un groupe `plot` pour ce que tous les tracés partagent (police, arrière-plans,
+grille).
 
 ```typescript
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
@@ -37,8 +38,8 @@ Lisez-le directement là où il est nécessaire. Ne le ré-exportez pas via un f
   conformité : 2D, tracé des supports : 3D) utilise de simples nombres.
 - **Apparences de sélection** : un dessin dont l'apparence change avec la sélection déclare `unselected` et
   `selected`. Un objet composé de plusieurs points (obstacle, sol) déclare également `inactivePoint`, l'apparence des
-  autres points de l'objet sélectionné. Les icônes (charges, modification de câble, brins coupés) ne déclarent que
-  `unselected`.
+  autres points de l'objet sélectionné. Les icônes (charges, modification de câble, manipulation de câble sur support,
+  brins coupés) ne déclarent que `unselected`.
 - **Des pixels, pas des unités de données** : les décalages tels que `arrowYOffset` ou `cutStrands.offsetY` sont en
   pixels, afin que l'écart reste identique quel que soit le niveau de zoom.
 - **Commenter le pourquoi** : lorsqu'une valeur semble arbitraire (un écart de 40 px entre deux icônes, une opacité

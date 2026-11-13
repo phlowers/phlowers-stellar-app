@@ -27,7 +27,9 @@ Tous les champs utilisent le camelCase à la frontière du worker. Chaque tâche
 
 Pour l'estimation de corde, `targetVerticalDistance` correspond à l'altitude du câble moins celle de l'obstacle et peut être négative. Sa valeur doit être finie, mais n'a pas à être positive. `supportIndex` indique où la corde est fixée ; `spanIndex` désigne toujours la portée contenant l'obstacle. Les conditions fixes facultatives peuvent être omises ou définies à `null`.
 
-La validation commune rejette les valeurs obligatoires absentes ou non finies, les indices négatifs ou fractionnaires et les points d'obstacle qui ne contiennent pas trois coordonnées finies. `targetDistance` et `loadPositionDistance` doivent être strictement positifs ; si `ropeLineicMass` est fourni, il doit également être strictement positif. Les bornes doivent contenir exactement deux valeurs finies dans l'ordre croissant.
+Au lieu de coordonnées brutes, une tâche peut désigner un obstacle enregistré dans l'étude avec `obstacleUuid` et `pointIndex` (indexé à partir de 0, alors obligatoire). Le point est alors résolu par `find_obstacle_point` (partagé avec la conformité) à partir des coordonnées absolues du moteur, dans le repère du canton, et `obstaclePoint` est ignoré. Le frontend doit utiliser cette forme : les points d'obstacle rendus dans `litData.obstacles` sont reprojetés pour la vue 2D et ne sont pas dans le repère du moteur. Un `obstacleUuid` inconnu lève `ObstacleNotFoundError` ; un `pointIndex` absent, négatif ou fractionnaire lève `EstimationInputError`, un `pointIndex` hors limites `ConformityInputError` (cas inatteignable depuis l'interface).
+
+La validation commune rejette les valeurs obligatoires absentes ou non finies, les indices négatifs ou fractionnaires et les points d'obstacle qui ne contiennent pas trois coordonnées finies. `targetDistance` et `loadPositionDistance` doivent être positifs ou nuls ; si `ropeLineicMass` est fourni, il doit être strictement positif. Un `targetDistance` nul est transmis au moteur, qui ne l'atteint jamais : les estimations de température et de charge lèvent `EstimationNotConvergedError`, celle du vent une `SolverError` dès que la chaîne d'isolateurs se retourne. Les bornes doivent contenir exactement deux valeurs finies dans l'ordre croissant.
 
 ## Indexation des portées et supports virtuels
 
@@ -60,6 +62,7 @@ Le nom de la classe d'exception Python (ou le texte de l'avertissement) est rech
 | `EstimationNotConvergedError` | La cible est inaccessible dans les bornes ou la distance ne peut pas être calculée à une borne. | `SOLVER_DID_NOT_CONVERGE` | Erreur | `shared.python-errors.estimation-not-converged-error` |
 | `EstimateOnSplitSupportError` | Un support virtuel divise la portée demandée. | `CALCULATION_ERROR` | Erreur | `shared.python-errors.estimate-on-split-support-error` |
 | `InvalidManipulationIndex` | Un index de portée ou de support est hors des limites valides. | `CALCULATION_ERROR` | Erreur | `shared.python-errors.invalid-manipulation-index` |
+| `ObstacleNotFoundError` | `obstacleUuid` n'est pas enregistré dans l'étude. | `CALCULATION_ERROR` | Erreur | `shared.python-errors.obstacle-not-found-error` |
 | `EstimationWarning` | Une charge déjà présente sur la portée estimée est ignorée par l'estimation de charge. Les charges des autres portées sont conservées. | Aucun échec de tâche | Avertissement | `shared.python-errors.estimation-warning` |
 
 `handle-task.ts` déduit `SOLVER_DID_NOT_CONVERGE` en vérifiant si le message d'exception contient la chaîne littérale `did not converge` ; les autres exceptions utilisent le `CALCULATION_ERROR` générique. Les diagnostics Python sont traités séparément et contiennent le message traduit et sa sévérité. L'avertissement de charge accompagne le résultat réussi, qui peut donc toujours être utilisé.
@@ -67,6 +70,14 @@ Le nom de la classe d'exception Python (ou le texte de l'avertissement) est rech
 ### Ajouter un code d'erreur d'estimation
 
 Pour une nouvelle erreur ou un nouvel avertissement Python, ajoutez le nom de la classe d'exception comme valeur dans `PythonErrorCode`, définissez sa sévérité dans `python-error-severity.ts`, ajoutez la correspondance `shared.python-errors.*` dans `python-error-messages.ts`, puis ajoutez les traductions anglaise et française correspondantes dans `public/i18n/en.json` et `public/i18n/fr.json`. Vérifiez que le texte de l'exception ou de l'avertissement contient exactement la valeur de l'énumération. La recherche est fondée sur les sous-chaînes et la première correspondance dans l'ordre de déclaration de l'énumération est retenue ; évitez donc les codes qui se chevauchent et placez les valeurs les plus spécifiques avant les valeurs plus générales. Consultez [Ajouter des codes d'erreur et d'avertissement](how_to_add_error_codes.md) pour connaître le pipeline de diagnostic complet.
+
+## Outil du Studio : Estimations
+
+La modale **Estimations** (`src/app/features/studio/estimations/`) s'ouvre depuis le menu **Outils** du Studio et depuis les accès rapides (outil `estimations` du `ToolbarDialogService`). Elle contient trois onglets ; seul **Température de conformité** (US.EST.TCO) est implémenté, les deux autres sont affichés désactivés en attendant leur récit utilisateur.
+
+L'onglet **Température de conformité** (`TemperatureEstimationComponent`) invite à choisir un obstacle tant qu'aucun n'est sélectionné, et liste les obstacles du canton ayant au moins un point (filtrables par nom). L'obstacle sélectionné dans le Studio (`ObstaclesService.selectedMeasureUuid`) est présélectionné à l'ouverture de l'onglet ; sinon, ou si la sélection est un sol, aucun n'est sélectionné. La liste **Point** est en lecture seule et positionnée sur le premier point de l'obstacle sélectionné. La **Distance verticale cible** est obligatoire, dans ]0 ; 150] m avec au plus 2 décimales (minimum `0.01` : le moteur accepte une distance nulle mais ne l'atteint jamais et répond `EstimationNotConvergedError`). **Calculer** exécute `estimateTemperature` avec `spanIndex = obstacle.supportIndex`, `obstacleUuid`, `pointIndex` et `bounds = [-50, 250]` °C ; l'obstacle et la distance sont verrouillés jusqu'à la fin du calcul, pour que le résultat leur corresponde toujours. Le résultat est affiché avec 2 décimales et peut être copié dans le presse-papier ; il est effacé dès qu'une saisie ou le canton change. En cas d'échec, le message d'erreur Python localisé est affiché, ou à défaut `studio.estimations.calculation-failed`.
+
+> Le moteur estime la température pour une distance 3D (`distance_3d`) entre le câble et le point d'obstacle, alors que l'interface libelle la saisie *Distance verticale cible* comme spécifié par le récit utilisateur.
 
 ## Limitation connue : direction du vent
 
@@ -87,7 +98,7 @@ cd stellar-engine && uv run pytest test/core/test_estimation.py -q -p no:logging
 Lancez les tests TypeScript ciblés depuis la racine du dépôt :
 
 ```bash
-npx vitest run src/app/core/services/worker_python/tasks/
+npx vitest run src/app/core/services/worker_python/tasks/ src/app/features/studio/estimations/
 ```
 
 Les tests Python couvrent la structure des résultats, les estimations, la validation des entrées, les cibles inaccessibles, la conversion d'index, les portées divisées par des supports virtuels, l'avertissement de charge existante et la préservation de l'état de l'étude.

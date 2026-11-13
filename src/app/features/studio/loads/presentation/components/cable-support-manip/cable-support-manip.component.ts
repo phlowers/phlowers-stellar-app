@@ -225,6 +225,18 @@ export class CableSupportManipComponent {
     untracked(() => this.onSupportChange(this.form.controls.support.value));
   });
 
+  // Pre-select the support whose manipulation icon was clicked on the section plot: patch the support control and
+  // re-run the pre-fill flow, then clear the signal so the same support can be selected again
+  private readonly _selectSupportFromPlot = effect(() => {
+    const supportUuid = this.cableSupportManipService.selectedSupportUuid();
+    if (!supportUuid) return;
+    untracked(() => {
+      this.form.controls.support.setValue(supportUuid);
+      this.onSupportChange(supportUuid);
+      this.cableSupportManipService.clearSelectedSupport();
+    });
+  });
+
   // Re-enable manip2 animations after each render cycle so that
   // user-triggered add/remove interactions still animate normally.
   private readonly _reenableManip2Anim = afterEveryRender(() => {
@@ -367,8 +379,15 @@ export class CableSupportManipComponent {
 
     this.isLoading.set(true);
     try {
+      let deleted = false;
       if (uuid) {
         await this.cableSupportManipService.delete(uuid);
+        deleted = true;
+      } else if (supportUuid && chargeUuid) {
+        // Applied then saved with the load case only: no section entry, but the plot still shows it
+        deleted = await this.cableSupportManipService.deleteFromCharge(supportUuid, chargeUuid);
+      }
+      if (deleted) {
         await this.cableSupportManipService.reloadSection();
         this.notificationService.success(
           this.translocoService.translate('loads.cable-support-manip.deleted-notification')

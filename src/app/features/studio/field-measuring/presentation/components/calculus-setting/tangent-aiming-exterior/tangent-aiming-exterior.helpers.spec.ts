@@ -1,3 +1,4 @@
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import {
   applyTangentAimingExteriorDefaults,
@@ -80,16 +81,21 @@ describe('tangent-aiming-exterior helpers', () => {
       });
     });
 
-    it('should force the tangente calculation type, the only one supported', () => {
+    it('should keep the chosen calculation type', () => {
       const data = {
         ...createTestMeasureData(),
         exteriorCalculationType: 'parametre' as const,
         exteriorParameter: 1500
       };
       expect(applyTangentAimingExteriorDefaults(data, '0')).toMatchObject({
-        exteriorCalculationType: 'tangente',
+        exteriorCalculationType: 'parametre',
         exteriorParameter: 1500
       });
+    });
+
+    it('should default the calculation type to tangente when missing', () => {
+      const data = { ...createTestMeasureData(), exteriorCalculationType: undefined } as unknown as FieldMeasure;
+      expect(applyTangentAimingExteriorDefaults(data, '0').exteriorCalculationType).toBe('tangente');
     });
 
     it('should not override an already chosen left support', () => {

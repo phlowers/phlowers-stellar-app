@@ -186,8 +186,13 @@
     "tangent-aiming-h-acc-distance-label": "Horizontal dist. from device to cable attach. of left support",
     "tangent-aiming-vertical-acc-angle-left-label": "Vertical angle from device to cable attach. of left support",
     "criterion-label": "Criterion",
+    "criterion-one-percent-label": "1% criterion",
     "criterion-respected": "Criterion respected",
-    "criterion-not-respected": "Criterion not respected"
+    "criterion-not-respected": "Criterion not respected",
+    "obstacle-name-label": "Obstacle name",
+    "celsius-unit": "°C",
+    "copied-to-clipboard": "Copied to clipboard",
+    "copy-to-clipboard-failed": "Failed to copy to the clipboard"
   },
   "auth": {
     "login-page": {
@@ -388,6 +393,7 @@
       "support-out-of-range-error": "The support is out of the valid range.",
       "generated-points-none-error": "No generated points were found after computation.",
       "night-time-error": "Sky cover cannot be estimated because the provided time is during the night.",
+      "obstacle-not-found-error": "The obstacle is not registered in the calculation engine.",
       "estimate-on-split-support-error": "Estimation is not possible on a span split by a virtual support.",
       "estimation-input-error": "The estimation inputs are missing or invalid.",
       "estimation-not-converged-error": "The target cannot be reached within the estimation bounds.",
@@ -837,6 +843,32 @@
         "angle-tangent": "ANGLE_TANGENT",
         "parameter": "PARAMETRE"
       }
+    },
+    "report": {
+      "title": "Field measure report",
+      "terrain-data-title": "Field data",
+      "measure-date": "Measure date",
+      "measure-time": "Measure time",
+      "method": "Method",
+      "measured-length": "Measured length",
+      "calculated-length": "Calculated length",
+      "measured-elevation": "Measured elevation difference",
+      "calculated-elevation": "Calculated elevation difference",
+      "vertical-distance-left": "Vert. dist. device to left cable attachment",
+      "horizontal-distance-left": "Horiz. dist. device to left cable attachment",
+      "vertical-angle-left": "Vertical angle device to left cable attachment",
+      "vertical-angle-right": "Vertical angle device to right cable attachment",
+      "calculation-type": "Calculation type",
+      "sights-length": "Length left sight right sight",
+      "sights-elevation": "Elevation difference left sight right sight",
+      "sight-x": "Sight {{ index }} X",
+      "sight-y": "Sight {{ index }} Y",
+      "wind-incidence": "Wind incidence",
+      "measured-solar-flux": "Measured solar flux",
+      "temperature-uncertainty": "Temperature uncertainty",
+      "blocked-invalid-tabs": "Report and export unavailable: incomplete or invalid data in {{ tabs }}.",
+      "blocked-invalid-global": "Report and export unavailable: incomplete or invalid name, span, longitude, latitude, altitude or azimuth.",
+      "blocked-unsaved": "Save the measure first."
     }
   },
   "studio": {
@@ -895,12 +927,20 @@
       "measurement-points-option": "Measurement points",
       "field-measurements-tool": "Field measurements",
       "vtl-and-guying-tool": "VTL & Guying",
-      "cable-marking-tool": "Cable marking",
       "strand-rrts-tool": "Strand RRTS",
       "forest-trenches-tool": "Forest trenches",
-      "height-and-lateral-distance-tool": "Height & lateral distance",
       "cable-adjustment-tool": "Cable adjustment",
       "rrts-cut-strands": "RRTS cut strands"
+    },
+    "estimations": {
+      "title": "Estimations",
+      "conformity-temperature-label": "Conformity temperature",
+      "wind-pressure-tab": "Wind pressure for min. distance",
+      "vertical-effort-tab": "Vertical cable displacement effort",
+      "choose-obstacle-info": "To use the estimation tool, you must first choose an obstacle",
+      "target-vertical-distance-label": "Target vertical distance",
+      "copy-temperature-aria-label": "Copy the conformity temperature",
+      "calculation-failed": "Failed to estimate the conformity temperature"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Expand details",
@@ -966,7 +1006,6 @@
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Create new obstacle",
-      "obstacle-name-label": "Obstacle name",
       "obstacle-altitude-type-label": "Obstacle altitude type",
       "free-positioning-forced-frame-warning": "Free positioning mode is only available with a left reference support, an absolute altitude type and a span-axis lateral distance type. The current obstacle settings differ, so the results may be inaccurate.",
       "delete-point-aria-label": "delete point",

@@ -9,6 +9,7 @@ import { ObstaclesTableComponent } from '../components/obstacles-table/obstacles
 import { StrandRrtsComponent } from '../components/strand-rrts/strand-rrts.component';
 import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
 import { ForestTrenchesComponent } from '@features/studio/forest-trenches/presentation/components/forest-trenches/forest-trenches.component';
+import { EstimationsComponent } from '@features/studio/estimations/presentation/components/estimations/estimations.component';
 import {
   DialogPhase,
   LoadTableContext,
@@ -75,6 +76,10 @@ export class ToolbarDialogService {
     'forest-trenches': {
       component: ForestTrenchesComponent,
       dialogStyle: { width: '86.5625rem', 'max-width': '90%' }
+    },
+    'estimations': {
+      component: EstimationsComponent,
+      dialogStyle: { width: '43.5rem', 'max-width': '90%' }
     },
     'other-tool': {
       component: null!

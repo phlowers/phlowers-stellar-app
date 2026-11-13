@@ -45,8 +45,8 @@ describe('TangentAimingExterior component', () => {
     component.form.controls.leftSupport.setValue('0');
     setInput('span-length-input', '100');
     setInput('h-acc-distance-input', '10');
-    setInput('vertical-acc-angle-left-input', '5');
-    setInput('vertical-acc-angle-right-input', '6');
+    setInput('vertical-acc-angle-left-input', '5.123');
+    setInput('vertical-acc-angle-right-input', '6.123');
   };
 
   beforeEach(async () => {
@@ -124,18 +124,15 @@ describe('TangentAimingExterior component', () => {
     expect(getByTestId('tangent-angle-input')).toBeNull();
   });
 
-  it('should expose parameter and tangent calculation type options with only the tangent one enabled', () => {
-    expect(component.calculationTypeOptions().map(({ value, disabled }) => ({ value, disabled }))).toEqual([
-      { value: 'parametre', disabled: true },
-      { value: 'tangente', disabled: false }
-    ]);
+  it('should expose both the parameter and tangent calculation type options as enabled', () => {
+    expect(component.calculationTypeOptions().map(({ value }) => value)).toEqual(['parametre', 'tangente']);
   });
 
   it('should disable the calculate button until the form is valid, then enable it', () => {
     const button = () => getByTestId('calculate-tangent-aiming-exterior-btn') as HTMLButtonElement;
     expect(button().disabled).toBe(true);
     fillCommonFields();
-    setInput('tangent-angle-input', '101.4');
+    setInput('tangent-angle-input', '101.456');
     expect(button().disabled).toBe(false);
   });
 
@@ -213,6 +210,20 @@ describe('TangentAimingExterior component', () => {
     setInput('h-acc-distance-input', '12');
     expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
     expect(component.measureData().exteriorHAccDistance).toBe(12);
+  });
+
+  it('should not allow a calculation on the parametre type, which the engine cannot calculate', async () => {
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    expect(component.canCalculate()).toBe(true);
+    component.updateCalculationType('parametre');
+    fixture.detectChanges();
+    expect(component.canCalculate()).toBe(false);
+    await component.calculate();
+    expect(workerPythonService.runTask).not.toHaveBeenCalled();
+    component.updateCalculationType('tangente');
+    fixture.detectChanges();
+    expect(component.canCalculate()).toBe(true);
   });
 
   it('should clear the result when the calculation type changes', async () => {
@@ -391,29 +402,16 @@ describe('TangentAimingExterior component', () => {
     expect(component.measureData().outputs.tangentAimingSupport).toBe(support);
   });
 
-  it('should only enable the calculate button when an input changed since the last calculation', async () => {
+  it('should keep the calculate button enabled before and after a calculation on a valid form', async () => {
     const button = () => getByTestId('calculate-tangent-aiming-exterior-btn') as HTMLButtonElement;
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
     expect(button().disabled).toBe(false);
     await component.calculate();
     fixture.detectChanges();
-    expect(button().disabled).toBe(true);
+    expect(button().disabled).toBe(false);
     setInput('h-acc-distance-input', '12');
     expect(component.measureData().exteriorHAccDistance).toBe(12);
     expect(button().disabled).toBe(false);
-  });
-
-  it('should keep the calculate button disabled while the inputs are back to their calculated values', async () => {
-    const button = () => getByTestId('calculate-tangent-aiming-exterior-btn') as HTMLButtonElement;
-    componentRef.setInput('measureData', validMeasure());
-    fixture.detectChanges();
-    await component.calculate();
-    fixture.detectChanges();
-    const calculated = String(component.measureData().exteriorHAccDistance);
-    setInput('h-acc-distance-input', '12');
-    expect(button().disabled).toBe(false);
-    setInput('h-acc-distance-input', calculated);
-    expect(button().disabled).toBe(true);
   });
 });

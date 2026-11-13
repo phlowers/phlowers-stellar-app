@@ -12,20 +12,35 @@ returns a JSON-serializable dictionary. The study is left untouched.
 
 Common inputs:
     spanIndex: Index of the span (before manipulation) holding the obstacle.
-    obstaclePoint: Obstacle coordinates ``[x, y, z]`` in meters.
+    obstaclePoint: Obstacle coordinates ``[x, y, z]`` in meters (section
+        frame). Ignored when ``obstacleUuid`` is given.
+    obstacleUuid: Optional uuid of an obstacle registered in the study; its
+        point ``pointIndex`` (required then) is used as obstacle point.
     bounds: Optional ``[lower, upper]`` search interval of the estimated
         variable. Defaults to the mechaphlowers defaults.
     temperature: Optional fixed cable temperature in °C.
     windPressure: Optional fixed wind pressure in Pa.
     iceThickness: Optional fixed ice thickness in cm.
 
-Raises (each class name is a ``PythonErrorCode`` on the frontend side):
+Raises (each class name is a ``PythonErrorCode`` on the frontend side, except
+``ConformityInputError`` which falls back to the caller's generic message):
     EstimationInputError: An input is missing or invalid.
+    ObstacleNotFoundError: ``obstacleUuid`` is not registered in the study.
+    ConformityInputError: ``pointIndex`` is out of the obstacle points (not
+        reachable from the UI).
     EstimationNotConvergedError: The target is not reachable within bounds.
     InvalidManipulationIndex: ``spanIndex`` or ``supportIndex`` is out of
         range (mechaphlowers).
     EstimateOnSplitSupportError: ``spanIndex`` is split by a virtual
         support (mechaphlowers).
+    SolverError: The balance solver fails for a trial value; its subclasses
+        (``ConvergenceError``, ``SuspectedChainReversal``) are forwarded
+        unchanged so the frontend shows the most specific message
+        (mechaphlowers).
+
+Warns (forwarded to the frontend through the captured Python warnings):
+    BalanceEngineWarning: The study had not been adjusted yet; mechaphlowers
+        then runs the adjustment on its internal copy (mechaphlowers).
 """
 
 import logging
@@ -37,6 +52,7 @@ from mechaphlowers import SectionStudy, units
 from mechaphlowers.core.numeric import EstimationResult
 from mechaphlowers.entities.errors import EstimateOnSplitSupportError
 
+from stellar_engine.core.conformity.runner import find_obstacle_point
 from stellar_engine.entities.errors import (
     EstimationInputError,
     EstimationNotConvergedError,
@@ -69,10 +85,12 @@ def _optional_float(inputs: dict, key: str) -> float | None:
     return None if value is None else _to_finite_float(value, key)
 
 
-def _positive_float(inputs: dict, key: str) -> float:
+def _non_negative_float(inputs: dict, key: str) -> float:
     value = _required_float(inputs, key)
-    if value <= 0:
-        raise EstimationInputError(_Errors.estimation_not_positive(key, value))
+    if value < 0:
+        raise EstimationInputError(
+            _Errors.estimation_not_positive(key, value, allow_zero=True)
+        )
     return value
 
 
@@ -85,7 +103,12 @@ def _index(inputs: dict, key: str) -> int:
     return int(value)
 
 
-def _obstacle_point(inputs: dict) -> np.ndarray:
+def _obstacle_point(inputs: dict, study: SectionStudy) -> np.ndarray:
+    obstacle_uuid = inputs.get("obstacleUuid")
+    if obstacle_uuid is not None:
+        return find_obstacle_point(
+            study, str(obstacle_uuid), _index(inputs, "pointIndex")
+        )
     point = inputs.get("obstaclePoint")
     if point is None:
         raise EstimationInputError(
@@ -149,7 +172,14 @@ def _solve(
     solve: Callable[[dict], EstimationResult],
     bounds: tuple[float, float] | None,
 ) -> dict:
-    """Run the estimation and convert mechaphlowers failures to Stellar errors."""
+    """Run the estimation and convert mechaphlowers failures to Stellar errors.
+
+    Raises:
+        EstimationNotConvergedError: If the target is not reached, or if the
+            objective is NaN at the bounds (plain ``ValueError``).
+        SolverError: Forwarded unchanged, like the typed ``ValueError``
+            subclasses of mechaphlowers, to keep their own frontend code.
+    """
     kwargs = {} if bounds is None else {"bounds": bounds}
     try:
         result = solve(kwargs)
@@ -181,10 +211,19 @@ def estimate_temperature(inputs: dict, study: SectionStudy) -> dict:
 
     Specific inputs: ``targetDistance`` (m), optional ``windPressure`` and
     ``iceThickness``.
+
+    Raises:
+        SolverError: If the balance solver fails for a trial temperature
+            (``ConvergenceError``, ``SuspectedChainReversal``).
+        EstimationNotConvergedError: If the target is not reachable within
+            the bounds, or the distance is NaN at the bounds.
+
+    Warns:
+        BalanceEngineWarning: If the study has not been adjusted yet.
     """
     span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
-    obstacle_point = _obstacle_point(inputs)
-    target_distance = _positive_float(inputs, "targetDistance")
+    obstacle_point = _obstacle_point(inputs, study)
+    target_distance = _non_negative_float(inputs, "targetDistance")
     wind_pressure = _optional_float(inputs, "windPressure")
     ice_thickness = _ice_thickness_meters(inputs)
     return _solve(
@@ -208,8 +247,8 @@ def estimate_wind(inputs: dict, study: SectionStudy) -> dict:
     ``iceThickness``.
     """
     span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
-    obstacle_point = _obstacle_point(inputs)
-    target_distance = _positive_float(inputs, "targetDistance")
+    obstacle_point = _obstacle_point(inputs, study)
+    target_distance = _non_negative_float(inputs, "targetDistance")
     new_temperature = _optional_float(inputs, "temperature")
     ice_thickness = _ice_thickness_meters(inputs)
     return _solve(
@@ -234,9 +273,11 @@ def estimate_load(inputs: dict, study: SectionStudy) -> dict:
     and ``iceThickness``. Loads on other spans are kept.
     """
     span_index = _index(inputs, "spanIndex")
-    obstacle_point = _obstacle_point(inputs)
-    target_distance = _positive_float(inputs, "targetDistance")
-    load_position_distance = _positive_float(inputs, "loadPositionDistance")
+    obstacle_point = _obstacle_point(inputs, study)
+    target_distance = _non_negative_float(inputs, "targetDistance")
+    load_position_distance = _non_negative_float(
+        inputs, "loadPositionDistance"
+    )
     new_temperature = _optional_float(inputs, "temperature")
     wind_pressure = _optional_float(inputs, "windPressure")
     ice_thickness = _ice_thickness_meters(inputs)
@@ -266,7 +307,7 @@ def estimate_rope(inputs: dict, study: SectionStudy) -> dict:
     """
     support_index = _index(inputs, "supportIndex")
     span_index = _index(inputs, "spanIndex")
-    obstacle_point = _obstacle_point(inputs)
+    obstacle_point = _obstacle_point(inputs, study)
     target_vertical_distance = _required_float(
         inputs, "targetVerticalDistance"
     )

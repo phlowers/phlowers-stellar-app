@@ -8,16 +8,23 @@ import numpy as np
 import pandas as pd
 import pytest
 from mechaphlowers import CableArray, SectionArray, SectionStudy
+from mechaphlowers.core.numeric import EstimationResult
 from mechaphlowers.entities.errors import (
+    BalanceEngineWarning,
+    ConvergenceError,
     EstimateOnSplitSupportError,
     EstimationWarning,
     InvalidManipulationIndex,
+    SolverError,
+    SuspectedChainReversal,
 )
 
 from stellar_engine.core import estimation
 from stellar_engine.entities.errors import (
+    ConformityInputError,
     EstimationInputError,
     EstimationNotConvergedError,
+    ObstacleNotFoundError,
 )
 
 N_SPANS = 4
@@ -27,8 +34,8 @@ OBSTACLE = [250.0, 10.0, 20.0]
 RESULT_KEYS = {"value", "residual", "iterations", "converged"}
 
 
-@pytest.fixture
-def study(cable_array_AM600: CableArray) -> SectionStudy:
+def build_study(cable_array: CableArray) -> SectionStudy:
+    """Build the test section study, without adjustment."""
     section_array = SectionArray(
         pd.DataFrame(
             {
@@ -46,9 +53,12 @@ def study(cable_array_AM600: CableArray) -> SectionStudy:
         sagging_temperature=15,
     )
     section_array.add_units({"line_angle": "grad"})
-    section_study = SectionStudy(
-        cable_array=cable_array_AM600, section_array=section_array
-    )
+    return SectionStudy(cable_array=cable_array, section_array=section_array)
+
+
+@pytest.fixture
+def study(cable_array_AM600: CableArray) -> SectionStudy:
+    section_study = build_study(cable_array_AM600)
     section_study.solve_adjustment()
     return section_study
 
@@ -184,7 +194,7 @@ def test_estimate_rope(study: SectionStudy):
     assert set(result) == RESULT_KEYS
     assert result["converged"] is True
     assert result["value"] == pytest.approx(5.0, abs=0.05)
-    assert study.manipulation._rope_or_chain_overlay is None
+    assert len(study.manipulation._rope_or_chain_overlay) == 0
     assert_study_untouched(study, dxdydz_before)
 
 
@@ -248,7 +258,7 @@ VALID_TEMPERATURE_INPUTS = {
         ({"obstaclePoint": None}, "Missing estimation input: obstaclePoint"),
         ({"targetDistance": float("nan")}, "targetDistance must be a finite"),
         ({"targetDistance": "abc"}, "targetDistance must be a finite"),
-        ({"targetDistance": 0.0}, "targetDistance must be strictly positive"),
+        ({"targetDistance": -1.0}, "targetDistance must be positive or zero"),
         ({"spanIndex": -1}, "spanIndex must be a non-negative integer"),
         ({"spanIndex": 0.5}, "spanIndex must be a non-negative integer"),
         ({"obstaclePoint": [1.0, 2.0]}, "obstaclePoint must contain 3"),
@@ -273,7 +283,7 @@ def test_estimate_invalid_inputs_raise_estimation_input_error(
         (
             estimation.estimate_load,
             {"targetDistance": 30.0, "loadPositionDistance": -1.0},
-            "loadPositionDistance must be strictly positive",
+            "loadPositionDistance must be positive or zero",
         ),
         (
             estimation.estimate_rope,
@@ -297,6 +307,95 @@ def test_estimate_load_and_rope_invalid_inputs(
     with pytest.raises(EstimationInputError, match=message):
         estimate(
             {"spanIndex": SPAN_INDEX, "obstaclePoint": OBSTACLE, **inputs},
+            study,
+        )
+
+
+ZERO_TARGET_CASES = [
+    (estimation.estimate_temperature, "estimate_temperature", {}),
+    (estimation.estimate_wind, "estimate_wind", {}),
+    (
+        estimation.estimate_load,
+        "estimate_load",
+        {"loadPositionDistance": 100.0},
+    ),
+]
+
+
+@pytest.mark.parametrize("estimate, engine_method, inputs", ZERO_TARGET_CASES)
+def test_estimate_zero_target_distance_is_delegated_to_the_engine(
+    study: SectionStudy,
+    monkeypatch: pytest.MonkeyPatch,
+    estimate,
+    engine_method: str,
+    inputs: dict,
+):
+    received: dict = {}
+
+    def record(**kwargs):
+        received.update(kwargs)
+        return EstimationResult(
+            value=1.0, residual=0.0, iterations=1, converged=True
+        )
+
+    monkeypatch.setattr(study.estimation_engine, engine_method, record)
+
+    estimate(
+        {
+            "spanIndex": SPAN_INDEX,
+            "obstaclePoint": OBSTACLE,
+            "targetDistance": 0.0,
+            **inputs,
+        },
+        study,
+    )
+
+    assert received["target_distance"] == 0.0
+
+
+@pytest.mark.parametrize(
+    "estimate, inputs, expected_error",
+    [
+        (estimation.estimate_temperature, {}, EstimationNotConvergedError),
+        (
+            estimation.estimate_load,
+            {"loadPositionDistance": 100.0},
+            EstimationNotConvergedError,
+        ),
+        # the wind pushes the cable until the chain reverses before reaching 0
+        (estimation.estimate_wind, {}, SolverError),
+    ],
+)
+def test_estimate_zero_target_distance_is_answered_by_the_engine(
+    study: SectionStudy, estimate, inputs: dict, expected_error
+):
+    with pytest.raises(expected_error):
+        estimate(
+            {
+                "spanIndex": SPAN_INDEX,
+                "obstaclePoint": OBSTACLE,
+                "targetDistance": 0.0,
+                **inputs,
+            },
+            study,
+        )
+
+
+def test_estimate_load_on_the_support_does_not_move_the_cable(
+    study: SectionStudy,
+):
+    # a zero load position puts the load on the left support of the span
+    with pytest.raises(
+        EstimationNotConvergedError, match="target is not reachable"
+    ):
+        estimation.estimate_load(
+            {
+                "spanIndex": SPAN_INDEX,
+                "obstaclePoint": OBSTACLE,
+                "targetDistance": reference_distance(study) - 1.0,
+                "loadPositionDistance": 0.0,
+                "bounds": [0.0, 1000.0],
+            },
             study,
         )
 
@@ -330,6 +429,45 @@ def test_estimate_nan_distance_raises_not_converged(
         EstimationNotConvergedError, match="distance to the obstacle"
     ):
         estimation.estimate_wind(VALID_TEMPERATURE_INPUTS, study)
+
+
+@pytest.mark.parametrize(
+    "solver_error", [SolverError, ConvergenceError, SuspectedChainReversal]
+)
+def test_estimate_temperature_forwards_solver_errors(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch, solver_error
+):
+    def raise_solver_error(**_kwargs):
+        raise solver_error("trial temperature did not balance")
+
+    monkeypatch.setattr(
+        study.estimation_engine, "estimate_temperature", raise_solver_error
+    )
+
+    # the frontend maps the class name found in the traceback
+    with pytest.raises(solver_error) as error:
+        estimation.estimate_temperature(VALID_TEMPERATURE_INPUTS, study)
+    assert type(error.value) is solver_error
+
+
+def test_estimate_temperature_on_unadjusted_study_warns(
+    cable_array_AM600: CableArray, study: SectionStudy
+):
+    target = reference_distance(study, new_temperature=60.0)
+    unadjusted = build_study(cable_array_AM600)
+
+    with pytest.warns(BalanceEngineWarning):
+        result = estimation.estimate_temperature(
+            {
+                **VALID_TEMPERATURE_INPUTS,
+                "targetDistance": target,
+                "bounds": [0.0, 120.0],
+            },
+            unadjusted,
+        )
+
+    assert result["converged"] is True
+    assert result["value"] == pytest.approx(60.0, abs=0.5)
 
 
 def test_estimate_span_out_of_range_raises_invalid_manipulation_index(
@@ -414,3 +552,112 @@ def test_estimate_load_on_span_with_existing_load_warns(study: SectionStudy):
         )
 
     assert result["value"] == pytest.approx(50.0, abs=1.0)
+
+
+# ---------------------------obstacle of the study----------------
+
+OBSTACLE_UUID = "obstacle-uuid"
+
+
+@pytest.fixture
+def study_with_obstacle(study: SectionStudy) -> SectionStudy:
+    study.position_engine.add_obstacle(
+        name=OBSTACLE_UUID,
+        span_index=SPAN_INDEX,
+        coords=np.array([OBSTACLE, [300.0, 5.0, 15.0]]),
+    )
+    return study
+
+
+def study_obstacle_point(study: SectionStudy, point_index: int) -> list:
+    coords = study.position_engine.get_group_points().obstacles.dict_coords()
+    return coords[OBSTACLE_UUID][point_index].tolist()
+
+
+def test_estimate_temperature_on_study_obstacle_point(
+    study_with_obstacle: SectionStudy,
+):
+    point = study_obstacle_point(study_with_obstacle, 1)
+    reference = study_with_obstacle.copy()
+    reference.solve_change_state(new_temperature=60.0)
+    target = reference.position_engine.point_distance(
+        SPAN_INDEX, np.array(point)
+    ).distance_3d
+
+    by_uuid = estimation.estimate_temperature(
+        {
+            "spanIndex": SPAN_INDEX,
+            "obstacleUuid": OBSTACLE_UUID,
+            "pointIndex": 1,
+            # ignored: the study obstacle point wins
+            "obstaclePoint": [0.0, 0.0, 0.0],
+            "targetDistance": target,
+            "bounds": [-50.0, 250.0],
+        },
+        study_with_obstacle,
+    )
+    by_point = estimation.estimate_temperature(
+        {
+            "spanIndex": SPAN_INDEX,
+            "obstaclePoint": point,
+            "targetDistance": target,
+            "bounds": [-50.0, 250.0],
+        },
+        study_with_obstacle,
+    )
+
+    assert by_uuid["value"] == pytest.approx(60.0, abs=0.5)
+    assert by_uuid["value"] == pytest.approx(by_point["value"])
+
+
+@pytest.mark.parametrize(
+    "overrides, message",
+    [
+        ({"pointIndex": None}, "Missing estimation input: pointIndex"),
+        ({"pointIndex": -1}, "pointIndex must be a non-negative integer"),
+    ],
+)
+def test_estimate_invalid_study_obstacle_point_raises_input_error(
+    study_with_obstacle: SectionStudy, overrides: dict, message: str
+):
+    inputs = {
+        "spanIndex": SPAN_INDEX,
+        "obstacleUuid": OBSTACLE_UUID,
+        "pointIndex": 0,
+        "targetDistance": 30.0,
+    }
+
+    with pytest.raises(EstimationInputError, match=message):
+        estimation.estimate_temperature(
+            {**inputs, **overrides}, study_with_obstacle
+        )
+
+
+def test_estimate_unknown_study_obstacle_raises_obstacle_not_found(
+    study_with_obstacle: SectionStudy,
+):
+    with pytest.raises(ObstacleNotFoundError):
+        estimation.estimate_temperature(
+            {
+                "spanIndex": SPAN_INDEX,
+                "obstacleUuid": "unknown-uuid",
+                "pointIndex": 0,
+                "targetDistance": 30.0,
+            },
+            study_with_obstacle,
+        )
+
+
+def test_estimate_out_of_range_study_obstacle_point_raises(
+    study_with_obstacle: SectionStudy,
+):
+    with pytest.raises(ConformityInputError, match="Point index 2 out of"):
+        estimation.estimate_temperature(
+            {
+                "spanIndex": SPAN_INDEX,
+                "obstacleUuid": OBSTACLE_UUID,
+                "pointIndex": 2,
+                "targetDistance": 30.0,
+            },
+            study_with_obstacle,
+        )

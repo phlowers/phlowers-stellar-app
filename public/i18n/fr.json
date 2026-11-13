@@ -186,8 +186,13 @@
     "tangent-aiming-h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
     "tangent-aiming-vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
     "criterion-label": "Critère",
+    "criterion-one-percent-label": "Critère 1 %",
     "criterion-respected": "Critère respecté",
-    "criterion-not-respected": "Critère non respecté"
+    "criterion-not-respected": "Critère non respecté",
+    "obstacle-name-label": "Nom de l'obstacle",
+    "celsius-unit": "°C",
+    "copied-to-clipboard": "Copié dans le presse-papier",
+    "copy-to-clipboard-failed": "Échec de la copie dans le presse-papier"
   },
   "auth": {
     "login-page": {
@@ -388,6 +393,7 @@
       "support-out-of-range-error": "Le support est hors de la plage valide.",
       "generated-points-none-error": "Aucun point généré n'a été trouvé après le calcul.",
       "night-time-error": "Impossible de calculer la couverture nuageuse si l'heure saisie correspond à la nuit.",
+      "obstacle-not-found-error": "L'obstacle n'est pas enregistré dans le moteur de calcul.",
       "estimate-on-split-support-error": "L'estimation est impossible sur une portée divisée par un support virtuel.",
       "estimation-input-error": "Les données de l'estimation sont manquantes ou invalides.",
       "estimation-not-converged-error": "La cible ne peut pas être atteinte dans les bornes de l'estimation.",
@@ -837,6 +843,32 @@
         "angle-tangent": "ANGLE_TANGENT",
         "parameter": "PARAMETRE"
       }
+    },
+    "report": {
+      "title": "Rapport Mesure de terrain",
+      "terrain-data-title": "Données terrain",
+      "measure-date": "Date de mesure",
+      "measure-time": "Heure de mesure",
+      "method": "Méthode",
+      "measured-length": "Longueur mesurée",
+      "calculated-length": "Longueur calculée",
+      "measured-elevation": "Dénivelé mesuré",
+      "calculated-elevation": "Dénivelé calculé",
+      "vertical-distance-left": "Dist. verticale appareil accr. câble G",
+      "horizontal-distance-left": "Dist. horizontale appareil accr. câble G",
+      "vertical-angle-left": "Angle vertical appareil accr. câble G",
+      "vertical-angle-right": "Angle vertical appareil accr. câble D",
+      "calculation-type": "Type de calcul",
+      "sights-length": "Longueur Visée G Visée D",
+      "sights-elevation": "Dénivelé Visée G Visée D",
+      "sight-x": "X Visée {{ index }}",
+      "sight-y": "Y Visée {{ index }}",
+      "wind-incidence": "Incidence du vent",
+      "measured-solar-flux": "Flux solaire mesuré",
+      "temperature-uncertainty": "Incertitude température",
+      "blocked-invalid-tabs": "Rapport et export indisponibles : données incomplètes ou invalides dans {{ tabs }}.",
+      "blocked-invalid-global": "Rapport et export indisponibles : nom, tronçon, longitude, latitude, altitude ou azimut incomplet ou invalide.",
+      "blocked-unsaved": "Enregistrez d'abord la mesure."
     }
   },
   "studio": {
@@ -895,12 +927,20 @@
       "measurement-points-option": "Points de mesure",
       "field-measurements-tool": "Mesures terrain",
       "vtl-and-guying-tool": "VHL & Haubanage",
-      "cable-marking-tool": "Marquage câble",
       "strand-rrts-tool": "CRR de brins coupés",
       "forest-trenches-tool": "Tranchées forestières",
-      "height-and-lateral-distance-tool": "Hauteur & distance latérale",
       "cable-adjustment-tool": "Réglage d'un câble",
       "rrts-cut-strands": "CRR de brins coupés"
+    },
+    "estimations": {
+      "title": "Estimations",
+      "conformity-temperature-label": "Température de conformité",
+      "wind-pressure-tab": "Pression vent pour distance mini.",
+      "vertical-effort-tab": "Effort déplacement vert. câble",
+      "choose-obstacle-info": "Pour utiliser l'outil d'estimation vous devez d'abord choisir un obstacle",
+      "target-vertical-distance-label": "Distance verticale cible",
+      "copy-temperature-aria-label": "Copier la température de conformité",
+      "calculation-failed": "Échec de l'estimation de la température de conformité"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Développer les détails",
@@ -966,7 +1006,6 @@
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Créer un nouvel obstacle",
-      "obstacle-name-label": "Nom de l'obstacle",
       "obstacle-altitude-type-label": "Type d'altitude d'obstacle",
       "free-positioning-forced-frame-warning": "Le mode de positionnement libre n'est disponible qu'avec un support de référence gauche, un type d'altitude absolue et une distance latérale selon l'axe de la portée. Les réglages actuels de l'obstacle diffèrent, les résultats peuvent donc être incorrects.",
       "delete-point-aria-label": "Supprimer un point",

@@ -68,14 +68,14 @@ export function isTangentAimingInteriorDataValid(data: FieldMeasure): boolean {
   return form.valid;
 }
 
-/** Fills the empty (`null`/`undefined`) tangent aiming (interior) inputs with their default; forces the supported calculation type. */
+/** Fills the empty (`null`/`undefined`) tangent aiming (interior) inputs with their default (calculation type included). */
 export function applyTangentAimingInteriorDefaults(
   data: FieldMeasure,
   defaultLeftSupport: string | null
 ): FieldMeasure {
   const next: FieldMeasure = {
     ...data,
-    interiorCalculationType: TANGENT_AIMING_CALCULATION_TYPE,
+    interiorCalculationType: data.interiorCalculationType ?? TANGENT_AIMING_CALCULATION_TYPE,
     interiorLeftSupport: data.interiorLeftSupport ?? defaultLeftSupport
   };
   for (const field of NUMERIC_FIELDS) {

@@ -5,8 +5,9 @@ import { AspectRatio, ScalingFactors, Side, SelectedDisplayOptions, View, Zoom2d
 import { Distance, GetSectionOutput, ObstacleOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
+import { createCableSupportManipAnnotations } from './createCableSupportManipAnnotations';
 import { createCutStrandsAnnotations, createCutStrandsShapes } from './createCutStrandsAnnotations';
-import { CableModification, SpanLoad } from '@shared/domain';
+import { CableModification, CableSupportManipulation, SpanLoad } from '@shared/domain';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { createDistanceVisuals } from './createDistanceTraces';
@@ -82,6 +83,8 @@ export interface CreatePlotParams {
   cableModifications?: readonly CableModification[];
   /** Lookup mapping a span uuid (left support uuid) to its absolute support index. */
   spanUuidToIndex?: ReadonlyMap<string, number>;
+  /** Saved cable support manipulations of the displayed load case, shown as clickable annotations on their support. */
+  cableSupportManips?: readonly CableSupportManipulation[];
   /** Saved RRTS cut strands, whose marking is drawn when it asks for one. */
   cutStrands?: RrtsCutStrandsData | null;
   /**
@@ -183,6 +186,11 @@ const createScene = (
       ...createCableModificationAnnotations(
         plotParams,
         plotParams.cableModifications ?? [],
+        plotParams.spanUuidToIndex ?? new Map()
+      ),
+      ...createCableSupportManipAnnotations(
+        plotParams,
+        plotParams.cableSupportManips ?? [],
         plotParams.spanUuidToIndex ?? new Map()
       ),
       ...createCutStrandsAnnotations(plotParams),
@@ -416,6 +424,11 @@ const layout2d = (
       ...createCableModificationAnnotations(
         plotParams,
         plotParams.cableModifications ?? [],
+        plotParams.spanUuidToIndex ?? new Map()
+      ),
+      ...createCableSupportManipAnnotations(
+        plotParams,
+        plotParams.cableSupportManips ?? [],
         plotParams.spanUuidToIndex ?? new Map()
       ),
       ...createCutStrandsAnnotations(plotParams),

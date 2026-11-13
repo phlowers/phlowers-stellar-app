@@ -60,7 +60,7 @@
     "node": "24.22.2"
   },
   "config": {
-    "mechaphlowers": "0.14.0",
+    "mechaphlowers": "0.14.1",
     "thermohl": "1.4.0"
   },
   "dependencies": {
@@ -108,8 +108,15 @@
     "marked": "$marked",
     "uuid": "14.0.0",
     "tar": "7.5.21",
-    "brace-expansion": "2.0.1",
-    "minimatch": "10.0.3",
+    "minimatch": "11.0.4",
+    "typedoc": {
+      "minimatch": "10.2.6"
+    },
+    "glob": "14.0.2",
+    "vite": "7.3.7",
+    "@analogjs/vite-plugin-nitro": {
+      "esbuild": "$esbuild"
+    },
     "rolldown": "1.0.0",
     "copy-webpack-plugin": {
       "serialize-javascript": "7.0.5"
@@ -126,21 +133,21 @@
     }
   },
   "devDependencies": {
-    "@analogjs/platform": "2.6.3",
-    "@analogjs/vite-plugin-angular": "2.6.3",
-    "@analogjs/vitest-angular": "2.6.3",
+    "@analogjs/platform": "2.9.5",
+    "@analogjs/vite-plugin-angular": "2.9.5",
+    "@analogjs/vitest-angular": "2.9.5",
     "@angular-builders/custom-esbuild": "21.1.0",
     "@angular-eslint/eslint-plugin-template": "21.4.0",
-    "@angular/build": "21.2.26",
-    "@angular/cli": "21.2.26",
+    "@angular/build": "21.2.29",
+    "@angular/cli": "21.2.29",
     "@angular/compiler-cli": "21.2.26",
     "@cyclonedx/cyclonedx-npm": "6.0.0",
-    "@jsverse/transloco-schematics": "^8.4.0",
+    "@jsverse/transloco-schematics": "8.4.0",
     "@playwright/test": "1.61.1",
     "@types/lodash": "4.17.24",
     "@types/papaparse": "5.5.2",
     "@types/plotly.js": "2.35.14",
-    "@vitest/coverage-v8": "4.1.10",
+    "@vitest/coverage-v8": "4.1.12",
     "angular-eslint": "21.4.0",
     "autoprefixer": "10.5.2",
     "esbuild": "0.28.2",
@@ -151,14 +158,14 @@
     "eslint-plugin-prefer-arrow": "1.2.3",
     "eslint-plugin-prettier": "4.2.5",
     "jsdom": "26.1.0",
-    "postcss": "^8.5.25",
+    "postcss": "8.5.25",
     "prettier": "3.9.4",
     "tailwindcss": "3.4.19",
     "typedoc": "0.28.20",
     "typescript": "5.9",
     "typescript-eslint": "8.63.0",
     "vite-tsconfig-paths": "6.1.1",
-    "vitest": "4.1.10",
+    "vitest": "4.1.12",
     "vitest-sonar-reporter": "3.0.0",
     "workbox-build": "7.4.1"
   }

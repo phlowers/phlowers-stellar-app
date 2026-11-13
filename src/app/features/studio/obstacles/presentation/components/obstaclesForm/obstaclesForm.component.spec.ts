@@ -105,6 +105,7 @@ describe('ObstaclesFormComponent', () => {
   let mockPlotService: { loading: ReturnType<typeof signal<boolean>> };
   let obstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
+    selectedMeasureUuid: ReturnType<typeof signal<string | null>>;
     setCurrentPointIndex: vi.Mock;
     resetCurrentPointIndex: vi.Mock;
   };
@@ -140,6 +141,7 @@ describe('ObstaclesFormComponent', () => {
     const indexSignal = signal<number | null>(null);
     obstaclesService = {
       activePointIndex: indexSignal,
+      selectedMeasureUuid: signal<string | null>(null),
       setCurrentPointIndex: vi.fn((i: unknown) => indexSignal.set(i as number)),
       resetCurrentPointIndex: vi.fn()
     };
@@ -194,7 +196,7 @@ describe('ObstaclesFormComponent', () => {
               'studio.obstacles-form.create-new-obstacle-btn': 'Create new obstacle',
               'common.span-label': 'Span',
               'common.obstacle-type-label': 'Obstacle type',
-              'studio.obstacles-form.obstacle-name-label': 'Obstacle name',
+              'common.obstacle-name-label': 'Obstacle name',
               'common.reference-support-label': 'Reference support',
               'studio.obstacles-form.obstacle-altitude-type-label': 'Obstacle altitude type',
               'studio.shared.lateral-distance-type-label': 'Lateral distance type',
@@ -506,7 +508,7 @@ describe('ObstaclesFormComponent', () => {
                   'studio.obstacles-form.create-new-obstacle-btn': 'Create new obstacle',
                   'common.span-label': 'Span',
                   'common.obstacle-type-label': 'Obstacle type',
-                  'studio.obstacles-form.obstacle-name-label': 'Obstacle name',
+                  'common.obstacle-name-label': 'Obstacle name',
                   'common.reference-support-label': 'Reference support',
                   'studio.obstacles-form.obstacle-altitude-type-label': 'Obstacle altitude type',
                   'studio.shared.lateral-distance-type-label': 'Lateral distance type',

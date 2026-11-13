@@ -6,6 +6,7 @@
  */
 
 import { TranslocoService } from '@jsverse/transloco';
+import { PythonDiagnostic } from './python-diagnostic.interfaces';
 import { PythonErrorCode } from './types';
 
 /** Map of Python exception class names to their i18n translation keys. */
@@ -28,6 +29,7 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
   [PythonErrorCode.SupportOutOfRangeError]: 'shared.python-errors.support-out-of-range-error',
   [PythonErrorCode.GeneratedPointsNoneError]: 'shared.python-errors.generated-points-none-error',
   [PythonErrorCode.NightTimeError]: 'shared.python-errors.night-time-error',
+  [PythonErrorCode.ObstacleNotFoundError]: 'shared.python-errors.obstacle-not-found-error',
   [PythonErrorCode.EstimateOnSplitSupportError]: 'shared.python-errors.estimate-on-split-support-error',
   [PythonErrorCode.EstimationInputError]: 'shared.python-errors.estimation-input-error',
   [PythonErrorCode.EstimationNotConvergedError]: 'shared.python-errors.estimation-not-converged-error',
@@ -48,4 +50,22 @@ export const formatPythonError = (code: PythonErrorCode | null, translocoService
   }
   const key = PYTHON_ERROR_KEYS[code];
   return key ? translocoService.translate(key) : null;
+};
+
+/**
+ * Formats the captured Python warnings (`warnings.warn()`, e.g. `BalanceEngineWarning`) into
+ * localized messages, one per code: warnings are collected per entity (obstacle, floor…) but
+ * their message only carries the code, so several of them would repeat the same text.
+ *
+ * @param diagnostics - The diagnostics returned by the worker task
+ * @param translocoService - The translation service (injected by caller)
+ * @returns The localized warning messages, without duplicates nor unmapped codes
+ */
+export const formatPythonWarnings = (diagnostics: PythonDiagnostic[], translocoService: TranslocoService): string[] => {
+  const warningCodes = new Set(
+    diagnostics.filter((diagnostic) => diagnostic.origin === 'warning').map((diagnostic) => diagnostic.code)
+  );
+  return [...warningCodes]
+    .map((code) => formatPythonError(code, translocoService))
+    .filter((message): message is string => message !== null);
 };

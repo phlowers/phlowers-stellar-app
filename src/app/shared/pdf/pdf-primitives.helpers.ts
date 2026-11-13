@@ -24,8 +24,10 @@ import {
   PARAGRAPH_INDENT,
   SECTION_TITLE_HEIGHT,
   SEPARATOR_MARGIN_Y,
+  TWO_COLUMN_WIDTH,
   VALUE_LINE_SPACING
 } from '@shared/pdf/pdf-layout.constantes';
+import { Section, Study } from '@shared/domain';
 import { PdfBulletItem, StudyCartoucheData, StudyCartoucheLabels } from '@shared/pdf/pdf-report.interfaces';
 
 /**
@@ -34,6 +36,13 @@ import { PdfBulletItem, StudyCartoucheData, StudyCartoucheLabels } from '@shared
  * while remaining large enough to keep the number of `String.fromCharCode` calls (and intermediate strings) low.
  */
 const BASE64_CHUNK_SIZE = 0x8000;
+
+// Status icon (tick / cross) drawn after a bullet value: size and gap in mm, line width in mm, RGB colors
+const STATUS_ICON_SIZE = 2.2;
+const STATUS_ICON_GAP = 1.5;
+const STATUS_ICON_LINE_WIDTH = 0.35;
+const STATUS_OK_COLOR = [0, 128, 0] as const;
+const STATUS_KO_COLOR = [200, 0, 0] as const;
 
 /** Loads a file from a URL and returns its raw base64 encoding (no data URL prefix). */
 export async function loadFileAsBase64(url: string): Promise<string> {
@@ -85,14 +94,34 @@ export function formatValue(value: number | null | undefined, unit: string, deci
   return unit ? `${formatted} ${unit}` : formatted;
 }
 
-/** Draws text with a bullet point prefix. Label is bold, value is normal (or bold when boldValue is true). */
+// Draws a tick (status true, green) or a cross (status false, red) of STATUS_ICON_SIZE mm, its baseline at `y`
+function drawStatusIcon(doc: jsPDF, status: boolean, x: number, y: number): void {
+  const top = y - STATUS_ICON_SIZE;
+  doc.setLineWidth(STATUS_ICON_LINE_WIDTH);
+  if (status) {
+    doc.setDrawColor(...STATUS_OK_COLOR);
+    doc.line(x, y - STATUS_ICON_SIZE / 2, x + STATUS_ICON_SIZE / 3, y);
+    doc.line(x + STATUS_ICON_SIZE / 3, y, x + STATUS_ICON_SIZE, top);
+  } else {
+    doc.setDrawColor(...STATUS_KO_COLOR);
+    doc.line(x, top, x + STATUS_ICON_SIZE, y);
+    doc.line(x, y, x + STATUS_ICON_SIZE, top);
+  }
+  doc.setDrawColor(0);
+}
+
+/**
+ * Draws text with a bullet point prefix. Label is bold, value is normal (or bold when boldValue is true).
+ * A defined `status` adds a tick / cross icon after the value.
+ */
 export function drawBulletItem(
   doc: jsPDF,
   label: string,
   value: string,
   x: number,
   y: number,
-  boldValue = false
+  boldValue = false,
+  status?: boolean
 ): void {
   const bulletText = `${BULLET} `;
   doc.setFont('Nunito', 'bold');
@@ -101,6 +130,9 @@ export function drawBulletItem(
   const labelWidth = doc.getTextWidth(bulletText + label + ' : ');
   doc.setFont('Nunito', boldValue ? 'bold' : 'normal');
   doc.text(value, x + labelWidth, y);
+  if (status !== undefined) {
+    drawStatusIcon(doc, status, x + labelWidth + doc.getTextWidth(value) + STATUS_ICON_GAP, y);
+  }
 }
 
 // Starts a new portrait page under the compact header. Returns the Y where its content starts
@@ -289,6 +321,21 @@ export function drawTitledBulletSection(doc: jsPDF, title: string, items: PdfBul
   return drawSectionEndSeparator(doc, drawBulletList(doc, items, y, leftX, wrapWidth));
 }
 
+/** Builds the study & canton cartouche values; missing study or section fall back to dashes and empty texts. */
+export const buildStudyCartouche = (study: Study | null, section: Section | null): StudyCartoucheData => {
+  const charge = section?.charges.find((c) => c.uuid === section.selected_charge_uuid);
+  return {
+    author: study?.author_email ?? '-',
+    studyTitle: study?.title ?? '-',
+    studyDescription: study?.description ?? '',
+    cantonName: section?.name ?? '-',
+    comment: section?.comment ?? '',
+    icName: section?.initial_conditions.find((ic) => ic.uuid === section.selected_initial_condition_uuid)?.name ?? '-',
+    chargeName: charge?.name ?? '-',
+    chargeDescription: charge?.description ?? ''
+  };
+};
+
 /** Draws the study & canton metadata cartouche (1 column, all values wrapping). Returns the next Y. */
 export function drawStudyCartoucheSection(
   doc: jsPDF,
@@ -310,9 +357,56 @@ export function drawStudyCartoucheSection(
   return drawTitledBulletSection(doc, title, items, startY);
 }
 
+/** Layout of a two-column item: label width, the value lines once wrapped to its column, and the height it takes. */
+interface TwoColumnItemLayout {
+  labelWidth: number;
+  lines: string[];
+  height: number;
+}
+
+// Values that do not fit their column are wrapped; the others keep a single line
+function layoutTwoColumnItem(doc: jsPDF, item: PdfBulletItem): TwoColumnItemLayout {
+  doc.setFont('Nunito', 'bold');
+  doc.setFontSize(FONT_SIZES.label);
+  const labelWidth = doc.getTextWidth(`${BULLET} ${item.label} : `);
+  doc.setFont('Nunito', 'normal');
+  const availableWidth = TWO_COLUMN_WIDTH - labelWidth;
+  const lines =
+    doc.getTextWidth(item.value) <= availableWidth ? [item.value] : doc.splitTextToSize(item.value, availableWidth);
+  return { labelWidth, lines, height: (lines.length - 1) * VALUE_LINE_SPACING + LINE_HEIGHT };
+}
+
+function drawTwoColumnItem(doc: jsPDF, item: PdfBulletItem, layout: TwoColumnItemLayout, x: number, y: number): void {
+  if (layout.lines.length <= 1) {
+    drawBulletItem(doc, item.label, item.value, x, y, false, item.status);
+    return;
+  }
+  doc.setFont('Nunito', 'bold');
+  doc.setFontSize(FONT_SIZES.label);
+  doc.text(`${BULLET} ${item.label} : `, x, y);
+  doc.setFont('Nunito', 'normal');
+  doc.text(layout.lines, x + layout.labelWidth, y);
+  if (item.status !== undefined) {
+    const lastLine = layout.lines[layout.lines.length - 1];
+    const lastLineY = y + (layout.lines.length - 1) * VALUE_LINE_SPACING;
+    drawStatusIcon(doc, item.status, x + layout.labelWidth + doc.getTextWidth(lastLine) + STATUS_ICON_GAP, lastLineY);
+  }
+}
+
+// Draws one column from `x` and returns the Y below its last item
+function drawTwoColumnItems(doc: jsPDF, items: PdfBulletItem[], x: number, startY: number): number {
+  return items.reduce((y, item) => {
+    const layout = layoutTwoColumnItem(doc, item);
+    if (item.label) {
+      drawTwoColumnItem(doc, item, layout, x, y);
+    }
+    return y + layout.height;
+  }, startY);
+}
+
 /**
- * Draws two columns of bullet items side by side, each column advancing independently.
- * Returns the Y position below the taller column.
+ * Draws two columns of bullet items side by side, each column advancing independently by the height of its items
+ * (values wrapping inside their column). Returns the Y position below the taller column.
  */
 export function drawTwoColumnBullets(
   doc: jsPDF,
@@ -323,22 +417,8 @@ export function drawTwoColumnBullets(
   const leftX = PAGE_MARGIN.left + PARAGRAPH_INDENT;
   const rightX = PAGE_MARGIN.left + PARAGRAPH_INDENT + CONTENT_WIDTH / 2;
 
-  let leftY = startY;
-  left.forEach((item) => {
-    if (item.label) {
-      drawBulletItem(doc, item.label, item.value, leftX, leftY);
-    }
-    leftY += LINE_HEIGHT;
-  });
-
-  let rightY = startY;
-  right.forEach((item) => {
-    if (item.label) {
-      drawBulletItem(doc, item.label, item.value, rightX, rightY);
-    }
-    rightY += LINE_HEIGHT;
-  });
-
+  const leftY = drawTwoColumnItems(doc, left, leftX, startY);
+  const rightY = drawTwoColumnItems(doc, right, rightX, startY);
   return Math.max(leftY, rightY);
 }
 
@@ -354,7 +434,10 @@ export function drawTitledTwoColumnBullets(
   right: PdfBulletItem[],
   startY: number
 ): number {
-  const lastRowOffset = SECTION_TITLE_HEIGHT + (Math.max(left.length, right.length, 1) - 1) * LINE_HEIGHT;
+  const columnHeight = (items: PdfBulletItem[]) =>
+    items.reduce((height, item) => height + layoutTwoColumnItem(doc, item).height, 0);
+  const tallestColumnHeight = Math.max(columnHeight(left), columnHeight(right));
+  const lastRowOffset = SECTION_TITLE_HEIGHT + Math.max(tallestColumnHeight - LINE_HEIGHT, 0);
   const y = drawSectionTitle(doc, title, ensurePortraitSpace(doc, startY, lastRowOffset));
   return drawTwoColumnBullets(doc, left, right, y);
 }

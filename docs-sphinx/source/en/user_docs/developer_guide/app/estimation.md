@@ -27,7 +27,9 @@ All fields use camelCase at the worker boundary. Every task has `spanIndex`, `ob
 
 For rope estimation, `targetVerticalDistance` is cable altitude minus obstacle altitude and may be negative. Its value must be finite, but it is not required to be positive. The `supportIndex` identifies where the rope is set; `spanIndex` still identifies the span containing the obstacle. Optional fixed conditions may be `null` or omitted.
 
-The common validation rejects missing/non-finite required values, negative or fractional indices, and obstacle points that do not contain three finite coordinates. `targetDistance` and `loadPositionDistance` must be strictly positive; a supplied `ropeLineicMass` must also be strictly positive. Bounds must contain exactly two finite values in increasing order.
+Instead of raw coordinates, a task may designate an obstacle registered in the study with `obstacleUuid` and `pointIndex` (0-based, required then). The point is then resolved by `find_obstacle_point` (shared with conformity) from the engine's absolute section-frame coordinates, and `obstaclePoint` is ignored. The frontend must use this form: the obstacle points rendered in `litData.obstacles` are re-projected for the 2D view and are not in the engine frame. An unknown `obstacleUuid` raises `ObstacleNotFoundError`; a missing, negative or fractional `pointIndex` raises `EstimationInputError`, an out-of-range one `ConformityInputError` (not reachable from the UI).
+
+The common validation rejects missing/non-finite required values, negative or fractional indices, and obstacle points that do not contain three finite coordinates. `targetDistance` and `loadPositionDistance` must be positive or zero; a supplied `ropeLineicMass` must be strictly positive. A zero `targetDistance` is passed to the engine, which never reaches it: temperature and load estimations raise `EstimationNotConvergedError`, wind estimation a `SolverError` once the insulator chain reverses. Bounds must contain exactly two finite values in increasing order.
 
 ## Span indexing and virtual supports
 
@@ -60,6 +62,7 @@ The Python exception class name (or warning text) is matched against `PythonErro
 | `EstimationNotConvergedError` | The target is unreachable in the bounds, or distance cannot be computed at a bound. | `SOLVER_DID_NOT_CONVERGE` | Error | `shared.python-errors.estimation-not-converged-error` |
 | `EstimateOnSplitSupportError` | A virtual support divides the requested span. | `CALCULATION_ERROR` | Error | `shared.python-errors.estimate-on-split-support-error` |
 | `InvalidManipulationIndex` | A span or support index is outside the valid range. | `CALCULATION_ERROR` | Error | `shared.python-errors.invalid-manipulation-index` |
+| `ObstacleNotFoundError` | `obstacleUuid` is not registered in the study. | `CALCULATION_ERROR` | Error | `shared.python-errors.obstacle-not-found-error` |
 | `EstimationWarning` | An existing load on the estimated span is ignored by load estimation. Loads on other spans are retained. | No task failure | Warning | `shared.python-errors.estimation-warning` |
 
 `handle-task.ts` derives `SOLVER_DID_NOT_CONVERGE` by checking whether the exception message contains the literal text `did not converge`; other exceptions use the generic `CALCULATION_ERROR`. Python diagnostics are matched separately and carry the localized message and severity. The load warning is emitted with the successful result, so consumers can still use that result.
@@ -67,6 +70,14 @@ The Python exception class name (or warning text) is matched against `PythonErro
 ### Adding an estimation error code
 
 For a new Python error or warning, add the exception class name as a value in `PythonErrorCode`, add its severity in `python-error-severity.ts`, add the corresponding `shared.python-errors.*` mapping in `python-error-messages.ts`, and add matching English and French strings in `public/i18n/en.json` and `public/i18n/fr.json`. Ensure the exception or warning text contains the exact enum value. Matching is substring-based and the first match in enum declaration order wins, so avoid codes that overlap and order more specific values before broader ones. See [How to Add Error/Warning Codes](how_to_add_error_codes.md) for the full diagnostic pipeline.
+
+## Studio tool: Estimations
+
+The **Estimations** dialog (`src/app/features/studio/estimations/`) opens from the Studio **Tools** menu and the quick-access shortcuts (`ToolbarDialogService` tool `estimations`). It holds three tabs; only **Conformity temperature** (US.EST.TCO) is implemented, the two others are shown disabled until their user story.
+
+The **Conformity temperature** tab (`TemperatureEstimationComponent`) shows a hint to choose an obstacle while none is selected, and lists the section obstacles holding at least one point (filterable by name). The obstacle selected in the Studio (`ObstaclesService.selectedMeasureUuid`) is preselected when the tab opens; otherwise, or when the selection is a floor, none is selected. The **Point** select is read-only and set to the first point of the selected obstacle. The **Target vertical distance** is required, in ]0; 150] m with at most 2 decimals (`0.01` minimum: the engine accepts a zero distance but never reaches it and answers `EstimationNotConvergedError`). **Calculate** runs `estimateTemperature` with `spanIndex = obstacle.supportIndex`, `obstacleUuid`, `pointIndex` and `bounds = [-50, 250]` °C; the obstacle and distance inputs are locked until it ends, so that the result always matches them. The result is shown with 2 decimals and can be copied to the clipboard; it is cleared as soon as an input or the section changes. Failures show the localized Python error, or `studio.estimations.calculation-failed`.
+
+> The engine estimates the temperature for a 3D distance (`distance_3d`) between the cable and the obstacle point, while the UI labels the input *Target vertical distance* as specified by the user story.
 
 ## Known limitation: wind direction
 
@@ -87,7 +98,7 @@ cd stellar-engine && uv run pytest test/core/test_estimation.py -q -p no:logging
 Run the focused TypeScript tests from the repository root:
 
 ```bash
-npx vitest run src/app/core/services/worker_python/tasks/
+npx vitest run src/app/core/services/worker_python/tasks/ src/app/features/studio/estimations/
 ```
 
 The Python tests cover result shape, estimates, input validation, unreachable targets, index mapping, split virtual supports, the existing-load warning, and preservation of the study state.

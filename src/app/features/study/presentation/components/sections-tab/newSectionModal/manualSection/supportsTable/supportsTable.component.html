@@ -288,7 +288,7 @@
                   type="text"
                   [attr.aria-label]="'supports-table.aria-chain-name-filter' | transloco"
                   [attr.placeholder]="'common.search' | transloco"
-                  (input)="onOptionFilterInput($event, 'chainName')"
+                  (input)="onOptionFilterInput($event)"
                   (keydown)="onOptionFilterKeydown($event)"
                   (focus)="resetOptionFilter($event)"
                   data-testid="chain-name-filter"
@@ -423,37 +423,30 @@
       <td class="text-column">
         @if (mode() !== 'view') {
           <div class="native-select-removable-value">
-            <select
-              class="native-select"
-              [attr.aria-label]="'common.support-name-full-label' | transloco"
+            <!-- PrimeNG uses the placeholder as a label when the selected name is outside the loaded options. -->
+            <p-select
+              class="w-full"
+              style="--p-select-placeholder-color: var(--p-select-color)"
+              [options]="visibleSupportNameOptions()"
               [ngModel]="support.name"
+              [placeholder]="support.name ?? ''"
               (ngModelChange)="onSupportFieldChange(support.uuid, 'name', $event)"
-              [id]="'supportName' + rowIndex"
-              (focusin)="expandOptions('name', support.uuid)"
-              (mousedown)="expandOptions('name', support.uuid)"
-              (focusout)="collapseOptions($event, 'name', support.uuid)"
+              [inputId]="'supportName' + rowIndex"
+              [ariaLabel]="'common.support-name-full-label' | transloco"
+              [ariaFilterLabel]="'supports-table.aria-support-name-filter' | transloco"
+              [filter]="true"
+              [filterPlaceholder]="'common.search' | transloco"
+              [virtualScroll]="true"
+              [virtualScrollItemSize]="34"
+              [lazy]="true"
+              [scrollHeight]="'21.25rem'"
+              [resetFilterOnHide]="true"
+              (onFilter)="onSupportNameFilter($event)"
+              (onLazyLoad)="onSupportNameLazyLoad($event)"
+              (onHide)="resetSupportNameFilter()"
+              appendTo="body"
               data-testid="support-name-select"
-            >
-              <option [ngValue]="null" hidden data-placeholder></option>
-              <div class="native-select__filter">
-                <input
-                  type="text"
-                  [attr.aria-label]="'supports-table.aria-support-name-filter' | transloco"
-                  [attr.placeholder]="'common.search' | transloco"
-                  (input)="onOptionFilterInput($event, 'name')"
-                  (keydown)="onOptionFilterKeydown($event)"
-                  (focus)="resetOptionFilter($event)"
-                  data-testid="support-name-filter"
-                />
-              </div>
-              @if (optionsExpanded('name', support.uuid)) {
-                @for (name of allSupportFilterTable(); track name) {
-                  <option [ngValue]="name">{{ name }}</option>
-                }
-              } @else if (support.name) {
-                <option [ngValue]="support.name">{{ support.name }}</option>
-              }
-            </select>
+            />
             @if (support.name) {
               <button
                 type="button"

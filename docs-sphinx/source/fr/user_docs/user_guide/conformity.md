@@ -141,8 +141,8 @@ surplomb, une colonne **Latéral**.
 | **Altitude câble** | Altitude du câble dans le cas considéré, dans le graphique. |
 | **Distance axe ligne câble** | Position du câble dans le cas considéré, sous forme de distance à l’axe de la ligne, dans le graphique. |
 | **Distance à respecter** | La distance requise par la règle, à la tension électrique de l’étude. |
-| **Altitude à respecter** | *Surplomb* uniquement. Écart vertical entre l’obstacle et le câble dans le cas de surplomb, moins la distance à respecter. Une valeur négative signifie que l’obstacle est trop proche **ou au-dessus du câble**. |
-| **Distance axe ligne respect** | *Latéral* uniquement. Distance entre l’obstacle et la position de câble la plus proche du côté latéral (deux directions du vent et positions intermédiaires), moins la distance à respecter. Une valeur négative signifie que l’obstacle est trop proche. |
+| **Altitude à respecter** | *Surplomb* uniquement. Altitude de la limite de zone au-dessus du câble, telle que tracée dans le graphique. C’est une coordonnée et non une marge : une valeur négative ne signifie pas une non-conformité (voir [Respect conformité](#conformity-user-compliance)). |
+| **Distance axe ligne respect** | *Latéral* uniquement. Distance à l’axe de la ligne de la limite de zone du côté latéral, telle que tracée dans le graphique. C’est une coordonnée et non une marge : une valeur négative ne signifie pas une non-conformité (voir [Respect conformité](#conformity-user-compliance)). |
 | **Respect conformité** | Le verdict pour la règle : **Oui**, **Non** ou **Inconnu**. |
 
 Une cellule est vide lorsque la valeur ne s’applique pas.
@@ -166,14 +166,20 @@ distance, dans le graphique, entre l’obstacle et cette position, et **Tempéra
 correspondent au scénario qui l’a produite. Cela indique dans quelle condition climatique l’obstacle est le plus proche du câble.
 La pression du vent de la colonne latérale est négative lorsque la position la plus proche est celle du sens opposé du vent.
 
+(conformity-user-compliance)=
 ### Respect conformité
 
-Le verdict est calculé à partir des deux valeurs de conformité du tableau et dépend du
-**type de graphique** de l’obstacle (voir [Graphique](#conformity-user-graph)) :
+Les deux lignes de respect du tableau sont des **coordonnées de la limite de zone** tracée dans le graphique.
+Ce ne sont pas les marges utilisées pour le verdict : elles peuvent être négatives (par exemple une limite à gauche
+de l’axe de la ligne) alors que l’obstacle est conforme, ou positives alors qu’il ne l’est pas. Comparez l’obstacle
+à la limite dans le graphique, ou lisez la ligne **Respect conformité**.
 
-- `cable_track` : l’obstacle est comparé à des **zones circulaires**. La valeur de surplomb est la distance à la position de surplomb et la valeur latérale la distance à la position latérale la plus proche, chacune moins sa distance à respecter. Le verdict est **Oui** lorsque l’obstacle est hors des zones circulaires, c’est-à-dire lorsque aucune valeur n’est négative (une valeur égale à 0 est conforme).
-- `vegetation` : l’obstacle est comparé à un **rectangle**. La valeur de surplomb est l’écart vertical jusqu’à la position de surplomb et la valeur latérale l’écart horizontal jusqu’à la position latérale la plus proche, chacune moins sa distance à respecter. Le verdict est **Non** seulement lorsque l’obstacle est **à l’intérieur du rectangle** : trop proche verticalement (ou au-dessus du câble), et soit trop proche latéralement soit horizontalement entre les positions latérales. Être trop proche sur un seul axe n’est pas suffisant.
-- `overhang` : l’obstacle est comparé à une **ligne**. Seule la valeur de surplomb existe : l’écart vertical jusqu’à la position de surplomb moins la distance de surplomb. Le verdict est **Oui** quand il n’est pas négatif, donc **Non** quand l’obstacle est trop proche ou au-dessus du câble.
+Le verdict est calculé à partir de **marges** internes, l’écart entre l’obstacle et la position du câble moins la
+distance à respecter, et dépend du **type de graphique** de l’obstacle (voir [Graphique](#conformity-user-graph)) :
+
+- `cable_track` : l’obstacle est comparé à des **zones circulaires**. La marge de surplomb est la distance à la position de surplomb et la marge latérale la distance à la position latérale la plus proche, chacune moins sa distance à respecter. Le verdict est **Oui** lorsque l’obstacle est hors des zones circulaires, c’est-à-dire lorsque aucune marge n’est négative (une marge égale à 0 est conforme).
+- `vegetation` : l’obstacle est comparé à un **rectangle**. La marge de surplomb est l’écart vertical jusqu’à la position de surplomb et la marge latérale l’écart horizontal jusqu’à la position latérale la plus proche, chacune moins sa distance à respecter. Le verdict est **Non** seulement lorsque l’obstacle est **à l’intérieur du rectangle** : trop proche verticalement (ou au-dessus du câble), et soit trop proche latéralement soit horizontalement entre les positions latérales. Être trop proche sur un seul axe n’est pas suffisant.
+- `overhang` : l’obstacle est comparé à une **ligne**. Seule la marge de surplomb existe : l’écart vertical jusqu’à la position de surplomb moins la distance de surplomb. Le verdict est **Oui** quand elle n’est pas négative, donc **Non** quand l’obstacle est trop proche ou au-dessus du câble.
 
 Le verdict est **Inconnu** lorsque la règle n’a pas de résultat : par exemple une règle que vous avez sélectionnée
 **après** le calcul. Cliquez sur **Calculer** à nouveau pour l’inclure.

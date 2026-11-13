@@ -17,6 +17,7 @@ import { vi } from 'vitest';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
+import { Select } from 'primeng/select';
 
 // Mock child component
 @Component({
@@ -1269,8 +1270,6 @@ describe('SupportsTableComponent', () => {
     });
   });
 
-  // Both filterable columns are the same native <select>; the only differences are the
-  // catalog they read and the support field they write.
   describe.each([
     {
       column: 'chain name',
@@ -1282,12 +1281,6 @@ describe('SupportsTableComponent', () => {
           createEmptyChain('BETA chain'),
           createEmptyChain('GAMMA alu')
         ])
-    },
-    {
-      column: 'support name',
-      testId: 'support-name',
-      field: 'name',
-      seedCatalog: () => distinctSupportNamesSubject.next(['ALU 1', 'BETA chain', 'GAMMA alu'])
     }
   ])('native $column select', ({ testId, field, seedCatalog }) => {
     const firstSelect = (): HTMLSelectElement =>
@@ -1394,6 +1387,195 @@ describe('SupportsTableComponent', () => {
           uuid: mockSupports[0].uuid,
           support: { [field]: null }
         });
+      });
+    });
+  });
+
+  describe('support-name select', () => {
+    const catalogNames = Array.from({ length: 45 }, (_, index) => `CAT-${String(index + 1).padStart(3, '0')}`);
+
+    const createSupportSelectFixture = async (supports: Support[]) => {
+      const supportFixture = TestBed.createComponent(SupportsTableComponent);
+      supportFixture.componentRef.setInput('supports', supports);
+      supportFixture.componentRef.setInput('mode', 'create');
+      supportFixture.componentRef.setInput('first', 0);
+      supportFixture.componentRef.setInput('rows', 10);
+      const supportChangeSpy = vi.spyOn(supportFixture.componentInstance.supportChange, 'emit');
+      distinctSupportNamesSubject.next([...catalogNames]);
+      supportFixture.detectChanges();
+      await Promise.resolve();
+      supportFixture.detectChanges();
+      return { supportFixture, supportChangeSpy };
+    };
+
+    beforeEach(() => {
+      distinctSupportNamesSubject.next(catalogNames);
+      fixture.detectChanges();
+    });
+
+    it('should render a filtered, virtualized PrimeNG select with only the first 20 sorted options', () => {
+      const selectHost = fixture.debugElement.query(By.css('[data-testid="support-name-select"]'));
+      const select = selectHost.injector.get(Select);
+
+      expect(selectHost.nativeElement.tagName).toBe('P-SELECT');
+      expect(select.filter).toBe(true);
+      expect(select.virtualScroll).toBe(true);
+      expect(select.lazy).toBe(true);
+      expect(select.virtualScrollItemSize).toBe(34);
+      expect(select.scrollHeight).toBe('21.25rem');
+      expect(select.options).toEqual(catalogNames.slice(0, 20));
+      expect(component.visibleSupportNameOptions()).toEqual(catalogNames.slice(0, 20));
+    });
+
+    it('should display existing catalog and custom names outside the first batch', async () => {
+      const supports = [
+        { ...mockSupports[0], name: 'CAT-040' },
+        { ...mockSupports[1], name: 'Custom support name' },
+        { ...mockSupports[2], name: null }
+      ];
+      const { supportFixture, supportChangeSpy } = await createSupportSelectFixture(supports);
+
+      const selectHosts = supportFixture.debugElement.queryAll(By.css('[data-testid="support-name-select"]'));
+      const catalogSelect = selectHosts[0].injector.get(Select);
+      const customSelect = selectHosts[1].injector.get(Select);
+
+      expect(catalogSelect.options).toEqual(catalogNames.slice(0, 20));
+      expect(customSelect.options).toEqual(catalogNames.slice(0, 20));
+      expect(catalogSelect.modelValue()).toBe('CAT-040');
+      expect(customSelect.modelValue()).toBe('Custom support name');
+      expect(selectHosts[0].nativeElement.textContent).toContain('CAT-040');
+      expect(selectHosts[1].nativeElement.textContent).toContain('Custom support name');
+      expect(selectHosts[0].nativeElement.style.getPropertyValue('--p-select-placeholder-color')).toBe(
+        'var(--p-select-color)'
+      );
+      expect(selectHosts[2].nativeElement.textContent.trim()).toBe('');
+      expect(supportChangeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should retain the selected name while the options are filtered and after the filter is reset', async () => {
+      const supports = [{ ...mockSupports[0], name: 'CAT-005' }];
+      const { supportFixture, supportChangeSpy } = await createSupportSelectFixture(supports);
+      const supportComponent = supportFixture.componentInstance;
+
+      const selectHost = supportFixture.debugElement.query(By.css('[data-testid="support-name-select"]'));
+      expect(selectHost.nativeElement.textContent).toContain('CAT-005');
+
+      supportComponent.onSupportNameFilter({ filter: 'CAT-04' });
+      supportFixture.detectChanges();
+      expect(supportComponent.visibleSupportNameOptions()).not.toContain('CAT-005');
+      expect(selectHost.nativeElement.textContent).toContain('CAT-005');
+
+      supportComponent.resetSupportNameFilter();
+      supportFixture.detectChanges();
+      expect(selectHost.nativeElement.textContent).toContain('CAT-005');
+      expect(supportChangeSpy).not.toHaveBeenCalled();
+    });
+
+    it('should append 20 options as the user scrolls toward the end of the current batch', () => {
+      component.onSupportNameLazyLoad({ first: 0, last: 20 });
+      expect(component.visibleSupportNameOptions()).toHaveLength(20);
+
+      component.onSupportNameLazyLoad({ first: 10, last: 20 });
+      expect(component.visibleSupportNameOptions()).toHaveLength(40);
+      expect(component.visibleSupportNameOptions().slice(0, 40)).toEqual(catalogNames.slice(0, 40));
+
+      component.onSupportNameLazyLoad({ first: 30, last: 40 });
+      expect(component.visibleSupportNameOptions()).toHaveLength(48);
+      expect(component.visibleSupportNameOptions().slice(0, 45)).toEqual(catalogNames);
+    });
+
+    it('should search the whole catalog, sort the matches, and reset paging to 20', () => {
+      component.onSupportNameLazyLoad({ first: 10, last: 20 });
+      component.onSupportNameFilter({ filter: 'CAT-04' });
+
+      expect(component.visibleSupportNameOptions()).toEqual([
+        'CAT-04',
+        'CAT-040',
+        'CAT-041',
+        'CAT-042',
+        'CAT-043',
+        'CAT-044',
+        'CAT-045'
+      ]);
+    });
+
+    it.each(['CAT-040', 'Custom support name'])(
+      'should keep "%s" selectable when pasted with surrounding whitespace into the real filter input',
+      async (name) => {
+        vi.stubGlobal(
+          'matchMedia',
+          vi.fn().mockImplementation((media: string) => ({
+            matches: false,
+            media,
+            onchange: null,
+            addListener: vi.fn(),
+            removeListener: vi.fn(),
+            addEventListener: vi.fn(),
+            removeEventListener: vi.fn(),
+            dispatchEvent: vi.fn()
+          }))
+        );
+        try {
+          const selectHost = fixture.debugElement.query(By.css('[data-testid="support-name-select"]'));
+          const select = selectHost.injector.get(Select);
+          select.show();
+          fixture.detectChanges();
+
+          await vi.waitFor(() => expect(select.filterViewChild?.nativeElement).toBeTruthy());
+          vi.spyOn(select.scroller!, 'scrollTo').mockImplementation(() => undefined);
+          const filterInput: HTMLInputElement = select.filterViewChild!.nativeElement;
+          filterInput.value = `  ${name}  `;
+          filterInput.dispatchEvent(new Event('input', { bubbles: true }));
+          fixture.detectChanges();
+
+          expect(component.visibleSupportNameOptions()).toEqual([name]);
+          expect(select.visibleOptions()).toEqual([name]);
+          expect(component.supportChange.emit).not.toHaveBeenCalled();
+          await new Promise<void>((resolve) => setTimeout(resolve, 0));
+          select.hide();
+          fixture.detectChanges();
+        } finally {
+          fixture.destroy();
+          vi.unstubAllGlobals();
+        }
+      }
+    );
+
+    it('should keep a typed name that is absent from the catalog selectable', async () => {
+      const customName = 'Custom support name';
+      component.onSupportNameFilter({ filter: customName });
+
+      expect(component.visibleSupportNameOptions()).toContain(customName);
+
+      await component.onSupportFieldChange('support1', 'name', customName);
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: 'support1',
+        support: { name: customName }
+      });
+    });
+
+    it('should display fewer than 20 options when fewer matches exist', () => {
+      component.onSupportNameFilter({ filter: 'CAT-045' });
+
+      expect(component.visibleSupportNameOptions()).toEqual(['CAT-045']);
+    });
+
+    it('should reset the query and visible batch when the select closes', () => {
+      component.onSupportNameLazyLoad({ first: 10, last: 20 });
+      component.onSupportNameFilter({ filter: 'CAT-04' });
+      component.resetSupportNameFilter();
+
+      expect(component.visibleSupportNameOptions()).toHaveLength(20);
+      expect(component.visibleSupportNameOptions()).toEqual(catalogNames.slice(0, 20));
+    });
+
+    it('should retain the clear-name button behavior', () => {
+      const clearButton = fixture.nativeElement.querySelector('[data-testid="support-name-clear-btn"]') as HTMLElement;
+      clearButton.click();
+
+      expect(component.supportChange.emit).toHaveBeenCalledWith({
+        uuid: mockSupports[0].uuid,
+        support: { name: null }
       });
     });
   });

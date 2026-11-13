@@ -2,7 +2,7 @@
 
 ## Objectif
 
-L'onglet **Calcul du paramètre** fournit des méthodes de mesure de terrain pour calculer le paramètre électrique de fléchage à partir d'observations d'angle et de distance sur site. Actuellement, seule la méthode **PAPOTO** est implémentée ; les méthodes Tangent Aiming et PEP sont des composants d'espace réservé (boutons radio désactivés).
+L'onglet **Calcul du paramètre** fournit des méthodes de mesure de terrain pour calculer le paramètre électrique de fléchage à partir d'observations d'angle et de distance sur site. Les méthodes **PAPOTO** et **Tangent Aiming** (variantes Support, Intérieur, Extérieur ; voir {doc}`tangent_aiming`) sont implémentées ; la méthode PEP est un composant d'espace réservé (bouton radio désactivé).
 
 Le paramètre calculé alimente ensuite l'onglet **Paramètre à 15 °C sans vent** en mode « auto », qui utilise `outputs.papoto.parameter` et `outputs.papoto.uncertainty` pour effectuer les calculs thermiques suivants.
 
@@ -11,14 +11,13 @@ Le paramètre calculé alimente ensuite l'onglet **Paramètre à 15 °C sans ven
 L'onglet de calcul du paramètre est implémenté par les composants suivants (chemins relatifs depuis `src/app/features/studio/field-measuring/`) :
 
 - **Sélecteur de méthode et conteneur** : `presentation/components/calculus-setting/calculus-setting.component.ts` et `.html`
-  - Boutons radio pour PAPOTO, Tangent Aiming (désactivé), PEP (désactivé)
+  - Boutons radio pour PAPOTO, Tangent Aiming (Support, Intérieur, Extérieur), PEP (désactivé)
   - Affichage conditionnel du composant enfant selon la sélection
 - **Formulaire de mesure PAPOTO** : `presentation/components/calculus-setting/papoto/papoto.component.ts` et `.html`
   - Champs de saisie pour la longueur de portée, la différence d'altitude et 12 angles (HL, H1–H3, HR, VL, V1–V3, VR)
   - Boîte de dialogue d'aide avec guidance visuelle (`papoto-help.webp`)
   - Section de résultats (paramètre, incertitude, paramètres 1–2, 2–3, 1–3, critère de validité à 0,5 %)
   - **Composants de remplacement** (sans logique) :
-    - `presentation/components/calculus-setting/tangent-aiming/tangent-aiming.component.ts` (désactivé)
     - `presentation/components/calculus-setting/pep/pep.component.ts` (désactivé)
 - **Modèle de domaine** : `domain/types.ts` (exporte l'interface `FieldMeasure` avec les champs PAPOTO et `PapotoResult`)
 - **Helpers** : `presentation/helpers.ts` et `presentation/constants.ts`

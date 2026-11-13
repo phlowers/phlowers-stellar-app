@@ -50,12 +50,16 @@
 
 <ng-template #footer>
   <div class="dialog-footer">
+    @if (reportExportBlockedReason(); as reason) {
+      <p class="dialog-footer__hint" role="status" data-testid="report-export-blocked-reason">{{ reason }}</p>
+    }
     <button
       app-btn
       type="button"
-      [disabled]="hasUnsavedChanges() || isTangentAimingMethod()"
+      [disabled]="!canReportOrExport()"
       btnStyle="outlined"
       (click)="onReport()"
+      data-testid="report-btn"
     >
       <app-icon icon="description" />
       <span>{{ 'common.report' | transloco }}</span>
@@ -63,7 +67,7 @@
     <button
       app-btn
       type="button"
-      [disabled]="hasUnsavedChanges() || isTangentAimingMethod()"
+      [disabled]="!canReportOrExport()"
       btnStyle="outlined"
       (click)="onExport()"
       data-testid="export-btn"

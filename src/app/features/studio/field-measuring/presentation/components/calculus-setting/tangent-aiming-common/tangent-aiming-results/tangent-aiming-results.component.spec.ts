@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
-import { TangentAimingResultsComponent } from './tangent-aiming-results.component';
+import { TangentAimingResultsComponent } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-results/tangent-aiming-results.component';
 
 describe('TangentAimingResults component', () => {
   let fixture: ComponentFixture<TangentAimingResultsComponent>;
@@ -17,6 +17,7 @@ describe('TangentAimingResults component', () => {
               'common.meter': 'm',
               'common.yes': 'Yes',
               'common.no': 'No',
+              'common.criterion-one-percent-label': '1% criterion',
               'field-measuring.tangent-aiming-exterior.calculation-failed': 'Failed (exterior)'
             }
           },
@@ -63,7 +64,28 @@ describe('TangentAimingResults component', () => {
     fixture.componentRef.setInput('format', 'percent');
     fixture.detectChanges();
     expect(getByTestId('test-uncertainty')?.textContent?.trim()).toBe('2 m');
-    expect(getByTestId('test-criterion')?.textContent).toContain('5 %');
+    expect(getByTestId('test-criterion')?.textContent).toContain('No');
     expect(getByTestId('test-criterion-ko')).toBeTruthy();
   });
+
+  it.each([
+    ['percent', true, 'Yes', 'ok', 'ko'],
+    ['percent', false, 'No', 'ko', 'ok'],
+    ['validity', true, 'Yes', 'ok', 'ko'],
+    ['validity', false, 'No', 'ko', 'ok']
+  ] as const)(
+    'should render the criterion in %s format when validity is %s',
+    (format, checkValidity, text, icon, hiddenIcon) => {
+      fixture.componentRef.setInput('format', format);
+      fixture.componentRef.setInput('result', { ...result, criterion: 7.5, checkValidity });
+      fixture.detectChanges();
+
+      expect(getByTestId('test-criterion-label')?.tagName).toBe('DT');
+      expect(getByTestId('test-criterion-label')?.textContent?.trim()).toBe('1% criterion');
+      expect(getByTestId('test-criterion')?.textContent).toContain(text);
+      expect(getByTestId('test-criterion')?.textContent).not.toContain('%');
+      expect(getByTestId(`test-criterion-${icon}`)?.classList).toContain(`criterion-${icon}`);
+      expect(getByTestId(`test-criterion-${hiddenIcon}`)).toBeNull();
+    }
+  );
 });

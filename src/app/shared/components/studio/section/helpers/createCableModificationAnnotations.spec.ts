@@ -299,7 +299,7 @@ describe('createCableModificationAnnotations', () => {
       expect(label.showarrow).toBe(false);
       expect(label.captureevents).toBe(false);
       expect(label.yshift).toBe(PlotlyDrawings.cableModification.label.yShift);
-      // |ay| = 90, label yshift = 110 → label sits above the icon.
+      // The label sits above the icon: its yshift is greater than the |ay| of the icon.
       expect((label.yshift as number) > Math.abs(PlotlyDrawings.cableModification.arrowYOffset)).toBe(true);
     });
 
@@ -378,10 +378,10 @@ describe('createCableModificationAnnotations', () => {
   });
 
   describe('overlap-prevention contract with load annotation', () => {
-    it('should sit vertically above the load icon (ay < -50) and stay horizontally aligned (ax = 0)', () => {
-      // The load helper uses ax: 0, ay: -50. The cable modification helper
+    it('should sit vertically above the load icons and stay horizontally aligned (ax = 0)', () => {
+      // The load helper uses ax: 0 and its own arrowYOffset. The cable modification helper
       // keeps ax: 0 (so the icon stays on its anchor point along the cable)
-      // and uses a smaller ay so it sits clearly above the load icon when both
+      // and uses a smaller ay so it sits clearly above the load icons when both
       // happen to anchor at the same data point.
       const [icon] = createCableModificationAnnotations(
         makePlotParams(),
@@ -389,7 +389,8 @@ describe('createCableModificationAnnotations', () => {
         new Map([['span-1', 0]])
       ) as AnnotationWithData[];
       expect(icon.ax).toBe(0);
-      expect((icon.ay as number) < -50).toBe(true);
+      expect(icon.ay as number).toBeLessThan(PlotlyDrawings.loadPunctual.arrowYOffset);
+      expect(icon.ay as number).toBeLessThan(PlotlyDrawings.loadMarking.arrowYOffset);
     });
   });
 });

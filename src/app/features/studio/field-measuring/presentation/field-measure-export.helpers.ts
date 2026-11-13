@@ -9,7 +9,7 @@ import { Section, Study } from '@shared/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { TranslocoService } from '@jsverse/transloco';
 import { FieldMeasure } from '../domain/types';
-import { formatSpanLabel, getActiveParameterOutput } from './helpers';
+import { formatGenerationDate, formatSpanLabel, getActiveParameterOutput } from './helpers';
 import {
   PAPOTO_VALIDITY_CRITERION_PERCENT,
   PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS,
@@ -55,15 +55,7 @@ const createUncertainValueUnit = <T, U extends string>(
  * @param date - The date to format (or `null`)
  * @returns The formatted date, or `null` when `date` is `null`
  */
-export const formatExportDate = (date: Date | null): string | null => {
-  if (!date) {
-    return null;
-  }
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
+export const formatExportDate = (date: Date | null): string | null => (date ? formatGenerationDate(date) : null);
 
 /**
  * Formats a time as `HH:mm` in local time.
@@ -119,8 +111,8 @@ export const buildGeneralExport = (section: Section | null, study: Study | null)
   loadCase: section?.charges.find((charge) => charge.uuid === section.selected_charge_uuid)?.name ?? null
 });
 
-// The legacy French span type 'garde' maps to the 'guard' translation key.
-const getSectionTypeKey = (spanType: string): string => {
+/** Transloco key of a section type; the legacy French span type 'garde' maps to the 'guard' key. */
+export const getSectionTypeKey = (spanType: string): string => {
   const keySuffix = spanType.toLowerCase() === 'garde' ? 'guard' : spanType;
   return `common.section-type.${keySuffix}`;
 };

@@ -1,0 +1,71 @@
+@use 'abstract.extracts' as app;
+
+dt {
+  @extend %label-style;
+}
+
+dd {
+  @extend %read-only-info;
+}
+
+h2 {
+  @extend %heading-s;
+  margin-bottom: 0.75rem;
+}
+
+.temperature-estimation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 2rem;
+    // Added to the 0.25rem gap above the (possibly empty) error row: 0.75rem between fields
+    row-gap: 0.5rem;
+  }
+
+  // Rows label / control / error: subgrid keeps them aligned across columns when a label wraps
+  &__field {
+    display: grid;
+    grid-row: span 3;
+    grid-template-rows: subgrid;
+    row-gap: 0.25rem;
+    margin: 0;
+  }
+
+  &__label {
+    align-self: end;
+  }
+
+  &__calculate {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  // Empty until calculated: the separator comes with the results
+  &__results {
+    display: block;
+  }
+
+  &__results-content {
+    border-top: 1px solid var(--star-dust-300);
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+
+  &__result {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
