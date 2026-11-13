@@ -298,7 +298,7 @@ describe('forest trenches helpers', () => {
       xAxisTitle: 'Distance',
       xTickLabels: ['Start', 'End'],
       yAxisTitle: 'Lateral distance',
-      axisLabel: 'Line axis',
+      axisLabel: 'Span axis',
       overhangCableLabel: (ruleName: string) => `${ruleName} overhang cable`,
       lateralCableLabel: (ruleName: string) => `${ruleName} cable`,
       lateralInverseCableLabel: (ruleName: string) => `${ruleName} inverse cable`,
@@ -315,8 +315,8 @@ describe('forest trenches helpers', () => {
 
       const traces = (Plotly.react as Mock).mock.calls[0][1] as Partial<PlotData>[];
       expect(traces.map((trace) => trace.name)).toEqual([
-        'Line axis',
-        'Line axis',
+        'Span axis',
+        'Span axis',
         'Rule two overhang cable',
         'Rule one cable',
         'Rule one limit',

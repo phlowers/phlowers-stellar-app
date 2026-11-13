@@ -11,7 +11,7 @@ export const FOREST_TRENCHES_PLOT_COLORS = {
   axis: '#000000'
 } as const;
 
-/** Small thin cross drawn on the line axis at every ground slicing point. */
+/** Small thin cross drawn on the span axis at every ground slicing point. */
 export const FOREST_TRENCHES_AXIS_POINT_MARKER = {
   symbol: 'x-thin',
   size: 7,
