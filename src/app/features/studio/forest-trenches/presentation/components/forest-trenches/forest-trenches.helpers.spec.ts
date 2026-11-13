@@ -310,11 +310,12 @@ describe('forest trenches helpers', () => {
       vi.clearAllMocks();
     });
 
-    it('draws the axis, the overhang cable, and the lateral cable and limit curves with the configured styles', () => {
+    it('draws the axis with a cross per slicing point, the overhang cable, and the lateral curves with the configured styles', () => {
       createForestTrenchesPlot(mockDocument(), span, options);
 
       const traces = (Plotly.react as Mock).mock.calls[0][1] as Partial<PlotData>[];
       expect(traces.map((trace) => trace.name)).toEqual([
+        'Line axis',
         'Line axis',
         'Rule two overhang cable',
         'Rule one cable',
@@ -323,17 +324,19 @@ describe('forest trenches helpers', () => {
         'Rule one inverse limit'
       ]);
       expect(traces[0].line).toMatchObject({ color: '#000000', dash: 'dash' });
-      for (const cableTrace of [traces[1], traces[2], traces[4]]) {
+      expect(traces[1]).toMatchObject({ mode: 'markers', x: [2, 8], y: [0, 0], showlegend: false });
+      expect(traces[1].marker).toMatchObject({ symbol: 'x-thin', color: '#000000' });
+      for (const cableTrace of [traces[2], traces[3], traces[5]]) {
         expect(cableTrace).toMatchObject({ mode: 'lines+markers', line: { dash: 'solid' } });
         expect(cableTrace.marker).toMatchObject({ symbol: 'circle' });
       }
-      for (const limitTrace of [traces[3], traces[5]]) {
+      for (const limitTrace of [traces[4], traces[6]]) {
         expect(limitTrace).toMatchObject({ mode: 'markers' });
         expect(limitTrace).not.toHaveProperty('line');
         expect(limitTrace.marker).toMatchObject({ symbol: 'square-open', color: '#ff0000' });
       }
-      expect(traces[1].marker).toMatchObject({ color: '#00ff00' });
-      expect(traces[1].y).toEqual([0, 0]);
+      expect(traces[2].marker).toMatchObject({ color: '#00ff00' });
+      expect(traces[2].y).toEqual([0, 0]);
       expect((Plotly.react as Mock).mock.calls[0][2].xaxis).toMatchObject({
         tickvals: [2, 8],
         ticktext: ['Start', 'End']
@@ -347,9 +350,9 @@ describe('forest trenches helpers', () => {
       });
 
       const traces = (Plotly.react as Mock).mock.calls[0][1] as Partial<PlotData>[];
-      expect(traces[1].marker).toMatchObject({ color: '#0000ff' });
-      expect(traces[1].line).toMatchObject({ color: '#0000ff' });
-      for (const lateralTrace of traces.slice(2)) {
+      expect(traces[2].marker).toMatchObject({ color: '#0000ff' });
+      expect(traces[2].line).toMatchObject({ color: '#0000ff' });
+      for (const lateralTrace of traces.slice(3)) {
         expect(lateralTrace.marker).toMatchObject({ color: '#ff0000' });
       }
     });
