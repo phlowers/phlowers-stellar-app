@@ -287,12 +287,14 @@
           <div [id]="FOREST_TRENCHES_PLOT_ID" class="results__plot"></div>
         </figure>
 
-        <dl class="results__median">
-          <dt>{{ 'studio.forest-trenches.median-f1' | transloco }}</dt>
-          <dd data-testid="forest-trenches-median-f1">
-            {{ span.medianF1 | number: '1.2-2' }} {{ 'common.meter' | transloco }}
-          </dd>
-        </dl>
+        @if (span.medianF1 !== null) {
+          <dl class="results__median">
+            <dt>{{ 'studio.forest-trenches.median-f1' | transloco }}</dt>
+            <dd data-testid="forest-trenches-median-f1">
+              {{ span.medianF1 | number: '1.2-2' }} {{ 'common.meter' | transloco }}
+            </dd>
+          </dl>
+        }
 
         @if (!isGraphEnlarged()) {
           <div class="results__table-wrapper">

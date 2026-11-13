@@ -5,6 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+/** Marker and connecting line style of one forest-trenches plot series. */
+export interface ForestTrenchesChartSeriesStyle {
+  marker: string;
+  line: string;
+}
+
 /** Fixed primary key used by the singleton conformity configuration row. */
 export const OBSTACLE_CONFORMITY_CONFIG_KEY = 'main';
 
@@ -40,11 +46,12 @@ export interface CatalogObstacleConformityConfigEntity {
   forest_trenches_overhang_rules: string[];
   /** Default lateral rules for the forest-trenches tool. */
   forest_trenches_lateral_rules: string[];
-  /** Base climatic case for the forest-trenches tool. */
-  forest_trenches_base_case: {
-    name: string;
-    temperature: number;
-    wind: number;
+  /** Plot styles of the forest-trenches tool, keys of PLOTLY_MARKER_SYMBOLS / PLOTLY_LINE_DASHES. */
+  forest_trenches_chart: {
+    cable: ForestTrenchesChartSeriesStyle;
+    limit: ForestTrenchesChartSeriesStyle;
+    /** Overrides the rule color of the overhang cable curves; null keeps the rule color. */
+    overhang_color: string | null;
   };
   /** Whether the mandatory forest-trenches floor obstacle is in the red zone. */
   floor_obstacle_red_zone: boolean;

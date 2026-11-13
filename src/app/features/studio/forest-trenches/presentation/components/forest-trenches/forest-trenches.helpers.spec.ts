@@ -6,7 +6,7 @@
  */
 
 import { type Mock, vi } from 'vitest';
-import Plotly, { type Data, type Layout } from 'plotly.js-dist-min';
+import Plotly, { type Layout, type PlotData } from 'plotly.js-dist-min';
 import type { CatalogObstacleRuleDefinitionEntity } from '@infrastructure/database/entities/catalog-obstacle-rule-definition.entity';
 import type { CatalogObstacleConformityConfigEntity } from '@infrastructure/database/entities/catalog-obstacle-conformity-config.entity';
 import type { Floor } from '@shared/domain/models/floor.model';
@@ -40,7 +40,11 @@ describe('forest trenches helpers', () => {
       forest_trenches_n_points_choices: [3, 5],
       forest_trenches_overhang_rules: ['AT'],
       forest_trenches_lateral_rules: ['AT'],
-      forest_trenches_base_case: { name: 'Base', temperature: 15, wind: 0 },
+      forest_trenches_chart: {
+        cable: { marker: 'circle', line: 'solid' },
+        limit: { marker: 'square-open', line: 'none' },
+        overhang_color: null
+      },
       floor_obstacle_red_zone: false,
       floor_obstacle_distances: [{ rule_type: 'AT', active: true, overhang: null, lateral: null }]
     } as unknown as CatalogObstacleConformityConfigEntity;
@@ -50,7 +54,11 @@ describe('forest trenches helpers', () => {
         nPointsChoices: [3, 5],
         overhangRules: ['AT'],
         lateralRules: ['AT'],
-        baseCase: { name: 'Base', temperature: 15, wind: 0 },
+        chart: {
+          cable: { marker: 'circle', line: 'solid' },
+          limit: { marker: 'square-open', line: 'none' },
+          overhang_color: null
+        },
         redZone: false,
         floorDistances: validConfig.floor_obstacle_distances
       });
@@ -66,9 +74,35 @@ describe('forest trenches helpers', () => {
       ['non numeric choices', { forest_trenches_n_points_choices: ['3'] }],
       ['bad overhang rules', { forest_trenches_overhang_rules: [1] }],
       ['missing lateral rules', { forest_trenches_lateral_rules: undefined }],
-      ['base case without name', { forest_trenches_base_case: { temperature: 1, wind: 0 } }],
-      ['base case without temperature', { forest_trenches_base_case: { name: 'B', wind: 0 } }],
-      ['base case without wind', { forest_trenches_base_case: { name: 'B', temperature: 1 } }],
+      ['missing chart', { forest_trenches_chart: undefined }],
+      ['chart without limit style', { forest_trenches_chart: { cable: { marker: 'circle', line: 'solid' } } }],
+      [
+        'chart without overhang color',
+        {
+          forest_trenches_chart: {
+            cable: { marker: 'circle', line: 'solid' },
+            limit: { marker: 'square', line: 'dash' }
+          }
+        }
+      ],
+      [
+        'unknown chart marker',
+        {
+          forest_trenches_chart: {
+            cable: { marker: 'plain-circle', line: 'solid' },
+            limit: { marker: 'square', line: 'dash' }
+          }
+        }
+      ],
+      [
+        'unknown chart line',
+        {
+          forest_trenches_chart: {
+            cable: { marker: 'circle', line: 'solid' },
+            limit: { marker: 'square', line: 'wavy' }
+          }
+        }
+      ],
       ['missing red zone', { floor_obstacle_red_zone: undefined }],
       ['missing distances', { floor_obstacle_distances: undefined }]
     ])('returns null for %s', (_label, override) => {
@@ -161,7 +195,7 @@ describe('forest trenches helpers', () => {
     const translate = (key: string, params?: Record<string, string | number>) =>
       `${key}:${params ? Object.values(params).join(',') : ''}`;
 
-    it('returns rows in the prescribed order, filters rules, and uses absolute distance values', () => {
+    it('returns the scenario rows in the prescribed order, filtered by selected rules, with signed axis distances', () => {
       const rows = buildForestTrenchesRows(
         span,
         {
@@ -169,9 +203,8 @@ describe('forest trenches helpers', () => {
           lateralRules: ['RULE_1', 'RULE_2', 'RULE_3'],
           overhangRules: ['RULE_3', 'RULE_2'],
           ruleDefinitions: rules,
-          repartitionTemperature: 10,
-          lateralDistanceTemperature: 15,
-          baseCase: { name: 'Base case', temperature: 15, wind: 0 }
+          repartitionTemperature: 70,
+          lateralDistanceTemperature: 65
         },
         translate
       );
@@ -179,26 +212,54 @@ describe('forest trenches helpers', () => {
       expect(rows.map((row) => row.id)).toEqual([
         'distance-to-left-support',
         'ground-elevation',
-        'axis-cable-repartition',
-        'axis-cable-base-case',
+        'cable-altitude-overhang-RULE_2',
+        'cable-altitude-lateral-RULE_1',
+        'cable-altitude-lateral-RULE_2',
+        'cable-height-overhang-RULE_2',
+        'overhang-compliance-limit-height-RULE_2',
         'axis-cable-lateral-RULE_1',
         'axis-cable-lateral-RULE_2',
         'axis-lateral-limit-RULE_1',
-        'axis-lateral-limit-RULE_2',
-        'cable-height-repartition',
-        'cable-height-base-case',
-        'overhang-compliance-limit-height-RULE_2',
-        'cable-elevation-lateral-RULE_1',
-        'cable-elevation-lateral-RULE_2',
-        'cable-elevation-repartition',
-        'cable-elevation-base-case'
+        'axis-lateral-limit-RULE_2'
       ]);
-      expect(rows[0].values).toEqual([2, 8]);
-      expect(rows[1].values).toEqual([-10, 12]);
-      expect(rows[2].values).toEqual([3, 4]);
-      expect(rows[4].label).toContain('Rule one,15');
-      expect(rows[10].label).toContain('Rule two');
+      const valuesById = Object.fromEntries(rows.map((row) => [row.id, row.values]));
+      expect(valuesById['distance-to-left-support']).toEqual([2, 8]);
+      expect(valuesById['ground-elevation']).toEqual([-10, 12]);
+      expect(valuesById['cable-altitude-overhang-RULE_2']).toEqual([32, 32]);
+      expect(valuesById['cable-altitude-lateral-RULE_1']).toEqual([31, 31]);
+      expect(valuesById['cable-height-overhang-RULE_2']).toEqual([42, 20]);
+      expect(valuesById['overhang-compliance-limit-height-RULE_2']).toEqual([-2, -2]);
+      expect(valuesById['axis-cable-lateral-RULE_1']).toEqual([-5, -5]);
+      expect(valuesById['axis-lateral-limit-RULE_1']).toEqual([-6, -6]);
       expect(rows.every((row) => row.unitKey === 'common.meter')).toBe(true);
+    });
+
+    it('labels each scenario row with the rule temperature, else the form temperature', () => {
+      const rows = buildForestTrenchesRows(
+        span,
+        {
+          selectedRules: ['RULE_1', 'RULE_2'],
+          lateralRules: ['RULE_1', 'RULE_2'],
+          overhangRules: ['RULE_2'],
+          ruleDefinitions: [
+            ruleDefinition('RULE_1', 'Rule one'),
+            {
+              ...ruleDefinition('RULE_2', 'Rule two'),
+              lateral_point: { temperature: null, pressure: 0, red_zone: false }
+            }
+          ],
+          repartitionTemperature: 70,
+          lateralDistanceTemperature: 65
+        },
+        translate
+      );
+      const labelById = Object.fromEntries(rows.map((row) => [row.id, row.label]));
+
+      expect(labelById['cable-altitude-overhang-RULE_2']).toBe(
+        'studio.forest-trenches.row-cable-altitude-overhang:Rule two,70'
+      );
+      expect(labelById['axis-cable-lateral-RULE_1']).toBe('studio.forest-trenches.row-axis-cable-lateral:Rule one,15');
+      expect(labelById['axis-cable-lateral-RULE_2']).toBe('studio.forest-trenches.row-axis-cable-lateral:Rule two,65');
     });
 
     it('rejects a selected rule whose result is missing from the span', () => {
@@ -214,8 +275,7 @@ describe('forest trenches helpers', () => {
             overhangRules: [],
             ruleDefinitions: rules,
             repartitionTemperature: 10,
-            lateralDistanceTemperature: 15,
-            baseCase: { name: 'Base case', temperature: 15, wind: 0 }
+            lateralDistanceTemperature: 15
           },
           translate
         )
@@ -227,14 +287,19 @@ describe('forest trenches helpers', () => {
     const span = makeSpan();
     const options = {
       lateralRuleTypes: ['RULE_1'],
-      ruleColors: { RULE_1: '#ff0000' },
-      ruleLabels: { RULE_1: 'Rule one' },
+      overhangRuleTypes: ['RULE_2'],
+      ruleColors: { RULE_1: '#ff0000', RULE_2: '#00ff00' },
+      ruleLabels: { RULE_1: 'Rule one', RULE_2: 'Rule two' },
+      chart: {
+        cable: { marker: 'circle', line: 'solid' },
+        limit: { marker: 'square-open', line: 'none' },
+        overhang_color: null
+      },
       xAxisTitle: 'Distance',
       xTickLabels: ['Start', 'End'],
       yAxisTitle: 'Lateral distance',
       axisLabel: 'Line axis',
-      repartitionLabel: 'Repartition',
-      baseCaseLabel: 'Base case',
+      overhangCableLabel: (ruleName: string) => `${ruleName} overhang cable`,
       lateralCableLabel: (ruleName: string) => `${ruleName} cable`,
       lateralInverseCableLabel: (ruleName: string) => `${ruleName} inverse cable`,
       lateralLimitLabel: (ruleName: string) => `${ruleName} limit`,
@@ -245,22 +310,48 @@ describe('forest trenches helpers', () => {
       vi.clearAllMocks();
     });
 
-    it('draws the axis, climate cases, and lateral points with their required markers', () => {
+    it('draws the axis, the overhang cable, and the lateral cable and limit curves with the configured styles', () => {
       createForestTrenchesPlot(mockDocument(), span, options);
 
-      const traces = (Plotly.react as Mock).mock.calls[0][1] as Data[];
-      expect(traces).toHaveLength(7);
+      const traces = (Plotly.react as Mock).mock.calls[0][1] as Partial<PlotData>[];
+      expect(traces.map((trace) => trace.name)).toEqual([
+        'Line axis',
+        'Rule two overhang cable',
+        'Rule one cable',
+        'Rule one limit',
+        'Rule one inverse cable',
+        'Rule one inverse limit'
+      ]);
       expect(traces[0].line).toMatchObject({ color: '#000000', dash: 'dash' });
-      expect(traces[1].line).toMatchObject({ color: '#2563eb' });
-      expect(traces[2].line).toMatchObject({ color: '#1e3a8a' });
-      expect(traces[3].marker).toMatchObject({ symbol: 'circle-open', color: '#ff0000' });
-      expect(traces[4].marker).toMatchObject({ symbol: 'diamond', color: '#ff0000' });
-      expect(traces[5].marker).toMatchObject({ symbol: 'circle-open', color: '#ff0000' });
-      expect(traces[6].marker).toMatchObject({ symbol: 'diamond', color: '#ff0000' });
+      for (const cableTrace of [traces[1], traces[2], traces[4]]) {
+        expect(cableTrace).toMatchObject({ mode: 'lines+markers', line: { dash: 'solid' } });
+        expect(cableTrace.marker).toMatchObject({ symbol: 'circle' });
+      }
+      for (const limitTrace of [traces[3], traces[5]]) {
+        expect(limitTrace).toMatchObject({ mode: 'markers' });
+        expect(limitTrace).not.toHaveProperty('line');
+        expect(limitTrace.marker).toMatchObject({ symbol: 'square-open', color: '#ff0000' });
+      }
+      expect(traces[1].marker).toMatchObject({ color: '#00ff00' });
+      expect(traces[1].y).toEqual([0, 0]);
       expect((Plotly.react as Mock).mock.calls[0][2].xaxis).toMatchObject({
         tickvals: [2, 8],
         ticktext: ['Start', 'End']
       });
+    });
+
+    it('colors only the overhang cable with the configured overhang color', () => {
+      createForestTrenchesPlot(mockDocument(), span, {
+        ...options,
+        chart: { ...options.chart, overhang_color: '#0000ff' }
+      });
+
+      const traces = (Plotly.react as Mock).mock.calls[0][1] as Partial<PlotData>[];
+      expect(traces[1].marker).toMatchObject({ color: '#0000ff' });
+      expect(traces[1].line).toMatchObject({ color: '#0000ff' });
+      for (const lateralTrace of traces.slice(2)) {
+        expect(lateralTrace.marker).toMatchObject({ color: '#ff0000' });
+      }
     });
 
     it('draws the positive-wind side below the axis (reversed y axis)', () => {
@@ -312,8 +403,6 @@ function makeSpan(): ForestTrenchesSpanOutput {
   const makePoint = (distance: number): ForestTrenchesSpanOutput['points'][number] => ({
     distanceToLeftSupport: distance === 2 ? 2 : 8,
     groundElevation: distance === 2 ? -10 : 12,
-    baseCase: { axisDistance: -4, elevation: 30, heightAboveGround: 20 },
-    repartition: { axisDistance: distance === 2 ? -3 : 4, elevation: 29, heightAboveGround: 19 },
     lateral: {
       RULE_1: { axisDistance: -5, elevation: 31, limitAxisDistance: -6 },
       RULE_2: { axisDistance: 7, elevation: 32, limitAxisDistance: 8 }
@@ -323,8 +412,8 @@ function makeSpan(): ForestTrenchesSpanOutput {
       RULE_2: { axisDistance: -7, elevation: 32, limitAxisDistance: -8 }
     },
     overhang: {
-      RULE_2: { elevation: 32, complianceLimitHeightAboveGround: -2 },
-      RULE_3: { elevation: 33, complianceLimitHeightAboveGround: 3 }
+      RULE_2: { elevation: 32, heightAboveGround: distance === 2 ? 42 : 20, complianceLimitHeightAboveGround: -2 },
+      RULE_3: { elevation: 33, heightAboveGround: 21, complianceLimitHeightAboveGround: 3 }
     }
   });
 
@@ -337,14 +426,6 @@ function makeSpan(): ForestTrenchesSpanOutput {
       { x: 10, y: 0 }
     ],
     plot: {
-      baseCase: [
-        { x: 0, y: -4 },
-        { x: 10, y: -4 }
-      ],
-      repartition: [
-        { x: 0, y: -3 },
-        { x: 10, y: -3 }
-      ],
       lateral: {
         RULE_1: {
           cable: [{ x: 0, y: -5 }],
@@ -355,6 +436,14 @@ function makeSpan(): ForestTrenchesSpanOutput {
         RULE_1: {
           cable: [{ x: 10, y: 5 }],
           limit: [{ x: 10, y: 6 }]
+        }
+      },
+      overhang: {
+        RULE_2: {
+          cable: [
+            { x: 0, y: 0 },
+            { x: 10, y: 0 }
+          ]
         }
       }
     },

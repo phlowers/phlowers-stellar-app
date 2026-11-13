@@ -19,6 +19,7 @@ import { NotificationService } from '@services/notification/notification.service
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ForestTrenchesComponent } from './forest-trenches.component';
+import { createForestTrenchesPlot } from './forest-trenches.helpers';
 
 vi.mock('./forest-trenches.helpers', async (importOriginal) => {
   const actual = await importOriginal<typeof import('./forest-trenches.helpers')>();
@@ -125,7 +126,7 @@ describe('ForestTrenchesComponent', () => {
       forest_trenches_n_points_choices: undefined,
       forest_trenches_overhang_rules: undefined,
       forest_trenches_lateral_rules: undefined,
-      forest_trenches_base_case: undefined,
+      forest_trenches_chart: undefined,
       floor_obstacle_red_zone: undefined,
       floor_obstacle_distances: undefined
     });
@@ -174,6 +175,7 @@ describe('ForestTrenchesComponent', () => {
         { spanIndex: 1, distances: [0, 100], altitudes: [10, 12] }
       ]
     });
+    expect(workerPython.runTask.mock.calls[2][1]).not.toHaveProperty('baseCase');
     expect(sectionService.createOrUpdateSection).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({
@@ -196,6 +198,43 @@ describe('ForestTrenchesComponent', () => {
     component.form.controls.selectedRules.setValue([]);
     expect(component.tableRows()).toHaveLength(displayedRowCount);
     expect(notificationService.success).toHaveBeenCalled();
+  });
+
+  it('redraws the plot with the legend only while the graph is enlarged', async () => {
+    await createComponent();
+    await component.calculate();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const plotMock = vi.mocked(createForestTrenchesPlot);
+    const lastShowLegend = (): boolean | undefined => plotMock.mock.lastCall?.[2].showLegend;
+    expect(lastShowLegend()).toBe(false);
+
+    component.toggleGraphSize();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(lastShowLegend()).toBe(true);
+
+    component.toggleGraphSize();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(lastShowLegend()).toBe(false);
+  });
+
+  it('hides the median F1 when no overhang rule was calculated', async () => {
+    await createComponent();
+    workerPython.runTask.mockImplementation((task: Task) =>
+      Promise.resolve(
+        task === Task.sliceGround
+          ? { result: { distances: [0, 100], altitudes: [10, 12], length: 100 }, error: null }
+          : { result: { spans: [{ ...makeSpanOutput(0), medianF1: null }] }, error: null }
+      )
+    );
+
+    await component.calculate();
+    fixture.detectChanges();
+
+    expect(getByTestId('forest-trenches-results-table')).not.toBeNull();
+    expect(getByTestId('forest-trenches-median-f1')).toBeNull();
   });
 
   it('does not calculate an interval whose last support precedes the first', async () => {
@@ -267,7 +306,11 @@ function makeDb(configOverride: Record<string, unknown> | null = {}) {
                 forest_trenches_n_points_choices: [3, 5],
                 forest_trenches_overhang_rules: ['RULE_1'],
                 forest_trenches_lateral_rules: ['RULE_1'],
-                forest_trenches_base_case: { name: 'Base case', temperature: 15, wind: 0 },
+                forest_trenches_chart: {
+                  cable: { marker: 'circle', line: 'solid' },
+                  limit: { marker: 'square-open', line: 'dash' },
+                  overhang_color: null
+                },
                 floor_obstacle_red_zone: false,
                 floor_obstacle_distances: [
                   { rule_type: 'RULE_1', active: true, overhang: { distance: 2 }, lateral: { distance: 3 } }
@@ -322,16 +365,9 @@ function makeSpanOutput(spanIndex: number) {
       { x: 100, y: 0 }
     ],
     plot: {
-      baseCase: [
-        { x: 0, y: 4 },
-        { x: 100, y: 4 }
-      ],
-      repartition: [
-        { x: 0, y: 3 },
-        { x: 100, y: 3 }
-      ],
       lateral: { RULE_1: { cable: [{ x: 0, y: 5 }], limit: [{ x: 0, y: 6 }] } },
-      lateralInverse: { RULE_1: { cable: [{ x: 100, y: -5 }], limit: [{ x: 100, y: -6 }] } }
+      lateralInverse: { RULE_1: { cable: [{ x: 100, y: -5 }], limit: [{ x: 100, y: -6 }] } },
+      overhang: { RULE_1: { cable: [{ x: 0, y: 0 }] } }
     },
     points: [makeForestPoint(0), makeForestPoint(100)]
   };
@@ -341,10 +377,8 @@ function makeForestPoint(distance: number) {
   return {
     distanceToLeftSupport: distance,
     groundElevation: 10,
-    baseCase: { axisDistance: 4, elevation: 30, heightAboveGround: 20 },
-    repartition: { axisDistance: 3, elevation: 29, heightAboveGround: 19 },
     lateral: { RULE_1: { axisDistance: 5, elevation: 31, limitAxisDistance: 6 } },
     lateralInverse: { RULE_1: { axisDistance: -5, elevation: 31, limitAxisDistance: -6 } },
-    overhang: { RULE_1: { elevation: 32, complianceLimitHeightAboveGround: 20 } }
+    overhang: { RULE_1: { elevation: 32, heightAboveGround: 22, complianceLimitHeightAboveGround: 20 } }
   };
 }

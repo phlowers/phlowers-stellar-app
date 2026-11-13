@@ -43,15 +43,22 @@ export interface ObstacleJsonDto {
   distances: ObstacleDistanceJsonDto[];
 }
 
-/** Forest-trenches-specific rule selections and base-case parameters. */
+/** Marker and connecting line style of one forest-trenches plot series. */
+export interface ForestTrenchesChartSeriesJsonDto {
+  marker: string;
+  line: string;
+}
+
+/** Forest-trenches-specific rule selections and plot styles. */
 export interface ForestTrenchesJsonDto {
   ground_n_slicing_points_choices: number[];
   overhang_rules_selected: string[];
   lateral_rules_selected: string[];
-  base_case: {
-    name: string;
-    temperature: number;
-    wind: number;
+  chart: {
+    cable: ForestTrenchesChartSeriesJsonDto;
+    limit: ForestTrenchesChartSeriesJsonDto;
+    /** Overrides the rule color of the overhang cable curves; null keeps the rule color. */
+    overhang_color: string | null;
   };
 }
 

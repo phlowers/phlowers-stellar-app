@@ -258,10 +258,10 @@
     "ground_n_slicing_points_choices": [5, 9, 17],
     "overhang_rules_selected": ["RULE_1"],
     "lateral_rules_selected": ["RULE_1", "RULE_2"],
-    "base_case": {
-      "name": "15°C without wind",
-      "temperature": 15,
-      "wind": 0
+    "chart": {
+      "cable": { "marker": "circle", "line": "solid" },
+      "limit": { "marker": "square-open", "line": "dash" },
+      "overhang_color": "#0000FF"
     }
   },
   "floor_obstacle": {
@@ -274,14 +274,14 @@
       {
         "ruleType": "RULE_1",
         "active": true,
-        "overhang": { "63": 0.0, "90": 0.0, "150": 0.0, "225": 0.0, "400": 0.0 },
-        "lateral": { "63": 0.0, "90": 0.0, "150": 0.0, "225": 0.0, "400": 0.0 }
+        "overhang": { "63": 2.0, "90": 2.0, "150": 2.0, "225": 2.0, "400": 2.0 },
+        "lateral": { "63": 3.0, "90": 3.0, "150": 3.0, "225": 0.0, "400": 3.0 }
       },
       {
         "ruleType": "RULE_2",
         "active": true,
-        "overhang": { "63": 0.0, "90": 0.0, "150": 0.0, "225": 0.0, "400": 0.0 },
-        "lateral": { "63": 0.0, "90": 0.0, "150": 0.0, "225": 0.0, "400": 0.0 }
+        "overhang": { "63": 4.0, "90": 4.0, "150": 4.0, "225": 4.0, "400": 4.0 },
+        "lateral": { "63": 5.0, "90": 5.0, "150": 5.0, "225": 5.0, "400": 5.0 }
       }
     ]
   }
