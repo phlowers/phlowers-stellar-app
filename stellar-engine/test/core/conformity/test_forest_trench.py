@@ -23,7 +23,6 @@ def test_forest_trench_request_parses_shared_and_span_inputs(
     assert request.electric_tension == "400 KV"
     assert request.overhang_rules == ("AT",)
     assert request.lateral_rules == ("AT",)
-    assert request.base_case.temperature == 15
     assert len(request.spans) == 2
     assert len(request.spans[0].distances) == 5
 
@@ -38,7 +37,7 @@ def test_forest_trench_request_rejects_mismatched_ground_arrays(
         ForestTrenchRequest.from_dict(inputs)
 
 
-def test_run_returns_multi_span_plot_table_and_repartition_sag(
+def test_run_returns_multi_span_rule_scenarios_and_overhang_sag(
     solved_study, make_forest_trench_inputs
 ):
     inputs = make_forest_trench_inputs()
@@ -77,28 +76,36 @@ def test_run_returns_multi_span_plot_table_and_repartition_sag(
             {"x": 0.0, "y": 0.0},
             {"x": span["length"], "y": 0.0},
         ]
-        assert len(span["plot"]["baseCase"]) == 5
-        assert len(span["plot"]["repartition"]) == 5
+        assert set(span["plot"]) == {"lateral", "lateralInverse", "overhang"}
         assert len(span["plot"]["lateral"]["AT"]["cable"]) == 5
         assert len(span["plot"]["lateralInverse"]["AT"]["limit"]) == 5
+        assert set(span["plot"]["overhang"]["AT"]) == {"cable"}
+        assert len(span["plot"]["overhang"]["AT"]["cable"]) == 5
         assert len(span["points"]) == 5
 
         for point in span["points"]:
-            assert point["baseCase"]["heightAboveGround"] == pytest.approx(
-                point["baseCase"]["elevation"] - point["groundElevation"]
-            )
+            assert set(point) == {
+                "distanceToLeftSupport",
+                "groundElevation",
+                "lateral",
+                "lateralInverse",
+                "overhang",
+            }
             lateral = point["lateral"]["AT"]
-            side = lateral["axisDistance"] or 200
-            expected_limit = lateral["axisDistance"] + (1 if side > 0 else -1)
             assert lateral["limitAxisDistance"] == pytest.approx(
-                expected_limit
+                lateral["axisDistance"] - 1
+            )
+            lateral_inverse = point["lateralInverse"]["AT"]
+            assert lateral_inverse["limitAxisDistance"] == pytest.approx(
+                lateral_inverse["axisDistance"] + 1
             )
             overhang = point["overhang"]["AT"]
+            assert overhang["heightAboveGround"] == pytest.approx(
+                overhang["elevation"] - point["groundElevation"]
+            )
             assert overhang[
                 "complianceLimitHeightAboveGround"
-            ] == pytest.approx(
-                overhang["elevation"] - 1.5 - point["groundElevation"]
-            )
+            ] == pytest.approx(overhang["heightAboveGround"] - 1.5)
 
     expected_study = deepcopy(solved_study)
     expected_study.solve_change_state(
@@ -112,3 +119,17 @@ def test_run_returns_multi_span_plot_table_and_repartition_sag(
         assert span["medianF1"] == pytest.approx(
             expected_sag[span["spanIndex"]]
         )
+
+
+def test_run_without_overhang_rule_has_no_median_f1(
+    solved_study, make_forest_trench_inputs
+):
+    inputs = make_forest_trench_inputs(span_indices=(0,), n_points=3)
+    inputs["overhangRules"] = []
+
+    result = run(inputs, solved_study)
+
+    span = result["spans"][0]
+    assert span["medianF1"] is None
+    assert span["plot"]["overhang"] == {}
+    assert all(point["overhang"] == {} for point in span["points"])

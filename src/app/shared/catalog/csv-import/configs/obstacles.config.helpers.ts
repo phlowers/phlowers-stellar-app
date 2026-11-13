@@ -16,6 +16,7 @@ import type {
   ObstacleRulePressure
 } from '@infrastructure/database';
 import { OBSTACLE_CONFORMITY_CONFIG_KEY } from '@infrastructure/database';
+import { PLOTLY_LINE_DASHES, PLOTLY_MARKER_SYMBOLS } from '@shared/constants/plotly-styles.constantes';
 import type {
   ObstacleConfigurationJsonDto,
   ObstacleDistanceJsonDto,
@@ -181,15 +182,28 @@ function assertForestTrenchesConfig(value: unknown): void {
     }
   }
 
-  const baseCase = value['base_case'];
-  if (!isObject(baseCase)) {
-    throw new Error('Obstacle configuration: `forest_trenches.base_case` must be an object');
+  const chart = value['chart'];
+  if (!isObject(chart)) {
+    throw new Error('Obstacle configuration: `forest_trenches.chart` must be an object');
   }
-  if (typeof baseCase['name'] !== 'string') {
-    throw new Error('Obstacle configuration: `forest_trenches.base_case.name` must be a string');
+  for (const series of ['cable', 'limit'] as const) {
+    const style = chart[series];
+    if (!isObject(style)) {
+      throw new Error(`Obstacle configuration: \`forest_trenches.chart.${series}\` must be an object`);
+    }
+    if (typeof style['marker'] !== 'string' || !Object.hasOwn(PLOTLY_MARKER_SYMBOLS, style['marker'])) {
+      throw new Error(
+        `Obstacle configuration: \`forest_trenches.chart.${series}.marker\` must be one of ${Object.keys(PLOTLY_MARKER_SYMBOLS).join(', ')}`
+      );
+    }
+    if (typeof style['line'] !== 'string' || !Object.hasOwn(PLOTLY_LINE_DASHES, style['line'])) {
+      throw new Error(
+        `Obstacle configuration: \`forest_trenches.chart.${series}.line\` must be one of ${Object.keys(PLOTLY_LINE_DASHES).join(', ')}`
+      );
+    }
   }
-  if (!isFiniteNumber(baseCase['temperature']) || !isFiniteNumber(baseCase['wind'])) {
-    throw new Error('Obstacle configuration: `forest_trenches.base_case` temperature and wind must be finite numbers');
+  if (chart['overhang_color'] !== null && typeof chart['overhang_color'] !== 'string') {
+    throw new Error('Obstacle configuration: `forest_trenches.chart.overhang_color` must be a string or null');
   }
 }
 
@@ -353,7 +367,11 @@ export function buildConformityConfig(payload: ObstacleConfigurationJsonDto): Ca
     forest_trenches_n_points_choices: [...payload.forest_trenches.ground_n_slicing_points_choices],
     forest_trenches_overhang_rules: [...payload.forest_trenches.overhang_rules_selected],
     forest_trenches_lateral_rules: [...payload.forest_trenches.lateral_rules_selected],
-    forest_trenches_base_case: { ...payload.forest_trenches.base_case },
+    forest_trenches_chart: {
+      cable: { ...payload.forest_trenches.chart.cable },
+      limit: { ...payload.forest_trenches.chart.limit },
+      overhang_color: payload.forest_trenches.chart.overhang_color
+    },
     floor_obstacle_red_zone: payload.floor_obstacle.redZone,
     floor_obstacle_distances: payload.floor_obstacle.distances.map(mapDistanceFields)
   };

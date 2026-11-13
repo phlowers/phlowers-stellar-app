@@ -153,15 +153,6 @@ class ConformityRequest:
 
 
 @dataclass(frozen=True)
-class ForestTrenchBaseCase:
-    """Climatic conditions of the additional forest-trenches base case."""
-
-    name: str
-    temperature: float
-    wind: float
-
-
-@dataclass(frozen=True)
 class ForestTrenchSpanInput:
     """Ground points and section span index for one forest-trenches span."""
 
@@ -180,7 +171,6 @@ class ForestTrenchRequest:
     tension_rules: dict[str, TensionRules]
     overhang_rules: tuple[str, ...]
     lateral_rules: tuple[str, ...]
-    base_case: ForestTrenchBaseCase
     spans: tuple[ForestTrenchSpanInput, ...]
 
     @classmethod
@@ -210,19 +200,6 @@ class ForestTrenchRequest:
         ):
             raise ConformityInputError(
                 "lateralRules must be a list of strings"
-            )
-
-        base_case = python_inputs.get("baseCase")
-        if not isinstance(base_case, dict):
-            raise ConformityInputError("baseCase must be a dictionary")
-        base_name = base_case.get("name")
-        temperature = base_case.get("temperature")
-        wind = base_case.get("wind")
-        if not isinstance(base_name, str):
-            raise ConformityInputError("baseCase name must be a string")
-        if not _is_finite_number(temperature) or not _is_finite_number(wind):
-            raise ConformityInputError(
-                "baseCase temperature and wind must be finite numbers"
             )
 
         spans_data = python_inputs.get("spans")
@@ -276,11 +253,6 @@ class ForestTrenchRequest:
             tension_rules=tension_rules,
             overhang_rules=tuple(overhang_rules),
             lateral_rules=tuple(lateral_rules),
-            base_case=ForestTrenchBaseCase(
-                name=base_name,
-                temperature=float(temperature),
-                wind=float(wind),
-            ),
             spans=tuple(spans),
         )
 

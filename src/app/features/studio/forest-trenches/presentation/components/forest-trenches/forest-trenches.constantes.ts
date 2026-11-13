@@ -8,7 +8,5 @@
 export const FOREST_TRENCHES_PLOT_ID = 'forest-trenches-plot';
 
 export const FOREST_TRENCHES_PLOT_COLORS = {
-  repartition: '#2563eb',
-  baseCase: '#1e3a8a',
   axis: '#000000'
 } as const;

@@ -5,15 +5,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import Plotly, { type Config, type Data, type Layout } from 'plotly.js-dist-min';
+import Plotly, { type Config, type Dash, type Data, type Layout } from 'plotly.js-dist-min';
 import type { Floor } from '@shared/domain/models/floor.model';
 import type { Support } from '@shared/domain/models/support.model';
 import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { PLOTLY_LINE_DASHES, PLOTLY_MARKER_SYMBOLS } from '@shared/constants/plotly-styles.constantes';
 import type { ForestTrenchesSpanOutput, SliceGroundInput } from '@services/worker_python/tasks/types';
 import { FOREST_TRENCHES_PLOT_COLORS, FOREST_TRENCHES_PLOT_ID } from './forest-trenches.constantes';
-import type { CatalogObstacleConformityConfigEntity } from '@infrastructure/database/entities/catalog-obstacle-conformity-config.entity';
 import type {
+  CatalogObstacleConformityConfigEntity,
+  ForestTrenchesChartSeriesStyle
+} from '@infrastructure/database/entities/catalog-obstacle-conformity-config.entity';
+import type {
+  ForestTrenchesChart,
   ForestTrenchesConfig,
   ForestTrenchesPlotOptions,
   ForestTrenchesRowsConfig,
@@ -25,6 +30,25 @@ const HOVER_TEMPLATE = '%{x:.2f} m, %{y:.2f} m<extra></extra>';
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string');
+
+const isChartSeriesStyle = (value: unknown): value is ForestTrenchesChartSeriesStyle => {
+  const style = value as Partial<ForestTrenchesChartSeriesStyle> | null | undefined;
+  return (
+    typeof style?.marker === 'string' &&
+    Object.hasOwn(PLOTLY_MARKER_SYMBOLS, style.marker) &&
+    typeof style.line === 'string' &&
+    Object.hasOwn(PLOTLY_LINE_DASHES, style.line)
+  );
+};
+
+const isChart = (value: unknown): value is ForestTrenchesChart => {
+  const chart = value as Partial<ForestTrenchesChart> | null | undefined;
+  return (
+    isChartSeriesStyle(chart?.cable) &&
+    isChartSeriesStyle(chart?.limit) &&
+    (chart.overhang_color === null || typeof chart.overhang_color === 'string')
+  );
+};
 
 /**
  * Extracts the forest-trenches settings from the stored conformity config. Returns null when any
@@ -38,7 +62,7 @@ export function getForestTrenchesConfig(
     forest_trenches_n_points_choices: nPointsChoices,
     forest_trenches_overhang_rules: overhangRules,
     forest_trenches_lateral_rules: lateralRules,
-    forest_trenches_base_case: baseCase,
+    forest_trenches_chart: chart,
     floor_obstacle_red_zone: redZone,
     floor_obstacle_distances: floorDistances
   } = config as Partial<CatalogObstacleConformityConfigEntity>;
@@ -49,16 +73,14 @@ export function getForestTrenchesConfig(
     !nPointsChoices.every((count) => typeof count === 'number' && Number.isFinite(count)) ||
     !isStringArray(overhangRules) ||
     !isStringArray(lateralRules) ||
-    typeof baseCase?.name !== 'string' ||
-    typeof baseCase.temperature !== 'number' ||
-    typeof baseCase.wind !== 'number' ||
+    !isChart(chart) ||
     typeof redZone !== 'boolean' ||
     !Array.isArray(floorDistances)
   ) {
     return null;
   }
 
-  return { nPointsChoices, overhangRules, lateralRules, baseCase, redZone, floorDistances };
+  return { nPointsChoices, overhangRules, lateralRules, chart, redZone, floorDistances };
 }
 
 export function spansInInterval(
@@ -142,7 +164,7 @@ export function buildForestTrenchesRows(
   rules: ForestTrenchesRowsConfig,
   t: ForestTrenchesTranslate
 ): ForestTrenchesTableRow[] {
-  const ruleNames = new Map(rules.ruleDefinitions.map((rule) => [rule.rule_type, rule.rule_name]));
+  const ruleByType = new Map(rules.ruleDefinitions.map((rule) => [rule.rule_type, rule]));
   const selectedRules = new Set(rules.selectedRules);
   const lateralRules = rules.lateralRules.filter((ruleType) => selectedRules.has(ruleType));
   const overhangRules = rules.overhangRules.filter((ruleType) => selectedRules.has(ruleType));
@@ -151,100 +173,80 @@ export function buildForestTrenchesRows(
   const addRow = (id: string, key: string, values: number[], params?: Record<string, string | number>): void => {
     rows.push({ id, label: t(key, params), unitKey: 'common.meter', values });
   };
-  const pointValues = (value: (point: ForestTrenchesSpanOutput['points'][number]) => number): number[] =>
-    span.points.map(value);
-  const absolute = (values: number[]): number[] => values.map(Math.abs);
-  const ruleName = (ruleType: string): string => ruleNames.get(ruleType) ?? ruleType;
+  type Point = ForestTrenchesSpanOutput['points'][number];
+  const overhangValues = (ruleType: string, value: (result: Point['overhang'][string]) => number): number[] =>
+    span.points.map((point) => value(requireRuleValue(point.overhang[ruleType], ruleType, 'overhang')));
+  const lateralValues = (ruleType: string, value: (result: Point['lateral'][string]) => number): number[] =>
+    span.points.map((point) => value(requireRuleValue(point.lateral[ruleType], ruleType, 'lateral')));
+  // Same temperature resolution as the engine scenarios: the rule temperature, else the form temperature.
+  const overhangParams = (ruleType: string) => ({
+    ruleName: ruleByType.get(ruleType)?.rule_name ?? ruleType,
+    temperature: ruleByType.get(ruleType)?.overhang_point.temperature ?? rules.repartitionTemperature
+  });
+  const lateralParams = (ruleType: string) => ({
+    ruleName: ruleByType.get(ruleType)?.rule_name ?? ruleType,
+    temperature: ruleByType.get(ruleType)?.lateral_point.temperature ?? rules.lateralDistanceTemperature
+  });
 
   addRow(
     'distance-to-left-support',
     'studio.forest-trenches.row-distance-to-left-support',
-    absolute(pointValues((point) => point.distanceToLeftSupport))
+    span.points.map((point) => Math.abs(point.distanceToLeftSupport))
   );
   addRow(
     'ground-elevation',
     'studio.forest-trenches.row-ground-elevation',
-    pointValues((point) => point.groundElevation)
-  );
-  addRow(
-    'axis-cable-repartition',
-    'studio.forest-trenches.row-axis-cable-repartition',
-    absolute(pointValues((point) => point.repartition.axisDistance)),
-    { temperature: rules.repartitionTemperature }
-  );
-  addRow(
-    'axis-cable-base-case',
-    'studio.forest-trenches.row-axis-cable-base-case',
-    absolute(pointValues((point) => point.baseCase.axisDistance)),
-    { temperature: rules.baseCase.temperature, caseName: rules.baseCase.name }
-  );
-
-  for (const ruleType of lateralRules) {
-    const name = ruleName(ruleType);
-    addRow(
-      `axis-cable-lateral-${ruleType}`,
-      'studio.forest-trenches.row-axis-cable-lateral',
-      absolute(span.points.map((point) => requireRuleValue(point.lateral[ruleType], ruleType, 'lateral').axisDistance)),
-      { ruleName: name, temperature: rules.lateralDistanceTemperature }
-    );
-  }
-  for (const ruleType of lateralRules) {
-    const name = ruleName(ruleType);
-    addRow(
-      `axis-lateral-limit-${ruleType}`,
-      'studio.forest-trenches.row-axis-lateral-limit',
-      absolute(
-        span.points.map((point) => requireRuleValue(point.lateral[ruleType], ruleType, 'lateral').limitAxisDistance)
-      ),
-      { ruleName: name }
-    );
-  }
-
-  addRow(
-    'cable-height-repartition',
-    'studio.forest-trenches.row-cable-height-repartition',
-    pointValues((point) => point.repartition.heightAboveGround),
-    { temperature: rules.repartitionTemperature }
-  );
-  addRow(
-    'cable-height-base-case',
-    'studio.forest-trenches.row-cable-height-base-case',
-    pointValues((point) => point.baseCase.heightAboveGround),
-    { temperature: rules.baseCase.temperature, caseName: rules.baseCase.name }
+    span.points.map((point) => point.groundElevation)
   );
 
   for (const ruleType of overhangRules) {
-    const name = ruleName(ruleType);
     addRow(
-      `overhang-compliance-limit-height-${ruleType}`,
-      'studio.forest-trenches.row-overhang-compliance-limit-height',
-      span.points.map(
-        (point) => requireRuleValue(point.overhang[ruleType], ruleType, 'overhang').complianceLimitHeightAboveGround
-      ),
-      { ruleName: name }
+      `cable-altitude-overhang-${ruleType}`,
+      'studio.forest-trenches.row-cable-altitude-overhang',
+      overhangValues(ruleType, (result) => result.elevation),
+      overhangParams(ruleType)
     );
   }
   for (const ruleType of lateralRules) {
-    const name = ruleName(ruleType);
     addRow(
-      `cable-elevation-lateral-${ruleType}`,
-      'studio.forest-trenches.row-cable-elevation-lateral',
-      span.points.map((point) => requireRuleValue(point.lateral[ruleType], ruleType, 'lateral').elevation),
-      { ruleName: name, temperature: rules.lateralDistanceTemperature }
+      `cable-altitude-lateral-${ruleType}`,
+      'studio.forest-trenches.row-cable-altitude-lateral',
+      lateralValues(ruleType, (result) => result.elevation),
+      lateralParams(ruleType)
     );
   }
-  addRow(
-    'cable-elevation-repartition',
-    'studio.forest-trenches.row-cable-elevation-repartition',
-    pointValues((point) => point.repartition.elevation),
-    { temperature: rules.repartitionTemperature }
-  );
-  addRow(
-    'cable-elevation-base-case',
-    'studio.forest-trenches.row-cable-elevation-base-case',
-    pointValues((point) => point.baseCase.elevation),
-    { temperature: rules.baseCase.temperature, caseName: rules.baseCase.name }
-  );
+  for (const ruleType of overhangRules) {
+    addRow(
+      `cable-height-overhang-${ruleType}`,
+      'studio.forest-trenches.row-cable-height-overhang',
+      overhangValues(ruleType, (result) => result.heightAboveGround),
+      overhangParams(ruleType)
+    );
+  }
+  for (const ruleType of overhangRules) {
+    addRow(
+      `overhang-compliance-limit-height-${ruleType}`,
+      'studio.forest-trenches.row-overhang-compliance-limit-height',
+      overhangValues(ruleType, (result) => result.complianceLimitHeightAboveGround),
+      overhangParams(ruleType)
+    );
+  }
+  for (const ruleType of lateralRules) {
+    addRow(
+      `axis-cable-lateral-${ruleType}`,
+      'studio.forest-trenches.row-axis-cable-lateral',
+      lateralValues(ruleType, (result) => result.axisDistance),
+      lateralParams(ruleType)
+    );
+  }
+  for (const ruleType of lateralRules) {
+    addRow(
+      `axis-lateral-limit-${ruleType}`,
+      'studio.forest-trenches.row-axis-lateral-limit',
+      lateralValues(ruleType, (result) => result.limitAxisDistance),
+      lateralParams(ruleType)
+    );
+  }
 
   return rows;
 }
@@ -256,41 +258,25 @@ function requireRuleValue<T>(value: T | undefined, ruleType: string, category: s
   return value;
 }
 
-function pointTrace(
+function scenarioTrace(
   points: ForestTrenchesSpanOutput['axis'],
   name: string,
   color: string,
-  symbol: string,
+  style: ForestTrenchesChartSeriesStyle,
   showLegend: boolean
 ): Data {
+  const dash = PLOTLY_LINE_DASHES[style.line] ?? null;
   return {
     x: points.map((point) => point.x),
     y: points.map((point) => point.y),
     type: 'scatter',
-    mode: 'markers',
+    mode: dash === null ? 'markers' : 'lines+markers',
+    ...(dash === null ? {} : { line: { color, width: 2, dash: dash as Dash } }),
     marker: {
       color,
       size: PlotlyDrawings.conformity.cablePoint.markerSize,
-      symbol,
+      symbol: PLOTLY_MARKER_SYMBOLS[style.marker],
       line: { color, width: 1.5 }
-    },
-    hovertemplate: HOVER_TEMPLATE,
-    name,
-    showlegend: showLegend
-  };
-}
-
-function lineTrace(points: ForestTrenchesSpanOutput['axis'], name: string, color: string, showLegend: boolean): Data {
-  return {
-    x: points.map((point) => point.x),
-    y: points.map((point) => point.y),
-    type: 'scatter',
-    mode: 'lines+markers',
-    line: { color, width: 2 },
-    marker: {
-      color,
-      size: PlotlyDrawings.conformity.cablePoint.markerSize,
-      symbol: 'circle'
     },
     hovertemplate: HOVER_TEMPLATE,
     name,
@@ -316,21 +302,35 @@ export function createForestTrenchesPlot(
       hoverinfo: 'skip',
       name: options.axisLabel,
       showlegend: showLegend
-    },
-    lineTrace(span.plot.repartition, options.repartitionLabel, FOREST_TRENCHES_PLOT_COLORS.repartition, showLegend),
-    lineTrace(span.plot.baseCase, options.baseCaseLabel, FOREST_TRENCHES_PLOT_COLORS.baseCase, showLegend)
+    }
   ];
+  const ruleColor = (ruleType: string): string =>
+    options.ruleColors[ruleType] ?? PlotlyDrawings.conformity.defaultZoneColor;
+  const ruleName = (ruleType: string): string => options.ruleLabels[ruleType] ?? ruleType;
+  const { cable, limit } = options.chart;
 
+  for (const ruleType of options.overhangRuleTypes) {
+    const overhang = requireRuleValue(span.plot.overhang[ruleType], ruleType, 'overhang plot');
+    traces.push(
+      scenarioTrace(
+        overhang.cable,
+        options.overhangCableLabel(ruleName(ruleType)),
+        options.chart.overhang_color ?? ruleColor(ruleType),
+        cable,
+        showLegend
+      )
+    );
+  }
   for (const ruleType of options.lateralRuleTypes) {
-    const color = options.ruleColors[ruleType] ?? PlotlyDrawings.conformity.defaultZoneColor;
-    const ruleName = options.ruleLabels[ruleType] ?? ruleType;
+    const color = ruleColor(ruleType);
+    const name = ruleName(ruleType);
     const lateral = requireRuleValue(span.plot.lateral[ruleType], ruleType, 'lateral plot');
     const lateralInverse = requireRuleValue(span.plot.lateralInverse[ruleType], ruleType, 'inverse lateral plot');
     traces.push(
-      pointTrace(lateral.cable, options.lateralCableLabel(ruleName), color, 'circle-open', showLegend),
-      pointTrace(lateral.limit, options.lateralLimitLabel(ruleName), color, 'diamond', showLegend),
-      pointTrace(lateralInverse.cable, options.lateralInverseCableLabel(ruleName), color, 'circle-open', showLegend),
-      pointTrace(lateralInverse.limit, options.lateralInverseLimitLabel(ruleName), color, 'diamond', showLegend)
+      scenarioTrace(lateral.cable, options.lateralCableLabel(name), color, cable, showLegend),
+      scenarioTrace(lateral.limit, options.lateralLimitLabel(name), color, limit, showLegend),
+      scenarioTrace(lateralInverse.cable, options.lateralInverseCableLabel(name), color, cable, showLegend),
+      scenarioTrace(lateralInverse.limit, options.lateralInverseLimitLabel(name), color, limit, showLegend)
     );
   }
 

@@ -51,14 +51,6 @@ def _plan_point(distance: float, lateral: float) -> dict[str, float]:
     return {"x": float(distance), "y": float(lateral)}
 
 
-def _limit_axis_distance(
-    axis_distance: float, wind_pressure: float, lateral_distance: float
-) -> float:
-    side = axis_distance if axis_distance != 0 else wind_pressure
-    direction = -1.0 if side < 0 else 1.0
-    return axis_distance + direction * lateral_distance
-
-
 def _scenario_lookup(
     scenarios_by_rule: dict[str, list[Scenario]],
 ) -> dict[tuple[str, ScenarioPoint], Scenario]:
@@ -137,20 +129,18 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
             )
         selected_scenarios.append(scenario)
 
-    base_state = TargetState(
-        new_temperature=request.base_case.temperature,
-        wind_pressure=request.base_case.wind,
+    # Every overhang scenario shares the repartition temperature without wind,
+    # so the first one gives the median F1 of the span.
+    median_state = next(
+        (
+            scenario.target_state
+            for scenario in selected_scenarios
+            if scenario.conformity_point == ScenarioPoint.OVERHANG
+        ),
+        None,
     )
-    repartition_state = TargetState(
-        new_temperature=request.parameters.repartition_temperature,
-        wind_pressure=0.0,
-    )
-    states = [scenario.target_state for scenario in selected_scenarios] + [
-        base_state,
-        repartition_state,
-    ]
 
-    def collect_repartition_sag(
+    def collect_sag(
         solved_study: SectionStudy, _state: TargetState
     ) -> dict[int, float]:
         sag_by_span = solved_study.balance_engine.get_data_spans()["sag"]
@@ -160,12 +150,17 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
         }
 
     state_runner = MultiStateRunner(working_study, projectors)
-    results = state_runner.run(states, state_hook=collect_repartition_sag)
-    repartition_key = (
-        repartition_state.wind_pressure,
-        repartition_state.new_temperature,
+    results = state_runner.run(
+        [scenario.target_state for scenario in selected_scenarios],
+        state_hook=collect_sag,
     )
-    median_f1_by_span = state_runner.state_extras[repartition_key]
+    median_f1_by_span = (
+        None
+        if median_state is None
+        else state_runner.state_extras[
+            (median_state.wind_pressure, median_state.new_temperature)
+        ]
+    )
 
     output_spans = []
     for span in request.spans:
@@ -184,40 +179,17 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
             rule_type: {"cable": [], "limit": []}
             for rule_type in request.lateral_rules
         }
-        base_case_plot = []
-        repartition_plot = []
+        overhang_plot = {
+            rule_type: {"cable": []} for rule_type in request.overhang_rules
+        }
         points_output = []
 
         for point_index, (distance, ground_elevation) in enumerate(
             zip(span.distances, span.altitudes)
         ):
-            base_point = _point_at_state(
-                results, base_state, span_index, point_index
-            )
-            repartition_point = _point_at_state(
-                results, repartition_state, span_index, point_index
-            )
-            base_case_plot.append(_plan_point(distance, base_point["lateral"]))
-            repartition_plot.append(
-                _plan_point(distance, repartition_point["lateral"])
-            )
             point_output = {
                 "distanceToLeftSupport": float(distance),
                 "groundElevation": float(ground_elevation),
-                "baseCase": {
-                    "axisDistance": base_point["lateral"],
-                    "elevation": base_point["altitude"],
-                    "heightAboveGround": (
-                        base_point["altitude"] - ground_elevation
-                    ),
-                },
-                "repartition": {
-                    "axisDistance": repartition_point["lateral"],
-                    "elevation": repartition_point["altitude"],
-                    "heightAboveGround": (
-                        repartition_point["altitude"] - ground_elevation
-                    ),
-                },
                 "lateral": {},
                 "lateralInverse": {},
                 "overhang": {},
@@ -236,28 +208,26 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
                         f"Missing lateral distance for rule {rule_type}"
                     )
 
-                for scenario, target, key, plot_data in (
+                for scenario, target, plot_data, direction in (
                     (
                         lateral_scenario,
                         point_output["lateral"],
-                        "lateral",
                         lateral_plot[rule_type],
+                        -1.0,
                     ),
                     (
                         inverse_scenario,
                         point_output["lateralInverse"],
-                        "lateralInverse",
                         lateral_inverse_plot[rule_type],
+                        1.0,
                     ),
                 ):
                     cable_point = _point_at_state(
                         results, scenario.target_state, span_index, point_index
                     )
                     axis_distance = cable_point["lateral"]
-                    limit_axis_distance = _limit_axis_distance(
-                        axis_distance,
-                        scenario.target_state.wind_pressure,
-                        lateral_distance,
+                    limit_axis_distance = (
+                        axis_distance + direction * lateral_distance
                     )
                     target[rule_type] = {
                         "axisDistance": axis_distance,
@@ -281,14 +251,19 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
                 cable_point = _point_at_state(
                     results, scenario.target_state, span_index, point_index
                 )
+                height_above_ground = (
+                    cable_point["altitude"] - ground_elevation
+                )
                 point_output["overhang"][rule_type] = {
                     "elevation": cable_point["altitude"],
+                    "heightAboveGround": height_above_ground,
                     "complianceLimitHeightAboveGround": (
-                        cable_point["altitude"]
-                        - overhang_distance
-                        - ground_elevation
+                        height_above_ground - overhang_distance
                     ),
                 }
+                overhang_plot[rule_type]["cable"].append(
+                    _plan_point(distance, cable_point["lateral"])
+                )
 
             points_output.append(point_output)
 
@@ -296,16 +271,19 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
             {
                 "spanIndex": span_index,
                 "length": length,
-                "medianF1": median_f1_by_span[span_index],
+                "medianF1": (
+                    None
+                    if median_f1_by_span is None
+                    else median_f1_by_span[span_index]
+                ),
                 "axis": [
                     {"x": 0.0, "y": 0.0},
                     {"x": length, "y": 0.0},
                 ],
                 "plot": {
-                    "baseCase": base_case_plot,
-                    "repartition": repartition_plot,
                     "lateral": lateral_plot,
                     "lateralInverse": lateral_inverse_plot,
+                    "overhang": overhang_plot,
                 },
                 "points": points_output,
             }

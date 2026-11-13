@@ -252,8 +252,7 @@ export class ForestTrenchesComponent implements OnDestroy {
         overhangRules: config.overhangRules,
         ruleDefinitions: this.catalogData()?.ruleDefinitions ?? [],
         repartitionTemperature: values.repartitionTemperature,
-        lateralDistanceTemperature: values.lateralDistanceTemperature,
-        baseCase: config.baseCase
+        lateralDistanceTemperature: values.lateralDistanceTemperature
       },
       (key, params) => this.translocoService.translate(key, params)
     );
@@ -345,7 +344,9 @@ export class ForestTrenchesComponent implements OnDestroy {
     const span = this.selectedSpan();
     const catalog = this.catalogData();
     const xTickLabels = this.xTickLabels();
-    if (!span || !catalog) {
+    const config = this.forestConfig();
+    const showLegend = this.isGraphEnlarged();
+    if (!span || !catalog || !config) {
       untracked(() => {
         this.disconnectPlotResize();
         purgeForestTrenchesPlot(this.document);
@@ -353,9 +354,9 @@ export class ForestTrenchesComponent implements OnDestroy {
       return;
     }
 
-    const config = this.forestConfig();
     const selectedRules = this.calculatedInputs()?.selectedRules ?? [];
-    const lateralRuleTypes = (config?.lateralRules ?? []).filter((ruleType) => selectedRules.includes(ruleType));
+    const lateralRuleTypes = config.lateralRules.filter((ruleType) => selectedRules.includes(ruleType));
+    const overhangRuleTypes = config.overhangRules.filter((ruleType) => selectedRules.includes(ruleType));
     const ruleColors = Object.fromEntries(catalog.ruleDefinitions.map((rule) => [rule.rule_type, rule.color]));
     const ruleLabels = Object.fromEntries(catalog.ruleDefinitions.map((rule) => [rule.rule_type, rule.rule_name]));
 
@@ -364,8 +365,10 @@ export class ForestTrenchesComponent implements OnDestroy {
         if (!this.document.getElementById(FOREST_TRENCHES_PLOT_ID)) return;
         createForestTrenchesPlot(this.document, span, {
           lateralRuleTypes,
+          overhangRuleTypes,
           ruleColors,
           ruleLabels,
+          chart: config.chart,
           xAxisTitle: this.translocoService.translate('studio.forest-trenches.plot-distance-axis', {
             unit: this.translocoService.translate('common.meter')
           }),
@@ -374,13 +377,8 @@ export class ForestTrenchesComponent implements OnDestroy {
             unit: this.translocoService.translate('common.meter')
           }),
           axisLabel: this.translocoService.translate('studio.forest-trenches.plot-axis-label'),
-          repartitionLabel: this.translocoService.translate('studio.forest-trenches.plot-repartition-label', {
-            temperature: this.calculatedInputs()?.repartitionTemperature ?? 0
-          }),
-          baseCaseLabel: this.translocoService.translate('studio.forest-trenches.plot-base-case-label', {
-            caseName: config?.baseCase.name ?? '',
-            temperature: config?.baseCase.temperature ?? 0
-          }),
+          overhangCableLabel: (ruleName) =>
+            this.translocoService.translate('studio.forest-trenches.plot-overhang-cable-label', { ruleName }),
           lateralCableLabel: (ruleName) =>
             this.translocoService.translate('studio.forest-trenches.plot-lateral-cable-label', { ruleName }),
           lateralInverseCableLabel: (ruleName) =>
@@ -389,7 +387,7 @@ export class ForestTrenchesComponent implements OnDestroy {
             this.translocoService.translate('studio.forest-trenches.plot-lateral-limit-label', { ruleName }),
           lateralInverseLimitLabel: (ruleName) =>
             this.translocoService.translate('studio.forest-trenches.plot-lateral-inverse-limit-label', { ruleName }),
-          showLegend: this.isGraphEnlarged()
+          showLegend
         });
         this.observePlotResize();
       },
@@ -461,7 +459,6 @@ export class ForestTrenchesComponent implements OnDestroy {
         rulesDistances,
         overhangRules: config.overhangRules.filter((ruleType) => selectedRuleTypes.includes(ruleType)),
         lateralRules: config.lateralRules.filter((ruleType) => selectedRuleTypes.includes(ruleType)),
-        baseCase: config.baseCase,
         spans
       };
       const { result, error } = await this.workerPythonService.runTask(Task.getForestTrenches, taskInput);

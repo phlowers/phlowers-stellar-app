@@ -267,11 +267,6 @@ def make_forest_trench_inputs(
             "rulesDistances": [make_distances("AT")],
             "overhangRules": ["AT"],
             "lateralRules": ["AT"],
-            "baseCase": {
-                "name": "15°C without wind",
-                "temperature": 15,
-                "wind": 0,
-            },
             "spans": spans,
         }
 

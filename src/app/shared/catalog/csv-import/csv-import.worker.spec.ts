@@ -302,7 +302,11 @@ describe('csv-import.worker - runWorkerImport', () => {
         ground_n_slicing_points_choices: [3],
         overhang_rules_selected: ['AT'],
         lateral_rules_selected: ['AT'],
-        base_case: { name: 'Synthetic base case', temperature: 15, wind: 0 }
+        chart: {
+          cable: { marker: 'circle', line: 'solid' },
+          limit: { marker: 'square-open', line: 'dash' },
+          overhang_color: '#0000FF'
+        }
       },
       floor_obstacle: {
         obstacleType: 'synthetic_floor',

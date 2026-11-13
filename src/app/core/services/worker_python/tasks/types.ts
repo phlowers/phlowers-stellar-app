@@ -898,11 +898,6 @@ export interface ForestTrenchesTaskInput {
   rulesDistances: ConformityRuleDistanceInput[];
   overhangRules: string[];
   lateralRules: string[];
-  baseCase: {
-    name: string;
-    temperature: number;
-    wind: number;
-  };
   spans: ForestTrenchesSpanInput[];
 }
 
@@ -915,16 +910,6 @@ export interface ConformityPointOutput {
 export interface ForestTrenchesPointOutput {
   distanceToLeftSupport: number;
   groundElevation: number;
-  baseCase: {
-    axisDistance: number;
-    elevation: number;
-    heightAboveGround: number;
-  };
-  repartition: {
-    axisDistance: number;
-    elevation: number;
-    heightAboveGround: number;
-  };
   lateral: Record<
     string,
     {
@@ -945,14 +930,13 @@ export interface ForestTrenchesPointOutput {
     string,
     {
       elevation: number;
+      heightAboveGround: number;
       complianceLimitHeightAboveGround: number;
     }
   >;
 }
 
 export interface ForestTrenchesPlotOutput {
-  baseCase: ConformityPointOutput[];
-  repartition: ConformityPointOutput[];
   lateral: Record<
     string,
     {
@@ -967,12 +951,14 @@ export interface ForestTrenchesPlotOutput {
       limit: ConformityPointOutput[];
     }
   >;
+  overhang: Record<string, { cable: ConformityPointOutput[] }>;
 }
 
 export interface ForestTrenchesSpanOutput {
   spanIndex: number;
   length: number;
-  medianF1: number;
+  // Sag at the overhang scenario state; null without any overhang rule selected.
+  medianF1: number | null;
   axis: ConformityPointOutput[];
   plot: ForestTrenchesPlotOutput;
   points: ForestTrenchesPointOutput[];
