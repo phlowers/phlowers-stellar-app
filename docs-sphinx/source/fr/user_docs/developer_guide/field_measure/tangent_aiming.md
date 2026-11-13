@@ -68,8 +68,8 @@ Export JSON (`presentation/field-measure-export.helpers.ts`) :
 | Champ exporté | Support | Intérieur / Extérieur |
 |---|---|---|
 | `subMethodName` | `SUPPORT` | `INTERIEUR` / `EXTERIEUR` (`TANGENTIAL_SIGHTS_SUB_METHOD_NAME_EXPORT_VALUES`) |
-| `measuredLength` | `tangentSpanLength` | `interiorSpanLength` / `exteriorSpanLength` |
-| `calculatedLength` | longueur de portée du moteur pour la portée sélectionnée (`getCalculatedSpanLength`) | idem |
+| `measuredHorizontalDistance` | `tangentSpanLength` | `interiorSpanLength` / `exteriorSpanLength` |
+| `calculatedHorizontalDistance` | distance horizontale entre accrochages du moteur (`output_parameters.horizontal_distance`) pour la portée sélectionnée (`getCalculatedSpanLength`) | idem |
 | `leftSupportMeasures.verticalDistance` | `cableHAccDistance` (distance verticale) | `null` |
 | `leftSupportMeasures.horizontalDistance` | `null` | `…HAccDistance` |
 | `leftSupportMeasures.verticalAngle` | `null` (pas d'angle gauche dans le formulaire) | `…VerticalAccAngleLeft` |

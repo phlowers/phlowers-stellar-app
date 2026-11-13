@@ -25,7 +25,7 @@ export const TANGENT_AIMING_SUPPORT_NUMBER_FIELDS: Record<
 > = {
   tangentSpanLength: {
     id: 'tasSpanLength',
-    labelKey: 'common.measured-span-length-label',
+    labelKey: 'common.measured-horizontal-distance-label',
     unitKey: 'common.meter',
     testId: 'span-length-input',
     step: 0.01,

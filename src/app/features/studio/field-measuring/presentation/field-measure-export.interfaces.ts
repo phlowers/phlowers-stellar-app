@@ -107,10 +107,10 @@ export type CalculatedParameterExport =
 
 /** Raw inputs and computed outputs for the PAPOTO parameter calculation method. */
 export interface PapotoMethodExport {
-  measuredLength: ValueUnit;
-  calculatedLength: ValueUnit;
-  measuredElevation: ValueUnit;
-  calculatedElevation: ValueUnit;
+  measuredHorizontalDistance: ValueUnit;
+  calculatedHorizontalDistance: ValueUnit;
+  measuredVerticalDistance: ValueUnit;
+  calculatedVerticalDistance: ValueUnit;
   horizontalAngles: {
     value: { HG: number | null; H1: number | null; H2: number | null; H3: number | null; HD: number | null };
     unit: '°';
@@ -125,8 +125,8 @@ export interface PapotoMethodExport {
 
 /** Inputs and results of the tangential sights parameter calculation method (support, exterior or interior). */
 export interface TangentialSightsMethodExport {
-  measuredLength: ValueUnit;
-  calculatedLength: ValueUnit;
+  measuredHorizontalDistance: ValueUnit;
+  calculatedHorizontalDistance: ValueUnit;
   leftSupportMeasures: {
     verticalDistance: ValueUnit;
     verticalAngle: ValueUnit;

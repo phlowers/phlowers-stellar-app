@@ -68,8 +68,8 @@ JSON export (`presentation/field-measure-export.helpers.ts`):
 | Export field | Support | Interior / Exterior |
 |---|---|---|
 | `subMethodName` | `SUPPORT` | `INTERIEUR` / `EXTERIEUR` (`TANGENTIAL_SIGHTS_SUB_METHOD_NAME_EXPORT_VALUES`) |
-| `measuredLength` | `tangentSpanLength` | `interiorSpanLength` / `exteriorSpanLength` |
-| `calculatedLength` | engine span length of the selected span (`getCalculatedSpanLength`) | same |
+| `measuredHorizontalDistance` | `tangentSpanLength` | `interiorSpanLength` / `exteriorSpanLength` |
+| `calculatedHorizontalDistance` | engine horizontal distance between attachments (`output_parameters.horizontal_distance`) of the selected span (`getCalculatedSpanLength`) | same |
 | `leftSupportMeasures.verticalDistance` | `cableHAccDistance` (vertical distance) | `null` |
 | `leftSupportMeasures.horizontalDistance` | `null` | `…HAccDistance` |
 | `leftSupportMeasures.verticalAngle` | `null` (no left angle in the form) | `…VerticalAccAngleLeft` |

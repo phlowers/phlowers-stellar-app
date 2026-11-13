@@ -31,10 +31,10 @@ Tous les champs du formulaire PAPOTO sont **obligatoires**. Vous devez les rempl
 | Libellé | Unité | Signification |
 |---|---|---|
 | **Support de gauche** | — | Sélectionnez l'extrémité de la portée considérée comme le support « gauche » (les deux options sont les supports de la portée sélectionnée). Cela détermine la manière dont les angles horizontaux sont mesurés. |
-| **Longueur mesurée de la portée** | m | Distance entre les deux points d'attache du câble sur les supports. |
-| **Diff. d'altitude des attaches mesurées** | m | Différence de hauteur verticale entre les points d'attache gauche et droit. Si le côté droit est plus haut, la valeur est positive. |
+| **Dist. horizontale entre accr. câble mesurée** | m | Distance horizontale entre les deux points d'attache du câble sur les supports. |
+| **Dist. verticale entre accr. câble mesurée** | m | Différence de hauteur verticale entre les points d'attache gauche et droit. Si le côté droit est plus haut, la valeur est positive. |
 
-Dans {{app_name}}, deux champs **Valeur calculée** (lecture seule) affichent la longueur de la portée et la différence d'altitude calculées à partir de l'analyse du terrain. Comparez-les avec vos valeurs mesurées pour valider vos mesures.
+Dans {{app_name}}, deux champs **Valeur calculée** (lecture seule) affichent la distance horizontale et la distance verticale entre les accrochages du câble, calculées à partir de l'analyse du terrain. Comparez-les avec vos valeurs mesurées pour valider vos mesures.
 
 ### Angles de mesure
 

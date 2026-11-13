@@ -35,7 +35,9 @@
       data-testid="left-support-select"
     />
 
-    <label for="spanLength" class="spanLength__label">{{ 'common.measured-span-length-label' | transloco }}</label>
+    <label for="spanLength" class="spanLength__label">{{
+      'common.measured-horizontal-distance-label' | transloco
+    }}</label>
     <p-inputgroup class="spanLength__input">
       <input
         id="spanLength"
@@ -52,15 +54,15 @@
     </p-inputgroup>
     <p id="spanLength-calculated" class="spanLength__desc">
       <ng-container>{{ 'common.calculated-value-label' | transloco }}</ng-container>
-      @if (calculatedSpanLength() !== null) {
-        {{ calculatedSpanLength() | number: '1.0-2' }} m
+      @if (calculatedHorizontalDistance() !== null) {
+        {{ calculatedHorizontalDistance() | number: '1.0-2' }} m
       } @else {
         -
       }
     </p>
 
     <label for="measuredElevationDifference" class="MED__label">{{
-      'field-measuring.papoto.elevation-diff-label' | transloco
+      'field-measuring.papoto.measured-vertical-distance-label' | transloco
     }}</label>
     <p-inputgroup class="MED__input">
       <input

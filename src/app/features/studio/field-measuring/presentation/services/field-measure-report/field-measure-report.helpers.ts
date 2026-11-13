@@ -209,16 +209,16 @@ const buildPapotoRows = (
   return [
     buildMethodRow(t(METHOD_VALUE_KEYS.papoto), measureData.leftSupport, transloco),
     [
-      meters(LABEL_KEYS.measuredLength, measureData.spanLength),
+      meters(LABEL_KEYS.measuredHorizontalDistance, measureData.spanLength),
       meters(
-        LABEL_KEYS.calculatedLength,
-        getCalculatedSpanLength(measureData.span, litData?.output_parameters.span_length)
+        LABEL_KEYS.calculatedHorizontalDistance,
+        getCalculatedSpanLength(measureData.span, litData?.output_parameters.horizontal_distance)
       )
     ],
     [
-      meters(LABEL_KEYS.measuredElevation, measureData.measuredElevationDifference),
+      meters(LABEL_KEYS.measuredVerticalDistance, measureData.measuredElevationDifference),
       meters(
-        LABEL_KEYS.calculatedElevation,
+        LABEL_KEYS.calculatedVerticalDistance,
         getCalculatedSpanLength(measureData.span, litData?.output_parameters.elevation)
       )
     ],
@@ -275,14 +275,14 @@ const buildTangentAimingRows = (
     buildMethodRow(methodLabel, tangentLeftSupportLabel(measureData, section, config.leftSupport), transloco),
     [
       numberItem(
-        t(LABEL_KEYS.measuredLength),
+        t(LABEL_KEYS.measuredHorizontalDistance),
         readNumber(measureData, config.spanLength),
         PDF_UNITS.meters,
         DECIMALS.length
       ),
       numberItem(
-        t(LABEL_KEYS.calculatedLength),
-        getCalculatedSpanLength(measureData.span, litData?.output_parameters.span_length),
+        t(LABEL_KEYS.calculatedHorizontalDistance),
+        getCalculatedSpanLength(measureData.span, litData?.output_parameters.horizontal_distance),
         PDF_UNITS.meters,
         DECIMALS.length
       )

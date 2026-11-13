@@ -168,7 +168,7 @@ describe('TangentAimingExterior component', () => {
   });
 
   it('should show the calculated span length of the selected span', () => {
-    litData.set({ output_parameters: { span_length: [123.456, 50] } });
+    litData.set({ output_parameters: { span_length: [999, 999], horizontal_distance: [123.456, 50] } });
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('#taeSpanLength-calculated').textContent).toContain('123.46');
   });

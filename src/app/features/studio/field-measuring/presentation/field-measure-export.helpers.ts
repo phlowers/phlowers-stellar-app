@@ -214,17 +214,19 @@ export const buildTemperatureCalculationExport = (
   };
 };
 
-/** Builds the PAPOTO method export block, including computed length/elevation from `litData`. */
+/** Builds the PAPOTO method export block, including computed horizontal/vertical distances from `litData`. */
 const buildPapotoMethodExport = (measureData: FieldMeasure, litData: GetSectionOutput | null): PapotoMethodExport => {
   const leftIndex = measureData.span?.[0] ?? null;
-  const calculatedLength = leftIndex !== null ? (litData?.output_parameters.span_length[leftIndex] ?? null) : null;
-  const calculatedElevation = leftIndex !== null ? (litData?.output_parameters.elevation[leftIndex] ?? null) : null;
+  const calculatedHorizontalDistance =
+    leftIndex !== null ? (litData?.output_parameters.horizontal_distance[leftIndex] ?? null) : null;
+  const calculatedVerticalDistance =
+    leftIndex !== null ? (litData?.output_parameters.elevation[leftIndex] ?? null) : null;
   const { papoto } = measureData.outputs;
   return {
-    measuredLength: createValueUnit(measureData.spanLength, 'm'),
-    calculatedLength: createValueUnit(calculatedLength, 'm'),
-    measuredElevation: createValueUnit(measureData.measuredElevationDifference, 'm'),
-    calculatedElevation: createValueUnit(calculatedElevation, 'm'),
+    measuredHorizontalDistance: createValueUnit(measureData.spanLength, 'm'),
+    calculatedHorizontalDistance: createValueUnit(calculatedHorizontalDistance, 'm'),
+    measuredVerticalDistance: createValueUnit(measureData.measuredElevationDifference, 'm'),
+    calculatedVerticalDistance: createValueUnit(calculatedVerticalDistance, 'm'),
     horizontalAngles: createValueUnit(
       { HG: measureData.HL, H1: measureData.H1, H2: measureData.H2, H3: measureData.H3, HD: measureData.HR },
       '°'
@@ -263,9 +265,9 @@ const buildTangentialSightsMethodExport = (
   const distance = createValueUnit(readNumber(measureData, config.distance), 'm');
   const result = measureData.outputs[config.output];
   return {
-    measuredLength: createValueUnit(readNumber(measureData, config.spanLength), 'm'),
-    calculatedLength: createValueUnit(
-      getCalculatedSpanLength(measureData.span, litData?.output_parameters.span_length),
+    measuredHorizontalDistance: createValueUnit(readNumber(measureData, config.spanLength), 'm'),
+    calculatedHorizontalDistance: createValueUnit(
+      getCalculatedSpanLength(measureData.span, litData?.output_parameters.horizontal_distance),
       'm'
     ),
     // The support form has no left vertical angle, and its distance is the vertical one; the others have the horizontal one.

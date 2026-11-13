@@ -31,10 +31,10 @@ All fields in the PAPOTO form are **mandatory**. You must fill them all before c
 | Label | Unit | Meaning |
 |---|---|---|
 | **Left support** | — | Select which end of the span is the "left" support (the two options are the supports of your selected span). This determines how horizontal angles are measured. |
-| **Measured span length** | m | The distance between the two support attachment points on the cable. |
-| **Elevation diff. of measured attach.** | m | The vertical height difference between the left and right attachment points. If right is higher, the value is positive. |
+| **Measured horiz. dist. between cable attach.** | m | The horizontal distance between the two support attachment points on the cable. |
+| **Measured vert. dist. between cable attach.** | m | The vertical height difference between the left and right attachment points. If right is higher, the value is positive. |
 
-In {{app_name}}, two **Calculated value** fields (read-only) show the span length and elevation difference computed from terrain analysis. Compare them with your measured values to validate your measurements.
+In {{app_name}}, two **Calculated value** fields (read-only) show the horizontal and vertical distances between the cable attachments, computed from terrain analysis. Compare them with your measured values to validate your measurements.
 
 ### Measurement Angles
 

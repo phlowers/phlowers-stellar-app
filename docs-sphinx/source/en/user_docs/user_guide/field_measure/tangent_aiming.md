@@ -23,7 +23,7 @@ Angles are expressed in **grads (gr)** and lengths in **meters**. Every displaye
 | Label | Unit | Meaning |
 |---|---|---|
 | **Left support** | — | End of the span considered as the "left" support. Defaults to the left support of the selected span. |
-| **Measured span length** | m | Distance measured between the two cable attachment points. A read-only **calculated value** from the terrain analysis lets you compare it with your measurement. |
+| **Measured horiz. dist. between cable attach.** | m | Distance measured between the two cable attachment points. A read-only **calculated value** from the terrain analysis lets you compare it with your measurement. |
 | **Cable tangent angle** | gr | Sighting angle of the cable tangent, between −200 and 200 gr. |
 | **Calculation type** | — | **Tangent**: the parameter is deduced from the tangent angle. The **Parameter** type can be selected and saved, but the calculation is not yet available for it. |
 

@@ -46,7 +46,7 @@ const section = {
 const study = { author_email: 'author@example.test', title: 'Study 1', description: 'Study description' } as Study;
 
 const litData = {
-  output_parameters: { span_length: [250.456, 0], elevation: [12.345, 0] }
+  output_parameters: { span_length: [999, 0], horizontal_distance: [250.456, 0], elevation: [12.345, 0] }
 } as unknown as GetSectionOutput;
 
 const papotoResult = {
@@ -186,9 +186,10 @@ describe('field-measure-report helpers', () => {
       expect(rows).toHaveLength(12);
       expect(findItem(rows, LABEL_KEYS.method)?.value).toBe('common.papoto-label');
       expect(findItem(rows, LABEL_KEYS.leftSupport)?.value).toBe('11');
-      expect(findItem(rows, LABEL_KEYS.measuredLength)?.value).toBe('250.00 m');
-      expect(findItem(rows, LABEL_KEYS.calculatedLength)?.value).toBe('250.46 m');
-      expect(findItem(rows, LABEL_KEYS.calculatedElevation)?.value).toBe('12.35 m');
+      expect(findItem(rows, LABEL_KEYS.measuredHorizontalDistance)?.value).toBe('250.00 m');
+      expect(findItem(rows, LABEL_KEYS.calculatedHorizontalDistance)?.value).toBe('250.46 m');
+      expect(findItem(rows, LABEL_KEYS.measuredVerticalDistance)?.value).toBe('12.00 m');
+      expect(findItem(rows, LABEL_KEYS.calculatedVerticalDistance)?.value).toBe('12.35 m');
       expect(findItem(rows, 'HG')?.value).toBe('1.000 gr');
       expect(findItem(rows, 'VG')?.value).toBe('2.000 gr');
       expect(findItem(rows, LABEL_KEYS.parameter)?.value).toBe('1234 m');
@@ -206,7 +207,7 @@ describe('field-measure-report helpers', () => {
         translocoService
       );
 
-      expect(findItem(rows, LABEL_KEYS.calculatedLength)?.value).toBe('-');
+      expect(findItem(rows, LABEL_KEYS.calculatedHorizontalDistance)?.value).toBe('-');
       expect(findItem(rows, LABEL_KEYS.parameter)?.value).toBe('-');
       expect(findItem(rows, LABEL_KEYS.criterion)).toMatchObject({ value: '-', status: undefined });
     });

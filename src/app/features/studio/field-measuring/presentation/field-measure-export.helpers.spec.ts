@@ -47,6 +47,7 @@ describe('field-measure-export.helpers', () => {
   const mockLitData: GetSectionOutput = {
     output_parameters: {
       span_length: [100, 200, 300],
+      horizontal_distance: [90, 190, 290],
       elevation: [1, 2, 3]
     }
   } as unknown as GetSectionOutput;
@@ -272,8 +273,10 @@ describe('field-measure-export.helpers', () => {
       expect(result.method.papoto).toBeDefined();
       expect(result.method.tangentialSights).toBeUndefined();
       expect(result.method.pep).toBeUndefined();
-      expect(result.method.papoto?.calculatedLength).toEqual({ value: 100, unit: 'm' });
-      expect(result.method.papoto?.calculatedElevation).toEqual({ value: 1, unit: 'm' });
+      expect(result.method.papoto?.measuredHorizontalDistance).toBeDefined();
+      expect(result.method.papoto?.calculatedHorizontalDistance).toEqual({ value: 90, unit: 'm' });
+      expect(result.method.papoto?.measuredVerticalDistance).toBeDefined();
+      expect(result.method.papoto?.calculatedVerticalDistance).toEqual({ value: 1, unit: 'm' });
       expect(result.method.papoto?.calculatedParameter).toEqual({
         parameter: { value: 500, unit: 'm', uncertainty: 0.5 },
         criterion: { threshold: 0.5, unit: '%', status: true }
@@ -303,8 +306,8 @@ describe('field-measure-export.helpers', () => {
       expect(result.method.papoto).toBeUndefined();
       expect(result.method.pep).toBeUndefined();
       expect(result.method.tangentialSights).toEqual({
-        measuredLength: { value: 102, unit: 'm' },
-        calculatedLength: { value: 100, unit: 'm' },
+        measuredHorizontalDistance: { value: 102, unit: 'm' },
+        calculatedHorizontalDistance: { value: 90, unit: 'm' },
         leftSupportMeasures: {
           verticalDistance: { value: 12.5, unit: 'm' },
           verticalAngle: { value: null, unit: '°' },
@@ -342,7 +345,7 @@ describe('field-measure-export.helpers', () => {
       expect(result.leftSupport).toBe('1');
       expect(Object.keys(result.method)).toEqual(['tangentialSights']);
       expect(result.method.tangentialSights).toMatchObject({
-        measuredLength: { value: 103, unit: 'm' },
+        measuredHorizontalDistance: { value: 103, unit: 'm' },
         leftSupportMeasures: {
           verticalDistance: { value: null, unit: 'm' },
           verticalAngle: { value: 90, unit: '°' },
@@ -358,7 +361,7 @@ describe('field-measure-export.helpers', () => {
       const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming', span: null });
       const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
       expect(result.method.tangentialSights?.calculatedParameter).toBeUndefined();
-      expect(result.method.tangentialSights?.calculatedLength).toEqual({ value: null, unit: 'm' });
+      expect(result.method.tangentialSights?.calculatedHorizontalDistance).toEqual({ value: null, unit: 'm' });
       expect(result.leftSupport).toBeNull();
     });
 

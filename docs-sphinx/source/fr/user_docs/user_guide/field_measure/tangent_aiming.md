@@ -23,7 +23,7 @@ Les angles sont exprimés en **grades (gr)** et les longueurs en **mètres**. To
 | Libellé | Unité | Signification |
 |---|---|---|
 | **Support de gauche** | — | Extrémité de la portée considérée comme le support « gauche ». Par défaut, le support de gauche de la portée sélectionnée. |
-| **Longueur de portée mesurée** | m | Distance mesurée entre les deux points d'accrochage du câble. Une **valeur calculée** (lecture seule) issue de l'analyse du terrain permet de la comparer à votre mesure. |
+| **Dist. horizontale entre accr. câble mesurée** | m | Distance mesurée entre les deux points d'accrochage du câble. Une **valeur calculée** (lecture seule) issue de l'analyse du terrain permet de la comparer à votre mesure. |
 | **Angle tangent au câble** | gr | Angle de visée de la tangente au câble, entre −200 et 200 gr. |
 | **Type de calcul** | — | **Tangente** : le paramètre est déduit de l'angle tangent. Le type **Paramètre** peut être sélectionné et enregistré, mais le calcul n'est pas encore disponible pour lui. |
 
