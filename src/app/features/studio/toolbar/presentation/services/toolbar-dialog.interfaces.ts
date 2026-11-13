@@ -10,6 +10,7 @@ export type Tool =
   | 'obstacles-table'
   | 'strand-rrts'
   | 'cable-adjustment'
+  | 'forest-trenches'
   | 'estimations'
   | 'other-tool';
 

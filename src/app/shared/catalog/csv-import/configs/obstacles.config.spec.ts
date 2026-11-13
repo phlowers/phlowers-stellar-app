@@ -91,7 +91,32 @@ const validPayload: ObstacleConfigurationJsonDto = {
       { label: 'ZVF', normal: 360, redZone: 480 }
     ]
   },
-  intermediatePointPositions: [0.33, 0.66]
+  intermediatePointPositions: [0.33, 0.66],
+  forest_trenches: {
+    ground_n_slicing_points_choices: [5, 9],
+    overhang_rules_selected: ['AT'],
+    lateral_rules_selected: ['AT', 'CCG-LA'],
+    chart: {
+      cable: { marker: 'circle', line: 'solid' },
+      limit: { marker: 'square-open', line: 'none' },
+      overhang_color: '#0000FF'
+    }
+  },
+  floor_obstacle: {
+    obstacleType: 'floor',
+    obstacleName: 'floor',
+    details: '',
+    redZone: true,
+    conformity: 'forest_trenches',
+    distances: [
+      {
+        ruleType: 'AT',
+        active: true,
+        overhang: { '63': 0 },
+        lateral: { '63': 0 }
+      }
+    ]
+  }
 };
 
 describe('obstacles.config - pure helpers', () => {
@@ -187,12 +212,39 @@ describe('obstacles.config - pure helpers', () => {
       expect(config.lateral_temperature_message).toBe('msg');
       expect(config.wind_zone_default).toBe('ZVN');
       expect(config.intermediate_point_positions).toEqual([0.33, 0.66]);
+      expect(config.forest_trenches_n_points_choices).toEqual([5, 9]);
+      expect(config.forest_trenches_overhang_rules).toEqual(['AT']);
+      expect(config.forest_trenches_lateral_rules).toEqual(['AT', 'CCG-LA']);
+      expect(config.forest_trenches_chart).toEqual({
+        cable: { marker: 'circle', line: 'solid' },
+        limit: { marker: 'square-open', line: 'none' },
+        overhang_color: '#0000FF'
+      });
+      expect(config.floor_obstacle_red_zone).toBe(true);
+      expect(config.floor_obstacle_distances).toEqual([
+        {
+          rule_type: 'AT',
+          active: true,
+          overhang: { '63': 0 },
+          lateral: { '63': 0 }
+        }
+      ]);
     });
 
     it('returns a defensive copy of intermediatePointPositions', () => {
       const config = buildConformityConfig(validPayload);
       config.intermediate_point_positions.push(0.99);
       expect(validPayload.intermediatePointPositions).toEqual([0.33, 0.66]);
+    });
+
+    it('returns defensive copies of forest-trenches configuration', () => {
+      const config = buildConformityConfig(validPayload);
+      config.forest_trenches_n_points_choices.push(17);
+      config.forest_trenches_chart.cable.marker = 'x';
+      config.floor_obstacle_distances[0].overhang!['63'] = 7;
+      expect(validPayload.forest_trenches.ground_n_slicing_points_choices).toEqual([5, 9]);
+      expect(validPayload.forest_trenches.chart.cable.marker).toBe('circle');
+      expect(validPayload.floor_obstacle.distances[0].overhang).toEqual({ '63': 0 });
     });
   });
 
@@ -229,6 +281,59 @@ describe('obstacles.config - pure helpers', () => {
       ]
     ])('throws when payload is %#', (payload, expectedMessage) => {
       expect(() => assertObstacleConfigurationJson(payload)).toThrow(expectedMessage as string);
+    });
+
+    it('rejects invalid forest-trenches slicing choices', () => {
+      const payload = {
+        ...validPayload,
+        forest_trenches: {
+          ...validPayload.forest_trenches,
+          ground_n_slicing_points_choices: [1, 5]
+        }
+      };
+      expect(() => assertObstacleConfigurationJson(payload)).toThrow(/integers >= 2/);
+    });
+
+    it.each([
+      ['a missing chart', undefined, /`forest_trenches\.chart` must be an object/],
+      ['a missing series', { cable: { marker: 'circle', line: 'solid' } }, /`forest_trenches\.chart\.limit`/],
+      [
+        'an unknown marker',
+        { cable: { marker: 'plain-circle', line: 'solid' }, limit: { marker: 'square', line: 'dash' } },
+        /`forest_trenches\.chart\.cable\.marker` must be one of/
+      ],
+      [
+        'an unknown line',
+        { cable: { marker: 'circle', line: 'solid' }, limit: { marker: 'square', line: 'wavy' } },
+        /`forest_trenches\.chart\.limit\.line` must be one of/
+      ],
+      [
+        'a missing overhang color',
+        { cable: { marker: 'circle', line: 'solid' }, limit: { marker: 'square', line: 'dash' } },
+        /`forest_trenches\.chart\.overhang_color` must be a string or null/
+      ],
+      [
+        'a non-string overhang color',
+        { cable: { marker: 'circle', line: 'solid' }, limit: { marker: 'square', line: 'dash' }, overhang_color: 255 },
+        /`forest_trenches\.chart\.overhang_color` must be a string or null/
+      ]
+    ])('rejects a forest-trenches chart with %s', (_label, chart, expectedMessage) => {
+      const payload = { ...validPayload, forest_trenches: { ...validPayload.forest_trenches, chart } };
+      expect(() => assertObstacleConfigurationJson(payload)).toThrow(expectedMessage);
+    });
+
+    it('accepts a null forest-trenches overhang color', () => {
+      const chart = { ...validPayload.forest_trenches.chart, overhang_color: null };
+      const payload = { ...validPayload, forest_trenches: { ...validPayload.forest_trenches, chart } };
+      expect(() => assertObstacleConfigurationJson(payload)).not.toThrow();
+    });
+
+    it('rejects a floor obstacle without distance entries', () => {
+      const payload = {
+        ...validPayload,
+        floor_obstacle: { ...validPayload.floor_obstacle, distances: null }
+      };
+      expect(() => assertObstacleConfigurationJson(payload)).toThrow(/floor_obstacle\.distances/);
     });
   });
 });

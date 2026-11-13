@@ -106,6 +106,10 @@ export enum Task {
   clearMeasureDistanceAnglePoints = 'clearMeasureDistanceAnglePoints',
   // Compute obstacle conformity zones and points
   getConformity = 'getConformity',
+  // Slice a span ground profile at evenly spaced points
+  sliceGround = 'sliceGround',
+  // Compute forest-trenches conformity on sliced ground points
+  getForestTrenches = 'getForestTrenches',
   // Set the number of cut strands per cable layer
   setCutStrands = 'setCutStrands',
   // Get the current number of cut strands per cable layer
@@ -559,6 +563,10 @@ export interface TaskInputs {
   [Task.clearMeasureDistanceAnglePoints]: undefined;
   // Inputs for getConformity task
   [Task.getConformity]: ConformityTaskInput;
+  // Inputs for sliceGround task
+  [Task.sliceGround]: SliceGroundInput;
+  // Inputs for getForestTrenches task
+  [Task.getForestTrenches]: ForestTrenchesTaskInput;
   // Inputs for setCutStrands task: number of cut strands per layer
   [Task.setCutStrands]: {
     cutStrands: number[];
@@ -809,7 +817,7 @@ export interface ConformityFormInput {
   lateralDistanceTemperature: number | null;
   selectedConformityRules: string[];
   conformity: string[] | null;
-  conformityPlot: 'vegetation' | 'cable_track' | 'overhang';
+  conformityPlot: 'vegetation' | 'cable_track' | 'overhang' | 'forest_trenches';
   intermediatePoints: number[];
   // Width (m) of the overhang conformity zone (2 times the arm length); the engine default applies when omitted.
   zoneWidth?: number;
@@ -825,10 +833,103 @@ export interface ConformityTaskInput {
   rulesDistances: ConformityRuleDistanceInput[];
 }
 
+export interface SliceGroundInput {
+  spanIndex: number;
+  nPoints: number;
+  referenceSupport: 'LEFT' | 'RIGHT';
+  floorPoints: ({
+    distance: number | null;
+    altitude: number | null;
+  } | null)[];
+}
+
+export interface SliceGroundOutput {
+  distances: number[];
+  altitudes: number[];
+  length: number;
+}
+
+export interface ForestTrenchesSpanInput {
+  spanIndex: number;
+  distances: number[];
+  altitudes: number[];
+}
+
+export interface ForestTrenchesTaskInput {
+  electricTension: string;
+  form: ConformityFormInput;
+  rulesClimaticConditions: ConformityRuleClimaticConditionInput[];
+  rulesDistances: ConformityRuleDistanceInput[];
+  overhangRules: string[];
+  lateralRules: string[];
+  spans: ForestTrenchesSpanInput[];
+}
+
 // A point in the 2D conformity cross-section: x = lateral distance (m), y = altitude (m).
 export interface ConformityPointOutput {
   x: number;
   y: number;
+}
+
+export interface ForestTrenchesPointOutput {
+  distanceToLeftSupport: number;
+  groundElevation: number;
+  lateral: Record<
+    string,
+    {
+      axisDistance: number;
+      elevation: number;
+      limitAxisDistance: number;
+    }
+  >;
+  lateralInverse: Record<
+    string,
+    {
+      axisDistance: number;
+      elevation: number;
+      limitAxisDistance: number;
+    }
+  >;
+  overhang: Record<
+    string,
+    {
+      elevation: number;
+      heightAboveGround: number;
+      complianceLimitHeightAboveGround: number;
+    }
+  >;
+}
+
+export interface ForestTrenchesPlotOutput {
+  lateral: Record<
+    string,
+    {
+      cable: ConformityPointOutput[];
+      limit: ConformityPointOutput[];
+    }
+  >;
+  lateralInverse: Record<
+    string,
+    {
+      cable: ConformityPointOutput[];
+      limit: ConformityPointOutput[];
+    }
+  >;
+  overhang: Record<string, { cable: ConformityPointOutput[] }>;
+}
+
+export interface ForestTrenchesSpanOutput {
+  spanIndex: number;
+  length: number;
+  // Sag at the overhang scenario state; null without any overhang rule selected.
+  medianF1: number | null;
+  axis: ConformityPointOutput[];
+  plot: ForestTrenchesPlotOutput;
+  points: ForestTrenchesPointOutput[];
+}
+
+export interface ForestTrenchesTaskOutput {
+  spans: ForestTrenchesSpanOutput[];
 }
 
 // A cable candidate point, carrying the disk radius (m) used by `cable_track`.
@@ -1018,6 +1119,10 @@ export interface TaskOutputs {
   [Task.clearMeasureDistanceAnglePoints]: { success: boolean };
   // Output from getConformity task
   [Task.getConformity]: ConformityTaskOutput;
+  // Output from sliceGround task
+  [Task.sliceGround]: SliceGroundOutput;
+  // Output from getForestTrenches task
+  [Task.getForestTrenches]: ForestTrenchesTaskOutput;
   // Output from setCutStrands task
   [Task.setCutStrands]: { success: boolean };
   // Output from getCutStrands task

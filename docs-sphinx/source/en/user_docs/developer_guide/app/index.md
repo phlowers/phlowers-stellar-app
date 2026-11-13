@@ -10,6 +10,7 @@ custom_components
 cut_strands
 engine_worker
 estimation
+forest_trenches
 how_to_add_error_codes
 i18n
 obstacles_floors_and_distances

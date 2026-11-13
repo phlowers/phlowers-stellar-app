@@ -12,6 +12,7 @@ Guides pas à pas pour utiliser l'application {{app_name}}.
  - {doc}`Positionnement libre <plot/free-positioning>` — Placez obstacles, sol, charges et repères de distance sur une portée figée.
  - {doc}`CRR de brins coupés <cut_strands>` — Calculez la résistance résiduelle d'un câble aux brins coupés, et le taux de travail qui en découle.
  - {doc}`Conformité <conformity>` — Vérifiez la distance entre un obstacle et le câble par rapport aux règles réglementaires, et lisez le tableau et le graphique.
+ - {doc}`Tranchées forestières <forest_trenches>` — Vérifiez, point par point le long d'une ou plusieurs portées, la position du câble par rapport au sol et aux distances de conformité.
 
 ```{toctree}
 :maxdepth: 2
@@ -24,5 +25,6 @@ Modification de câble <charge-cable-manip-at-span>
 Mesure de terrain <field_measure/index>
 CRR de brins coupés <cut_strands>
 Conformité <conformity>
+Tranchées forestières <forest_trenches>
 Positionnement libre <plot/free-positioning>
 ```

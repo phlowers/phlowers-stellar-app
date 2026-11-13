@@ -1,0 +1,326 @@
+<ng-template #header>
+  <p class="text-l-600 mb-0 flex gap-2 items-center">
+    <app-icon icon="forest" aria-hidden="true" />
+    <span>{{ 'studio.forest-trenches.title' | transloco }}</span>
+  </p>
+</ng-template>
+
+<div class="forest-trenches" [attr.aria-busy]="isCalculating()">
+  @if (!isGraphEnlarged()) {
+    <form
+      [formGroup]="form"
+      class="form"
+      (ngSubmit)="calculate()"
+      data-testid="forest-trenches-form"
+      [animate.enter]="animationsReady() ? 'anim-expand-height' : ''"
+      animate.leave="anim-collapse-height"
+    >
+      <fieldset>
+        <legend class="form__title-span underline-text">
+          {{ 'studio.forest-trenches.span-information' | transloco }}
+        </legend>
+
+        <label for="firstSupportUuid" class="form__first-support-label">{{
+          'studio.forest-trenches.first-support' | transloco
+        }}</label>
+        <p-select
+          inputId="firstSupportUuid"
+          formControlName="firstSupportUuid"
+          [options]="supportOptions()"
+          optionLabel="label"
+          optionValue="value"
+          fluid
+          class="form__first-support-input"
+          data-testid="forest-trenches-first-support-select"
+        />
+
+        <label for="lastSupportUuid" class="form__last-support-label">{{
+          'studio.forest-trenches.last-support' | transloco
+        }}</label>
+        <p-select
+          inputId="lastSupportUuid"
+          formControlName="lastSupportUuid"
+          [options]="supportOptions()"
+          optionLabel="label"
+          optionValue="value"
+          fluid
+          class="form__last-support-input"
+          data-testid="forest-trenches-last-support-select"
+        />
+
+        <label for="nPoints" class="form__n-points-label">{{ 'studio.forest-trenches.n-points' | transloco }}</label>
+        <p-select
+          inputId="nPoints"
+          formControlName="nPoints"
+          [options]="nPointOptions()"
+          optionLabel="label"
+          optionValue="value"
+          fluid
+          class="form__n-points-input"
+          data-testid="forest-trenches-n-points-select"
+        />
+      </fieldset>
+
+      <fieldset>
+        <legend class="form__title-form underline-text">{{ 'studio.conformity.form-legend' | transloco }}</legend>
+
+        <dl class="contents">
+          <dt class="form__electric-tension-label">{{ 'studio.conformity.electric-tension-label' | transloco }}</dt>
+          <dd class="form__electric-tension-input">{{ electricTensionLabel() }}</dd>
+        </dl>
+
+        <label for="windZone" class="form__wind-label">{{ 'studio.conformity.wind-zone-label' | transloco }}</label>
+        <p-select
+          inputId="windZone"
+          formControlName="windZone"
+          [options]="windZoneOptions()"
+          optionLabel="label"
+          optionValue="value"
+          fluid
+          class="form__wind-input"
+          data-testid="forest-trenches-wind-zone-select"
+        />
+
+        <div class="form__wind-compl">
+          <p-checkbox formControlName="windMinus" inputId="windMinus" [binary]="true" />
+          <label for="windMinus">{{ 'studio.conformity.wind-minus-label' | transloco }}</label>
+          <p-checkbox formControlName="redZonePresence" inputId="redZonePresence" [binary]="true" />
+          <label for="redZonePresence">{{ 'studio.conformity.red-zone-presence-label' | transloco }}</label>
+        </div>
+
+        <label for="repartitionTemperature" class="form__distrib-temp-label">{{
+          'studio.conformity.repartition-temperature-label' | transloco
+        }}</label>
+        <p-inputgroup class="form__distrib-temp-input">
+          <input
+            id="repartitionTemperature"
+            type="number"
+            pInputText
+            [attr.step]="BOUNDS.repartitionTemperature.step"
+            [attr.min]="BOUNDS.repartitionTemperature.min"
+            [attr.max]="BOUNDS.repartitionTemperature.max"
+            formControlName="repartitionTemperature"
+            [attr.aria-invalid]="form.controls.repartitionTemperature.invalid ? 'true' : null"
+            [attr.aria-errormessage]="
+              form.controls.repartitionTemperature.invalid ? 'forest-trenches-repartition-error' : null
+            "
+            data-testid="forest-trenches-repartition-temperature-input"
+          />
+          <p-inputgroup-addon>{{ 'common.celsius' | transloco }}</p-inputgroup-addon>
+        </p-inputgroup>
+        <div class="form__distrib-temp-error">
+          @if (form.controls.repartitionTemperature.errors?.['min']; as minError) {
+            <p-message
+              id="forest-trenches-repartition-error"
+              severity="error"
+              size="small"
+              variant="simple"
+              role="alert"
+            >
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
+            </p-message>
+          } @else if (form.controls.repartitionTemperature.errors?.['max']; as maxError) {
+            <p-message
+              id="forest-trenches-repartition-error"
+              severity="error"
+              size="small"
+              variant="simple"
+              role="alert"
+            >
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (form.controls.repartitionTemperature.errors?.['maxDecimals']; as decimalsError) {
+            <p-message
+              id="forest-trenches-repartition-error"
+              severity="error"
+              size="small"
+              variant="simple"
+              role="alert"
+            >
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError.maxDecimals } }}
+            </p-message>
+          }
+        </div>
+
+        <label for="lateralDistanceTemperature" class="form__lat-temp-label">
+          @if (lateralTemperatureRuleName()) {
+            {{ lateralTemperatureRuleName() }} —
+          }
+          {{ 'studio.conformity.lateral-distance-temperature-label' | transloco }}
+        </label>
+        <p-inputgroup class="form__lat-temp-input">
+          <input
+            id="lateralDistanceTemperature"
+            type="number"
+            pInputText
+            [attr.step]="BOUNDS.lateralDistanceTemperature.step"
+            [attr.min]="BOUNDS.lateralDistanceTemperature.min"
+            [attr.max]="BOUNDS.lateralDistanceTemperature.max"
+            formControlName="lateralDistanceTemperature"
+            [attr.aria-invalid]="form.controls.lateralDistanceTemperature.invalid ? 'true' : null"
+            [attr.aria-errormessage]="
+              form.controls.lateralDistanceTemperature.invalid ? 'forest-trenches-lateral-error' : null
+            "
+            [attr.aria-describedby]="lateralTemperatureHint() ? 'forest-trenches-lateral-hint' : null"
+            data-testid="forest-trenches-lateral-temperature-input"
+          />
+          <p-inputgroup-addon>{{ 'common.celsius' | transloco }}</p-inputgroup-addon>
+        </p-inputgroup>
+        <div class="form__lat-temp-compl">
+          @if (form.controls.lateralDistanceTemperature.errors?.['min']; as minError) {
+            <p-message id="forest-trenches-lateral-error" severity="error" size="small" variant="simple" role="alert">
+              {{ 'common.min-value-error' | transloco: { min: minError.min } }}
+            </p-message>
+          } @else if (form.controls.lateralDistanceTemperature.errors?.['max']; as maxError) {
+            <p-message id="forest-trenches-lateral-error" severity="error" size="small" variant="simple" role="alert">
+              {{ 'common.max-value-error' | transloco: { max: maxError.max } }}
+            </p-message>
+          } @else if (form.controls.lateralDistanceTemperature.errors?.['maxDecimals']; as decimalsError) {
+            <p-message id="forest-trenches-lateral-error" severity="error" size="small" variant="simple" role="alert">
+              {{ 'common.max-decimals-error' | transloco: { maxDecimals: decimalsError.maxDecimals } }}
+            </p-message>
+          }
+          @if (lateralTemperatureHint()) {
+            <small id="forest-trenches-lateral-hint">{{ lateralTemperatureHint() }}</small>
+          }
+        </div>
+
+        <label for="selectedRules" class="form__conformity-select-label">{{
+          'studio.shared.conformity-label' | transloco
+        }}</label>
+        <p-multiselect
+          inputId="selectedRules"
+          formControlName="selectedRules"
+          [options]="ruleOptions()"
+          optionLabel="label"
+          optionValue="value"
+          [filter]="false"
+          [showToggleAll]="false"
+          fluid
+          class="form__conformity-select-input"
+          data-testid="forest-trenches-rules-multiselect"
+        />
+      </fieldset>
+
+      @if (isConfigMissing()) {
+        <p-message
+          class="form__config-error"
+          severity="error"
+          role="alert"
+          data-testid="forest-trenches-missing-configuration"
+        >
+          {{ 'studio.forest-trenches.missing-configuration' | transloco }}
+        </p-message>
+      }
+
+      <button
+        app-btn
+        type="submit"
+        class="form__submit"
+        [disabled]="!canCalculate()"
+        [btnLoading]="isCalculating()"
+        data-testid="forest-trenches-calculate-btn"
+      >
+        <app-icon icon="rocket_launch" aria-hidden="true" />
+        {{ 'common.calculate' | transloco }}
+      </button>
+    </form>
+  }
+
+  <output class="sr-only" aria-live="polite">
+    @if (isCalculating()) {
+      {{ 'studio.conformity.calculating-text' | transloco }}
+    } @else if (calculationError()) {
+      {{ calculationError() }}
+    } @else if (results().length > 0) {
+      {{ 'studio.conformity.results-updated-text' | transloco }}
+    }
+  </output>
+
+  @if (calculationError(); as error) {
+    <p-message severity="error" role="alert" data-testid="forest-trenches-calculation-error">
+      {{ 'studio.forest-trenches.calculation-failed' | transloco: { errorMessage: error } }}
+    </p-message>
+  }
+
+  @if (results().length > 0) {
+    <section class="results" animate.enter="anim-expand-height">
+      <hr class="results__separator" />
+
+      <h2 class="results__title">{{ 'common.results' | transloco }}</h2>
+
+      <div class="results__span">
+        <label for="resultSpan" class="results__span-label">{{
+          'studio.forest-trenches.result-span' | transloco
+        }}</label>
+        <p-select
+          inputId="resultSpan"
+          [formControl]="spanControl"
+          [options]="resultSpanOptions()"
+          optionLabel="label"
+          optionValue="value"
+          fluid
+          data-testid="forest-trenches-result-span-select"
+        />
+      </div>
+
+      @if (selectedSpan(); as span) {
+        <figure class="results__figure">
+          <figcaption class="sr-only">{{ 'studio.forest-trenches.plot-caption' | transloco }}</figcaption>
+          <button
+            app-btn
+            btnStyle="text"
+            btnSize="s"
+            type="button"
+            class="results__figure-toggle"
+            [attr.aria-pressed]="isGraphEnlarged()"
+            (click)="toggleGraphSize()"
+            data-testid="forest-trenches-graph-toggle-btn"
+          >
+            <app-icon [icon]="isGraphEnlarged() ? 'fullscreen_exit' : 'fullscreen'" aria-hidden="true" />
+            @if (isGraphEnlarged()) {
+              {{ 'studio.conformity.reduce-graphic-view-btn' | transloco }}
+            } @else {
+              {{ 'studio.conformity.enlarge-graphic-view-btn' | transloco }}
+            }
+          </button>
+          <div [id]="FOREST_TRENCHES_PLOT_ID" class="results__plot"></div>
+        </figure>
+
+        @if (span.medianF1 !== null) {
+          <dl class="results__median">
+            <dt>{{ 'studio.forest-trenches.median-f1' | transloco }}</dt>
+            <dd data-testid="forest-trenches-median-f1">
+              {{ span.medianF1 | number: '1.2-2' }} {{ 'common.meter' | transloco }}
+            </dd>
+          </dl>
+        }
+
+        @if (!isGraphEnlarged()) {
+          <div class="results__table-wrapper">
+            <table class="results__table" data-testid="forest-trenches-results-table">
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  @for (label of xTickLabels(); track $index) {
+                    <th scope="col">{{ label }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of tableRows(); track row.id) {
+                  <tr>
+                    <th scope="row">{{ row.label }}</th>
+                    @for (value of row.values; track $index) {
+                      <td>{{ value | number: '1.2-2' }} {{ row.unitKey | transloco }}</td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    </section>
+  }
+</div>

@@ -44,7 +44,12 @@ import {
   getLateralDistanceTypeLabels
 } from './conformity.constantes';
 import { ConformityOption, ConformityRuleResult, ResultRow } from './conformity.model';
-import { computeOverhangZoneWidth, getVisibleConformityCommonRows } from './conformity.helpers';
+import {
+  computeOverhangZoneWidth,
+  getEffectiveWindPressure,
+  getElectricTensionLabel,
+  getVisibleConformityCommonRows
+} from './conformity.helpers';
 import { ConformityPlotResponse } from './conformity-plot.model';
 import {
   createConformityPlot,
@@ -222,8 +227,7 @@ export class ConformityComponent implements OnDestroy {
   });
 
   readonly electricTensionLabel = computed(() => {
-    const voltage = this.spanService.section()?.voltage_idr;
-    return voltage ?? '-';
+    return getElectricTensionLabel(this.spanService.section()?.voltage_idr);
   });
 
   private readonly altitudeTypeLabels = getAltitudeTypeLabels(this.translocoService);
@@ -349,10 +353,11 @@ export class ConformityComponent implements OnDestroy {
   readonly windZoneOptions = computed(() => this.windZones().map((z) => ({ label: z.label, value: z.label })));
 
   readonly effectiveWindPressure = computed(() => {
-    const label = this.formValue().windZone;
-    const zone = this.windZones().find((z) => z.label === label);
-    if (!zone) return null;
-    return this.redZonePresenceValue() ? zone.red_zone : zone.normal;
+    return getEffectiveWindPressure(
+      this.windZones(),
+      this.formValue().windZone,
+      this.redZonePresenceValue()
+    );
   });
 
   readonly conformityOptions = toSignal(

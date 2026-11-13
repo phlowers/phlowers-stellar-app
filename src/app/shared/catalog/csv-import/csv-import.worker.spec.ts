@@ -297,7 +297,25 @@ describe('csv-import.worker - runWorkerImport', () => {
       repartitionTemperatureFields: { defaultValue: 75 },
       lateralTemperatureFields: { defaultValue: 65, ruleType: 'CCG-LA', message: 'm' },
       windZone: { default: 'ZVN', values: [{ label: 'ZVN', normal: 240, redZone: 360 }] },
-      intermediatePointPositions: [0.33, 0.66]
+      intermediatePointPositions: [0.33, 0.66],
+      forest_trenches: {
+        ground_n_slicing_points_choices: [3],
+        overhang_rules_selected: ['AT'],
+        lateral_rules_selected: ['AT'],
+        chart: {
+          cable: { marker: 'circle', line: 'solid' },
+          limit: { marker: 'square-open', line: 'dash' },
+          overhang_color: '#0000FF'
+        }
+      },
+      floor_obstacle: {
+        obstacleType: 'synthetic_floor',
+        obstacleName: 'Synthetic floor',
+        details: 'Synthetic floor profile',
+        redZone: false,
+        conformity: 'forest_trenches',
+        distances: [{ ruleType: 'AT', active: true, overhang: { '63': 0 }, lateral: { '63': 0 } }]
+      }
     };
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')

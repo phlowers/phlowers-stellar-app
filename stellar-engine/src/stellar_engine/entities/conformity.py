@@ -28,6 +28,7 @@ class ConformityPlot(StrEnum):
     CABLE_TRACK = "cable_track"
     VEGETATION = "vegetation"
     OVERHANG = "overhang"
+    FOREST_TRENCHES = "forest_trenches"
 
 
 class ScenarioPoint(StrEnum):
@@ -265,7 +266,7 @@ class ConformityParametersInput:
             conformity_plot = ConformityPlot(data["conformityPlot"])
         except ValueError:
             raise ConformityInputError(
-                "conformityPlot must be one of 'vegetation', 'cable_track', 'overhang'"
+                "conformityPlot must be one of 'vegetation', 'cable_track', 'overhang', 'forest_trenches'"
             ) from None
 
         return cls(

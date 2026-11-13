@@ -43,6 +43,35 @@ export interface ObstacleJsonDto {
   distances: ObstacleDistanceJsonDto[];
 }
 
+/** Marker and connecting line style of one forest-trenches plot series. */
+export interface ForestTrenchesChartSeriesJsonDto {
+  marker: string;
+  line: string;
+}
+
+/** Forest-trenches-specific rule selections and plot styles. */
+export interface ForestTrenchesJsonDto {
+  ground_n_slicing_points_choices: number[];
+  overhang_rules_selected: string[];
+  lateral_rules_selected: string[];
+  chart: {
+    cable: ForestTrenchesChartSeriesJsonDto;
+    limit: ForestTrenchesChartSeriesJsonDto;
+    /** Overrides the rule color of the overhang cable curves; null keeps the rule color. */
+    overhang_color: string | null;
+  };
+}
+
+/** Mandatory floor obstacle, kept out of the regular obstacle list. */
+export interface ForestTrenchesFloorObstacleJsonDto {
+  obstacleType: string;
+  obstacleName: string;
+  details: string;
+  redZone: boolean;
+  conformity: 'forest_trenches';
+  distances: ObstacleDistanceJsonDto[];
+}
+
 /** Wind zone entry as serialized in JSON (`windZone.values[]`). */
 export interface WindZoneValueJsonDto {
   label: string;
@@ -83,4 +112,6 @@ export interface ObstacleConfigurationJsonDto {
   lateralTemperatureFields: LateralTemperatureFieldsJsonDto;
   windZone: WindZoneJsonDto;
   intermediatePointPositions: number[];
+  forest_trenches: ForestTrenchesJsonDto;
+  floor_obstacle: ForestTrenchesFloorObstacleJsonDto;
 }

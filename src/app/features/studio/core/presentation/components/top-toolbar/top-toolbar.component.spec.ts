@@ -485,13 +485,10 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute action for tool item 4 - Forest trenches', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       const items = component.toolsItems();
 
       items[3].action();
-      expect(alertSpy).toHaveBeenCalledWith('click Forest trenches');
-
-      alertSpy.mockRestore();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledWith('forest-trenches');
     });
 
     it('should execute action for tool item 5 - Cable adjustment', () => {
@@ -516,7 +513,6 @@ describe('StudioTopToolbarComponent', () => {
     });
 
     it('should execute all actions through toolsDropdown commands', () => {
-      const alertSpy = vi.spyOn(globalThis, 'alert').mockReturnValue(undefined);
       component.ngOnInit();
       const tools = component.toolsDropdown();
 
@@ -524,10 +520,7 @@ describe('StudioTopToolbarComponent', () => {
         tools?.[i].command?.({});
       }
 
-      // Every tool opens a dialog, except Forest trenches which calls alert
-      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(5);
-      expect(alertSpy).toHaveBeenCalledTimes(1);
-      alertSpy.mockRestore();
+      expect(mockToolbarDialogService.openTool).toHaveBeenCalledTimes(6);
     });
   });
 
