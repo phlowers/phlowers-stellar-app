@@ -106,7 +106,7 @@ export function nextLeftSupportState(
   return { resolved, state: { previous: { spanKey, leftSupport: resolved }, memory } };
 }
 
-/** Span length computed by the engine for the selected span, or null when unavailable. */
+/** Per-span engine value (e.g. horizontal distance between attachments) of the selected span, or null when unavailable. */
 export function getCalculatedSpanLength(
   span: number[] | null | undefined,
   spanLengths: (number | null)[] | null | undefined

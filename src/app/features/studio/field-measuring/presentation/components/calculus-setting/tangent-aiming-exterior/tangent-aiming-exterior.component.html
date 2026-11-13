@@ -40,8 +40,8 @@
   <div class="spanLengthDesc">
     <p id="taeSpanLength-calculated" class="spanLength__desc">
       {{ 'common.calculated-value-label' | transloco }}
-      @if (calculatedSpanLength() !== null) {
-        {{ calculatedSpanLength() | number: '1.0-2' }} {{ 'common.meter' | transloco }}
+      @if (calculatedHorizontalDistance() !== null) {
+        {{ calculatedHorizontalDistance() | number: '1.0-2' }} {{ 'common.meter' | transloco }}
       } @else {
         -
       }

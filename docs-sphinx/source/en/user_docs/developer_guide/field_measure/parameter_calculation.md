@@ -4,7 +4,7 @@
 
 The **Parameter Calculation** tab provides field measurement methods to compute the electrical sag parameter from on-site angle and distance observations. The **PAPOTO** and **Tangent Aiming** methods (Support, Interior and Exterior variants; see {doc}`tangent_aiming`) are implemented; the PEP method is a placeholder component (disabled radio button).
 
-The computed parameter feeds the **Parameter at 15°C without wind** tab in "auto" mode, which uses `outputs.papoto.parameter` and `outputs.papoto.uncertainty` to perform subsequent thermal calculations.
+The computed parameter feeds the **Parameter at 15°C without wind** tab in "auto" mode, which uses the parameter and uncertainty of the retained method (`getActiveParameterOutput()`: `outputs.papoto` or the `outputs.tangentAiming*` of the selected variant) to perform subsequent thermal calculations.
 
 ## Component Tree and Files
 
@@ -123,10 +123,14 @@ Error details are logged in the browser console but are not exposed to the end u
 
 When the user opens the **Parameter at 15°C without wind** tab in **"auto"** update mode:
 
-1. `parameterPapoto` is populated from `outputs.papoto.parameter`
-2. `parameterUncertaintyPapoto` is populated from `outputs.papoto.uncertainty`
+1. The parameter is taken from `getActiveParameterOutput()` (`outputs.papoto.parameter` for PAPOTO)
+2. The uncertainty is taken from the same output (`outputs.papoto.uncertainty` for PAPOTO)
 
 If the user switches to **"manual"** mode, the auto-populated values are preserved and become editable. Any change to PAPOTO inputs (HL, H1, etc., or span length) clears the stale result (`outputs.papoto = null`), forcing recalculation if needed.
+
+## Report and export
+
+Once the measure is saved (see {doc}`terrain_data`), the PAPOTO inputs and result are exported in `parameterCalculation.method.papoto` by `buildPapotoMethodExport` (`presentation/field-measure-export.helpers.ts`): measured horizontal and vertical distances between attachments (`spanLength`, `measuredElevationDifference`), calculated ones (`horizontal_distance` and `elevation` from `litData.output_parameters` for the left support of the span), horizontal and vertical angles, intermediate parameters 1-2, 2-3 and 1-3, and `calculatedParameter` (`{ parameter, criterion: { threshold: 0.5, unit: "%", status } }`, `PAPOTO_VALIDITY_CRITERION_PERCENT`). `parameterCalculation.leftSupport` is the form label of the left support (`formatLeftSupportLabel`, support index + 1). The PEP export is a placeholder: its block only contains the entered sights.
 
 ## Tests
 

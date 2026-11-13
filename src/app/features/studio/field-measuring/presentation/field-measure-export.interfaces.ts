@@ -5,6 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { FieldMeasure } from '../domain/types';
+
 /** A numeric (or other) value paired with its unit of measure. */
 export interface ValueUnit<T = number | null> {
   value: T;
@@ -88,36 +90,27 @@ export interface TemperatureCalculationExport {
     | undefined;
 }
 
-/** Calculated parameter block shared by PAPOTO and PEP methods (uses `criterion`, in %). */
-export type PapotoCalculatedParameterExport =
-  | {
-      parameter: UncertainValueUnit;
-      criterion: { value: number; unit: '%'; status: boolean };
-    }
-  | undefined;
+/** Validity criterion of a calculated parameter: threshold in %, and whether the result respects it. */
+export interface CriterionExport {
+  threshold: number;
+  unit: '%';
+  status: boolean;
+}
 
-/** Calculated parameter block for the PEP method — same shape as PAPOTO's. */
-export type PepCalculatedParameterExport =
+/** Calculated parameter block shared by all parameter calculation methods; `undefined` when not computed. */
+export type CalculatedParameterExport =
   | {
       parameter: UncertainValueUnit;
-      criterion: { value: number; unit: '%'; status: boolean };
-    }
-  | undefined;
-
-/** Calculated parameter block for the tangential sights method (uses `rating`, in meters — not `criterion`). */
-export type TangentialSightsCalculatedParameterExport =
-  | {
-      parameter: UncertainValueUnit;
-      rating: { value: number; unit: 'm'; status: boolean };
+      criterion: CriterionExport;
     }
   | undefined;
 
 /** Raw inputs and computed outputs for the PAPOTO parameter calculation method. */
 export interface PapotoMethodExport {
-  measuredLength: ValueUnit;
-  calculatedLength: ValueUnit;
-  measuredElevation: ValueUnit;
-  calculatedElevation: ValueUnit;
+  measuredHorizontalDistance: ValueUnit;
+  calculatedHorizontalDistance: ValueUnit;
+  measuredVerticalDistance: ValueUnit;
+  calculatedVerticalDistance: ValueUnit;
   horizontalAngles: {
     value: { HG: number | null; H1: number | null; H2: number | null; H3: number | null; HD: number | null };
     unit: '°';
@@ -127,13 +120,13 @@ export interface PapotoMethodExport {
     unit: '°';
   };
   intermediateParameters: { value: { p12: number | null; p23: number | null; p13: number | null }; unit: 'm' };
-  calculatedParameter: PapotoCalculatedParameterExport;
+  calculatedParameter: CalculatedParameterExport;
 }
 
-/** Raw inputs for the tangential sights parameter calculation method (placeholder, not implemented). */
+/** Inputs and results of the tangential sights parameter calculation method (support, exterior or interior). */
 export interface TangentialSightsMethodExport {
-  measuredLength: ValueUnit;
-  calculatedLength: ValueUnit;
+  measuredHorizontalDistance: ValueUnit;
+  calculatedHorizontalDistance: ValueUnit;
   leftSupportMeasures: {
     verticalDistance: ValueUnit;
     verticalAngle: ValueUnit;
@@ -143,7 +136,7 @@ export interface TangentialSightsMethodExport {
     verticalAngle: ValueUnit;
   };
   calculationType: { type: 'PARAMETRE' | 'ANGLE_TANGENT'; value: number | null };
-  calculatedParameter: TangentialSightsCalculatedParameterExport;
+  calculatedParameter: CalculatedParameterExport;
 }
 
 /** Raw inputs for the PEP parameter calculation method (placeholder, not implemented). */
@@ -153,13 +146,22 @@ export interface PepMethodExport {
   horizontalDistances: { value: { X1: number | null; X2: number | null; X3: number | null }; unit: 'm' };
   verticalDistances: { value: { Y1: number | null; Y2: number | null; Y3: number | null }; unit: 'm' };
   intermediateParameters: { value: { p12: number | null; p23: number | null; p13: number | null }; unit: 'm' };
-  calculatedParameter: PepCalculatedParameterExport;
+  calculatedParameter: CalculatedParameterExport;
 }
+
+/** Sub-method of the tangential sights method. */
+export type TangentialSightsSubMethodName = 'SUPPORT' | 'EXTERIEUR' | 'INTERIEUR';
+
+/** Calculation methods of the field measure that are tangential sights sub-methods. */
+export type TangentialSightsCalculationMethod = Extract<
+  FieldMeasure['calculationMethod'],
+  'tangente-aiming' | 'tangente-aiming-exterior' | 'tangente-aiming-interior'
+>;
 
 /** Parameter calculation tab data — only the key matching the active `methodName` is populated in `method`. */
 export interface ParameterCalculationExport {
   methodName: 'PAPOTO' | 'VISEES_TANGENTES' | 'PEP';
-  subMethodName: null;
+  subMethodName: TangentialSightsSubMethodName | null;
   leftSupport: string | null;
   method: {
     papoto?: PapotoMethodExport;

@@ -86,9 +86,9 @@ export abstract class TangentAimingFormBase {
     buildSpanSupportOptions(this.spanService.section()?.supports ?? [], this.measureData().span)
   );
 
-  /** Span length computed by the engine for the selected span, or null when unavailable. */
-  readonly calculatedSpanLength = computed(() =>
-    getCalculatedSpanLength(this.measureData().span, this.plotService.litData()?.output_parameters.span_length)
+  /** Horizontal distance between cable attachments computed by the engine for the selected span, or null when unavailable. */
+  readonly calculatedHorizontalDistance = computed(() =>
+    getCalculatedSpanLength(this.measureData().span, this.plotService.litData()?.output_parameters.horizontal_distance)
   );
 
   readonly calculationTypeOptions = computed(() => {

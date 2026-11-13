@@ -24,7 +24,7 @@ export const TANGENT_AIMING_EXTERIOR_NUMBER_FIELDS: Record<
 > = {
   spanLength: {
     id: 'taeSpanLength',
-    labelKey: 'common.measured-span-length-label',
+    labelKey: 'common.measured-horizontal-distance-label',
     unitKey: 'common.meter',
     testId: 'span-length-input',
     step: 0.01,

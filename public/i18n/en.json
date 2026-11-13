@@ -175,7 +175,7 @@
     "z-label": "Z:",
     "support-name-full-label": "Support name",
     "left-support-label": "Left support",
-    "measured-span-length-label": "Measured span length",
+    "measured-horizontal-distance-label": "Measured horiz. dist. between cable attach.",
     "calculated-value-label": "Calculated value:",
     "tangent-aiming-help-aria-label": "open tangent aiming help",
     "calculation-type-label": "Calculation type:",
@@ -755,7 +755,7 @@
       "close-aria-label": "close PAPOTO help",
       "import-station-data": "Import station's datas",
       "mandatory-msg": "All fields are mandatory for calculus setting",
-      "elevation-diff-label": "Elevation diff. of measured attach.",
+      "measured-vertical-distance-label": "Measured vert. dist. between cable attach.",
       "hl-label": "HL",
       "h1-label": "H1",
       "h2-label": "H2",
@@ -834,6 +834,10 @@
         "kmh": "KM/H",
         "ms": "M/S"
       },
+      "season": {
+        "summer": "SUMMER",
+        "winter": "WINTER"
+      },
       "update-mode-15c": {
         "auto": "AUTO",
         "manual": "MANUELLE"
@@ -849,10 +853,10 @@
       "measure-date": "Measure date",
       "measure-time": "Measure time",
       "method": "Method",
-      "measured-length": "Measured length",
-      "calculated-length": "Calculated length",
-      "measured-elevation": "Measured elevation difference",
-      "calculated-elevation": "Calculated elevation difference",
+      "measured-horizontal-distance": "Measured horiz. dist. between cable attach.",
+      "calculated-horizontal-distance": "Calculated horiz. dist. between cable attach.",
+      "measured-vertical-distance": "Measured vert. dist. between cable attach.",
+      "calculated-vertical-distance": "Calculated vert. dist. between cable attach.",
       "vertical-distance-left": "Vert. dist. device to left cable attachment",
       "horizontal-distance-left": "Horiz. dist. device to left cable attachment",
       "vertical-angle-left": "Vertical angle device to left cable attachment",

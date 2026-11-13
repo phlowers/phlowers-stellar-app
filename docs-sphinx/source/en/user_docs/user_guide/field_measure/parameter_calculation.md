@@ -31,10 +31,10 @@ All fields in the PAPOTO form are **mandatory**. You must fill them all before c
 | Label | Unit | Meaning |
 |---|---|---|
 | **Left support** | — | Select which end of the span is the "left" support (the two options are the supports of your selected span). This determines how horizontal angles are measured. |
-| **Measured span length** | m | The distance between the two support attachment points on the cable. |
-| **Elevation diff. of measured attach.** | m | The vertical height difference between the left and right attachment points. If right is higher, the value is positive. |
+| **Measured horiz. dist. between cable attach.** | m | The horizontal distance between the two support attachment points on the cable. |
+| **Measured vert. dist. between cable attach.** | m | The vertical height difference between the left and right attachment points. If right is higher, the value is positive. |
 
-In {{app_name}}, two **Calculated value** fields (read-only) show the span length and elevation difference computed from terrain analysis. Compare them with your measured values to validate your measurements.
+In {{app_name}}, two **Calculated value** fields (read-only) show the horizontal and vertical distances between the cable attachments, computed from terrain analysis. Compare them with your measured values to validate your measurements.
 
 ### Measurement Angles
 
@@ -108,6 +108,10 @@ This can happen if:
 - Input data is inconsistent
 
 Check your entered values and try again. If the error persists, review your field measurements.
+
+## Report and export
+
+Once the measure is saved, **Report** and **Export** include the inputs and results of the PAPOTO method (see {doc}`terrain_data`). In the JSON export, `parameterCalculation.method.papoto` contains the measured and calculated lengths and elevations, the horizontal and vertical angles, the parameters 1-2, 2-3 and 1-3, then the calculated parameter with its uncertainty and its criterion (`threshold` of 0.5%, `status`: criterion met or not). The left support is exported with the label displayed in the form.
 
 ## Next Step
 

@@ -87,6 +87,15 @@ export const LEFT_SUPPORT_OPTION_KEYS: TranslatableSelectOption[] = [
 /** PAPOTO validity criterion threshold (0.5%), not exposed by `PapotoResult` — used for the JSON export. */
 export const PAPOTO_VALIDITY_CRITERION_PERCENT = 0.5;
 
+/** Tangential sights validity criterion threshold (1%), not exposed by the tangent aiming result — used for the JSON export. */
+export const TANGENT_AIMING_VALIDITY_CRITERION_PERCENT = 1;
+
+/** Maps the internal `season` value to a Transloco key for JSON export label. */
+export const SEASON_EXPORT_KEYS: Record<FieldMeasure['season'], string> = {
+  summer: 'field-measuring.export-labels.season.summer',
+  winter: 'field-measuring.export-labels.season.winter'
+};
+
 /** Maps the internal `windSpeedUnit` value to a Transloco key for JSON export label. */
 export const WIND_SPEED_UNIT_EXPORT_KEYS: Record<FieldMeasure['windSpeedUnit'], string> = {
   kmh: 'field-measuring.export-labels.wind-speed-unit.kmh',
@@ -110,6 +119,13 @@ export const PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS: Record<
  * export contract code, identical across locales, not a user-facing label.
  */
 export const TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE = 'VISEES_TANGENTES' as const;
+
+/** Fixed (non-translatable) `subMethodName` export value of each tangential sights calculation method. */
+export const TANGENTIAL_SIGHTS_SUB_METHOD_NAME_EXPORT_VALUES = {
+  'tangente-aiming': 'SUPPORT',
+  'tangente-aiming-exterior': 'EXTERIEUR',
+  'tangente-aiming-interior': 'INTERIEUR'
+} as const;
 
 /** Maps the internal `updateMode15C` value to a Transloco key for JSON export label. */
 export const UPDATE_MODE_15C_EXPORT_KEYS: Record<FieldMeasure['updateMode15C'], string> = {

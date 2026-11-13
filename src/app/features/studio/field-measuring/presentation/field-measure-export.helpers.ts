@@ -9,11 +9,22 @@ import { Section, Study } from '@shared/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { TranslocoService } from '@jsverse/transloco';
 import { FieldMeasure } from '../domain/types';
-import { formatGenerationDate, formatSpanLabel, getActiveParameterOutput } from './helpers';
+import {
+  formatGenerationDate,
+  formatLeftSupportLabel,
+  formatSpanLabel,
+  getActiveParameterOutput,
+  readNumber
+} from './helpers';
+import { getCalculatedSpanLength } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
+import { TANGENT_AIMING_REPORT_CONFIGS } from './services/field-measure-report/field-measure-report.constantes';
 import {
   PAPOTO_VALIDITY_CRITERION_PERCENT,
   PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS,
+  SEASON_EXPORT_KEYS,
+  TANGENT_AIMING_VALIDITY_CRITERION_PERCENT,
   TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE,
+  TANGENTIAL_SIGHTS_SUB_METHOD_NAME_EXPORT_VALUES,
   UPDATE_MODE_15C_EXPORT_KEYS,
   WIND_SPEED_UNIT_EXPORT_KEYS,
   CALCULATION_TYPE_EXPORT_KEYS
@@ -26,6 +37,7 @@ import {
   PapotoMethodExport,
   PepMethodExport,
   SpanExport,
+  TangentialSightsCalculationMethod,
   TangentialSightsMethodExport,
   TemperatureCalculationExport,
   UncertainValueUnit,
@@ -94,6 +106,15 @@ export const formatExportDateTimeWithOffset = (value: string | null | undefined)
 };
 
 /**
+ * Formats the time of a date as `HH:mm:ss.SSS±HH:MM` in local time with its offset (time part of
+ * `formatExportDateTimeWithOffset`, so the general and measure dates share the same convention).
+ * @param time - The time to format (or `null`)
+ * @returns The formatted time, or `null` when `time` is `null` or invalid
+ */
+export const formatExportTimeWithOffset = (time: Date | null): string | null =>
+  formatExportDateTimeWithOffset(time?.toISOString())?.split('T')[1] ?? null;
+
+/**
  * Builds the `general` export block (study/section context, formerly `metaData`).
  * @param section - The current section (or `null`)
  * @param study - The current study (or `null`)
@@ -126,8 +147,8 @@ export const getSectionTypeKey = (spanType: string): string => {
 export const buildMeasureExport = (measureData: FieldMeasure, translocoService: TranslocoService): MeasureExport => ({
   name: measureData.name,
   date: formatExportDate(measureData.date),
-  time: formatExportTime(measureData.time),
-  season: measureData.season ?? null,
+  time: formatExportTimeWithOffset(measureData.time),
+  season: measureData.season ? translocoService.translate(SEASON_EXPORT_KEYS[measureData.season]) : null,
   voltage: createValueUnit(measureData.voltage, 'KV'),
   sectionType: measureData.spanType ? translocoService.translate(getSectionTypeKey(measureData.spanType)) : null,
   cable: measureData.cableName,
@@ -193,17 +214,19 @@ export const buildTemperatureCalculationExport = (
   };
 };
 
-/** Builds the PAPOTO method export block, including computed length/elevation from `litData`. */
+/** Builds the PAPOTO method export block, including computed horizontal/vertical distances from `litData`. */
 const buildPapotoMethodExport = (measureData: FieldMeasure, litData: GetSectionOutput | null): PapotoMethodExport => {
   const leftIndex = measureData.span?.[0] ?? null;
-  const calculatedLength = leftIndex !== null ? (litData?.output_parameters.span_length[leftIndex] ?? null) : null;
-  const calculatedElevation = leftIndex !== null ? (litData?.output_parameters.elevation[leftIndex] ?? null) : null;
+  const calculatedHorizontalDistance =
+    leftIndex !== null ? (litData?.output_parameters.horizontal_distance[leftIndex] ?? null) : null;
+  const calculatedVerticalDistance =
+    leftIndex !== null ? (litData?.output_parameters.elevation[leftIndex] ?? null) : null;
   const { papoto } = measureData.outputs;
   return {
-    measuredLength: createValueUnit(measureData.spanLength, 'm'),
-    calculatedLength: createValueUnit(calculatedLength, 'm'),
-    measuredElevation: createValueUnit(measureData.measuredElevationDifference, 'm'),
-    calculatedElevation: createValueUnit(calculatedElevation, 'm'),
+    measuredHorizontalDistance: createValueUnit(measureData.spanLength, 'm'),
+    calculatedHorizontalDistance: createValueUnit(calculatedHorizontalDistance, 'm'),
+    measuredVerticalDistance: createValueUnit(measureData.measuredElevationDifference, 'm'),
+    calculatedVerticalDistance: createValueUnit(calculatedVerticalDistance, 'm'),
     horizontalAngles: createValueUnit(
       { HG: measureData.HL, H1: measureData.H1, H2: measureData.H2, H3: measureData.H3, HD: measureData.HR },
       '°'
@@ -223,37 +246,58 @@ const buildPapotoMethodExport = (measureData: FieldMeasure, litData: GetSectionO
     calculatedParameter: papoto
       ? {
           parameter: createUncertainValueUnit(papoto.parameter, 'm', papoto.uncertainty),
-          criterion: { value: PAPOTO_VALIDITY_CRITERION_PERCENT, unit: '%', status: papoto.checkValidity }
+          criterion: { threshold: PAPOTO_VALIDITY_CRITERION_PERCENT, unit: '%', status: papoto.checkValidity }
         }
       : undefined
   };
 };
 
-/** Builds the tangential sights (Visées tangentes) method export block from raw inputs (method not implemented). */
+/** Builds the tangential sights (Visées tangentes) method export block for the support, exterior or interior form. */
 const buildTangentialSightsMethodExport = (
   measureData: FieldMeasure,
-  translocoService: TranslocoService
+  litData: GetSectionOutput | null,
+  translocoService: TranslocoService,
+  method: TangentialSightsCalculationMethod
 ): TangentialSightsMethodExport => {
-  const calculationTypeKey =
-    measureData.calculationType === 'tangente'
-      ? CALCULATION_TYPE_EXPORT_KEYS.tangente
-      : CALCULATION_TYPE_EXPORT_KEYS.other;
+  const config = TANGENT_AIMING_REPORT_CONFIGS[method];
+  const isTangentAngle = measureData[config.calculationType] === 'tangente';
+  const isSupport = method === 'tangente-aiming';
+  const distance = createValueUnit(readNumber(measureData, config.distance), 'm');
+  const result = measureData.outputs[config.output];
   return {
-    measuredLength: createValueUnit(null, 'm'),
-    calculatedLength: createValueUnit(null, 'm'),
+    measuredHorizontalDistance: createValueUnit(readNumber(measureData, config.spanLength), 'm'),
+    calculatedHorizontalDistance: createValueUnit(
+      getCalculatedSpanLength(measureData.span, litData?.output_parameters.horizontal_distance),
+      'm'
+    ),
+    // The support form has no left vertical angle, and its distance is the vertical one; the others have the horizontal one.
     leftSupportMeasures: {
-      verticalDistance: createValueUnit(null, 'm'),
-      verticalAngle: createValueUnit(measureData.cableVerticalAccAngle, '°'),
-      horizontalDistance: createValueUnit(measureData.cableHAccDistance, 'm')
+      verticalDistance: isSupport ? distance : createValueUnit(null, 'm'),
+      verticalAngle: createValueUnit(
+        config.verticalAngleLeft ? readNumber(measureData, config.verticalAngleLeft) : null,
+        '°'
+      ),
+      horizontalDistance: isSupport ? createValueUnit(null, 'm') : distance
     },
     rightSupportMeasures: {
-      verticalAngle: createValueUnit(measureData.cableTangentAngle, '°')
+      verticalAngle: createValueUnit(readNumber(measureData, config.verticalAngleRight), '°')
     },
     calculationType: {
-      type: translocoService.translate(calculationTypeKey),
-      value: null
+      type: translocoService.translate(
+        isTangentAngle ? CALCULATION_TYPE_EXPORT_KEYS.tangente : CALCULATION_TYPE_EXPORT_KEYS.other
+      ),
+      value: readNumber(measureData, isTangentAngle ? config.tangentAngle : config.parameter)
     },
-    calculatedParameter: undefined
+    calculatedParameter: result
+      ? {
+          parameter: createUncertainValueUnit(result.parameter, 'm', result.uncertainty),
+          criterion: {
+            threshold: TANGENT_AIMING_VALIDITY_CRITERION_PERCENT,
+            unit: '%',
+            status: result.checkValidity
+          }
+        }
+      : undefined
   };
 };
 
@@ -286,34 +330,32 @@ export const buildParameterCalculationExport = (
   litData: GetSectionOutput | null,
   translocoService: TranslocoService
 ): ParameterCalculationExport => {
-  const method: ParameterCalculationExport['method'] = {};
-  switch (measureData.calculationMethod) {
-    case 'papoto':
-      method.papoto = buildPapotoMethodExport(measureData, litData);
-      break;
-    case 'tangente-aiming':
-      method.tangentialSights = buildTangentialSightsMethodExport(measureData, translocoService);
-      break;
-    case 'tangente-aiming-exterior':
-    case 'tangente-aiming-interior':
-      // Export is disabled for these methods (RG.EXP-BTN.1): the block stays empty.
-      break;
-    case 'pep':
-      method.pep = buildPepMethodExport(measureData);
-      break;
-  }
   const { calculationMethod } = measureData;
-  const methodName: ParameterCalculationExport['methodName'] =
-    calculationMethod === 'tangente-aiming' ||
-    calculationMethod === 'tangente-aiming-exterior' ||
-    calculationMethod === 'tangente-aiming-interior'
-      ? TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE
-      : translocoService.translate(PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS[calculationMethod]);
+  if (calculationMethod === 'papoto') {
+    return {
+      methodName: translocoService.translate(PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS.papoto),
+      subMethodName: null,
+      leftSupport: formatLeftSupportLabel(measureData.leftSupport),
+      method: { papoto: buildPapotoMethodExport(measureData, litData) }
+    };
+  }
+  if (calculationMethod === 'pep') {
+    return {
+      methodName: translocoService.translate(PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS.pep),
+      subMethodName: null,
+      leftSupport: measureData.leftSupport,
+      method: { pep: buildPepMethodExport(measureData) }
+    };
+  }
   return {
-    methodName,
-    subMethodName: null,
-    leftSupport: measureData.leftSupport,
-    method
+    methodName: TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE,
+    subMethodName: TANGENTIAL_SIGHTS_SUB_METHOD_NAME_EXPORT_VALUES[calculationMethod],
+    leftSupport: formatLeftSupportLabel(
+      measureData[TANGENT_AIMING_REPORT_CONFIGS[calculationMethod].leftSupport] as string | null
+    ),
+    method: {
+      tangentialSights: buildTangentialSightsMethodExport(measureData, litData, translocoService, calculationMethod)
+    }
   };
 };
 

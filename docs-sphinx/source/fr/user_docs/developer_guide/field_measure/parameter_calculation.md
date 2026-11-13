@@ -4,7 +4,7 @@
 
 L'onglet **Calcul du paramètre** fournit des méthodes de mesure de terrain pour calculer le paramètre électrique de fléchage à partir d'observations d'angle et de distance sur site. Les méthodes **PAPOTO** et **Tangent Aiming** (variantes Support, Intérieur, Extérieur ; voir {doc}`tangent_aiming`) sont implémentées ; la méthode PEP est un composant d'espace réservé (bouton radio désactivé).
 
-Le paramètre calculé alimente ensuite l'onglet **Paramètre à 15 °C sans vent** en mode « auto », qui utilise `outputs.papoto.parameter` et `outputs.papoto.uncertainty` pour effectuer les calculs thermiques suivants.
+Le paramètre calculé alimente ensuite l'onglet **Paramètre à 15 °C sans vent** en mode « auto », qui utilise le paramètre et l'incertitude de la méthode retenue (`getActiveParameterOutput()` : `outputs.papoto` ou les `outputs.tangentAiming*` de la variante sélectionnée) pour effectuer les calculs thermiques suivants.
 
 ## Arborescence des composants et fichiers
 
@@ -123,10 +123,14 @@ Les détails de l'erreur sont consignés dans la console du navigateur, mais ne 
 
 Quand l'utilisateur ouvre l'onglet **Paramètre à 15 °C sans vent** en mode de mise à jour **« auto »** :
 
-1. `parameterPapoto` est alimenté depuis `outputs.papoto.parameter`
-2. `parameterUncertaintyPapoto` est alimenté depuis `outputs.papoto.uncertainty`
+1. Le paramètre est lu depuis `getActiveParameterOutput()` (`outputs.papoto.parameter` pour PAPOTO)
+2. L'incertitude est lue depuis la même sortie (`outputs.papoto.uncertainty` pour PAPOTO)
 
 Si l'utilisateur bascule en mode **« manuel »**, les valeurs préremplies automatiquement sont conservées et deviennent modifiables. Toute modification des entrées PAPOTO (HL, H1, etc., ou longueur de portée) efface le résultat obsolète (`outputs.papoto = null`), forçant ainsi un recalcul si nécessaire.
+
+## Rapport et export
+
+Une fois la mesure enregistrée (voir {doc}`terrain_data`), les entrées et le résultat PAPOTO sont exportés dans `parameterCalculation.method.papoto` par `buildPapotoMethodExport` (`presentation/field-measure-export.helpers.ts`) : distances horizontale et verticale entre accrochages mesurées (`spanLength`, `measuredElevationDifference`), calculées (`horizontal_distance` et `elevation` de `litData.output_parameters` pour le support de gauche de la portée), angles horizontaux et verticaux, paramètres intermédiaires 1-2, 2-3 et 1-3, et `calculatedParameter` (`{ parameter, criterion: { threshold: 0.5, unit: "%", status } }`, `PAPOTO_VALIDITY_CRITERION_PERCENT`). `parameterCalculation.leftSupport` est le libellé du support de gauche dans le formulaire (`formatLeftSupportLabel`, index du support + 1). L'export PEP est un espace réservé : son bloc ne contient que les visées saisies.
 
 ## Tests
 

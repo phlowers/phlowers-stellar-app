@@ -313,8 +313,8 @@ describe('TangentAimingSupport component', () => {
     expect(component.isCalculating()).toBe(false);
   });
 
-  it('should return no span length when the span is unknown', () => {
-    expect(component.calculatedSpanLength()).toBeNull();
+  it('should return no horizontal distance when the span is unknown', () => {
+    expect(component.calculatedHorizontalDistance()).toBeNull();
   });
 
   it('should run the tangent aiming task with the support inputs and store its result', async () => {

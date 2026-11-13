@@ -47,6 +47,7 @@ describe('field-measure-export.helpers', () => {
   const mockLitData: GetSectionOutput = {
     output_parameters: {
       span_length: [100, 200, 300],
+      horizontal_distance: [90, 190, 290],
       elevation: [1, 2, 3]
     }
   } as unknown as GetSectionOutput;
@@ -131,13 +132,27 @@ describe('field-measure-export.helpers', () => {
       const result = buildMeasureExport(measureData, mockTranslocoService);
       expect(result).toMatchObject({
         name: 'MT 1',
-        season: 'winter',
+        season: 'field-measuring.export-labels.season.winter',
         voltage: { value: '225 kV', unit: 'KV' },
         sectionType: 'common.section-type.phase',
         cable: 'ASTER600',
         cablesNumber: 2,
         phaseNumber: 3
       });
+    });
+
+    it('should export the time with seconds and timezone offset, or null without time', () => {
+      const withTime = buildMeasureExport(
+        createTestMeasureData({ time: new Date(2026, 0, 5, 14, 30, 15) }),
+        mockTranslocoService
+      );
+      expect(withTime.time).toMatch(/^14:30:15\.000[+-]\d{2}:\d{2}$/);
+      expect(buildMeasureExport(createTestMeasureData({ time: null }), mockTranslocoService).time).toBeNull();
+    });
+
+    it('should translate the season through its export key', () => {
+      const result = buildMeasureExport(createTestMeasureData({ season: 'summer' }), mockTranslocoService);
+      expect(result.season).toBe('field-measuring.export-labels.season.summer');
     });
   });
 
@@ -254,40 +269,100 @@ describe('field-measure-export.helpers', () => {
       const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
       expect(result.methodName).toBe('common.papoto-label');
       expect(result.subMethodName).toBeNull();
-      expect(result.leftSupport).toBe('0');
+      expect(result.leftSupport).toBe('1');
       expect(result.method.papoto).toBeDefined();
       expect(result.method.tangentialSights).toBeUndefined();
       expect(result.method.pep).toBeUndefined();
-      expect(result.method.papoto?.calculatedLength).toEqual({ value: 100, unit: 'm' });
-      expect(result.method.papoto?.calculatedElevation).toEqual({ value: 1, unit: 'm' });
+      expect(result.method.papoto?.measuredHorizontalDistance).toBeDefined();
+      expect(result.method.papoto?.calculatedHorizontalDistance).toEqual({ value: 90, unit: 'm' });
+      expect(result.method.papoto?.measuredVerticalDistance).toBeDefined();
+      expect(result.method.papoto?.calculatedVerticalDistance).toEqual({ value: 1, unit: 'm' });
       expect(result.method.papoto?.calculatedParameter).toEqual({
         parameter: { value: 500, unit: 'm', uncertainty: 0.5 },
-        criterion: { value: 0.5, unit: '%', status: true }
+        criterion: { threshold: 0.5, unit: '%', status: true }
       });
     });
 
-    it('should populate only the tangentialSights method block for the tangente-aiming calculation method', () => {
-      const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming' });
-      const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
+    const tangentOutput = { parameter: 600, uncertainty: 4, criterion: 0.8, checkValidity: false };
+    const emptyOutputs = createTestMeasureData().outputs;
+
+    it('should export the support sub-method of the tangential sights from the support form fields', () => {
+      const measureData = createTestMeasureData({
+        calculationMethod: 'tangente-aiming',
+        span: [0, 1],
+        tangentLeftSupport: '1',
+        tangentSpanLength: 102,
+        cableHAccDistance: 12.5,
+        cableVerticalAccAngle: 95.5,
+        calculationType: 'parametre',
+        cableParameter: 1800,
+        cableTangentAngle: 7,
+        outputs: { ...emptyOutputs, tangentAimingSupport: tangentOutput }
+      });
+      const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
       expect(result.methodName).toBe('VISEES_TANGENTES');
-      expect(result.method.tangentialSights).toBeDefined();
+      expect(result.subMethodName).toBe('SUPPORT');
+      expect(result.leftSupport).toBe('2');
       expect(result.method.papoto).toBeUndefined();
       expect(result.method.pep).toBeUndefined();
+      expect(result.method.tangentialSights).toEqual({
+        measuredHorizontalDistance: { value: 102, unit: 'm' },
+        calculatedHorizontalDistance: { value: 90, unit: 'm' },
+        leftSupportMeasures: {
+          verticalDistance: { value: 12.5, unit: 'm' },
+          verticalAngle: { value: null, unit: '°' },
+          horizontalDistance: { value: null, unit: 'm' }
+        },
+        rightSupportMeasures: { verticalAngle: { value: 95.5, unit: '°' } },
+        calculationType: { type: 'field-measuring.export-labels.calculation-type.parameter', value: 1800 },
+        calculatedParameter: {
+          parameter: { value: 600, unit: 'm', uncertainty: 4 },
+          criterion: { threshold: 1, unit: '%', status: false }
+        }
+      });
+    });
+
+    it.each([
+      ['tangente-aiming-exterior', 'EXTERIEUR', 'tangentAimingExterior'],
+      ['tangente-aiming-interior', 'INTERIEUR', 'tangentAimingInterior']
+    ] as const)('should export the %s sub-method from its own form fields', (method, subMethod, outputKey) => {
+      const prefix = method === 'tangente-aiming-exterior' ? 'exterior' : 'interior';
+      const measureData = createTestMeasureData({
+        calculationMethod: method,
+        span: [0, 1],
+        [`${prefix}LeftSupport`]: '0',
+        [`${prefix}SpanLength`]: 103,
+        [`${prefix}HAccDistance`]: 20,
+        [`${prefix}VerticalAccAngleLeft`]: 90,
+        [`${prefix}VerticalAccAngleRight`]: 110,
+        [`${prefix}CalculationType`]: 'tangente',
+        [`${prefix}Parameter`]: 1500,
+        [`${prefix}TangentAngle`]: 8,
+        outputs: { ...emptyOutputs, [outputKey]: tangentOutput }
+      });
+      const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
+      expect(result.subMethodName).toBe(subMethod);
+      expect(result.leftSupport).toBe('1');
+      expect(Object.keys(result.method)).toEqual(['tangentialSights']);
+      expect(result.method.tangentialSights).toMatchObject({
+        measuredHorizontalDistance: { value: 103, unit: 'm' },
+        leftSupportMeasures: {
+          verticalDistance: { value: null, unit: 'm' },
+          verticalAngle: { value: 90, unit: '°' },
+          horizontalDistance: { value: 20, unit: 'm' }
+        },
+        rightSupportMeasures: { verticalAngle: { value: 110, unit: '°' } },
+        calculationType: { type: 'field-measuring.export-labels.calculation-type.angle-tangent', value: 8 },
+        calculatedParameter: { criterion: { threshold: 1, unit: '%', status: false } }
+      });
+    });
+
+    it('should leave the tangential sights calculated parameter undefined and the length null without result', () => {
+      const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming', span: null });
+      const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
       expect(result.method.tangentialSights?.calculatedParameter).toBeUndefined();
-    });
-
-    it('should leave the method block empty for the tangente-aiming-exterior calculation method', () => {
-      const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming-exterior' });
-      const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
-      expect(result.methodName).toBe('VISEES_TANGENTES');
-      expect(result.method).toEqual({});
-    });
-
-    it('should leave the method block empty for the tangente-aiming-interior calculation method', () => {
-      const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming-interior' });
-      const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
-      expect(result.methodName).toBe('VISEES_TANGENTES');
-      expect(result.method).toEqual({});
+      expect(result.method.tangentialSights?.calculatedHorizontalDistance).toEqual({ value: null, unit: 'm' });
+      expect(result.leftSupport).toBeNull();
     });
 
     it('should populate only the pep method block for the pep calculation method', () => {
