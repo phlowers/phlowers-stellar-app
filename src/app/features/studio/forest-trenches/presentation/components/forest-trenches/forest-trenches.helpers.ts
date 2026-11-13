@@ -12,7 +12,11 @@ import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.consta
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { PLOTLY_LINE_DASHES, PLOTLY_MARKER_SYMBOLS } from '@shared/constants/plotly-styles.constantes';
 import type { ForestTrenchesSpanOutput, SliceGroundInput } from '@services/worker_python/tasks/types';
-import { FOREST_TRENCHES_PLOT_COLORS, FOREST_TRENCHES_PLOT_ID } from './forest-trenches.constantes';
+import {
+  FOREST_TRENCHES_AXIS_POINT_MARKER,
+  FOREST_TRENCHES_PLOT_COLORS,
+  FOREST_TRENCHES_PLOT_ID
+} from './forest-trenches.constantes';
 import type {
   CatalogObstacleConformityConfigEntity,
   ForestTrenchesChartSeriesStyle
@@ -301,7 +305,24 @@ export function createForestTrenchesPlot(
       line: { color: FOREST_TRENCHES_PLOT_COLORS.axis, width: 1.5, dash: 'dash' },
       hoverinfo: 'skip',
       name: options.axisLabel,
+      legendgroup: 'axis',
       showlegend: showLegend
+    },
+    {
+      x: span.points.map((point) => point.distanceToLeftSupport),
+      y: span.points.map(() => 0),
+      type: 'scatter',
+      mode: 'markers',
+      marker: {
+        color: FOREST_TRENCHES_PLOT_COLORS.axis,
+        symbol: FOREST_TRENCHES_AXIS_POINT_MARKER.symbol,
+        size: FOREST_TRENCHES_AXIS_POINT_MARKER.size,
+        line: { color: FOREST_TRENCHES_PLOT_COLORS.axis, width: FOREST_TRENCHES_AXIS_POINT_MARKER.lineWidth }
+      },
+      hovertemplate: HOVER_TEMPLATE,
+      name: options.axisLabel,
+      legendgroup: 'axis',
+      showlegend: false
     }
   ];
   const ruleColor = (ruleType: string): string =>
