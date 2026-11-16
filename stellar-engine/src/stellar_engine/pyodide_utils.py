@@ -25,6 +25,8 @@ def convert_jsnull(obj) -> object:
     elif isinstance(obj, list):
         return [convert_jsnull(item) for item in obj]
 
+    s = "test: ceci est une variable inutile"
+
     return obj
 
 
