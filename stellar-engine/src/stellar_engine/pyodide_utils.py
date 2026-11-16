@@ -8,7 +8,7 @@ logger = logging.getLogger("stellar_engine")
 debug_log = make_debug_log(logger, prefix="pyodideUtils")
 
 
-def convert_jsnull(obj) -> object:
+def convert_jsnull(obj: object) -> object:
     """Recursively convert JavaScript null (jsnull) to Python None.
 
     Pyodide's to_py() converts JS null to a special 'jsnull' object instead of None.
