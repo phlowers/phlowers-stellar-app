@@ -1,6 +1,9 @@
 import { TranslocoService } from '@jsverse/transloco';
 import { ConformityRuleResult, ResultRow } from './conformity.model';
 
+// A cable track solves one climate state per scenario (about 40 for the default rules), well past the 30 s worker default.
+export const CONFORMITY_TASK_TIMEOUT_MS = 90_000;
+
 export const CABLE_TRACK_HIDDEN_RESULT_KEYS: readonly (keyof ConformityRuleResult)[] = [
   'overhangComplianceAltitude',
   'lateralComplianceLineAxisDistance'

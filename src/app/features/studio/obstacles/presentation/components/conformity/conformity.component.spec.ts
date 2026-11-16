@@ -12,6 +12,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { Task } from '@services/worker_python/tasks/types';
 import { createConformityPlot, purgeConformityPlot, resizeConformityPlot } from './helpers/createConformityPlot';
 import { CONFORMITY_PLOT_MOCK } from './conformity-plot.mock';
+import { CONFORMITY_TASK_TIMEOUT_MS } from './conformity.constantes';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
 vi.mock('./helpers/createConformityPlot');
@@ -145,7 +146,7 @@ describe('ConformityComponent', () => {
   };
   let mockSpanService: { section: typeof sectionSignal; getSpanOptions: ReturnType<typeof vi.fn> };
   let mockNotification: { error: ReturnType<typeof vi.fn> };
-  let mockWorkerPython: { runTask: ReturnType<typeof vi.fn> };
+  let mockWorkerPython: { runTaskWithTimeout: ReturnType<typeof vi.fn> };
   /**
    * Configures the TestBed and creates the component, then flushes the async Dexie-backed
    * signals (wind zones, conformity config, options) so derived state is fully resolved.
@@ -174,33 +175,35 @@ describe('ConformityComponent', () => {
     mockNotification = { error: vi.fn() };
 
     mockWorkerPython = {
-      runTask: vi.fn().mockImplementation((_task: Task, inputs: { form: { selectedConformityRules?: string[] } }) => {
-        const rules = inputs.form.selectedConformityRules ?? [];
-        const results = Object.fromEntries(
-          rules.map((ruleType) => [
-            ruleType,
-            {
-              overhangCableAltitude: 42,
-              lateralCableAltitude: 38,
-              overhangCableLineAxisDistance: 150,
-              lateralCableLineAxisDistance: 120,
-              overhangDistanceToComply: 5,
-              lateralDistanceToComply: 3,
-              overhangComplianceAltitude: 7,
-              lateralComplianceLineAxisDistance: 4,
-              conformityCompliance: true
-            }
-          ])
-        );
-        return Promise.resolve({
-          result: {
-            obstacle: CONFORMITY_PLOT_MOCK.obstacle,
-            conformity: CONFORMITY_PLOT_MOCK.conformity,
-            results
-          },
-          error: null
-        });
-      })
+      runTaskWithTimeout: vi
+        .fn()
+        .mockImplementation((_task: Task, inputs: { form: { selectedConformityRules?: string[] } }) => {
+          const rules = inputs.form.selectedConformityRules ?? [];
+          const results = Object.fromEntries(
+            rules.map((ruleType) => [
+              ruleType,
+              {
+                overhangCableAltitude: 42,
+                lateralCableAltitude: 38,
+                overhangCableLineAxisDistance: 150,
+                lateralCableLineAxisDistance: 120,
+                overhangDistanceToComply: 5,
+                lateralDistanceToComply: 3,
+                overhangComplianceAltitude: 7,
+                lateralComplianceLineAxisDistance: 4,
+                conformityCompliance: true
+              }
+            ])
+          );
+          return Promise.resolve({
+            result: {
+              obstacle: CONFORMITY_PLOT_MOCK.obstacle,
+              conformity: CONFORMITY_PLOT_MOCK.conformity,
+              results
+            },
+            error: null
+          });
+        })
     };
 
     await TestBed.configureTestingModule({
@@ -659,25 +662,27 @@ describe('ConformityComponent', () => {
       await createComponent();
       component.form.controls.selectedPoint.setValue(1);
       fixture.detectChanges();
-      mockWorkerPython.runTask.mockClear();
+      mockWorkerPython.runTaskWithTimeout.mockClear();
 
       await component.calculate();
 
-      expect(mockWorkerPython.runTask).toHaveBeenCalledWith(
+      expect(mockWorkerPython.runTaskWithTimeout).toHaveBeenCalledWith(
         Task.getConformity,
-        expect.objectContaining({ pointIndex: 1 })
+        expect.objectContaining({ pointIndex: 1 }),
+        CONFORMITY_TASK_TIMEOUT_MS
       );
     });
 
     it('should send point index 0 for a single-point obstacle', async () => {
       await createComponent();
-      mockWorkerPython.runTask.mockClear();
+      mockWorkerPython.runTaskWithTimeout.mockClear();
 
       await component.calculate();
 
-      expect(mockWorkerPython.runTask).toHaveBeenCalledWith(
+      expect(mockWorkerPython.runTaskWithTimeout).toHaveBeenCalledWith(
         Task.getConformity,
-        expect.objectContaining({ pointIndex: 0 })
+        expect.objectContaining({ pointIndex: 0 }),
+        CONFORMITY_TASK_TIMEOUT_MS
       );
     });
 
@@ -829,7 +834,7 @@ describe('ConformityComponent', () => {
   describe('getValue', () => {
     it('should expose worker border coordinates unchanged and preserve its compliance verdict', async () => {
       await createComponent();
-      mockWorkerPython.runTask.mockResolvedValueOnce({
+      mockWorkerPython.runTaskWithTimeout.mockResolvedValueOnce({
         result: {
           obstacle: CONFORMITY_PLOT_MOCK.obstacle,
           conformity: CONFORMITY_PLOT_MOCK.conformity,
