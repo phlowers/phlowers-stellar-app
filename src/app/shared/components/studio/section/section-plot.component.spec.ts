@@ -170,6 +170,8 @@ describe('SectionPlotComponent', () => {
       spans: [[[100, 200, 300, 400, 500]]],
       obstacles: null,
       distances: null,
+      virtual_supports: null,
+      virtual_insulators: null,
       loads: {}
     },
     output_parameters: {
@@ -1109,6 +1111,8 @@ describe('SectionPlotComponent', () => {
           spans: [],
           obstacles: null,
           distances: null,
+          virtual_supports: null,
+          virtual_insulators: null,
           loads: {}
         },
         output_parameters: {
