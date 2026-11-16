@@ -6,7 +6,7 @@
   "common": {
     "actions-label": "Actions",
     "add": "Ajouter",
-    "add-load-case-label": "Ajouter un cas de charge",
+    "add-load-case-label": "Ajouter un cas de charges",
     "add-point-label": "Ajouter un point",
     "altitude-label": "Altitude",
     "attachment-set-label": "Set d'accroche",
@@ -33,7 +33,7 @@
     "cut-strands-layer-label": "Brins coupés couche {{ layer }}",
     "date-label": "Date",
     "delete": "Supprimer",
-    "description-label": "Description",
+    "description-label": "Description du cas de charges",
     "dis-symmetric": "Dissymétrique",
     "distance-label": "Distance",
     "duplicate": "Dupliquer",
@@ -45,7 +45,7 @@
     "error": "Erreur",
     "error-parsing-file-label": "Erreur lors de l'analyse du fichier",
     "error-reading-file-label": "Erreur lors de la lecture du fichier",
-    "export": "Export",
+    "export": "Exporter",
     "failed-to-generate-report": "Échec de la génération du rapport",
     "form-label": "Formulaire",
     "free-positioning-label": "Positionnement libre",
@@ -59,16 +59,20 @@
     "latitude-label": "Latitude",
     "line-angle-label": "Angle en ligne",
     "line-axis-dist-label": "Dist. axe ligne.",
+    "link-label": "Liaison",
+    "link-emptyFilter" : "Aucune liaison trouvée.",
+    "link-empty" : "Aucune liaison proposée.",
     "lit-label": "LIT",
     "lit-idr-label": "LIT - IDR",
     "lit-adr-label": "LIT - ADR",
-    "link-label": "Liaison",
-    "load-description-label": "Description du cas de charge",
-    "load-name-label": "Cas de charge",
+    "lit-emptyFilter" : "Aucune LIT trouvée.",
+    "lit-empty" : "Aucune LIT proposée.",
+    "load-description-label": "Description du cas de charges",
+    "load-name-label": "Cas de charges",
     "loading": "Chargement",
     "loads-label": "Charges",
     "longitude-label": "Longitude",
-    "manual-label": "Manuel",
+    "manual-label": "Manuelle",
     "marking-label": "Marquage",
     "max-decimals-error": "Décimales max : {{ maxDecimals }}",
     "max-value-error": "Valeur max : {{ max }}",
@@ -106,7 +110,7 @@
     "repartition-temperature-label": "Température de répartition",
     "report": "Rapport",
     "report-generated-successfully-label": "Rapport généré avec succès",
-    "required": "Requis",
+    "required": "Valeur requise.",
     "reset": "Réinitialiser",
     "results": "Résultats :",
     "save": "Enregistrer",
@@ -114,11 +118,11 @@
     "section-label": "Canton",
     "section-name-label": "Nom du canton",
     "section-type-label": "Type de canton",
-    "select-load-case-label": "Sélectionner le cas de charge",
+    "select-load-case-label": "Sélectionner le cas de charges",
     "select-point-label": "Sélectionner le point",
     "sign-in-label": "Se connecter",
     "span-label": "Portée",
-    "span-length-short-label": "L. portée",
+    "span-length-short-label": "Longueur portée",
     "storage-insufficient-label": "Espace de stockage insuffisant",
     "studies-label": "Études",
     "studio": "Studio",
@@ -126,14 +130,14 @@
     "study-label": "Étude",
     "success": "Succès",
     "support-label": "Support",
-    "support-name-label": "Nom de supp.",
+    "support-name-label": "Nom de support",
     "support-no-label": "N° de support",
     "symmetric": "Symétrique",
     "tools-label": "Outils",
     "uncertainty-cable-temperature-label": "Incertitude température du câble",
     "validate": "Valider",
     "vertical-angle-right-support-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
-    "view": "Voir",
+    "view": "Consulter",
     "wind-minus-label": "Vent -",
     "wind-zone-label": "Zone de vent",
     "yes": "Oui",
@@ -170,7 +174,7 @@
     "min-temperature-label": "Température min",
     "max-wind-pressure-label": "Pression du vent max",
     "error-occurred-label": "Une erreur s'est produite",
-    "load-case-name-label": "Nom du cas de charge",
+    "load-case-name-label": "Nom du cas de charges",
     "modify-label": "Modifier",
     "supports-amount-label": "Nombre de supports",
     "span-length-label": "Longueur de portée",
@@ -218,27 +222,30 @@
       "login-failed": "Échec de la connexion. Veuillez réessayer."
     }
   },
+  "topbar": {
+    "no-user": "aucun utilisateur"
+  },
   "changelog": {
     "empty": "Aucun changelog trouvé"
   },
   "home": {
-    "news-text": "Bienvenue sur Celeste ! Nous sommes ravis de vous présenter cette nouvelle application. Veuillez nous contacter pour partager vos idées et vos retours pour nous aider à améliorer cette application !",
-    "news-link-text": "Voir toutes les actualités",
+    "news-text": "Bienvenue sur l'application Céleste.",
+    "news-link-text": "Voir toutes les actualités.",
     "update-title": "Journal des modifications",
     "update-text": "Voir les dernières mises à jour.",
-    "update-link-text": "En savoir plus",
-    "update-link-explicit-text": "En savoir plus sur les dernières mises à jour",
-    "update-available": "Mise à jour disponible",
+    "update-link-text": "En savoir plus.",
+    "update-link-explicit-text": "En savoir plus sur les dernières mises à jour.",
+    "update-available": "Mise à jour disponible.",
     "update-new-available": "Une nouvelle mise à jour de l'application est disponible !",
     "offline-card": {
       "title": "État de l'application",
-      "connection-online": "Connecté.",
-      "connection-offline": "Pas de connexion.",
-      "status-ready": "Mode hors ligne prêt.",
-      "status-preparing": "Préparation du mode hors ligne en cours.",
-      "status-waiting-network": "Réseau trop lent : préparation du mode hors ligne en attente.",
-      "status-storage-insufficient": "Espace insuffisant : mode hors ligne impossible.",
-      "status-not-prepared": "Mode hors ligne indisponible.",
+      "connection-online": "Mode connecté.",
+      "connection-offline": "Mode déconnecté.",
+      "status-ready": "Application disponible.",
+      "status-preparing": "Installation de l'application en cours.",
+      "status-waiting-network": "Réseau trop lent : installation de l'application en attente.",
+      "status-storage-insufficient": "Espace insuffisant : installation de l'application impossible.",
+      "status-not-prepared": "Application non disponible hors ligne.",
       "update-postponed-network": "Mise à jour reportée : réseau trop lent.",
       "update-blocked-storage": "Mise à jour impossible : espace insuffisant."
     },
@@ -268,7 +275,7 @@
   },
   "instruction-manual": {
     "intro-title": "Bienvenue sur l'espace d'aide et de documentation",
-    "intro-text": "Retrouvez ici toutes les ressources indispensables pour prendre en main l'application Céleste, configurer vos études, gérer vos cantons et exporter vos résultats en toute simplicité. Choisissez le format qui vous convient le mieux.",
+    "intro-text": "Toutes les ressources essentielles pour utiliser l'application Céleste efficacement : prise en main, préparation des études, gestion des cantons, configuration des outils et export des résultats. Choisir simplement le format de consultation souhaité.",
     "pdf-title": "Télécharger le manuel PDF",
     "pdf-file-name-label": "Nom du fichier",
     "pdf-size-label": "Taille estimée",
@@ -347,25 +354,24 @@
     "studies-service": {
       "unauthorized-error": "Vous ne pouvez pas mettre à jour une étude que vous n'avez pas créée, veuillez la dupliquer.",
       "unauthorized-summary": "Non autorisé",
-      "imported-from-protov4": "Étude importée depuis le protoV4"
+      "imported-from-protov4": "Étude importée du proto V4"
     },
     "app-update-service": {
       "offline-status": {
-        "preparing": "Préparation en cours",
-        "storage-insufficient": "Espace insuffisant",
-        "not-prepared": "Indisponible"
+        "preparing": "Installation de l'application en cours.",
+        "storage-insufficient": "Espace insuffisant.",
+        "not-prepared": "Application non disponible hors ligne."
       },
       "update-deferred-network": "Mise à jour reportée : la connexion ne permet pas de la télécharger maintenant (réseau lent ou non mesurable, ou économiseur de données activé), elle sera téléchargée plus tard.",
-      "check-started": "Vérification des mises à jour : une nouvelle version sera téléchargée en arrière-plan.",
-      "update-waiting-summary": "Mise à jour téléchargée",
-      "update-waiting-detail": "Elle sera appliquée au prochain démarrage de l'application (fermez toutes les fenêtres de Stellar, puis rouvrez-la).",
-      "storage-insufficient-detail": "Espace de stockage insuffisant pour télécharger la mise à jour : libérez de l'espace sur l'appareil."
+      "check-started": "Vérification des mises à jour : si une mise à jour est disponible, elle sera téléchargée en arrière-plan.",
+      "update-waiting-summary": "Mise à jour téléchargée.",
+      "update-waiting-detail": "La mise à jour sera appliquée au prochain démarrage de l'application : fermer toutes les fenêtres de l'application, puis relancer l'application.",      "storage-insufficient-detail": "Espace de stockage insuffisant pour télécharger la mise à jour : libérez de l'espace sur l'appareil."
     },
     "obstacle-form-service": {
       "delete-detail": "Obstacle supprimé",
       "delete-error-detail": "Échec de la suppression de l'obstacle",
       "conformity-saved-detail": "Données de conformité enregistrées",
-      "distance-calculation-error-detail": "Échec du calcul des distances des obstacles",
+      "distance-calculation-error-detail": "Échec du calcul des distances à l'obstacle.",
       "save-detail": "Obstacle enregistré"
     },
     "free-positioning-data": {
@@ -456,15 +462,15 @@
       "cut-strands-marking": "Brins coupés"
     },
     "loads-service": {
-      "update-detail": "Charge mise à jour",
-      "create-detail": "Charge créée",
-      "delete-detail": "Charge supprimée"
+      "update-detail": "Cas de charges mis à jour.",
+      "create-detail": "Cas de charges créé.",
+      "delete-detail": "Cas de charges supprimé."
     },
     "new-load-modal": {
-      "create-title": "Créer un cas de charge",
+      "create-title": "Créer un cas de charges",
       "generalities": "Généralités",
-      "load-name-error": "Le nom du cas de charge doit être unique.",
-      "description-placeholder": "Ajouter une description au cas de charge",
+      "load-name-error": "Le nom du cas de charges doit être unique.",
+      "description-placeholder": "Saisir la description du cas de charges",
       "default-name": "CC"
     }
   },
@@ -498,7 +504,7 @@
       "go-to-study": "Aller à l'étude"
     },
     "import": {
-      "description": "Vous pouvez importer plusieurs fichiers, ils seront disponibles dans l'onglet \"Mes études\".",
+      "description": "Pour importer une étude du proto V4 ou de Céleste V5, cliquer ou placer le(s) fichier(s) d'étude sur l'emplacement ci-dessous :\nles études importées sont listées dans l'onglet \"Mes dernières études\".",
       "file-formats": "Formats de fichiers : .csv, .clst, .stsd",
       "error-cable-not-found": "Câble non trouvé dans la base de données",
       "error-import": "Erreur lors de l'importation de l'étude",
@@ -510,7 +516,7 @@
     "table": {
       "col-title": "Titre",
       "col-modification-date": "Date de modification",
-      "col-description": "Description/commentaire",
+      "col-description": "Description / Commentaire",
       "study-actions-menu": "Menu des actions d'étude",
       "pagination-report": "Étude {first} à {last} sur {totalRecords}"
     },
@@ -522,7 +528,7 @@
   },
   "study": {
     "tabs": {
-      "sections": "Sections",
+      "sections": "Cantons",
       "saved-states": "États enregistrés",
       "measurements": "Mesures",
       "ground-obstacles": "Sol et obstacles"
@@ -530,15 +536,15 @@
     "notifications": {
       "duplicated": "Étude dupliquée",
       "duplication-failed": "Échec de la duplication de l'étude",
-      "section-updated": "Canton mis à jour",
-      "section-created": "Canton créé",
-      "section-deleted": "Canton supprimé",
-      "section-duplicated": "Canton dupliqué",
-      "geometry-objects-updated": "Les obstacles, sols, charges et brins coupés CRR ont été mis à jour pour correspondre à la géométrie du canton",
-      "ic-updated": "Condition initiale mise à jour",
-      "ic-added": "Condition initiale ajoutée",
-      "ic-deleted": "Condition initiale supprimée",
-      "ic-duplicated": "Condition initiale dupliquée"
+      "section-updated": "Canton mis à jour.",
+      "section-created": "Canton créé.",
+      "section-deleted": "Canton supprimé.",
+      "section-duplicated": "Canton dupliqué.",
+      "geometry-objects-updated": "Les obstacles, sols, charges et brins coupés CRR ont été mis à jour pour correspondre à la géométrie du canton.",
+      "ic-updated": "Condition initiale mise à jour.",
+      "ic-added": "Condition initiale ajoutée.",
+      "ic-deleted": "Condition initiale supprimée.",
+      "ic-duplicated": "Condition initiale dupliquée."
     },
     "header": {
       "details": "Détails",
@@ -564,9 +570,9 @@
   },
   "section-modal": {
     "choose-type": "Choisir un type de création",
-    "type-local-ref": "Depuis le référentiel local",
-    "type-distant-ref": "Depuis le référentiel distant",
-    "type-file": "Depuis un fichier",
+    "type-local-ref": "A partir du référentiel local",
+    "type-distant-ref": "A partir du référentiel distant",
+    "type-file": "A partir d'un fichier",
     "create-btn": "Créer le canton",
     "update-btn": "Mettre à jour le canton",
     "title-view": "Voir un canton de l'étude",
@@ -575,36 +581,47 @@
     "location-removed-after-insert": "La position de départ n'a pas pu être calculée à partir du support suivant : le canton est enregistré sans géolocalisation."
   },
   "manual-section": {
-    "tab-general": "Général",
-    "tab-supports": "Supports",
+    "tab-general": "Généralités",
+    "tab-supports": "Liste des supports",
     "tab-graphical": "Vue graphique",
     "line-team-group": "Équipe ligne",
+    "line_team-emptyFilter" : "Aucune EEL trouvée.",
+    "line_team-empty" : "Aucune EEL proposée.",
     "label-maintenance-center": "CM",
+    "maintenance_center-emptyFilter" : "Aucun CM trouvé.",
+    "maintenance_center-empty" : "Aucun CM proposé.",
     "label-regional-team": "GMR",
+    "regional_team-emptyFilter" : "Aucun GMR trouvé.",
+    "regional_team-empty" : "Aucun GMR proposé.",    
     "label-etl": "Niveau de tension électrique",
+    "voltage-emptyFilter" : "Aucune tension électrique trouvée.",
+    "voltage-empty" : "Aucune tension électrique proposée.",
     "label-link-idr": "Liaison - IDR",
     "label-link-adr": "Liaison - ADR",
+    "branch-emptyFilter" : "Aucune branche trouvée.",
+    "branch-empty" : "Aucune branche proposée.",    
+    "placeholder-section-comment": "Saisir la description du canton.",
     "current-page-report": "Support {first} à {last} sur {totalRecords}",
     "name-unique": "Le nom du canton doit être unique.",
     "no-voltage": "HORS TENSION",
-    "double-click-hint": "Double-cliquez sur une colonne pour copier la valeur sur tous les supports",
+    "double-click-hint": "Un double-clic sur le nom d'une colonne duplique la valeur de la première ligne sur l'ensemble de la colonne.",
     "aria-supports-comment": "commentaire sur les supports",
-    "placeholder-supports-comment": "Description des supports"
+    "placeholder-supports-comment": "Saisir la description de la liste des supports."
   },
   "supports-table": {
     "localization-status": "En attente du chargement du moteur pour afficher les résultats de calcul",
-    "col-number": "N° supp.",
-    "col-attachment-alt": "Alt. accr. câble (NGF)",
-    "col-attachment-position": "Pos. d'accroche",
-    "col-angle": "Angle",
-    "col-chain-name": "Nom chaîne",
-    "col-chain-length": "L. chaîne",
-    "col-chain-weight": "P. chaîne",
-    "col-arm-length": "L. bras",
-    "col-chain-v": "Chaîne V",
-    "col-supp-foot-alt": "Alt. pied supp.",
-    "col-chain-surface": "Surf. chaîne",
-    "col-tower": "Tower",
+    "col-number": "N° support",
+    "col-attachment-alt": "Altitude accr. câble (NGF)",
+    "col-attachment-position": "Position d'accroche",
+    "col-angle": "Angle en ligne",
+    "col-chain-name": "Nom de chaîne",
+    "col-chain-length": "Longueur de chaîne",
+    "col-chain-weight": "Poids de chaîne",
+    "col-arm-length": "Longueur de bras",
+    "col-chain-v": "Chaîne en V",
+    "col-supp-foot-alt": "Altitude pied support",
+    "col-chain-surface": "Surface de chaîne",
+    "col-tower": "Fichier Tower",
     "col-x-lambert": "X Lambert 93",
     "col-y-lambert": "Y Lambert 93",
     "add-before": "Ajouter un support avant",
@@ -621,11 +638,11 @@
     "aria-attachment-position": "position d'accroche"
   },
   "attachment-modal": {
-    "choose-hint": "Choisissez le set d'accroche dans la liste ou sur le graphique afin de trouver la bonne longueur du bras.",
-    "label-attachment-set": "Set accroche",
-    "arm-length": "L. bras",
+    "choose-hint": "Choisir le set d'accroche dans la liste ou sur le graphique afin d'obtenir la bonne longueur de bras.",
+    "label-attachment-set": "Set d'accroche",
+    "arm-length": "Longueur de bras",
     "height-below-console": "Hauteur sous console",
-    "auto-fill-hint": "Le Set d'accroche et la valeur de L. bras (m) sera automatiquement renseigné dans le tableau."
+    "auto-fill-hint": "Le set d'accroche et la longueur de bras du support seront automatiquement renseignés dans le tableau."
   },
   "location": {
     "title": "Coordonnées du support 1 :",
@@ -921,23 +938,23 @@
     "top-toolbar": {
       "invert-label": "Inverser :",
       "display-label": "Affichage",
-      "display-info-text": "Sélectionnez les éléments à afficher dans le studio.",
-      "tables-label": "Tableau",
+      "display-info-text": "Sélectionner les éléments à rendre visibles dans le graphe de l'état généré.",
+      "tables-label": "Tableaux",
       "edit-shortcuts-aria-label": "Modifier les raccourcis des outils sélectionnés",
       "export-section-aria-label": "Exporter le canton dans un fichier canton Stellar",
-      "inset-title": "Insertion",
-      "organize-tools-info-text": "Sélectionnez et organisez les outils avec un accès rapide (maximum 5).",
-      "loads-table-label": "Tableau de charges",
-      "l0-table-label": "Tableau des longueurs L0",
-      "hanging-table-label": "Tableau de pose",
-      "obstacles-table-label": "Tableau d'obstacles",
-      "grounds-table-label": "Tableau de sols",
+      "inset-title": "Accès rapide",
+      "organize-tools-info-text": "Affecter jusqu'à 5 outils à l'accès rapide.",
+      "loads-table-label": "Cas de charges",
+      "l0-table-label": "Longueurs naturelles L0",
+      "hanging-table-label": "Pose du canton",
+      "obstacles-table-label": "Obstacles",
+      "grounds-table-label": "Sols",
       "profile-option": "Profil",
       "face-option": "Ligne",
-      "base-option": "Base",
+      "base-option": "Etat initial",
       "transparent-background-option": "Fond transparent",
-      "measurement-points-option": "Points de mesure",
-      "field-measurements-tool": "Mesures terrain",
+      "measurement-points-option": "Points de distances",
+      "field-measurements-tool": "Mesures de terrain",
       "vtl-and-guying-tool": "VHL & Haubanage",
       "strand-rrts-tool": "CRR de brins coupés",
       "forest-trenches-tool": "Tranchées forestières",
@@ -982,13 +999,13 @@
       "th-t0-label": "Tension hor. (T0) :",
       "inf-tension-acc-label": "Taccr. inf. :",
       "cable-slope-left-att-label": "Pente câble accr. gauche :",
-      "cable-slope-right-att-label": "Pente câble acc. droit :"
+      "cable-slope-right-att-label": "Pente câble acc. droite :"
     },
     "free-positioning": {
       "x-label": "x :",
       "z-label": "z :",
       "y-label": "y :",
-      "floor": "Terrain"
+      "floor": "Sol"
     },
     "studio-page": {
       "working-load-label": "Taux de travail",
@@ -1017,8 +1034,8 @@
     "quick-measures": {
       "select-obstacle-aria-label": "sélectionner un obstacle ou un sol",
       "select-obstacle-point-aria-label": "Sélectionner le point d'un obstacle ou d'un sol",
-      "not-selected-option": "Non sélectionné",
-      "floor-option": "sol {{ span }}"
+      "not-selected-option": "Désélectionner",
+      "floor-option": "Sol {{span}}"
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Créer un nouvel obstacle",
@@ -1106,7 +1123,7 @@
       "distance-12-label": "Distance 1-2",
       "distance-23-label": "Distance 2-3",
       "angle-123-label": "Angle 1-2-3",
-      "add-measurement-points-error": "Échec de l'ajout des points de mesure"
+      "add-measurement-points-error": "Échec de l'ajout des points de distances"
     },
     "floor": {
       "reference-support-point-title": "Point du support de référence",
@@ -1130,7 +1147,7 @@
       "current-page-report": "{currentPage} sur {totalPages}"
     },
     "loads-table": {
-      "description-length-label": "Description {{count}}/240",
+      "description-length-label": "Description du cas de charges ({{count}}/240)",
       "cable-temp-label": "Temp. câble",
       "index-label": "N°",
       "ref-support-label": "Support réf.",

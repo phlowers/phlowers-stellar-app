@@ -124,6 +124,7 @@ describe('ImportStudyComponent', () => {
         TranslocoTestingModule.forRoot({
           langs: {
             en: {
+              'studies.import.description': 'First line.\nSecond line.',
               'studies.import.error-cable-not-found': 'Cable not found in database',
               'studies.import.error-import': 'Error importing study',
               'studies.import.error-delete': 'Error deleting study',
@@ -1718,6 +1719,13 @@ describe('ImportStudyComponent', () => {
   });
 
   describe('UC: should display file upload and imported studies', () => {
+    it('should preserve line breaks in the import description', () => {
+      const description = fixture.nativeElement.querySelector('p.whitespace-pre-line') as HTMLElement;
+
+      expect(description.textContent).toBe('First line.\nSecond line.');
+      expect(description.classList.contains('whitespace-pre-line')).toBe(true);
+    });
+
     it('UC-S7: should render file upload input', () => {
       // The component contains a p-toast that requires full MessageService; verify the component has the file input template
       expect(component).toBeTruthy();
