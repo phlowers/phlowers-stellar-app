@@ -63,7 +63,7 @@ export function toObstaclePointInputs(
   obstacle: Obstacle | null
 ): EstimationObstaclePointInputs | null {
   const { obstacleUuid, pointIndex } = value;
-  if (!obstacle || obstacle.uuid !== obstacleUuid || pointIndex === null) {
+  if (obstacle?.uuid !== obstacleUuid || pointIndex === null) {
     return null;
   }
   return { spanIndex: obstacle.supportIndex, obstacleUuid, pointIndex };

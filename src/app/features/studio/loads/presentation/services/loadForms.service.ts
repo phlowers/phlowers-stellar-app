@@ -86,7 +86,7 @@ export class LoadFormsService {
   readonly isEngineSynchronized = computed(() => {
     const studyId = this.plotService.engineStudyId();
     const section = this.spanService.section();
-    if (!studyId || !section || this.plotService.engineStudySectionUuid() !== section.uuid) return false;
+    if (!studyId || this.plotService.engineStudySectionUuid() !== section?.uuid) return false;
     if (this.isApplyingLoadCase()) return false;
     const chargeUuid = section.selected_charge_uuid;
     // Without a (known) selected charge there is no load case to push: the base climate of the study applies

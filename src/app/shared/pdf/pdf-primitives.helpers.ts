@@ -387,7 +387,7 @@ function drawTwoColumnItem(doc: jsPDF, item: PdfBulletItem, layout: TwoColumnIte
   doc.setFont('Nunito', 'normal');
   doc.text(layout.lines, x + layout.labelWidth, y);
   if (item.status !== undefined) {
-    const lastLine = layout.lines[layout.lines.length - 1];
+    const lastLine = layout.lines.at(-1)!;
     const lastLineY = y + (layout.lines.length - 1) * VALUE_LINE_SPACING;
     drawStatusIcon(doc, item.status, x + layout.labelWidth + doc.getTextWidth(lastLine) + STATUS_ICON_GAP, lastLineY);
   }

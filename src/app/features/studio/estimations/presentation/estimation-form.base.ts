@@ -109,9 +109,8 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
    */
   protected readonly result = computed(() => {
     const outcome = this.outcome();
-    return outcome &&
-      outcome.section === this.spanService.section() &&
-      outcome.engineRevision === this.loadFormsService.engineRevision()
+    return outcome?.section === this.spanService.section() &&
+      outcome?.engineRevision === this.loadFormsService.engineRevision()
       ? outcome.result
       : null;
   });
