@@ -133,8 +133,5 @@ export const UPDATE_MODE_15C_EXPORT_KEYS: Record<FieldMeasure['updateMode15C'], 
   manual: 'field-measuring.export-labels.update-mode-15c.manual'
 };
 
-/** Maps the internal `calculationType` value to a Transloco key for JSON export label. */
-export const CALCULATION_TYPE_EXPORT_KEYS: Record<string, string> = {
-  tangente: 'field-measuring.export-labels.calculation-type.angle-tangent',
-  other: 'field-measuring.export-labels.calculation-type.parameter'
-};
+/** Unit of the angles exported from the PAPOTO and tangent aiming forms, which are entered in grades. */
+export const GRADE_EXPORT_UNIT = 'gr';

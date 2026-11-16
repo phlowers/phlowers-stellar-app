@@ -21,6 +21,7 @@ import { CheckboxModule, CheckboxChangeEvent } from 'primeng/checkbox';
 import { createEmptySection } from '@shared/domain/helpers/sections.helpers';
 import { RouterLink } from '@angular/router';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
+import { Rfc9557ToDatePipe } from '@shared/pipes/rfc9557-to-date.pipe';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -62,6 +63,7 @@ import { getDateLocale } from '@shared/helpers/modification-date.helpers';
     RouterLink,
     SelectWithButtonsComponent,
     ToolbarDialogComponent,
+    Rfc9557ToDatePipe,
     TranslocoModule
   ],
   templateUrl: './sectionsTab.component.html',

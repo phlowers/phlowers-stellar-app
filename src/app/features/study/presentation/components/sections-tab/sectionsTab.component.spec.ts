@@ -19,6 +19,7 @@ import { Subject } from 'rxjs';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 
 import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
+import { formatRfc9557 } from '@shared/helpers/date-time.helpers';
 class MockMaintenanceService {
   ready = { next: vi.fn() };
   getMaintenance = vi.fn().mockResolvedValue([]);
@@ -489,6 +490,22 @@ describe('SectionsTabComponent', () => {
 
     it('should render the date in American English format', () => {
       expect(renderDate()).toBe('September 10. 2026, 04:32 PM');
+    });
+
+    it('should render the same text for an RFC 9557 date as for the legacy ISO date of the same instant', () => {
+      const legacyText = renderDate();
+      fixture.componentRef.setInput('study', {
+        sections: [{ ...mockSection, updated_at: formatRfc9557(new Date(2026, 8, 10, 16, 32)) }]
+      });
+      fixture.detectChanges();
+      expect(getByTestId('section-last-modified')!.textContent!.trim()).toBe(legacyText);
+      expect(legacyText).toBe('September 10. 2026, 04:32 PM');
+    });
+
+    it('should render nothing, without error, for an unreadable date', () => {
+      fixture.componentRef.setInput('study', { sections: [{ ...mockSection, updated_at: 'not-a-date' }] });
+      expect(() => fixture.detectChanges()).not.toThrow();
+      expect(getByTestId('section-last-modified')!.textContent!.trim()).toBe('');
     });
   });
 

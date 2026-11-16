@@ -153,6 +153,7 @@ describe('tangent-aiming-exterior helpers', () => {
         exteriorTangentAngle: 101.4
       });
       expect(toTangentAimingExteriorTaskInputs(inputs)).toEqual({
+        calculationType: 'tangente',
         angleToCableTangent: 101.4,
         angleToLeftSupport: 93.6,
         angleToRightSupport: 99.3,
@@ -160,6 +161,18 @@ describe('tangent-aiming-exterior helpers', () => {
         inputHeight: 0,
         distance: -50
       });
+    });
+
+    it('should send the parameter instead of the tangent angle on the parametre type', () => {
+      const inputs = toTangentAimingExteriorInputs({
+        ...createTestMeasureData(),
+        exteriorCalculationType: 'parametre',
+        exteriorParameter: 1800,
+        exteriorTangentAngle: null
+      });
+      const taskInputs = toTangentAimingExteriorTaskInputs(inputs);
+      expect(taskInputs).toMatchObject({ calculationType: 'parametre', parameter: 1800 });
+      expect(taskInputs).not.toHaveProperty('angleToCableTangent');
     });
 
     it('should build the calculation inputs', () => {

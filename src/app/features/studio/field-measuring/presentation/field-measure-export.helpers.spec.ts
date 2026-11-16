@@ -9,6 +9,7 @@ import { Section, Study, SkyCover } from '@shared/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { TranslocoService } from '@jsverse/transloco';
 import { createTestMeasureData } from './helpers';
+import { parseRfc9557 } from '@shared/helpers/date-time.helpers';
 import {
   buildFieldMeasureExportJson,
   buildGeneralExport,
@@ -18,8 +19,9 @@ import {
   buildSpanExport,
   buildTemperatureCalculationExport,
   buildZeroWindCalculationExport,
-  formatExportDate,
   formatExportDateTimeWithOffset,
+  formatExportMeasureDate,
+  formatExportMeasureTime,
   formatExportTime
 } from './field-measure-export.helpers';
 
@@ -38,6 +40,12 @@ describe('field-measure-export.helpers', () => {
     selected_charge_uuid: 'charge-1'
   } as unknown as Section;
 
+  /** Supports whose displayed numbers differ from their 1-based index. */
+  const sectionWithSupports = {
+    ...mockSection,
+    supports: [{ number: 'P42' }, { number: 'P43' }]
+  } as unknown as Section;
+
   const mockStudy: Study = {
     author_email: 'user@example.com',
     title: 'Test Study',
@@ -52,13 +60,36 @@ describe('field-measure-export.helpers', () => {
     }
   } as unknown as GetSectionOutput;
 
-  describe('formatExportDate', () => {
-    it('should return null for a null date', () => {
-      expect(formatExportDate(null)).toBeNull();
+  /** Instant read back from an RFC 9557 string; checks that the offset written matches the instant. */
+  const instantOf = (value: string | null): number => parseRfc9557(value)!.getTime();
+  const rfc9557Pattern = (offset: string): RegExp =>
+    new RegExp(
+      `^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\${offset.slice(0, 1)}${offset.slice(1)}\\[Europe/Paris\\]$`
+    );
+  const isParisMachine = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Europe/Paris';
+  /** Literal examples only hold when the machine is in the configured zone; the other tests hold anywhere. */
+  const itOnParisMachine = isParisMachine ? it : it.skip;
+
+  describe('formatExportMeasureDate', () => {
+    it('should return null for a null or invalid date', () => {
+      expect(formatExportMeasureDate(null)).toBeNull();
+      expect(formatExportMeasureDate(new Date('invalid'))).toBeNull();
     });
 
-    it('should format a date as YYYY-MM-DD', () => {
-      expect(formatExportDate(new Date(2026, 0, 5))).toBe('2026-01-05');
+    it.each([
+      ['winter', new Date(2026, 0, 5, 18, 45), '+01:00'],
+      ['summer', new Date(2026, 6, 5, 18, 45), '+02:00']
+    ])('should format a %s date as the midnight of its day with that day offset', (_season, date, offset) => {
+      const result = formatExportMeasureDate(date);
+      expect(result).toMatch(rfc9557Pattern(offset));
+      expect(instantOf(result)).toBe(new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime());
+    });
+
+    itOnParisMachine('should write the midnight of the day in Europe/Paris', () => {
+      expect(formatExportMeasureDate(new Date(2026, 10, 6, 18, 45))).toBe(
+        '2026-11-06T00:00:00.000+01:00[Europe/Paris]'
+      );
+      expect(formatExportMeasureDate(new Date(2026, 6, 6, 18, 45))).toBe('2026-07-06T00:00:00.000+02:00[Europe/Paris]');
     });
   });
 
@@ -73,6 +104,43 @@ describe('field-measure-export.helpers', () => {
     });
   });
 
+  describe('formatExportMeasureTime', () => {
+    it('should return null for a null or invalid time', () => {
+      expect(formatExportMeasureTime(null)).toBeNull();
+      expect(formatExportMeasureTime(new Date('invalid'), new Date(2026, 0, 5))).toBeNull();
+    });
+
+    it.each([
+      ['winter', new Date(2026, 0, 15), new Date(2026, 6, 15, 14, 30, 15), '+01:00'],
+      ['summer', new Date(2026, 6, 15), new Date(2026, 0, 15, 14, 30, 15), '+02:00']
+    ])(
+      'should combine a %s measure date with the clock of a time stored on another season day',
+      (_season, date, time, offset) => {
+        const result = formatExportMeasureTime(time, date);
+        // The offset is the one of the measure day, not of the day stored in the time field
+        expect(result).toMatch(rfc9557Pattern(offset));
+        expect(instantOf(result)).toBe(
+          new Date(date.getFullYear(), date.getMonth(), date.getDate(), 14, 30, 15).getTime()
+        );
+      }
+    );
+
+    itOnParisMachine('should write the entered time on the measure day in Europe/Paris', () => {
+      expect(formatExportMeasureTime(new Date(2026, 0, 1, 16, 46, 15, 869), new Date(2026, 10, 6))).toBe(
+        '2026-11-06T16:46:15.869+01:00[Europe/Paris]'
+      );
+      expect(formatExportMeasureTime(new Date(2026, 0, 1, 16, 46, 15, 869), new Date(2026, 6, 6))).toBe(
+        '2026-07-06T16:46:15.869+02:00[Europe/Paris]'
+      );
+    });
+
+    it('should fall back to the day of the time without a valid measure date', () => {
+      const time = new Date(2026, 6, 15, 9, 5, 0);
+      expect(instantOf(formatExportMeasureTime(time, null))).toBe(time.getTime());
+      expect(formatExportMeasureTime(time, new Date('invalid'))).toBe(formatExportMeasureTime(time, null));
+    });
+  });
+
   describe('formatExportDateTimeWithOffset', () => {
     it('should return null for a missing or invalid value', () => {
       expect(formatExportDateTimeWithOffset(null)).toBeNull();
@@ -80,10 +148,18 @@ describe('field-measure-export.helpers', () => {
       expect(formatExportDateTimeWithOffset('not-a-date')).toBeNull();
     });
 
-    it('should format the local date-time with its offset and keep the same instant', () => {
-      const result = formatExportDateTimeWithOffset('2026-09-30T09:11:10.819Z');
-      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}[+-]\d{2}:\d{2}$/);
-      expect(Date.parse(result!)).toBe(Date.parse('2026-09-30T09:11:10.819Z'));
+    it('should write a legacy ISO instant as RFC 9557 in the configured zone, whatever the machine zone', () => {
+      expect(formatExportDateTimeWithOffset('2026-09-30T09:11:10.819Z')).toBe(
+        '2026-09-30T11:11:10.819+02:00[Europe/Paris]'
+      );
+      expect(formatExportDateTimeWithOffset('2026-11-13T14:29:52.604Z')).toBe(
+        '2026-11-13T15:29:52.604+01:00[Europe/Paris]'
+      );
+    });
+
+    it('should keep the same instant when the value is already in RFC 9557', () => {
+      const value = '2026-11-13T15:29:52.604+01:00[Europe/Paris]';
+      expect(formatExportDateTimeWithOffset(value)).toBe(value);
     });
   });
 
@@ -92,7 +168,7 @@ describe('field-measure-export.helpers', () => {
       const result = buildGeneralExport(mockSection, mockStudy);
       expect(result).toEqual({
         author: 'user@example.com',
-        date: formatExportDateTimeWithOffset('2026-01-27T10:00:00Z'),
+        date: '2026-01-27T11:00:00.000+01:00[Europe/Paris]',
         study: 'Test Study',
         litCode: 'LIT-1',
         litName: 'LIT ADR 1',
@@ -100,6 +176,11 @@ describe('field-measure-export.helpers', () => {
         initialCondition: 'Initial Condition 1',
         loadCase: 'Load case 1'
       });
+    });
+
+    it('should read the study update date in RFC 9557, as the application now writes it', () => {
+      const study = { ...mockStudy, updated_at_offline: '2026-07-14T10:30:00.123+02:00[Europe/Paris]' } as Study;
+      expect(buildGeneralExport(mockSection, study).date).toBe('2026-07-14T10:30:00.123+02:00[Europe/Paris]');
     });
 
     it('should return null fields when section and study are null', () => {
@@ -141,13 +222,25 @@ describe('field-measure-export.helpers', () => {
       });
     });
 
-    it('should export the time with seconds and timezone offset, or null without time', () => {
-      const withTime = buildMeasureExport(
-        createTestMeasureData({ time: new Date(2026, 0, 5, 14, 30, 15) }),
+    it('should export the measure date and time as RFC 9557 date-times with the measure day offset, or null without them', () => {
+      const measure = buildMeasureExport(
+        createTestMeasureData({ date: new Date(2026, 0, 15), time: new Date(2026, 6, 15, 14, 30, 15) }),
         mockTranslocoService
       );
-      expect(withTime.time).toMatch(/^14:30:15\.000[+-]\d{2}:\d{2}$/);
-      expect(buildMeasureExport(createTestMeasureData({ time: null }), mockTranslocoService).time).toBeNull();
+      expect(measure.date).toMatch(rfc9557Pattern('+01:00'));
+      expect(measure.time).toMatch(rfc9557Pattern('+01:00'));
+      expect(instantOf(measure.date)).toBe(new Date(2026, 0, 15).getTime());
+      expect(instantOf(measure.time)).toBe(new Date(2026, 0, 15, 14, 30, 15).getTime());
+
+      const empty = buildMeasureExport(createTestMeasureData({ date: null, time: null }), mockTranslocoService);
+      expect(empty.date).toBeNull();
+      expect(empty.time).toBeNull();
+    });
+
+    it('should return a null time for an invalid time instead of throwing', () => {
+      const measureData = createTestMeasureData({ time: new Date('invalid') });
+      expect(() => buildMeasureExport(measureData, mockTranslocoService)).not.toThrow();
+      expect(buildMeasureExport(measureData, mockTranslocoService).time).toBeNull();
     });
 
     it('should translate the season through its export key', () => {
@@ -236,7 +329,7 @@ describe('field-measure-export.helpers', () => {
     it('should populate only the papoto method block for the papoto calculation method', () => {
       const measureData = createTestMeasureData({
         calculationMethod: 'papoto',
-        leftSupport: '0',
+        leftSupport: 'P42',
         span: [0, 1],
         spanLength: 105,
         measuredElevationDifference: 3,
@@ -266,10 +359,15 @@ describe('field-measure-export.helpers', () => {
           tangentAimingInterior: null
         }
       });
-      const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
+      const result = buildParameterCalculationExport(
+        measureData,
+        sectionWithSupports,
+        mockLitData,
+        mockTranslocoService
+      );
       expect(result.methodName).toBe('common.papoto-label');
       expect(result.subMethodName).toBeNull();
-      expect(result.leftSupport).toBe('1');
+      expect(result.leftSupport).toBe('P42');
       expect(result.method.papoto).toBeDefined();
       expect(result.method.tangentialSights).toBeUndefined();
       expect(result.method.pep).toBeUndefined();
@@ -299,10 +397,15 @@ describe('field-measure-export.helpers', () => {
         cableTangentAngle: 7,
         outputs: { ...emptyOutputs, tangentAimingSupport: tangentOutput }
       });
-      const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
+      const result = buildParameterCalculationExport(
+        measureData,
+        sectionWithSupports,
+        mockLitData,
+        mockTranslocoService
+      );
       expect(result.methodName).toBe('VISEES_TANGENTES');
       expect(result.subMethodName).toBe('SUPPORT');
-      expect(result.leftSupport).toBe('2');
+      expect(result.leftSupport).toBe('P43');
       expect(result.method.papoto).toBeUndefined();
       expect(result.method.pep).toBeUndefined();
       expect(result.method.tangentialSights).toEqual({
@@ -310,11 +413,11 @@ describe('field-measure-export.helpers', () => {
         calculatedHorizontalDistance: { value: 90, unit: 'm' },
         leftSupportMeasures: {
           verticalDistance: { value: 12.5, unit: 'm' },
-          verticalAngle: { value: null, unit: '°' },
+          verticalAngle: { value: null, unit: 'gr' },
           horizontalDistance: { value: null, unit: 'm' }
         },
-        rightSupportMeasures: { verticalAngle: { value: 95.5, unit: '°' } },
-        calculationType: { type: 'field-measuring.export-labels.calculation-type.parameter', value: 1800 },
+        rightSupportMeasures: { verticalAngle: { value: 95.5, unit: 'gr' } },
+        calculationType: { type: 'common.parameter-label', value: 1800 },
         calculatedParameter: {
           parameter: { value: 600, unit: 'm', uncertainty: 4 },
           criterion: { threshold: 1, unit: '%', status: false }
@@ -340,34 +443,64 @@ describe('field-measure-export.helpers', () => {
         [`${prefix}TangentAngle`]: 8,
         outputs: { ...emptyOutputs, [outputKey]: tangentOutput }
       });
-      const result = buildParameterCalculationExport(measureData, mockLitData, mockTranslocoService);
+      const result = buildParameterCalculationExport(
+        measureData,
+        sectionWithSupports,
+        mockLitData,
+        mockTranslocoService
+      );
       expect(result.subMethodName).toBe(subMethod);
-      expect(result.leftSupport).toBe('1');
+      expect(result.leftSupport).toBe('P42');
       expect(Object.keys(result.method)).toEqual(['tangentialSights']);
       expect(result.method.tangentialSights).toMatchObject({
         measuredHorizontalDistance: { value: 103, unit: 'm' },
         leftSupportMeasures: {
           verticalDistance: { value: null, unit: 'm' },
-          verticalAngle: { value: 90, unit: '°' },
+          verticalAngle: { value: 90, unit: 'gr' },
           horizontalDistance: { value: 20, unit: 'm' }
         },
-        rightSupportMeasures: { verticalAngle: { value: 110, unit: '°' } },
-        calculationType: { type: 'field-measuring.export-labels.calculation-type.angle-tangent', value: 8 },
+        rightSupportMeasures: { verticalAngle: { value: 110, unit: 'gr' } },
+        calculationType: { type: 'common.calculation-type-tangent', value: 8 },
         calculatedParameter: { criterion: { threshold: 1, unit: '%', status: false } }
+      });
+    });
+
+    it('should treat a measure without calculation type as the default tangent type, like the form', () => {
+      const measureData = createTestMeasureData({
+        calculationMethod: 'tangente-aiming',
+        calculationType: undefined,
+        cableTangentAngle: 7,
+        cableParameter: 1800
+      });
+      const result = buildParameterCalculationExport(measureData, null, null, mockTranslocoService);
+      expect(result.method.tangentialSights?.calculationType).toEqual({
+        type: 'common.calculation-type-tangent',
+        value: 7
       });
     });
 
     it('should leave the tangential sights calculated parameter undefined and the length null without result', () => {
       const measureData = createTestMeasureData({ calculationMethod: 'tangente-aiming', span: null });
-      const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
+      const result = buildParameterCalculationExport(measureData, null, null, mockTranslocoService);
       expect(result.method.tangentialSights?.calculatedParameter).toBeUndefined();
       expect(result.method.tangentialSights?.calculatedHorizontalDistance).toEqual({ value: null, unit: 'm' });
       expect(result.leftSupport).toBeNull();
     });
 
+    it('should export the PAPOTO angles in grades like the form', () => {
+      const result = buildParameterCalculationExport(
+        createTestMeasureData({ calculationMethod: 'papoto' }),
+        null,
+        null,
+        mockTranslocoService
+      );
+      expect(result.method.papoto?.horizontalAngles.unit).toBe('gr');
+      expect(result.method.papoto?.verticalAngles.unit).toBe('gr');
+    });
+
     it('should populate only the pep method block for the pep calculation method', () => {
       const measureData = createTestMeasureData({ calculationMethod: 'pep' });
-      const result = buildParameterCalculationExport(measureData, null, mockTranslocoService);
+      const result = buildParameterCalculationExport(measureData, null, null, mockTranslocoService);
       expect(result.methodName).toBe('common.pep-label');
       expect(result.method.pep).toBeDefined();
       expect(result.method.papoto).toBeUndefined();

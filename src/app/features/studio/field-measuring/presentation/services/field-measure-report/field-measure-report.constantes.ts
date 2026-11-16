@@ -95,12 +95,6 @@ export const UPDATE_MODE_VALUE_KEYS: Record<FieldMeasure['updateMode15C'], strin
   manual: 'field-measuring.parameter-calculation-15.manual-option'
 };
 
-/** Display value of the calculation type of the tangent aiming methods. */
-export const CALCULATION_TYPE_VALUE_KEYS: Record<FieldMeasure['calculationType'], string> = {
-  parametre: 'common.parameter-label',
-  tangente: 'common.tangent-angle-label'
-};
-
 /** Method label of each parameter calculation method (the tangent aiming ones name their sub-method). */
 export const METHOD_VALUE_KEYS: Record<FieldMeasure['calculationMethod'], string> = {
   papoto: 'common.papoto-label',

@@ -178,5 +178,24 @@ describe('StudyImportService', () => {
       expect(study.sections[0].field_measures[0].date).toBeInstanceOf(Date);
       expect(study.sections[0].field_measures[0].season).toBe('summer');
     });
+
+    it('should read field measure dates written in RFC 9557 like the legacy ISO ones', async () => {
+      const section = {
+        ...CURRENT_SECTION,
+        field_measures: [
+          {
+            date: '2025-06-01T02:00:00.000+02:00[Europe/Paris]',
+            time: '2025-06-01T12:00:00.000+02:00[Europe/Paris]',
+            season: 'summer'
+          }
+        ]
+      };
+
+      const study = await importStudy([section]);
+
+      const [measure] = study.sections[0].field_measures;
+      expect(measure.date?.toISOString()).toBe('2025-06-01T00:00:00.000Z');
+      expect(measure.time?.toISOString()).toBe('2025-06-01T10:00:00.000Z');
+    });
   });
 });

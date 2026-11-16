@@ -17,8 +17,10 @@ import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { liveQuery } from 'dexie';
 import { MessageService } from 'primeng/api';
 import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
+import { serializeSectionDates } from '@shared/domain/helpers/field-measure.helpers';
 import { StudyExportFormat } from '@services/studies/studies.interfaces';
 import { DEFAULT_STUDY_EXPORT_FORMAT } from '@services/studies/studies.constantes';
+import { compareRfc9557, nowRfc9557 } from '@shared/helpers/date-time.helpers';
 
 /**
  * Field validation limits for support data imported from CSV.
@@ -95,8 +97,8 @@ export class StudiesService {
       ...study,
       author_email: study.author_email || userEmail,
       uuid,
-      created_at_offline: new Date().toISOString(),
-      updated_at_offline: new Date().toISOString(),
+      created_at_offline: nowRfc9557(),
+      updated_at_offline: nowRfc9557(),
       saved: false
     });
     await this.refreshStudies();
@@ -142,8 +144,8 @@ export class StudiesService {
       title: duplicateTitle,
       author_email: userEmail || study.author_email,
       uuid: uuidv4(),
-      created_at_offline: new Date().toISOString(),
-      updated_at_offline: new Date().toISOString(),
+      created_at_offline: nowRfc9557(),
+      updated_at_offline: nowRfc9557(),
       saved: false
     };
     await this.db?.studies.add(newStudy);
@@ -173,7 +175,11 @@ export class StudiesService {
    * @returns The latest studies
    */
   getLatestStudies() {
-    return this.db?.studies.orderBy('created_at_offline').reverse().limit(4).toArray();
+    return this.db?.studies
+      .toArray()
+      .then((studies) =>
+        studies.sort((a, b) => compareRfc9557(a.created_at_offline, b.created_at_offline, -1)).slice(0, 4)
+      );
   }
 
   /**
@@ -193,7 +199,7 @@ export class StudiesService {
     }
     await this.db?.studies.update(study.uuid, {
       ...study,
-      updated_at_offline: new Date().toISOString()
+      updated_at_offline: nowRfc9557()
     });
   }
 
@@ -224,10 +230,11 @@ export class StudiesService {
    * @param format `clst` (base64-encoded JSON, default) or `stsd` (plain JSON)
    */
   async downloadStudy(uuid: string, filename: string, format: StudyExportFormat = DEFAULT_STUDY_EXPORT_FORMAT) {
-    const study = await this.getStudy(uuid);
-    if (!study) {
+    const storedStudy = await this.getStudy(uuid);
+    if (!storedStudy) {
       return;
     }
+    const study = { ...storedStudy, sections: storedStudy.sections.map(serializeSectionDates) };
     const blob =
       format === 'stsd'
         ? new Blob([JSON.stringify(study, null, 2)], { type: 'application/json' })

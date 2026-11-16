@@ -127,7 +127,7 @@ Seul l'onglet **affiché** est contrôlé : pour vérifier un autre onglet, affi
 | Bloc | Contenu |
 |---|---|
 | `general` | auteur, date de l'étude, nom de l'étude, code et nom de la LIT, canton, condition initiale et cas de charges de l'état courant |
-| `measure` | nom, date (`AAAA-MM-JJ`), heure avec secondes et fuseau horaire (par exemple `14:30:00.000+01:00`), saison (`ETE` / `HIVER` en français), tension, type de canton, câble, nombre de câbles, numéro de phase |
+| `measure` | nom, date et heure au format RFC 9557 avec le fuseau horaire du jour de la mesure, heure d'été/hiver incluse (par exemple `2026-11-06T16:46:15.869+01:00[Europe/Paris]`), saison (`ETE` / `HIVER` en français), tension, type de canton, câble, nombre de câbles, numéro de phase |
 | `span` | portée, longitude, latitude, altitude, azimut |
 | `temperatureCalculation` | conditions de température (ambiante, vent, flux solaire, transit) et résultats (température et flux solaire du câble) |
 | `parameterCalculation` | méthode retenue, sous-méthode, support de gauche, saisies et résultats de la méthode retenue uniquement |

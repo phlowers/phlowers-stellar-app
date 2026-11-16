@@ -50,9 +50,9 @@ export interface CatalogSupportAttachmentEntity {
   support_tower: string;
   /** UUID v4 kept for traceability with the original CSV rows */
   uuid: string;
-  /** ISO 8601 timestamp of creation */
+  /** RFC 9557 timestamp of creation */
   created_at: string;
-  /** ISO 8601 timestamp of last update */
+  /** RFC 9557 timestamp of last update */
   updated_at: string;
   /** Attachment sets carried by this support, sorted by `attachment_set` */
   attachments: AttachmentSetItem[];

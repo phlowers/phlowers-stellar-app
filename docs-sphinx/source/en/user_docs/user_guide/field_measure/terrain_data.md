@@ -127,7 +127,7 @@ Only the **displayed** tab is checked: to check another tab, display it. In the 
 | Block | Content |
 |---|---|
 | `general` | author, study date, study name, LIT code and name, section, initial condition and load case of the current state |
-| `measure` | name, date (`YYYY-MM-DD`), time with seconds and timezone (for example `14:30:00.000+01:00`), season (`SUMMER` / `WINTER` in English), voltage, section type, cable, number of cables, phase number |
+| `measure` | name, date and time as RFC 9557 date-times with the timezone offset of the measure day, daylight saving time included (for example `2026-11-06T16:46:15.869+01:00[Europe/Paris]`), season (`SUMMER` / `WINTER` in English), voltage, section type, cable, number of cables, phase number |
 | `span` | span, longitude, latitude, altitude, azimuth |
 | `temperatureCalculation` | temperature conditions (ambient, wind, solar flux, transit) and results (cable temperature and solar flux) |
 | `parameterCalculation` | retained method, sub-method, left support, inputs and results of the retained method only |

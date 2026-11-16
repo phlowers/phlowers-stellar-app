@@ -22,6 +22,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SectionsTabComponent } from '@features/study/presentation/components/sections-tab/sectionsTab.component';
 import { NotificationService } from '@services/notification/notification.service';
 import { NewStudyModalComponent } from '@shared/components/new-study-modal/new-study-modal.component';
+import { compareRfc9557 } from '@shared/helpers/date-time.helpers';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
@@ -79,7 +80,7 @@ export class StudyComponent implements OnInit {
         if (study) {
           this.study.set({
             ...study,
-            sections: study.sections.toSorted((a, b) => -a.created_at.localeCompare(b.created_at))
+            sections: study.sections.toSorted((a, b) => compareRfc9557(a.created_at, b.created_at, -1))
           });
         } else {
           void this.router.navigate(['/studies']);
@@ -102,7 +103,7 @@ export class StudyComponent implements OnInit {
           if (study) {
             this.study.set({
               ...study,
-              sections: study.sections.toSorted((a, b) => -a.created_at.localeCompare(b.created_at))
+              sections: study.sections.toSorted((a, b) => compareRfc9557(a.created_at, b.created_at, -1))
             });
           } else {
             void this.router.navigate(['/studies']);

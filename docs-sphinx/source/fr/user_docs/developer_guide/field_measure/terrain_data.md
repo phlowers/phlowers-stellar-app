@@ -150,9 +150,9 @@ Tous les champs sont obligatoires et sont contrôlés pour leurs plages :
 - **Enregistrement** : `saveExportFile()` utilise `showSaveFilePicker` lorsqu'il est disponible (typé dans `field-measure-export.window.d.ts` ; une annulation par l'utilisateur, `AbortError`, est ignorée silencieusement ; les autres erreurs sont consignées via `LoggerService` puis basculent sur le téléchargement), sinon télécharge le fichier via un lien `<a download>` temporaire
 - **Nom du fichier** : `Export Mesure de terrain_<measure name>_<section name>_<date>.json` (`buildFieldMeasureExportFilename()`)
 - **Structure** : `{ groundMeasurement: [ { general, measure, span, temperatureCalculation, parameterCalculation, zeroWindCalculation } ] }`, typée dans `field-measure-export.interfaces.ts`
-- **`measure`** : `season` est traduit (`ETE`/`HIVER` en français, `SUMMER`/`WINTER` en anglais, clés `field-measuring.export-labels.season.*`) ; `time` contient les secondes et le décalage horaire (`HH:mm:ss.SSS±HH:MM`), comme `general.date`
+- **`measure`** : `season` est traduit (`ETE`/`HIVER` en français, `SUMMER`/`WINTER` en anglais, clés `field-measuring.export-labels.season.*`) ; `date` et `time` sont des date-heures RFC 9557 (`AAAA-MM-JJTHH:mm:ss.SSS±HH:MM[Fuseau]`, comme `general.date`, fuseau issu de `environment.timeZone`, voir le [format brut des dates](../app/date_time_format.md)) avec le décalage en vigueur le jour de la mesure, heure d'été/hiver incluse : `date` est minuit du jour de la mesure, `time` est l'heure saisie ce jour-là
 - **`parameterCalculation`** : seul le bloc de la méthode retenue est présent dans `method`.
-  - `leftSupport` est le libellé affiché par le formulaire PAPOTO (index du support + 1, voir `formatLeftSupportLabel()`), pour PAPOTO et les visées tangentes.
+  - `leftSupport` est le numéro de support affiché par le formulaire : le libellé PAPOTO tel qu'enregistré, ou pour les visées tangentes le numéro résolu depuis l'index de support enregistré (`buildSpanSupportOptions`).
   - Les visées tangentes exportent `methodName: "VISEES_TANGENTES"` et `subMethodName` `SUPPORT` / `EXTERIEUR` / `INTERIEUR`. Le bloc `tangentialSights` lit les champs de la variante retenue via `TANGENT_AIMING_REPORT_CONFIGS`. Pour la variante Support, la distance saisie est exportée dans `leftSupportMeasures.verticalDistance` (pas d'angle vertical gauche) ; les autres variantes exportent `horizontalDistance` et `verticalAngle`.
   - `calculatedParameter.criterion` vaut `{ threshold, unit: "%", status }`, avec `threshold` = `0.5` pour PAPOTO et `1` pour les visées tangentes (`PAPOTO_VALIDITY_CRITERION_PERCENT`, `TANGENT_AIMING_VALIDITY_CRITERION_PERCENT`). Il est absent tant que la méthode n'est pas calculée.
   - Le bloc PEP reste un emplacement réservé.
@@ -195,7 +195,7 @@ Les fichiers de spécification suivants couvrent la fonctionnalité des données
 - `presentation/components/init/init.component.spec.ts` – écran d'initialisation (créer/sélectionner)
 - `presentation/components/field-measuring/field-measuring.component.spec.ts` – boîte de dialogue, validation, sauvegarde/export
 - `presentation/field-measure-export.helpers.spec.ts` – structure de l'export JSON
-- `presentation/helpers.spec.ts` – helpers partagés (validité, `formatLeftSupportLabel`, nom de fichier)
+- `presentation/helpers.spec.ts` – helpers partagés (validité, nom de fichier)
 - `presentation/components/temperature-calculation/temperature-calculation.component.spec.ts` – onglet lié
 - `presentation/components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component.spec.ts` – onglet lié
 - `presentation/components/calculus-setting/calculus-setting.component.spec.ts` – onglet lié

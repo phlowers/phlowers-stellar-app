@@ -5,7 +5,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { FieldMeasure } from '@shared/domain/models/field-measure.model';
-import { isDaylightSavingTime, normalizeFieldMeasureDates, toDateOrNull } from './field-measure.helpers';
+import { Section } from '@shared/domain/models/section.model';
+import {
+  isDaylightSavingTime,
+  normalizeFieldMeasureDates,
+  serializeFieldMeasureDates,
+  serializeSectionDates,
+  toDateOrNull
+} from './field-measure.helpers';
 
 const buildMeasure = (overrides: Record<string, unknown>): FieldMeasure =>
   ({ uuid: 'measure-uuid', name: 'Measure', ...overrides }) as unknown as FieldMeasure;
@@ -26,12 +33,67 @@ describe('field-measure.helpers', () => {
       expect(toDateOrNull(date.toISOString())?.getTime()).toBe(date.getTime());
     });
 
+    it('should parse an RFC 9557 string to the same instant as the legacy ISO string', () => {
+      expect(toDateOrNull('2026-07-14T10:30:00.000+02:00[Europe/Paris]')?.toISOString()).toBe(
+        '2026-07-14T08:30:00.000Z'
+      );
+      expect(toDateOrNull('2026-07-14T10:30:00.000+02:00[Europe/Paris]')?.getTime()).toBe(
+        toDateOrNull('2026-07-14T08:30:00.000Z')?.getTime()
+      );
+    });
+
     it('should parse a timestamp', () => {
       expect(toDateOrNull(0)?.getTime()).toBe(0);
     });
 
     it.each([null, undefined, '', '   ', 'not-a-date', {}, true])('should return null for %p', (value) => {
       expect(toDateOrNull(value)).toBeNull();
+    });
+  });
+
+  describe('serializeFieldMeasureDates / serializeSectionDates', () => {
+    it('should write the date and time as RFC 9557 strings without modifying the measure', () => {
+      const date = new Date('2026-07-14T08:30:00.000Z');
+      const time = new Date('2026-01-05T13:45:10.250Z');
+      const measure = buildMeasure({ date, time, name: 'M1' });
+
+      const serialized = serializeFieldMeasureDates(measure) as unknown as Record<string, unknown>;
+
+      expect(serialized['date']).toBe('2026-07-14T10:30:00.000+02:00[Europe/Paris]');
+      expect(serialized['time']).toBe('2026-01-05T14:45:10.250+01:00[Europe/Paris]');
+      expect(serialized['name']).toBe('M1');
+      expect(measure.date).toBe(date);
+      expect(measure.time).toBe(time);
+    });
+
+    it('should write null for a missing or invalid date and keep a legacy string readable', () => {
+      const serialized = serializeFieldMeasureDates(
+        buildMeasure({ date: null, time: new Date('invalid') })
+      ) as unknown as Record<string, unknown>;
+      expect(serialized['date']).toBeNull();
+      expect(serialized['time']).toBeNull();
+
+      const legacy = serializeFieldMeasureDates(
+        buildMeasure({ date: '2026-07-14T08:30:00.000Z', time: null })
+      ) as unknown as Record<string, unknown>;
+      expect(legacy['date']).toBe('2026-07-14T10:30:00.000+02:00[Europe/Paris]');
+    });
+
+    it('should serialize the field measures of a section and round-trip through normalizeFieldMeasureDates', () => {
+      const date = new Date('2026-07-14T08:30:00.000Z');
+      const section = { name: 'S', field_measures: [buildMeasure({ date, time: date, season: 'summer' })] } as Section;
+
+      const json = JSON.parse(JSON.stringify(serializeSectionDates(section))) as Section;
+
+      expect(json.field_measures[0].date).toBe('2026-07-14T10:30:00.000+02:00[Europe/Paris]');
+      const revived = normalizeFieldMeasureDates(json.field_measures[0]);
+      expect(revived.date?.getTime()).toBe(date.getTime());
+      expect(revived.time?.getTime()).toBe(date.getTime());
+      expect(section.field_measures[0].date).toBe(date);
+    });
+
+    it('should leave a section without field measures untouched', () => {
+      expect(serializeSectionDates({ name: 'S' } as Section)).toEqual({ name: 'S' });
     });
   });
 

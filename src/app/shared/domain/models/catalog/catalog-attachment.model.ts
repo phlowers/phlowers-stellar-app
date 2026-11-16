@@ -29,9 +29,9 @@
 export interface CatalogAttachment {
   /** Unique identifier (UUID v4) */
   uuid: string;
-  /** ISO 8601 timestamp of last update */
+  /** RFC 9557 timestamp of last update (older values may be ISO 8601 ending with `Z`) */
   updated_at: string;
-  /** ISO 8601 timestamp of creation */
+  /** RFC 9557 timestamp of creation (older values may be ISO 8601 ending with `Z`) */
   created_at: string;
   /** Internal ID of the support */
   support_internal_id?: string;

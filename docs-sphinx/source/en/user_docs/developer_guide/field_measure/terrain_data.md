@@ -150,9 +150,9 @@ All fields are mandatory and checked for range:
 - **Saving**: `saveExportFile()` uses `showSaveFilePicker` when available (typed in `field-measure-export.window.d.ts`; a user cancellation, `AbortError`, is silently ignored; other errors are logged through `LoggerService` and fall back to the download), otherwise downloads the file through a temporary `<a download>` link
 - **Filename**: `Export Mesure de terrain_<measure name>_<section name>_<date>.json` (`buildFieldMeasureExportFilename()`)
 - **Structure**: `{ groundMeasurement: [ { general, measure, span, temperatureCalculation, parameterCalculation, zeroWindCalculation } ] }`, typed in `field-measure-export.interfaces.ts`
-- **`measure`**: `season` is translated (`ETE`/`HIVER` in French, `SUMMER`/`WINTER` in English, keys `field-measuring.export-labels.season.*`); `time` carries seconds and the timezone offset (`HH:mm:ss.SSS±HH:MM`), like `general.date`
+- **`measure`**: `season` is translated (`ETE`/`HIVER` in French, `SUMMER`/`WINTER` in English, keys `field-measuring.export-labels.season.*`); `date` and `time` are RFC 9557 date-times (`YYYY-MM-DDTHH:mm:ss.SSS±HH:MM[Zone]`, like `general.date`, zone from `environment.timeZone`, see [raw date format](../app/date_time_format.md)) with the offset in force on the measure day, daylight saving time included: `date` is the midnight of the measure day, `time` is the entered time on that day
 - **`parameterCalculation`**: only the block of the retained method is present in `method`.
-  - `leftSupport` is the label shown by the PAPOTO form (support index + 1, see `formatLeftSupportLabel()`), for PAPOTO and tangent aiming.
+  - `leftSupport` is the support number shown by the form: the PAPOTO label as stored, or for tangent aiming the number resolved from the stored support index (`buildSpanSupportOptions`).
   - Tangent aiming exports `methodName: "VISEES_TANGENTES"` and `subMethodName` `SUPPORT` / `EXTERIEUR` / `INTERIEUR`. The `tangentialSights` block reads the fields of the retained variant through `TANGENT_AIMING_REPORT_CONFIGS`. In the Support variant the entered distance is exported as `leftSupportMeasures.verticalDistance` (no left vertical angle); the other variants export `horizontalDistance` and `verticalAngle`.
   - `calculatedParameter.criterion` is `{ threshold, unit: "%", status }`, with `threshold` = `0.5` for PAPOTO and `1` for tangent aiming (`PAPOTO_VALIDITY_CRITERION_PERCENT`, `TANGENT_AIMING_VALIDITY_CRITERION_PERCENT`). It is absent while the method is not calculated.
   - The PEP block is still a placeholder.
@@ -195,7 +195,7 @@ The following spec files cover the terrain data functionality:
 - `presentation/components/init/init.component.spec.ts` – Init screen (create/select)
 - `presentation/components/field-measuring/field-measuring.component.spec.ts` – Dialog, validation, save/export
 - `presentation/field-measure-export.helpers.spec.ts` – JSON export structure
-- `presentation/helpers.spec.ts` – shared helpers (validity, `formatLeftSupportLabel`, filename)
+- `presentation/helpers.spec.ts` – shared helpers (validity, filename)
 - `presentation/components/temperature-calculation/temperature-calculation.component.spec.ts` – Linked tab
 - `presentation/components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component.spec.ts` – Linked tab
 - `presentation/components/calculus-setting/calculus-setting.component.spec.ts` – Linked tab

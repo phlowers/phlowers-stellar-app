@@ -14,7 +14,8 @@ import {
   nextLeftSupportState,
   resolveLeftSupport,
   resolveSpanLeftSupport,
-  syncDisplayedControls
+  syncDisplayedControls,
+  toCalculationTypeTaskInputs
 } from './tangent-aiming-common.helpers';
 
 describe('tangent-aiming-common helpers', () => {
@@ -143,6 +144,25 @@ describe('tangent-aiming-common helpers', () => {
         { label: 'common.parameter-label', value: 'parametre' },
         { label: 'common.calculation-type-tangent', value: 'tangente' }
       ]);
+    });
+
+    it('should send the value of the selected calculation type only, defaulting a missing value to 0', () => {
+      expect(toCalculationTypeTaskInputs('tangente', 101.4, 1800)).toEqual({
+        calculationType: 'tangente',
+        angleToCableTangent: 101.4
+      });
+      expect(toCalculationTypeTaskInputs('parametre', 101.4, 1800)).toEqual({
+        calculationType: 'parametre',
+        parameter: 1800
+      });
+      expect(toCalculationTypeTaskInputs('tangente', null, null)).toEqual({
+        calculationType: 'tangente',
+        angleToCableTangent: 0
+      });
+      expect(toCalculationTypeTaskInputs('parametre', null, null)).toEqual({
+        calculationType: 'parametre',
+        parameter: 0
+      });
     });
 
     it('should only report the error of a touched control', () => {

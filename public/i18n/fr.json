@@ -836,10 +836,6 @@
       "update-mode-15c": {
         "auto": "AUTO",
         "manual": "MANUELLE"
-      },
-      "calculation-type": {
-        "angle-tangent": "ANGLE_TANGENT",
-        "parameter": "PARAMETRE"
       }
     },
     "report": {

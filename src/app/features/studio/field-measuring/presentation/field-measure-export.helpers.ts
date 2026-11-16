@@ -9,15 +9,17 @@ import { Section, Study } from '@shared/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { TranslocoService } from '@jsverse/transloco';
 import { FieldMeasure } from '../domain/types';
+import { formatSpanLabel, getActiveParameterOutput, readNumber } from './helpers';
+import { formatRfc9557, formatRfc9557OrNull, parseRfc9557 } from '@shared/helpers/date-time.helpers';
 import {
-  formatGenerationDate,
-  formatLeftSupportLabel,
-  formatSpanLabel,
-  getActiveParameterOutput,
-  readNumber
-} from './helpers';
-import { getCalculatedSpanLength } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
+  buildSpanSupportOptions,
+  getCalculatedSpanLength
+} from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
 import { TANGENT_AIMING_REPORT_CONFIGS } from './services/field-measure-report/field-measure-report.constantes';
+import {
+  TANGENT_AIMING_CALCULATION_TYPE,
+  TANGENT_AIMING_CALCULATION_TYPE_LABEL_KEYS
+} from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   PAPOTO_VALIDITY_CRITERION_PERCENT,
   PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS,
@@ -27,7 +29,7 @@ import {
   TANGENTIAL_SIGHTS_SUB_METHOD_NAME_EXPORT_VALUES,
   UPDATE_MODE_15C_EXPORT_KEYS,
   WIND_SPEED_UNIT_EXPORT_KEYS,
-  CALCULATION_TYPE_EXPORT_KEYS
+  GRADE_EXPORT_UNIT
 } from './constants';
 import {
   GeneralExport,
@@ -63,13 +65,6 @@ const createUncertainValueUnit = <T, U extends string>(
 });
 
 /**
- * Formats a date as `YYYY-MM-DD` in local time.
- * @param date - The date to format (or `null`)
- * @returns The formatted date, or `null` when `date` is `null`
- */
-export const formatExportDate = (date: Date | null): string | null => (date ? formatGenerationDate(date) : null);
-
-/**
  * Formats a time as `HH:mm` in local time.
  * @param time - The time to format (or `null`)
  * @returns The formatted time, or `null` when `time` is `null`
@@ -83,36 +78,51 @@ export const formatExportTime = (time: Date | null): string | null => {
   return `${hours}:${minutes}`;
 };
 
-/**
- * Formats an ISO date-time string as `YYYY-MM-DDTHH:mm:ss.SSS±HH:MM` in local time with its offset.
- * @param value - The ISO date-time string to format (or `null`/empty)
- * @returns The formatted date-time, or `null` when `value` is missing or invalid
- */
-export const formatExportDateTimeWithOffset = (value: string | null | undefined): string | null => {
-  if (!value) {
-    return null;
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return null;
-  }
-  const pad = (n: number, length = 2): string => String(n).padStart(length, '0');
-  const offsetMinutes = -date.getTimezoneOffset();
-  const sign = offsetMinutes >= 0 ? '+' : '-';
-  const absOffset = Math.abs(offsetMinutes);
-  const datePart = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-  const timePart = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(date.getMilliseconds(), 3)}`;
-  return `${datePart}T${timePart}${sign}${pad(Math.floor(absOffset / 60))}:${pad(absOffset % 60)}`;
-};
+const isValidDate = (value: Date | null): value is Date => value !== null && !Number.isNaN(value.getTime());
 
 /**
- * Formats the time of a date as `HH:mm:ss.SSS±HH:MM` in local time with its offset (time part of
- * `formatExportDateTimeWithOffset`, so the general and measure dates share the same convention).
- * @param time - The time to format (or `null`)
- * @returns The formatted time, or `null` when `time` is `null` or invalid
+ * Formats a raw date (RFC 9557 or legacy ISO 8601 string) as an RFC 9557 date-time in the configured time zone,
+ * `YYYY-MM-DDTHH:mm:ss.SSS±HH:MM[Zone]`, with the offset in force at that instant (daylight saving time included).
+ * @param value - The raw date (or `null`/empty)
+ * @returns The formatted date-time, or `null` when `value` is missing or invalid
  */
-export const formatExportTimeWithOffset = (time: Date | null): string | null =>
-  formatExportDateTimeWithOffset(time?.toISOString())?.split('T')[1] ?? null;
+export const formatExportDateTimeWithOffset = (value: string | null | undefined): string | null =>
+  formatRfc9557OrNull(parseRfc9557(value));
+
+/**
+ * Formats the measure date as the midnight of its day, `YYYY-MM-DDT00:00:00.000±HH:MM[Zone]`, with the offset
+ * (daylight saving time included) of that day.
+ * @param date - The measure date (or `null`)
+ * @returns The formatted date-time, or `null` when `date` is `null` or invalid
+ */
+export const formatExportMeasureDate = (date: Date | null): string | null =>
+  isValidDate(date) ? formatRfc9557(new Date(date.getFullYear(), date.getMonth(), date.getDate())) : null;
+
+/**
+ * Formats the measure time as `YYYY-MM-DDTHH:mm:ss.SSS±HH:MM[Zone]`: the clock of `time` on the measure day, with
+ * the offset (daylight saving time included) of that day. The time field only stores a clock time on an arbitrary
+ * day, whose offset may differ from the measure date's.
+ * @param time - The measure time (or `null`)
+ * @param date - The measure date giving the day (or `null` to use the day of `time`)
+ * @returns The formatted date-time, or `null` when `time` is `null` or invalid
+ */
+export const formatExportMeasureTime = (time: Date | null, date: Date | null = null): string | null => {
+  if (!isValidDate(time)) {
+    return null;
+  }
+  const day = isValidDate(date) ? date : time;
+  return formatRfc9557(
+    new Date(
+      day.getFullYear(),
+      day.getMonth(),
+      day.getDate(),
+      time.getHours(),
+      time.getMinutes(),
+      time.getSeconds(),
+      time.getMilliseconds()
+    )
+  );
+};
 
 /**
  * Builds the `general` export block (study/section context, formerly `metaData`).
@@ -146,8 +156,8 @@ export const getSectionTypeKey = (spanType: string): string => {
  */
 export const buildMeasureExport = (measureData: FieldMeasure, translocoService: TranslocoService): MeasureExport => ({
   name: measureData.name,
-  date: formatExportDate(measureData.date),
-  time: formatExportTimeWithOffset(measureData.time),
+  date: formatExportMeasureDate(measureData.date),
+  time: formatExportMeasureTime(measureData.time, measureData.date),
   season: measureData.season ? translocoService.translate(SEASON_EXPORT_KEYS[measureData.season]) : null,
   voltage: createValueUnit(measureData.voltage, 'KV'),
   sectionType: measureData.spanType ? translocoService.translate(getSectionTypeKey(measureData.spanType)) : null,
@@ -229,11 +239,11 @@ const buildPapotoMethodExport = (measureData: FieldMeasure, litData: GetSectionO
     calculatedVerticalDistance: createValueUnit(calculatedVerticalDistance, 'm'),
     horizontalAngles: createValueUnit(
       { HG: measureData.HL, H1: measureData.H1, H2: measureData.H2, H3: measureData.H3, HD: measureData.HR },
-      '°'
+      GRADE_EXPORT_UNIT
     ),
     verticalAngles: createValueUnit(
       { VG: measureData.VL, V1: measureData.V1, V2: measureData.V2, V3: measureData.V3, VD: measureData.VR },
-      '°'
+      GRADE_EXPORT_UNIT
     ),
     intermediateParameters: createValueUnit(
       {
@@ -260,7 +270,9 @@ const buildTangentialSightsMethodExport = (
   method: TangentialSightsCalculationMethod
 ): TangentialSightsMethodExport => {
   const config = TANGENT_AIMING_REPORT_CONFIGS[method];
-  const isTangentAngle = measureData[config.calculationType] === 'tangente';
+  const calculationType = (measureData[config.calculationType] ??
+    TANGENT_AIMING_CALCULATION_TYPE) as FieldMeasure['calculationType'];
+  const isTangentAngle = calculationType === 'tangente';
   const isSupport = method === 'tangente-aiming';
   const distance = createValueUnit(readNumber(measureData, config.distance), 'm');
   const result = measureData.outputs[config.output];
@@ -275,17 +287,15 @@ const buildTangentialSightsMethodExport = (
       verticalDistance: isSupport ? distance : createValueUnit(null, 'm'),
       verticalAngle: createValueUnit(
         config.verticalAngleLeft ? readNumber(measureData, config.verticalAngleLeft) : null,
-        '°'
+        GRADE_EXPORT_UNIT
       ),
       horizontalDistance: isSupport ? createValueUnit(null, 'm') : distance
     },
     rightSupportMeasures: {
-      verticalAngle: createValueUnit(readNumber(measureData, config.verticalAngleRight), '°')
+      verticalAngle: createValueUnit(readNumber(measureData, config.verticalAngleRight), GRADE_EXPORT_UNIT)
     },
     calculationType: {
-      type: translocoService.translate(
-        isTangentAngle ? CALCULATION_TYPE_EXPORT_KEYS.tangente : CALCULATION_TYPE_EXPORT_KEYS.other
-      ),
+      type: translocoService.translate(TANGENT_AIMING_CALCULATION_TYPE_LABEL_KEYS[calculationType]),
       value: readNumber(measureData, isTangentAngle ? config.tangentAngle : config.parameter)
     },
     calculatedParameter: result
@@ -321,12 +331,14 @@ const buildPepMethodExport = (measureData: FieldMeasure): PepMethodExport => ({
  * Builds the `parameterCalculation` export block. Only the key matching the active `calculationMethod`
  * is populated in `method`; the other methods are left undefined.
  * @param measureData - The field measure to export
+ * @param section - The current section (or `null`), used to resolve the displayed number of the left support
  * @param litData - The current section geometry/output parameters (or `null`)
  * @param translocoService - The Transloco service used to translate export labels
  * @returns The `parameterCalculation` export block
  */
 export const buildParameterCalculationExport = (
   measureData: FieldMeasure,
+  section: Section | null,
   litData: GetSectionOutput | null,
   translocoService: TranslocoService
 ): ParameterCalculationExport => {
@@ -335,7 +347,8 @@ export const buildParameterCalculationExport = (
     return {
       methodName: translocoService.translate(PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS.papoto),
       subMethodName: null,
-      leftSupport: formatLeftSupportLabel(measureData.leftSupport),
+      // The PAPOTO form stores the displayed support number
+      leftSupport: measureData.leftSupport,
       method: { papoto: buildPapotoMethodExport(measureData, litData) }
     };
   }
@@ -350,9 +363,11 @@ export const buildParameterCalculationExport = (
   return {
     methodName: TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE,
     subMethodName: TANGENTIAL_SIGHTS_SUB_METHOD_NAME_EXPORT_VALUES[calculationMethod],
-    leftSupport: formatLeftSupportLabel(
-      measureData[TANGENT_AIMING_REPORT_CONFIGS[calculationMethod].leftSupport] as string | null
-    ),
+    // The tangent aiming forms store the support index: export the support number they display
+    leftSupport:
+      buildSpanSupportOptions(section?.supports ?? [], measureData.span).find(
+        (option) => option.value === measureData[TANGENT_AIMING_REPORT_CONFIGS[calculationMethod].leftSupport]
+      )?.label ?? null,
     method: {
       tangentialSights: buildTangentialSightsMethodExport(measureData, litData, translocoService, calculationMethod)
     }
@@ -425,7 +440,7 @@ export const buildGroundMeasurementExport = (
   measure: buildMeasureExport(measureData, translocoService),
   span: buildSpanExport(measureData, section),
   temperatureCalculation: buildTemperatureCalculationExport(measureData, translocoService),
-  parameterCalculation: buildParameterCalculationExport(measureData, litData, translocoService),
+  parameterCalculation: buildParameterCalculationExport(measureData, section, litData, translocoService),
   zeroWindCalculation: buildZeroWindCalculationExport(measureData, translocoService)
 });
 

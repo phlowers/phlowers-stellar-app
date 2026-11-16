@@ -113,11 +113,11 @@ export interface PapotoMethodExport {
   calculatedVerticalDistance: ValueUnit;
   horizontalAngles: {
     value: { HG: number | null; H1: number | null; H2: number | null; H3: number | null; HD: number | null };
-    unit: '°';
+    unit: 'gr';
   };
   verticalAngles: {
     value: { VG: number | null; V1: number | null; V2: number | null; V3: number | null; VD: number | null };
-    unit: '°';
+    unit: 'gr';
   };
   intermediateParameters: { value: { p12: number | null; p23: number | null; p13: number | null }; unit: 'm' };
   calculatedParameter: CalculatedParameterExport;
@@ -135,7 +135,7 @@ export interface TangentialSightsMethodExport {
   rightSupportMeasures: {
     verticalAngle: ValueUnit;
   };
-  calculationType: { type: 'PARAMETRE' | 'ANGLE_TANGENT'; value: number | null };
+  calculationType: { type: string; value: number | null };
   calculatedParameter: CalculatedParameterExport;
 }
 

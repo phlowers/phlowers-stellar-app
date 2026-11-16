@@ -7,6 +7,7 @@
 
 import { InitialCondition, Section, Support } from '@shared/domain';
 import { v4 as uuidv4 } from 'uuid';
+import { nowRfc9557 } from '@shared/helpers/date-time.helpers';
 
 /**
  * Helper functions for creating section and support objects.
@@ -114,8 +115,8 @@ export const createEmptySection = (): Section => {
     floors: [],
     internal_id: '',
     short_name: '',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    created_at: nowRfc9557(),
+    updated_at: nowRfc9557(),
     internal_catalog_id: '',
     cable_short_name: '',
     optical_fibers_amount: 0,

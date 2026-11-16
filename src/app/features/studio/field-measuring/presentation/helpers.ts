@@ -103,16 +103,6 @@ export const readNumber = (measureData: FieldMeasure, key: keyof FieldMeasure): 
   measureData[key] as number | null;
 
 /**
- * Formats the label of a stored left support index the way the PAPOTO form displays it (1-based index).
- * @param leftSupport - The stored support index (or `null`)
- * @returns The 1-based label, or `null` when the support is missing or not an index
- */
-export const formatLeftSupportLabel = (leftSupport: string | null): string | null => {
-  const index = leftSupport === null || leftSupport === '' ? Number.NaN : Number(leftSupport);
-  return Number.isInteger(index) ? String(index + 1) : null;
-};
-
-/**
  * Picks the localization of the reference support of a span from the computed section localization.
  * Uses the span's left support when no support of the span matches `referenceSupport`.
  * @param localization - The resolved section localization (one entry per support)

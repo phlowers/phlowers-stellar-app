@@ -8,6 +8,7 @@ import type Papa from 'papaparse';
 import type { Table } from 'dexie';
 import type { CsvImportConfig } from './csv-import.engine.interfaces';
 import type { CsvImportWorkerResponse } from './csv-import.worker.interfaces';
+import { nowRfc9557 } from '@shared/helpers/date-time.helpers';
 
 const DEFAULT_CHUNK_SIZE = 512 * 1024;
 
@@ -17,7 +18,7 @@ export interface CsvImportEngineDeps {
   papa: typeof Papa;
   /** Resolves the Dexie table by name; engine never opens the database itself. */
   resolveTable: (tableName: string) => Table<unknown, unknown>;
-  /** Returns the current ISO 8601 timestamp (allows test injection). */
+  /** Returns the current RFC 9557 timestamp (allows test injection). */
   now?: () => string;
 }
 
@@ -54,7 +55,7 @@ export async function runCsvImport<TRow>(
   overrides: { chunkSize?: number } = {}
 ): Promise<CsvImportEngineResult> {
   const table = deps.resolveTable(config.tableName);
-  const now = (deps.now ?? (() => new Date().toISOString()))();
+  const now = (deps.now ?? nowRfc9557)();
   const ctx = { table, now };
 
   if (config.clearBeforeImport !== false) {

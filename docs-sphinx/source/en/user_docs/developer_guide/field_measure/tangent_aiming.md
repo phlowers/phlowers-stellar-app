@@ -54,7 +54,7 @@ All three variants share the same engine call (angles in grads, lengths in meter
 A negative `distance` places the device on the outer side of the left support (Exterior).
 
 ```{note}
-Only the `tangente` calculation type is computed. The `parametre` type can be selected and saved, but the engine only deduces the parameter from the cable tangent angle.
+Both calculation types run `Task.calculateTangentAiming`. The task inputs carry the selected `calculationType` and the entered value of that type only: `parameter` replaces `angleToCableTangent` when the type is `parametre` (`toCalculationTypeTaskInputs`).
 ```
 
 The **Calculate** button (`canCalculate()`) is enabled when the form is valid (`isFormValid`), no calculation is running and the calculation type is `tangente` (`TANGENT_AIMING_CALCULATION_TYPE`). A failure sets `hasError()` and shows the variant `calculationFailedKey` message.
@@ -74,10 +74,10 @@ JSON export (`presentation/field-measure-export.helpers.ts`):
 | `leftSupportMeasures.horizontalDistance` | `null` | `…HAccDistance` |
 | `leftSupportMeasures.verticalAngle` | `null` (no left angle in the form) | `…VerticalAccAngleLeft` |
 | `rightSupportMeasures.verticalAngle` | `cableVerticalAccAngle` | `…VerticalAccAngleRight` |
-| `calculationType` | `type` (`PARAMETRE` / `ANGLE_TANGENT`) and `value` (the entered parameter or tangent angle) | same |
+| `calculationType` | `type` (the translated label of the form selector option, "Parameter" / "Tangent") and `value` (the entered parameter or tangent angle) | same |
 | `calculatedParameter` | from `outputs.tangentAimingSupport` | from `outputs.tangentAimingInterior` / `…Exterior` |
 
-`calculatedParameter` is `{ parameter: { value, unit: "m", uncertainty }, criterion: { threshold: 1, unit: "%", status } }` (`TANGENT_AIMING_VALIDITY_CRITERION_PERCENT`, `status` = `checkValidity`), and `undefined` until the variant is calculated. `parameterCalculation.leftSupport` is the label of the variant's left support (`formatLeftSupportLabel`).
+`calculatedParameter` is `{ parameter: { value, unit: "m", uncertainty }, criterion: { threshold: 1, unit: "%", status } }` (`TANGENT_AIMING_VALIDITY_CRITERION_PERCENT`, `status` = `checkValidity`), and `undefined` until the variant is calculated. `parameterCalculation.leftSupport` is the support number displayed by the variant's left support selector.
 
 ## Validation and invalidation
 

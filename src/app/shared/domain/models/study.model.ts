@@ -21,8 +21,8 @@ import { Section } from './section.model';
  *   author_email: 'user@example.com',
  *   title: 'Power Line Analysis',
  *   shareable: true,
- *   created_at_offline: '2026-01-27T10:00:00Z',
- *   updated_at_offline: '2026-01-27T10:00:00Z',
+ *   created_at_offline: '2026-01-27T11:00:00.000+01:00[Europe/Paris]',
+ *   updated_at_offline: '2026-01-27T11:00:00.000+01:00[Europe/Paris]',
  *   saved: true,
  *   sections: []
  * };
@@ -41,9 +41,9 @@ export interface Study {
   description?: string;
   /** Whether the study can be shared with others */
   shareable: boolean;
-  /** ISO 8601 timestamp of offline creation */
+  /** RFC 9557 timestamp of offline creation (older values may be ISO 8601 ending with `Z`) */
   created_at_offline: string;
-  /** ISO 8601 timestamp of last offline update */
+  /** RFC 9557 timestamp of last offline update (older values may be ISO 8601 ending with `Z`) */
   updated_at_offline: string;
   /** Whether the study has been saved */
   saved: boolean;
