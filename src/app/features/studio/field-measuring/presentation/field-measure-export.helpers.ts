@@ -10,7 +10,12 @@ import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { TranslocoService } from '@jsverse/transloco';
 import { FieldMeasure } from '../domain/types';
 import { formatSpanLabel, getActiveParameterOutput, readNumber } from './helpers';
-import { formatRfc9557, formatRfc9557OrNull, parseRfc9557 } from '@shared/helpers/date-time.helpers';
+import {
+  formatRfc9557,
+  formatRfc9557OrNull,
+  parseRfc9557,
+  zonedWallClockToDate
+} from '@shared/helpers/date-time.helpers';
 import {
   buildSpanSupportOptions,
   getCalculatedSpanLength
@@ -96,7 +101,9 @@ export const formatExportDateTimeWithOffset = (value: string | null | undefined)
  * @returns The formatted date-time, or `null` when `date` is `null` or invalid
  */
 export const formatExportMeasureDate = (date: Date | null): string | null =>
-  isValidDate(date) ? formatRfc9557(new Date(date.getFullYear(), date.getMonth(), date.getDate())) : null;
+  isValidDate(date)
+    ? formatRfc9557(zonedWallClockToDate({ year: date.getFullYear(), month: date.getMonth(), day: date.getDate() }))
+    : null;
 
 /**
  * Formats the measure time as `YYYY-MM-DDTHH:mm:ss.SSS±HH:MM[Zone]`: the clock of `time` on the measure day, with
@@ -112,15 +119,15 @@ export const formatExportMeasureTime = (time: Date | null, date: Date | null = n
   }
   const day = isValidDate(date) ? date : time;
   return formatRfc9557(
-    new Date(
-      day.getFullYear(),
-      day.getMonth(),
-      day.getDate(),
-      time.getHours(),
-      time.getMinutes(),
-      time.getSeconds(),
-      time.getMilliseconds()
-    )
+    zonedWallClockToDate({
+      year: day.getFullYear(),
+      month: day.getMonth(),
+      day: day.getDate(),
+      hour: time.getHours(),
+      minute: time.getMinutes(),
+      second: time.getSeconds(),
+      millisecond: time.getMilliseconds()
+    })
   );
 };
 

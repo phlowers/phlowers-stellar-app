@@ -175,11 +175,22 @@ export class StudiesService {
    * @returns The latest studies
    */
   getLatestStudies() {
-    return this.db?.studies
-      .toArray()
-      .then((studies) =>
-        studies.sort((a, b) => compareRfc9557(a.created_at_offline, b.created_at_offline, -1)).slice(0, 4)
-      );
+    const studies = this.db?.studies;
+    if (!studies) {
+      return undefined;
+    }
+    return Promise.all([
+      studies.orderBy('created_at_offline').keys(),
+      studies.orderBy('created_at_offline').primaryKeys()
+    ]).then(async ([createdAtKeys, uuids]) => {
+      const latestUuids = createdAtKeys
+        .map((createdAt, index) => ({ createdAt, uuid: uuids[index] }))
+        .sort((a, b) => compareRfc9557(a.createdAt, b.createdAt, -1))
+        .slice(0, 4)
+        .map(({ uuid }) => uuid);
+      const latestStudies = await studies.bulkGet(latestUuids);
+      return latestStudies.filter((study): study is StudyEntity => study !== undefined);
+    });
   }
 
   /**

@@ -9,7 +9,6 @@ import { Section, Study, SkyCover } from '@shared/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { TranslocoService } from '@jsverse/transloco';
 import { createTestMeasureData } from './helpers';
-import { parseRfc9557 } from '@shared/helpers/date-time.helpers';
 import {
   buildFieldMeasureExportJson,
   buildGeneralExport,
@@ -60,8 +59,6 @@ describe('field-measure-export.helpers', () => {
     }
   } as unknown as GetSectionOutput;
 
-  /** Instant read back from an RFC 9557 string; checks that the offset written matches the instant. */
-  const instantOf = (value: string | null): number => parseRfc9557(value)!.getTime();
   const rfc9557Pattern = (offset: string): RegExp =>
     new RegExp(
       `^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\${offset.slice(0, 1)}${offset.slice(1)}\\[Europe/Paris\\]$`
@@ -77,19 +74,11 @@ describe('field-measure-export.helpers', () => {
     });
 
     it.each([
-      ['winter', new Date(2026, 0, 5, 18, 45), '+01:00'],
-      ['summer', new Date(2026, 6, 5, 18, 45), '+02:00']
-    ])('should format a %s date as the midnight of its day with that day offset', (_season, date, offset) => {
-      const result = formatExportMeasureDate(date);
-      expect(result).toMatch(rfc9557Pattern(offset));
-      expect(instantOf(result)).toBe(new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime());
-    });
-
-    itOnParisMachine('should write the midnight of the day in Europe/Paris', () => {
-      expect(formatExportMeasureDate(new Date(2026, 10, 6, 18, 45))).toBe(
-        '2026-11-06T00:00:00.000+01:00[Europe/Paris]'
-      );
-      expect(formatExportMeasureDate(new Date(2026, 6, 6, 18, 45))).toBe('2026-07-06T00:00:00.000+02:00[Europe/Paris]');
+      ['winter', new Date(2026, 0, 5, 18, 45), '2026-01-05T00:00:00.000+01:00[Europe/Paris]'],
+      ['summer', new Date(2026, 6, 5, 18, 45), '2026-07-05T00:00:00.000+02:00[Europe/Paris]'],
+      ['late-evening', new Date(2026, 6, 5, 23, 30), '2026-07-05T00:00:00.000+02:00[Europe/Paris]']
+    ])('should format a %s date as the midnight of its day in Europe/Paris', (_season, date, expected) => {
+      expect(formatExportMeasureDate(date)).toBe(expected);
     });
   });
 
@@ -111,17 +100,23 @@ describe('field-measure-export.helpers', () => {
     });
 
     it.each([
-      ['winter', new Date(2026, 0, 15), new Date(2026, 6, 15, 14, 30, 15), '+01:00'],
-      ['summer', new Date(2026, 6, 15), new Date(2026, 0, 15, 14, 30, 15), '+02:00']
+      [
+        'winter',
+        new Date(2026, 0, 15),
+        new Date(2026, 6, 15, 14, 30, 15),
+        '2026-01-15T14:30:15.000+01:00[Europe/Paris]'
+      ],
+      [
+        'summer',
+        new Date(2026, 6, 15),
+        new Date(2026, 0, 15, 14, 30, 15),
+        '2026-07-15T14:30:15.000+02:00[Europe/Paris]'
+      ]
     ])(
       'should combine a %s measure date with the clock of a time stored on another season day',
-      (_season, date, time, offset) => {
-        const result = formatExportMeasureTime(time, date);
+      (_season, date, time, expected) => {
         // The offset is the one of the measure day, not of the day stored in the time field
-        expect(result).toMatch(rfc9557Pattern(offset));
-        expect(instantOf(result)).toBe(
-          new Date(date.getFullYear(), date.getMonth(), date.getDate(), 14, 30, 15).getTime()
-        );
+        expect(formatExportMeasureTime(time, date)).toBe(expected);
       }
     );
 
@@ -136,7 +131,7 @@ describe('field-measure-export.helpers', () => {
 
     it('should fall back to the day of the time without a valid measure date', () => {
       const time = new Date(2026, 6, 15, 9, 5, 0);
-      expect(instantOf(formatExportMeasureTime(time, null))).toBe(time.getTime());
+      expect(formatExportMeasureTime(time, null)).toBe('2026-07-15T09:05:00.000+02:00[Europe/Paris]');
       expect(formatExportMeasureTime(time, new Date('invalid'))).toBe(formatExportMeasureTime(time, null));
     });
   });
@@ -229,8 +224,8 @@ describe('field-measure-export.helpers', () => {
       );
       expect(measure.date).toMatch(rfc9557Pattern('+01:00'));
       expect(measure.time).toMatch(rfc9557Pattern('+01:00'));
-      expect(instantOf(measure.date)).toBe(new Date(2026, 0, 15).getTime());
-      expect(instantOf(measure.time)).toBe(new Date(2026, 0, 15, 14, 30, 15).getTime());
+      expect(measure.date).toBe('2026-01-15T00:00:00.000+01:00[Europe/Paris]');
+      expect(measure.time).toBe('2026-01-15T14:30:15.000+01:00[Europe/Paris]');
 
       const empty = buildMeasureExport(createTestMeasureData({ date: null, time: null }), mockTranslocoService);
       expect(empty.date).toBeNull();

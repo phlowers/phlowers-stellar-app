@@ -13,7 +13,8 @@ import {
   getConfiguredTimeZone,
   nowRfc9557,
   parseRfc9557,
-  resolveTimeZone
+  resolveTimeZone,
+  zonedWallClockToDate
 } from './date-time.helpers';
 
 describe('date-time.helpers', () => {
@@ -132,6 +133,23 @@ describe('date-time.helpers', () => {
         const date = new Date(iso);
         expect(parseRfc9557(formatRfc9557(date))?.getTime()).toBe(date.getTime());
       }
+    });
+  });
+
+  describe('zonedWallClockToDate', () => {
+    it('should read the wall clock in the given zone, whatever the browser zone', () => {
+      expect(zonedWallClockToDate({ year: 2026, month: 0, day: 5 }, 'Asia/Tokyo').toISOString()).toBe(
+        '2026-01-04T15:00:00.000Z'
+      );
+      expect(zonedWallClockToDate({ year: 2026, month: 6, day: 1, hour: 10 }, 'Europe/Paris').toISOString()).toBe(
+        '2026-07-01T08:00:00.000Z'
+      );
+    });
+
+    it('should use the offset in force on that day, daylight saving time included', () => {
+      expect(zonedWallClockToDate({ year: 2026, month: 0, day: 15, hour: 14 }, 'Europe/Paris').toISOString()).toBe(
+        '2026-01-15T13:00:00.000Z'
+      );
     });
   });
 

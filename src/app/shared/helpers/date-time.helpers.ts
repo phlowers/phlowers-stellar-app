@@ -66,6 +66,49 @@ export const formatRfc9557 = (date: Date, timeZone: string = getConfiguredTimeZo
   return `${day}T${time}${toIsoOffset(parts['timeZoneName'])}[${zone}]`;
 };
 
+/** Offset in milliseconds of `timeZone` from UTC at the given instant (daylight saving time included). */
+const getZoneOffsetMs = (instantMs: number, timeZone: string): number => {
+  const parts: Record<string, string> = {};
+  for (const { type, value } of getFormatter(timeZone).formatToParts(new Date(instantMs))) {
+    parts[type] = value;
+  }
+  const wallClockAsUtc = Date.UTC(
+    Number(parts['year']),
+    Number(parts['month']) - 1,
+    Number(parts['day']),
+    Number(parts['hour']) % 24,
+    Number(parts['minute']),
+    Number(parts['second'])
+  );
+  return wallClockAsUtc - Math.floor(instantMs / 1000) * 1000;
+};
+
+/**
+ * Returns the instant at which the wall clock of `timeZone` reads the given fields, whatever the time zone of the
+ * browser. The offset is the one in force at that instant (daylight saving time included).
+ * @param wallClock - Calendar and clock fields, `month` being 0-based (missing clock fields default to midnight)
+ * @param timeZone - The IANA zone, defaults to the configured one
+ * @returns The matching instant
+ */
+export const zonedWallClockToDate = (
+  wallClock: {
+    year: number;
+    month: number;
+    day: number;
+    hour?: number;
+    minute?: number;
+    second?: number;
+    millisecond?: number;
+  },
+  timeZone: string = getConfiguredTimeZone()
+): Date => {
+  const zone = resolveTimeZone(timeZone);
+  const { year, month, day, hour = 0, minute = 0, second = 0, millisecond = 0 } = wallClock;
+  const wallClockAsUtc = Date.UTC(year, month, day, hour, minute, second, millisecond);
+  const firstGuess = wallClockAsUtc - getZoneOffsetMs(wallClockAsUtc, zone);
+  return new Date(wallClockAsUtc - getZoneOffsetMs(firstGuess, zone));
+};
+
 /** Same as `formatRfc9557`, returning `null` for a missing or invalid date. */
 export const formatRfc9557OrNull = (date: Date | null | undefined, timeZone?: string): string | null =>
   date instanceof Date && !Number.isNaN(date.getTime()) ? formatRfc9557(date, timeZone) : null;

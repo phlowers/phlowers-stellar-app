@@ -105,7 +105,7 @@ export class HomeComponent {
 
     effect(() => {
       if (this.studiesReady()) {
-        void this.studiesService.getLatestStudies().then((studies) => {
+        void this.studiesService.getLatestStudies()?.then((studies) => {
           this.latestStudies.set(
             studies?.map((study) => {
               const updatedAt = parseRfc9557(study.updated_at_offline);

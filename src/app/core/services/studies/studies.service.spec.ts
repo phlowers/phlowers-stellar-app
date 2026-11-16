@@ -50,6 +50,7 @@ interface MockDb {
     clear: vi.Mock;
     update: vi.Mock;
     orderBy: vi.Mock;
+    bulkGet: vi.Mock;
   };
 }
 
@@ -95,12 +96,10 @@ describe('StudiesService', () => {
         clear: vi.fn().mockResolvedValue(undefined),
         update: vi.fn().mockResolvedValue(1),
         orderBy: vi.fn().mockReturnValue({
-          reverse: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              toArray: vi.fn().mockResolvedValue([mockStudyFromDb])
-            })
-          })
-        })
+          keys: vi.fn().mockResolvedValue([]),
+          primaryKeys: vi.fn().mockResolvedValue([])
+        }),
+        bulkGet: vi.fn().mockResolvedValue([])
       }
     };
 
@@ -190,19 +189,30 @@ describe('StudiesService', () => {
     });
   });
 
-  it('returns the 4 latest studies by instant, whatever the date format or offset', async () => {
-    const study = (uuid: string, created_at_offline: string) => ({ ...mockStudyFromDb, uuid, created_at_offline });
-    mockDb.studies.toArray.mockResolvedValue([
-      study('old-z', '2025-01-01T00:00:00.000Z'),
-      study('summer', '2026-07-01T10:00:00.000+02:00[Europe/Paris]'),
-      study('invalid', 'not-a-date'),
-      study('winter', '2026-12-01T10:00:00.000+01:00[Europe/Paris]'),
-      study('legacy-z', '2026-07-01T07:59:00.000Z'),
-      study('newest', '2026-12-01T09:30:00.000Z')
-    ]);
+  it('returns the 4 latest studies by instant, reading only index keys then fetching those 4', async () => {
+    const entries: [string, string][] = [
+      ['old-z', '2025-01-01T00:00:00.000Z'],
+      ['summer', '2026-07-01T10:00:00.000+02:00[Europe/Paris]'],
+      ['invalid', 'not-a-date'],
+      ['winter', '2026-12-01T10:00:00.000+01:00[Europe/Paris]'],
+      ['legacy-z', '2026-07-01T07:59:00.000Z'],
+      ['newest', '2026-12-01T09:30:00.000Z']
+    ];
+    const byUuid = new Map(
+      entries.map(([uuid, created_at_offline]) => [uuid, { ...mockStudyFromDb, uuid, created_at_offline }])
+    );
+    const sortedEntries = [...entries].sort(([, a], [, b]) => a.localeCompare(b));
+    mockDb.studies.orderBy.mockReturnValue({
+      keys: vi.fn().mockResolvedValue(sortedEntries.map(([, createdAt]) => createdAt)),
+      primaryKeys: vi.fn().mockResolvedValue(sortedEntries.map(([uuid]) => uuid))
+    });
+    mockDb.studies.bulkGet.mockImplementation(async (uuids: string[]) => uuids.map((uuid) => byUuid.get(uuid)));
 
     const latest = await service.getLatestStudies();
 
+    expect(mockDb.studies.orderBy).toHaveBeenCalledWith('created_at_offline');
+    expect(mockDb.studies.toArray).not.toHaveBeenCalled();
+    expect(mockDb.studies.bulkGet).toHaveBeenCalledWith(['newest', 'winter', 'summer', 'legacy-z']);
     expect(latest?.map((s) => s.uuid)).toEqual(['newest', 'winter', 'summer', 'legacy-z']);
   });
 
@@ -211,6 +221,12 @@ describe('StudiesService', () => {
     await service.getStudies();
 
     expect(mockDb.studies.toArray).toHaveBeenCalled();
+
+    mockDb.studies.orderBy.mockReturnValue({
+      keys: vi.fn().mockResolvedValue([mockStudyFromDb.created_at_offline]),
+      primaryKeys: vi.fn().mockResolvedValue([mockStudyFromDb.uuid])
+    });
+    mockDb.studies.bulkGet.mockResolvedValue([mockStudyFromDb]);
 
     const latest = await service.getLatestStudies();
     expect(latest).toEqual([mockStudyFromDb]);
