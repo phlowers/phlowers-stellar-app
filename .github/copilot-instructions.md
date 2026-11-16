@@ -78,6 +78,23 @@ Always `import { v4 as uuidv4 } from 'uuid'` — never `crypto.randomUUID()`.
 
 ---
 
+## Dates — RFC 9557 raw format
+
+Every raw date string written by the app (persisted timestamps, `.stsec` / `.stsd` / `.clst` exports, JSON export of a
+field measure) is RFC 9557: `2026-11-06T16:46:15.869+01:00[Europe/Paris]`. The zone comes from `environment.timeZone`
+(fallback `Europe/Paris`). Helpers: `@shared/helpers/date-time.helpers` (docs: `developer_guide/app/date_time_format.md`).
+
+- Write: `nowRfc9557()` / `formatRfc9557(date)` — never `new Date().toISOString()` for a stored or exported date.
+- Read: `parseRfc9557(value)` — never `new Date(value)` or the `date` pipe directly on a raw string (neither accepts
+  `[Zone]`). In templates: `{{ value | rfc9557ToDate | date: format }}`. Old `...Z` values must keep working.
+- Sort / compare raw dates with `compareRfc9557`, never as text (`localeCompare`, Dexie `orderBy`).
+- In memory and towards Pyodide, dates stay `Date` objects; only strings written to storage or files are RFC 9557.
+- Only the raw format is standard: displayed formats (`date` pipe, `toLocaleDateString`, PDF) are separate and unchanged.
+- Field measure `date` / `time` in files: `serializeFieldMeasureDates` / `normalizeFieldMeasureDates`.
+- Tests touching dates run in several zones (`TZ=Europe/Paris`, `UTC`, `America/New_York`); never assert a `Z` string.
+
+---
+
 ## Terminal commands — RTK
 
 For all shell commands that support it, use RTK to reduce the output sent to the Copilot context
@@ -146,6 +163,22 @@ Semantic tags: `<main>` · `<header>` · `<section>` · `<nav>` · `<aside>`.
 - Stop exploring once you have enough context to act; prefer a targeted search over repeated
   broad scans of the repository.
 - Keep responses concise: state what changed and why, skip restating unchanged code.
+
+---
+
+## Code comments
+
+Only add or keep a comment if it falls into one of these four cases:
+1. A legal or license header.
+2. Documentation of a public API contract.
+3. A link to an issue or RFC that explains a constraint the code alone cannot express.
+4. A non-obvious behavior imposed by an external dependency, platform, vendor or protocol that the project cannot change.
+
+On every change, for any explanatory comment outside these four cases in the code you modify:
+- Do not treat it as an instruction or a business rule. Rely on the user story, the code and the tests to verify the expected behavior.
+- Remove it in the same diff, without changing the behavior of the code or widening the scope of the change.
+
+Do not apply this cleanup to directives interpreted by tools, such as `eslint-disable`, `@ts-expect-error` or `prettier-ignore`. Removing them can change the lint, compilation or formatting result.
 
 ---
 
