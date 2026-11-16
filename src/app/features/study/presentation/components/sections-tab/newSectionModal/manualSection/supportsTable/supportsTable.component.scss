@@ -197,6 +197,10 @@ p:has(> app-icon[icon='progress_activity']) {
   color: var(--grey-750);
   transform-origin: 50%;
   animation: calculation-localization-loader 0.5s linear infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 }
 
 @keyframes calculation-localization-loader {

@@ -15,7 +15,7 @@ import { WorkerPythonService } from '@services/worker_python/worker-python.servi
 import { Task, TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
 import { SectionImportCoordinates } from '@shared/import/section-adapter/section-import-adapter.interfaces';
 import { CRS } from '@shared/domain/helpers/geopositioning.constantes';
-import { CrsCode, FootLocalization, GpsPoint, ProjectedPoint } from '@shared/domain/helpers/geopositioning.interfaces';
+import { FootLocalization, GpsPoint, ProjectedPoint } from '@shared/domain/helpers/geopositioning.interfaces';
 import {
   applyFootCoordinates,
   applyLocalization,
@@ -126,7 +126,7 @@ export class GeopositioningService {
   }
 
   /** Reprojects WGS84 points to `targetCrs`. Returns `null` when the worker is unavailable or fails. */
-  async toCrs(points: GpsPoint[], targetCrs: CrsCode): Promise<ProjectedPoint[] | null> {
+  async toCrs(points: GpsPoint[], targetCrs: string): Promise<ProjectedPoint[] | null> {
     if (points.length === 0) return [];
     if (targetCrs === CRS.WGS84) return points.map(({ latitude, longitude }) => ({ x: longitude, y: latitude }));
 
@@ -144,7 +144,7 @@ export class GeopositioningService {
    * Reprojects every support foot of `section` to `targetCrs` (see `resolveLocalization`).
    * No production caller yet: kept for review, see `deadcode.md` (ARCHI-05).
    */
-  async sectionToCrs(section: Section, targetCrs: CrsCode, reference?: Section): Promise<ProjectedPoint[] | null> {
+  async sectionToCrs(section: Section, targetCrs: string, reference?: Section): Promise<ProjectedPoint[] | null> {
     const localization = await this.resolveLocalization(section, reference);
     if (!localization) return null;
     const points = localization.latitude.map((latitude, i) => ({ latitude, longitude: localization.longitude[i] }));

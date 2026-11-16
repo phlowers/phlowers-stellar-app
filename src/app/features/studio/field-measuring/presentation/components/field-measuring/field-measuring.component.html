@@ -51,7 +51,7 @@
 <ng-template #footer>
   <div class="dialog-footer">
     @if (reportExportBlockedReason(); as reason) {
-      <p class="dialog-footer__hint" role="status" data-testid="report-export-blocked-reason">{{ reason }}</p>
+      <output class="dialog-footer__hint" data-testid="report-export-blocked-reason">{{ reason }}</output>
     }
     <button
       app-btn

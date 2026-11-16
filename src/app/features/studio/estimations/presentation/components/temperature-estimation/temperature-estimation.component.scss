@@ -2,6 +2,4 @@
 
 @include estimation-form.result-elements;
 
-.temperature-estimation {
-  @include estimation-form.form-block;
-}
+@include estimation-form.form-block('temperature-estimation');
