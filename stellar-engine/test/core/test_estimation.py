@@ -4,6 +4,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import math
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -798,3 +800,40 @@ def test_estimate_minimum_distance_wind_keeps_scan_when_refinement_fails(
 
     assert result["value"] == 500.0
     assert result["distance"] == 20.0
+
+
+@pytest.mark.parametrize(
+    "bounds, minimum, expected_pressure",
+    [
+        # near an end bound: the interval beside the winning end is refined
+        ([-3000.0, 3000.0], 2950.0, 2950.0),
+        ([-3000.0, 3000.0], -2950.0, -2950.0),
+        # near the starting bound of one-sided searches
+        ([0.0, 3000.0], 20.0, 20.0),
+        ([-3000.0, 0.0], -20.0, -20.0),
+        # true bound minima: the end point stays the result
+        ([-3000.0, 3000.0], 4000.0, 3000.0),
+        ([-3000.0, 3000.0], -4000.0, -3000.0),
+        ([0.0, 3000.0], -300.0, 0.0),
+        ([-3000.0, 0.0], 300.0, 0.0),
+    ],
+)
+def test_estimate_minimum_distance_wind_refines_beside_a_winning_end(
+    study: SectionStudy,
+    monkeypatch: pytest.MonkeyPatch,
+    bounds: list,
+    minimum: float,
+    expected_pressure: float,
+):
+    patch_wind_distance(
+        study,
+        monkeypatch,
+        lambda pressure: math.sqrt(1.0 + ((pressure - minimum) / 100.0) ** 2),
+    )
+
+    result = minimum_distance_wind(study, SWUNG_OBSTACLE, bounds=bounds)
+
+    assert result["value"] == pytest.approx(expected_pressure, abs=1.0)
+    assert result["distance"] == pytest.approx(
+        math.sqrt(1.0 + ((result["value"] - minimum) / 100.0) ** 2)
+    )

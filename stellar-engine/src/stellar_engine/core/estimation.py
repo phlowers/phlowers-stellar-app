@@ -343,7 +343,8 @@ def _brent_minimum(
     """Brent's minimization of ``distance`` on [lower, upper].
 
     ``best`` is an already computed ``(pressure, distance)`` inside the
-    interval, lower than the distance at its ends. Parabolic interpolation
+    interval or at one of its ends, not higher than the other computed
+    distances. Parabolic interpolation
     steps are taken when they are reliable, golden section steps otherwise.
 
     Returns:
@@ -485,14 +486,15 @@ def estimate_minimum_distance_wind(inputs: dict, study: SectionStudy) -> dict:
         raise _scan_failure(up)
 
     best = points[closest]
-    # an end point is a search bound: the distance decreases up to it
-    if 0 < closest < len(points) - 1:
+    # an end point is a search bound: the minimum may lie in the interval
+    # beside it, the end point itself staying a candidate
+    if len(points) > 1:
         scan = up if best[0] >= start else down
         try:
             refined = _brent_minimum(
                 scan.distance if scan.complete else new_distance(),
-                points[closest - 1][0],
-                points[closest + 1][0],
+                points[max(closest - 1, 0)][0],
+                points[min(closest + 1, len(points) - 1)][0],
                 best,
             )
         except SolverError as error:
