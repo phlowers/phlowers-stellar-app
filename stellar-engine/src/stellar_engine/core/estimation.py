@@ -57,6 +57,7 @@ from mechaphlowers.entities.errors import (
     EstimateOnSplitSupportError,
     SolverError,
 )
+from scipy.optimize import minimize_scalar  # type: ignore[import-untyped]
 
 from stellar_engine.core.conformity.runner import find_obstacle_point
 from stellar_engine.entities.errors import (
@@ -73,8 +74,6 @@ MINIMUM_DISTANCE_WIND_STEP = 250.0
 MINIMUM_DISTANCE_WIND_TOLERANCE = 0.5
 MINIMUM_DISTANCE_WIND_MAX_ITERATIONS = 50
 DEFAULT_MINIMUM_DISTANCE_WIND_BOUNDS = (-1000.0, 1000.0)
-# Golden section ratio (3 - sqrt(5)) / 2 of Brent's minimization
-_GOLDEN_SECTION = (3.0 - math.sqrt(5.0)) / 2.0
 
 
 def _to_finite_float(value: object, key: str) -> float:
@@ -334,82 +333,6 @@ def _scan_failure(scan: _WindScan) -> Exception:
     )
 
 
-def _brent_minimum(
-    distance: Callable[[float], float],
-    lower: float,
-    upper: float,
-    best: tuple[float, float],
-) -> tuple[float, float]:
-    """Brent's minimization of ``distance`` on [lower, upper].
-
-    ``best`` is an already computed ``(pressure, distance)`` inside the
-    interval or at one of its ends, not higher than the other computed
-    distances. Parabolic interpolation
-    steps are taken when they are reliable, golden section steps otherwise.
-
-    Returns:
-        The pressure of the minimum distance found, with that distance.
-    """
-    x = w = v = best[0]
-    fx = fw = fv = best[1]
-    step = previous_step = 0.0
-    half_tolerance = MINIMUM_DISTANCE_WIND_TOLERANCE / 2.0
-    for _ in range(MINIMUM_DISTANCE_WIND_MAX_ITERATIONS):
-        middle = (lower + upper) / 2.0
-        if (
-            abs(x - middle)
-            <= MINIMUM_DISTANCE_WIND_TOLERANCE - (upper - lower) / 2.0
-        ):
-            break
-        parabolic = False
-        if abs(previous_step) > half_tolerance:
-            r = (x - w) * (fx - fv)
-            q = (x - v) * (fx - fw)
-            p = (x - v) * q - (x - w) * r
-            q = 2.0 * (q - r)
-            if q > 0.0:
-                p = -p
-            q = abs(q)
-            if abs(p) < abs(0.5 * q * previous_step) and q * (
-                lower - x
-            ) < p < q * (upper - x):
-                previous_step, step = step, p / q
-                parabolic = True
-                # never evaluate too close to the interval ends
-                if (
-                    x + step - lower < MINIMUM_DISTANCE_WIND_TOLERANCE
-                    or upper - x - step < MINIMUM_DISTANCE_WIND_TOLERANCE
-                ):
-                    step = math.copysign(half_tolerance, middle - x)
-        if not parabolic:
-            previous_step = (lower - x) if x >= middle else (upper - x)
-            step = _GOLDEN_SECTION * previous_step
-        u = x + (
-            step
-            if abs(step) >= half_tolerance
-            else math.copysign(half_tolerance, step)
-        )
-        fu = distance(u)
-        if fu <= fx:
-            if u >= x:
-                lower = x
-            else:
-                upper = x
-            v, w, x = w, x, u
-            fv, fw, fx = fw, fx, fu
-        else:
-            if u < x:
-                lower = u
-            else:
-                upper = u
-            if fu <= fw or w == x:
-                v, w = w, u
-                fv, fw = fw, fu
-            elif fu <= fv or v in (x, w):
-                v, fv = u, fu
-    return x, fx
-
-
 def estimate_minimum_distance_wind(inputs: dict, study: SectionStudy) -> dict:
     """Estimate the wind pressure (Pa) bringing the cable closest to the obstacle.
 
@@ -419,7 +342,7 @@ def estimate_minimum_distance_wind(inputs: dict, study: SectionStudy) -> dict:
     The distance is assumed unimodal in the wind pressure: it is scanned
     every ``MINIMUM_DISTANCE_WIND_STEP`` Pa from 0 Pa (or the bound closest to
     it) in the decreasing direction until it increases, then the bracketed
-    minimum is refined with Brent's method.
+    minimum is refined with ``scipy.optimize.minimize_scalar``.
 
     Specific inputs: ``temperature`` (°C), optional ``iceThickness``.
 
@@ -491,19 +414,25 @@ def estimate_minimum_distance_wind(inputs: dict, study: SectionStudy) -> dict:
     if len(points) > 1:
         scan = up if best[0] >= start else down
         try:
-            refined = _brent_minimum(
+            refined = minimize_scalar(
                 scan.distance if scan.complete else new_distance(),
-                points[max(closest - 1, 0)][0],
-                points[min(closest + 1, len(points) - 1)][0],
-                best,
+                bounds=(
+                    points[max(closest - 1, 0)][0],
+                    points[min(closest + 1, len(points) - 1)][0],
+                ),
+                method="bounded",
+                options={
+                    "xatol": MINIMUM_DISTANCE_WIND_TOLERANCE,
+                    "maxiter": MINIMUM_DISTANCE_WIND_MAX_ITERATIONS,
+                },
             )
         except SolverError as error:
             logger.warning(
                 "Wind refinement failed, scan result kept: %s", error
             )
         else:
-            if refined[1] < best[1]:
-                best = refined
+            if refined.fun < best[1]:
+                best = (float(refined.x), float(refined.fun))
     logger.debug(
         "Minimum distance wind: %s Pa, %s m (%s evaluations)",
         best[0],

@@ -14,7 +14,6 @@ import {
 } from '@services/worker_python/tasks/types';
 import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { PlotResolutionService } from './plot-resolution.service';
 import { PlotOptionsService } from './plot-options.service';
 import { PlotSpanService } from './plot-span.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -65,7 +64,6 @@ export class PlotService {
   // Whether the outputs in litData account for at least one cut strand
   readonly isCutStrandApplied = computed(() => hasCutStrand(this.projectedCutStrands()));
 
-  private readonly resolutionService = inject(PlotResolutionService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly spanService = inject(PlotSpanService);
   private readonly workerPythonService = inject(WorkerPythonService);
