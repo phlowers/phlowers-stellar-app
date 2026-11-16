@@ -241,8 +241,23 @@ describe('ObstaclesTableComponent', () => {
   });
 
   describe('span selection', () => {
-    it('defaults to the first available span option', () => {
-      expect(component.selectedSpanUuid()).toBe('support-1');
+    it('defaults to "all spans"', () => {
+      expect(component.selectedSpanUuid()).toBe(ALL_SPANS_OPTION_VALUE);
+    });
+
+    it('falls back to "all spans" when the selected span no longer exists', () => {
+      component.selectedSpanUuid.set('removed-support');
+      sectionSignal.set(makeSection());
+      fixture.detectChanges();
+      expect(component.selectedSpanUuid()).toBe(ALL_SPANS_OPTION_VALUE);
+    });
+
+    it('defaults to "all spans" again once spans come back after there were none', () => {
+      sectionSignal.set(makeSection({ supports: [] }));
+      fixture.detectChanges();
+      sectionSignal.set(makeSection());
+      fixture.detectChanges();
+      expect(component.selectedSpanUuid()).toBe(ALL_SPANS_OPTION_VALUE);
     });
 
     it('resets to null when there are no span options', () => {
@@ -305,9 +320,11 @@ describe('ObstaclesTableComponent', () => {
     it('excludes obstacles that do not belong to the selected span', () => {
       sectionSignal.set(
         makeSection({
+          supports: makeSupports(['AB12C', 'AB13C', 'AB14C']),
           obstacles: [makeObstacle({ uuid: 'obs-other-span', supportUuid: 'support-2' })]
         })
       );
+      component.selectedSpanUuid.set('support-1');
       fixture.detectChanges();
 
       expect(component.rows()).toHaveLength(0);
@@ -332,6 +349,109 @@ describe('ObstaclesTableComponent', () => {
       expect(rows[0].referenceSupportLabel).toBe('AB12C');
       expect(rows[1].spanLabel).toBe('AB13C - AB14C');
       expect(rows[1].referenceSupportLabel).toBe('AB14C');
+    });
+
+    it('lists the obstacles from the left span to the right one, whatever their creation order, when "all spans" is selected', () => {
+      sectionSignal.set(
+        makeSection({
+          supports: makeSupports(['AB12C', 'AB13C', 'AB14C', 'AB15C']),
+          obstacles: [
+            makeObstacle({ uuid: 'obs-span-3', name: 'Third', supportUuid: 'support-3' }),
+            makeObstacle({ uuid: 'obs-span-1', name: 'First', supportUuid: 'support-1' }),
+            makeObstacle({ uuid: 'obs-span-2', name: 'Second', supportUuid: 'support-2' })
+          ]
+        })
+      );
+      component.selectedSpanUuid.set(ALL_SPANS_OPTION_VALUE);
+      fixture.detectChanges();
+
+      expect(component.rows().map((row) => row.obstacleName)).toEqual(['First', 'Second', 'Third']);
+    });
+
+    it('keeps the creation order of the obstacles of a same span', () => {
+      sectionSignal.set(
+        makeSection({
+          supports: makeSupports(['AB12C', 'AB13C', 'AB14C']),
+          obstacles: [
+            makeObstacle({ uuid: 'obs-1', name: 'Right A', supportUuid: 'support-2' }),
+            makeObstacle({ uuid: 'obs-2', name: 'Left A', supportUuid: 'support-1' }),
+            makeObstacle({ uuid: 'obs-3', name: 'Right B', supportUuid: 'support-2' }),
+            makeObstacle({ uuid: 'obs-4', name: 'Left B', supportUuid: 'support-1' })
+          ]
+        })
+      );
+      component.selectedSpanUuid.set(ALL_SPANS_OPTION_VALUE);
+      fixture.detectChanges();
+
+      expect(component.rows().map((row) => row.obstacleName)).toEqual(['Left A', 'Left B', 'Right A', 'Right B']);
+    });
+
+    it('keeps the points of an obstacle together and in order when sorting the obstacles by span', () => {
+      sectionSignal.set(
+        makeSection({
+          supports: makeSupports(['AB12C', 'AB13C', 'AB14C']),
+          obstacles: [
+            makeObstacle({
+              uuid: 'obs-right',
+              name: 'Right',
+              supportUuid: 'support-2',
+              positions: [
+                { x: 1, y: 0, z: 0 },
+                { x: 2, y: 0, z: 0 }
+              ]
+            }),
+            makeObstacle({
+              uuid: 'obs-left',
+              name: 'Left',
+              supportUuid: 'support-1',
+              positions: [
+                { x: 3, y: 0, z: 0 },
+                { x: 4, y: 0, z: 0 }
+              ]
+            })
+          ]
+        })
+      );
+      component.selectedSpanUuid.set(ALL_SPANS_OPTION_VALUE);
+      fixture.detectChanges();
+
+      expect(component.rows().map((row) => [row.obstacleName, row.pointNumber])).toEqual([
+        ['Left', 1],
+        ['Left', 2],
+        ['Right', 1],
+        ['Right', 2]
+      ]);
+    });
+
+    it('lists the obstacles of a span that no longer exists after the others', () => {
+      sectionSignal.set(
+        makeSection({
+          supports: makeSupports(['AB12C', 'AB13C', 'AB14C']),
+          obstacles: [
+            makeObstacle({ uuid: 'obs-orphan', name: 'Orphan', supportUuid: 'removed-support' }),
+            makeObstacle({ uuid: 'obs-span-2', name: 'Second', supportUuid: 'support-2' }),
+            makeObstacle({ uuid: 'obs-span-1', name: 'First', supportUuid: 'support-1' })
+          ]
+        })
+      );
+      component.selectedSpanUuid.set(ALL_SPANS_OPTION_VALUE);
+      fixture.detectChanges();
+
+      expect(component.rows().map((row) => row.obstacleName)).toEqual(['First', 'Second', 'Orphan']);
+    });
+
+    it('does not reorder the obstacles of the section', () => {
+      const obstacles = [
+        makeObstacle({ uuid: 'obs-span-2', supportUuid: 'support-2' }),
+        makeObstacle({ uuid: 'obs-span-1', supportUuid: 'support-1' })
+      ];
+      sectionSignal.set(makeSection({ supports: makeSupports(['AB12C', 'AB13C', 'AB14C']), obstacles }));
+      component.selectedSpanUuid.set(ALL_SPANS_OPTION_VALUE);
+      fixture.detectChanges();
+
+      component.rows();
+
+      expect(obstacles.map((obstacle) => obstacle.uuid)).toEqual(['obs-span-2', 'obs-span-1']);
     });
 
     it('resolves the reference support label from the span support options', () => {
@@ -678,6 +798,27 @@ describe('ObstaclesTableComponent', () => {
       expect(rows.map((row) => row.spanLabel)).toEqual(['AB12C - AB13C', 'AB13C - AB14C']);
     });
 
+    it('lists the obstacles from the left span to the right one, not in the order they were created', async () => {
+      distancesSignal.set([makeDistance('obs-1'), makeDistance('obs-2'), makeDistance('obs-3')]);
+      sectionSignal.set(
+        makeSection({
+          supports: makeSupports(['AB12C', 'AB13C', 'AB14C', 'AB15C']),
+          obstacles: [
+            makeObstacle({ uuid: 'obs-1', name: 'Created first, third span', supportUuid: 'support-3' }),
+            makeObstacle({ uuid: 'obs-2', name: 'Created second, first span', supportUuid: 'support-1' }),
+            makeObstacle({ uuid: 'obs-3', name: 'Created third, second span', supportUuid: 'support-2' })
+          ]
+        })
+      );
+      component.selectedSpanUuid.set(ALL_SPANS_OPTION_VALUE);
+      fixture.detectChanges();
+
+      await component.onGenerateReport();
+
+      const { rows } = mockReportService.generateReport.mock.calls[0][0] as ObstaclesTableReportData;
+      expect(rows.map((row) => row.spanLabel)).toEqual(['AB12C - AB13C', 'AB13C - AB14C', 'AB14C - AB15C']);
+    });
+
     it('falls back to placeholders when no study, initial condition or load case is available', async () => {
       distancesSignal.set([makeDistance('obs-1')]);
       sectionSignal.set(makeSection({ name: 'Fake canton', obstacles: [makeObstacle()] }));
@@ -838,7 +979,7 @@ describe('ObstaclesTableComponent', () => {
         };
       };
 
-      it('disables the button and shows its loading state while the distances are being calculated', () => {
+      it('disables the button without showing its loading state while the distances are being calculated', () => {
         setReportContext();
         const { footerFixture, button, buttonComponent } = renderReportButtonWithComponent();
         expect(button.disabled).toBe(false);
@@ -849,7 +990,7 @@ describe('ObstaclesTableComponent', () => {
 
         expect(component.isGeneratingReport()).toBe(false);
         expect(button.disabled).toBe(true);
-        expect(buttonComponent.btnLoading()).toBe(true);
+        expect(buttonComponent.btnLoading()).toBe(false);
 
         plotLoadingSignal.set(false);
         footerFixture.detectChanges();
@@ -868,7 +1009,7 @@ describe('ObstaclesTableComponent', () => {
       });
 
       // The obstacle calculation updates the positions before the projection refresh starts
-      it('disables the button and shows its loading state while an obstacle calculation awaits its projection', () => {
+      it('disables the button without showing its loading state while an obstacle calculation awaits its projection', () => {
         setReportContext();
         const { footerFixture, button, buttonComponent } = renderReportButtonWithComponent();
 
@@ -877,7 +1018,7 @@ describe('ObstaclesTableComponent', () => {
 
         expect(plotLoadingSignal()).toBe(false);
         expect(button.disabled).toBe(true);
-        expect(buttonComponent.btnLoading()).toBe(true);
+        expect(buttonComponent.btnLoading()).toBe(false);
 
         isCalculatingObstacleSignal.set(false);
         footerFixture.detectChanges();
@@ -896,7 +1037,7 @@ describe('ObstaclesTableComponent', () => {
       });
 
       // The load case switch selects the charge before the engine tasks and the projection refresh start
-      it('disables the button and shows its loading state while a load case is being applied', () => {
+      it('disables the button without showing its loading state while a load case is being applied', () => {
         setReportContext();
         const { footerFixture, button, buttonComponent } = renderReportButtonWithComponent();
 
@@ -905,7 +1046,7 @@ describe('ObstaclesTableComponent', () => {
 
         expect(plotLoadingSignal()).toBe(false);
         expect(button.disabled).toBe(true);
-        expect(buttonComponent.btnLoading()).toBe(true);
+        expect(buttonComponent.btnLoading()).toBe(false);
 
         isApplyingLoadCaseSignal.set(false);
         footerFixture.detectChanges();

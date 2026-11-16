@@ -119,7 +119,7 @@
     type="button"
     btnStyle="text"
     [disabled]="!canGenerateReport()"
-    [btnLoading]="isReportLoading()"
+    [btnLoading]="isGeneratingReport()"
     (click)="onGenerateReport()"
     data-testid="report-btn"
   >
