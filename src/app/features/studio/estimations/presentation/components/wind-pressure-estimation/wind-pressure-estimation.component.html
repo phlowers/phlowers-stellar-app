@@ -1,0 +1,134 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="calculate()"
+  class="wind-pressure-estimation"
+  [attr.aria-busy]="isCalculating()"
+  data-testid="wind-pressure-estimation-form"
+>
+  @if (!hasObstacle()) {
+    <p class="wind-pressure-estimation__info" data-testid="choose-obstacle-info">
+      <app-icon icon="info" aria-hidden="true" />
+      {{ 'studio.estimations.choose-obstacle-info' | transloco }}
+    </p>
+  }
+
+  <div class="wind-pressure-estimation__grid">
+    <div class="wind-pressure-estimation__field">
+      <label class="wind-pressure-estimation__label" for="wind-estimation-obstacle">{{
+        'common.obstacle-name-label' | transloco
+      }}</label>
+      <p-select
+        inputId="wind-estimation-obstacle"
+        [options]="obstacleOptions()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="obstacleUuid"
+        [filter]="true"
+        filterBy="label"
+        appendTo="body"
+        fluid
+        data-testid="obstacle-select"
+      />
+    </div>
+
+    <div class="wind-pressure-estimation__field">
+      <label class="wind-pressure-estimation__label" for="wind-estimation-point">{{
+        'common.point-label' | transloco
+      }}</label>
+      <p-select
+        inputId="wind-estimation-point"
+        [options]="pointOptions()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="pointIndex"
+        appendTo="body"
+        fluid
+        data-testid="point-select"
+      />
+    </div>
+
+    @let error = temperatureError();
+    <div class="wind-pressure-estimation__field">
+      <label class="wind-pressure-estimation__label" for="wind-estimation-temperature">
+        {{ 'common.temperature-label' | transloco }}
+      </label>
+      <p-inputgroup>
+        <input
+          id="wind-estimation-temperature"
+          type="number"
+          pInputText
+          formControlName="temperature"
+          [attr.min]="limits.min"
+          [attr.max]="limits.max"
+          [attr.step]="limits.step"
+          required
+          data-testid="temperature-input"
+          [attr.aria-invalid]="error ? 'true' : null"
+          [attr.aria-errormessage]="error ? 'wind-estimation-temperature-error' : null"
+        />
+        <p-inputgroup-addon>{{ 'common.celsius-unit' | transloco }}</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (error) {
+        <p-message id="wind-estimation-temperature-error" severity="error" size="small" variant="simple" role="alert">
+          {{ error.key | transloco: error.params }}
+        </p-message>
+      }
+    </div>
+  </div>
+
+  <div class="wind-pressure-estimation__calculate">
+    <button
+      type="submit"
+      app-btn
+      [disabled]="!canCalculate()"
+      [btnLoading]="isCalculating()"
+      data-testid="calculate-btn"
+    >
+      <app-icon icon="rocket_launch" aria-hidden="true" />
+      {{ 'common.calculate' | transloco }}
+    </button>
+  </div>
+</form>
+
+<!-- Always on the page: screen readers only announce results added to a live region that is already there -->
+<output class="wind-pressure-estimation__results" data-testid="results">
+  @let pressure = windPressure();
+  @if (pressure !== null) {
+    <div
+      class="wind-pressure-estimation__results-content"
+      animate.enter="anim-expand-height"
+      data-testid="results-frame"
+    >
+      <h2>{{ 'common.results' | transloco }}</h2>
+      <div class="wind-pressure-estimation__grid">
+        <dl class="wind-pressure-estimation__field">
+          <dt>{{ 'studio.estimations.wind-pressure-label' | transloco }}</dt>
+          <dd class="wind-pressure-estimation__result">
+            <span data-testid="wind-pressure-value"
+              >{{ pressure | number: pressureFormat }}&nbsp;{{ 'common.pascal-unit' | transloco }}</span
+            >
+            <button
+              type="button"
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              [attr.aria-label]="'studio.estimations.copy-wind-pressure-aria-label' | transloco"
+              (click)="copyWindPressure()"
+              data-testid="copy-wind-pressure-btn"
+            >
+              <app-icon icon="content_copy" aria-hidden="true" />
+            </button>
+          </dd>
+        </dl>
+        <dl class="wind-pressure-estimation__field">
+          <dt>{{ 'studio.estimations.minimum-oblique-distance-label' | transloco }}</dt>
+          <dd class="wind-pressure-estimation__result">
+            <span data-testid="minimum-distance-value"
+              >{{ minimumDistance() | number: distanceFormat }}&nbsp;{{ 'common.meter' | transloco }}</span
+            >
+          </dd>
+        </dl>
+      </div>
+    </div>
+  }
+</output>

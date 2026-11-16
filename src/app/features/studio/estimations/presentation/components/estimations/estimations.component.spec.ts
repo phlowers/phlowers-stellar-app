@@ -10,10 +10,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { EstimationsComponent } from '@features/studio/estimations/presentation/components/estimations/estimations.component';
 import { TemperatureEstimationComponent } from '@features/studio/estimations/presentation/components/temperature-estimation/temperature-estimation.component';
+import { WindPressureEstimationComponent } from '@features/studio/estimations/presentation/components/wind-pressure-estimation/wind-pressure-estimation.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 
 @Component({ selector: 'app-temperature-estimation', template: '<p data-testid="temperature-estimation-stub"></p>' })
 class TemperatureEstimationStubComponent {}
+
+@Component({
+  selector: 'app-wind-pressure-estimation',
+  template: '<p data-testid="wind-pressure-estimation-stub"></p>'
+})
+class WindPressureEstimationStubComponent {}
 
 describe('EstimationsComponent', () => {
   let component: EstimationsComponent;
@@ -44,8 +51,8 @@ describe('EstimationsComponent', () => {
       providers: [{ provide: ToolbarDialogService, useValue: mockToolbarDialogService }]
     })
       .overrideComponent(EstimationsComponent, {
-        remove: { imports: [TemperatureEstimationComponent] },
-        add: { imports: [TemperatureEstimationStubComponent] }
+        remove: { imports: [TemperatureEstimationComponent, WindPressureEstimationComponent] },
+        add: { imports: [TemperatureEstimationStubComponent, WindPressureEstimationStubComponent] }
       })
       .compileComponents();
 
@@ -72,7 +79,7 @@ describe('EstimationsComponent', () => {
     expect(mockToolbarDialogService.setTemplates).toHaveBeenLastCalledWith({});
   });
 
-  it('shows three tabs, only the temperature one being usable', () => {
+  it('shows three tabs, the temperature and wind pressure ones being usable', () => {
     const tabs = [
       ['temperature-tab', 'Conformity temperature'],
       ['wind-pressure-tab', 'Wind pressure for min. distance'],
@@ -82,12 +89,21 @@ describe('EstimationsComponent', () => {
       expect(getByTestId(testId)?.textContent?.trim()).toBe(label);
     }
     expect(getByTestId('temperature-tab')?.getAttribute('aria-disabled')).toBe('false');
-    expect(getByTestId('wind-pressure-tab')?.getAttribute('aria-disabled')).toBe('true');
+    expect(getByTestId('wind-pressure-tab')?.getAttribute('aria-disabled')).toBe('false');
     expect(getByTestId('vertical-effort-tab')?.getAttribute('aria-disabled')).toBe('true');
   });
 
   it('opens on the temperature tab', () => {
     expect(component.activeTab()).toBe('temperature');
     expect(getByTestId('temperature-estimation-stub')).not.toBeNull();
+  });
+
+  it('shows the wind pressure estimation in its tab', () => {
+    component.activeTab.set('wind-pressure');
+    fixture.detectChanges();
+
+    expect(
+      getByTestId('wind-pressure-panel')?.querySelector('[data-testid="wind-pressure-estimation-stub"]')
+    ).not.toBeNull();
   });
 });

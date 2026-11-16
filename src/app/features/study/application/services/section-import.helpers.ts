@@ -26,7 +26,7 @@ export function findMaxFiniteValue(values: readonly (number | null)[]): { value:
 /** Name of the support when it has one, otherwise its 1-based number. */
 export function getSupportLabel(support: Pick<Support, 'name'> | undefined, index: number): string {
   const name = support?.name?.trim();
-  return name ? name : String(index + 1);
+  return name || String(index + 1);
 }
 
 /** Maximum position error of a section, with the support where it occurs and the resulting severity. */

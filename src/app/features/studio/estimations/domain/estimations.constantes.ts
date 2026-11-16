@@ -25,6 +25,24 @@ export const CONFORMITY_TEMPERATURE_BOUNDS: readonly [number, number] = [-50, 25
 /** Number format of the conformity temperature: always 2 decimals. */
 export const CONFORMITY_TEMPERATURE_FORMAT = '1.2-2';
 
+export const CABLE_TEMPERATURE_DECIMALS = 2;
+
+/** Cable temperature (°C) entered for an estimation: the conformity temperature range. */
+export const CABLE_TEMPERATURE_LIMITS = {
+  min: CONFORMITY_TEMPERATURE_BOUNDS[0],
+  max: CONFORMITY_TEMPERATURE_BOUNDS[1],
+  step: 10 ** -CABLE_TEMPERATURE_DECIMALS
+} as const;
+
+/** Search interval (Pa) of the wind pressure giving the minimum distance, also its displayed range. */
+export const MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS: readonly [number, number] = [-3000, 3000];
+
+/** Number format of the wind pressure giving the minimum distance: no decimal. */
+export const MINIMUM_DISTANCE_WIND_PRESSURE_FORMAT = '1.0-0';
+
+/** Number format of the minimum oblique distance: always 2 decimals. */
+export const MINIMUM_OBLIQUE_DISTANCE_FORMAT = '1.2-2';
+
 export const DEFAULT_ESTIMATION_TAB: EstimationTabValue = 'temperature';
 
 export const ESTIMATION_TABS: readonly EstimationTab[] = [
@@ -37,7 +55,7 @@ export const ESTIMATION_TABS: readonly EstimationTab[] = [
   {
     value: 'wind-pressure',
     labelKey: 'studio.estimations.wind-pressure-tab',
-    disabled: true,
+    disabled: false,
     testId: 'wind-pressure-tab'
   },
   {

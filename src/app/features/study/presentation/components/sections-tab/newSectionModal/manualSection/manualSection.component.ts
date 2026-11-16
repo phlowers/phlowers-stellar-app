@@ -354,7 +354,7 @@ export class ManualSectionComponent implements OnInit {
     if (anchor?.supportUuid === uuid) {
       this.startAnchor.set(null);
       this.applyStart(null);
-    } else if (anchor && supports[0].uuid === anchor.supportUuid) {
+    } else if (supports[0].uuid === anchor?.supportUuid) {
       this.startAnchor.set(null);
       this.applyStart(getStartFromAnchorSupport(anchor, supports[0]));
     } else if (deletesGeolocatedStart) {

@@ -5,9 +5,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-/** EPSG code of a coordinate reference system, e.g. `EPSG:4326`. */
-export type CrsCode = string;
-
 /** WGS84 GPS point, in decimal degrees. */
 export interface GpsPoint {
   latitude: number;

@@ -6,14 +6,18 @@
  */
 
 import { LateralDistanceType, Obstacle, ReferenceSupport } from '@shared/domain/models/obstacle.model';
-import { TemperatureEstimationFormValue } from '@features/studio/estimations/domain/estimations.interfaces';
+import {
+  TemperatureEstimationFormValue,
+  WindPressureEstimationFormValue
+} from '@features/studio/estimations/domain/estimations.interfaces';
 import {
   getDefaultPointIndex,
   getEstimableObstacles,
   getPreselectedObstacleUuid,
   toObstacleOptions,
   toPointOptions,
-  toTemperatureEstimationInputs
+  toTemperatureEstimationInputs,
+  toWindPressureEstimationInputs
 } from '@features/studio/estimations/presentation/estimations.helpers';
 
 // Synthetic data only
@@ -122,6 +126,40 @@ describe('estimations helpers', () => {
       ['no target distance', makeFormValue({ targetDistance: null }), makeObstacle()]
     ])('returns null with %s', (_, value, obstacle) => {
       expect(toTemperatureEstimationInputs(value, obstacle)).toBeNull();
+    });
+  });
+
+  describe('toWindPressureEstimationInputs', () => {
+    const windFormValue = (
+      overrides: Partial<WindPressureEstimationFormValue> = {}
+    ): WindPressureEstimationFormValue => ({
+      obstacleUuid: 'obstacle-a',
+      pointIndex: 1,
+      temperature: -12.5,
+      ...overrides
+    });
+
+    it('maps the form to the engine inputs on the obstacle span, bounded to [-3000; 3000] Pa', () => {
+      expect(toWindPressureEstimationInputs(windFormValue(), makeObstacle())).toEqual({
+        spanIndex: 1,
+        obstacleUuid: 'obstacle-a',
+        pointIndex: 1,
+        temperature: -12.5,
+        bounds: [-3000, 3000]
+      });
+    });
+
+    it('keeps a zero temperature', () => {
+      expect(toWindPressureEstimationInputs(windFormValue({ temperature: 0 }), makeObstacle())?.temperature).toBe(0);
+    });
+
+    it.each([
+      ['no obstacle', windFormValue(), null],
+      ['another obstacle', windFormValue({ obstacleUuid: 'obstacle-b' }), makeObstacle()],
+      ['no point', windFormValue({ pointIndex: null }), makeObstacle()],
+      ['no temperature', windFormValue({ temperature: null }), makeObstacle()]
+    ])('returns null with %s', (_, value, obstacle) => {
+      expect(toWindPressureEstimationInputs(value, obstacle)).toBeNull();
     });
   });
 });

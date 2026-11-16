@@ -22,12 +22,19 @@ import { ToolbarDialogService } from '@features/studio/toolbar/presentation/serv
 import { DEFAULT_ESTIMATION_TAB, ESTIMATION_TABS } from '@features/studio/estimations/domain/estimations.constantes';
 import { EstimationTabValue } from '@features/studio/estimations/domain/estimations.interfaces';
 import { TemperatureEstimationComponent } from '@features/studio/estimations/presentation/components/temperature-estimation/temperature-estimation.component';
+import { WindPressureEstimationComponent } from '@features/studio/estimations/presentation/components/wind-pressure-estimation/wind-pressure-estimation.component';
 
 /** "Estimations" studio tool dialog: one tab per estimation (US.EST). */
 @Component({
   selector: 'app-estimations',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoModule, TabsModule, IconComponent, TemperatureEstimationComponent],
+  imports: [
+    TranslocoModule,
+    TabsModule,
+    IconComponent,
+    TemperatureEstimationComponent,
+    WindPressureEstimationComponent
+  ],
   templateUrl: './estimations.component.html'
 })
 export class EstimationsComponent {

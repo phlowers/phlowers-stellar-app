@@ -159,9 +159,7 @@ describe('HangingTableReportService', () => {
     );
 
     const doc = await getMockDoc();
-    const temperatureLabelCalls = doc.text.mock.calls.filter(
-      (call) => call[0] === 'studio.conformity.temperature-label'
-    );
+    const temperatureLabelCalls = doc.text.mock.calls.filter((call) => call[0] === 'common.temperature-label');
     expect(temperatureLabelCalls).toHaveLength(1);
     expect(doc.addPage).not.toHaveBeenCalled();
   });

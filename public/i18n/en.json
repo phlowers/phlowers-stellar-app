@@ -191,7 +191,9 @@
     "obstacle-name-label": "Obstacle name",
     "celsius-unit": "°C",
     "copied-to-clipboard": "Copied to clipboard",
-    "copy-to-clipboard-failed": "Failed to copy to the clipboard"
+    "copy-to-clipboard-failed": "Failed to copy to the clipboard",
+    "temperature-label": "Temperature",
+    "pascal-unit": "Pa"
   },
   "auth": {
     "login-page": {
@@ -939,7 +941,11 @@
       "choose-obstacle-info": "To use the estimation tool, you must first choose an obstacle",
       "target-vertical-distance-label": "Target vertical distance",
       "copy-temperature-aria-label": "Copy the conformity temperature",
-      "calculation-failed": "Failed to estimate the conformity temperature"
+      "calculation-failed": "Failed to estimate the conformity temperature",
+      "wind-pressure-label": "Wind pressure",
+      "minimum-oblique-distance-label": "Minimum oblique distance",
+      "copy-wind-pressure-aria-label": "Copy the wind pressure",
+      "wind-pressure-calculation-failed": "Failed to estimate the wind pressure"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Expand details",
@@ -1050,7 +1056,6 @@
       "distance-to-comply-label": "Distance to comply",
       "compliance-altitude-label": "Compliance altitude",
       "compliance-line-axis-distance-label": "Compliance line axis distance",
-      "temperature-label": "Temperature",
       "wind-pressure-label": "Wind pressure",
       "minimal-distance-label": "Cable minimal distance"
     },

@@ -159,6 +159,16 @@ export const buildTerrainDataRows = (
   ];
 };
 
+/** Criterion item: "-" until a result exists, then a yes/no validity flag. */
+const buildCriterionItem = (checkValidity: boolean | undefined, transloco: TranslocoService): PdfBulletItem => {
+  const label = transloco.translate(LABEL_KEYS.criterion);
+  if (checkValidity === undefined) {
+    return item(label, '-');
+  }
+  const validityKey = checkValidity ? 'common.yes' : 'common.no';
+  return item(label, transloco.translate(validityKey), checkValidity);
+};
+
 /** Parameter, uncertainty and criterion items shared by every method: `result` is `null` until calculated. */
 const buildResultItems = (
   result: { parameter: number; uncertainty: number; checkValidity: boolean } | null,
@@ -176,13 +186,7 @@ const buildResultItems = (
     PDF_UNITS.meters,
     DECIMALS.parameter
   ),
-  criterion: result
-    ? item(
-        transloco.translate(LABEL_KEYS.criterion),
-        transloco.translate(result.checkValidity ? 'common.yes' : 'common.no'),
-        result.checkValidity
-      )
-    : item(transloco.translate(LABEL_KEYS.criterion), '-')
+  criterion: buildCriterionItem(result?.checkValidity, transloco)
 });
 
 /** Method and left support items opening every method block. */
