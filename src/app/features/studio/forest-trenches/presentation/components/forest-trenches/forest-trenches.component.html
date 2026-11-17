@@ -62,14 +62,14 @@
       </fieldset>
 
       <fieldset>
-        <legend class="form__title-form underline-text">{{ 'studio.conformity.form-legend' | transloco }}</legend>
+        <legend class="form__title-form underline-text">{{ 'common.form-label' | transloco }}</legend>
 
         <dl>
-          <dt class="form__electric-tension-label">{{ 'studio.conformity.electric-tension-label' | transloco }}</dt>
+          <dt class="form__electric-tension-label">{{ 'common.electric-tension-label' | transloco }}</dt>
           <dd class="form__electric-tension-input">{{ electricTensionLabel() }}</dd>
         </dl>
 
-        <label for="windZone" class="form__wind-label">{{ 'studio.conformity.wind-zone-label' | transloco }}</label>
+        <label for="windZone" class="form__wind-label">{{ 'common.wind-zone-label' | transloco }}</label>
         <p-select
           inputId="windZone"
           formControlName="windZone"
@@ -83,13 +83,13 @@
 
         <div class="form__wind-compl">
           <p-checkbox formControlName="windMinus" inputId="windMinus" [binary]="true" />
-          <label for="windMinus">{{ 'studio.conformity.wind-minus-label' | transloco }}</label>
+          <label for="windMinus">{{ 'common.wind-minus-label' | transloco }}</label>
           <p-checkbox formControlName="redZonePresence" inputId="redZonePresence" [binary]="true" />
-          <label for="redZonePresence">{{ 'studio.conformity.red-zone-presence-label' | transloco }}</label>
+          <label for="redZonePresence">{{ 'common.red-zone-presence-label' | transloco }}</label>
         </div>
 
         <label for="repartitionTemperature" class="form__distrib-temp-label">{{
-          'studio.conformity.repartition-temperature-label' | transloco
+          'common.repartition-temperature-label' | transloco
         }}</label>
         <p-inputgroup class="form__distrib-temp-input">
           <input
@@ -146,7 +146,7 @@
           @if (lateralTemperatureRuleName()) {
             {{ lateralTemperatureRuleName() }} —
           }
-          {{ 'studio.conformity.lateral-distance-temperature-label' | transloco }}
+          {{ 'common.lateral-distance-temperature-label' | transloco }}
         </label>
         <p-inputgroup class="form__lat-temp-input">
           <input
@@ -185,8 +185,8 @@
           }
         </div>
 
-        <label for="selectedRules" class="form__conformity-select-label">{{
-          'studio.shared.conformity-label' | transloco
+        <label for="selectedRules" class="form__rules-select-label">{{
+          'studio.forest-trenches.rules-label' | transloco
         }}</label>
         <p-multiselect
           inputId="selectedRules"
@@ -197,7 +197,7 @@
           [filter]="false"
           [showToggleAll]="false"
           fluid
-          class="form__conformity-select-input"
+          class="form__rules-select-input"
           data-testid="forest-trenches-rules-multiselect"
         />
       </fieldset>
@@ -229,11 +229,11 @@
 
   <output class="sr-only" aria-live="polite">
     @if (isCalculating()) {
-      {{ 'studio.conformity.calculating-text' | transloco }}
+      {{ 'studio.forest-trenches.calculating-text' | transloco }}
     } @else if (calculationError()) {
       {{ calculationError() }}
     } @else if (results().length > 0) {
-      {{ 'studio.conformity.results-updated-text' | transloco }}
+      {{ 'studio.forest-trenches.results-updated-text' | transloco }}
     }
   </output>
 
@@ -299,11 +299,6 @@
               </button>
             </div>
           </div>
-
-          <button type="button" app-btn btnStyle="outlined" disabled>
-            <app-icon icon="download" aria-hidden="true" />
-            Générer rapport VEGEO
-          </button>
         </div>
       }
 
@@ -322,9 +317,9 @@
             >
               <app-icon [icon]="isGraphEnlarged() ? 'fullscreen_exit' : 'fullscreen'" aria-hidden="true" />
               @if (isGraphEnlarged()) {
-                {{ 'studio.conformity.reduce-graphic-view-btn' | transloco }}
+                {{ 'common.reduce-graphic-view-btn' | transloco }}
               } @else {
-                {{ 'studio.conformity.enlarge-graphic-view-btn' | transloco }}
+                {{ 'common.enlarge-graphic-view-btn' | transloco }}
               }
             </button>
             <div [id]="FOREST_TRENCHES_PLOT_ID" class="results__plot"></div>

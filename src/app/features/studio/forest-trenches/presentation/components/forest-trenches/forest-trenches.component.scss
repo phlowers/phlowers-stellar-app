@@ -82,8 +82,8 @@ tr:has(td) {
     'firstLabel lastLabel . . nPointsLabel'
     'firstInput lastInput . . nPointsInput'
     'titleForm titleForm titleForm titleForm titleForm'
-    'tensionLabel windLabel distribTempLabel latTempLabel conformitySelectLabel'
-    'tensionInput windInput distribTempInput latTempInput conformitySelectInput'
+    'tensionLabel windLabel distribTempLabel latTempLabel rulesSelectLabel'
+    'tensionInput windInput distribTempInput latTempInput rulesSelectInput'
     '. windComplement distribTempComplement latTempComplement .'
     'configError configError configError configError configError'
     'submit submit submit submit submit';
@@ -162,12 +162,12 @@ tr:has(td) {
     grid-area: latTempComplement;
     @extend %_mb-3;
   }
-  &__conformity-select-label {
-    grid-area: conformitySelectLabel;
+  &__rules-select-label {
+    grid-area: rulesSelectLabel;
     @extend %_self-end;
   }
-  &__conformity-select-input {
-    grid-area: conformitySelectInput;
+  &__rules-select-input {
+    grid-area: rulesSelectInput;
   }
   &__config-error {
     grid-area: configError;
