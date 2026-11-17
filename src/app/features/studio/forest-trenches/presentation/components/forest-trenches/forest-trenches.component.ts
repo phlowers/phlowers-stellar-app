@@ -62,7 +62,7 @@ import {
   spansInInterval,
   toSliceGroundInput
 } from './forest-trenches.helpers';
-import { FOREST_TRENCHES_PLOT_ID } from './forest-trenches.constantes';
+import { FOREST_TRENCHES_CALCULATION_TIMEOUT_MS, FOREST_TRENCHES_PLOT_ID } from './forest-trenches.constantes';
 import type {
   ForestTrenchesCatalogData,
   ForestTrenchesSelectOption,
@@ -468,7 +468,11 @@ export class ForestTrenchesComponent implements OnDestroy {
         lateralRules: config.lateralRules.filter((ruleType) => selectedRuleTypes.includes(ruleType)),
         spans
       };
-      const { result, error } = await this.workerPythonService.runTask(Task.getForestTrenches, taskInput);
+      const { result, error } = await this.workerPythonService.runTaskWithTimeout(
+        Task.getForestTrenches,
+        taskInput,
+        FOREST_TRENCHES_CALCULATION_TIMEOUT_MS
+      );
       if (error || !result) throw new Error(error ?? 'Forest trenches task failed.');
       if (!result.spans.length) throw new Error('Forest trenches task returned no span results.');
 

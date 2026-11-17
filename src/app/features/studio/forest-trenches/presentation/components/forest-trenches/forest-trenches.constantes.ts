@@ -7,6 +7,9 @@
 
 export const FOREST_TRENCHES_PLOT_ID = 'forest-trenches-plot';
 
+// The forest trenches task computes every span of the interval in a single call, the default 30 s is too short for long sections
+export const FOREST_TRENCHES_CALCULATION_TIMEOUT_MS = 90_000;
+
 export const FOREST_TRENCHES_PLOT_COLORS = {
   axis: '#000000'
 } as const;

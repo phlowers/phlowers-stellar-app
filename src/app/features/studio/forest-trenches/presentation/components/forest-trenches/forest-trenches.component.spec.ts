@@ -19,6 +19,7 @@ import { NotificationService } from '@services/notification/notification.service
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ForestTrenchesComponent } from './forest-trenches.component';
+import { FOREST_TRENCHES_CALCULATION_TIMEOUT_MS } from './forest-trenches.constantes';
 import { createForestTrenchesPlot } from './forest-trenches.helpers';
 
 vi.mock('./forest-trenches.helpers', async (importOriginal) => {
@@ -36,7 +37,7 @@ describe('ForestTrenchesComponent', () => {
   let component: ForestTrenchesComponent;
   let section: Section;
   let sectionSignal: ReturnType<typeof signal<Section | null>>;
-  let workerPython: { runTask: ReturnType<typeof vi.fn> };
+  let workerPython: { runTask: ReturnType<typeof vi.fn>; runTaskWithTimeout: ReturnType<typeof vi.fn> };
   let sectionService: { createOrUpdateSection: ReturnType<typeof vi.fn> };
   let notificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
   let logger: { error: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
@@ -51,15 +52,13 @@ describe('ForestTrenchesComponent', () => {
     notificationService = { success: vi.fn(), error: vi.fn() };
     logger = { error: vi.fn(), warn: vi.fn() };
     workerPython = {
-      runTask: vi.fn().mockImplementation((task: Task) => {
-        if (task === Task.sliceGround) {
-          return Promise.resolve({
-            result: { distances: [0, 100], altitudes: [10, 12], length: 100 },
-            error: null
-          });
-        }
-        return Promise.resolve({ result: { spans: [makeSpanOutput(0), makeSpanOutput(1)] }, error: null });
-      })
+      runTask: vi.fn().mockResolvedValue({
+        result: { distances: [0, 100], altitudes: [10, 12], length: 100 },
+        error: null
+      }),
+      runTaskWithTimeout: vi
+        .fn()
+        .mockResolvedValue({ result: { spans: [makeSpanOutput(0), makeSpanOutput(1)] }, error: null })
     };
 
     await TestBed.configureTestingModule({
@@ -155,18 +154,17 @@ describe('ForestTrenchesComponent', () => {
     await fixture.whenStable();
     fixture.detectChanges();
 
-    expect(workerPython.runTask.mock.calls.map(([task]) => task)).toEqual([
-      Task.sliceGround,
-      Task.sliceGround,
-      Task.getForestTrenches
-    ]);
+    expect(workerPython.runTask.mock.calls.map(([task]) => task)).toEqual([Task.sliceGround, Task.sliceGround]);
+    expect(workerPython.runTaskWithTimeout).toHaveBeenCalledTimes(1);
+    expect(workerPython.runTaskWithTimeout.mock.calls[0][0]).toBe(Task.getForestTrenches);
+    expect(workerPython.runTaskWithTimeout.mock.calls[0][2]).toBe(FOREST_TRENCHES_CALCULATION_TIMEOUT_MS);
     expect(workerPython.runTask.mock.calls[0][1]).toMatchObject({
       spanIndex: 0,
       nPoints: 3,
       referenceSupport: 'LEFT',
       floorPoints: [{ distance: 25, altitude: 11 }]
     });
-    expect(workerPython.runTask.mock.calls[2][1]).toMatchObject({
+    expect(workerPython.runTaskWithTimeout.mock.calls[0][1]).toMatchObject({
       electricTension: '400 kV',
       overhangRules: ['RULE_1'],
       lateralRules: ['RULE_1'],
@@ -175,7 +173,7 @@ describe('ForestTrenchesComponent', () => {
         { spanIndex: 1, distances: [0, 100], altitudes: [10, 12] }
       ]
     });
-    expect(workerPython.runTask.mock.calls[2][1]).not.toHaveProperty('baseCase');
+    expect(workerPython.runTaskWithTimeout.mock.calls[0][1]).not.toHaveProperty('baseCase');
     expect(sectionService.createOrUpdateSection).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({
@@ -222,13 +220,10 @@ describe('ForestTrenchesComponent', () => {
 
   it('hides the median F1 when no overhang rule was calculated', async () => {
     await createComponent();
-    workerPython.runTask.mockImplementation((task: Task) =>
-      Promise.resolve(
-        task === Task.sliceGround
-          ? { result: { distances: [0, 100], altitudes: [10, 12], length: 100 }, error: null }
-          : { result: { spans: [{ ...makeSpanOutput(0), medianF1: null }] }, error: null }
-      )
-    );
+    workerPython.runTaskWithTimeout.mockResolvedValue({
+      result: { spans: [{ ...makeSpanOutput(0), medianF1: null }] },
+      error: null
+    });
 
     await component.calculate();
     fixture.detectChanges();
