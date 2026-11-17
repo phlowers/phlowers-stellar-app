@@ -33,6 +33,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { MessageModule } from 'primeng/message';
 import { OBSTACLE_CONFORMITY_CONFIG_KEY } from '@infrastructure/database';
 import { Section } from '@shared/domain';
+import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import type { ForestTrenchesInputs } from '@shared/domain/models/forest-trenches.model';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -164,8 +165,8 @@ export class ForestTrenchesComponent implements OnDestroy {
 
   readonly supports = computed(() => this.spanService.section()?.supports ?? []);
   readonly supportOptions = computed<ForestTrenchesSelectOption<string>[]>(() =>
-    this.supports().map((support) => ({
-      label: support.name ?? support.number ?? support.uuid,
+    this.supports().map((support, index) => ({
+      label: this.supportLabel(index),
       value: support.uuid
     }))
   );
@@ -221,6 +222,12 @@ export class ForestTrenchesComponent implements OnDestroy {
     const selectedIndex = this.spanControlValue();
     return spans.find((span) => span.spanIndex === selectedIndex) ?? spans[0] ?? null;
   });
+  private readonly selectedSpanPosition = computed(() => {
+    const span = this.selectedSpan();
+    return span ? this.results().indexOf(span) : -1;
+  });
+  readonly isPreviousSpanDisabled = computed(() => this.selectedSpanPosition() <= 0);
+  readonly isNextSpanDisabled = computed(() => this.selectedSpanPosition() >= this.results().length - 1);
   readonly resultSpanOptions = computed<ForestTrenchesSelectOption<number>[]>(() =>
     this.results().map((span) => ({
       label: this.translocoService.translate('studio.forest-trenches.span-option', {
@@ -497,6 +504,11 @@ export class ForestTrenchesComponent implements OnDestroy {
     }
   }
 
+  selectAdjacentSpan(step: -1 | 1): void {
+    const span = this.results()[this.selectedSpanPosition() + step];
+    if (span) this.spanControl.setValue(span.spanIndex);
+  }
+
   toggleGraphSize(): void {
     this.isGraphEnlarged.update((enlarged) => !enlarged);
     afterNextRender(() => resizeForestTrenchesPlot(this.document), { injector: this.injector });
@@ -546,9 +558,10 @@ export class ForestTrenchesComponent implements OnDestroy {
     };
   }
 
+  // Same support label as the other studio screens: the truncated support number, or its 1-based index
   private supportLabel(supportIndex: number): string {
-    const support = this.supports()[supportIndex];
-    return support?.name ?? support?.number ?? support?.uuid ?? '';
+    const number = this.supports()[supportIndex]?.number;
+    return number ? formatSupportNumber(number) : String(supportIndex + 1);
   }
 
   private observePlotResize(): void {

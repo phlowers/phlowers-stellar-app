@@ -1069,6 +1069,8 @@
       "n-points": "Nombre de points de découpage du sol",
       "result-span": "Portée",
       "span-option": "{{ firstSupport }} – {{ lastSupport }}",
+      "previous-span-aria-label": "Portée précédente",
+      "next-span-aria-label": "Portée suivante",
       "median-f1": "F1 médian à la répartition",
       "plot-caption": "Vue en plan des tranchées forestières",
       "plot-distance-axis": "Distance au support de gauche ({{ unit }})",

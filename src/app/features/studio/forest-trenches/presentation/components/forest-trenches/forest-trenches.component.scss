@@ -8,6 +8,11 @@
   align-self: end;
 }
 
+:host {
+  display: block;
+  min-width: 0;
+}
+
 dl,
 fieldset {
   @apply contents;
@@ -23,14 +28,10 @@ dd {
 
 legend {
   @extend %heading-xs;
+  padding-bottom: 1rem;
 }
 
 .forest-trenches {
-  min-width: 0;
-}
-
-:host {
-  display: block;
   min-width: 0;
 }
 
@@ -154,13 +155,58 @@ legend {
     color: var(--star-dust-950);
   }
 
-  &__span {
-    @apply flex flex-col gap-1 min-w-full mb-3;
-    max-width: 24rem;
+  &__cta {
+    @apply flex gap-1 min-w-full mb-3;
   }
 
   &__span-label {
     @extend %label-style;
+  }
+
+  &__span-select {
+    @apply flex items-stretch border rounded-md;
+    border-color: var(--star-dust-700);
+  }
+
+  &__span-button {
+    @apply inline-flex items-center;
+    border-color: var(--star-dust-300);
+    color: var(--star-dust-950);
+    background-color: var(--grey-white);
+    transition:
+      background-color 0.3s linear,
+      outline 0.3s linear;
+
+    &:not(:disabled):hover {
+      background-color: var(--primary-100);
+    }
+
+    &:focus-visible {
+      @extend %focus-state;
+    }
+
+    &:disabled {
+      background-color: var(--grey-0);
+      color: var(--grey-300);
+    }
+
+    &--left {
+      @apply border-r rounded-ss-md rounded-es-md;
+      padding-right: 0.375rem;
+    }
+
+    &--right {
+      @apply border-l rounded-se-md rounded-ee-md;
+      padding-left: 0.375rem;
+    }
+  }
+
+  &__span-button-icon {
+    font-size: 1.25rem;
+  }
+
+  &__span-p-select {
+    @apply flex-1 min-w-0 border-0 shadow-none;
   }
 
   &__figure {

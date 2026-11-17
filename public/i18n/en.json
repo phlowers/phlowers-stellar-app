@@ -1069,6 +1069,8 @@
       "n-points": "Number of ground slicing points",
       "result-span": "Span",
       "span-option": "{{ firstSupport }} – {{ lastSupport }}",
+      "previous-span-aria-label": "Previous span",
+      "next-span-aria-label": "Next span",
       "median-f1": "Median F1 at repartition",
       "plot-caption": "Forest trenches plan view",
       "plot-distance-axis": "Distance from left support ({{ unit }})",

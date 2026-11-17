@@ -7,7 +7,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { TranslocoTestingModule } from '@jsverse/transloco';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 import { Section } from '@shared/domain';
 import { StorageService } from '@services/storage/storage.service';
 import { PlotService } from '@services/plot/plot.service';
@@ -235,6 +235,58 @@ describe('ForestTrenchesComponent', () => {
 
     expect(getByTestId('forest-trenches-results-table')).not.toBeNull();
     expect(getByTestId('forest-trenches-median-f1')).toBeNull();
+  });
+
+  it('labels supports and spans with the support number, not the support name', async () => {
+    await createComponent();
+    const translate = vi.spyOn(TestBed.inject(TranslocoService), 'translate');
+
+    await component.calculate();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.supportOptions().map((option) => option.label)).toEqual(['1', '2', '3']);
+    expect(component.resultSpanOptions()).toHaveLength(2);
+    expect(translate).toHaveBeenCalledWith('studio.forest-trenches.span-option', {
+      firstSupport: '1',
+      lastSupport: '2'
+    });
+    expect(translate).toHaveBeenCalledWith('studio.forest-trenches.span-option', {
+      firstSupport: '2',
+      lastSupport: '3'
+    });
+    expect(vi.mocked(createForestTrenchesPlot).mock.lastCall?.[2].xTickLabels).toEqual(['1', '2']);
+  });
+
+  it('falls back to the 1-based support index when a support has no number', async () => {
+    const unnumberedSection = makeSection();
+    unnumberedSection.supports = unnumberedSection.supports.map((support) => ({ ...support, number: null }));
+    await createComponent(unnumberedSection);
+
+    expect(component.supportOptions().map((option) => option.label)).toEqual(['1', '2', '3']);
+  });
+
+  it('steps through the result spans with the previous and next buttons', async () => {
+    await createComponent();
+    await component.calculate();
+    fixture.detectChanges();
+    const previousButton = getByTestId('forest-trenches-prev-span-btn') as HTMLButtonElement;
+    const nextButton = getByTestId('forest-trenches-next-span-btn') as HTMLButtonElement;
+
+    expect(component.selectedSpan()?.spanIndex).toBe(0);
+    expect(previousButton.disabled).toBe(true);
+    expect(nextButton.disabled).toBe(false);
+
+    nextButton.click();
+    fixture.detectChanges();
+    expect(component.selectedSpan()?.spanIndex).toBe(1);
+    expect(previousButton.disabled).toBe(false);
+    expect(nextButton.disabled).toBe(true);
+
+    previousButton.click();
+    fixture.detectChanges();
+    expect(component.selectedSpan()?.spanIndex).toBe(0);
+    expect(previousButton.disabled).toBe(true);
   });
 
   it('does not calculate an interval whose last support precedes the first', async () => {

@@ -249,19 +249,48 @@
 
       <h2 class="results__title">{{ 'common.results' | transloco }}</h2>
 
-      <div class="results__span">
+      <div class="results__cta">
         <label for="resultSpan" class="results__span-label">{{
           'studio.forest-trenches.result-span' | transloco
         }}</label>
-        <p-select
-          inputId="resultSpan"
-          [formControl]="spanControl"
-          [options]="resultSpanOptions()"
-          optionLabel="label"
-          optionValue="value"
-          fluid
-          data-testid="forest-trenches-result-span-select"
-        />
+
+        <div class="results__span-select">
+          <button
+            type="button"
+            [disabled]="isPreviousSpanDisabled()"
+            (click)="selectAdjacentSpan(-1)"
+            class="results__span-button results__span-button--left"
+            [attr.aria-label]="'studio.forest-trenches.previous-span-aria-label' | transloco"
+            data-testid="forest-trenches-prev-span-btn"
+          >
+            <app-icon icon="chevron_left" class="results__span-button-icon" aria-hidden="true" />
+          </button>
+          <p-select
+            inputId="resultSpan"
+            [formControl]="spanControl"
+            [options]="resultSpanOptions()"
+            optionLabel="label"
+            optionValue="value"
+            fluid
+            class="results__span-p-select"
+            data-testid="forest-trenches-result-span-select"
+          />
+          <button
+            type="button"
+            [disabled]="isNextSpanDisabled()"
+            (click)="selectAdjacentSpan(1)"
+            class="results__span-button results__span-button--right"
+            [attr.aria-label]="'studio.forest-trenches.next-span-aria-label' | transloco"
+            data-testid="forest-trenches-next-span-btn"
+          >
+            <app-icon icon="chevron_right" class="results__span-button-icon" aria-hidden="true" />
+          </button>
+        </div>
+
+        <button type="button" app-btn btnStyle="outlined" disabled>
+          <app-icon icon="download" aria-hidden="true" />
+          Générer rapport VEGEO
+        </button>
       </div>
 
       @if (selectedSpan(); as span) {
