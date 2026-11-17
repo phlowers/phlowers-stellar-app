@@ -40,14 +40,14 @@ export class CalculusSettingComponent {
     computation: (method) => CALCULUS_TYPE_BY_METHOD[method] ?? 'PAPOTO'
   });
 
-  /** Selects a method and persists it in the measure (PEP is not selectable yet); the auto 15°C result of the previous method is stale. */
+  /** Selects a method and persists it in the measure; the auto 15°C result of the previous method is stale. */
   onCalculusTypeChange(type: string): void {
     this.selectedCalculusType.set(type);
     const method = (Object.keys(CALCULUS_TYPE_BY_METHOD) as FieldMeasure['calculationMethod'][]).find(
       (m) => CALCULUS_TYPE_BY_METHOD[m] === type
     );
     const mode = method && TANGENT_AIMING_MODES[method];
-    if (method === 'papoto' || mode) {
+    if (method === 'papoto' || method === 'pep' || mode) {
       this.measureData.update((d) =>
         clearAutoParameter15C({
           ...(mode ? mode.applyDefaults(d, getDefaultLeftSupport(d.span)) : d),

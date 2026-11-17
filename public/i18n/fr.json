@@ -774,6 +774,13 @@
       "criterion-label": "Critère 0.5%",
       "help-title": "Aide (PAPOTO)"
     },
+    "pep": {
+      "usage-msg": "Cette méthode n'est utilisable que si la mesure de la distance des points situés sur le câble avec la visée laser est possible.",
+      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul de paramètre.",
+      "length-label": "Dist. horiz. entre Visée G et Visée D",
+      "elevation-diff-label": "Dist. vert. entre Visée G et Visée D",
+      "criterion-label": "Critère 0,5%"
+    },
     "field-datas": {
       "mandatory-msg": "Toutes les données sont obligatoires.",
       "name-label": "Nom de la mesure",

@@ -235,9 +235,9 @@ describe('CalculusSetting component', () => {
       });
     });
 
-    it('should not persist PEP', () => {
+    it('should persist PEP as calculationMethod', () => {
       component.onCalculusTypeChange('PEP');
-      expect(component.measureData().calculationMethod).toBe('papoto');
+      expect(component.measureData().calculationMethod).toBe('pep');
     });
 
     it('should restore the selection from a saved measure', () => {
@@ -273,8 +273,10 @@ describe('CalculusSetting component', () => {
       expect(getByTestId('tangent-aiming-interior-radio')).toBeTruthy();
     });
 
-    it('should render pep-radio', () => {
-      expect(getByTestId('pep-radio')).toBeTruthy();
+    it('should render an enabled pep-radio', () => {
+      const pepRadio = getByTestId('pep-radio')?.querySelector('input') as HTMLInputElement | null;
+      expect(pepRadio).toBeTruthy();
+      expect(pepRadio?.disabled).toBe(false);
     });
   });
 });

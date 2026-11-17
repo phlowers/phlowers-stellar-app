@@ -1,1 +1,158 @@
-<p>pep works!</p>
+<div class="pep__btns">
+  <button disabled app-btn btnStyle="outlined" data-testid="pep-help-btn">
+    <app-icon icon="help" aria-hidden="true" />
+  </button>
+
+  <button disabled app-btn btnStyle="outlined" data-testid="pep-import-station-data-btn">
+    <ng-container>{{ 'field-measuring.papoto.import-station-data' | transloco }}</ng-container>
+  </button>
+</div>
+
+<p id="usage-pep" class="pep__info-msg" data-testid="pep-usage-msg">
+  <app-icon icon="info" />
+  <span>{{ 'field-measuring.pep.usage-msg' | transloco }}</span>
+</p>
+
+<p id="mandatory-pep" class="pep__info-msg pep__info-msg--mandatory">
+  <app-icon icon="info" />
+  <span>{{ 'field-measuring.pep.mandatory-msg' | transloco }}</span>
+</p>
+
+<div class="pep__form">
+  <div class="pep__form__line1">
+    <label for="pepLeftSupport" class="leftSupport__label">{{ 'common.left-support-label' | transloco }}</label>
+    <p-select
+      inputId="pepLeftSupport"
+      [options]="leftSupportOptions()"
+      [ngModel]="measureData().leftSupport"
+      (ngModelChange)="updateField('leftSupport', $event)"
+      optionLabel="label"
+      optionValue="value"
+      [fluid]="true"
+      aria-describedby="mandatory-pep"
+      [required]="true"
+      class="leftSupport__input"
+      data-testid="pep-left-support-select"
+    />
+
+    <label for="lengthBetweenSightGD" class="spanLength__label">{{
+      'field-measuring.pep.length-label' | transloco
+    }}</label>
+    <p-inputgroup class="spanLength__input">
+      <input
+        id="lengthBetweenSightGD"
+        type="number"
+        pInputText
+        [ngModel]="measureData().lengthBetweenSightGD"
+        (ngModelChange)="updateField('lengthBetweenSightGD', $event)"
+        [min]="0"
+        aria-describedby="mandatory-pep lengthBetweenSightGD-calculated"
+        required
+        data-testid="pep-length-input"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+    <p id="lengthBetweenSightGD-calculated" class="spanLength__desc">
+      <ng-container>{{ 'common.calculated-value-label' | transloco }}</ng-container>
+      -
+    </p>
+
+    <label for="elevationDifferenceBetweenSightGD" class="MED__label">{{
+      'field-measuring.pep.elevation-diff-label' | transloco
+    }}</label>
+    <p-inputgroup class="MED__input">
+      <input
+        id="elevationDifferenceBetweenSightGD"
+        type="number"
+        pInputText
+        [ngModel]="measureData().elevationDifferenceBetweenSightGD"
+        (ngModelChange)="updateField('elevationDifferenceBetweenSightGD', $event)"
+        aria-describedby="mandatory-pep elevationDifferenceBetweenSightGD-calculated"
+        required
+        data-testid="pep-elevation-difference-input"
+      />
+      <p-inputgroup-addon>m</p-inputgroup-addon>
+    </p-inputgroup>
+    <p id="elevationDifferenceBetweenSightGD-calculated" class="MED__desc">
+      <ng-container>{{ 'common.calculated-value-label' | transloco }}</ng-container>
+      -
+    </p>
+  </div>
+
+  <div class="pep__form__sights">
+    @for (sight of sights; track sight.index) {
+      <div>
+        <label [for]="sight.xField">{{ 'field-measuring.report.sight-x' | transloco: { index: sight.index } }}</label>
+        <p-inputgroup>
+          <input
+            [id]="sight.xField"
+            type="number"
+            pInputText
+            [ngModel]="measureData()[sight.xField]"
+            (ngModelChange)="updateField(sight.xField, $event)"
+            aria-describedby="mandatory-pep"
+            required
+            [attr.data-testid]="'pep-x-sight-' + sight.index + '-input'"
+          />
+          <p-inputgroup-addon>m</p-inputgroup-addon>
+        </p-inputgroup>
+      </div>
+
+      <div>
+        <label [for]="sight.yField">{{ 'field-measuring.report.sight-y' | transloco: { index: sight.index } }}</label>
+        <p-inputgroup>
+          <input
+            [id]="sight.yField"
+            type="number"
+            pInputText
+            [ngModel]="measureData()[sight.yField]"
+            (ngModelChange)="updateField(sight.yField, $event)"
+            aria-describedby="mandatory-pep"
+            required
+            [attr.data-testid]="'pep-y-sight-' + sight.index + '-input'"
+          />
+          <p-inputgroup-addon>m</p-inputgroup-addon>
+        </p-inputgroup>
+      </div>
+    }
+  </div>
+</div>
+
+<div class="text-right">
+  <button app-btn disabled data-testid="pep-calculate-btn">
+    <app-icon icon="rocket_launch" />
+    <ng-container>{{ 'common.calculate' | transloco }}</ng-container>
+  </button>
+</div>
+
+<output class="block">
+  <div class="pep__results">
+    <h2 class="pep__results__title">{{ 'common.results' | transloco }}</h2>
+    <dl class="pep__results__list">
+      <div class="param">
+        <dt>{{ 'common.parameter-label' | transloco }}</dt>
+        <dd data-testid="pep-parameter">-</dd>
+      </div>
+      <div class="incertainParam">
+        <dt>{{ 'common.uncertainty-parameter-label' | transloco }}</dt>
+        <dd data-testid="pep-uncertainty">-</dd>
+      </div>
+      <div class="param12">
+        <dt>{{ 'field-measuring.papoto.parameter-1-2-label' | transloco }}</dt>
+        <dd data-testid="pep-parameter-1-2">-</dd>
+      </div>
+      <div class="param23">
+        <dt>{{ 'field-measuring.papoto.parameter-2-3-label' | transloco }}</dt>
+        <dd data-testid="pep-parameter-2-3">-</dd>
+      </div>
+      <div class="param13">
+        <dt>{{ 'field-measuring.papoto.parameter-1-3-label' | transloco }}</dt>
+        <dd data-testid="pep-parameter-1-3">-</dd>
+      </div>
+      <div class="crit">
+        <dt>{{ 'field-measuring.pep.criterion-label' | transloco }}</dt>
+        <dd data-testid="pep-criterion">-</dd>
+      </div>
+    </dl>
+  </div>
+</output>

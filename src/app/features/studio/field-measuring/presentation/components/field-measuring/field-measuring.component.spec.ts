@@ -703,6 +703,14 @@ describe('FieldMeasuringComponent', () => {
       expect(component.canReportOrExport()).toBe(false);
     });
 
+    it('should be false on the parameter calculation tab with PEP, which has no result to report yet', async () => {
+      component.measureData.set({ ...validMeasure(), calculationMethod: 'pep' });
+      await component.onSave();
+      component.activeTab.set('parameterCalculation');
+      expect(component.isParameterCalculationValid()).toBe(false);
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
     it('should explain nothing when the buttons are active', async () => {
       component.measureData.set(validMeasure());
       await component.onSave();
