@@ -64,7 +64,7 @@
       <fieldset>
         <legend class="form__title-form underline-text">{{ 'studio.conformity.form-legend' | transloco }}</legend>
 
-        <dl class="contents">
+        <dl>
           <dt class="form__electric-tension-label">{{ 'studio.conformity.electric-tension-label' | transloco }}</dt>
           <dd class="form__electric-tension-input">{{ electricTensionLabel() }}</dd>
         </dl>
@@ -247,86 +247,105 @@
     <section class="results" animate.enter="anim-expand-height">
       <hr class="results__separator" />
 
-      <h2 class="results__title">{{ 'common.results' | transloco }}</h2>
+      @if (!isGraphEnlarged()) {
+        <h2
+          class="results__title"
+          [animate.enter]="animationsReady() ? 'anim-expand-height' : ''"
+          animate.leave="anim-collapse-height"
+        >
+          {{ 'common.results' | transloco }}
+        </h2>
 
-      <div class="results__cta">
-        <label for="resultSpan" class="results__span-label">{{
-          'studio.forest-trenches.result-span' | transloco
-        }}</label>
+        <div
+          class="results__cta"
+          [animate.enter]="animationsReady() ? 'anim-expand-height' : ''"
+          animate.leave="anim-collapse-height"
+        >
+          <div>
+            <label for="resultSpan" class="results__span-label">
+              {{ 'studio.forest-trenches.result-span' | transloco }}
+            </label>
 
-        <div class="results__span-select">
-          <button
-            type="button"
-            [disabled]="isPreviousSpanDisabled()"
-            (click)="selectAdjacentSpan(-1)"
-            class="results__span-button results__span-button--left"
-            [attr.aria-label]="'studio.forest-trenches.previous-span-aria-label' | transloco"
-            data-testid="forest-trenches-prev-span-btn"
-          >
-            <app-icon icon="chevron_left" class="results__span-button-icon" aria-hidden="true" />
-          </button>
-          <p-select
-            inputId="resultSpan"
-            [formControl]="spanControl"
-            [options]="resultSpanOptions()"
-            optionLabel="label"
-            optionValue="value"
-            fluid
-            class="results__span-p-select"
-            data-testid="forest-trenches-result-span-select"
-          />
-          <button
-            type="button"
-            [disabled]="isNextSpanDisabled()"
-            (click)="selectAdjacentSpan(1)"
-            class="results__span-button results__span-button--right"
-            [attr.aria-label]="'studio.forest-trenches.next-span-aria-label' | transloco"
-            data-testid="forest-trenches-next-span-btn"
-          >
-            <app-icon icon="chevron_right" class="results__span-button-icon" aria-hidden="true" />
+            <div class="results__span-select">
+              <button
+                type="button"
+                [disabled]="isPreviousSpanDisabled()"
+                (click)="selectAdjacentSpan(-1)"
+                class="results__span-button results__span-button--left"
+                [attr.aria-label]="'studio.forest-trenches.previous-span-aria-label' | transloco"
+                data-testid="forest-trenches-prev-span-btn"
+              >
+                <app-icon icon="chevron_left" class="results__span-button-icon" aria-hidden="true" />
+              </button>
+              <p-select
+                inputId="resultSpan"
+                [formControl]="spanControl"
+                [options]="resultSpanOptions()"
+                optionLabel="label"
+                optionValue="value"
+                fluid
+                class="results__span-p-select"
+                data-testid="forest-trenches-result-span-select"
+              />
+              <button
+                type="button"
+                [disabled]="isNextSpanDisabled()"
+                (click)="selectAdjacentSpan(1)"
+                class="results__span-button results__span-button--right"
+                [attr.aria-label]="'studio.forest-trenches.next-span-aria-label' | transloco"
+                data-testid="forest-trenches-next-span-btn"
+              >
+                <app-icon icon="chevron_right" class="results__span-button-icon" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+
+          <button type="button" app-btn btnStyle="outlined" disabled>
+            <app-icon icon="download" aria-hidden="true" />
+            Générer rapport VEGEO
           </button>
         </div>
-
-        <button type="button" app-btn btnStyle="outlined" disabled>
-          <app-icon icon="download" aria-hidden="true" />
-          Générer rapport VEGEO
-        </button>
-      </div>
+      }
 
       @if (selectedSpan(); as span) {
-        <figure class="results__figure">
-          <figcaption class="sr-only">{{ 'studio.forest-trenches.plot-caption' | transloco }}</figcaption>
-          <button
-            app-btn
-            btnStyle="text"
-            btnSize="s"
-            type="button"
-            class="results__figure-toggle"
-            [attr.aria-pressed]="isGraphEnlarged()"
-            (click)="toggleGraphSize()"
-            data-testid="forest-trenches-graph-toggle-btn"
-          >
-            <app-icon [icon]="isGraphEnlarged() ? 'fullscreen_exit' : 'fullscreen'" aria-hidden="true" />
-            @if (isGraphEnlarged()) {
-              {{ 'studio.conformity.reduce-graphic-view-btn' | transloco }}
-            } @else {
-              {{ 'studio.conformity.enlarge-graphic-view-btn' | transloco }}
-            }
-          </button>
-          <div [id]="FOREST_TRENCHES_PLOT_ID" class="results__plot"></div>
-        </figure>
+        <div class="results__plot-median-wrapper">
+          <figure class="results__figure">
+            <figcaption class="sr-only">{{ 'studio.forest-trenches.plot-caption' | transloco }}</figcaption>
+            <button
+              app-btn
+              btnStyle="text"
+              btnSize="s"
+              type="button"
+              [attr.aria-pressed]="isGraphEnlarged()"
+              (click)="toggleGraphSize()"
+              data-testid="forest-trenches-graph-toggle-btn"
+            >
+              <app-icon [icon]="isGraphEnlarged() ? 'fullscreen_exit' : 'fullscreen'" aria-hidden="true" />
+              @if (isGraphEnlarged()) {
+                {{ 'studio.conformity.reduce-graphic-view-btn' | transloco }}
+              } @else {
+                {{ 'studio.conformity.enlarge-graphic-view-btn' | transloco }}
+              }
+            </button>
+            <div [id]="FOREST_TRENCHES_PLOT_ID" class="results__plot"></div>
+          </figure>
 
-        @if (span.medianF1 !== null) {
-          <dl class="results__median">
-            <dt>{{ 'studio.forest-trenches.median-f1' | transloco }}</dt>
-            <dd data-testid="forest-trenches-median-f1">
-              {{ span.medianF1 | number: '1.2-2' }} {{ 'common.meter' | transloco }}
-            </dd>
-          </dl>
-        }
+          @if (span.medianF1 !== null && !isGraphEnlarged()) {
+            <dl
+              class="results__median"
+              [animate.enter]="animationsReady() ? 'anim-expand-width' : ''"
+              animate.leave="anim-collapse-width"
+            >
+              <dt>{{ 'studio.forest-trenches.median-f1' | transloco }}</dt>
+              <dd data-testid="forest-trenches-median-f1">
+                {{ span.medianF1 | number: '1.2-2' }} {{ 'common.meter' | transloco }}
+              </dd>
+            </dl>
+          }
+        </div>
 
         @if (!isGraphEnlarged()) {
-          <div class="results__table-wrapper">
+          <div [animate.enter]="animationsReady() ? 'anim-expand-height' : ''" animate.leave="anim-collapse-height">
             <table class="results__table" data-testid="forest-trenches-results-table">
               <thead>
                 <tr>

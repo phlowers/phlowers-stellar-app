@@ -4,13 +4,12 @@
   @apply mb-3;
 }
 
-%_self-end {
-  align-self: end;
+%_mb-4 {
+  @apply mb-4;
 }
 
-:host {
-  display: block;
-  min-width: 0;
+%_self-end {
+  align-self: end;
 }
 
 dl,
@@ -31,8 +30,47 @@ legend {
   padding-bottom: 1rem;
 }
 
-.forest-trenches {
-  min-width: 0;
+th {
+  @apply text-left;
+  @extend %text-m-600;
+  background-color: var(--primary-50);
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+
+  &[scope='col'] {
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+
+  &[scope='row'] {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--star-dust-300);
+}
+
+td {
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+  text-wrap: nowrap;
+}
+
+tr:has(td) {
+  &:nth-child(even) {
+    td {
+      background-color: var(--grey-white);
+    }
+  }
+
+  &:nth-child(odd) {
+    td {
+      background-color: var(--star-dust-50);
+    }
+  }
 }
 
 .form {
@@ -142,21 +180,20 @@ legend {
 }
 
 .results {
-  @apply flex flex-wrap gap-x-8;
-
   &__separator {
-    @apply flex-1 min-w-full border-t my-3;
+    @apply border-t my-3;
     border-top-color: var(--star-dust-300);
   }
 
   &__title {
-    @apply flex-1 min-w-full mt-0 mb-3;
-    @extend %heading-s;
+    @apply mt-0;
+    @extend %heading-s, %_mb-4;
     color: var(--star-dust-950);
   }
 
   &__cta {
-    @apply flex gap-1 min-w-full mb-3;
+    @apply flex gap-8 items-end;
+    @extend %_mb-4;
   }
 
   &__span-label {
@@ -164,7 +201,7 @@ legend {
   }
 
   &__span-select {
-    @apply flex items-stretch border rounded-md;
+    @apply flex items-stretch border rounded-md h-8; // Forcing height at 32px cause its misaligned wit next button. Not the prettiest but quickfix.
     border-color: var(--star-dust-700);
   }
 
@@ -209,97 +246,44 @@ legend {
     @apply flex-1 min-w-0 border-0 shadow-none;
   }
 
-  &__figure {
-    @apply flex flex-col m-0 min-w-full;
-    height: 24rem;
-    transition: height 0.3s ease-in-out;
+  &__plot-median-wrapper {
+    display: flex;
+    gap: 1rem;
   }
 
-  &__figure-toggle {
-    align-self: flex-end;
+  &__figure {
+    flex-grow: 1;
+    text-align: right;
   }
 
   &__plot {
-    @apply flex-1;
-    min-height: 0;
+    height: 18.75rem;
   }
 
   &__median {
-    @apply min-w-full my-3;
-  }
-
-  &__table-wrapper {
-    @apply min-w-full;
-    overflow-x: auto;
+    display: block;
+    padding-top: 1.75rem;
+    min-width: 9.1875rem;
+    transition: min-width 0.3s ease-in-out;
   }
 
   &__table {
-    width: 100%;
     color: var(--star-dust-950);
     border: 1px solid var(--star-dust-300);
   }
 }
 
-/* Enlarged graph: the form is removed with its collapse animation and the table is not rendered. */
+// Enlarged graph: the form is removed with its collapse animation and the table is not rendered.
 :host(.graph-enlarged) {
-  .results__separator,
-  .results__title {
+  .results__separator {
     display: none;
   }
 
-  .results__figure {
+  .results__plot {
     height: 75vh;
   }
-}
 
-th {
-  @apply text-left;
-  @extend %text-m-600;
-  background-color: var(--primary-50);
-  padding-right: 0.5rem;
-  padding-left: 0.5rem;
-
-  &[scope='col'] {
-    padding-top: 0.375rem;
-    padding-bottom: 0.375rem;
-  }
-
-  &[scope='row'] {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-  }
-
-  &[scope='colgroup'] {
-    @apply text-center;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-  }
-}
-
-th,
-td {
-  border-bottom: 1px solid var(--star-dust-300);
-}
-
-td {
-  padding-right: 0.5rem;
-  padding-left: 0.5rem;
-
-  &[colspan='2'] {
-    @apply text-center;
-  }
-}
-
-tr:has(td) {
-  &:nth-child(even) {
-    td {
-      background-color: var(--grey-white);
-    }
-  }
-
-  &:nth-child(odd) {
-    td {
-      background-color: var(--star-dust-50);
-    }
+  .results__median {
+    min-width: 0;
   }
 }
