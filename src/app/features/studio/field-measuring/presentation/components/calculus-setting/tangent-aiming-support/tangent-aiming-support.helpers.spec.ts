@@ -159,6 +159,7 @@ describe('tangent-aiming-support helpers', () => {
       cableTangentAngle: 100
     });
     expect(toTangentAimingTaskInputs(inputs)).toEqual({
+      calculationType: 'tangente',
       angleToCableTangent: 100,
       angleToLeftSupport: 0,
       angleToRightSupport: 98.4,
@@ -166,5 +167,17 @@ describe('tangent-aiming-support helpers', () => {
       inputHeight: 10,
       distance: 0
     });
+  });
+
+  it('should send the parameter instead of the tangent angle on the parametre type', () => {
+    const inputs = toTangentAimingSupportInputs({
+      ...createTestMeasureData(),
+      calculationType: 'parametre',
+      cableParameter: 1800,
+      cableTangentAngle: null
+    });
+    const taskInputs = toTangentAimingTaskInputs(inputs);
+    expect(taskInputs).toMatchObject({ calculationType: 'parametre', parameter: 1800 });
+    expect(taskInputs).not.toHaveProperty('angleToCableTangent');
   });
 });

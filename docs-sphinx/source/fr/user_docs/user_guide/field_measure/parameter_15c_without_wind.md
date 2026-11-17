@@ -41,9 +41,11 @@ En mode **Manuel**, vous devez saisir tous les éléments suivants :
 | **Température du câble** | °C | Température du câble au moment de la mesure | 18,5 |
 | **Incertitude de la température du câble** | °C | Incertitude de mesure de la température | 1,8 |
 
-Les quatre champs sont **obligatoires**. Si l'un d'entre eux manque ou est vide lorsque vous cliquez sur **Calculer le paramètre du réglage à 15 °C**, vous voyez l'erreur :
+Les quatre champs sont **obligatoires**. Le bouton **Calculer le paramètre du réglage à 15 °C** reste **inactif** tant qu'il manque l'une de ces valeurs (ou qu'elle est invalide) ; une note au-dessus du formulaire le rappelle :
 
-> **Tous les champs sont obligatoires pour le calcul du paramètre à 15 °C**
+> **Toutes les données sont obligatoires pour le calcul du paramètre à 15°C.**
+
+En mode **Auto**, le bouton est donc actif uniquement lorsqu'un paramètre (PAPOTO ou visées tangentes) **et** une température du câble ont déjà été calculés dans les onglets précédents.
 
 ## Comment calculer
 

@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { Section } from '@shared/domain';
+import { serializeSectionDates } from '@shared/domain/helpers/field-measure.helpers';
 import {
   STELLAR_SECTION_EXTENSION,
   STELLAR_SECTION_FORMAT,
@@ -14,7 +15,7 @@ import {
 
 /** Wraps a section in the versioned Stellar envelope read back by the `stellar_json` import adapter. */
 export function buildSectionEnvelope(section: Section): StellarSectionEnvelope {
-  return { format: STELLAR_SECTION_FORMAT, version: STELLAR_SECTION_VERSION, section };
+  return { format: STELLAR_SECTION_FORMAT, version: STELLAR_SECTION_VERSION, section: serializeSectionDates(section) };
 }
 
 /** Builds `<section name>.stsec`, replacing characters that are illegal on common filesystems. */

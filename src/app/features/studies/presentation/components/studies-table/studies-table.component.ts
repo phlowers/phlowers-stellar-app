@@ -16,6 +16,8 @@ import { TabsModule } from 'primeng/tabs';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
 import { Study } from '@shared/domain';
+import { Rfc9557ToDatePipe } from '@shared/pipes/rfc9557-to-date.pipe';
+import { sortStudiesByField } from './studies-table.helpers';
 import { CommonModule, DatePipe } from '@angular/common';
 import { getDateLocale } from '@shared/helpers/modification-date.helpers';
 import { RouterLink } from '@angular/router';
@@ -42,6 +44,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     CommonModule,
     DatePipe,
     RouterLink,
+    Rfc9557ToDatePipe,
     TranslocoModule
   ],
   templateUrl: './studies-table.component.html',
@@ -85,5 +88,10 @@ export class StudiesTableComponent {
   onSort(event: SortEvent) {
     this.sortField.set(event.field as string);
     this.sortOrder.set(event.order as number);
+  }
+
+  /** Custom sort of the table: the modification date is sorted by instant, not by text. */
+  sortStudies(event: SortEvent) {
+    sortStudiesByField(event.data as Study[], event.field as string, event.order as number);
   }
 }

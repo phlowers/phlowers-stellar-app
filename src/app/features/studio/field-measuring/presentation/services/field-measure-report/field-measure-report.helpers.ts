@@ -35,16 +35,20 @@ import {
 import {
   formatGenerationDate,
   formatSpanLabel,
+  readNumber,
   sanitizeFilename
 } from '@features/studio/field-measuring/presentation/helpers';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
+import {
+  TANGENT_AIMING_CALCULATION_TYPE,
+  TANGENT_AIMING_CALCULATION_TYPE_LABEL_KEYS
+} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import { Section, Study } from '@shared/domain';
 import { PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import { buildStudyCartouche, drawTwoColumnBulletSection, formatValue } from '@shared/pdf/pdf-primitives.helpers';
 
 import {
-  CALCULATION_TYPE_VALUE_KEYS,
   DECIMALS,
   KMH_TO_MS,
   LABEL_KEYS,
@@ -94,10 +98,6 @@ const optionLabel = (
 };
 
 const isPhaseSection = (spanType: string | null): boolean => spanType?.toLowerCase() === 'phase';
-
-/** Reads a numeric field of the measure by key. */
-const readNumber = (measureData: FieldMeasure, key: keyof FieldMeasure): number | null =>
-  measureData[key] as number | null;
 
 /** Number of the left support of a tangent aiming form, which stores the support index. */
 const tangentLeftSupportLabel = (measureData: FieldMeasure, section: Section | null, key: keyof FieldMeasure): string =>
@@ -216,16 +216,16 @@ const buildPapotoRows = (
   return [
     buildMethodRow(t(METHOD_VALUE_KEYS.papoto), measureData.leftSupport, transloco),
     [
-      meters(LABEL_KEYS.measuredLength, measureData.spanLength),
+      meters(LABEL_KEYS.measuredHorizontalDistance, measureData.spanLength),
       meters(
-        LABEL_KEYS.calculatedLength,
-        getCalculatedSpanLength(measureData.span, litData?.output_parameters.span_length)
+        LABEL_KEYS.calculatedHorizontalDistance,
+        getCalculatedSpanLength(measureData.span, litData?.output_parameters.horizontal_distance)
       )
     ],
     [
-      meters(LABEL_KEYS.measuredElevation, measureData.measuredElevationDifference),
+      meters(LABEL_KEYS.measuredVerticalDistance, measureData.measuredElevationDifference),
       meters(
-        LABEL_KEYS.calculatedElevation,
+        LABEL_KEYS.calculatedVerticalDistance,
         getCalculatedSpanLength(measureData.span, litData?.output_parameters.elevation)
       )
     ],
@@ -251,7 +251,8 @@ const buildTangentAimingRows = (
 ): FieldMeasureReportRow[] => {
   const t = (key: string): string => transloco.translate(key);
   const result = buildResultItems(measureData.outputs[config.output], transloco);
-  const calculationType = measureData[config.calculationType] as FieldMeasure['calculationType'];
+  const calculationType = (measureData[config.calculationType] ??
+    TANGENT_AIMING_CALCULATION_TYPE) as FieldMeasure['calculationType'];
   const angle = (key: string, value: number | null): PdfBulletItem =>
     numberItem(t(key), value, PDF_UNITS.grad, DECIMALS.tangentAngle);
   // The parameter or the tangent angle is entered depending on the calculation type
@@ -271,7 +272,10 @@ const buildTangentAimingRows = (
     DECIMALS.length
   );
   const rightAngle = angle(LABEL_KEYS.verticalAngleRight, readNumber(measureData, config.verticalAngleRight));
-  const typeItem = textItem(t(LABEL_KEYS.calculationType), t(CALCULATION_TYPE_VALUE_KEYS[calculationType]));
+  const typeItem = textItem(
+    t(LABEL_KEYS.calculationType),
+    t(TANGENT_AIMING_CALCULATION_TYPE_LABEL_KEYS[calculationType])
+  );
   const distanceAndAngles: FieldMeasureReportRow[] = config.verticalAngleLeft
     ? [
         [distance, null],
@@ -282,14 +286,14 @@ const buildTangentAimingRows = (
     buildMethodRow(methodLabel, tangentLeftSupportLabel(measureData, section, config.leftSupport), transloco),
     [
       numberItem(
-        t(LABEL_KEYS.measuredLength),
+        t(LABEL_KEYS.measuredHorizontalDistance),
         readNumber(measureData, config.spanLength),
         PDF_UNITS.meters,
         DECIMALS.length
       ),
       numberItem(
-        t(LABEL_KEYS.calculatedLength),
-        getCalculatedSpanLength(measureData.span, litData?.output_parameters.span_length),
+        t(LABEL_KEYS.calculatedHorizontalDistance),
+        getCalculatedSpanLength(measureData.span, litData?.output_parameters.horizontal_distance),
         PDF_UNITS.meters,
         DECIMALS.length
       )

@@ -54,10 +54,10 @@ export const LABEL_KEYS = {
   azimuth: 'common.azimuth-label',
   method: 'field-measuring.report.method',
   leftSupport: 'common.left-support-label',
-  measuredLength: 'field-measuring.report.measured-length',
-  calculatedLength: 'field-measuring.report.calculated-length',
-  measuredElevation: 'field-measuring.report.measured-elevation',
-  calculatedElevation: 'field-measuring.report.calculated-elevation',
+  measuredHorizontalDistance: 'field-measuring.report.measured-horizontal-distance',
+  calculatedHorizontalDistance: 'field-measuring.report.calculated-horizontal-distance',
+  measuredVerticalDistance: 'field-measuring.report.measured-vertical-distance',
+  calculatedVerticalDistance: 'field-measuring.report.calculated-vertical-distance',
   parameter: 'common.parameter-label',
   uncertainty: 'common.uncertainty-parameter-label',
   criterion: 'common.criterion-label',
@@ -93,12 +93,6 @@ export const LABEL_KEYS = {
 export const UPDATE_MODE_VALUE_KEYS: Record<FieldMeasure['updateMode15C'], string> = {
   auto: 'common.auto-label',
   manual: 'field-measuring.parameter-calculation-15.manual-option'
-};
-
-/** Display value of the calculation type of the tangent aiming methods. */
-export const CALCULATION_TYPE_VALUE_KEYS: Record<FieldMeasure['calculationType'], string> = {
-  parametre: 'common.parameter-label',
-  tangente: 'common.tangent-angle-label'
 };
 
 /** Method label of each parameter calculation method (the tangent aiming ones name their sub-method). */

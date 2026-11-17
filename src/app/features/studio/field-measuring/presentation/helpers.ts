@@ -98,6 +98,10 @@ export const formatSpanLabel = (section: Section | null, span: number[] | null):
   return `${formatSupportLabel(supports, leftIndex)} - ${formatSupportLabel(supports, rightIndex)}`;
 };
 
+/** Reads a numeric field of the measure by key. */
+export const readNumber = (measureData: FieldMeasure, key: keyof FieldMeasure): number | null =>
+  measureData[key] as number | null;
+
 /**
  * Picks the localization of the reference support of a span from the computed section localization.
  * Uses the span's left support when no support of the span matches `referenceSupport`.

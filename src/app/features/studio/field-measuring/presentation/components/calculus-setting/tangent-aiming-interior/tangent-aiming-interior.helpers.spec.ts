@@ -198,6 +198,7 @@ describe('tangent-aiming-interior helpers', () => {
         interiorTangentAngle: 101.398
       });
       expect(toTangentAimingInteriorTaskInputs(inputs)).toEqual({
+        calculationType: 'tangente',
         angleToCableTangent: 101.398,
         angleToLeftSupport: 93.655,
         angleToRightSupport: 99.293,
@@ -207,9 +208,22 @@ describe('tangent-aiming-interior helpers', () => {
       });
     });
 
+    it('should send the parameter instead of the tangent angle on the parametre type', () => {
+      const inputs = toTangentAimingInteriorInputs({
+        ...createTestMeasureData(),
+        interiorCalculationType: 'parametre',
+        interiorParameter: 1800,
+        interiorTangentAngle: null
+      });
+      const taskInputs = toTangentAimingInteriorTaskInputs(inputs);
+      expect(taskInputs).toMatchObject({ calculationType: 'parametre', parameter: 1800 });
+      expect(taskInputs).not.toHaveProperty('angleToCableTangent');
+    });
+
     it('should default the missing task inputs to 0', () => {
       const inputs = toTangentAimingInteriorInputs(createTestMeasureData());
       expect(toTangentAimingInteriorTaskInputs(inputs)).toEqual({
+        calculationType: 'tangente',
         angleToCableTangent: 0,
         angleToLeftSupport: 0,
         angleToRightSupport: 0,

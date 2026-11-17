@@ -14,6 +14,7 @@ import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Section, Study } from '@shared/domain';
+import { normalizeFieldMeasureDates, serializeFieldMeasureDates } from '@shared/domain/helpers/field-measure.helpers';
 
 import { LABEL_KEYS } from './field-measure-report.constantes';
 import {
@@ -46,7 +47,7 @@ const section = {
 const study = { author_email: 'author@example.test', title: 'Study 1', description: 'Study description' } as Study;
 
 const litData = {
-  output_parameters: { span_length: [250.456, 0], elevation: [12.345, 0] }
+  output_parameters: { span_length: [999, 0], horizontal_distance: [250.456, 0], elevation: [12.345, 0] }
 } as unknown as GetSectionOutput;
 
 const papotoResult = {
@@ -164,6 +165,21 @@ describe('field-measure-report helpers', () => {
       expect(findItem(rows, LABEL_KEYS.windDirection)?.value).toBe('Unknown');
       expect(findItem(rows, LABEL_KEYS.skyCover)?.value).toBe('N0');
     });
+
+    it('should render the same date and time for a measure read back from RFC 9557 strings', () => {
+      const entered = new Date(2026, 8, 10, 16, 32);
+      const original = measure({ date: entered, time: entered });
+      // Raw dates are RFC 9557 strings in a saved file; reading them back gives the same instants
+      const saved = JSON.parse(JSON.stringify(serializeFieldMeasureDates(original))) as FieldMeasure;
+      expect(saved.date).toMatch(/\[Europe\/Paris\]$/);
+      const revived = normalizeFieldMeasureDates(saved);
+
+      const rows = buildTerrainDataRows(revived, section, translocoService, 'fr-FR');
+
+      expect(buildTerrainDataRows(original, section, translocoService, 'fr-FR')).toEqual(rows);
+      expect(findItem(rows, LABEL_KEYS.measureDate)?.value).toBe('10/09/2026');
+      expect(findItem(rows, LABEL_KEYS.measureTime)?.value).toBe('16:32');
+    });
   });
 
   describe('buildParameterCalculationRows', () => {
@@ -186,9 +202,10 @@ describe('field-measure-report helpers', () => {
       expect(rows).toHaveLength(12);
       expect(findItem(rows, LABEL_KEYS.method)?.value).toBe('common.papoto-label');
       expect(findItem(rows, LABEL_KEYS.leftSupport)?.value).toBe('11');
-      expect(findItem(rows, LABEL_KEYS.measuredLength)?.value).toBe('250.00 m');
-      expect(findItem(rows, LABEL_KEYS.calculatedLength)?.value).toBe('250.46 m');
-      expect(findItem(rows, LABEL_KEYS.calculatedElevation)?.value).toBe('12.35 m');
+      expect(findItem(rows, LABEL_KEYS.measuredHorizontalDistance)?.value).toBe('250.00 m');
+      expect(findItem(rows, LABEL_KEYS.calculatedHorizontalDistance)?.value).toBe('250.46 m');
+      expect(findItem(rows, LABEL_KEYS.measuredVerticalDistance)?.value).toBe('12.00 m');
+      expect(findItem(rows, LABEL_KEYS.calculatedVerticalDistance)?.value).toBe('12.35 m');
       expect(findItem(rows, 'HG')?.value).toBe('1.000 gr');
       expect(findItem(rows, 'VG')?.value).toBe('2.000 gr');
       expect(findItem(rows, LABEL_KEYS.parameter)?.value).toBe('1234 m');
@@ -206,7 +223,7 @@ describe('field-measure-report helpers', () => {
         translocoService
       );
 
-      expect(findItem(rows, LABEL_KEYS.calculatedLength)?.value).toBe('-');
+      expect(findItem(rows, LABEL_KEYS.calculatedHorizontalDistance)?.value).toBe('-');
       expect(findItem(rows, LABEL_KEYS.parameter)?.value).toBe('-');
       expect(findItem(rows, LABEL_KEYS.criterion)).toMatchObject({ value: '-', status: undefined });
     });
@@ -250,10 +267,22 @@ describe('field-measure-report helpers', () => {
       expect(findItem(rows, LABEL_KEYS.verticalDistanceLeft)?.value).toBe('3.00 m');
       expect(findItem(rows, LABEL_KEYS.verticalAngleLeft)).toBeUndefined();
       expect(findItem(rows, LABEL_KEYS.verticalAngleRight)?.value).toBe('10 gr');
-      expect(findItem(rows, LABEL_KEYS.calculationType)?.value).toBe('common.tangent-angle-label');
+      expect(findItem(rows, LABEL_KEYS.calculationType)?.value).toBe('common.calculation-type-tangent');
       expect(findItem(rows, LABEL_KEYS.tangentAngle)?.value).toBe('5 gr');
       expect(findItem(rows, LABEL_KEYS.parameter)?.value).toBe('901 m');
       expect(findItem(rows, LABEL_KEYS.criterion)).toMatchObject({ value: 'common.no', status: false });
+    });
+
+    it('should report a measure without calculation type as the default tangent type, like the form', () => {
+      const rows = buildParameterCalculationRows(
+        measure({ calculationMethod: 'tangente-aiming', calculationType: undefined }),
+        section,
+        litData,
+        translocoService
+      );
+
+      expect(findItem(rows, LABEL_KEYS.calculationType)?.value).toBe('common.calculation-type-tangent');
+      expect(findItem(rows, LABEL_KEYS.tangentAngle)).toBeDefined();
     });
 
     it('should report the entered parameter instead of the tangent angle for the "parameter" calculation type', () => {

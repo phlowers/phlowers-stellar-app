@@ -13,7 +13,7 @@ export type CsvKey = 'attachments' | 'cables' | 'chains' | 'lines' | 'maintenanc
 export interface CsvImportContext {
   /** Dexie table where rows must be written. */
   table: Table<unknown, unknown>;
-  /** ISO 8601 timestamp captured once at engine start. */
+  /** RFC 9557 timestamp captured once at engine start. */
   now: string;
 }
 

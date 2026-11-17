@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 import { createEmptySection } from '@shared/domain/helpers/sections.helpers';
+import { FieldMeasure } from '@shared/domain/models/field-measure.model';
 import { buildSectionEnvelope, buildSectionExportFilename } from './section-export.helpers';
 
 describe('buildSectionEnvelope', () => {
@@ -12,6 +13,20 @@ describe('buildSectionEnvelope', () => {
     const section = { ...createEmptySection(), name: 'S1' };
 
     expect(buildSectionEnvelope(section)).toEqual({ format: 'stellar-section', version: 1, section });
+  });
+
+  it('should write the dates of the field measures as RFC 9557 strings', () => {
+    const date = new Date('2026-07-14T08:30:00.000Z');
+    const section = {
+      ...createEmptySection(),
+      field_measures: [{ uuid: 'm1', date, time: date } as unknown as FieldMeasure]
+    };
+
+    const exported = buildSectionEnvelope(section).section.field_measures[0] as unknown as Record<string, unknown>;
+
+    expect(exported['date']).toBe('2026-07-14T10:30:00.000+02:00[Europe/Paris]');
+    expect(exported['time']).toBe('2026-07-14T10:30:00.000+02:00[Europe/Paris]');
+    expect(section.field_measures[0].date).toBe(date);
   });
 });
 

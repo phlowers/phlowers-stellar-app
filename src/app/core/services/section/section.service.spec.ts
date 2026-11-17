@@ -9,6 +9,7 @@ import { TestBed } from '@angular/core/testing';
 import { SectionService } from './section.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { Section } from '@shared/domain';
+import { parseRfc9557 } from '@shared/helpers/date-time.helpers';
 import { StudyEntity } from '@infrastructure/database';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
@@ -204,8 +205,12 @@ describe('SectionService', () => {
         })
       );
       expect(newSection.created_at).toBe(newSection.updated_at);
-      expect(newSection.created_at >= beforeCall).toBe(true);
-      expect(newSection.created_at <= afterCall).toBe(true);
+      expect(newSection.created_at).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}[+-]\d{2}:\d{2}\[Europe\/Paris\]$/
+      );
+      const createdAt = parseRfc9557(newSection.created_at)!.getTime();
+      expect(createdAt).toBeGreaterThanOrEqual(Date.parse(beforeCall));
+      expect(createdAt).toBeLessThanOrEqual(Date.parse(afterCall));
     });
 
     it('should update an existing section', async () => {

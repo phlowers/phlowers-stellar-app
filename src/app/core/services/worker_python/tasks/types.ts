@@ -384,8 +384,11 @@ export interface TaskInputs {
     VR: number;
   };
   // Inputs for calculateTangentAiming task (angles in grad, lengths in meters)
+  // The parameter replaces the cable tangent angle when the calculation type is `parametre`
   [Task.calculateTangentAiming]: {
-    angleToCableTangent: number;
+    calculationType: 'parametre' | 'tangente';
+    angleToCableTangent?: number;
+    parameter?: number;
     angleToLeftSupport: number;
     angleToRightSupport: number;
     spanLength: number;

@@ -12,7 +12,8 @@ import { Task, TaskInputs } from '@services/worker_python/tasks/types';
 import { TANGENT_AIMING_CALCULATION_TYPE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   createNumberControl,
-  syncDisplayedControls
+  syncDisplayedControls,
+  toCalculationTypeTaskInputs
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   TANGENT_AIMING_INTERIOR_COMMON_FIELDS,
@@ -116,7 +117,7 @@ export function toTangentAimingInteriorTaskInputs(
   inputs: TangentAimingInteriorInputs
 ): TaskInputs[Task.calculateTangentAiming] {
   return {
-    angleToCableTangent: inputs.tangentAngle ?? 0,
+    ...toCalculationTypeTaskInputs(inputs.calculationType, inputs.tangentAngle, inputs.parameter),
     angleToLeftSupport: inputs.verticalAccAngleLeft ?? 0,
     angleToRightSupport: inputs.verticalAccAngleRight ?? 0,
     spanLength: inputs.spanLength ?? 0,

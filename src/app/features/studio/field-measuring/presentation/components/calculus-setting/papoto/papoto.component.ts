@@ -67,7 +67,7 @@ export class PapotoComponent {
   });
 
   // Helper function to get calculated value from litData
-  private getCalculatedValue(field: 'span_length' | 'elevation'): number | null {
+  private getCalculatedValue(field: 'horizontal_distance' | 'elevation'): number | null {
     const span = this.measureData().span;
     const litData = this.plotService.litData();
 
@@ -81,8 +81,8 @@ export class PapotoComponent {
     return value ?? null;
   }
 
-  // Computed property for calculated span length
-  calculatedSpanLength = computed(() => this.getCalculatedValue('span_length'));
+  // Computed property for calculated horizontal distance between cable attachments
+  calculatedHorizontalDistance = computed(() => this.getCalculatedValue('horizontal_distance'));
 
   // Computed property for calculated elevation difference
   calculatedElevation = computed(() => this.getCalculatedValue('elevation'));

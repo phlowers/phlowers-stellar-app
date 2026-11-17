@@ -35,9 +35,9 @@
     {{ study()?.author_email }}
   </p>
 
-  <time [attr.datetime]="study()?.created_at_offline" class="study-header__time">
+  <time [attr.datetime]="(study()?.created_at_offline | rfc9557ToDate)?.toISOString()" class="study-header__time">
     <app-icon icon="schedule" />
-    {{ study()?.created_at_offline | date: dateFormat() }}
+    {{ study()?.created_at_offline | rfc9557ToDate | date: dateFormat() }}
   </time>
   @if (study()?.shareable) {
     <hr class="study-header__separator" />

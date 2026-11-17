@@ -4,7 +4,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
+import { Section } from '@shared/domain/models/section.model';
 import { FieldMeasure } from '@shared/domain/models/field-measure.model';
+import { formatRfc9557OrNull, parseRfc9557 } from '@shared/helpers/date-time.helpers';
 
 /**
  * Determines whether a date falls within Daylight Saving Time (DST), by comparing its timezone
@@ -21,23 +23,35 @@ export const isDaylightSavingTime = (date: Date = new Date()): boolean => {
 
 /**
  * Converts a persisted date value into a `Date`. Values coming from a JSON round-trip
- * (study/section export then import) are ISO strings instead of `Date` instances.
- * @param value - A `Date`, an ISO date string, a timestamp, or anything else
+ * (study/section export then import) are RFC 9557 or ISO strings instead of `Date` instances.
+ * @param value - A `Date`, an RFC 9557 / ISO date string, a timestamp, or anything else
  * @returns A valid `Date`, or `null` when the value cannot be converted
  */
-export const toDateOrNull = (value: unknown): Date | null => {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-  if (typeof value !== 'string' && typeof value !== 'number') {
-    return null;
-  }
-  if (typeof value === 'string' && value.trim() === '') {
-    return null;
-  }
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-};
+export const toDateOrNull = (value: unknown): Date | null => parseRfc9557(value);
+
+/**
+ * Prepares a field measure for JSON: `date` and `time` become RFC 9557 strings (`null` when missing or invalid).
+ * The result is a copy; the measure is not modified. `normalizeFieldMeasureDates` is the reverse operation.
+ * @param measure - The field measure, whose dates are `Date` instances (or already strings)
+ * @returns A JSON-ready copy, typed as `FieldMeasure` because its date fields are only read back through
+ *   `normalizeFieldMeasureDates`
+ */
+export const serializeFieldMeasureDates = (measure: FieldMeasure): FieldMeasure =>
+  ({
+    ...measure,
+    date: formatRfc9557OrNull(parseRfc9557(measure.date)),
+    time: formatRfc9557OrNull(parseRfc9557(measure.time))
+  }) as unknown as FieldMeasure;
+
+/**
+ * Prepares a section for JSON by serializing the dates of its field measures.
+ * @param section - The section to export
+ * @returns A copy of the section without `Date` instances in its field measures
+ */
+export const serializeSectionDates = (section: Section): Section => ({
+  ...section,
+  field_measures: section.field_measures?.map(serializeFieldMeasureDates)
+});
 
 /**
  * Restores the date/time/season fields of a field measure after a JSON round-trip, so that

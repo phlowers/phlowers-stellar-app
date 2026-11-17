@@ -15,6 +15,9 @@ import { StudyEntity } from '@infrastructure/database';
 import { liveQuery } from 'dexie';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
+
+const RFC_9557_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}[+-]\d{2}:\d{2}\[Europe\/Paris\]$/;
+
 vi.mock('uuid', () => ({
   v4: vi.fn(() => 'mock-uuid-123')
 }));
@@ -47,6 +50,7 @@ interface MockDb {
     clear: vi.Mock;
     update: vi.Mock;
     orderBy: vi.Mock;
+    bulkGet: vi.Mock;
   };
 }
 
@@ -92,12 +96,10 @@ describe('StudiesService', () => {
         clear: vi.fn().mockResolvedValue(undefined),
         update: vi.fn().mockResolvedValue(1),
         orderBy: vi.fn().mockReturnValue({
-          reverse: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-              toArray: vi.fn().mockResolvedValue([mockStudyFromDb])
-            })
-          })
-        })
+          keys: vi.fn().mockResolvedValue([]),
+          primaryKeys: vi.fn().mockResolvedValue([])
+        }),
+        bulkGet: vi.fn().mockResolvedValue([])
       }
     };
 
@@ -156,8 +158,8 @@ describe('StudiesService', () => {
       ...mockStudy,
       author_email: 'test@example.com',
       uuid: 'mock-uuid-123',
-      created_at_offline: expect.any(String),
-      updated_at_offline: expect.any(String),
+      created_at_offline: expect.stringMatching(RFC_9557_PATTERN),
+      updated_at_offline: expect.stringMatching(RFC_9557_PATTERN),
       saved: false
     });
     expect(service.studies.value).toEqual([mockStudyFromDb]);
@@ -181,19 +183,52 @@ describe('StudiesService', () => {
       sections: [],
       author_email: 'test@example.com',
       uuid: 'mock-uuid-123',
-      created_at_offline: expect.any(String),
-      updated_at_offline: expect.any(String),
+      created_at_offline: expect.stringMatching(RFC_9557_PATTERN),
+      updated_at_offline: expect.stringMatching(RFC_9557_PATTERN),
       saved: false
     });
   });
 
+  it('returns the 4 latest studies by instant, reading only index keys then fetching those 4', async () => {
+    const entries: [string, string][] = [
+      ['old-z', '2025-01-01T00:00:00.000Z'],
+      ['summer', '2026-07-01T10:00:00.000+02:00[Europe/Paris]'],
+      ['invalid', 'not-a-date'],
+      ['winter', '2026-12-01T10:00:00.000+01:00[Europe/Paris]'],
+      ['legacy-z', '2026-07-01T07:59:00.000Z'],
+      ['newest', '2026-12-01T09:30:00.000Z']
+    ];
+    const byUuid = new Map(
+      entries.map(([uuid, created_at_offline]) => [uuid, { ...mockStudyFromDb, uuid, created_at_offline }])
+    );
+    const sortedEntries = [...entries].sort(([, a], [, b]) => a.localeCompare(b));
+    mockDb.studies.orderBy.mockReturnValue({
+      keys: vi.fn().mockResolvedValue(sortedEntries.map(([, createdAt]) => createdAt)),
+      primaryKeys: vi.fn().mockResolvedValue(sortedEntries.map(([uuid]) => uuid))
+    });
+    mockDb.studies.bulkGet.mockImplementation(async (uuids: string[]) => uuids.map((uuid) => byUuid.get(uuid)));
+
+    const latest = await service.getLatestStudies();
+
+    expect(mockDb.studies.orderBy).toHaveBeenCalledWith('created_at_offline');
+    expect(mockDb.studies.toArray).not.toHaveBeenCalled();
+    expect(mockDb.studies.bulkGet).toHaveBeenCalledWith(['newest', 'winter', 'summer', 'legacy-z']);
+    expect(latest?.map((s) => s.uuid)).toEqual(['newest', 'winter', 'summer', 'legacy-z']);
+  });
+
   it('gets studies and latest studies', async () => {
+    mockDb.studies.toArray.mockResolvedValue([mockStudyFromDb]);
     await service.getStudies();
 
     expect(mockDb.studies.toArray).toHaveBeenCalled();
 
+    mockDb.studies.orderBy.mockReturnValue({
+      keys: vi.fn().mockResolvedValue([mockStudyFromDb.created_at_offline]),
+      primaryKeys: vi.fn().mockResolvedValue([mockStudyFromDb.uuid])
+    });
+    mockDb.studies.bulkGet.mockResolvedValue([mockStudyFromDb]);
+
     const latest = await service.getLatestStudies();
-    expect(mockDb.studies.orderBy).toHaveBeenCalledWith('created_at_offline');
     expect(latest).toEqual([mockStudyFromDb]);
   });
 
@@ -227,8 +262,8 @@ describe('StudiesService', () => {
       title: 'Test Study (Copy 1)',
       author_email: 'test@example.com',
       uuid: 'mock-uuid-123',
-      created_at_offline: expect.any(String),
-      updated_at_offline: expect.any(String),
+      created_at_offline: expect.stringMatching(RFC_9557_PATTERN),
+      updated_at_offline: expect.stringMatching(RFC_9557_PATTERN),
       saved: false
     });
     expect(service.studies.value).toEqual([mockStudyFromDb]);
@@ -254,8 +289,8 @@ describe('StudiesService', () => {
       title: 'Test Study (Copy 1)',
       author_email: mockStudyFromDb.author_email,
       uuid: 'mock-uuid-123',
-      created_at_offline: expect.any(String),
-      updated_at_offline: expect.any(String),
+      created_at_offline: expect.stringMatching(RFC_9557_PATTERN),
+      updated_at_offline: expect.stringMatching(RFC_9557_PATTERN),
       saved: false
     });
   });
@@ -298,7 +333,7 @@ describe('StudiesService', () => {
       uuid: 'existing-uuid-123',
       author_email: 'test@example.com',
       title: 'Updated',
-      updated_at_offline: expect.any(String)
+      updated_at_offline: expect.stringMatching(RFC_9557_PATTERN)
     });
   });
 
@@ -754,6 +789,45 @@ describe('StudiesService', () => {
     expect(createObjectUrlSpy).toHaveBeenCalled();
     expect(clickSpy).toHaveBeenCalled();
     expect(revokeObjectUrlSpy).toHaveBeenCalled();
+
+    createObjectUrlSpy.mockRestore();
+    revokeObjectUrlSpy.mockRestore();
+    createElementSpy.mockRestore();
+  });
+
+  it('writes the dates of the field measures as RFC 9557 strings in the downloaded study', async () => {
+    const date = new Date('2026-07-14T08:30:00.000Z');
+    const studyWithMeasure = {
+      ...mockStudyFromDb,
+      sections: [{ uuid: 's1', field_measures: [{ uuid: 'm1', date, time: date }] }]
+    } as unknown as StudyEntity;
+    mockDb.studies.get.mockResolvedValue(studyWithMeasure);
+    const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+    if (!URL.revokeObjectURL) {
+      Object.defineProperty(URL, 'revokeObjectURL', { value: vi.fn(), writable: true });
+    }
+    const revokeObjectUrlSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    const originalCreateElement = document.createElement.bind(document);
+    const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName) => {
+      const element = originalCreateElement(tagName);
+      if (tagName === 'a') {
+        element.click = vi.fn();
+      }
+      return element;
+    });
+
+    await service.downloadStudy('existing-uuid-123', 'file-name', 'stsd');
+    await service.downloadStudy('existing-uuid-123', 'file-name', 'clst');
+
+    const stsd = JSON.parse(await (createObjectUrlSpy.mock.calls[0][0] as Blob).text());
+    const clst = JSON.parse(atob(await (createObjectUrlSpy.mock.calls[1][0] as Blob).text()));
+    for (const exported of [stsd, clst]) {
+      expect(exported.sections[0].field_measures[0]).toMatchObject({
+        date: '2026-07-14T10:30:00.000+02:00[Europe/Paris]',
+        time: '2026-07-14T10:30:00.000+02:00[Europe/Paris]'
+      });
+    }
+    expect(studyWithMeasure.sections[0].field_measures[0].date).toBe(date);
 
     createObjectUrlSpy.mockRestore();
     revokeObjectUrlSpy.mockRestore();
