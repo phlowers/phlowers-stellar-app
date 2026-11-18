@@ -82,8 +82,8 @@ tr:has(td) {
 
   grid-template-areas:
     'titleSpan titleSpan titleSpan titleSpan titleSpan'
-    'firstLabel lastLabel . . nPointsLabel'
-    'firstInput lastInput . . nPointsInput'
+    'firstLabel lastLabel nPointsLabel . .'
+    'firstInput lastInput nPointsInput . .'
     'titleForm titleForm titleForm titleForm titleForm'
     'tensionLabel windLabel distribTempLabel latTempLabel rulesSelectLabel'
     'tensionInput windInput distribTempInput latTempInput rulesSelectInput'
@@ -250,10 +250,10 @@ tr:has(td) {
   }
 
   &__plot-median-wrapper {
-    @extend %_mb-4;
     display: flex;
     gap: 1rem;
     transition: margin-bottom 0.3s ease-in-out;
+    margin-bottom: 2rem;
   }
 
   &__figure {
