@@ -317,7 +317,7 @@ const buildPepRows = (measureData: FieldMeasure, transloco: TranslocoService): F
   // The PEP calculation is not available yet: no result to report
   const result = buildResultItems(null, transloco);
   return [
-    buildMethodRow(t(METHOD_VALUE_KEYS.pep), measureData.leftSupport, transloco),
+    buildMethodRow(t(METHOD_VALUE_KEYS.pep), measureData.pepLeftSupport, transloco),
     [
       meters(t(LABEL_KEYS.sightsLength), measureData.lengthBetweenSightGD),
       meters(t(LABEL_KEYS.sightsElevation), measureData.elevationDifferenceBetweenSightGD)

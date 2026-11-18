@@ -6,6 +6,7 @@ import { TangentAimingSupportComponent } from './tangent-aiming-support/tangent-
 import { TangentAimingExteriorComponent } from './tangent-aiming-exterior/tangent-aiming-exterior.component';
 import { TangentAimingInteriorComponent } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.component';
 import { PepComponent } from './pep/pep.component';
+import { applyPepDefaults } from './pep/pep.helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TranslocoModule } from '@jsverse/transloco';
 import { getDefaultLeftSupport } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
@@ -48,12 +49,12 @@ export class CalculusSettingComponent {
     );
     const mode = method && TANGENT_AIMING_MODES[method];
     if (method === 'papoto' || method === 'pep' || mode) {
-      this.measureData.update((d) =>
-        clearAutoParameter15C({
-          ...(mode ? mode.applyDefaults(d, getDefaultLeftSupport(d.span)) : d),
-          calculationMethod: method
-        })
-      );
+      const defaultLeftSupport = getDefaultLeftSupport(this.measureData().span);
+      const withDefaults = (d: FieldMeasure): FieldMeasure => {
+        if (mode) return mode.applyDefaults(d, defaultLeftSupport);
+        return method === 'pep' ? applyPepDefaults(d, defaultLeftSupport) : d;
+      };
+      this.measureData.update((d) => clearAutoParameter15C({ ...withDefaults(d), calculationMethod: method }));
     }
   }
   leftSupportOption = computed(() => {

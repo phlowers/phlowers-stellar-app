@@ -19,7 +19,7 @@ Three methods are available in a radio button selector:
   - Computes the parameter from the cable tangent angle, depending on the device position
   - See {doc}`tangent_aiming`
   
-- **PEP** (disabled)
+- **PEP**
   - Not yet available in {{app_name}}
 
 ## PAPOTO Measurement Setup

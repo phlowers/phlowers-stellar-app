@@ -5,6 +5,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+/** Numeric inputs of the PEP form. */
+export type PepNumericField =
+  | 'lengthBetweenSightGD'
+  | 'elevationDifferenceBetweenSightGD'
+  | 'xSight1'
+  | 'xSight2'
+  | 'xSight3'
+  | 'ySight1'
+  | 'ySight2'
+  | 'ySight3';
+
 /** Display index and measure keys of the horizontal and vertical coordinates of one PEP sight. */
 export interface PepSight {
   index: number;

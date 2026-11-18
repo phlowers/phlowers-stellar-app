@@ -19,7 +19,7 @@ Trois méthodes sont disponibles dans un sélecteur radio :
   - Calcule le paramètre à partir de l'angle de la tangente au câble, selon la position de l'appareil
   - Voir {doc}`tangent_aiming`
 
-- **PEP** (désactivée)
+- **PEP**
   - Pas encore disponible dans {{app_name}}
 
 ## Configuration de la mesure PAPOTO
