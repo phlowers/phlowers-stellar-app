@@ -57,7 +57,6 @@ from mechaphlowers.entities.errors import (
     EstimateOnSplitSupportError,
     SolverError,
 )
-from scipy.optimize import minimize_scalar  # type: ignore[import-untyped]
 
 from stellar_engine.core.conformity.runner import find_obstacle_point
 from stellar_engine.entities.errors import (
@@ -320,6 +319,41 @@ def _scan_wind(
     return _WindScan(points, True, None, distance)
 
 
+def _minimize_bounded(
+    function: Callable[[float], float],
+    lower: float,
+    upper: float,
+    tolerance: float,
+    max_iterations: int,
+) -> tuple[float, float]:
+    """Golden-section search of the minimum of ``function`` on [lower, upper].
+
+    The function is assumed unimodal on the interval. Returns the best
+    ``(x, function(x))`` evaluated, ``x`` being within ``tolerance`` of the
+    minimum unless ``max_iterations`` is reached first. Any exception raised
+    by ``function`` is propagated.
+    """
+    ratio = (math.sqrt(5.0) - 1.0) / 2.0
+    inner_low = upper - ratio * (upper - lower)
+    inner_high = lower + ratio * (upper - lower)
+    value_low = function(inner_low)
+    value_high = function(inner_high)
+    for _ in range(max_iterations):
+        if upper - lower <= tolerance:
+            break
+        if value_low < value_high:
+            upper, inner_high, value_high = inner_high, inner_low, value_low
+            inner_low = upper - ratio * (upper - lower)
+            value_low = function(inner_low)
+        else:
+            lower, inner_low, value_low = inner_low, inner_high, value_high
+            inner_high = lower + ratio * (upper - lower)
+            value_high = function(inner_high)
+    if value_low < value_high:
+        return inner_low, value_low
+    return inner_high, value_high
+
+
 def _scan_failure(scan: _WindScan) -> Exception:
     """Error explaining why the minimum distance cannot be reached."""
     if scan.failure is not None:
@@ -342,7 +376,7 @@ def estimate_minimum_distance_wind(inputs: dict, study: SectionStudy) -> dict:
     The distance is assumed unimodal in the wind pressure: it is scanned
     every ``MINIMUM_DISTANCE_WIND_STEP`` Pa from 0 Pa (or the bound closest to
     it) in the decreasing direction until it increases, then the bracketed
-    minimum is refined with ``scipy.optimize.minimize_scalar``.
+    minimum is refined with a golden-section search.
 
     Specific inputs: ``temperature`` (°C), optional ``iceThickness``.
 
@@ -414,25 +448,20 @@ def estimate_minimum_distance_wind(inputs: dict, study: SectionStudy) -> dict:
     if len(points) > 1:
         scan = up if best[0] >= start else down
         try:
-            refined = minimize_scalar(
+            refined = _minimize_bounded(
                 scan.distance if scan.complete else new_distance(),
-                bounds=(
-                    points[max(closest - 1, 0)][0],
-                    points[min(closest + 1, len(points) - 1)][0],
-                ),
-                method="bounded",
-                options={
-                    "xatol": MINIMUM_DISTANCE_WIND_TOLERANCE,
-                    "maxiter": MINIMUM_DISTANCE_WIND_MAX_ITERATIONS,
-                },
+                points[max(closest - 1, 0)][0],
+                points[min(closest + 1, len(points) - 1)][0],
+                MINIMUM_DISTANCE_WIND_TOLERANCE,
+                MINIMUM_DISTANCE_WIND_MAX_ITERATIONS,
             )
         except SolverError as error:
             logger.warning(
                 "Wind refinement failed, scan result kept: %s", error
             )
         else:
-            if refined.fun < best[1]:
-                best = (float(refined.x), float(refined.fun))
+            if refined[1] < best[1]:
+                best = (float(refined[0]), float(refined[1]))
     logger.debug(
         "Minimum distance wind: %s Pa, %s m (%s evaluations)",
         best[0],
