@@ -207,6 +207,10 @@ const tasks: Record<
   [Task.estimateMinimumDistanceWind]: {
     function: 'estimate_minimum_distance_wind',
     externalPackages: []
+  },
+  [Task.estimateEffort]: {
+    function: 'estimate_effort',
+    externalPackages: []
   }
 };
 

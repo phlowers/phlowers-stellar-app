@@ -193,6 +193,7 @@
     "copied-to-clipboard": "Copied to clipboard",
     "copy-to-clipboard-failed": "Failed to copy to the clipboard",
     "temperature-label": "Temperature",
+    "dan-unit": "daN",
     "pascal-unit": "Pa"
   },
   "auth": {
@@ -945,7 +946,14 @@
       "wind-pressure-label": "Wind pressure",
       "minimum-oblique-distance-label": "Minimum oblique distance",
       "copy-wind-pressure-aria-label": "Copy the wind pressure",
-      "wind-pressure-calculation-failed": "Failed to estimate the wind pressure"
+      "wind-pressure-calculation-failed": "Failed to estimate the wind pressure",
+      "target-displacement-label": "Target displ.",
+      "effort-direction-up": "Up",
+      "effort-direction-down": "Down",
+      "effort-label": "Traction (-) / Weight (+)",
+      "axis-displacement-label": "Displ. along span axis (x)",
+      "copy-effort-aria-label": "Copy the effort",
+      "effort-calculation-failed": "Failed to estimate the effort"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Expand details",

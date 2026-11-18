@@ -5,7 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { EstimationTab, EstimationTabValue } from '@features/studio/estimations/domain/estimations.interfaces';
+import {
+  EffortDirection,
+  EffortDirectionOption,
+  EstimationTab,
+  EstimationTabValue
+} from '@features/studio/estimations/domain/estimations.interfaces';
 
 export const TARGET_DISTANCE_DECIMALS = 2;
 // Strictly positive: the smallest value with 2 decimals. The engine accepts a zero distance but never
@@ -43,6 +48,35 @@ export const MINIMUM_DISTANCE_WIND_PRESSURE_FORMAT = '1.0-0';
 /** Number format of the minimum oblique distance: always 2 decimals. */
 export const MINIMUM_OBLIQUE_DISTANCE_FORMAT = '1.2-2';
 
+export const EFFORT_DISTANCE_MIN = 0;
+export const EFFORT_DISTANCE_DECIMALS = 2;
+export const EFFORT_DISTANCE_DEFAULT = 0;
+
+export const EFFORT_TARGET_DISPLACEMENT_MIN = 0;
+export const EFFORT_TARGET_DISPLACEMENT_MAX = 150;
+export const EFFORT_TARGET_DISPLACEMENT_DECIMALS = 0;
+export const EFFORT_TARGET_DISPLACEMENT_DEFAULT = 0;
+
+/** Number format of the effort and of its displacement along the span axis: always 2 decimals. */
+export const EFFORT_RESULT_FORMAT = '1.2-2';
+
+export const DEFAULT_EFFORT_DIRECTION: EffortDirection = 'UP';
+
+export const EFFORT_INPUT_LIMITS = {
+  // the maximum distance is the length of the selected span
+  distance: { min: EFFORT_DISTANCE_MIN, step: 10 ** -EFFORT_DISTANCE_DECIMALS },
+  targetDisplacement: {
+    min: EFFORT_TARGET_DISPLACEMENT_MIN,
+    max: EFFORT_TARGET_DISPLACEMENT_MAX,
+    step: 10 ** -EFFORT_TARGET_DISPLACEMENT_DECIMALS
+  }
+} as const;
+
+export const EFFORT_DIRECTION_OPTIONS: EffortDirectionOption[] = [
+  { labelKey: 'studio.estimations.effort-direction-up', value: 'UP' },
+  { labelKey: 'studio.estimations.effort-direction-down', value: 'DOWN' }
+];
+
 export const DEFAULT_ESTIMATION_TAB: EstimationTabValue = 'temperature';
 
 export const ESTIMATION_TABS: readonly EstimationTab[] = [
@@ -61,7 +95,7 @@ export const ESTIMATION_TABS: readonly EstimationTab[] = [
   {
     value: 'vertical-effort',
     labelKey: 'studio.estimations.vertical-effort-tab',
-    disabled: true,
+    disabled: false,
     testId: 'vertical-effort-tab'
   }
 ];

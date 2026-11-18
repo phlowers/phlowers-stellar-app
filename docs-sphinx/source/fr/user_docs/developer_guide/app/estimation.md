@@ -12,11 +12,11 @@ Task.estimate* (TypeScript)
   → SectionStudy.estimation_engine (mechaphlowers)
 ```
 
-L'énumération `Task` et ses correspondances `TaskInputs`/`TaskOutputs` sont définies dans `src/app/core/services/worker_python/tasks/types.ts`. `src/app/core/services/worker_python/tasks/handle-task.ts` associe `estimateRope`, `estimateTemperature`, `estimateLoad`, `estimateWind` et `estimateMinimumDistanceWind` aux fonctions snake_case correspondantes de `src/app/core/services/worker_python/tasks/python-scripts/api.py`. Chaque wrapper API convertit les entrées JavaScript en valeurs Python et appelle la fonction correspondante de `stellar-engine/src/stellar_engine/core/estimation.py` avec l'étude courante.
+L'énumération `Task` et ses correspondances `TaskInputs`/`TaskOutputs` sont définies dans `src/app/core/services/worker_python/tasks/types.ts`. `src/app/core/services/worker_python/tasks/handle-task.ts` associe `estimateRope`, `estimateTemperature`, `estimateLoad`, `estimateWind`, `estimateMinimumDistanceWind` et `estimateEffort` aux fonctions snake_case correspondantes de `src/app/core/services/worker_python/tasks/python-scripts/api.py`. Chaque wrapper API convertit les entrées JavaScript en valeurs Python et appelle la fonction correspondante de `stellar-engine/src/stellar_engine/core/estimation.py` (`stellar-engine/src/stellar_engine/tools/effort_estimation.py` pour `estimateEffort`) avec l'étude courante.
 
 ## Entrées des tâches
 
-Tous les champs utilisent le camelCase à la frontière du worker. Chaque tâche reçoit `spanIndex`, `obstaclePoint` et, facultativement, `bounds` et `iceThickness`. `spanIndex` est l'index **avant manipulation**. `obstaclePoint` est `[x, y, z]` en mètres. Si `bounds` est fourni, il représente `[lower, upper]` dans les unités de la variable estimée ; les deux valeurs doivent être finies et `lower < upper`. En l'absence de bornes, les valeurs par défaut de l'estimateur mechaphlowers sont utilisées. `iceThickness` est exprimé en centimètres à la frontière de l'API TypeScript/Python et converti en mètres avant l'appel à mechaphlowers.
+Tous les champs utilisent le camelCase à la frontière du worker. Chaque tâche, sauf `estimateEffort`, reçoit `spanIndex`, `obstaclePoint` et, facultativement, `bounds` et `iceThickness`. `spanIndex` est l'index **avant manipulation**. `obstaclePoint` est `[x, y, z]` en mètres. Si `bounds` est fourni, il représente `[lower, upper]` dans les unités de la variable estimée ; les deux valeurs doivent être finies et `lower < upper`. En l'absence de bornes, les valeurs par défaut de l'estimateur mechaphlowers sont utilisées. `iceThickness` est exprimé en centimètres à la frontière de l'API TypeScript/Python et converti en mètres avant l'appel à mechaphlowers.
 
 | Tâche | Variable estimée | Entrées propres à la tâche |
 |---|---|---|
@@ -24,6 +24,7 @@ Tous les champs utilisent le camelCase à la frontière du worker. Chaque tâche
 | `estimateWind` | Pression du vent (Pa) | `targetDistance` (m) obligatoire ; `temperature` (°C) fixe facultative. |
 | `estimateMinimumDistanceWind` | Pression du vent (Pa) minimisant la distance | `temperature` (°C) fixe obligatoire ; aucune distance cible. |
 | `estimateLoad` | Masse de charge (kg) | `targetDistance` (m) et `loadPositionDistance` (m depuis le support gauche de la portée) obligatoires ; `temperature` (°C) fixe et `windPressure` (Pa) fixes facultatifs. |
+| `estimateEffort` | Masse de charge (kg), également renvoyée en daN | `loadPositionDistance` (m depuis le support gauche de la portée), `temperature` (°C) fixe et `targetVerticalDisplacement` (m, positif vers le haut) obligatoires ; aucun obstacle. |
 | `estimateRope` | Longueur de corde (m) | `supportIndex` (avant manipulation) et `targetVerticalDistance` (m) obligatoires ; `ropeLineicMass` (kg/m), `temperature` (°C) fixe et `windPressure` (Pa) fixes facultatifs. |
 
 Pour l'estimation de corde, `targetVerticalDistance` correspond à l'altitude du câble moins celle de l'obstacle et peut être négative. Sa valeur doit être finie, mais n'a pas à être positive. `supportIndex` indique où la corde est fixée ; `spanIndex` désigne toujours la portée contenant l'obstacle. Les conditions fixes facultatives peuvent être omises ou définies à `null`.
@@ -34,7 +35,7 @@ La validation commune rejette les valeurs obligatoires absentes ou non finies, l
 
 ## Indexation des portées et supports virtuels
 
-Les cinq tâches reçoivent `spanIndex` selon la convention d'indexation avant manipulation. `estimateTemperature`, `estimateWind` et `estimateMinimumDistanceWind` le convertissent en interne avec `study.manipulation.span_index_after_virtual_support`, car mechaphlowers attend l'index de portée après manipulation pour ces estimateurs climatiques. `estimateLoad` et `estimateRope` transmettent l'index initial à leur estimateur mechaphlowers. Si un support virtuel divise la portée demandée, chaque tâche refuse l'estimation avec `EstimateOnSplitSupportError` ; l'estimation sur l'une des parties d'une portée divisée n'est pas prise en charge.
+Les six tâches reçoivent `spanIndex` selon la convention d'indexation avant manipulation. `estimateTemperature`, `estimateWind`, `estimateMinimumDistanceWind` et `estimateEffort` le convertissent en interne avec `study.manipulation.span_index_after_virtual_support`, car mechaphlowers attend l'index de portée après manipulation pour ces estimateurs climatiques. `estimateLoad` et `estimateRope` transmettent l'index initial à leur estimateur mechaphlowers. Si un support virtuel divise la portée demandée, chaque tâche refuse l'estimation avec `EstimateOnSplitSupportError` ; l'estimation sur l'une des parties d'une portée divisée n'est pas prise en charge.
 
 Pour l'estimation de corde, `supportIndex` est également fourni selon la convention avant manipulation. Un index de portée ou de support hors limites déclenche `InvalidManipulationIndex` de mechaphlowers.
 
@@ -67,6 +68,25 @@ Chaque tâche de recherche de racine réussie renvoie la même structure :
 
 `value` est la pression de vent (Pa), `distance` la distance oblique minimale (m) et `iterations` le nombre d'évaluations de la distance. mechaphlowers ne fournit que la recherche de racine : `estimate_minimum_distance_wind` minimise donc la fonction objectif de ses estimateurs climatiques (`_build_distance_objective__climatic_case` avec une cible nulle, c'est-à-dire la distance elle-même). La distance est supposée unimodale en fonction de la pression de vent : elle est parcourue tous les `MINIMUM_DISTANCE_WIND_STEP` (250 Pa) depuis 0 Pa (ou la borne la plus proche) dans le sens où elle décroît, jusqu'à ce qu'elle augmente, puis le minimum encadré est affiné par `scipy.optimize.minimize_scalar` (`method="bounded"`, de type Brent, `MINIMUM_DISTANCE_WIND_TOLERANCE`, 0,5 Pa). Des pas réduits gardent chaque résolution d'équilibre proche de la précédente : un saut important de pression de vent peut retourner à tort les chaînes. Une résolution d'équilibre en échec empêche toutes les résolutions suivantes de la copie du moteur ; chaque parcours utilise donc sa propre copie. Un minimum situé sur une borne de recherche est renvoyé tel quel. Si le solveur d'équilibre échoue à 0 Pa, ou alors que la distance décroît encore (typiquement `SuspectedChainReversal` avant que le câble soit au plus près), cette erreur est propagée telle quelle ; une distance NaN déclenche `EstimationNotConvergedError` à la place. Un échec du solveur pendant l'affinage conserve le minimum parcouru.
 
+### Effort (traction ou poids)
+
+`estimateEffort` (`stellar-engine/src/stellar_engine/tools/effort_estimation.py`) estime la masse de charge déplaçant verticalement le câble d'une portée d'un déplacement cible. Elle réutilise la validation, la conversion d'index de portée, l'enveloppe `_solve` et les erreurs du module ci-dessus, et laisse l'étude intacte (la charge est appliquée sur une copie du moteur d'équilibre ; une charge existante sur la portée est remplacée, comme pour `estimateLoad`). Elle renvoie :
+
+```json
+{
+  "value": -123.4,
+  "residual": 0.0,
+  "iterations": 5,
+  "converged": true,
+  "effort": -121.05,
+  "axisDisplacement": 0.126
+}
+```
+
+`value` est la masse de charge (kg), négative pour une traction (déplacement vers le haut) et positive pour un poids (déplacement vers le bas) ; `effort` est la même charge en daN (`units` de mechaphlowers, soit 1 kg = 0,981 daN). `axisDisplacement` est le déplacement absolu (m) du point d'application de la charge selon l'axe de la portée, entre le câble à vide et le câble sous la charge estimée ; le point est lu dans le repère du support gauche de la portée (`get_loads_coords(project=True, frame_index=span_index)`).
+
+`estimateLoad` n'est pas utilisée ici : elle vise une distance à un obstacle, et le calcul de distance de mechaphlowers échoue lorsque l'obstacle est proche du nœud de charge, systématiquement pour une traction (masse négative). `estimateEffort` vise à la place l'altitude du point d'application de la charge. Les grandes masses font diverger le solveur d'équilibre : l'intervalle de recherche croît donc progressivement à partir de 50 kg, en doublant jusqu'à 20 000 kg ; une cible non atteinte dans cette plage, ou un échec du solveur pendant cette croissance, lève `EstimationNotConvergedError`. Une cible nulle renvoie un effort nul. Une charge appliquée sur un support (`loadPositionDistance` égal à 0 ou à la longueur de portée) est ignorée par le moteur et ne peut pas déplacer le câble : une cible non nulle lève alors aussi `EstimationNotConvergedError`.
+
 ## Correspondance des erreurs et avertissements
 
 Le nom de la classe d'exception Python (ou le texte de l'avertissement) est recherché dans `PythonErrorCode` par `handle-task.ts`. La première valeur d'énumération correspondante est retenue. La sévérité est définie dans `src/app/core/services/worker_python/tasks/python-error-severity.ts`, tandis que le texte traduit est choisi dans `src/app/core/services/worker_python/tasks/python-error-messages.ts` à partir de `shared.python-errors.*`. Les messages de validation Python sont construits par `_Errors.estimation_*` dans `stellar-engine/src/stellar_engine/entities/errors.py`.
@@ -88,11 +108,13 @@ Pour une nouvelle erreur ou un nouvel avertissement Python, ajoutez le nom de la
 
 ## Outil du Studio : Estimations
 
-La modale **Estimations** (`src/app/features/studio/estimations/`) s'ouvre depuis le menu **Outils** du Studio et depuis les accès rapides (outil `estimations` du `ToolbarDialogService`). Elle contient trois onglets ; **Température de conformité** (US.EST.TCO) et **Pression vent pour distance mini.** (US.EST.PRE-DIS) sont implémentés, l'onglet d'effort vertical est affiché désactivé en attendant son récit utilisateur. Les deux onglets étendent `EstimationFormBase` (`presentation/estimation-form.base.ts`), qui gère le choix de l'obstacle et du point, le calcul, la correspondance entre le résultat et le canton, le verrouillage des saisies et la copie dans le presse-papier ; chaque onglet ne fournit que ses champs numériques, sa tâche et la conversion de ses entrées. Leur mise en page est partagée par les mixins de `_estimation-form.scss`.
+La modale **Estimations** (`src/app/features/studio/estimations/`) s'ouvre depuis le menu **Outils** du Studio et depuis les accès rapides (outil `estimations` du `ToolbarDialogService`). Elle contient trois onglets : **Température de conformité** (US.EST.TCO), **Pression vent pour distance mini.** (US.EST.PRE-DIS) et **Effort déplacement vert. câble** (US.EST.PDS-TRA). Chaque onglet étend `EstimationCalculationBase` (`presentation/estimation-calculation.base.ts`), qui gère le calcul, la correspondance entre le résultat et le canton, le verrouillage des saisies et la copie dans le presse-papier ; chaque onglet fournit son formulaire, sa tâche et la conversion de ses entrées. Les deux onglets d'obstacle étendent `EstimationFormBase` (`presentation/estimation-form.base.ts`), qui ajoute le choix de l'obstacle et du point et ne demande que les champs numériques. Leur mise en page est partagée par les mixins de `_estimation-form.scss`.
 
 L'onglet **Température de conformité** (`TemperatureEstimationComponent`) invite à choisir un obstacle tant qu'aucun n'est sélectionné, et liste les obstacles du canton ayant au moins un point (filtrables par nom). L'obstacle sélectionné dans le Studio (`ObstaclesService.selectedMeasureUuid`) est présélectionné à l'ouverture de l'onglet ; sinon, ou si la sélection est un sol, aucun n'est sélectionné. La liste **Point** est en lecture seule et positionnée sur le premier point de l'obstacle sélectionné. La **Distance verticale cible** est obligatoire, dans ]0 ; 150] m avec au plus 2 décimales (minimum `0.01` : le moteur accepte une distance nulle mais ne l'atteint jamais et répond `EstimationNotConvergedError`). **Calculer** exécute `estimateTemperature` avec `spanIndex = obstacle.supportIndex`, `obstacleUuid`, `pointIndex` et `bounds = [-50, 250]` °C ; l'obstacle et la distance sont verrouillés jusqu'à la fin du calcul, pour que le résultat leur corresponde toujours. Le résultat est affiché avec 2 décimales et peut être copié dans le presse-papier ; il est effacé dès qu'une saisie ou le canton change. En cas d'échec, le message d'erreur Python localisé est affiché, ou à défaut `studio.estimations.calculation-failed`.
 
 L'onglet **Pression vent pour distance mini.** (`WindPressureEstimationComponent`) reprend le comportement de l'obstacle et du point. La **Température** est obligatoire, dans [-50 ; 250] °C avec au plus 2 décimales. **Calculer** exécute `estimateMinimumDistanceWind` avec `spanIndex = obstacle.supportIndex`, `obstacleUuid`, `pointIndex`, `temperature` et `bounds = [-3000, 3000]` Pa. Les résultats affichent la **Pression de vent** sans décimale (copiable, sans séparateur de milliers) et la **Distance oblique minimum** avec 2 décimales. En cas d'échec, le message d'erreur Python localisé est affiché, ou à défaut `studio.estimations.wind-pressure-calculation-failed`.
+
+L'onglet **Effort déplacement vert. câble** (`EffortEstimationComponent`) estime l'effort à appliquer en un point d'une portée, sans obstacle. La liste **Portée** (filtrable) contient toutes les portées du canton, la portée courante étant sélectionnée par défaut ; la liste **Support de référence** est réduite aux deux supports de la portée (support de départ par défaut). La **Distance au support de référence** est obligatoire, dans [0 ; longueur de portée] m avec au plus 2 décimales (0 par défaut), la **Température** est obligatoire, dans [-50 ; 250] °C avec au plus 2 décimales (vide par défaut), et le **Dépl. cible** est un interrupteur **Montée** (défaut) / **Descente** avec un entier obligatoire dans [0 ; 150] m (0 par défaut). **Calculer** exécute `estimateEffort` avec `spanIndex`, `loadPositionDistance` (la distance, ou la longueur de portée moins la distance depuis le support de droite), `temperature` et `targetVerticalDisplacement` (négatif pour **Descente**). Les résultats affichent l'effort **Traction (-) / Poids (+)** en daN (copiable, sans unité ni séparateur de milliers) et le **Déplact selon axe de portée (x)** en m, tous deux avec 2 décimales, et sont effacés dès qu'une saisie ou le canton change. En cas d'échec, le message d'erreur Python localisé est affiché, ou à défaut `studio.estimations.effort-calculation-failed`.
 
 > Le moteur estime la température pour une distance 3D (`distance_3d`) entre le câble et le point d'obstacle, alors que l'interface libelle la saisie *Distance verticale cible* comme spécifié par le récit utilisateur.
 
@@ -109,7 +131,7 @@ npm run set-up-mechaphlowers:engine-only
 Lancez le test Python ciblé depuis la racine du dépôt :
 
 ```bash
-cd stellar-engine && uv run pytest test/core/test_estimation.py -q -p no:logging
+cd stellar-engine && uv run pytest test/core/test_estimation.py test/tools/test_effort_estimation.py -q -p no:logging
 ```
 
 Lancez les tests TypeScript ciblés depuis la racine du dépôt :
@@ -118,4 +140,4 @@ Lancez les tests TypeScript ciblés depuis la racine du dépôt :
 npx vitest run src/app/core/services/worker_python/tasks/ src/app/features/studio/estimations/
 ```
 
-Les tests Python couvrent la structure des résultats, les estimations, la validation des entrées, les cibles inaccessibles, la conversion d'index, les portées divisées par des supports virtuels, l'avertissement de charge existante, la préservation de l'état de l'étude et la recherche de la pression de vent pour distance minimale (minimum de chaque côté, sur une borne, retournement des chaînes avant le minimum, distances NaN, échec de l'affinage).
+Les tests Python couvrent la structure des résultats, les estimations, la validation des entrées, les cibles inaccessibles, la conversion d'index, les portées divisées par des supports virtuels, l'avertissement de charge existante, la préservation de l'état de l'étude et la recherche de la pression de vent pour distance minimale (minimum de chaque côté, sur une borne, retournement des chaînes avant le minimum, distances NaN, échec de l'affinage). `test/tools/test_effort_estimation.py` couvre l'estimation d'effort (signe, conversion en daN, déplacement selon l'axe de la portée, cible nulle, charge sur un support, cible inaccessible, entrées invalides, portée divisée, étude laissée intacte).
