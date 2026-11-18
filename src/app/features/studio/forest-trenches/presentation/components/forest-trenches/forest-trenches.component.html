@@ -340,7 +340,11 @@
         </div>
 
         @if (!isGraphEnlarged()) {
-          <div [animate.enter]="animationsReady() ? 'anim-expand-height' : ''" animate.leave="anim-collapse-height">
+          <div
+            class="results__table-wrapper"
+            [animate.enter]="animationsReady() ? 'anim-expand-height' : ''"
+            animate.leave="anim-collapse-height"
+          >
             <table class="results__table" data-testid="forest-trenches-results-table">
               <thead>
                 <tr>

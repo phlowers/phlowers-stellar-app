@@ -1,5 +1,8 @@
 @use 'abstract.extracts' as app;
 
+$_plot-heigth--shrink: 18.75rem;
+$_plot-height--expand: 75vh;
+
 %_mb-3 {
   @apply mb-3;
 }
@@ -247,17 +250,22 @@ tr:has(td) {
   }
 
   &__plot-median-wrapper {
+    @extend %_mb-4;
     display: flex;
     gap: 1rem;
+    transition: margin-bottom 0.3s ease-in-out;
   }
 
   &__figure {
     flex-grow: 1;
     text-align: right;
+    overflow: hidden;
+    transition: height 0.3s ease-in-out 0.2s;
   }
 
+  &__figure,
   &__plot {
-    height: 18.75rem;
+    height: $_plot-heigth--shrink;
   }
 
   &__median {
@@ -265,6 +273,11 @@ tr:has(td) {
     padding-top: 1.75rem;
     min-width: 9.1875rem;
     transition: min-width 0.3s ease-in-out;
+  }
+
+  &__table-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   &__table {
@@ -275,15 +288,22 @@ tr:has(td) {
 
 // Enlarged graph: the form is removed with its collapse animation and the table is not rendered.
 :host(.graph-enlarged) {
-  .results__separator {
-    display: none;
-  }
+  .results {
+    &__separator {
+      display: none;
+    }
 
-  .results__plot {
-    height: 75vh;
-  }
+    &__plot-median-wrapper {
+      margin-bottom: 0;
+    }
 
-  .results__median {
-    min-width: 0;
+    &__figure,
+    &__plot {
+      height: 75vh;
+    }
+
+    &__median {
+      min-width: 0;
+    }
   }
 }
