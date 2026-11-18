@@ -1105,6 +1105,19 @@ describe('FieldMeasuringComponent', () => {
     }
   );
 
+  describe('canSave - pep', () => {
+    it('should re-enable the save button after a save when a PEP input is edited (RG.PEP.ENR-BTN.1)', async () => {
+      component.measureData.set(
+        createTestMeasureData({ name: 'Measure 1', calculationMethod: 'pep', pepLeftSupport: '0', xSight1: 10 })
+      );
+      await component.onSave();
+      expect(component.canSave()).toBe(false);
+
+      component.measureData.set({ ...component.measureData(), xSight1: 20 });
+      expect(component.canSave()).toBe(true);
+    });
+  });
+
   describe('onSave - tangent aiming (exterior)', () => {
     it('should reset the non displayed field and the other modes, keeping the displayed ones', async () => {
       const plotService = TestBed.inject(PlotService);

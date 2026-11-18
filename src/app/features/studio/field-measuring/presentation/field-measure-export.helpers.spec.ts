@@ -501,6 +501,38 @@ describe('field-measure-export.helpers', () => {
       expect(result.method.papoto).toBeUndefined();
       expect(result.method.tangentialSights).toBeUndefined();
       expect(result.method.pep?.calculatedParameter).toBeUndefined();
+      expect(result.method.pep?.intermediateParameters).toEqual({
+        value: { p12: null, p23: null, p13: null },
+        unit: 'm'
+      });
+    });
+
+    it('should export the pep intermediate and calculated parameters when a pep result exists', () => {
+      const measureData = createTestMeasureData({
+        calculationMethod: 'pep',
+        outputs: {
+          papoto: null,
+          pep: {
+            parameter: 450,
+            parameter_1_2: 1,
+            parameter_2_3: 2,
+            parameter_1_3: 3,
+            checkValidity: false,
+            uncertainty: 0.7
+          },
+          cableTemperature: null,
+          parameter15C: null,
+          tangentAimingSupport: null,
+          tangentAimingExterior: null,
+          tangentAimingInterior: null
+        }
+      });
+      const { pep } = buildParameterCalculationExport(measureData, null, null, mockTranslocoService).method;
+      expect(pep?.intermediateParameters).toEqual({ value: { p12: 1, p23: 2, p13: 3 }, unit: 'm' });
+      expect(pep?.calculatedParameter).toEqual({
+        parameter: { value: 450, unit: 'm', uncertainty: 0.7 },
+        criterion: { threshold: 0.5, unit: '%', status: false }
+      });
     });
   });
 
