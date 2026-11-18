@@ -507,6 +507,25 @@ describe('field-measure-export.helpers', () => {
       });
     });
 
+    it('should export the pep raw inputs', () => {
+      const measureData = createTestMeasureData({
+        calculationMethod: 'pep',
+        lengthBetweenSightGD: 100,
+        elevationDifferenceBetweenSightGD: -2,
+        xSight1: 1,
+        xSight2: 2,
+        xSight3: 3,
+        ySight1: 4,
+        ySight2: 5,
+        ySight3: 6
+      });
+      const { pep } = buildParameterCalculationExport(measureData, null, mockTranslocoService).method;
+      expect(pep?.sightsDeltaLength).toEqual({ value: 100, unit: 'm' });
+      expect(pep?.sightsDeltaElevation).toEqual({ value: -2, unit: 'm' });
+      expect(pep?.horizontalDistances).toEqual({ value: { X1: 1, X2: 2, X3: 3 }, unit: 'm' });
+      expect(pep?.verticalDistances).toEqual({ value: { Y1: 4, Y2: 5, Y3: 6 }, unit: 'm' });
+    });
+
     it('should export the pep intermediate and calculated parameters when a pep result exists', () => {
       const measureData = createTestMeasureData({
         calculationMethod: 'pep',

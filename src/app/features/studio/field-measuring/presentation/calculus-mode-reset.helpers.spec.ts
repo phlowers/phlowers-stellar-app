@@ -323,6 +323,18 @@ describe('toUnsavedChangesComparable', () => {
     expect(toUnsavedChangesComparable(saved, '0')).not.toHaveProperty('calculationMethod');
   });
 
+  it('ignores the PEP defaults of a measure saved before PEP existed, but not a PEP input edit (RG.PEP.ENR-BTN.1)', () => {
+    const legacy = createTestMeasureData({ pepLeftSupport: null, xSight1: null, lengthBetweenSightGD: null });
+    const opened = { ...legacy, pepLeftSupport: '0', xSight1: 0, lengthBetweenSightGD: 0 };
+    expect(toUnsavedChangesComparable(opened, '0')).toEqual(toUnsavedChangesComparable(legacy, '0'));
+    expect(toUnsavedChangesComparable({ ...opened, xSight1: 5 }, '0')).not.toEqual(
+      toUnsavedChangesComparable(legacy, '0')
+    );
+    expect(toUnsavedChangesComparable({ ...opened, pepLeftSupport: '1' }, '0')).not.toEqual(
+      toUnsavedChangesComparable(legacy, '0')
+    );
+  });
+
   it('ignores the stale automatic 15°C result but not an input edit', () => {
     const data = createTestMeasureData({ calculationMethod: 'tangente-aiming', tangentSpanLength: 10 });
     const withAuto = {

@@ -20,7 +20,8 @@ Three methods are available in a radio button selector:
   - See {doc}`tangent_aiming`
   
 - **PEP**
-  - Not yet available in {{app_name}}
+  - Computes the parameter from the positions of three sights on the cable, measured with a laser sight
+  - See [PEP Measurement](#pep-measurement) below. The result is currently a **simulated** value, as the calculation engine does not implement PEP yet
 
 ## PAPOTO Measurement Setup
 
@@ -112,6 +113,24 @@ Check your entered values and try again. If the error persists, review your fiel
 ## Report and export
 
 Once the measure is saved, **Report** and **Export** include the inputs and results of the PAPOTO method (see {doc}`terrain_data`). In the JSON export, `parameterCalculation.method.papoto` contains the measured and calculated lengths and elevations, the horizontal and vertical angles, the parameters 1-2, 2-3 and 1-3, then the calculated parameter with its uncertainty and its criterion (`threshold` of 0.5%, `status`: criterion met or not). The left support is exported with the label displayed in the form.
+
+## PEP Measurement
+
+The PEP method can only be used if the distance between the points on the cable can be measured with the laser sight. All fields are **mandatory**.
+
+| Label | Unit | Allowed values | Meaning |
+|---|---|---|---|
+| **Left support** | — | Every support of the section (number truncated to 5 characters) | Defaults to the departure support of the selected span |
+| **Horiz. dist. btwn Sight G and Sight D** | m | 0 to 5000, 2 decimals max | Horizontal distance between the left and right sights. The span length computed by {{app_name}} is shown beside it |
+| **Vert. dist. btwn Sight G and Sight D** | m | -1000 to 1000, 2 decimals max | Elevation difference between the left and right sights. The computed elevation difference is shown beside it |
+| **X Sight 1 to 3** | m | 0 to 5000, 2 decimals max | Horizontal distance of each sight |
+| **Y Sight 1 to 3** | m | -1000 to 1000, 2 decimals max | Vertical distance of each sight |
+
+Numeric fields default to **0**. The **Calculate** button is disabled while the left support is empty or a value is out of bounds.
+
+The **Results** section (parameter, uncertainty, parameters 1-2, 2-3 and 1-3, 0.5% criterion with its ✓/✗ icon) is hidden until you click **Calculate**. Editing any PEP input hides it again and clears the previous result. The inputs stay editable after the calculation.
+
+Each PEP input edit can be saved. The PEP result is available to the **Parameter at 15°C without wind** tab in "auto" mode. The report and the export of a measure are not available with PEP yet.
 
 ## Next Step
 

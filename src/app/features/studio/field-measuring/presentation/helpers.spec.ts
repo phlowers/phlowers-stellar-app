@@ -153,6 +153,17 @@ describe('getActiveParameterOutput', () => {
     }
   );
 
+  it('should return the PEP result for the PEP method, null without result and never the PAPOTO one', () => {
+    const pep = { ...papoto, parameter_1_2: 1, parameter_2_3: 2, parameter_1_3: 3, checkValidity: true };
+    expect(getActiveParameterOutput(withOutputs('pep', { pep: pep as FieldMeasureOutputs['pep'] }))).toEqual({
+      parameter: 900,
+      uncertainty: 3
+    });
+    expect(
+      getActiveParameterOutput(withOutputs('pep', { papoto: papoto as FieldMeasureOutputs['papoto'], pep: null }))
+    ).toBeNull();
+  });
+
   it('should return the PAPOTO result for the PAPOTO method', () => {
     expect(
       getActiveParameterOutput(withOutputs('papoto', { papoto: { ...papoto } as FieldMeasureOutputs['papoto'] }))

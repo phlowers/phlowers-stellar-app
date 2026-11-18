@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ComponentRef, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
+import { By } from '@angular/platform-browser';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { PepComponent } from './pep.component';
@@ -97,6 +98,52 @@ describe('Pep component', () => {
     expect(component.calculatedSpanLength()).toBe(150);
     expect(component.calculatedElevation()).toBe(10.75);
     expect(getByTestId('pep-length-input')?.closest('.pep__form')?.textContent).toContain('150');
+  });
+
+  it('should follow the left support and invalidate the previous result when it changes (RG.PEP.SUP.1)', () => {
+    component.calculate();
+    expect(component.measureData().outputs.pep).toEqual(PEP_MOCK_RESULT);
+
+    component.updateField('pepLeftSupport', '2');
+    fixture.detectChanges();
+    expect(component.measureData().pepLeftSupport).toBe('2');
+    expect(component.measureData().outputs.pep).toBeNull();
+    expect(component.calculatedSpanLength()).toBe(200);
+    expect(component.calculatedElevation()).toBe(-3.25);
+  });
+
+  it('should disable the calculate button without left support (RG.PEP.CAL-BNT.1)', () => {
+    setMeasure({ pepLeftSupport: null });
+    expect((getByTestId('pep-calculate-btn') as HTMLButtonElement).disabled).toBe(true);
+    component.calculate();
+    expect(component.measureData().outputs.pep).toBeNull();
+  });
+
+  it('should hide the results of a stored result when the form is invalid', () => {
+    setMeasure({ xSight2: -1, outputs: { ...createTestMeasureData().outputs, pep: PEP_MOCK_RESULT } });
+    expect(getByTestId('pep-parameter')).toBeNull();
+  });
+
+  it('should offer a filterable left support list (RG.PEP.SUP.2)', () => {
+    const select = fixture.debugElement.query(By.css('[data-testid="pep-left-support-select"]'));
+    expect(select.componentInstance.filter).toBe(true);
+  });
+
+  it('should show the calculated elevation, or a dash without left support, as read-only text (RG.PEP.DEN-CAL.2, LON-CAL.2)', () => {
+    const calculated = (id: string) => fixture.nativeElement.querySelector(`#${id}`) as HTMLElement;
+    expect(calculated('elevationDifferenceBetweenSightGD-calculated').textContent).toContain('10.75');
+    expect(calculated('lengthBetweenSightGD-calculated').querySelector('input')).toBeNull();
+
+    setMeasure({ pepLeftSupport: null });
+    expect(calculated('elevationDifferenceBetweenSightGD-calculated').textContent).toContain('-');
+    expect(calculated('lengthBetweenSightGD-calculated').textContent).toContain('-');
+  });
+
+  it('should render the results as read-only text with no input (RG.PEP.PAR-RES.2)', () => {
+    component.calculate();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.pep__results')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.pep__results input')).toBeNull();
   });
 
   it('should have no calculated value without left support', () => {

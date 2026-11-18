@@ -1116,6 +1116,53 @@ describe('FieldMeasuringComponent', () => {
       component.measureData.set({ ...component.measureData(), xSight1: 20 });
       expect(component.canSave()).toBe(true);
     });
+
+    it('should save the PEP inputs and reset the inputs of the other methods (RG.PEP.ENR-BTN.2)', async () => {
+      const modifySectionSpy = vi.spyOn(TestBed.inject(PlotService), 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({
+          name: 'Measure 1',
+          calculationMethod: 'pep',
+          pepLeftSupport: '0',
+          xSight1: 10,
+          ySight3: -5,
+          HL: 5,
+          tangentSpanLength: 400
+        })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.calculationMethod).toBe('pep');
+      expect(saved?.pepLeftSupport).toBe('0');
+      expect(saved?.xSight1).toBe(10);
+      expect(saved?.ySight3).toBe(-5);
+      expect(saved?.HL).toBeNull();
+      expect(saved?.tangentSpanLength).not.toBe(400);
+    });
+
+    it('should keep the report and export inactive with PEP even when a result exists (RG.PEP.RAP-BTN.1, EXP-BTN.1)', async () => {
+      const base = createTestMeasureData({ name: 'Measure 1', calculationMethod: 'pep', pepLeftSupport: '0' });
+      component.measureData.set({
+        ...base,
+        outputs: {
+          ...base.outputs,
+          pep: {
+            parameter: 1,
+            uncertainty: 1,
+            parameter_1_2: 1,
+            parameter_2_3: 1,
+            parameter_1_3: 1,
+            checkValidity: true
+          }
+        }
+      });
+      await component.onSave();
+      component.activeTab.set('parameterCalculation');
+      expect(component.isParameterCalculationValid()).toBe(false);
+      expect(component.canReportOrExport()).toBe(false);
+    });
   });
 
   describe('onSave - tangent aiming (exterior)', () => {
