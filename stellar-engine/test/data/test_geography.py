@@ -28,7 +28,7 @@ def test_compute_localization():
         "startLongitude": 2.3522,
         "startAzimuth": 90,
         "spanLength": [500, 500, 500, np.nan],
-        "lineAngle": [0, 10, 0, 0],
+        "lineAngle": [50, 10, 0, 0],
     }
     result = compute_localization(inputs)
     expected_keys = {
