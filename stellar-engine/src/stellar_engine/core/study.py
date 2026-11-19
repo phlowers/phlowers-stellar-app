@@ -211,7 +211,13 @@ def initialize_study(python_inputs: dict):
     )
 
     study.solve_adjustment()
-    study.solve_change_state()
+    DEFAULT_CLIMATE = {
+        "wind_pressure": 0,
+        "ice_thickness": 0,
+        "new_temperature": initial_condition.base_temperature,
+        "wind_direction": "clockwise",
+    }
+    study.solve_change_state(**DEFAULT_CLIMATE)
 
     base_study = deepcopy(study)
 
