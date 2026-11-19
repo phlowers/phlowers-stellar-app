@@ -13,7 +13,8 @@ import { clearAutoParameter15C } from '@features/studio/field-measuring/presenta
 import { TANGENT_AIMING_CALCULATION_TYPE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   createNumberControl,
-  syncDisplayedControls
+  syncDisplayedControls,
+  toCalculationTypeTaskInputs
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   TANGENT_AIMING_SUPPORT_COMMON_FIELDS,
@@ -110,7 +111,7 @@ export function toTangentAimingSupportInputs(data: FieldMeasure): TangentAimingS
 /** Builds the `calculateTangentAiming` task inputs: sighting device right below the left support (no horizontal distance). */
 export function toTangentAimingTaskInputs(inputs: TangentAimingSupportInputs): TaskInputs[Task.calculateTangentAiming] {
   return {
-    angleToCableTangent: inputs.tangentAngle ?? 0,
+    ...toCalculationTypeTaskInputs(inputs.calculationType, inputs.tangentAngle, inputs.parameter),
     angleToLeftSupport: 0,
     angleToRightSupport: inputs.verticalAccAngle ?? 0,
     spanLength: inputs.spanLength ?? 0,

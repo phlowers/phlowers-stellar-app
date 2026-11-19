@@ -100,13 +100,13 @@ La fonction utilise une dérivée par différences finies pour estimer la sensib
 - **Mode Auto** : les quatre valeurs doivent être des nombres (ni null, ni undefined)
 - **Mode Manuel** : les quatre champs saisis manuellement doivent être des nombres
 
-L'état invalide est contrôlé par le signal `isFormValid()`.
+L'état invalide est contrôlé par le signal `isFormValid()`, qui désactive aussi le bouton **Calculer**. En mode `auto`, le paramètre et l'incertitude proviennent de `getActiveParameterOutput()`, c'est-à-dire du résultat de la méthode retenue (PAPOTO ou l'une des variantes de visées tangentes) : le bouton reste donc désactivé tant que cette méthode et le calcul de la température n'ont pas été exécutés.
 
 ### Gestion des erreurs
 
 - **signal `parameter15CError`** : défini à `true` en cas d'échec de validation ou d'erreur de calcul Python
 - **signal `isCalculating`** : défini à `true` pendant l'exécution de la tâche worker ; empêche les clics simultanés
-- **notification utilisateur** : en cas d'échec de validation, l'interface affiche le message « All fields are mandatory for parameter calculation at 15°C »
+- **notification utilisateur** : une note permanente au-dessus du formulaire affiche « All fields are mandatory for parameter calculation at 15°C » (`field-measuring.parameter-calculation-15.mandatory-msg`)
 
 ## Création d'une condition initiale
 

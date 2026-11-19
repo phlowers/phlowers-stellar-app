@@ -11,6 +11,7 @@ import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { getNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
+import { TANGENT_AIMING_CALCULATION_TYPE_LABEL_KEYS } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   LeftSupportSnapshot,
   LeftSupportState,
@@ -26,6 +27,17 @@ export function createNumberControl({ min, max, decimals }: TangentAimingFieldRu
     Validators.max(max),
     maxDecimalsValidator(decimals)
   ]);
+}
+
+/** Calculation type and entered value of the `calculateTangentAiming` task: the parameter replaces the tangent angle. */
+export function toCalculationTypeTaskInputs(
+  calculationType: TangentAimingCalculationType,
+  tangentAngle: number | null,
+  parameter: number | null
+): { calculationType: TangentAimingCalculationType; angleToCableTangent?: number; parameter?: number } {
+  return calculationType === 'parametre'
+    ? { calculationType, parameter: parameter ?? 0 }
+    : { calculationType, angleToCableTangent: tangentAngle ?? 0 };
 }
 
 /** Enables the displayed controls and disables the hidden ones so they do not block validity. */
@@ -106,7 +118,7 @@ export function nextLeftSupportState(
   return { resolved, state: { previous: { spanKey, leftSupport: resolved }, memory } };
 }
 
-/** Span length computed by the engine for the selected span, or null when unavailable. */
+/** Per-span engine value (e.g. horizontal distance between attachments) of the selected span, or null when unavailable. */
 export function getCalculatedSpanLength(
   span: number[] | null | undefined,
   spanLengths: (number | null)[] | null | undefined
@@ -119,8 +131,8 @@ export function buildCalculationTypeOptions(
   translocoService: TranslocoService
 ): { label: string; value: TangentAimingCalculationType }[] {
   return [
-    { label: translocoService.translate('common.parameter-label'), value: 'parametre' },
-    { label: translocoService.translate('common.calculation-type-tangent'), value: 'tangente' }
+    { label: translocoService.translate(TANGENT_AIMING_CALCULATION_TYPE_LABEL_KEYS.parametre), value: 'parametre' },
+    { label: translocoService.translate(TANGENT_AIMING_CALCULATION_TYPE_LABEL_KEYS.tangente), value: 'tangente' }
   ];
 }
 

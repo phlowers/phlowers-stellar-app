@@ -14,6 +14,7 @@ import { findDuplicateTitle } from '@shared/helpers/duplicate';
 import { cloneDeep } from 'lodash';
 import { sanitizeSectionGeometry } from '@services/section/section-geometry.helpers';
 import { SectionUpdateResult } from '@services/section/section-geometry.interfaces';
+import { nowRfc9557 } from '@shared/helpers/date-time.helpers';
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +43,7 @@ export class SectionService {
 
     const { section: sanitizedSection, removedGeometryBoundObjects } = sanitizeSectionGeometry(section);
 
-    const nowDate = new Date().toISOString();
+    const nowDate = nowRfc9557();
     sanitizedSection.updated_at = nowDate;
     if (existingSection) {
       study.sections = study.sections.map((s) => (s?.uuid === sanitizedSection?.uuid ? sanitizedSection : s));
@@ -85,8 +86,8 @@ export class SectionService {
         section.name,
         this.translocoService.translate('shared.duplicate.copy-suffix')
       ),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      created_at: nowRfc9557(),
+      updated_at: nowRfc9557()
     };
     study.sections = [...study.sections, newSection];
     await this.studiesService.updateStudy(study);

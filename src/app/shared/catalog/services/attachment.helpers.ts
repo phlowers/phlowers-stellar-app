@@ -2,6 +2,7 @@ import { AttachmentSetItem, CatalogAttachmentEntity, CatalogSupportAttachmentEnt
 import { AttachmentCsvDto } from '@infrastructure/dto';
 import { v4 as uuidv4 } from 'uuid';
 import { toNumber } from 'lodash';
+import { nowRfc9557 } from '@shared/helpers/date-time.helpers';
 
 /**
  * Partial group emitted while streaming a CSV chunk.
@@ -64,7 +65,7 @@ export const groupChunkBySupport = (rows: AttachmentCsvDto[]): SupportAttachment
 export const mergeSupportAttachmentGroup = (
   existing: CatalogSupportAttachmentEntity | undefined,
   chunk: SupportAttachmentGroupChunk,
-  now: string = new Date().toISOString()
+  now: string = nowRfc9557()
 ): CatalogSupportAttachmentEntity => {
   const bySet = (a: AttachmentSetItem, b: AttachmentSetItem): number =>
     (a.attachment_set ?? 0) - (b.attachment_set ?? 0);
@@ -120,8 +121,8 @@ export const mapAttachmentCsvToEntities = (data: AttachmentCsvDto[]): CatalogAtt
     .filter((item) => item.support_idr || item.support_adr)
     .map((item) => ({
       uuid: uuidv4(),
-      updated_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
+      updated_at: nowRfc9557(),
+      created_at: nowRfc9557(),
       support_name: item.support_idr || item.support_adr,
       attachment_set: toNumber(item.position),
       attachment_altitude: Number.parseFloat(item.Z),

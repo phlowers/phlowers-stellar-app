@@ -56,6 +56,23 @@ describe('StudyHeader', () => {
   });
 
   describe('UC: display study title and action buttons', () => {
+    it('UC-SH1b: should give the time element a valid datetime and render a date written in RFC 9557', () => {
+      fixture.componentRef.setInput('study', {
+        uuid: 'u1',
+        title: 'My Study',
+        author_email: 'a@b.com',
+        created_at_offline: '2026-07-14T10:30:00.000+02:00[Europe/Paris]',
+        updated_at_offline: '2026-07-14T10:30:00.000+02:00[Europe/Paris]',
+        shareable: false,
+        saved: true,
+        sections: []
+      });
+      expect(() => fixture.detectChanges()).not.toThrow();
+
+      const time = fixture.nativeElement.querySelector('time.study-header__time') as HTMLElement;
+      expect(time.getAttribute('datetime')).toBe('2026-07-14T08:30:00.000Z');
+    });
+
     it('UC-SH1: should display study title when study is provided', () => {
       fixture.componentRef.setInput('study', {
         uuid: 'u1',

@@ -6,12 +6,13 @@
  */
 import type { JsonImportApplyResult, JsonImportConfig, StellarDexieHandle } from './json-import.engine.interfaces';
 import type { CsvImportWorkerResponse } from './csv-import.worker.interfaces';
+import { nowRfc9557 } from '@shared/helpers/date-time.helpers';
 
 /** Engine dependencies — injected to keep the engine pure & testable. */
 export interface JsonImportEngineDeps {
   /** Worker-owned Dexie instance exposing every catalog table by name. */
   db: StellarDexieHandle;
-  /** Returns the current ISO 8601 timestamp (allows test injection). */
+  /** Returns the current RFC 9557 timestamp (allows test injection). */
   now?: () => string;
   /** Forwarded to the config's context; see `JsonImportContext.tableNamePrefix`. */
   tableNamePrefix?: string;
@@ -42,7 +43,7 @@ export async function runJsonImport(
   deps: JsonImportEngineDeps,
   post: (msg: CsvImportWorkerResponse) => void
 ): Promise<JsonImportApplyResult> {
-  const now = (deps.now ?? (() => new Date().toISOString()))();
+  const now = (deps.now ?? nowRfc9557)();
   const result = await config.apply(payload, { db: deps.db, now, tableNamePrefix: deps.tableNamePrefix });
   post({ type: 'progress', csvKey: config.csvKey, processedRows: result.totalRows });
   post({ type: 'done', csvKey: config.csvKey, totalRows: result.totalRows, totalKeys: result.totalKeys });

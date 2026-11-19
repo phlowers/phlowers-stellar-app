@@ -23,7 +23,7 @@ Angles are expressed in **grads (gr)** and lengths in **meters**. Every displaye
 | Label | Unit | Meaning |
 |---|---|---|
 | **Left support** | — | End of the span considered as the "left" support. Defaults to the left support of the selected span. |
-| **Measured span length** | m | Distance measured between the two cable attachment points. A read-only **calculated value** from the terrain analysis lets you compare it with your measurement. |
+| **Measured horiz. dist. between cable attach.** | m | Distance measured between the two cable attachment points. A read-only **calculated value** from the terrain analysis lets you compare it with your measurement. |
 | **Cable tangent angle** | gr | Sighting angle of the cable tangent, between −200 and 200 gr. |
 | **Calculation type** | — | **Tangent**: the parameter is deduced from the tangent angle. The **Parameter** type can be selected and saved, but the calculation is not yet available for it. |
 
@@ -52,6 +52,16 @@ The device is placed **inside the span**, at a horizontal distance from the left
 
 The device is placed **outside the span, on the left support side** (to the left of it). The fields are identical to the Interior variant; only the device position changes: the horizontal distance entered is measured **outwards** from the span, starting at the left support.
 
+## Running the calculation
+
+The **Calculate** button is enabled when:
+
+- all displayed fields are filled and within their bounds;
+- the selected calculation type is **Tangent** (with the **Parameter** type, the button stays disabled);
+- no calculation is running (a loading indicator is displayed during processing).
+
+If the calculation fails, an error message is displayed under the button ("Failed to calculate parameter by tangent aiming", with the variant in parentheses for Exterior and Interior).
+
 ## Reading the result
 
 After clicking **Calculate**, the **Results** section displays:
@@ -65,3 +75,12 @@ Editing a displayed field invalidates the previous result (and the automatic 15 
 ```{note}
 Only one calculation method is kept when the measure is saved. Inputs of the other methods (PAPOTO, other tangent aiming variants, PEP) are erased.
 ```
+
+## Report and export
+
+Once the measure is saved, the **Report** and **Export** buttons of the dialog are available for the three variants (see {doc}`terrain_data`). Only the retained variant is reported:
+
+- the **PDF report** presents the method and the left support, the measured and calculated span lengths, the entered distance and angles, the calculation type with the entered value (tangent angle or parameter), then the parameter, the uncertainty and the 1% criterion;
+- the **JSON export** describes the variant in `parameterCalculation`: `methodName` is `VISEES_TANGENTES`, `subMethodName` is `SUPPORT`, `EXTERIEUR` or `INTERIEUR`, and the `tangentialSights` block contains the entered measures and, if the calculation was run, the calculated parameter with its criterion (`threshold` of 1%).
+
+In the export, the distance of the **Support** variant is reported as the left-side vertical distance (`leftSupportMeasures.verticalDistance`) and its vertical angle as the right-side angle (`rightSupportMeasures.verticalAngle`). The **Interior** and **Exterior** variants report the horizontal distance and the left-side vertical angle (`leftSupportMeasures.horizontalDistance`, `leftSupportMeasures.verticalAngle`) as well as the right-side vertical angle.

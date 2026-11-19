@@ -222,16 +222,18 @@ describe('TangentAimingSupport component', () => {
     expect(getByTestId('tangent-aiming-support-parameter')).toBeNull();
   });
 
-  it('should not allow a calculation on the parametre type, which the engine cannot calculate', async () => {
+  it('should calculate on the parametre type with the parameter replacing the tangent angle', async () => {
     expect(component.canCalculate()).toBe(true);
     component.updateCalculationType('parametre');
     fixture.detectChanges();
-    expect(component.canCalculate()).toBe(false);
-    await component.calculate();
-    expect(workerPythonService.runTask).not.toHaveBeenCalled();
-    component.updateCalculationType('tangente');
+    setInput('parameter-input', '1800');
     fixture.detectChanges();
     expect(component.canCalculate()).toBe(true);
+    await component.calculate();
+    const inputs = workerPythonService.runTask.mock.calls[0][1];
+    expect(inputs).toMatchObject({ calculationType: 'parametre', parameter: 1800 });
+    expect(inputs).not.toHaveProperty('angleToCableTangent');
+    expect(component.measureData().outputs.tangentAimingSupport).toEqual(TASK_RESULT);
   });
 
   it('should clear a stale result when the calculation type changes', async () => {
@@ -313,8 +315,8 @@ describe('TangentAimingSupport component', () => {
     expect(component.isCalculating()).toBe(false);
   });
 
-  it('should return no span length when the span is unknown', () => {
-    expect(component.calculatedSpanLength()).toBeNull();
+  it('should return no horizontal distance when the span is unknown', () => {
+    expect(component.calculatedHorizontalDistance()).toBeNull();
   });
 
   it('should run the tangent aiming task with the support inputs and store its result', async () => {
@@ -332,6 +334,7 @@ describe('TangentAimingSupport component', () => {
     fixture.detectChanges();
     expect(workerPythonService.runTask).toHaveBeenCalledWith(Task.calculateTangentAiming, {
       spanLength: 400,
+      calculationType: 'tangente',
       angleToCableTangent: 100,
       angleToLeftSupport: 0,
       angleToRightSupport: 98.41,

@@ -4,6 +4,8 @@
   [rows]="defaultRowsPerPage"
   [rowsPerPageOptions]="rowsPerPageOptions"
   (onSort)="onSort($event)"
+  [customSort]="true"
+  (sortFunction)="sortStudies($event)"
   [value]="studies()"
   [showCurrentPageReport]="true"
   [currentPageReportTemplate]="'studies.table.pagination-report' | transloco"
@@ -80,7 +82,7 @@
       <td>{{ study.title }}</td>
       <td>{{ study.author_email }}</td>
       <td data-testid="study-modification-date">
-        {{ study.updated_at_offline | date: dateFormat() : undefined : dateLocale() }}
+        {{ study.updated_at_offline | rfc9557ToDate | date: dateFormat() : undefined : dateLocale() }}
       </td>
       <td>{{ study.sections?.[0]?.lit_idr }}</td>
       <td>

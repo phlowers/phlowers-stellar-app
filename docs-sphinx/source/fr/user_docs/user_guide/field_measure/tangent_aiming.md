@@ -23,7 +23,7 @@ Les angles sont exprimés en **grades (gr)** et les longueurs en **mètres**. To
 | Libellé | Unité | Signification |
 |---|---|---|
 | **Support de gauche** | — | Extrémité de la portée considérée comme le support « gauche ». Par défaut, le support de gauche de la portée sélectionnée. |
-| **Longueur de portée mesurée** | m | Distance mesurée entre les deux points d'accrochage du câble. Une **valeur calculée** (lecture seule) issue de l'analyse du terrain permet de la comparer à votre mesure. |
+| **Dist. horizontale entre accr. câble mesurée** | m | Distance mesurée entre les deux points d'accrochage du câble. Une **valeur calculée** (lecture seule) issue de l'analyse du terrain permet de la comparer à votre mesure. |
 | **Angle tangent au câble** | gr | Angle de visée de la tangente au câble, entre −200 et 200 gr. |
 | **Type de calcul** | — | **Tangente** : le paramètre est déduit de l'angle tangent. Le type **Paramètre** peut être sélectionné et enregistré, mais le calcul n'est pas encore disponible pour lui. |
 
@@ -52,6 +52,16 @@ L'appareil est placé **dans la portée**, à une distance horizontale du suppor
 
 L'appareil est placé **hors de la portée, du côté du support de gauche** (à gauche de celui-ci). Les champs sont identiques à ceux de la variante Intérieur ; seule la position de l'appareil change : la distance horizontale saisie est mesurée **vers l'extérieur** de la portée, à partir du support de gauche.
 
+## Lancer le calcul
+
+Le bouton **Calculer** est actif lorsque :
+
+- tous les champs affichés sont renseignés et dans leurs bornes ;
+- le type de calcul sélectionné est **Tangente** (avec le type **Paramètre**, le bouton reste inactif) ;
+- aucun calcul n'est en cours (un indicateur de chargement s'affiche pendant le traitement).
+
+Si le calcul échoue, un message d'erreur s'affiche sous le bouton (« Échec du calcul du paramètre par visées tangentes », avec la variante entre parenthèses pour Extérieur et Intérieur).
+
 ## Lire le résultat
 
 Après clic sur **Calculer**, la section **Résultats** affiche :
@@ -65,3 +75,12 @@ Modifier un champ affiché invalide le résultat précédent (et le paramètre �
 ```{note}
 Une seule méthode de calcul est conservée à l'enregistrement de la mesure. Les saisies des autres méthodes (PAPOTO, autres variantes de visées tangentes, PEP) sont effacées.
 ```
+
+## Rapport et export
+
+Une fois la mesure enregistrée, les boutons **Rapport** et **Exporter** de la boîte de dialogue sont disponibles pour les trois variantes (voir {doc}`terrain_data`). Seule la variante retenue est reportée :
+
+- le **rapport PDF** présente la méthode et le support de gauche, les longueurs de portée mesurée et calculée, la distance et les angles saisis, le type de calcul avec la valeur saisie (angle tangent ou paramètre), puis le paramètre, l'incertitude et le critère 1 % ;
+- l'**export JSON** décrit la variante dans `parameterCalculation` : `methodName` vaut `VISEES_TANGENTES`, `subMethodName` vaut `SUPPORT`, `EXTERIEUR` ou `INTERIEUR`, et le bloc `tangentialSights` contient les mesures saisies et, si le calcul a été fait, le paramètre calculé avec son critère (`threshold` de 1 %).
+
+Dans l'export, la distance de la variante **Support** est reportée comme distance verticale côté gauche (`leftSupportMeasures.verticalDistance`) et son angle vertical comme angle côté droit (`rightSupportMeasures.verticalAngle`). Les variantes **Intérieur** et **Extérieur** reportent la distance horizontale et l'angle vertical côté gauche (`leftSupportMeasures.horizontalDistance`, `leftSupportMeasures.verticalAngle`) ainsi que l'angle vertical côté droit.

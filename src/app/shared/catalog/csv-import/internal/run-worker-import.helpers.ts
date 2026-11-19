@@ -15,6 +15,7 @@ import type { CsvImportWorkerRequest, CsvImportWorkerResponse } from '../csv-imp
 import { CatalogIntegrityError } from '../csv-import.errors';
 import { downloadAndHash } from './verified-download.helpers';
 import { STAGING_TABLE_PREFIX } from '@infrastructure/database/app-database.versions';
+import { nowRfc9557 } from '@shared/helpers/date-time.helpers';
 
 /** Shape of a `metadata` row (mirrors `MetadataEntity`, kept local to avoid a runtime import). */
 interface MetadataRow {
@@ -88,7 +89,7 @@ async function promoteStagingToLive(
     await metadataTable.put({
       key: metadataKey,
       value: verifiedHash,
-      updated_at: new Date().toISOString()
+      updated_at: nowRfc9557()
     });
   });
 }

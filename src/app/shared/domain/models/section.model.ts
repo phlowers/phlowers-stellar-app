@@ -74,9 +74,9 @@ export interface Section {
   name: string;
   /** Short display name */
   short_name: string;
-  /** ISO 8601 timestamp of creation */
+  /** RFC 9557 timestamp of creation (older values may be ISO 8601 ending with `Z`) */
   created_at: string;
-  /** ISO 8601 timestamp of last update */
+  /** RFC 9557 timestamp of last update (older values may be ISO 8601 ending with `Z`) */
   updated_at: string;
   /** Reference to catalog entry */
   internal_catalog_id: string;

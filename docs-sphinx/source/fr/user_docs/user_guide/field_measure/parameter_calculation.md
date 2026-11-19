@@ -31,10 +31,10 @@ Tous les champs du formulaire PAPOTO sont **obligatoires**. Vous devez les rempl
 | Libellé | Unité | Signification |
 |---|---|---|
 | **Support de gauche** | — | Sélectionnez l'extrémité de la portée considérée comme le support « gauche » (les deux options sont les supports de la portée sélectionnée). Cela détermine la manière dont les angles horizontaux sont mesurés. |
-| **Longueur mesurée de la portée** | m | Distance entre les deux points d'attache du câble sur les supports. |
-| **Diff. d'altitude des attaches mesurées** | m | Différence de hauteur verticale entre les points d'attache gauche et droit. Si le côté droit est plus haut, la valeur est positive. |
+| **Dist. horizontale entre accr. câble mesurée** | m | Distance horizontale entre les deux points d'attache du câble sur les supports. |
+| **Dist. verticale entre accr. câble mesurée** | m | Différence de hauteur verticale entre les points d'attache gauche et droit. Si le côté droit est plus haut, la valeur est positive. |
 
-Dans {{app_name}}, deux champs **Valeur calculée** (lecture seule) affichent la longueur de la portée et la différence d'altitude calculées à partir de l'analyse du terrain. Comparez-les avec vos valeurs mesurées pour valider vos mesures.
+Dans {{app_name}}, deux champs **Valeur calculée** (lecture seule) affichent la distance horizontale et la distance verticale entre les accrochages du câble, calculées à partir de l'analyse du terrain. Comparez-les avec vos valeurs mesurées pour valider vos mesures.
 
 ### Angles de mesure
 
@@ -108,6 +108,10 @@ Cela peut se produire si :
 - les données d'entrée sont incohérentes
 
 Vérifiez les valeurs saisies et réessayez. Si l'erreur persiste, examinez vos mesures de terrain.
+
+## Rapport et export
+
+Une fois la mesure enregistrée, **Rapport** et **Exporter** reprennent les saisies et les résultats de la méthode PAPOTO (voir {doc}`terrain_data`). Dans l'export JSON, `parameterCalculation.method.papoto` contient les longueurs et dénivelés mesurés et calculés, les angles horizontaux et verticaux, les paramètres 1-2, 2-3 et 1-3, puis le paramètre calculé avec son incertitude et son critère (`threshold` de 0,5 %, `status` : critère respecté ou non). Le support de gauche est exporté avec le libellé affiché dans le formulaire.
 
 ## Étape suivante
 

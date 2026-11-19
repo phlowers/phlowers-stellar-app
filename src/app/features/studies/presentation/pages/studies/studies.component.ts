@@ -23,6 +23,7 @@ import { StudiesTableComponent } from '@features/studies/presentation/components
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ImportStudyComponent } from '@features/studies/presentation/components/import-study/import-study.component';
 import { ExportDialogComponent } from '@shared/components/export-dialog/export-dialog.component';
+import { compareRfc9557 } from '@shared/helpers/date-time.helpers';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -84,9 +85,7 @@ export class StudiesComponent {
   }
 
   sortStudies(studies: Study[]) {
-    return [...studies].sort((a, b) => {
-      return new Date(b.created_at_offline).getTime() - new Date(a.created_at_offline).getTime();
-    });
+    return [...studies].sort((a, b) => compareRfc9557(a.created_at_offline, b.created_at_offline, -1));
   }
 
   duplicateStudy(uuid: string) {

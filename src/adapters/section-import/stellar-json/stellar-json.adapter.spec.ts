@@ -113,6 +113,37 @@ describe('StellarJsonAdapter', () => {
       }
     });
 
+    it('should turn the dates of the field measures back into Date instances (RFC 9557 and legacy formats)', async () => {
+      const raw = buildSectionJson({
+        field_measures: [
+          {
+            uuid: 'm1',
+            date: '2026-07-14T10:30:00.000+02:00[Europe/Paris]',
+            time: '2026-07-14T10:30:00.000+02:00[Europe/Paris]',
+            season: 'summer'
+          },
+          { uuid: 'm2', date: '2026-01-05T09:00:00.000Z', time: null, season: 'winter' },
+          'not-a-measure'
+        ]
+      });
+
+      const { section } = await adapter.import(sourceOf(raw, 'a.json'));
+
+      expect(section.field_measures).toHaveLength(2);
+      const [first, second] = section.field_measures;
+      expect(first.date?.toISOString()).toBe('2026-07-14T08:30:00.000Z');
+      expect(first.time?.toISOString()).toBe('2026-07-14T08:30:00.000Z');
+      expect(second.date?.toISOString()).toBe('2026-01-05T09:00:00.000Z');
+      expect(second.time).toBeNull();
+    });
+
+    it('should map field measures to an empty array when absent or not an array', async () => {
+      for (const field_measures of [undefined, 'nope']) {
+        const { section } = await adapter.import(sourceOf(buildSectionJson({ field_measures }), 'a.json'));
+        expect(section.field_measures).toEqual([]);
+      }
+    });
+
     it('should read the section and the coordinates of a version 1 envelope', async () => {
       const coordinates = { crs: 'WGS84', x: [3, null], y: [45, 46] };
       const envelope = { format: 'stellar-section', version: 1, section: buildSectionJson(), coordinates };

@@ -15,7 +15,7 @@ export type StellarDexieHandle = Dexie & Record<string, Table<unknown, unknown>>
 export interface JsonImportContext {
   /** Worker-owned Dexie instance exposing every catalog table by name. */
   db: StellarDexieHandle;
-  /** ISO 8601 timestamp captured once at engine start. */
+  /** RFC 9557 timestamp captured once at engine start. */
   now: string;
   /**
    * Prefix prepended to every table name the config writes to (e.g.

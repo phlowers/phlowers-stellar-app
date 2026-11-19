@@ -168,7 +168,7 @@ describe('TangentAimingExterior component', () => {
   });
 
   it('should show the calculated span length of the selected span', () => {
-    litData.set({ output_parameters: { span_length: [123.456, 50] } });
+    litData.set({ output_parameters: { span_length: [999, 999], horizontal_distance: [123.456, 50] } });
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('#taeSpanLength-calculated').textContent).toContain('123.46');
   });
@@ -212,18 +212,20 @@ describe('TangentAimingExterior component', () => {
     expect(component.measureData().exteriorHAccDistance).toBe(12);
   });
 
-  it('should not allow a calculation on the parametre type, which the engine cannot calculate', async () => {
+  it('should calculate on the parametre type with the parameter replacing the tangent angle', async () => {
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
     expect(component.canCalculate()).toBe(true);
     component.updateCalculationType('parametre');
     fixture.detectChanges();
-    expect(component.canCalculate()).toBe(false);
-    await component.calculate();
-    expect(workerPythonService.runTask).not.toHaveBeenCalled();
-    component.updateCalculationType('tangente');
+    setInput('parameter-input', '1800');
     fixture.detectChanges();
     expect(component.canCalculate()).toBe(true);
+    await component.calculate();
+    const inputs = workerPythonService.runTask.mock.calls[0][1];
+    expect(inputs).toMatchObject({ calculationType: 'parametre', parameter: 1800 });
+    expect(inputs).not.toHaveProperty('angleToCableTangent');
+    expect(component.measureData().outputs.tangentAimingExterior).toEqual(TASK_RESULT);
   });
 
   it('should clear the result when the calculation type changes', async () => {
@@ -251,6 +253,7 @@ describe('TangentAimingExterior component', () => {
     fixture.detectChanges();
     expect(workerPythonService.runTask).toHaveBeenCalledWith(Task.calculateTangentAiming, {
       spanLength: 400,
+      calculationType: 'tangente',
       angleToCableTangent: 101.4,
       angleToLeftSupport: 93.66,
       angleToRightSupport: 99.29,

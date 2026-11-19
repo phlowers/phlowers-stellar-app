@@ -54,8 +54,30 @@ Les trois variantes partagent le même appel au moteur (angles en grades, longue
 Une `distance` négative place l'appareil du côté extérieur du support de gauche (Extérieur).
 
 ```{note}
-Seul le type de calcul `tangente` est calculé. Le type `parametre` peut être sélectionné et enregistré, mais le moteur ne déduit le paramètre qu'à partir de l'angle de la tangente au câble.
+Les deux types de calcul lancent `Task.calculateTangentAiming`. Les entrées de la task portent le `calculationType` sélectionné et la seule valeur saisie de ce type : `parameter` remplace `angleToCableTangent` quand le type est `parametre` (`toCalculationTypeTaskInputs`).
 ```
+
+Le bouton **Calculer** (`canCalculate()`) est actif lorsque le formulaire est valide (`isFormValid`), qu'aucun calcul n'est en cours et que le type de calcul est `tangente` (`TANGENT_AIMING_CALCULATION_TYPE`). Un échec positionne `hasError()` et affiche le message `calculationFailedKey` de la variante.
+
+## Rapport et export
+
+Les trois variantes sont reportées via `TANGENT_AIMING_REPORT_CONFIGS` (`services/field-measure-report/field-measure-report.constantes.ts`), partagé : il associe chaque `calculationMethod` aux champs de `FieldMeasure` qu'elle lit (support de gauche, longueur de portée, distance, angles verticaux gauche et droit, type de calcul, paramètre, angle tangent) et à sa clé dans `outputs`. Le rapport PDF (`buildTangentAimingRows`) et l'export JSON (`buildTangentialSightsMethodExport`) lisent ces champs via cette configuration, de sorte que les saisies d'une variante sont déclarées une seule fois.
+
+Export JSON (`presentation/field-measure-export.helpers.ts`) :
+
+| Champ exporté | Support | Intérieur / Extérieur |
+|---|---|---|
+| `subMethodName` | `SUPPORT` | `INTERIEUR` / `EXTERIEUR` (`TANGENTIAL_SIGHTS_SUB_METHOD_NAME_EXPORT_VALUES`) |
+| `measuredHorizontalDistance` | `tangentSpanLength` | `interiorSpanLength` / `exteriorSpanLength` |
+| `calculatedHorizontalDistance` | distance horizontale entre accrochages du moteur (`output_parameters.horizontal_distance`) pour la portée sélectionnée (`getCalculatedSpanLength`) | idem |
+| `leftSupportMeasures.verticalDistance` | `cableHAccDistance` (distance verticale) | `null` |
+| `leftSupportMeasures.horizontalDistance` | `null` | `…HAccDistance` |
+| `leftSupportMeasures.verticalAngle` | `null` (pas d'angle gauche dans le formulaire) | `…VerticalAccAngleLeft` |
+| `rightSupportMeasures.verticalAngle` | `cableVerticalAccAngle` | `…VerticalAccAngleRight` |
+| `calculationType` | `type` (le libellé traduit de l'option du sélecteur du formulaire, « Paramètre » / « Tangente ») et `value` (le paramètre ou l'angle tangent saisi) | idem |
+| `calculatedParameter` | depuis `outputs.tangentAimingSupport` | depuis `outputs.tangentAimingInterior` / `…Exterior` |
+
+`calculatedParameter` vaut `{ parameter: { value, unit: "m", uncertainty }, criterion: { threshold: 1, unit: "%", status } }` (`TANGENT_AIMING_VALIDITY_CRITERION_PERCENT`, `status` = `checkValidity`), et `undefined` tant que la variante n'est pas calculée. `parameterCalculation.leftSupport` est le numéro de support affiché par le sélecteur de support de gauche de la variante.
 
 ## Validation et invalidation
 

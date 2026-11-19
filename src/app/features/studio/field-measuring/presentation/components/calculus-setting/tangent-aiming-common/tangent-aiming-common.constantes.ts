@@ -21,11 +21,14 @@ export const TANGENT_AIMING_FIELD_RULES: Record<TangentAimingRuleField, TangentA
   tangentAngle: { min: -200, max: 200, decimals: 3, default: 0 }
 };
 
-/**
- * Default calculation type of a tangent aiming form. The engine (`calculate_tangent_aiming`) only computes the
- * parameter from the cable tangent angle: the `parametre` type can be selected and saved but not calculated yet.
- */
+/** Default calculation type of a tangent aiming form. */
 export const TANGENT_AIMING_CALCULATION_TYPE: TangentAimingCalculationType = 'tangente';
+
+/** Transloco key of the label of each calculation type: shared by the form selector, the report and the export. */
+export const TANGENT_AIMING_CALCULATION_TYPE_LABEL_KEYS: Record<TangentAimingCalculationType, string> = {
+  parametre: 'common.parameter-label',
+  tangente: 'common.calculation-type-tangent'
+};
 
 /** Left support tracking before any resolution. */
 export const INITIAL_LEFT_SUPPORT_STATE: LeftSupportState = { previous: null, memory: {} };

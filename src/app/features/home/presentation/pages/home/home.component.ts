@@ -15,6 +15,7 @@ import { CardStudyComponent } from '@shared/components/atoms/card-study/card-stu
 import { StudiesService } from '@services/studies/studies.service';
 import { Study } from '@shared/domain';
 import TimeAgo from 'javascript-time-ago';
+import { parseRfc9557 } from '@shared/helpers/date-time.helpers';
 import fr from 'javascript-time-ago/locale/fr';
 import en from 'javascript-time-ago/locale/en';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
@@ -104,12 +105,12 @@ export class HomeComponent {
 
     effect(() => {
       if (this.studiesReady()) {
-        void this.studiesService.getLatestStudies().then((studies) => {
+        void this.studiesService.getLatestStudies()?.then((studies) => {
           this.latestStudies.set(
-            studies?.map((study) => ({
-              ...study,
-              updated_at_offline: this.timeAgo.format(new Date(study.updated_at_offline))
-            }))
+            studies?.map((study) => {
+              const updatedAt = parseRfc9557(study.updated_at_offline);
+              return { ...study, updated_at_offline: updatedAt ? this.timeAgo.format(updatedAt) : '' };
+            })
           );
         });
       }

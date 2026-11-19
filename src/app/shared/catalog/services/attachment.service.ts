@@ -14,6 +14,7 @@ import { DerivedSupportAttachmentFields, SupportNameEntry } from './attachment.i
 import { toLegacyEntity } from './attachment.helpers';
 import { CsvImportClientService } from '@shared/catalog/csv-import';
 import { truncateNumberToOneDecimal } from '@shared/helpers/truncateDecimals';
+import { nowRfc9557 } from '@shared/helpers/date-time.helpers';
 
 /**
  * Service for managing attachment point catalog data.
@@ -310,7 +311,7 @@ export class AttachmentService {
     const keys = uniqueEntries.map((e) => e.supportName);
     const existing = await db.catSupportAttachments.bulkGet(keys);
 
-    const now = new Date().toISOString();
+    const now = nowRfc9557();
     const toAdd: CatalogSupportAttachmentEntity[] = uniqueEntries
       .map((e, i) => ({ entry: e, exists: !!existing[i] }))
       .filter((x) => !x.exists)

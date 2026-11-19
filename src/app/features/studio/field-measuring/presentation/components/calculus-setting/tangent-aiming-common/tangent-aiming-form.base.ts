@@ -16,10 +16,7 @@ import { Task } from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
-import {
-  INITIAL_LEFT_SUPPORT_STATE,
-  TANGENT_AIMING_CALCULATION_TYPE
-} from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
+import { INITIAL_LEFT_SUPPORT_STATE } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import {
   buildCalculationTypeOptions,
   buildSpanSupportOptions,
@@ -73,22 +70,17 @@ export abstract class TangentAimingFormBase {
     ]);
   });
 
-  /** The calculate button is usable on a valid form; only the tangent type can be calculated by the engine. */
-  readonly canCalculate = computed(
-    () =>
-      this.isFormValid() &&
-      !this.isCalculating() &&
-      (this.measureData()[this.config.calculationTypeKey] ?? TANGENT_AIMING_CALCULATION_TYPE) === 'tangente'
-  );
+  /** The calculate button is usable on a valid form, whatever the calculation type. */
+  readonly canCalculate = computed(() => this.isFormValid() && !this.isCalculating());
 
   /** Both supports of the selected span, empty without span. */
   readonly supportOptions = computed(() =>
     buildSpanSupportOptions(this.spanService.section()?.supports ?? [], this.measureData().span)
   );
 
-  /** Span length computed by the engine for the selected span, or null when unavailable. */
-  readonly calculatedSpanLength = computed(() =>
-    getCalculatedSpanLength(this.measureData().span, this.plotService.litData()?.output_parameters.span_length)
+  /** Horizontal distance between cable attachments computed by the engine for the selected span, or null when unavailable. */
+  readonly calculatedHorizontalDistance = computed(() =>
+    getCalculatedSpanLength(this.measureData().span, this.plotService.litData()?.output_parameters.horizontal_distance)
   );
 
   readonly calculationTypeOptions = computed(() => {
