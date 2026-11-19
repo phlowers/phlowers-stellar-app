@@ -422,41 +422,12 @@ export class ForestTrenchesComponent implements OnDestroy {
       // Resolved from the same snapshot as the other inputs: the form stays editable while the ground is sliced
       const windPressure = getEffectiveWindPressure(catalog.windZones, values.windZone, values.redZonePresence);
       const selectedRuleTypes = values.selectedRules;
-      const ruleByType = new Map(catalog.ruleDefinitions.map((rule) => [rule.rule_type, rule]));
-      const rulesClimaticConditions = selectedRuleTypes.map((ruleType) => {
-        const rule = ruleByType.get(ruleType);
-        if (!rule) throw this.missingConfigurationError(`Missing climatic definition for rule "${ruleType}".`);
-        return {
-          ruleType,
-          ruleName: rule.rule_name,
-          lateralPoint: rule.lateral_point,
-          overhangPoint: rule.overhang_point
-        };
-      });
-      const distanceByType = new Map(config.floorDistances.map((distance) => [distance.rule_type, distance]));
-      const rulesDistances = selectedRuleTypes.map((ruleType) => {
-        const distance = distanceByType.get(ruleType);
-        if (!distance) throw this.missingConfigurationError(`Missing floor-obstacle distance for rule "${ruleType}".`);
-        return {
-          ruleType,
-          lateral: distance.lateral,
-          overhang: distance.overhang
-        };
-      });
+      const rulesClimaticConditions = this.buildRulesClimaticConditions(catalog, selectedRuleTypes);
+      const rulesDistances = this.buildRulesDistances(config, selectedRuleTypes);
       const spanIndices = spansInInterval(section.supports, values.firstSupportUuid, values.lastSupportUuid);
-      const spans: TaskInputs[Task.getForestTrenches]['spans'] = [];
-      for (const spanIndex of spanIndices) {
-        const floor = section.floors?.find((candidate) => candidate.supportUuid === section.supports[spanIndex].uuid);
-        const { result, error, diagnostics } = await this.workerPythonService.runTask(
-          Task.sliceGround,
-          toSliceGroundInput(floor, spanIndex, values.nPoints)
-        );
-        // The dialog was closed meanwhile: the worker cannot be interrupted, but the remaining slices and the
-        // calculation are not queued
-        if (this.destroyRef.destroyed) return;
-        if (error || !result) throw this.taskError('Ground slicing task', error, diagnostics);
-        spans.push({ spanIndex, distances: result.distances, altitudes: result.altitudes });
-      }
+      const spans = await this.sliceSpans(section, spanIndices, values.nPoints);
+      // The dialog was closed meanwhile: the remaining slices and the calculation are not queued
+      if (!spans) return;
 
       const taskInput: TaskInputs[Task.getForestTrenches] = {
         electricTension: section.voltage_idr ?? '',
@@ -534,6 +505,56 @@ export class ForestTrenchesComponent implements OnDestroy {
     } finally {
       this.isCalculating.set(false);
     }
+  }
+
+  private async sliceSpans(
+    section: Section,
+    spanIndices: number[],
+    nPoints: number
+  ): Promise<TaskInputs[Task.getForestTrenches]['spans'] | null> {
+    const spans: TaskInputs[Task.getForestTrenches]['spans'] = [];
+    for (const spanIndex of spanIndices) {
+      const floor = section.floors?.find((candidate) => candidate.supportUuid === section.supports[spanIndex].uuid);
+      const { result, error, diagnostics } = await this.workerPythonService.runTask(
+        Task.sliceGround,
+        toSliceGroundInput(floor, spanIndex, nPoints)
+      );
+      // The worker cannot be interrupted, but a closed dialog stops the remaining work
+      if (this.destroyRef.destroyed) return null;
+      if (error || !result) throw this.taskError('Ground slicing task', error, diagnostics);
+      spans.push({ spanIndex, distances: result.distances, altitudes: result.altitudes });
+    }
+    return spans;
+  }
+
+  private buildRulesClimaticConditions(
+    catalog: NonNullable<ReturnType<typeof this.catalogData>>,
+    selectedRuleTypes: string[]
+  ) {
+    const ruleByType = new Map(catalog.ruleDefinitions.map((rule) => [rule.rule_type as string, rule]));
+    return selectedRuleTypes.map((ruleType) => {
+      const rule = ruleByType.get(ruleType);
+      if (!rule) throw this.missingConfigurationError(`Missing climatic definition for rule "${ruleType}".`);
+      return {
+        ruleType,
+        ruleName: rule.rule_name,
+        lateralPoint: rule.lateral_point,
+        overhangPoint: rule.overhang_point
+      };
+    });
+  }
+
+  private buildRulesDistances(config: NonNullable<ReturnType<typeof this.forestConfig>>, selectedRuleTypes: string[]) {
+    const distanceByType = new Map(config.floorDistances.map((distance) => [distance.rule_type as string, distance]));
+    return selectedRuleTypes.map((ruleType) => {
+      const distance = distanceByType.get(ruleType);
+      if (!distance) throw this.missingConfigurationError(`Missing floor-obstacle distance for rule "${ruleType}".`);
+      return {
+        ruleType,
+        lateral: distance.lateral,
+        overhang: distance.overhang
+      };
+    });
   }
 
   selectAdjacentSpan(step: -1 | 1): void {
@@ -616,7 +637,7 @@ export class ForestTrenchesComponent implements OnDestroy {
     );
     return {
       firstSupportUuid: supports[0]?.uuid ?? '',
-      lastSupportUuid: supports[supports.length - 1]?.uuid ?? '',
+      lastSupportUuid: supports.at(-1)?.uuid ?? '',
       nPoints: forestConfig?.nPointsChoices[0] ?? 2,
       windZone: config?.wind_zone_default ?? catalog.windZones[0]?.label ?? '',
       repartitionTemperature: config?.repartition_temperature_default ?? null,

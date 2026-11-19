@@ -29,7 +29,8 @@ export function getEffectiveWindPressure(
   redZonePresence: boolean
 ): number | null {
   const zone = windZones.find((windZone) => windZone.label === windZoneLabel);
-  return zone ? (redZonePresence ? zone.red_zone : zone.normal) : null;
+  if (!zone) return null;
+  return redZonePresence ? zone.red_zone : zone.normal;
 }
 
 /** Read-only electric tension shown in the conformity-style forms; "-" when the section has none. */

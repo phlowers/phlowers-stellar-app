@@ -213,17 +213,17 @@ function assertForestTrenchesFloorObstacle(value: unknown): asserts value is For
   }
   for (const key of ['obstacleType', 'obstacleName', 'details'] as const) {
     if (typeof value[key] !== 'string') {
-      throw new Error(`Obstacle configuration: \`floor_obstacle.${key}\` must be a string`);
+      throw new TypeError(`Obstacle configuration: \`floor_obstacle.${key}\` must be a string`);
     }
   }
   if (typeof value['redZone'] !== 'boolean') {
-    throw new Error('Obstacle configuration: `floor_obstacle.redZone` must be a boolean');
+    throw new TypeError('Obstacle configuration: `floor_obstacle.redZone` must be a boolean');
   }
   if (value['conformity'] !== 'forest_trenches') {
     throw new Error('Obstacle configuration: `floor_obstacle.conformity` must be "forest_trenches"');
   }
   if (!Array.isArray(value['distances'])) {
-    throw new Error('Obstacle configuration: `floor_obstacle.distances` must be an array');
+    throw new TypeError('Obstacle configuration: `floor_obstacle.distances` must be an array');
   }
   value['distances'].forEach((distance, distanceIndex) => {
     assertObstacleDistanceEntry(distance, 0, distanceIndex, 'floor_obstacle');
