@@ -187,7 +187,7 @@ def apply_climate_to_engine(
     )
 
 
-def initialize_study(python_inputs: dict):
+def initialize_study(python_inputs: dict) -> tuple[SectionStudy, SectionStudy]:
     logger.debug(f"Initializing section with inputs: {python_inputs}")
 
     input_section = python_inputs["section"]
