@@ -354,11 +354,7 @@ export class ConformityComponent implements OnDestroy {
   readonly windZoneOptions = computed(() => this.windZones().map((z) => ({ label: z.label, value: z.label })));
 
   readonly effectiveWindPressure = computed(() => {
-    return getEffectiveWindPressure(
-      this.windZones(),
-      this.formValue().windZone,
-      this.redZonePresenceValue()
-    );
+    return getEffectiveWindPressure(this.windZones(), this.formValue().windZone, this.redZonePresenceValue());
   });
 
   readonly conformityOptions = toSignal(

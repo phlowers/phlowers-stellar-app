@@ -47,7 +47,8 @@ describe('formatPythonError', () => {
               'shared.python-errors.estimation-input-error': 'The estimation inputs are missing or invalid.',
               'shared.python-errors.estimation-not-converged-error':
                 'The target cannot be reached within the estimation bounds.',
-              'shared.python-errors.estimation-warning': 'The existing load on the estimated span was ignored.'
+              'shared.python-errors.estimation-warning': 'The existing load on the estimated span was ignored.',
+              'shared.python-errors.conformity-input-error': 'The conformity inputs are missing or invalid.'
             }
           },
           translocoConfig: {
@@ -75,8 +76,9 @@ describe('formatPythonError', () => {
     [PythonErrorCode.EstimationInputError, 'The estimation inputs are missing or invalid.'],
     [PythonErrorCode.EstimationNotConvergedError, 'The target cannot be reached within the estimation bounds.'],
     [PythonErrorCode.EstimationWarning, 'The existing load on the estimated span was ignored.'],
-    [PythonErrorCode.ObstacleNotFoundError, 'The obstacle is not registered in the calculation engine.']
-  ])('should return the localized estimation message for %s', (code, expected) => {
+    [PythonErrorCode.ObstacleNotFoundError, 'The obstacle is not registered in the calculation engine.'],
+    [PythonErrorCode.ConformityInputError, 'The conformity inputs are missing or invalid.']
+  ])('should return the localized message for %s', (code, expected) => {
     expect(formatPythonError(code, translocoService)).toBe(expected);
   });
 

@@ -13,8 +13,8 @@ import { StorageService } from '@services/storage/storage.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { SectionService } from '@services/section/section.service';
-import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@services/worker_python/tasks/types';
+import { TaskTimeoutError, WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/types';
 import { NotificationService } from '@services/notification/notification.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -54,11 +54,14 @@ describe('ForestTrenchesComponent', () => {
     workerPython = {
       runTask: vi.fn().mockResolvedValue({
         result: { distances: [0, 100], altitudes: [10, 12], length: 100 },
-        error: null
+        error: null,
+        diagnostics: []
       }),
-      runTaskWithTimeout: vi
-        .fn()
-        .mockResolvedValue({ result: { spans: [makeSpanOutput(0), makeSpanOutput(1)] }, error: null })
+      runTaskWithTimeout: vi.fn().mockResolvedValue({
+        result: { spans: [makeSpanOutput(0), makeSpanOutput(1)] },
+        error: null,
+        diagnostics: []
+      })
     };
 
     await TestBed.configureTestingModule({
@@ -198,6 +201,31 @@ describe('ForestTrenchesComponent', () => {
     expect(notificationService.success).toHaveBeenCalled();
   });
 
+  it('calculates with the inputs the run started with when the form is edited while the ground is sliced', async () => {
+    await createComponent();
+    const startingPressure = component.effectiveWindPressure();
+    let finishSlice!: () => void;
+    workerPython.runTask.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishSlice = () =>
+          resolve({ result: { distances: [0, 100], altitudes: [10, 12], length: 100 }, error: null, diagnostics: [] });
+      })
+    );
+
+    const calculation = component.calculate();
+    await vi.waitFor(() => expect(workerPython.runTask).toHaveBeenCalledTimes(1));
+    component.form.controls.redZonePresence.setValue(true);
+    expect(component.effectiveWindPressure()).not.toBe(startingPressure);
+    finishSlice();
+    await calculation;
+
+    expect(workerPython.runTaskWithTimeout.mock.calls[0][1].form).toMatchObject({
+      windPressure: startingPressure,
+      redZonePresence: false
+    });
+    expect(sectionSignal()?.forest_trenches).toMatchObject({ redZonePresence: false });
+  });
+
   it('redraws the plot with the legend only while the graph is enlarged', async () => {
     await createComponent();
     await component.calculate();
@@ -294,17 +322,109 @@ describe('ForestTrenchesComponent', () => {
     expect(workerPython.runTask).not.toHaveBeenCalled();
   });
 
-  it('logs and displays worker errors without saving the inputs', async () => {
-    await createComponent();
-    workerPython.runTask.mockResolvedValueOnce({ result: null, error: 'Ground slicing failed' });
+  describe('when the calculation fails', () => {
+    // Without translations, `translate` returns the key: the error shown is the key of the message the user gets
+    async function expectFailure(expectedMessageKey: string): Promise<void> {
+      await component.calculate();
+      fixture.detectChanges();
 
-    await component.calculate();
-    fixture.detectChanges();
+      expect(component.calculationError()).toBe(expectedMessageKey);
+      expect(notificationService.error).toHaveBeenCalledTimes(1);
+      expect(getByTestId('forest-trenches-calculation-error')).not.toBeNull();
+      expect(sectionService.createOrUpdateSection).not.toHaveBeenCalled();
+    }
 
-    expect(logger.error).toHaveBeenCalledWith('Failed to calculate forest trenches', expect.any(Error));
-    expect(notificationService.error).toHaveBeenCalled();
-    expect(getByTestId('forest-trenches-calculation-error')).not.toBeNull();
-    expect(sectionService.createOrUpdateSection).not.toHaveBeenCalled();
+    it('shows the translated task error and logs its technical identifier', async () => {
+      await createComponent();
+      workerPython.runTask.mockResolvedValueOnce({ result: null, error: TaskError.CALCULATION_ERROR, diagnostics: [] });
+
+      await expectFailure('shared.studio.calculation-error');
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to calculate forest trenches',
+        expect.objectContaining({ message: expect.stringContaining(TaskError.CALCULATION_ERROR) })
+      );
+    });
+
+    it('prefers the message of the Python error raised by the task', async () => {
+      await createComponent();
+      workerPython.runTask.mockResolvedValueOnce({
+        result: null,
+        error: TaskError.CALCULATION_ERROR,
+        diagnostics: [
+          {
+            code: PythonErrorCode.SupportOutOfRangeError,
+            severity: 'error',
+            origin: 'exception',
+            rawText: 'SupportOutOfRangeError: spanIndex 5 is out of range'
+          }
+        ]
+      });
+
+      await expectFailure('shared.python-errors.support-out-of-range-error');
+    });
+
+    it('shows the message of the Python error raised by the forest trenches task', async () => {
+      await createComponent();
+      workerPython.runTaskWithTimeout.mockResolvedValue({
+        result: null,
+        error: TaskError.CALCULATION_ERROR,
+        diagnostics: [
+          {
+            code: PythonErrorCode.ConformityInputError,
+            severity: 'error',
+            origin: 'exception',
+            rawText: 'ConformityInputError: spans must be a non-empty list'
+          }
+        ]
+      });
+
+      await expectFailure('shared.python-errors.conformity-input-error');
+    });
+
+    it('asks to update the catalogs when a selected rule has no floor-obstacle distance', async () => {
+      await createComponent(makeSection(), { floor_obstacle_distances: [] });
+      component.form.controls.selectedRules.setValue(['RULE_1']);
+
+      await expectFailure('studio.forest-trenches.missing-configuration');
+
+      expect(workerPython.runTask).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to calculate forest trenches',
+        expect.objectContaining({ message: expect.stringContaining('RULE_1') })
+      );
+    });
+
+    it('shows a calculation error when the task returns no span results', async () => {
+      await createComponent();
+      workerPython.runTaskWithTimeout.mockResolvedValue({ result: { spans: [] }, error: null, diagnostics: [] });
+
+      await expectFailure('shared.studio.calculation-error');
+    });
+
+    it('shows the time limit when the calculation times out', async () => {
+      await createComponent();
+      const translate = vi.spyOn(TestBed.inject(TranslocoService), 'translate');
+      workerPython.runTaskWithTimeout.mockRejectedValue(
+        new TaskTimeoutError(Task.getForestTrenches, FOREST_TRENCHES_CALCULATION_TIMEOUT_MS)
+      );
+
+      await expectFailure('studio.forest-trenches.calculation-timeout');
+
+      expect(translate).toHaveBeenCalledWith('studio.forest-trenches.calculation-timeout', {
+        seconds: FOREST_TRENCHES_CALCULATION_TIMEOUT_MS / 1000
+      });
+    });
+
+    it('only shows an unknown error for an unexpected failure, and logs its details', async () => {
+      await createComponent();
+      const failure = new Error('Python worker is not initialized. Call setup() before running tasks.');
+      workerPython.runTask.mockRejectedValueOnce(failure);
+
+      await expectFailure('shared.studio.unknown-error');
+
+      expect(logger.error).toHaveBeenCalledWith('Failed to calculate forest trenches', failure);
+    });
   });
 
   it('ignores saved support uuids that are not in the current section', async () => {
@@ -325,6 +445,89 @@ describe('ForestTrenchesComponent', () => {
     expect(component.form.controls.firstSupportUuid.value).toBe('support-1');
     expect(component.form.controls.lastSupportUuid.value).toBe('support-3');
     expect(component.form.controls.windMinus.value).toBe(true);
+  });
+
+  describe('when the section or the dialog changes during the calculation', () => {
+    // Holds the calculation task until the returned function is called, to act while a run is in flight
+    function holdCalculation(): () => void {
+      let release!: () => void;
+      workerPython.runTaskWithTimeout.mockReturnValue(
+        new Promise((resolve) => {
+          release = () => resolve({ result: { spans: [makeSpanOutput(0)] }, error: null });
+        })
+      );
+      return release;
+    }
+
+    it('does not save nor publish a calculation that ends after the dialog is closed', async () => {
+      await createComponent();
+      const release = holdCalculation();
+
+      const calculation = component.calculate();
+      await vi.waitFor(() => expect(workerPython.runTaskWithTimeout).toHaveBeenCalled());
+      fixture.destroy();
+      release();
+      await calculation;
+
+      expect(sectionService.createOrUpdateSection).not.toHaveBeenCalled();
+      expect(sectionSignal()).toBe(section);
+      expect(notificationService.success).not.toHaveBeenCalled();
+    });
+
+    it('stops slicing the remaining spans once the dialog is closed', async () => {
+      await createComponent();
+      let finishSlice!: () => void;
+      workerPython.runTask.mockReturnValueOnce(
+        new Promise((resolve) => {
+          finishSlice = () =>
+            resolve({ result: { distances: [0, 100], altitudes: [10, 12], length: 100 }, error: null });
+        })
+      );
+
+      const calculation = component.calculate();
+      await vi.waitFor(() => expect(workerPython.runTask).toHaveBeenCalledTimes(1));
+      fixture.destroy();
+      finishSlice();
+      await calculation;
+
+      expect(workerPython.runTask).toHaveBeenCalledTimes(1);
+      expect(workerPython.runTaskWithTimeout).not.toHaveBeenCalled();
+      expect(sectionService.createOrUpdateSection).not.toHaveBeenCalled();
+    });
+
+    it('merges the inputs into the section as it was edited during the calculation', async () => {
+      await createComponent();
+      const release = holdCalculation();
+
+      const calculation = component.calculate();
+      await vi.waitFor(() => expect(workerPython.runTaskWithTimeout).toHaveBeenCalled());
+      sectionSignal.set({ ...section, name: 'Edited while calculating' });
+      release();
+      await calculation;
+
+      const savedSection = sectionService.createOrUpdateSection.mock.calls[0][1];
+      expect(savedSection).toMatchObject({
+        name: 'Edited while calculating',
+        forest_trenches: expect.objectContaining({ firstSupportUuid: 'support-1', lastSupportUuid: 'support-3' })
+      });
+      expect(sectionSignal()).toBe(savedSection);
+    });
+
+    it('does not save nor publish over another section opened during the calculation', async () => {
+      await createComponent();
+      const release = holdCalculation();
+
+      const calculation = component.calculate();
+      await vi.waitFor(() => expect(workerPython.runTaskWithTimeout).toHaveBeenCalled());
+      const otherSection = { ...makeSection(), uuid: 'section-2' };
+      sectionSignal.set(otherSection);
+      release();
+      await calculation;
+
+      expect(sectionService.createOrUpdateSection).not.toHaveBeenCalled();
+      expect(sectionSignal()).toBe(otherSection);
+      expect(notificationService.success).not.toHaveBeenCalled();
+    });
   });
 
   function getByTestId(id: string): HTMLElement | null {

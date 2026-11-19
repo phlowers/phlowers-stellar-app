@@ -1,7 +1,8 @@
 @use 'abstract.extracts' as app;
 
 $_plot-heigth--shrink: 18.75rem;
-$_plot-height--expand: 75vh;
+$_plot-heigth--expand: 75vh;
+$_plot-toggle-btn-height: 1.5625rem;
 
 %_mb-3 {
   @apply mb-3;
@@ -259,11 +260,11 @@ tr:has(td) {
   &__figure {
     flex-grow: 1;
     text-align: right;
+    height: $_plot-heigth--shrink + $_plot-toggle-btn-height;
     overflow: hidden;
     transition: height 0.3s ease-in-out 0.2s;
   }
 
-  &__figure,
   &__plot {
     height: $_plot-heigth--shrink;
   }
@@ -297,7 +298,10 @@ tr:has(td) {
       margin-bottom: 0;
     }
 
-    &__figure,
+    &__figure {
+      height: calc(#{$_plot-heigth--expand} + #{$_plot-toggle-btn-height});
+    }
+
     &__plot {
       height: 75vh;
     }

@@ -10,6 +10,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   Injector,
@@ -39,13 +40,15 @@ import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StorageService } from '@services/storage/storage.service';
 import { SectionService } from '@services/section/section.service';
-import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskInputs } from '@services/worker_python/tasks/types';
+import { TaskTimeoutError, WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
+import { Task, TaskError, TaskInputs } from '@services/worker_python/tasks/types';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { formatStudioError } from '@shared/components/studio/helpers/errors';
 import { CONFORMITY_BOUNDS } from '@features/studio/obstacles/presentation/components/conformity/conformity.constantes';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import {
@@ -63,6 +66,7 @@ import {
   toSliceGroundInput
 } from './forest-trenches.helpers';
 import { FOREST_TRENCHES_CALCULATION_TIMEOUT_MS, FOREST_TRENCHES_PLOT_ID } from './forest-trenches.constantes';
+import { ForestTrenchesError } from './forest-trenches.errors';
 import type {
   ForestTrenchesCatalogData,
   ForestTrenchesSelectOption,
@@ -104,6 +108,7 @@ export class ForestTrenchesComponent implements OnDestroy {
   private readonly translocoService = inject(TranslocoService);
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
 
@@ -414,11 +419,13 @@ export class ForestTrenchesComponent implements OnDestroy {
     this.calculationError.set(null);
     try {
       const values = this.form.getRawValue();
+      // Resolved from the same snapshot as the other inputs: the form stays editable while the ground is sliced
+      const windPressure = getEffectiveWindPressure(catalog.windZones, values.windZone, values.redZonePresence);
       const selectedRuleTypes = values.selectedRules;
       const ruleByType = new Map(catalog.ruleDefinitions.map((rule) => [rule.rule_type, rule]));
       const rulesClimaticConditions = selectedRuleTypes.map((ruleType) => {
         const rule = ruleByType.get(ruleType);
-        if (!rule) throw new Error(`Missing climatic definition for rule "${ruleType}".`);
+        if (!rule) throw this.missingConfigurationError(`Missing climatic definition for rule "${ruleType}".`);
         return {
           ruleType,
           ruleName: rule.rule_name,
@@ -429,7 +436,7 @@ export class ForestTrenchesComponent implements OnDestroy {
       const distanceByType = new Map(config.floorDistances.map((distance) => [distance.rule_type, distance]));
       const rulesDistances = selectedRuleTypes.map((ruleType) => {
         const distance = distanceByType.get(ruleType);
-        if (!distance) throw new Error(`Missing floor-obstacle distance for rule "${ruleType}".`);
+        if (!distance) throw this.missingConfigurationError(`Missing floor-obstacle distance for rule "${ruleType}".`);
         return {
           ruleType,
           lateral: distance.lateral,
@@ -440,11 +447,14 @@ export class ForestTrenchesComponent implements OnDestroy {
       const spans: TaskInputs[Task.getForestTrenches]['spans'] = [];
       for (const spanIndex of spanIndices) {
         const floor = section.floors?.find((candidate) => candidate.supportUuid === section.supports[spanIndex].uuid);
-        const { result, error } = await this.workerPythonService.runTask(
+        const { result, error, diagnostics } = await this.workerPythonService.runTask(
           Task.sliceGround,
           toSliceGroundInput(floor, spanIndex, values.nPoints)
         );
-        if (error || !result) throw new Error(error ?? 'Ground slicing task failed.');
+        // The dialog was closed meanwhile: the worker cannot be interrupted, but the remaining slices and the
+        // calculation are not queued
+        if (this.destroyRef.destroyed) return;
+        if (error || !result) throw this.taskError('Ground slicing task', error, diagnostics);
         spans.push({ spanIndex, distances: result.distances, altitudes: result.altitudes });
       }
 
@@ -452,7 +462,7 @@ export class ForestTrenchesComponent implements OnDestroy {
         electricTension: section.voltage_idr ?? '',
         form: {
           windZone: values.windZone,
-          windPressure: this.effectiveWindPressure(),
+          windPressure,
           windMinus: values.windMinus,
           redZonePresence: values.redZonePresence,
           repartitionTemperature: values.repartitionTemperature,
@@ -468,16 +478,27 @@ export class ForestTrenchesComponent implements OnDestroy {
         lateralRules: config.lateralRules.filter((ruleType) => selectedRuleTypes.includes(ruleType)),
         spans
       };
-      const { result, error } = await this.workerPythonService.runTaskWithTimeout(
+      const { result, error, diagnostics } = await this.workerPythonService.runTaskWithTimeout(
         Task.getForestTrenches,
         taskInput,
         FOREST_TRENCHES_CALCULATION_TIMEOUT_MS
       );
-      if (error || !result) throw new Error(error ?? 'Forest trenches task failed.');
-      if (!result.spans.length) throw new Error('Forest trenches task returned no span results.');
+      if (this.destroyRef.destroyed) return;
+      if (error || !result) throw this.taskError('Forest trenches task', error, diagnostics);
+      if (!result.spans.length) {
+        throw new ForestTrenchesError(
+          'Forest trenches task returned no span results.',
+          formatStudioError(TaskError.CALCULATION_ERROR, this.translocoService)
+        );
+      }
 
+      // The calculation can take a while: merge the inputs into the section as it is now, not into the one captured
+      // when it started, and drop the run if another section has been opened since
+      const latestSection = this.spanService.section();
+      const latestStudy = this.plotService.study();
+      if (!latestSection || !latestStudy || !this.isStillOpen(study.uuid, section.uuid)) return;
       const updatedSection: Section = {
-        ...section,
+        ...latestSection,
         forest_trenches: {
           firstSupportUuid: values.firstSupportUuid,
           lastSupportUuid: values.lastSupportUuid,
@@ -490,15 +511,22 @@ export class ForestTrenchesComponent implements OnDestroy {
           selectedRules: selectedRuleTypes
         }
       };
-      await this.sectionService.createOrUpdateSection(study, updatedSection);
+      await this.sectionService.createOrUpdateSection(latestStudy, updatedSection);
+      // The write cannot be interrupted: if the studio moved on meanwhile, the saved section must not become the
+      // active one again
+      if (!this.isStillOpen(study.uuid, section.uuid)) return;
       this.spanService.section.set(updatedSection);
+      // The section stays in sync with what was saved, but nobody is left to read the results once the dialog is closed
+      if (this.destroyRef.destroyed) return;
       this.resultsState.set(result.spans);
       this.calculatedInputs.set(updatedSection.forest_trenches ?? null);
       this.spanControl.setValue(result.spans[0].spanIndex);
       this.notificationService.success(this.translocoService.translate('studio.forest-trenches.notifications.saved'));
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error('Failed to calculate forest trenches', error);
+      // Nobody is left to read the error once the dialog is closed
+      if (this.destroyRef.destroyed) return;
+      const errorMessage = this.failureMessage(error);
       this.calculationError.set(errorMessage);
       this.notificationService.error(
         this.translocoService.translate('studio.forest-trenches.calculation-failed', { errorMessage })
@@ -522,6 +550,40 @@ export class ForestTrenchesComponent implements OnDestroy {
     this.toolbarDialogService.setTemplates({});
     this.disconnectPlotResize();
     purgeForestTrenchesPlot(this.document);
+  }
+
+  // The study and the section the calculation started on may have been replaced while it ran or saved. The study is
+  // compared by uuid: it is read from a live query, so its object changes after every write
+  private isStillOpen(studyUuid: string, sectionUuid: string): boolean {
+    return this.plotService.study()?.uuid === studyUuid && this.spanService.section()?.uuid === sectionUuid;
+  }
+
+  // A selected rule the catalog does not fully describe: same cause and remedy as a missing configuration
+  private missingConfigurationError(message: string): ForestTrenchesError {
+    return new ForestTrenchesError(
+      message,
+      this.translocoService.translate('studio.forest-trenches.missing-configuration')
+    );
+  }
+
+  // The user gets the message of the Python error raised by the task, if there is one, the technical cause is logged
+  private taskError(task: string, error: TaskError | null, diagnostics: PythonDiagnostic[]): ForestTrenchesError {
+    const exceptionCode = diagnostics.find((diagnostic) => diagnostic.origin === 'exception')?.code ?? null;
+    return new ForestTrenchesError(
+      `${task} failed (${error ?? 'no result'})`,
+      formatStudioError(error, this.translocoService, exceptionCode)
+    );
+  }
+
+  // Localized cause of a failure. Anything unexpected only shows as an unknown error, its details are in the log
+  private failureMessage(error: unknown): string {
+    if (error instanceof ForestTrenchesError) return error.displayMessage;
+    if (error instanceof TaskTimeoutError) {
+      return this.translocoService.translate('studio.forest-trenches.calculation-timeout', {
+        seconds: Math.round(error.timeoutMs / 1000)
+      });
+    }
+    return formatStudioError(null, this.translocoService);
   }
 
   private async loadCatalogData(): Promise<ForestTrenchesCatalogData> {

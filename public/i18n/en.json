@@ -408,7 +408,8 @@
       "estimate-on-split-support-error": "Estimation is not possible on a span split by a virtual support.",
       "estimation-input-error": "The estimation inputs are missing or invalid.",
       "estimation-not-converged-error": "The target cannot be reached within the estimation bounds.",
-      "estimation-warning": "The existing load on the estimated span was ignored."
+      "estimation-warning": "The existing load on the estimated span was ignored.",
+      "conformity-input-error": "The conformity inputs are missing or invalid."
     },
     "initial-condition-modal": {
       "create-title": "Create an initial condition",
@@ -1090,6 +1091,7 @@
       "row-axis-lateral-limit": "Span axis to lateral limit: {{ ruleName }}",
       "row-overhang-compliance-limit-height": "Overhang compliance limit height: {{ ruleName }}",
       "calculation-failed": "Forest trenches calculation failed: {{ errorMessage }}",
+      "calculation-timeout": "The calculation took longer than {{ seconds }} seconds. Reduce the number of spans or of ground slicing points, then try again.",
       "calculating-text": "Calculating forest trenches…",
       "results-updated-text": "Forest trenches results updated.",
       "rules-label": "Forest trenches rules",
