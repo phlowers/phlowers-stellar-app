@@ -59,10 +59,6 @@
   "engines": {
     "node": "24.22.2"
   },
-  "config": {
-    "mechaphlowers": "0.14.1",
-    "thermohl": "1.4.0"
-  },
   "dependencies": {
     "@angular-slider/ngx-slider": "21.0.0",
     "@angular/cdk": "21.2.14",

@@ -36,6 +36,7 @@
     "description-label": "Description",
     "dis-symmetric": "Dissymmetric",
     "distance-label": "Distance",
+    "distance-to-reference-support-label": "Distance to reference support",
     "duplicate": "Duplicate",
     "edit": "Edit",
     "eel-label": "EEL",
@@ -193,6 +194,7 @@
     "copied-to-clipboard": "Copied to clipboard",
     "copy-to-clipboard-failed": "Failed to copy to the clipboard",
     "temperature-label": "Temperature",
+    "dan-unit": "daN",
     "pascal-unit": "Pa"
   },
   "auth": {
@@ -945,7 +947,14 @@
       "wind-pressure-label": "Wind pressure",
       "minimum-oblique-distance-label": "Minimum oblique distance",
       "copy-wind-pressure-aria-label": "Copy the wind pressure",
-      "wind-pressure-calculation-failed": "Failed to estimate the wind pressure"
+      "wind-pressure-calculation-failed": "Failed to estimate the wind pressure",
+      "target-displacement-label": "Target displ.",
+      "effort-direction-up": "Up",
+      "effort-direction-down": "Down",
+      "effort-label": "Traction (-) / Weight (+)",
+      "axis-displacement-label": "Displ. along span axis (x)",
+      "copy-effort-aria-label": "Copy the effort",
+      "effort-calculation-failed": "Failed to estimate the effort"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Expand details",
@@ -1242,7 +1251,6 @@
       "layers-detail": "Layers detail",
       "current-work-load-label": "Current max working load",
       "staff-presence-label": "Staff presence",
-      "distance-support-ref-label": "Distance to reference support",
       "add-marking-label": "Add an indication \"cut strands\"",
       "result-cable-rrts-label": "Cable's RRTS",
       "result-new-working-load-label": "New max working load",

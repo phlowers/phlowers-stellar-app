@@ -98,6 +98,13 @@ class _Errors:
         )
 
     @staticmethod
+    def estimation_load_on_support() -> str:
+        return (
+            "Effort estimation failed: the cable cannot be displaced by a "
+            "load applied on a support"
+        )
+
+    @staticmethod
     def estimation_minimum_not_reached(variable: str, value: float) -> str:
         return (
             f"{variable} estimation did not converge: the distance to the "

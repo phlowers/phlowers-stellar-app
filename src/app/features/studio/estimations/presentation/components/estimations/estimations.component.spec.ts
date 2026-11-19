@@ -10,6 +10,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
 import { EstimationsComponent } from '@features/studio/estimations/presentation/components/estimations/estimations.component';
 import { TemperatureEstimationComponent } from '@features/studio/estimations/presentation/components/temperature-estimation/temperature-estimation.component';
+import { EffortEstimationComponent } from '@features/studio/estimations/presentation/components/effort-estimation/effort-estimation.component';
 import { WindPressureEstimationComponent } from '@features/studio/estimations/presentation/components/wind-pressure-estimation/wind-pressure-estimation.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 
@@ -21,6 +22,9 @@ class TemperatureEstimationStubComponent {}
   template: '<p data-testid="wind-pressure-estimation-stub"></p>'
 })
 class WindPressureEstimationStubComponent {}
+
+@Component({ selector: 'app-effort-estimation', template: '<p data-testid="effort-estimation-stub"></p>' })
+class EffortEstimationStubComponent {}
 
 describe('EstimationsComponent', () => {
   let component: EstimationsComponent;
@@ -51,8 +55,16 @@ describe('EstimationsComponent', () => {
       providers: [{ provide: ToolbarDialogService, useValue: mockToolbarDialogService }]
     })
       .overrideComponent(EstimationsComponent, {
-        remove: { imports: [TemperatureEstimationComponent, WindPressureEstimationComponent] },
-        add: { imports: [TemperatureEstimationStubComponent, WindPressureEstimationStubComponent] }
+        remove: {
+          imports: [TemperatureEstimationComponent, WindPressureEstimationComponent, EffortEstimationComponent]
+        },
+        add: {
+          imports: [
+            TemperatureEstimationStubComponent,
+            WindPressureEstimationStubComponent,
+            EffortEstimationStubComponent
+          ]
+        }
       })
       .compileComponents();
 
@@ -79,7 +91,7 @@ describe('EstimationsComponent', () => {
     expect(mockToolbarDialogService.setTemplates).toHaveBeenLastCalledWith({});
   });
 
-  it('shows three tabs, the temperature and wind pressure ones being usable', () => {
+  it('shows three usable tabs', () => {
     const tabs = [
       ['temperature-tab', 'Conformity temperature'],
       ['wind-pressure-tab', 'Wind pressure for min. distance'],
@@ -90,7 +102,7 @@ describe('EstimationsComponent', () => {
     }
     expect(getByTestId('temperature-tab')?.getAttribute('aria-disabled')).toBe('false');
     expect(getByTestId('wind-pressure-tab')?.getAttribute('aria-disabled')).toBe('false');
-    expect(getByTestId('vertical-effort-tab')?.getAttribute('aria-disabled')).toBe('true');
+    expect(getByTestId('vertical-effort-tab')?.getAttribute('aria-disabled')).toBe('false');
   });
 
   it('opens on the temperature tab', () => {
@@ -104,6 +116,15 @@ describe('EstimationsComponent', () => {
 
     expect(
       getByTestId('wind-pressure-panel')?.querySelector('[data-testid="wind-pressure-estimation-stub"]')
+    ).not.toBeNull();
+  });
+
+  it('shows the effort estimation in its tab', () => {
+    component.activeTab.set('vertical-effort');
+    fixture.detectChanges();
+
+    expect(
+      getByTestId('vertical-effort-panel')?.querySelector('[data-testid="effort-estimation-stub"]')
     ).not.toBeNull();
   });
 });

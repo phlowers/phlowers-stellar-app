@@ -21,6 +21,7 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { DEFAULT_ESTIMATION_TAB, ESTIMATION_TABS } from '@features/studio/estimations/domain/estimations.constantes';
 import { EstimationTabValue } from '@features/studio/estimations/domain/estimations.interfaces';
+import { EffortEstimationComponent } from '@features/studio/estimations/presentation/components/effort-estimation/effort-estimation.component';
 import { TemperatureEstimationComponent } from '@features/studio/estimations/presentation/components/temperature-estimation/temperature-estimation.component';
 import { WindPressureEstimationComponent } from '@features/studio/estimations/presentation/components/wind-pressure-estimation/wind-pressure-estimation.component';
 
@@ -33,7 +34,8 @@ import { WindPressureEstimationComponent } from '@features/studio/estimations/pr
     TabsModule,
     IconComponent,
     TemperatureEstimationComponent,
-    WindPressureEstimationComponent
+    WindPressureEstimationComponent,
+    EffortEstimationComponent
   ],
   templateUrl: './estimations.component.html'
 })

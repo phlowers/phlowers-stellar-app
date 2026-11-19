@@ -247,6 +247,7 @@ def estimate_temperature(inputs: dict, study: SectionStudy) -> dict:
             target_distance=target_distance,
             wind_pressure=wind_pressure,
             ice_thickness=ice_thickness,
+            distance_type="distance_3d",
             **kwargs,
         ),
         _bounds(inputs),
@@ -416,6 +417,7 @@ def estimate_minimum_distance_wind(inputs: dict, study: SectionStudy) -> dict:
                 0.0,
                 "wind_pressure",
                 fixed_conditions,
+                distance_type="distance_3d",
             )
         )
 

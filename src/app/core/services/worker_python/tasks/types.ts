@@ -125,7 +125,9 @@ export enum Task {
   // Estimate the wind pressure giving a target distance to an obstacle
   estimateWind = 'estimateWind',
   // Estimate the wind pressure bringing the cable closest to an obstacle
-  estimateMinimumDistanceWind = 'estimateMinimumDistanceWind'
+  estimateMinimumDistanceWind = 'estimateMinimumDistanceWind',
+  // Estimate the load mass (traction or weight) giving a target vertical displacement of its application point
+  estimateEffort = 'estimateEffort'
 }
 
 /**
@@ -592,6 +594,8 @@ export interface TaskInputs {
   [Task.estimateWind]: EstimateWindInputs;
   // Inputs for estimateMinimumDistanceWind task
   [Task.estimateMinimumDistanceWind]: EstimateMinimumDistanceWindInputs;
+  // Inputs for estimateEffort task
+  [Task.estimateEffort]: EstimateEffortInputs;
 }
 
 /**
@@ -684,6 +688,23 @@ export interface EstimateRopeInputs extends EstimationBaseInputs {
 }
 
 /**
+ * Inputs for the estimateEffort task (estimated value in kg: negative for a traction, positive for a weight).
+ * It does not target an obstacle: the load application point is displaced vertically.
+ *
+ * @category Worker Types
+ */
+export interface EstimateEffortInputs {
+  // Index of the span (before manipulation) holding the load
+  spanIndex: number;
+  // Load position from the left support of the span in meters
+  loadPositionDistance: number;
+  // Fixed cable temperature in °C
+  temperature: number;
+  // Target vertical displacement of the load application point in meters, positive upward
+  targetVerticalDisplacement: number;
+}
+
+/**
  * Output of every estimation task.
  *
  * @category Worker Types
@@ -711,6 +732,18 @@ export interface MinimumDistanceWindEstimationResult {
   distance: number;
   // Number of distance evaluations
   iterations: number;
+}
+
+/**
+ * Output of the estimateEffort task.
+ *
+ * @category Worker Types
+ */
+export interface EffortEstimationResult extends EstimationResult {
+  // Same load as `value` in daN: negative for a traction, positive for a weight
+  effort: number;
+  // Displacement of the load application point along the span axis in meters, in absolute value
+  axisDisplacement: number;
 }
 
 /**
@@ -1074,4 +1107,6 @@ export interface TaskOutputs {
   [Task.estimateWind]: EstimationResult;
   // Output from estimateMinimumDistanceWind task: wind pressure in Pa with the minimum distance in m
   [Task.estimateMinimumDistanceWind]: MinimumDistanceWindEstimationResult;
+  // Output from estimateEffort task: load mass in kg with the displacement along the span axis in m
+  [Task.estimateEffort]: EffortEstimationResult;
 }

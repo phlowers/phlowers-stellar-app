@@ -93,7 +93,7 @@ export class WindPressureEstimationComponent extends EstimationFormBase<
     };
   }
 
-  protected toInputs(value: WindPressureEstimationFormValue, obstacle: Obstacle | null) {
+  protected toObstacleInputs(value: WindPressureEstimationFormValue, obstacle: Obstacle | null) {
     return toWindPressureEstimationInputs(value, obstacle);
   }
 }

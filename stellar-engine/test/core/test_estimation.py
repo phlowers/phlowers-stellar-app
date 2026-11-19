@@ -756,8 +756,28 @@ def patch_wind_distance(
     monkeypatch.setattr(
         study.estimation_engine,
         "_build_distance_objective__climatic_case",
-        lambda *_args: distance,
+        lambda *_args, **_kwargs: distance,
     )
+
+
+def test_estimate_minimum_distance_wind_minimizes_the_3d_distance(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
+):
+    received = {}
+
+    def build_objective(*_args, **kwargs):
+        received.update(kwargs)
+        return lambda pressure: abs(pressure - 500.0)
+
+    monkeypatch.setattr(
+        study.estimation_engine,
+        "_build_distance_objective__climatic_case",
+        build_objective,
+    )
+
+    minimum_distance_wind(study, SWUNG_OBSTACLE)
+
+    assert received["distance_type"] == "distance_3d"
 
 
 def test_estimate_minimum_distance_wind_nan_distance_raises_not_converged(
