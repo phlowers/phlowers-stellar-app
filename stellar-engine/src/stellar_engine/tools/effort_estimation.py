@@ -26,7 +26,6 @@ engine. An existing load on ``spanIndex`` is replaced, as in
 """
 
 from collections.abc import Callable
-from copy import deepcopy
 
 import numpy as np
 from mechaphlowers import SectionStudy, units
@@ -53,6 +52,9 @@ REFERENCE_MASS = 1e-6
 # the mass (kg) starts at INITIAL_MASS and doubles up to MAX_MASS.
 INITIAL_MASS = 50.0
 MAX_MASS = 20000.0
+# Smallest step (kg) from the last successful mass retried after a solver
+# failure before the target is declared unreachable.
+MIN_MASS_STEP = 1.0
 
 
 def _is_on_support(inputs: dict, study: SectionStudy) -> bool:
@@ -68,44 +70,79 @@ def _is_on_support(inputs: dict, study: SectionStudy) -> bool:
     return position <= 0 or position >= span_length
 
 
+def _with_float_loads(study: SectionStudy) -> SectionStudy:
+    """Return the study, or a copy of it whose load masses are floats.
+
+    mechaphlowers keeps the dtype of the load masses: integer masses would
+    truncate every trial mass.
+    """
+    span_loads = study.balance_engine.span_loads
+    if np.issubdtype(np.asarray(span_loads.load_mass).dtype, np.floating):
+        return study
+    float_study = study.copy()
+    span_length = arr.decr(
+        float_study.balance_engine.section_array.data.span_length.to_numpy()
+    )
+    float_study.balance_engine.set_loads(
+        span_loads.load_position * span_length,
+        np.asarray(span_loads.load_mass, dtype=float),
+    )
+    return float_study
+
+
 def _load_point_function(
     inputs: dict, study: SectionStudy
 ) -> Callable[[float], np.ndarray]:
     """Return ``f(mass) -> [x, y, z]`` of the load application point (m).
 
     Coordinates are expressed in the frame of the left support of the span,
-    so that ``x`` runs along the span axis.
+    so that ``x`` runs along the span axis. The load is applied by the
+    mechaphlowers load objective, on a copy of the balance engine rebuilt
+    after a solver failure, which breaks every next solve of a copy.
     """
-    span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
+    span_index = _index(inputs, "spanIndex")
     load_position_distance = _non_negative_float(
         inputs, "loadPositionDistance"
     )
     temperature = _required_float(inputs, "temperature")
+    estimation_engine = _with_float_loads(study).estimation_engine
+    last_point: dict[str, np.ndarray] = {}
 
-    original_balance_engine = study.balance_engine
-    # Drop observers so the study's downstream engines are not copied
-    balance_engine = deepcopy(
-        original_balance_engine,
-        {id(original_balance_engine._observers): []},
-    )
-    position_engine = PositionEngine(balance_engine)
-    span_length = arr.decr(
-        balance_engine.section_array.data.span_length.to_numpy()
-    )
-    load_positions = balance_engine.span_loads.load_position * span_length
-    load_masses = balance_engine.span_loads.load_mass.copy()
-    load_positions[span_index] = load_position_distance
+    def residual_factory(
+        position_engine: PositionEngine, span_index_after_manip: int
+    ) -> Callable[[], float]:
+        def residual() -> float:
+            coords = position_engine.get_loads_coords(
+                project=True, frame_index=span_index_after_manip
+            )
+            last_point["value"] = np.array(
+                coords[span_index_after_manip], dtype=float
+            )
+            return 0.0
+
+        return residual
+
+    def build_objective() -> Callable[[float], float]:
+        return estimation_engine._build_load_objective(
+            span_index,
+            load_position_distance,
+            {"new_temperature": temperature},
+            residual_factory,
+        )
+
+    objective: Callable[[float], float] | None = None
 
     def load_point(mass: float) -> np.ndarray:
-        load_masses[span_index] = mass if mass != 0 else REFERENCE_MASS
-        balance_engine.set_loads(load_positions, load_masses)
-        # set_loads resets the nodes: a cold solve may diverge
-        balance_engine.solve_change_state()
-        balance_engine.solve_change_state(new_temperature=temperature)
-        coords = position_engine.get_loads_coords(
-            project=True, frame_index=span_index
-        )
-        return np.array(coords[span_index], dtype=float)
+        nonlocal objective
+        if objective is None:
+            objective = build_objective()
+        try:
+            # A null mass is ignored by the engine
+            objective(mass if mass != 0 else REFERENCE_MASS)
+        except SolverError:
+            objective = None
+            raise
+        return last_point["value"]
 
     return load_point
 
@@ -115,8 +152,12 @@ def _bracket_mass(
 ) -> tuple[float, float] | None:
     """Find masses of ``sign`` over which the objective changes sign.
 
+    The trial mass doubles from INITIAL_MASS up to MAX_MASS. When the engine
+    solver fails on a trial, the step from the last successful mass is halved
+    and the trial retried, as the root may lie before the failing mass.
+
     Returns None when no sign change is found up to MAX_MASS or when the
-    engine solver fails before.
+    solver keeps failing down to a step of MIN_MASS_STEP.
     """
     lower_mass = sign * REFERENCE_MASS
     reference_value = objective(lower_mass)
@@ -125,7 +166,11 @@ def _bracket_mass(
         try:
             value = objective(sign * mass)
         except SolverError:
-            return None
+            step = (mass - abs(lower_mass)) / 2
+            if step < MIN_MASS_STEP:
+                return None
+            mass = abs(lower_mass) + step
+            continue
         if value * reference_value <= 0:
             return min(lower_mass, sign * mass), max(lower_mass, sign * mass)
         if mass >= MAX_MASS:

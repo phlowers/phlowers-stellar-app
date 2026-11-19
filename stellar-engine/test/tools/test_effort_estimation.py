@@ -82,6 +82,21 @@ def test_downward_displacement_gives_a_positive_weight(solved_study):
     assert displacement == pytest.approx(-2.0, abs=0.01)
 
 
+def test_integer_load_masses_do_not_truncate_the_reference_mass(
+    solved_study,
+):
+    solved_study.set_loads([0.0, 0.0, 0.0], [0, 0, 0])
+    solved_study.solve_change_state()
+    assert np.issubdtype(
+        solved_study.balance_engine.span_loads.load_mass.dtype, np.integer
+    )
+
+    result = estimate_effort(INPUTS, solved_study)
+
+    assert result["converged"] is True
+    assert result["value"] > 0
+
+
 def test_effort_is_the_mass_in_daN(solved_study):
     result = estimate_effort(INPUTS, solved_study)
 
@@ -249,3 +264,59 @@ def test_bracket_mass_returns_none_when_the_solver_fails():
         return 1.0
 
     assert effort_estimation._bracket_mass(objective, 1.0) is None
+
+
+def test_bracket_mass_retries_a_failed_trial_with_a_smaller_step():
+    def objective(mass: float) -> float:
+        if abs(mass) >= 100.0:
+            raise ConvergenceError("diverged")
+        return abs(mass) - 76.0
+
+    low, high = effort_estimation._bracket_mass(objective, 1.0)
+
+    assert 50.0 <= low < 76.0 <= high < 100.0
+
+
+def test_bracket_mass_retries_a_failed_traction_trial():
+    def objective(mass: float) -> float:
+        if abs(mass) >= 100.0:
+            raise ConvergenceError("diverged")
+        return 76.0 + mass
+
+    low, high = effort_estimation._bracket_mass(objective, -1.0)
+
+    assert -100.0 < low <= -76.0 < high <= -50.0
+
+
+def test_load_point_rebuilds_the_engine_copy_after_a_solver_failure(
+    solved_study, monkeypatch
+):
+    engine_class = type(solved_study.estimation_engine)
+    builds = []
+    build = engine_class._build_load_objective
+
+    def counting_build(engine, *args):
+        builds.append(1)
+        return build(engine, *args)
+
+    monkeypatch.setattr(engine_class, "_build_load_objective", counting_build)
+    balance_engine_class = type(solved_study.balance_engine)
+    solve = balance_engine_class.solve_change_state
+    calls = []
+
+    def failing_on_first_trial(engine, *args, **kwargs):
+        calls.append(1)
+        # the first call sets the initial state while building the objective
+        if len(calls) == 2:
+            raise ConvergenceError("diverged")
+        return solve(engine, *args, **kwargs)
+
+    monkeypatch.setattr(
+        balance_engine_class, "solve_change_state", failing_on_first_trial
+    )
+    load_point = effort_estimation._load_point_function(INPUTS, solved_study)
+
+    with pytest.raises(ConvergenceError):
+        load_point(50.0)
+    assert np.all(np.isfinite(load_point(50.0)))
+    assert len(builds) == 2
