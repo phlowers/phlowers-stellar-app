@@ -5,9 +5,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { formatNumber } from '@angular/common';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { EstimateMinimumDistanceWindInputs, EstimateTemperatureInputs } from '@services/worker_python/tasks/types';
 import {
+  BOUNDS_ERROR_FORMAT,
   CONFORMITY_TEMPERATURE_BOUNDS,
   MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS
 } from '@features/studio/estimations/domain/estimations.constantes';
@@ -91,4 +93,22 @@ export function toWindPressureEstimationInputs(
     return null;
   }
   return { ...point, temperature: value.temperature, bounds: [...MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS] };
+}
+
+/**
+ * Interpolation parameters of the "target beyond the search bounds" engine errors: the formatted search bounds,
+ * followed by their unit. `undefined` when the inputs hold no bounds.
+ */
+export function toBoundsErrorParams(
+  inputs: { bounds?: readonly [number, number] | null },
+  unit: string,
+  locale: string
+): { lowerBound: string; upperBound: string } | undefined {
+  if (!inputs.bounds) {
+    return undefined;
+  }
+  const [lowerBound, upperBound] = inputs.bounds.map((bound) =>
+    `${formatNumber(bound, locale, BOUNDS_ERROR_FORMAT)} ${unit}`.trim()
+  );
+  return { lowerBound, upperBound };
 }

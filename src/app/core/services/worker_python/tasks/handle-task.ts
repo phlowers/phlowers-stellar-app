@@ -208,6 +208,10 @@ const tasks: Record<
     function: 'estimate_load',
     externalPackages: []
   },
+  [Task.estimateLoadRelative]: {
+    function: 'estimate_load_relative',
+    externalPackages: []
+  },
   [Task.estimateWind]: {
     function: 'estimate_wind',
     externalPackages: []

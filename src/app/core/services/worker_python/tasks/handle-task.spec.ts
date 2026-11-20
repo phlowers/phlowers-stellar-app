@@ -93,6 +93,7 @@ describe('Task handlers', () => {
       [Task.estimateRope, 'estimate_rope'],
       [Task.estimateTemperature, 'estimate_temperature'],
       [Task.estimateLoad, 'estimate_load'],
+      [Task.estimateLoadRelative, 'estimate_load_relative'],
       [Task.estimateWind, 'estimate_wind'],
       [Task.estimateMinimumDistanceWind, 'estimate_minimum_distance_wind'],
       [Task.sliceGround, 'slice_ground'],

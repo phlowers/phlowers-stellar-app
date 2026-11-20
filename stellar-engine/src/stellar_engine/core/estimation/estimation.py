@@ -9,8 +9,8 @@
 Each function reads camelCase inputs coming from the frontend, delegates to
 ``SectionStudy.estimation_engine`` (mechaphlowers ``EstimationEngine``) and
 returns a JSON-serializable dictionary. The study is left untouched.
-``estimate_minimum_distance_wind`` has no target distance: it minimizes the
-distance to the obstacle over the wind pressure.
+``estimate_minimum_distance_wind`` has no target distance: it uses the
+mechaphlowers closest-point mode of ``estimate_wind``.
 
 Common inputs:
     spanIndex: Index of the span (before manipulation) holding the obstacle.
@@ -31,6 +31,11 @@ Raises (each class name is a ``PythonErrorCode`` on the frontend side, except
     ConformityInputError: ``pointIndex`` is out of the obstacle points (not
         reachable from the UI).
     EstimationNotConvergedError: The target is not reachable within bounds.
+    EstimationTargetAboveBoundsError: ``EstimationNotConvergedError`` subclass
+        raised by ``estimate_temperature`` (when ``bounds`` is given) if the
+        search stopped at the upper bound: the target needs a larger value.
+    EstimationTargetBelowBoundsError: Same, at the lower bound: the target
+        needs a smaller value.
     InvalidManipulationIndex: ``spanIndex`` or ``supportIndex`` is out of
         range (mechaphlowers).
     EstimateOnSplitSupportError: ``spanIndex`` is split by a virtual
@@ -48,111 +53,58 @@ Warns (forwarded to the frontend through the captured Python warnings):
 import logging
 import math
 from collections.abc import Callable
-from typing import NamedTuple
+from typing import Literal
 
-import numpy as np
 from mechaphlowers import SectionStudy, units
 from mechaphlowers.core.numeric import EstimationResult
 from mechaphlowers.entities.errors import (
     EstimateOnSplitSupportError,
-    SolverError,
 )
 
-from stellar_engine.core.conformity.runner import find_obstacle_point
+from stellar_engine.core.estimation.robust import (
+    RobustEstimation,
+    is_state_solvable,
+)
+from stellar_engine.core.estimation.validation import (
+    _bounds,
+    _index,
+    _non_negative_float,
+    _obstacle_point,
+    _optional_float,
+    _required_float,
+)
 from stellar_engine.entities.errors import (
     EstimationInputError,
     EstimationNotConvergedError,
+    EstimationTargetAboveBoundsError,
+    EstimationTargetBelowBoundsError,
     _Errors,
 )
 
 logger = logging.getLogger("stellar_engine")
 
-# Minimum distance wind: step (Pa) of the scan bracketing the minimum, then
-# tolerance (Pa) and maximum iterations of its refinement.
-MINIMUM_DISTANCE_WIND_STEP = 250.0
-MINIMUM_DISTANCE_WIND_TOLERANCE = 0.5
-MINIMUM_DISTANCE_WIND_MAX_ITERATIONS = 50
-DEFAULT_MINIMUM_DISTANCE_WIND_BOUNDS = (-1000.0, 1000.0)
+# Wind direction used by the mechaphlowers estimations: our default
+WIND_DIRECTION: Literal["clockwise", "anticlockwise"] = "clockwise"
+# Our default wind pressure search interval for mechaphlowers (Pa)
+DEFAULT_WIND_BOUNDS = (-1000.0, 1000.0)
 
+# ------ Robust estimation parameters ------
+# Step (Pa) of the outward scan looking for the first unsolvable wind
+WIND_SOLVABLE_STEP = 50.0
+# Retries of the closest-point search after a chain reversal
+WIND_REVERSAL_RETRIES = 3
+# Fraction of each bound (from the reference wind) kept on each retry
+WIND_REVERSAL_SHRINK = 0.75
 
-def _to_finite_float(value: object, key: str) -> float:
-    try:
-        number = float(value)  # type: ignore[arg-type]
-    except (TypeError, ValueError) as error:
-        raise EstimationInputError(
-            _Errors.estimation_not_finite(key)
-        ) from error
-    if not math.isfinite(number):
-        raise EstimationInputError(_Errors.estimation_not_finite(key))
-    return number
-
-
-def _required_float(inputs: dict, key: str) -> float:
-    if inputs.get(key) is None:
-        raise EstimationInputError(_Errors.estimation_missing_input(key))
-    return _to_finite_float(inputs[key], key)
-
-
-def _optional_float(inputs: dict, key: str) -> float | None:
-    value = inputs.get(key)
-    return None if value is None else _to_finite_float(value, key)
-
-
-def _non_negative_float(inputs: dict, key: str) -> float:
-    value = _required_float(inputs, key)
-    if value < 0:
-        raise EstimationInputError(
-            _Errors.estimation_not_positive(key, value, allow_zero=True)
-        )
-    return value
-
-
-def _index(inputs: dict, key: str) -> int:
-    value = _required_float(inputs, key)
-    if value != int(value) or value < 0:
-        raise EstimationInputError(
-            _Errors.estimation_invalid_index(key, value)
-        )
-    return int(value)
-
-
-def _obstacle_point(inputs: dict, study: SectionStudy) -> np.ndarray:
-    obstacle_uuid = inputs.get("obstacleUuid")
-    if obstacle_uuid is not None:
-        return find_obstacle_point(
-            study, str(obstacle_uuid), _index(inputs, "pointIndex")
-        )
-    point = inputs.get("obstaclePoint")
-    if point is None:
-        raise EstimationInputError(
-            _Errors.estimation_missing_input("obstaclePoint")
-        )
-    try:
-        array = np.asarray(point, dtype=float)
-    except (TypeError, ValueError) as error:
-        raise EstimationInputError(
-            _Errors.estimation_invalid_obstacle_point(point)
-        ) from error
-    if array.shape != (3,) or not np.all(np.isfinite(array)):
-        raise EstimationInputError(
-            _Errors.estimation_invalid_obstacle_point(point)
-        )
-    return array
-
-
-def _bounds(inputs: dict) -> tuple[float, float] | None:
-    bounds = inputs.get("bounds")
-    if bounds is None:
-        return None
-    try:
-        lower, upper = (float(bound) for bound in bounds)
-    except (TypeError, ValueError) as error:
-        raise EstimationInputError(
-            _Errors.estimation_invalid_bounds(bounds)
-        ) from error
-    if not (math.isfinite(lower) and math.isfinite(upper) and lower < upper):
-        raise EstimationInputError(_Errors.estimation_invalid_bounds(bounds))
-    return lower, upper
+# ------ Tolerances ------
+# Precision (Pa) of the limit of the solvable wind pressures
+WIND_SOLVABLE_TOLERANCE = 1.0
+# Tolerance for the solvable temperature (degC)
+TEMPERATURE_SOLVABLE_TOLERANCE = 1.0
+# Tolerance for the solvable rope (m)
+ROPE_SOLVABLE_TOLERANCE = 0.1
+# Tolerance for the load (N)
+LOAD_SOLVABLE_TOLERANCE = 1.0
 
 
 def _ice_thickness_meters(inputs: dict) -> float | None:
@@ -180,16 +132,42 @@ def _engine_span_index(study: SectionStudy, span_index: int) -> int:
     return engine_span_index
 
 
+def _raise_if_stopped_at_bound(
+    variable: str, value: float, bounds: tuple[float, float]
+) -> None:
+    """Raise the side-specific error when an unreached search ended on a bound.
+
+    mechaphlowers returns the bound closest to the target when the objective
+    does not change sign over the bounds.
+    """
+    lower, upper = bounds
+    if math.isclose(value, upper):
+        raise EstimationTargetAboveBoundsError(
+            _Errors.estimation_target_beyond_bound(variable, "upper", upper)
+        )
+    if math.isclose(value, lower):
+        raise EstimationTargetBelowBoundsError(
+            _Errors.estimation_target_beyond_bound(variable, "lower", lower)
+        )
+
+
 def _solve(
     variable: str,
     solve: Callable[[dict], EstimationResult],
     bounds: tuple[float, float] | None,
+    report_bound_side: bool = False,
 ) -> dict:
     """Run the estimation and convert mechaphlowers failures to Stellar errors.
 
+    ``report_bound_side`` tells, when the search stops on a bound, on which
+    side of the bounds the target lies. Only valid for a distance that varies
+    monotonically with the estimated variable (the temperature).
+
     Raises:
         EstimationNotConvergedError: If the target is not reached, or if the
-            objective is NaN at the bounds (plain ``ValueError``).
+            objective is NaN at the bounds (plain ``ValueError``). Its
+            subclasses tell on which side of the bounds the target lies, when
+            ``report_bound_side`` is set and the search stopped at a bound.
         SolverError: Forwarded unchanged, like the typed ``ValueError``
             subclasses of mechaphlowers, to keep their own frontend code.
     """
@@ -206,6 +184,8 @@ def _solve(
         ) from error
     logger.debug("%s estimation result: %s", variable, result)
     if not result.converged:
+        if report_bound_side and bounds is not None:
+            _raise_if_stopped_at_bound(variable, result.value, bounds)
         raise EstimationNotConvergedError(
             _Errors.estimation_not_converged(
                 variable, result.value, bounds or "default"
@@ -216,6 +196,7 @@ def _solve(
         "residual": float(result.residual),
         "iterations": int(result.iterations),
         "converged": bool(result.converged),
+        "extra": {name: float(value) for name, value in result.extra.items()},
     }
 
 
@@ -247,9 +228,11 @@ def estimate_temperature(inputs: dict, study: SectionStudy) -> dict:
             target_distance=target_distance,
             wind_pressure=wind_pressure,
             ice_thickness=ice_thickness,
+            tol=TEMPERATURE_SOLVABLE_TOLERANCE,
             **kwargs,
         ),
         _bounds(inputs),
+        report_bound_side=True,
     )
 
 
@@ -272,111 +255,25 @@ def estimate_wind(inputs: dict, study: SectionStudy) -> dict:
             target_distance=target_distance,
             new_temperature=new_temperature,
             ice_thickness=ice_thickness,
+            tol=WIND_SOLVABLE_TOLERANCE,
             **kwargs,
         ),
         _bounds(inputs),
     )
 
 
-class _WindScan(NamedTuple):
-    """Distances computed by ``_scan_wind``, as ``(pressure, distance)``."""
-
-    points: list[tuple[float, float]]
-    # whether the scan stopped because the distance increased or at the bound
-    complete: bool
-    # balance solver failure that stopped the scan (None for a NaN distance)
-    failure: SolverError | None
-    # distance function of the scan, its engine copy holding the last state
-    distance: Callable[[float], float]
-
-
-def _scan_wind(
-    distance: Callable[[float], float], start: float, stop: float
-) -> _WindScan:
-    """Distances every ``MINIMUM_DISTANCE_WIND_STEP`` Pa from start to stop.
-
-    The scan stops at the first increasing distance (the minimum is then
-    bracketed by the last three points), at ``stop``, or at the first
-    pressure whose distance cannot be computed (e.g. the chains reverse).
-    Small steps keep each balance solve close to the previous one.
-    """
-    span = abs(stop - start)
-    direction = 1.0 if stop >= start else -1.0
-    points: list[tuple[float, float]] = []
-    for step in range(math.ceil(span / MINIMUM_DISTANCE_WIND_STEP) + 1):
-        pressure = start + direction * min(
-            step * MINIMUM_DISTANCE_WIND_STEP, span
-        )
-        try:
-            value = distance(pressure)
-        except SolverError as error:
-            return _WindScan(points, False, error, distance)
-        if not math.isfinite(value):
-            return _WindScan(points, False, None, distance)
-        points.append((pressure, value))
-        if len(points) > 1 and value > points[-2][1]:
-            break
-    return _WindScan(points, True, None, distance)
-
-
-def _minimize_bounded(
-    function: Callable[[float], float],
-    lower: float,
-    upper: float,
-    tolerance: float,
-    max_iterations: int,
-) -> tuple[float, float]:
-    """Golden-section search of the minimum of ``function`` on [lower, upper].
-
-    The function is assumed unimodal on the interval. Returns the best
-    ``(x, function(x))`` evaluated, ``x`` being within ``tolerance`` of the
-    minimum unless ``max_iterations`` is reached first. Any exception raised
-    by ``function`` is propagated.
-    """
-    ratio = (math.sqrt(5.0) - 1.0) / 2.0
-    inner_low = upper - ratio * (upper - lower)
-    inner_high = lower + ratio * (upper - lower)
-    value_low = function(inner_low)
-    value_high = function(inner_high)
-    for _ in range(max_iterations):
-        if upper - lower <= tolerance:
-            break
-        if value_low < value_high:
-            upper, inner_high, value_high = inner_high, inner_low, value_low
-            inner_low = upper - ratio * (upper - lower)
-            value_low = function(inner_low)
-        else:
-            lower, inner_low, value_low = inner_low, inner_high, value_high
-            inner_high = lower + ratio * (upper - lower)
-            value_high = function(inner_high)
-    if value_low < value_high:
-        return inner_low, value_low
-    return inner_high, value_high
-
-
-def _scan_failure(scan: _WindScan) -> Exception:
-    """Error explaining why the minimum distance cannot be reached."""
-    if scan.failure is not None:
-        return scan.failure
-    if not scan.points:
-        return EstimationNotConvergedError(
-            _Errors.estimation_distance_not_computable("Wind")
-        )
-    return EstimationNotConvergedError(
-        _Errors.estimation_minimum_not_reached("Wind", scan.points[-1][0])
-    )
-
-
 def estimate_minimum_distance_wind(inputs: dict, study: SectionStudy) -> dict:
     """Estimate the wind pressure (Pa) bringing the cable closest to the obstacle.
 
-    Unlike the other estimations there is no target distance: the 3D distance
-    to the obstacle is minimized over the wind pressure ``bounds`` (default
-    ``DEFAULT_MINIMUM_DISTANCE_WIND_BOUNDS``), at the fixed ``temperature``.
-    The distance is assumed unimodal in the wind pressure: it is scanned
-    every ``MINIMUM_DISTANCE_WIND_STEP`` Pa from 0 Pa (or the bound closest to
-    it) in the decreasing direction until it increases, then the bracketed
-    minimum is refined with a golden-section search.
+    Closest-point mode of mechaphlowers ``estimate_wind`` (no target
+    distance): the 3D distance to the obstacle is minimized over the wind
+    pressure ``bounds`` at the fixed ``temperature``. ``RobustEstimation``
+    first reduces the bounds to the wind pressures the balance solver can
+    solve, so a wind reversing the insulator chains at a
+    bound does not fail the estimation. If the chains still reverse during
+    the search (a wind between two scanned ones), the bounds are shrunk
+    toward no wind and the search retried, up to ``WIND_REVERSAL_RETRIES``
+    times.
 
     Specific inputs: ``temperature`` (°C), optional ``iceThickness``.
 
@@ -386,92 +283,51 @@ def estimate_minimum_distance_wind(inputs: dict, study: SectionStudy) -> dict:
         ``iterations``: number of distance evaluations.
 
     Raises:
-        SolverError: If the balance solver fails at the starting pressure, or
-            while the distance is still decreasing (``SuspectedChainReversal``
-            when the chains reverse).
-        EstimationNotConvergedError: In the same cases, when the distance is
-            NaN instead.
-
-    Warns:
-        BalanceEngineWarning: If the study has not been adjusted yet.
+        EstimationNotConvergedError: If the minimum lies on a bound (possibly
+            the solvable limit), or the distance is NaN at the bounds.
+        SolverError: If the balance solver fails even without wind, or the
+            chains still reverse after the retries.
     """
     span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
     obstacle_point = _obstacle_point(inputs, study)
-    fixed_conditions = {
-        "new_temperature": _required_float(inputs, "temperature"),
-        "ice_thickness": _ice_thickness_meters(inputs),
-    }
-    lower, upper = _bounds(inputs) or DEFAULT_MINIMUM_DISTANCE_WIND_BOUNDS
-    start = min(max(0.0, lower), upper)
-    evaluations = 0
+    new_temperature = _required_float(inputs, "temperature")
+    ice_thickness = _ice_thickness_meters(inputs)
+    robust_wind = RobustEstimation(
+        variable="Wind",
+        is_solvable=lambda wind: is_state_solvable(
+            study,
+            new_temperature=new_temperature,
+            wind_pressure=wind,
+            ice_thickness=ice_thickness,
+            wind_direction=WIND_DIRECTION,
+        ),
+        tolerance=WIND_SOLVABLE_TOLERANCE,
+        step=WIND_SOLVABLE_STEP,
+        retries=WIND_REVERSAL_RETRIES,
+        shrink=WIND_REVERSAL_SHRINK,
+    )
 
-    def new_distance() -> Callable[[float], float]:
-        # A failed balance solve breaks every next solve of the engine copy:
-        # each scan runs on its own copy. With a zero target, the
-        # mechaphlowers objective is the distance itself.
-        objective = (
-            study.estimation_engine._build_distance_objective__climatic_case(
-                span_index,
-                obstacle_point,
-                0.0,
-                "wind_pressure",
-                fixed_conditions,
-            )
+    def solve(kwargs: dict) -> EstimationResult:
+        return study.estimation_engine.estimate_wind(
+            span_index=span_index,
+            obstacle_point=obstacle_point,
+            target_distance=None,
+            new_temperature=new_temperature,
+            ice_thickness=ice_thickness,
+            wind_direction=WIND_DIRECTION,
+            distance_type="distance_3d",
+            tol=WIND_SOLVABLE_TOLERANCE,
+            **kwargs,
         )
 
-        def distance(pressure: float) -> float:
-            nonlocal evaluations
-            evaluations += 1
-            return float(objective(pressure))
-
-        return distance
-
-    up = _scan_wind(new_distance(), start, upper)
-    if not up.points:
-        raise _scan_failure(up)
-    down = _WindScan(up.points[:1], True, None, up.distance)
-    descends_up = len(up.points) > 1 and up.points[1][1] < up.points[0][1]
-    if start > lower and not descends_up:
-        down = _scan_wind(new_distance(), start, lower)
-    # increasing pressures, the start point shared by both scans
-    points = down.points[:0:-1] + up.points
-    closest = min(range(len(points)), key=lambda index: points[index][1])
-    # the distance still decreases where it stops being computable
-    if closest == 0 and not down.complete:
-        raise _scan_failure(down)
-    if closest == len(points) - 1 and not up.complete:
-        raise _scan_failure(up)
-
-    best = points[closest]
-    # an end point is a search bound: the minimum may lie in the interval
-    # beside it, the end point itself staying a candidate
-    if len(points) > 1:
-        scan = up if best[0] >= start else down
-        try:
-            refined = _minimize_bounded(
-                scan.distance if scan.complete else new_distance(),
-                points[max(closest - 1, 0)][0],
-                points[min(closest + 1, len(points) - 1)][0],
-                MINIMUM_DISTANCE_WIND_TOLERANCE,
-                MINIMUM_DISTANCE_WIND_MAX_ITERATIONS,
-            )
-        except SolverError as error:
-            logger.warning(
-                "Wind refinement failed, scan result kept: %s", error
-            )
-        else:
-            if refined[1] < best[1]:
-                best = (float(refined[0]), float(refined[1]))
-    logger.debug(
-        "Minimum distance wind: %s Pa, %s m (%s evaluations)",
-        best[0],
-        best[1],
-        evaluations,
+    result = robust_wind.run(
+        lambda bounds: _solve("Wind", solve, bounds),
+        _bounds(inputs) or DEFAULT_WIND_BOUNDS,
     )
     return {
-        "value": float(best[0]),
-        "distance": float(best[1]),
-        "iterations": evaluations,
+        "value": result["value"],
+        "distance": result["residual"],
+        "iterations": result["iterations"],
     }
 
 
@@ -501,6 +357,47 @@ def estimate_load(inputs: dict, study: SectionStudy) -> dict:
             new_temperature=new_temperature,
             wind_pressure=wind_pressure,
             ice_thickness=ice_thickness,
+            tol=LOAD_SOLVABLE_TOLERANCE,
+            **kwargs,
+        ),
+        _bounds(inputs),
+    )
+
+
+def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
+    """Estimate the load mass (kg) on ``spanIndex`` giving an altitude change.
+
+    No obstacle is involved: the cable altitude at ``loadPositionDistance`` is
+    compared to its altitude before the load. A load lowers the cable, so
+    ``targetDistance`` is usually negative.
+
+    Specific inputs: ``targetDistance`` (m, signed altitude change of the
+    cable at the load position), ``loadPositionDistance`` (m from the left
+    support of the span), optional ``temperature``, ``windPressure`` and
+    ``iceThickness``. Loads on other spans are kept.
+
+    Returns:
+        The usual estimation result, whose ``extra["x_shift"]`` is the shift
+        (m) of the cable abscissa at the load point (initial minus final).
+    """
+    span_index = _index(inputs, "spanIndex")
+    target_distance = _required_float(inputs, "targetDistance")
+    load_position_distance = _non_negative_float(
+        inputs, "loadPositionDistance"
+    )
+    new_temperature = _optional_float(inputs, "temperature")
+    wind_pressure = _optional_float(inputs, "windPressure")
+    ice_thickness = _ice_thickness_meters(inputs)
+    return _solve(
+        "Load",
+        lambda kwargs: study.estimation_engine.estimate_load_relative(
+            span_index=span_index,
+            target_distance=target_distance,
+            load_position_distance=load_position_distance,
+            new_temperature=new_temperature,
+            wind_pressure=wind_pressure,
+            ice_thickness=ice_thickness,
+            tol=LOAD_SOLVABLE_TOLERANCE,
             **kwargs,
         ),
         _bounds(inputs),
@@ -540,6 +437,7 @@ def estimate_rope(inputs: dict, study: SectionStudy) -> dict:
             new_temperature=new_temperature,
             wind_pressure=wind_pressure,
             ice_thickness=ice_thickness,
+            tol=ROPE_SOLVABLE_TOLERANCE,
             **kwargs,
         ),
         _bounds(inputs),

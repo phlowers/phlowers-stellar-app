@@ -14,6 +14,7 @@ import {
   getDefaultPointIndex,
   getEstimableObstacles,
   getPreselectedObstacleUuid,
+  toBoundsErrorParams,
   toObstacleOptions,
   toPointOptions,
   toTemperatureEstimationInputs,
@@ -108,6 +109,26 @@ describe('estimations helpers', () => {
     });
   });
 
+  describe('toBoundsErrorParams', () => {
+    it('formats the search bounds with their unit', () => {
+      expect(toBoundsErrorParams({ bounds: [-50, 250] }, '°C', 'en')).toEqual({
+        lowerBound: '-50 °C',
+        upperBound: '250 °C'
+      });
+    });
+
+    it('omits the unit when there is none and keeps at most 2 decimals', () => {
+      expect(toBoundsErrorParams({ bounds: [0.256, 1000] }, '', 'en')).toEqual({
+        lowerBound: '0.26',
+        upperBound: '1,000'
+      });
+    });
+
+    it.each([[undefined], [null]])('returns undefined when the bounds are %s', (bounds) => {
+      expect(toBoundsErrorParams({ bounds }, '°C', 'en')).toBeUndefined();
+    });
+  });
+
   describe('toTemperatureEstimationInputs', () => {
     it('maps the form to the engine inputs on the obstacle span, bounded to [-50; 250] °C', () => {
       expect(toTemperatureEstimationInputs(makeFormValue(), makeObstacle())).toEqual({
@@ -145,7 +166,7 @@ describe('estimations helpers', () => {
         obstacleUuid: 'obstacle-a',
         pointIndex: 1,
         temperature: -12.5,
-        bounds: [-3000, 3000]
+        bounds: [-1000, 1000]
       });
     });
 

@@ -1,0 +1,583 @@
+{
+  "format": "stellar-section",
+  "version": 1,
+  "section": {
+    "uuid": "d7154aa4-9409-49b4-ae39-c974aeb238a9",
+    "name": "aa",
+    "type": "phase",
+    "electric_phase_number": 0,
+    "cables_amount": 1,
+    "cable_name": "ASTER600",
+    "supports": [
+      {
+        "uuid": "0bf38433-6b68-4cf7-ae18-9766db2967ed",
+        "number": "1",
+        "name": null,
+        "spanLength": 500,
+        "spanAngle": -20,
+        "attachmentSet": null,
+        "attachmentHeight": 500,
+        "heightBelowConsole": null,
+        "towerModel": null,
+        "cableType": null,
+        "armLength": 35,
+        "chainName": null,
+        "chainLength": 3,
+        "chainWeight": 0,
+        "chainV": false,
+        "counterWeight": 0,
+        "supportFootAltitude": 470,
+        "attachmentPosition": null,
+        "chainSurface": 0,
+        "spanAzimut": -18,
+        "footLongitude": 1.208498369240738,
+        "footLatitude": 44.3394305316403,
+        "xFootLambert93": null,
+        "yFootLambert93": null
+      },
+      {
+        "uuid": "51130a9f-ef53-4359-86fc-ee4f258edf9c",
+        "number": "2",
+        "name": null,
+        "spanLength": 500,
+        "spanAngle": -35,
+        "attachmentSet": null,
+        "attachmentHeight": 450,
+        "heightBelowConsole": null,
+        "towerModel": null,
+        "cableType": null,
+        "armLength": 10,
+        "chainName": null,
+        "chainLength": 3,
+        "chainWeight": 0,
+        "chainV": false,
+        "counterWeight": 0,
+        "supportFootAltitude": 420,
+        "attachmentPosition": null,
+        "chainSurface": 0,
+        "spanAzimut": -49.5,
+        "footLongitude": 1.2064259721798016,
+        "footLatitude": 44.34367732083451,
+        "xFootLambert93": null,
+        "yFootLambert93": null
+      },
+      {
+        "uuid": "e1dc90ba-995c-40ed-8db8-5d0b04f92bd7",
+        "number": "3",
+        "name": null,
+        "spanLength": null,
+        "spanAngle": 45,
+        "attachmentSet": null,
+        "attachmentHeight": 560,
+        "heightBelowConsole": null,
+        "towerModel": null,
+        "cableType": null,
+        "armLength": -15,
+        "chainName": null,
+        "chainLength": 3,
+        "chainWeight": 0,
+        "chainV": false,
+        "counterWeight": 0,
+        "supportFootAltitude": 530,
+        "attachmentPosition": null,
+        "chainSurface": 0,
+        "spanAzimut": null,
+        "footLongitude": 1.2015665503696298,
+        "footLatitude": 44.3465210607835,
+        "xFootLambert93": null,
+        "yFootLambert93": null
+      }
+    ],
+    "obstacles": [
+      {
+        "uuid": "52b6cc64-72c2-442f-8159-89dba631a066",
+        "supportUuid": "0bf38433-6b68-4cf7-ae18-9766db2967ed",
+        "supportIndex": 0,
+        "name": "ttt",
+        "type": "accessible_building",
+        "altitudeType": "absolute",
+        "lateralDistanceType": "SPAN_AXIS",
+        "referenceSupport": "LEFT",
+        "positions": [
+          {
+            "x": 10,
+            "y": 5,
+            "z": 65
+          }
+        ]
+      },
+      {
+        "uuid": "40d53bcf-d6bd-4426-a66c-28774e0c8b32",
+        "supportUuid": "0bf38433-6b68-4cf7-ae18-9766db2967ed",
+        "supportIndex": 0,
+        "name": "aaa",
+        "type": "accessible_building",
+        "altitudeType": "absolute",
+        "lateralDistanceType": "SPAN_AXIS",
+        "referenceSupport": "LEFT",
+        "positions": [
+          {
+            "x": 100.5,
+            "y": -7.2,
+            "z": -12.9
+          },
+          {
+            "x": 205.8,
+            "y": -9,
+            "z": -33
+          },
+          {
+            "x": 389.5,
+            "y": -3.7,
+            "z": -26
+          }
+        ]
+      },
+      {
+        "uuid": "d6b76259-cc02-4456-80b0-448d4762f3b2",
+        "supportUuid": "51130a9f-ef53-4359-86fc-ee4f258edf9c",
+        "supportIndex": 1,
+        "name": "ppp",
+        "type": "accessible_building",
+        "altitudeType": "absolute",
+        "lateralDistanceType": "SPAN_AXIS",
+        "referenceSupport": "LEFT",
+        "positions": [
+          {
+            "x": 121.2,
+            "y": -6.1,
+            "z": 446.7
+          },
+          {
+            "x": 50,
+            "y": -4.1,
+            "z": 417
+          },
+          {
+            "x": 19.5,
+            "y": -5.5,
+            "z": 449
+          }
+        ]
+      }
+    ],
+    "floors": [
+      {
+        "uuid": "c3f16604-bc27-4c9e-acee-ea7e24588cb6",
+        "supportUuid": "0bf38433-6b68-4cf7-ae18-9766db2967ed",
+        "referenceSupport": "LEFT",
+        "points": [
+          {
+            "altitude": 470,
+            "distanceToRefSupport": 0
+          },
+          {
+            "altitude": 446.8,
+            "distanceToRefSupport": 73.3
+          },
+          {
+            "altitude": 424.7,
+            "distanceToRefSupport": 188.6
+          },
+          {
+            "altitude": 411.5,
+            "distanceToRefSupport": 301.5
+          },
+          {
+            "altitude": 420,
+            "distanceToRefSupport": 500
+          }
+        ]
+      },
+      {
+        "uuid": "b784accb-a5e8-4ce1-a288-0131fc4d39db",
+        "supportUuid": "51130a9f-ef53-4359-86fc-ee4f258edf9c",
+        "referenceSupport": "LEFT",
+        "points": [
+          {
+            "altitude": 420,
+            "distanceToRefSupport": 0
+          },
+          {
+            "altitude": 425.8,
+            "distanceToRefSupport": 406.9
+          },
+          {
+            "altitude": 530,
+            "distanceToRefSupport": 500
+          }
+        ]
+      }
+    ],
+    "internal_id": "",
+    "short_name": "",
+    "created_at": "2026-07-10T17:44:40.116Z",
+    "updated_at": "2026-11-20T20:21:14.221+01:00[Europe/Paris]",
+    "internal_catalog_id": "",
+    "cable_short_name": "",
+    "optical_fibers_amount": 0,
+    "spans_amount": 0,
+    "begin_span_name": "",
+    "last_span_name": "",
+    "first_support_number": 0,
+    "last_support_number": 0,
+    "first_attachment_set": "",
+    "last_attachment_set": "",
+    "voltage_idr": "400 KV",
+    "initial_conditions": [
+      {
+        "uuid": "bf294857-8ce4-40a7-b366-c81d9b17b0a5",
+        "name": "IC 1",
+        "base_parameters": 1000,
+        "base_temperature": 15,
+        "cable_pretension": 0,
+        "min_temperature": 0,
+        "max_wind_pressure": 0,
+        "max_frost_width": 0
+      },
+      {
+        "uuid": "bd00f246-b3a8-40a1-bf66-9e1c8b04614e",
+        "name": "IC 1 (Copy 1)",
+        "base_parameters": 1000,
+        "base_temperature": 50,
+        "cable_pretension": 0,
+        "min_temperature": 0,
+        "max_wind_pressure": 0,
+        "max_frost_width": 0
+      }
+    ],
+    "selected_initial_condition_uuid": "bd00f246-b3a8-40a1-bf66-9e1c8b04614e",
+    "charges": [
+      {
+        "uuid": "96ae0aa7-bbc1-4b81-82dd-9de47f8f517d",
+        "name": "CC 1",
+        "personnelPresence": true,
+        "description": "",
+        "data": {
+          "climate": {
+            "windPressure": 0,
+            "cableTemperature": 9,
+            "symmetryType": "symmetric",
+            "iceThickness": 0,
+            "frontierSupportNumber": 2,
+            "iceThicknessBefore": 0,
+            "iceThicknessAfter": 0
+          },
+          "spanLoads": [
+            {
+              "supportUuid": "0bf38433-6b68-4cf7-ae18-9766db2967ed",
+              "loadPosition": 0,
+              "loadWeight": 0,
+              "type": "punctual",
+              "referenceSupport": "LEFT"
+            },
+            {
+              "supportUuid": "51130a9f-ef53-4359-86fc-ee4f258edf9c",
+              "loadPosition": 0,
+              "loadWeight": 0,
+              "type": "punctual",
+              "referenceSupport": "LEFT"
+            },
+            {
+              "supportUuid": "e1dc90ba-995c-40ed-8db8-5d0b04f92bd7",
+              "loadPosition": 0,
+              "loadWeight": 0,
+              "type": "punctual",
+              "referenceSupport": "LEFT"
+            }
+          ],
+          "cableModifParams": [],
+          "supportManipParams": [],
+          "spanManipParams": []
+        }
+      }
+    ],
+    "selected_charge_uuid": "96ae0aa7-bbc1-4b81-82dd-9de47f8f517d",
+    "field_measures": [
+      {
+        "uuid": "1d38e25f-44cf-45df-bac1-cdfbb9997d5e",
+        "name": "TM 1",
+        "span": [
+          0,
+          1
+        ],
+        "longitude": 1.208498369240738,
+        "latitude": 44.3394305316403,
+        "altitude": 0,
+        "azimuth": 0,
+        "date": "2026-09-28T22:06:25.531+02:00[Europe/Paris]",
+        "time": "2026-09-28T22:06:25.531+02:00[Europe/Paris]",
+        "season": "summer",
+        "ambientTemperature": 10,
+        "windSpeed": 10,
+        "windSpeedUnit": "kmh",
+        "windDirection": "North",
+        "skyCover": "N2",
+        "calculationMethod": "papoto",
+        "leftSupport": null,
+        "spanLength": null,
+        "measuredElevationDifference": null,
+        "HL": null,
+        "H1": null,
+        "H2": null,
+        "H3": null,
+        "HR": null,
+        "VL": null,
+        "V1": null,
+        "V2": null,
+        "V3": null,
+        "VR": null,
+        "cableHAccDistance": 0,
+        "cableVerticalAccAngle": 0,
+        "calculationType": "tangente",
+        "cableTangentAngle": 0,
+        "lengthBetweenSightGD": null,
+        "elevationDifferenceBetweenSightGD": null,
+        "xSight1": null,
+        "xSight2": null,
+        "xSight3": null,
+        "ySight1": null,
+        "ySight2": null,
+        "ySight3": null,
+        "transit": 150,
+        "windIncidence": 0,
+        "windIncidenceMode": "auto",
+        "diffuseSolarFlux": 123,
+        "directSolarFlux": 0,
+        "diffuseDirectSolarFlux": 246,
+        "diffusedSolarFlux": 0,
+        "measuredDiffusedPlusDirectSolarFlux": 0,
+        "measuredDiffusedSolarFlux": null,
+        "diffusedPlusDirectSolarFlux": 0,
+        "updateMode15C": "auto",
+        "parameterPapoto": null,
+        "parameterUncertaintyPapoto": null,
+        "cableTemperatureCalibration": null,
+        "cableTemperatureCalibrationUncertainty": null,
+        "manualParameterCalculation15CWithoutWind": null,
+        "link": "",
+        "voltage": "400 KV",
+        "spanType": "phase",
+        "phaseNumber": 0,
+        "numberOfConductors": 1,
+        "cableName": "ASTER600",
+        "outputs": {
+          "papoto": null,
+          "cableTemperature": {
+            "cableTemperature": 10.8,
+            "cableTemperatureUncertainty": 1.9
+          },
+          "parameter15C": null,
+          "tangentAimingSupport": null,
+          "tangentAimingExterior": null,
+          "tangentAimingInterior": null
+        },
+        "tangentLeftSupport": "0",
+        "tangentSpanLength": 0,
+        "cableParameter": 20,
+        "exteriorCalculationType": "tangente",
+        "exteriorLeftSupport": "0",
+        "exteriorSpanLength": 0,
+        "exteriorHAccDistance": 0,
+        "exteriorVerticalAccAngleLeft": 0,
+        "exteriorVerticalAccAngleRight": 0,
+        "exteriorParameter": 20,
+        "exteriorTangentAngle": 0,
+        "interiorCalculationType": "tangente",
+        "interiorLeftSupport": "0",
+        "interiorSpanLength": 0,
+        "interiorHAccDistance": 0,
+        "interiorVerticalAccAngleLeft": 0,
+        "interiorVerticalAccAngleRight": 0,
+        "interiorParameter": 20,
+        "interiorTangentAngle": 0,
+        "savedTab": "temperatureCalculation"
+      },
+      {
+        "uuid": "0b5b3eb4-fb3a-461d-bfe8-88beb1fc0ab1",
+        "name": "TM 2",
+        "span": [
+          1,
+          2
+        ],
+        "longitude": null,
+        "latitude": null,
+        "altitude": null,
+        "azimuth": null,
+        "date": "2026-09-28T23:32:13.677+02:00[Europe/Paris]",
+        "time": "2026-09-28T23:32:13.677+02:00[Europe/Paris]",
+        "season": "summer",
+        "ambientTemperature": null,
+        "windSpeed": null,
+        "windSpeedUnit": "kmh",
+        "windDirection": null,
+        "skyCover": null,
+        "calculationMethod": "papoto",
+        "leftSupport": null,
+        "spanLength": null,
+        "measuredElevationDifference": null,
+        "HL": null,
+        "H1": null,
+        "H2": null,
+        "H3": null,
+        "HR": null,
+        "VL": null,
+        "V1": null,
+        "V2": null,
+        "V3": null,
+        "VR": null,
+        "cableHAccDistance": null,
+        "cableVerticalAccAngle": null,
+        "calculationType": "parametre",
+        "cableTangentAngle": null,
+        "lengthBetweenSightGD": null,
+        "elevationDifferenceBetweenSightGD": null,
+        "xSight1": null,
+        "xSight2": null,
+        "xSight3": null,
+        "ySight1": null,
+        "ySight2": null,
+        "ySight3": null,
+        "transit": null,
+        "windIncidence": null,
+        "windIncidenceMode": "auto",
+        "diffuseSolarFlux": 123,
+        "directSolarFlux": null,
+        "diffuseDirectSolarFlux": 246,
+        "diffusedSolarFlux": null,
+        "measuredDiffusedPlusDirectSolarFlux": 0,
+        "measuredDiffusedSolarFlux": null,
+        "diffusedPlusDirectSolarFlux": null,
+        "updateMode15C": "auto",
+        "parameterPapoto": null,
+        "parameterUncertaintyPapoto": null,
+        "cableTemperatureCalibration": null,
+        "cableTemperatureCalibrationUncertainty": null,
+        "manualParameterCalculation15CWithoutWind": null,
+        "link": null,
+        "voltage": "400 KV",
+        "spanType": "phase",
+        "phaseNumber": null,
+        "numberOfConductors": 1,
+        "cableName": "ASTER600",
+        "outputs": {
+          "papoto": null,
+          "cableTemperature": null,
+          "parameter15C": null
+        }
+      },
+      {
+        "uuid": "57dab5c1-376d-4c72-a985-c06b94014f16",
+        "name": "TM 3",
+        "span": [
+          1,
+          2
+        ],
+        "longitude": null,
+        "latitude": null,
+        "altitude": null,
+        "azimuth": null,
+        "date": "2026-09-28T23:41:06.088+02:00[Europe/Paris]",
+        "time": "2026-09-28T23:41:06.088+02:00[Europe/Paris]",
+        "season": "summer",
+        "ambientTemperature": null,
+        "windSpeed": null,
+        "windSpeedUnit": "kmh",
+        "windDirection": null,
+        "skyCover": null,
+        "calculationMethod": "papoto",
+        "leftSupport": null,
+        "spanLength": null,
+        "measuredElevationDifference": null,
+        "HL": null,
+        "H1": null,
+        "H2": null,
+        "H3": null,
+        "HR": null,
+        "VL": null,
+        "V1": null,
+        "V2": null,
+        "V3": null,
+        "VR": null,
+        "cableHAccDistance": null,
+        "cableVerticalAccAngle": null,
+        "calculationType": "parametre",
+        "cableTangentAngle": null,
+        "lengthBetweenSightGD": null,
+        "elevationDifferenceBetweenSightGD": null,
+        "xSight1": null,
+        "xSight2": null,
+        "xSight3": null,
+        "ySight1": null,
+        "ySight2": null,
+        "ySight3": null,
+        "transit": null,
+        "windIncidence": null,
+        "windIncidenceMode": "auto",
+        "diffuseSolarFlux": 123,
+        "directSolarFlux": null,
+        "diffuseDirectSolarFlux": 246,
+        "diffusedSolarFlux": null,
+        "measuredDiffusedPlusDirectSolarFlux": 0,
+        "measuredDiffusedSolarFlux": null,
+        "diffusedPlusDirectSolarFlux": null,
+        "updateMode15C": "auto",
+        "parameterPapoto": null,
+        "parameterUncertaintyPapoto": null,
+        "cableTemperatureCalibration": null,
+        "cableTemperatureCalibrationUncertainty": null,
+        "manualParameterCalculation15CWithoutWind": null,
+        "link": null,
+        "voltage": "400 KV",
+        "spanType": "phase",
+        "phaseNumber": null,
+        "numberOfConductors": 1,
+        "cableName": "ASTER600",
+        "outputs": {
+          "papoto": null,
+          "cableTemperature": null,
+          "parameter15C": null
+        }
+      }
+    ],
+    "selected_field_measure_uuid": "1d38e25f-44cf-45df-bac1-cdfbb9997d5e",
+    "cable_modifications": [],
+    "selected_cable_modification_uuid": null,
+    "cable_span_manipulations": [],
+    "selected_cable_span_manipulation_uuid": null,
+    "cable_support_manipulations": [],
+    "selected_cable_support_manipulation_uuid": null,
+    "start_azimuth": 0,
+    "mean_reprojection_diff_meters": null,
+    "studio_view_state": {
+      "camera": null,
+      "view": "3d",
+      "side": "profile",
+      "zoom2d": null,
+      "scalingFactors": {
+        "x": 1,
+        "y": 1,
+        "z": 1,
+        "aspectMode": "data"
+      },
+      "resolution": 100,
+      "startSupport": 1,
+      "endSupport": 2
+    },
+    "rrts_cut_strands": null,
+    "forest_trenches": {
+      "firstSupportUuid": "0bf38433-6b68-4cf7-ae18-9766db2967ed",
+      "lastSupportUuid": "e1dc90ba-995c-40ed-8db8-5d0b04f92bd7",
+      "nPoints": 5,
+      "windZone": "200",
+      "windMinus": false,
+      "redZonePresence": false,
+      "repartitionTemperature": 100,
+      "lateralDistanceTemperature": 100,
+      "selectedRules": [
+        "RULE_1",
+        "RULE_2"
+      ]
+    }
+  }
+}

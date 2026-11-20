@@ -22,6 +22,9 @@ export const TARGET_DISTANCE_LIMITS = {
 /** Search interval (°C) of the conformity temperature, also its displayed range. */
 export const CONFORMITY_TEMPERATURE_BOUNDS: readonly [number, number] = [-50, 250];
 
+/** Number format of the search bounds quoted in the "target beyond the bounds" errors. */
+export const BOUNDS_ERROR_FORMAT = '1.0-2';
+
 /** Number format of the conformity temperature: always 2 decimals. */
 export const CONFORMITY_TEMPERATURE_FORMAT = '1.2-2';
 
@@ -35,7 +38,7 @@ export const CABLE_TEMPERATURE_LIMITS = {
 } as const;
 
 /** Search interval (Pa) of the wind pressure giving the minimum distance, also its displayed range. */
-export const MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS: readonly [number, number] = [-3000, 3000];
+export const MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS: readonly [number, number] = [-1000, 1000];
 
 /** Number format of the wind pressure giving the minimum distance: no decimal. */
 export const MINIMUM_DISTANCE_WIND_PRESSURE_FORMAT = '1.0-0';

@@ -47,6 +47,10 @@ describe('formatPythonError', () => {
               'shared.python-errors.estimation-input-error': 'The estimation inputs are missing or invalid.',
               'shared.python-errors.estimation-not-converged-error':
                 'The target cannot be reached within the estimation bounds.',
+              'shared.python-errors.estimation-target-above-bounds-error':
+                'The target cannot be reached: it needs more than {{ upperBound }}.',
+              'shared.python-errors.estimation-target-below-bounds-error':
+                'The target cannot be reached: it needs less than {{ lowerBound }}.',
               'shared.python-errors.estimation-warning': 'The existing load on the estimated span was ignored.',
               'shared.python-errors.conformity-input-error': 'The conformity inputs are missing or invalid.'
             }
@@ -80,6 +84,19 @@ describe('formatPythonError', () => {
     [PythonErrorCode.ConformityInputError, 'The conformity inputs are missing or invalid.']
   ])('should return the localized message for %s', (code, expected) => {
     expect(formatPythonError(code, translocoService)).toBe(expected);
+  });
+
+  it('should interpolate the given params in the message', () => {
+    expect(
+      formatPythonError(PythonErrorCode.EstimationTargetAboveBoundsError, translocoService, {
+        upperBound: '250 °C'
+      })
+    ).toBe('The target cannot be reached: it needs more than 250 °C.');
+    expect(
+      formatPythonError(PythonErrorCode.EstimationTargetBelowBoundsError, translocoService, {
+        lowerBound: '-50 °C'
+      })
+    ).toBe('The target cannot be reached: it needs less than -50 °C.');
   });
 
   it.each(Object.values(PythonErrorCode))('should format code %s to a non-null, non-empty message', (code) => {

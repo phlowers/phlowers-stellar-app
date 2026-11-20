@@ -139,6 +139,10 @@ describe('TemperatureEstimationComponent', () => {
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}',
               'shared.python-errors.estimation-not-converged-error': 'The target cannot be reached',
+              'shared.python-errors.estimation-target-above-bounds-error':
+                'The target needs more than {{ upperBound }}',
+              'shared.python-errors.estimation-target-below-bounds-error':
+                'The target needs less than {{ lowerBound }}',
               'shared.python-errors.solver-error': 'A solver error occurred.',
               'shared.python-errors.convergence-error': 'The solver failed to converge.',
               'shared.python-errors.suspected-chain-reversal': 'The insulator chain is suspected to have reversed.',
@@ -253,8 +257,8 @@ describe('TemperatureEstimationComponent', () => {
   });
 
   describe('Point (RG.TCO.OBS-PTN)', () => {
-    it('is greyed out, without point before an obstacle is selected', () => {
-      expect(component.form.controls.pointIndex.disabled).toBe(true);
+    it('is editable, without point before an obstacle is selected', () => {
+      expect(component.form.controls.pointIndex.enabled).toBe(true);
       expect(component.form.controls.pointIndex.value).toBeNull();
       expect(selectByTestId('point-select').options).toEqual([]);
     });
@@ -267,7 +271,7 @@ describe('TemperatureEstimationComponent', () => {
         { label: 'Point 2', value: 1 }
       ]);
       expect(component.form.controls.pointIndex.value).toBe(0);
-      expect(component.form.controls.pointIndex.disabled).toBe(true);
+      expect(component.form.controls.pointIndex.enabled).toBe(true);
     });
 
     it('follows the obstacle selection', () => {
@@ -370,7 +374,7 @@ describe('TemperatureEstimationComponent', () => {
 
       expect(component.form.controls.obstacleUuid.enabled).toBe(true);
       expect(component.form.controls.targetDistance.enabled).toBe(true);
-      expect(component.form.controls.pointIndex.disabled).toBe(true);
+      expect(component.form.controls.pointIndex.enabled).toBe(true);
     });
 
     it('locks the inputs during the calculation, so that the result matches them', async () => {
@@ -382,12 +386,14 @@ describe('TemperatureEstimationComponent', () => {
       fixture.detectChanges();
 
       expect(component.form.controls.obstacleUuid.disabled).toBe(true);
+      expect(component.form.controls.pointIndex.disabled).toBe(true);
       expect((getByTestId('target-distance-input') as HTMLInputElement).disabled).toBe(true);
 
       resolveTask({ result: ENGINE_RESULT, error: null, diagnostics: [] });
       await calculation;
       fixture.detectChanges();
 
+      expect(component.form.controls.pointIndex.enabled).toBe(true);
       expect((getByTestId('target-distance-input') as HTMLInputElement).disabled).toBe(false);
       expect(textOf('conformity-temperature-value')).toBe('12.35 °C');
     });
@@ -524,6 +530,22 @@ describe('TemperatureEstimationComponent', () => {
       expect(mockNotificationService.error).toHaveBeenCalledWith('The target cannot be reached');
       expect(getByTestId('results-frame')).toBeNull();
       expect(calculateBtn().disabled).toBe(false);
+    });
+
+    it.each([
+      [PythonErrorCode.EstimationTargetAboveBoundsError, 'The target needs more than 250 °C'],
+      [PythonErrorCode.EstimationTargetBelowBoundsError, 'The target needs less than -50 °C']
+    ])('quotes the search bound with its unit on %s', async (code, message) => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: null,
+        error: TaskError.SOLVER_DID_NOT_CONVERGE,
+        diagnostics: [{ code, severity: 'error', origin: 'exception', rawText: `${code}: beyond the bounds` }]
+      });
+      fillForm();
+
+      await calculate();
+
+      expect(mockNotificationService.error).toHaveBeenCalledWith(message);
     });
 
     it.each([

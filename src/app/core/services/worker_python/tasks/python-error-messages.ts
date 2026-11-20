@@ -33,6 +33,8 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
   [PythonErrorCode.EstimateOnSplitSupportError]: 'shared.python-errors.estimate-on-split-support-error',
   [PythonErrorCode.EstimationInputError]: 'shared.python-errors.estimation-input-error',
   [PythonErrorCode.EstimationNotConvergedError]: 'shared.python-errors.estimation-not-converged-error',
+  [PythonErrorCode.EstimationTargetAboveBoundsError]: 'shared.python-errors.estimation-target-above-bounds-error',
+  [PythonErrorCode.EstimationTargetBelowBoundsError]: 'shared.python-errors.estimation-target-below-bounds-error',
   [PythonErrorCode.EstimationWarning]: 'shared.python-errors.estimation-warning',
   [PythonErrorCode.ConformityInputError]: 'shared.python-errors.conformity-input-error'
 };
@@ -43,14 +45,19 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
  *
  * @param code - The Python exception class name, or `null`
  * @param translocoService - The translation service (injected by caller)
+ * @param params - Interpolation parameters of the message (e.g. the search bounds of an estimation)
  * @returns The localized message, or `null` if no mapping exists
  */
-export const formatPythonError = (code: PythonErrorCode | null, translocoService: TranslocoService): string | null => {
+export const formatPythonError = (
+  code: PythonErrorCode | null,
+  translocoService: TranslocoService,
+  params?: Record<string, unknown>
+): string | null => {
   if (code === null) {
     return null;
   }
   const key = PYTHON_ERROR_KEYS[code];
-  return key ? translocoService.translate(key) : null;
+  return key ? translocoService.translate(key, params) : null;
 };
 
 /**

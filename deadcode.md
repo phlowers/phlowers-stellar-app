@@ -91,6 +91,14 @@
 - **Detected on**: 2026-10-29.
 - **Status**: PENDING REVIEW; deletion requires user validation.
 
+### Unused `_Errors.estimation_minimum_not_reached` — `stellar-engine/src/stellar_engine/entities/errors.py`
+
+- **Source**: `stellar-engine/src/stellar_engine/entities/errors.py` (`estimation_minimum_not_reached`).
+- **Evidence**: `estimate_minimum_distance_wind` now delegates to the mechaphlowers closest-point `estimate_wind` and no longer scans the wind pressure; no caller remains in `stellar-engine/src` or its tests.
+- **Removal impact**: Remove the method; no i18n key depends on it.
+- **Detected on**: 2026-11-20.
+- **Status**: PENDING REVIEW; deletion requires user validation.
+
 ## Legend
 - **📍 Source**: file and line number
 - **🔍 Evidence**: why it is considered dead

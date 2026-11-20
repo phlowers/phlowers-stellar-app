@@ -91,6 +91,16 @@ class _Errors:
         )
 
     @staticmethod
+    def estimation_target_beyond_bound(
+        variable: str, side: str, bound: float
+    ) -> str:
+        return (
+            f"{variable} estimation did not converge: the target needs a "
+            f"value {'above' if side == 'upper' else 'below'} the {side} "
+            f"bound {bound}"
+        )
+
+    @staticmethod
     def estimation_distance_not_computable(variable: str) -> str:
         return (
             f"{variable} estimation failed: distance to the obstacle "
@@ -136,3 +146,11 @@ class EstimationInputError(ValueError):
 
 class EstimationNotConvergedError(ValueError):
     """Raised when an estimation cannot reach the target within its bounds."""
+
+
+class EstimationTargetAboveBoundsError(EstimationNotConvergedError):
+    """Raised when the target needs a value above the upper search bound."""
+
+
+class EstimationTargetBelowBoundsError(EstimationNotConvergedError):
+    """Raised when the target needs a value below the lower search bound."""

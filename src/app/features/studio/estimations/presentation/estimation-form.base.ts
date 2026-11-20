@@ -15,7 +15,7 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
+import { EstimationBaseInputs, Task, TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
 import { formatPythonError, formatPythonWarnings } from '@services/worker_python/tasks/python-error-messages';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
@@ -27,6 +27,7 @@ import {
   getDefaultPointIndex,
   getEstimableObstacles,
   getPreselectedObstacleUuid,
+  toBoundsErrorParams,
   toObstacleOptions,
   toPointOptions
 } from '@features/studio/estimations/presentation/estimations.helpers';
@@ -53,13 +54,11 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
   protected abstract readonly calculationFailedKey: string;
   /** Technical log message of a calculation failure. */
   protected abstract readonly calculationFailedLog: string;
+  /** Transloco key of the unit of the estimated value, quoted with the search bounds in the engine errors. */
+  protected readonly boundsUnitKey: string | null = null;
 
   private readonly obstacleUuidControl = new FormControl<string | null>(null, Validators.required);
-  // read-only in these user stories: always the first point of the obstacle
-  private readonly pointIndexControl = new FormControl<number | null>(
-    { value: null, disabled: true },
-    Validators.required
-  );
+  private readonly pointIndexControl = new FormControl<number | null>(null, Validators.required);
 
   readonly form = new FormGroup({
     obstacleUuid: this.obstacleUuidControl,
@@ -160,8 +159,11 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
         this.logger.error(this.calculationFailedLog, error);
         this.outcome.set(null);
         this.notificationService.error(
-          formatPythonError(diagnostics.find((d) => d.origin === 'exception')?.code ?? null, this.translocoService) ??
-            this.translocoService.translate(this.calculationFailedKey)
+          formatPythonError(
+            diagnostics.find((d) => d.origin === 'exception')?.code ?? null,
+            this.translocoService,
+            toBoundsErrorParams(inputs as EstimationBaseInputs, this.boundsUnit(), this.locale)
+          ) ?? this.translocoService.translate(this.calculationFailedKey)
         );
         return;
       }
@@ -174,6 +176,10 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
       this.setInputsLocked(false);
       this.isCalculating.set(false);
     }
+  }
+
+  private boundsUnit(): string {
+    return this.boundsUnitKey === null ? '' : this.translocoService.translate(this.boundsUnitKey);
   }
 
   /** Error of a numeric control, once edited or touched. Must be called in an injection context. */
@@ -203,10 +209,9 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
     return this.form.getRawValue() as EstimationFormValue<TValueKey>;
   }
 
-  // without event: the form value and validity are unchanged, and the point stays read-only
+  // without event: the form value and validity are unchanged
   private setInputsLocked(locked: boolean): void {
     for (const control of Object.values<AbstractControl>(this.form.controls)) {
-      if (control === this.pointIndexControl) continue;
       if (locked) {
         control.disable({ emitEvent: false });
       } else {

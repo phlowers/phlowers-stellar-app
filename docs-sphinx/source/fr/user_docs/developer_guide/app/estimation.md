@@ -12,7 +12,7 @@ Task.estimate* (TypeScript)
   → SectionStudy.estimation_engine (mechaphlowers)
 ```
 
-L'énumération `Task` et ses correspondances `TaskInputs`/`TaskOutputs` sont définies dans `src/app/core/services/worker_python/tasks/types.ts`. `src/app/core/services/worker_python/tasks/handle-task.ts` associe `estimateRope`, `estimateTemperature`, `estimateLoad`, `estimateWind` et `estimateMinimumDistanceWind` aux fonctions snake_case correspondantes de `src/app/core/services/worker_python/tasks/python-scripts/api.py`. Chaque wrapper API convertit les entrées JavaScript en valeurs Python et appelle la fonction correspondante de `stellar-engine/src/stellar_engine/core/estimation.py` avec l'étude courante.
+L'énumération `Task` et ses correspondances `TaskInputs`/`TaskOutputs` sont définies dans `src/app/core/services/worker_python/tasks/types.ts`. `src/app/core/services/worker_python/tasks/handle-task.ts` associe `estimateRope`, `estimateTemperature`, `estimateLoad`, `estimateLoadRelative`, `estimateWind` et `estimateMinimumDistanceWind` aux fonctions snake_case correspondantes de `src/app/core/services/worker_python/tasks/python-scripts/api.py`. Chaque wrapper API convertit les entrées JavaScript en valeurs Python et appelle la fonction correspondante de `stellar-engine/src/stellar_engine/core/estimation.py` avec l'étude courante.
 
 ## Entrées des tâches
 
@@ -24,6 +24,7 @@ Tous les champs utilisent le camelCase à la frontière du worker. Chaque tâche
 | `estimateWind` | Pression du vent (Pa) | `targetDistance` (m) obligatoire ; `temperature` (°C) fixe facultative. |
 | `estimateMinimumDistanceWind` | Pression du vent (Pa) minimisant la distance | `temperature` (°C) fixe obligatoire ; aucune distance cible. |
 | `estimateLoad` | Masse de charge (kg) | `targetDistance` (m) et `loadPositionDistance` (m depuis le support gauche de la portée) obligatoires ; `temperature` (°C) fixe et `windPressure` (Pa) fixes facultatifs. |
+| `estimateLoadRelative` | Masse de charge (kg) | Sans obstacle. `targetDistance` signé (m, variation d'altitude du câble à la position de la charge, généralement négative) et `loadPositionDistance` (m depuis le support gauche de la portée) obligatoires ; `temperature` (°C) fixe et `windPressure` (Pa) fixes facultatifs. `extra.x_shift` est le décalage d'abscisse du câble (m) au point de charge. |
 | `estimateRope` | Longueur de corde (m) | `supportIndex` (avant manipulation) et `targetVerticalDistance` (m) obligatoires ; `ropeLineicMass` (kg/m), `temperature` (°C) fixe et `windPressure` (Pa) fixes facultatifs. |
 
 Pour l'estimation de corde, `targetVerticalDistance` correspond à l'altitude du câble moins celle de l'obstacle et peut être négative. Sa valeur doit être finie, mais n'a pas à être positive. `supportIndex` indique où la corde est fixée ; `spanIndex` désigne toujours la portée contenant l'obstacle. Les conditions fixes facultatives peuvent être omises ou définies à `null`.
@@ -34,7 +35,7 @@ La validation commune rejette les valeurs obligatoires absentes ou non finies, l
 
 ## Indexation des portées et supports virtuels
 
-Les cinq tâches reçoivent `spanIndex` selon la convention d'indexation avant manipulation. `estimateTemperature`, `estimateWind` et `estimateMinimumDistanceWind` le convertissent en interne avec `study.manipulation.span_index_after_virtual_support`, car mechaphlowers attend l'index de portée après manipulation pour ces estimateurs climatiques. `estimateLoad` et `estimateRope` transmettent l'index initial à leur estimateur mechaphlowers. Si un support virtuel divise la portée demandée, chaque tâche refuse l'estimation avec `EstimateOnSplitSupportError` ; l'estimation sur l'une des parties d'une portée divisée n'est pas prise en charge.
+Les six tâches reçoivent `spanIndex` selon la convention d'indexation avant manipulation. `estimateTemperature`, `estimateWind` et `estimateMinimumDistanceWind` le convertissent en interne avec `study.manipulation.span_index_after_virtual_support`, car mechaphlowers attend l'index de portée après manipulation pour ces estimateurs climatiques. `estimateLoad`, `estimateLoadRelative` et `estimateRope` transmettent l'index initial à leur estimateur mechaphlowers. Si un support virtuel divise la portée demandée, chaque tâche refuse l'estimation avec `EstimateOnSplitSupportError` ; l'estimation sur l'une des parties d'une portée divisée n'est pas prise en charge.
 
 Pour l'estimation de corde, `supportIndex` est également fourni selon la convention avant manipulation. Un index de portée ou de support hors limites déclenche `InvalidManipulationIndex` de mechaphlowers.
 
@@ -47,11 +48,12 @@ Chaque tâche de recherche de racine réussie renvoie la même structure :
   "value": 60.0,
   "residual": 0.001,
   "iterations": 8,
-  "converged": true
+  "converged": true,
+  "extra": {}
 }
 ```
 
-`value` utilise les unités de la variable estimée, `residual` correspond au résidu final de la fonction objectif et `iterations` indique le nombre d'itérations du solveur. Bien que `EstimationResult.converged` soit un booléen, un résultat renvoyé contient toujours `converged: true` : `_solve` déclenche `EstimationNotConvergedError` au lieu de renvoyer un résultat non convergé. Un `ValueError` ordinaire de mechaphlowers, lorsque la distance à l'obstacle ne peut pas être calculée à une borne de recherche, est converti en cette même exception ; les exceptions typées du moteur sont propagées telles quelles.
+`value` utilise les unités de la variable estimée, `residual` correspond au résidu final de la fonction objectif `iterations` indique le nombre d'itérations du solveur et `extra` contient les valeurs nommées supplémentaires calculées par le moteur (vide s'il n'y en a pas). Bien que `EstimationResult.converged` soit un booléen, un résultat renvoyé contient toujours `converged: true` : `_solve` déclenche `EstimationNotConvergedError` au lieu de renvoyer un résultat non convergé. Un `ValueError` ordinaire de mechaphlowers, lorsque la distance à l'obstacle ne peut pas être calculée à une borne de recherche, est converti en cette même exception ; les exceptions typées du moteur sont propagées telles quelles.
 
 ### Pression de vent pour distance minimale
 
@@ -65,7 +67,41 @@ Chaque tâche de recherche de racine réussie renvoie la même structure :
 }
 ```
 
-`value` est la pression de vent (Pa), `distance` la distance oblique minimale (m) et `iterations` le nombre d'évaluations de la distance. mechaphlowers ne fournit que la recherche de racine : `estimate_minimum_distance_wind` minimise donc la fonction objectif de ses estimateurs climatiques (`_build_distance_objective__climatic_case` avec une cible nulle, c'est-à-dire la distance elle-même). La distance est supposée unimodale en fonction de la pression de vent : elle est parcourue tous les `MINIMUM_DISTANCE_WIND_STEP` (250 Pa) depuis 0 Pa (ou la borne la plus proche) dans le sens où elle décroît, jusqu'à ce qu'elle augmente, puis le minimum encadré est affiné par une recherche par section dorée (`MINIMUM_DISTANCE_WIND_TOLERANCE`, 0,5 Pa). Des pas réduits gardent chaque résolution d'équilibre proche de la précédente : un saut important de pression de vent peut retourner à tort les chaînes. Une résolution d'équilibre en échec empêche toutes les résolutions suivantes de la copie du moteur ; chaque parcours utilise donc sa propre copie. Un minimum situé sur une borne de recherche est renvoyé tel quel. Si le solveur d'équilibre échoue à 0 Pa, ou alors que la distance décroît encore (typiquement `SuspectedChainReversal` avant que le câble soit au plus près), cette erreur est propagée telle quelle ; une distance NaN déclenche `EstimationNotConvergedError` à la place. Un échec du solveur pendant l'affinage conserve le minimum parcouru.
+`value` est la pression de vent (Pa), `distance` la distance oblique minimale (m) et `iterations` le nombre d'évaluations de la distance. `estimate_minimum_distance_wind` utilise le mode « point le plus proche » de `estimate_wind` de mechaphlowers (`target_distance=None`) : son minimiseur de Brent évalue la distance aux deux `bounds` et suppose un seul minimum à l'intérieur (par défaut `[-1000, 1000]` Pa). La recherche est encapsulée dans une `RobustEstimation` (voir *Estimation robuste* ci-dessous), qui réduit d'abord les bornes aux pressions de vent que le solveur d'équilibre sait résoudre autour de l'absence de vent (un vent fort retourne les chaînes d'isolateurs, `SuspectedChainReversal`, ce qui ferait échouer la recherche via l'évaluation des bornes), puis relance la recherche sur des bornes resserrées vers l'absence de vent si les chaînes se retournent encore pendant celle-ci. Un minimum situé sur une borne (éventuellement cette limite solvable), ou une distance NaN, déclenche `EstimationNotConvergedError` ; un échec du solveur d'équilibre sans vent, ou un retournement des chaînes qui persiste après les nouvelles tentatives, est propagé tel quel.
+
+### Estimation robuste
+
+Les recherches de mechaphlowers évaluent la fonction objectif aux deux bornes et s'arrêtent au premier échec du solveur d'équilibre : une seule valeur d'essai non résoluble fait donc échouer toute l'estimation. `RobustEstimation` (`stellar-engine/src/stellar_engine/core/estimation/robust.py`) rend une recherche 1D robuste à ces valeurs. Elle est indépendante de mechaphlowers : l'estimation fournit un prédicat `is_solvable(value)` et un appelable `search(bounds)`, ce qui permettra de la réutiliser plus tard pour d'autres estimations. `estimate_minimum_distance_wind` en est aujourd'hui la seule utilisatrice.
+
+| Champ | Défaut | Rôle |
+|---|---|---|
+| `variable` | | Nom de la variable estimée, pour les logs |
+| `is_solvable` | | Indique si le solveur d'équilibre réussit pour une valeur |
+| `tolerance` | | Précision des limites solvables (dichotomie) |
+| `step` | | Pas du balayage vers l'extérieur qui cherche la première valeur non résoluble |
+| `neutral` | `0` | Valeur supposée résoluble (par ex. absence de vent) |
+| `retries` | `3` | Nombre de nouvelles tentatives de la recherche après un échec `retried_errors` |
+| `shrink` | `0.75` | Fraction de chaque borne (depuis la référence) conservée à chaque nouvelle tentative |
+| `retried_errors` | `(SuspectedChainReversal,)` | Échecs du solveur qui déclenchent une nouvelle tentative |
+
+Pour le vent, `estimate_minimum_distance_wind` fixe `tolerance=WIND_SOLVABLE_TOLERANCE` (1 Pa), `step=WIND_SOLVABLE_STEP` (50 Pa), `retries=WIND_REVERSAL_RETRIES` (3) et `shrink=WIND_REVERSAL_SHRINK` (0,75), et construit `is_solvable` avec `is_state_solvable` à la température, l'épaisseur de glace et la direction du vent fixées.
+
+**Le vent peut échouer à l'intérieur des bornes.** Les pressions de vent résolubles ne forment pas un seul intervalle : un vent fort retourne les chaînes d'isolateurs, puis un vent beaucoup plus fort peut de nouveau être résolu sur un état à chaînes retournées. Avec les bornes par défaut `[-1000, 1000]` Pa, une section fictive pourrait se comporter ainsi :
+
+```text
+  -1000      -950        -300     0      400        ~950       1000
+    |  solves  |   fails   |    solves    |   fails   |  solves  |
+    |  again   | (reversal)|  (reference) | (reversal)|  again   |
+               <-------------- kept bounds ------------>
+                           [-300, 400]
+```
+
+Résoluble sur `[-300, 400]`, en échec sur `(400, ~950)` et `(-950, -300)`, puis de nouveau résoluble au-delà. Cela a deux conséquences, chacune traitée par `RobustEstimation` :
+
+1. **Îlots de nouveau résolubles.** Une simple dichotomie entre une borne et la référence pourrait converger vers une limite voisine de l'îlot « de nouveau résoluble » (par ex. vers 950 Pa) et laisser une zone en échec à l'intérieur des bornes. `solvable_bounds(bounds)` part donc de `reference(bounds)` (`neutral` ramené dans les bornes), balaie chaque côté vers l'extérieur par pas de `step` jusqu'à la première valeur non résoluble, puis affine cette limite par dichotomie jusqu'à `tolerance`. Seul l'intervalle contenant la référence est conservé (`[-300, 400]` ci-dessus). Si la référence elle-même n'est pas résoluble, les bornes sont renvoyées inchangées afin que l'erreur du solveur parvienne à l'utilisateur.
+2. **Zones en échec plus étroites que `step`.** Le balayage ne teste qu'une valeur tous les `step` : une zone en échec plus étroite que `step` entre deux valeurs balayées peut donc être manquée, et un `SuspectedChainReversal` peut encore survenir pendant la recherche dans les bornes conservées. `run(search, bounds)` intercepte les `retried_errors`, rapproche les deux bornes de la référence avec `shrunk_bounds(bounds, reference)` (chaque borne conserve la fraction `shrink` de sa distance à la référence) et relance la recherche, au plus `retries` fois ; l'erreur est ensuite propagée.
+
+`is_state_solvable(study, **state)` est la sonde mechaphlowers derrière `is_solvable` : elle appelle `solve_change_state(**state)` sur une `deepcopy` du moteur d'équilibre de l'étude (sans ses observateurs, pour ne pas copier les moteurs en aval) et renvoie `False` en cas de `SolverError`. Une copie neuve est utilisée à chaque sonde, car un calcul en échec corrompt le moteur, et le moteur est résolu directement, comme dans les recherches d'estimation de mechaphlowers, plutôt que via `SectionStudy.solve_change_state`, dont le démarrage à chaud (warm start) résout plus de cas que la recherche.
 
 ## Correspondance des erreurs et avertissements
 
@@ -75,6 +111,8 @@ Le nom de la classe d'exception Python (ou le texte de l'avertissement) est rech
 |---|---|---|---|---|
 | `EstimationInputError` | Une entrée d'estimation est absente ou invalide. | `CALCULATION_ERROR` | Erreur | `shared.python-errors.estimation-input-error` |
 | `EstimationNotConvergedError` | La cible est inaccessible dans les bornes ou la distance ne peut pas être calculée à une borne. | `SOLVER_DID_NOT_CONVERGE` | Erreur | `shared.python-errors.estimation-not-converged-error` |
+| `EstimationTargetAboveBoundsError` | Sous-classe d'`EstimationNotConvergedError` levée par `estimate_temperature` quand la recherche s'arrête sur la borne supérieure : la cible nécessite une température plus élevée. | `SOLVER_DID_NOT_CONVERGE` | Erreur | `shared.python-errors.estimation-target-above-bounds-error` |
+| `EstimationTargetBelowBoundsError` | Idem sur la borne inférieure : la cible nécessite une température plus basse. | `SOLVER_DID_NOT_CONVERGE` | Erreur | `shared.python-errors.estimation-target-below-bounds-error` |
 | `EstimateOnSplitSupportError` | Un support virtuel divise la portée demandée. | `CALCULATION_ERROR` | Erreur | `shared.python-errors.estimate-on-split-support-error` |
 | `InvalidManipulationIndex` | Un index de portée ou de support est hors des limites valides. | `CALCULATION_ERROR` | Erreur | `shared.python-errors.invalid-manipulation-index` |
 | `ObstacleNotFoundError` | `obstacleUuid` n'est pas enregistré dans l'étude. | `CALCULATION_ERROR` | Erreur | `shared.python-errors.obstacle-not-found-error` |
@@ -90,11 +128,11 @@ Pour une nouvelle erreur ou un nouvel avertissement Python, ajoutez le nom de la
 
 La modale **Estimations** (`src/app/features/studio/estimations/`) s'ouvre depuis le menu **Outils** du Studio et depuis les accès rapides (outil `estimations` du `ToolbarDialogService`). Elle contient trois onglets ; **Température de conformité** (US.EST.TCO) et **Pression vent pour distance mini.** (US.EST.PRE-DIS) sont implémentés, l'onglet d'effort vertical est affiché désactivé en attendant son récit utilisateur. Les deux onglets étendent `EstimationFormBase` (`presentation/estimation-form.base.ts`), qui gère le choix de l'obstacle et du point, le calcul, la correspondance entre le résultat et le canton, le verrouillage des saisies et la copie dans le presse-papier ; chaque onglet ne fournit que ses champs numériques, sa tâche et la conversion de ses entrées. Leur mise en page est partagée par les mixins de `_estimation-form.scss`.
 
-L'onglet **Température de conformité** (`TemperatureEstimationComponent`) invite à choisir un obstacle tant qu'aucun n'est sélectionné, et liste les obstacles du canton ayant au moins un point (filtrables par nom). L'obstacle sélectionné dans le Studio (`ObstaclesService.selectedMeasureUuid`) est présélectionné à l'ouverture de l'onglet ; sinon, ou si la sélection est un sol, aucun n'est sélectionné. La liste **Point** est en lecture seule et positionnée sur le premier point de l'obstacle sélectionné. La **Distance verticale cible** est obligatoire, dans ]0 ; 150] m avec au plus 2 décimales (minimum `0.01` : le moteur accepte une distance nulle mais ne l'atteint jamais et répond `EstimationNotConvergedError`). **Calculer** exécute `estimateTemperature` avec `spanIndex = obstacle.supportIndex`, `obstacleUuid`, `pointIndex` et `bounds = [-50, 250]` °C ; l'obstacle et la distance sont verrouillés jusqu'à la fin du calcul, pour que le résultat leur corresponde toujours. Le résultat est affiché avec 2 décimales et peut être copié dans le presse-papier ; il est effacé dès qu'une saisie ou le canton change. En cas d'échec, le message d'erreur Python localisé est affiché, ou à défaut `studio.estimations.calculation-failed`.
+L'onglet **Température de conformité** (`TemperatureEstimationComponent`) invite à choisir un obstacle tant qu'aucun n'est sélectionné, et liste les obstacles du canton ayant au moins un point (filtrables par nom). L'obstacle sélectionné dans le Studio (`ObstaclesService.selectedMeasureUuid`) est présélectionné à l'ouverture de l'onglet ; sinon, ou si la sélection est un sol, aucun n'est sélectionné. La liste **Point** est en lecture seule et positionnée sur le premier point de l'obstacle sélectionné. La **Distance verticale cible** est obligatoire, dans ]0 ; 150] m avec au plus 2 décimales (minimum `0.01` : le moteur accepte une distance nulle mais ne l'atteint jamais et répond `EstimationNotConvergedError`). **Calculer** exécute `estimateTemperature` avec `spanIndex = obstacle.supportIndex`, `obstacleUuid`, `pointIndex` et `bounds = [-50, 250]` °C ; l'obstacle et la distance sont verrouillés jusqu'à la fin du calcul, pour que le résultat leur corresponde toujours. Le résultat est affiché avec 2 décimales et peut être copié dans le presse-papier ; il est effacé dès qu'une saisie ou le canton change. En cas d'échec, le message d'erreur Python localisé est affiché, ou à défaut `studio.estimations.calculation-failed`. Quand la cible est au-delà des bornes de recherche, l'erreur cite la borne avec son unité (`EstimationFormBase.boundsUnitKey`, `toBoundsErrorParams`), p. ex. « La cible ne peut pas être atteinte : elle nécessite plus de 250 °C. ».
 
-L'onglet **Pression vent pour distance mini.** (`WindPressureEstimationComponent`) reprend le comportement de l'obstacle et du point. La **Température** est obligatoire, dans [-50 ; 250] °C avec au plus 2 décimales. **Calculer** exécute `estimateMinimumDistanceWind` avec `spanIndex = obstacle.supportIndex`, `obstacleUuid`, `pointIndex`, `temperature` et `bounds = [-3000, 3000]` Pa. Les résultats affichent la **Pression de vent** sans décimale (copiable, sans séparateur de milliers) et la **Distance oblique minimum** avec 2 décimales. En cas d'échec, le message d'erreur Python localisé est affiché, ou à défaut `studio.estimations.wind-pressure-calculation-failed`.
+L'onglet **Pression vent pour distance mini.** (`WindPressureEstimationComponent`) reprend le comportement de l'obstacle et du point. La **Température** est obligatoire, dans [-50 ; 250] °C avec au plus 2 décimales. **Calculer** exécute `estimateMinimumDistanceWind` avec `spanIndex = obstacle.supportIndex`, `obstacleUuid`, `pointIndex`, `temperature` et `bounds = [-1000, 1000]` Pa. Les résultats affichent la **Pression de vent** sans décimale (copiable, sans séparateur de milliers) et la **Distance oblique minimum** avec 2 décimales. En cas d'échec, le message d'erreur Python localisé est affiché, ou à défaut `studio.estimations.wind-pressure-calculation-failed`.
 
-> Le moteur estime la température pour une distance 3D (`distance_3d`) entre le câble et le point d'obstacle, alors que l'interface libelle la saisie *Distance verticale cible* comme spécifié par le récit utilisateur.
+> Le moteur estime la température pour une distance verticale (`distance_type="vertical"`, défaut de mechaphlowers) entre le câble et le point d'obstacle, comme le libellé *Distance verticale cible* de l'interface.
 
 ## Limitation connue : direction du vent
 

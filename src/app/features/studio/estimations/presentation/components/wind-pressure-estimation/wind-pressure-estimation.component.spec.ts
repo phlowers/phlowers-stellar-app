@@ -212,7 +212,7 @@ describe('WindPressureEstimationComponent', () => {
   });
 
   describe('Point (RG.PRE-DIS.OBS-PTN)', () => {
-    it('is greyed out and set to the first point of the selected obstacle', () => {
+    it('is editable, set to the first point of the selected obstacle', () => {
       selectObstacle('obstacle-a');
 
       expect(selectByTestId('point-select').options).toEqual([
@@ -220,7 +220,7 @@ describe('WindPressureEstimationComponent', () => {
         { label: 'Point 2', value: 1 }
       ]);
       expect(component.form.controls.pointIndex.value).toBe(0);
-      expect(component.form.controls.pointIndex.disabled).toBe(true);
+      expect(component.form.controls.pointIndex.enabled).toBe(true);
     });
   });
 
@@ -271,7 +271,7 @@ describe('WindPressureEstimationComponent', () => {
       expect(calculateBtn().disabled).toBe(false);
     });
 
-    it('estimates the minimum distance wind pressure on the obstacle point, bounded to [-3000; 3000] Pa', async () => {
+    it('estimates the minimum distance wind pressure on the obstacle point, bounded to [-1000; 1000] Pa', async () => {
       fillForm();
 
       await calculate();
@@ -281,7 +281,7 @@ describe('WindPressureEstimationComponent', () => {
         obstacleUuid: 'obstacle-b',
         pointIndex: 0,
         temperature: -12.5,
-        bounds: [-3000, 3000]
+        bounds: [-1000, 1000]
       });
     });
 
@@ -294,6 +294,7 @@ describe('WindPressureEstimationComponent', () => {
       fixture.detectChanges();
       expect((getByTestId('temperature-input') as HTMLInputElement).disabled).toBe(true);
       expect(component.form.controls.obstacleUuid.disabled).toBe(true);
+      expect(component.form.controls.pointIndex.disabled).toBe(true);
 
       resolveTask({ result: ENGINE_RESULT, error: null, diagnostics: [] });
       await calculation;
@@ -301,7 +302,7 @@ describe('WindPressureEstimationComponent', () => {
 
       expect((getByTestId('temperature-input') as HTMLInputElement).disabled).toBe(false);
       expect(component.form.controls.obstacleUuid.enabled).toBe(true);
-      expect(component.form.controls.pointIndex.disabled).toBe(true);
+      expect(component.form.controls.pointIndex.enabled).toBe(true);
     });
   });
 
