@@ -628,6 +628,10 @@ notifiée (`studio.conformity.export-invalid-data-error`). La modale reste ouver
 - Contenu : `{ distancesConformityCheck: [ { metaData, obstacleData, conformityInput, conformityChecks } ] }`.
   Les valeurs sont brutes (non arrondies), sous forme `{ value, unit }` ; une valeur absente (par exemple
   le côté latéral d’un obstacle `overhang`) vaut `{ value: null, unit }`.
+- `obstacleData.altitudeType` (`absolute`, `relative`, `relative_cable`) et `lateralDistanceType`
+  (`SPAN_AXIS`, `LINE_AXIS`) donnent la référence de `height` et `lateralDistance`, exportés tels que
+  saisis et non normalisés.
+- Seules les règles actuellement affichées (sélectionnées et calculées) sont exportées.
 - `voltage` provient de `voltage_idr` : `"<nombre> KV"` donne `{ value: <nombre>, unit: 'KV' }`, tout autre
   libellé (par exemple *HORS TENSION*) est conservé tel quel avec `unit: null`.
 - `cableSwingingAngle` n’est pas calculé : toujours `{ value: null, unit: '°' }`.

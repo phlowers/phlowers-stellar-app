@@ -432,6 +432,14 @@ export class ConformityComponent implements OnDestroy {
    * later only fill still-empty fields instead of clobbering user edits. */
   private lastPopulatedUuid: string | null | undefined = undefined;
 
+  /** Identifies the latest calculation; bumped on close/obstacle change so a pending one cannot publish stale results. */
+  private calculationRun = 0;
+
+  private invalidatePendingCalculation(): void {
+    this.calculationRun++;
+    this.isCalculating.set(false);
+  }
+
   /** Populate the form from the saved conformity data (falling back to defaults) when the obstacle
    * changes, and top up still-empty fields as async config/options resolve. */
   private readonly populateForm = effect(() => {
@@ -444,6 +452,7 @@ export class ConformityComponent implements OnDestroy {
       const isNewObstacle = uuid !== this.lastPopulatedUuid;
       if (isNewObstacle) {
         this.lastPopulatedUuid = uuid;
+        this.invalidatePendingCalculation();
         this._conformityResults.set(null);
         this.calculatedInputs.set(null);
         this._conformityPlotData.set(null);
@@ -488,6 +497,7 @@ export class ConformityComponent implements OnDestroy {
   private readonly clearResultsOnClose = effect(() => {
     if (!this.isOpen())
       untracked(() => {
+        this.invalidatePendingCalculation();
         this._conformityResults.set(null);
         this.calculatedInputs.set(null);
         this._conformityPlotData.set(null);
@@ -533,7 +543,13 @@ export class ConformityComponent implements OnDestroy {
     );
   });
 
-  readonly canExport = computed(() => this.conformityResults() !== null && this.calculatedInputs() !== null);
+  /** Rules currently displayed (live selection) that have calculated results, so the export matches the table and plot. */
+  private readonly exportRules = computed(() => {
+    const results = this._conformityResults();
+    return results ? this.selectedConformityColumns().filter((option) => results[option.value]) : [];
+  });
+
+  readonly canExport = computed(() => this.calculatedInputs() !== null && this.exportRules().length > 0);
 
   /** Auto-display results when reopening a saved conformity whose inputs are all present. */
   private readonly autoCalculate = effect(() => {
@@ -583,6 +599,7 @@ export class ConformityComponent implements OnDestroy {
         ? computeOverhangZoneWidth(this.spanService.section()?.supports ?? [], obstacle.supportUuid)
         : undefined;
 
+    const run = ++this.calculationRun;
     this.isCalculating.set(true);
     this.calculationError.set(null);
 
@@ -641,6 +658,7 @@ export class ConformityComponent implements OnDestroy {
       if (conformityTaskError || !conformityTaskOutput) {
         throw new Error(conformityTaskError ?? 'Conformity task failed');
       }
+      if (run !== this.calculationRun) return;
 
       const plotData: ConformityPlotResponse = {
         obstacle: conformityTaskOutput.obstacle,
@@ -652,13 +670,14 @@ export class ConformityComponent implements OnDestroy {
       this._ruleColorsByType.set(Object.fromEntries(rules.map((r) => [r.rule_type, r.color])));
       this._conformityPlotData.set(plotData);
     } catch (error) {
+      if (run !== this.calculationRun) return;
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(errorMessage);
       this.notificationService.error(
         this.translocoService.translate('studio.conformity.calculation-failed-error', { errorMessage })
       );
     } finally {
-      this.isCalculating.set(false);
+      if (run === this.calculationRun) this.isCalculating.set(false);
     }
   }
 
@@ -667,15 +686,12 @@ export class ConformityComponent implements OnDestroy {
     const results = this._conformityResults();
     const inputs = this.calculatedInputs();
     const point = inputs ? (this.positions()[inputs.pointIndex] ?? null) : null;
-    if (!obstacle || !results || !inputs || !point) {
+    if (!obstacle || !results || !inputs || !point || !this.exportRules().length) {
       this.notificationService.error(this.translocoService.translate('studio.conformity.export-invalid-data-error'));
       return;
     }
     const section = this.spanService.section();
-    const options = this.conformityOptions();
-    const rules = (inputs.form.conformity ?? [])
-      .filter((value) => results[value])
-      .map((value) => ({ value, label: options.find((o) => o.value === value)?.label ?? value }));
+    const rules = this.exportRules().map(({ value, label }) => ({ value, label }));
     const json = buildConformityExportJson({
       section,
       study: this.plotService.study(),

@@ -111,7 +111,9 @@ export const buildConformityExport = (params: ConformityExportParams): Conformit
       support: params.referenceSupportLabel,
       supportDistance: valueUnit(point.x, UNITS.meter),
       height: valueUnit(point.z, UNITS.meter),
-      lateralDistance: valueUnit(point.y, UNITS.meter)
+      lateralDistance: valueUnit(point.y, UNITS.meter),
+      altitudeType: obstacle.altitudeType,
+      lateralDistanceType: obstacle.lateralDistanceType
     },
     conformityInput: {
       voltage: parseVoltage(section?.voltage_idr),

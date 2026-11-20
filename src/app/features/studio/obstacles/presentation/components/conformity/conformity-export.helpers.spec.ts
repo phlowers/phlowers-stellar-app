@@ -27,7 +27,12 @@ const study = {
   updated_at_offline: '2026-01-27T10:00:00Z'
 } as unknown as Study;
 
-const obstacle = { name: 'Obstacle 1', type: 'road' } as unknown as Obstacle;
+const obstacle = {
+  name: 'Obstacle 1',
+  type: 'road',
+  altitudeType: 'relative',
+  lateralDistanceType: 'LINE_AXIS'
+} as unknown as Obstacle;
 
 const result: ConformityRuleResult = {
   overhangCableAltitude: 12.3456,
@@ -100,7 +105,9 @@ describe('buildConformityExport', () => {
       support: 'S1',
       supportDistance: { value: 1.5, unit: 'm' },
       height: { value: 3.5, unit: 'm' },
-      lateralDistance: { value: 2.5, unit: 'm' }
+      lateralDistance: { value: 2.5, unit: 'm' },
+      altitudeType: 'relative',
+      lateralDistanceType: 'LINE_AXIS'
     });
     expect(exported.conformityInput).toEqual({
       voltage: { value: 90, unit: 'KV' },

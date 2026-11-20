@@ -623,6 +623,10 @@ Cancelling the picker does nothing. Without results, snapshot, point or section,
 - Content: `{ distancesConformityCheck: [ { metaData, obstacleData, conformityInput, conformityChecks } ] }`.
   Values are raw (not rounded) `{ value, unit }` pairs; a missing value (for example the lateral side of
   an `overhang` obstacle) is `{ value: null, unit }`.
+- `obstacleData.altitudeType` (`absolute`, `relative`, `relative_cable`) and `lateralDistanceType`
+  (`SPAN_AXIS`, `LINE_AXIS`) give the reference of `height` and `lateralDistance`, which are exported
+  as entered and not normalised.
+- Only the rules currently displayed (selected and calculated) are exported.
 - `voltage` comes from `voltage_idr`: `"<number> KV"` gives `{ value: <number>, unit: 'KV' }`, any other
   label (for example *HORS TENSION*) is kept raw with `unit: null`.
 - `cableSwingingAngle` is not computed: always `{ value: null, unit: '°' }`.

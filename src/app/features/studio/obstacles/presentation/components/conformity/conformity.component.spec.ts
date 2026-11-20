@@ -747,6 +747,28 @@ describe('ConformityComponent', () => {
       expect(component.canExport()).toBe(true);
     });
 
+    it('should export only the rules still selected and displayed', async () => {
+      await createComponent();
+      component.form.controls.conformity.setValue(['rule_a', 'rule_b']);
+      await component.calculate();
+      component.form.controls.conformity.setValue(['rule_a']);
+      const { write } = mockPicker();
+
+      await component.exportConformity();
+
+      const exported = JSON.parse(write.mock.calls[0][0]).distancesConformityCheck[0];
+      expect(exported.conformityChecks).toHaveLength(1);
+      expect(exported.conformityInput.rules).toHaveLength(1);
+    });
+
+    it('should not be exportable once every calculated rule is deselected', async () => {
+      await createComponent();
+      await component.calculate();
+      component.form.controls.conformity.setValue([]);
+
+      expect(component.canExport()).toBe(false);
+    });
+
     it('should notify an error and not open the picker when there are no results', async () => {
       await createComponent();
       const { picker } = mockPicker();
@@ -760,7 +782,6 @@ describe('ConformityComponent', () => {
     it('should write the JSON through the file picker using the calculated inputs, not the edited form', async () => {
       await createComponent();
       await component.calculate();
-      component.form.controls.conformity.setValue(['rule_b']);
       component.form.controls.windZone.setValue('Z2');
       const { picker, write, close } = mockPicker();
 
@@ -804,8 +825,8 @@ describe('ConformityComponent', () => {
       globalThis.showSaveFilePicker = pickerFails
         ? (vi.fn().mockRejectedValue(new Error('boom')) as unknown as PickerFn)
         : undefined;
-      URL.createObjectURL = vi.fn().mockReturnValue('blob:x');
-      URL.revokeObjectURL = vi.fn();
+      vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:x');
+      vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
       const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
 
       await component.exportConformity();
@@ -1193,6 +1214,31 @@ describe('ConformityComponent', () => {
       fixture.componentRef.setInput('isOpen', false);
       fixture.detectChanges();
       expect(component.conformityResults()).toBeNull();
+    });
+
+    it('should drop a calculation that resolves after the modal closed', async () => {
+      await createComponent();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      const original = mockWorkerPython.runTaskWithTimeout.getMockImplementation();
+      let release: () => void = () => undefined;
+      mockWorkerPython.runTaskWithTimeout.mockImplementationOnce(
+        (...args: unknown[]) =>
+          new Promise((resolve) => {
+            release = () => resolve(original?.(...args));
+          })
+      );
+
+      const pending = component.calculate();
+      await vi.waitFor(() => expect(component.isCalculating()).toBe(true));
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+      expect(component.isCalculating()).toBe(false);
+      release();
+      await pending;
+
+      expect(component.conformityResults()).toBeNull();
+      expect(component.canExport()).toBe(false);
     });
   });
 });

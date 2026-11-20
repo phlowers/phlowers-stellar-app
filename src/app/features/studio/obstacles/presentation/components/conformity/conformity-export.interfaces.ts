@@ -48,6 +48,10 @@ export interface ConformityObstacleDataExport {
   supportDistance: ConformityValueUnit;
   height: ConformityValueUnit;
   lateralDistance: ConformityValueUnit;
+  /** Reference of `height` (absolute altitude, or relative to the support / cable). */
+  altitudeType: Obstacle['altitudeType'];
+  /** Reference of `lateralDistance` (span axis or line axis). */
+  lateralDistanceType: Obstacle['lateralDistanceType'];
 }
 
 export interface ConformityInputExport {
