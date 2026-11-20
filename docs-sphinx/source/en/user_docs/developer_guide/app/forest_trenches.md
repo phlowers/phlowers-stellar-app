@@ -235,8 +235,12 @@ It returns `{ distances, altitudes, length }`.
    pressure, and the inverse lateral case uses the opposite pressure. For each lateral rule the run keeps `LATERAL` and
    `LATERAL_INVERSE`. For each overhang rule it keeps `OVERHANG`. A missing scenario raises `ConformityInputError`.
 6. `MultiStateRunner` solves each unique (wind pressure, temperature) state once, then measures every span's points. The
-   first and last points use the cable attachment points. The intermediate points use `DistanceEngine.plane_distance`. If
-   no intersection is found, the nearest cable attachment point is used.
+   first and last points use the cable attachment points. The intermediate points use `DistanceEngine.plane_distance`. The
+   ground of a span is an array linked to that span, so a point can lie where its vertical plane does not cut the cable
+   (for example near a support). This is accepted and does not raise an error: `SpanPointsProjector._fallback_extremity`
+   then uses the first or last cable point, whichever is closest to the ground point once both are projected in the
+   point's plane, by lateral distance and altitude. The position along the span is not considered, so the chosen end is
+   not necessarily the nearest support. Any other `plane_distance` error is raised.
 7. Projected values are the signed lateral distance in the plane from the span axis, and the altitude. A state hook collects
    the sag of each requested span. `medianF1` is the sag in the state of the first overhang scenario, since all overhang
    scenarios share the repartition temperature and have no wind. It is `null` when there is no overhang rule.

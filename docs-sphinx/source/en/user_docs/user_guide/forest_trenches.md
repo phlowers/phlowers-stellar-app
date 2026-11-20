@@ -184,6 +184,10 @@ does not run by itself: click **Calculate** to show the results.
 - A span without saved ground is calculated with a straight ground, between the ground altitudes at the
   feet of its two supports.
 - Points beyond the first or the last point of the ground keep the altitude of that end point.
+- The ground belongs to each span. If, for a ground point, the vertical plane perpendicular to the span does not cut the
+  cable (for example very close to a support), the calculation continues: it uses the cable end (left or right
+  attachment) closest to the ground point in altitude and lateral distance, without considering the position along the
+  span.
 - When the saved values are no longer valid, for example a range of supports that no longer exists, or a
   number of points that is no longer in the catalog, the form goes back to the default values. Rules that
   are no longer offered are dropped.

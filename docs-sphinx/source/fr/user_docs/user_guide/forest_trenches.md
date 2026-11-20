@@ -196,6 +196,10 @@ mais le calcul ne se relance pas tout seul : cliquez sur **Calculer** pour affic
   pied de ses deux supports.
 - Les points situés au-delà du premier ou du dernier point du sol gardent l'altitude de ce point
   d'extrémité.
+- Le sol est propre à chaque portée. Si, pour un point du sol, le plan vertical perpendiculaire à la portée ne coupe pas le
+  câble (par exemple tout près d'un support), le calcul continue : il utilise l'extrémité du câble (attache gauche ou
+  droite) la plus proche du point du sol en altitude et en distance latérale, sans tenir compte de la position le long de la
+  portée.
 - Lorsque les valeurs enregistrées ne sont plus valides, par exemple une plage de supports qui n'existe
   plus, ou un nombre de points absent du catalogue, le formulaire revient aux valeurs par défaut. Les
   règles qui ne sont plus proposées sont retirées.

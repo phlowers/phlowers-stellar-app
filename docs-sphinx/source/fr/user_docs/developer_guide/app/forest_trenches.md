@@ -232,7 +232,12 @@ Elle renvoie `{ distances, altitudes, length }`.
    manquant lève `ConformityInputError`.
 6. `MultiStateRunner` résout une seule fois chaque état unique (pression de vent, température), puis mesure les points de
    chaque portée. Le premier et le dernier point utilisent les points d'attache du câble. Les points intermédiaires utilisent
-   `DistanceEngine.plane_distance`. Si aucune intersection n'est trouvée, le point d'attache du câble le plus proche est utilisé.
+   `DistanceEngine.plane_distance`. Le sol d'une portée est un tableau lié à cette portée : un point peut donc se trouver là
+   où son plan vertical ne coupe pas le câble (par exemple près d'un support). Ce cas est accepté et ne lève pas d'erreur :
+   `SpanPointsProjector._fallback_extremity` utilise alors le premier ou le dernier point du câble, celui qui est le plus
+   proche du point du sol une fois les deux projetés dans le plan du point, selon la distance latérale et l'altitude. La
+   position le long de la portée n'est pas prise en compte : l'extrémité retenue n'est donc pas forcément le support le plus
+   proche. Toute autre erreur de `plane_distance` est levée.
 7. Les valeurs projetées sont la distance latérale signée, dans le plan, par rapport à l'axe de la portée, et l'altitude. Un
    hook d'état collecte la flèche de chaque portée demandée. `medianF1` est la flèche dans l'état du premier scénario de
    surplomb, car tous les scénarios de surplomb partagent la température de répartition et n'ont pas de vent. Elle vaut `null`
