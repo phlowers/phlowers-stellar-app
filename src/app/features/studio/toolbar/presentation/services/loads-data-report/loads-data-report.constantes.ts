@@ -165,7 +165,7 @@ export const PDF_LOADS_LABEL_KEYS: LoadsReportLabels = {
 
   author: 'common.author-label',
   study: 'common.study-label',
-  studyDescription: 'common.description-label',
+  studyDescription: 'common.study-description-label',
   chargeName: 'common.load-name-label',
   chargeDescription: 'common.load-description-label',
   canton: 'common.section-label',

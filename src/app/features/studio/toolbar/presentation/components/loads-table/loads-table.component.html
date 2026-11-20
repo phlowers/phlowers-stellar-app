@@ -11,7 +11,7 @@
       <dt class="load-name-label">{{ 'common.load-case-name-label' | transloco }}</dt>
       <dd class="load-name-value">{{ name() }}</dd>
 
-      <dt class="load-desc-label">{{ 'common.description-label' | transloco }}</dt>
+      <dt class="load-desc-label">{{ 'common.load-description-label' | transloco }}</dt>
       <dd class="load-desc-value">{{ description() || '-' }}</dd>
     </dl>
   } @else {
@@ -35,6 +35,7 @@
       pTextarea
       class="load-desc-value"
       id="description"
+      [placeholder]="'shared.new-load-modal.description-placeholder' | transloco"
       maxlength="240"
       [ngModel]="description()"
       (ngModelChange)="updateDescription($event)"

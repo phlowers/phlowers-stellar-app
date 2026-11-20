@@ -103,7 +103,7 @@ export const PDF_LABEL_KEYS: SectionReportLabels = {
   cartoucheTitle: 'common.study-and-section-label',
   author: 'common.author-label',
   study: 'common.study-label',
-  studyDescription: 'common.description-label',
+  studyDescription: 'common.study-description-label',
   section: 'common.section-label',
   sectionComment: 'common.comment-label',
   initialCondition: 'common.initial-condition-label',
