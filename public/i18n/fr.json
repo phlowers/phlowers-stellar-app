@@ -407,9 +407,10 @@
       "obstacle-not-found-error": "L'obstacle n'est pas enregistré dans le moteur de calcul.",
       "estimate-on-split-support-error": "L'estimation est impossible sur une portée divisée par un support virtuel.",
       "estimation-input-error": "Les données de l'estimation sont manquantes ou invalides.",
-      "estimation-not-converged-error": "La cible ne peut pas être atteinte dans les bornes de l'estimation.",
-      "estimation-target-above-bounds-error": "La cible ne peut pas être atteinte : elle nécessite plus de {{ upperBound }}.",
-      "estimation-target-below-bounds-error": "La cible ne peut pas être atteinte : elle nécessite moins de {{ lowerBound }}.",
+      "estimation-not-converged-error": "La distance à l'obstacle ne peut pas être calculée dans les bornes de l'estimation.",
+      "estimation-target-above-bounds-warning": "La cible ne peut pas être atteinte : elle nécessite plus de {{ upperBound }}. La valeur la plus proche trouvée est affichée.",
+      "estimation-target-below-bounds-warning": "La cible ne peut pas être atteinte : elle nécessite moins de {{ lowerBound }}. La valeur la plus proche trouvée est affichée.",
+      "estimation-not-converged-warning": "La cible ne peut pas être atteinte dans les bornes de l'estimation. La valeur la plus proche trouvée est affichée.",
       "estimation-warning": "La charge existante sur la portée estimée a été ignorée.",
       "conformity-input-error": "Les données du calcul de conformité sont manquantes ou invalides."
     },

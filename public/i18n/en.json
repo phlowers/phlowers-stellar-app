@@ -407,9 +407,10 @@
       "obstacle-not-found-error": "The obstacle is not registered in the calculation engine.",
       "estimate-on-split-support-error": "Estimation is not possible on a span split by a virtual support.",
       "estimation-input-error": "The estimation inputs are missing or invalid.",
-      "estimation-not-converged-error": "The target cannot be reached within the estimation bounds.",
-      "estimation-target-above-bounds-error": "The target cannot be reached: it needs more than {{ upperBound }}.",
-      "estimation-target-below-bounds-error": "The target cannot be reached: it needs less than {{ lowerBound }}.",
+      "estimation-not-converged-error": "The distance to the obstacle cannot be computed within the estimation bounds.",
+      "estimation-target-above-bounds-warning": "The target cannot be reached: it needs more than {{ upperBound }}. The closest value found is shown.",
+      "estimation-target-below-bounds-warning": "The target cannot be reached: it needs less than {{ lowerBound }}. The closest value found is shown.",
+      "estimation-not-converged-warning": "The target cannot be reached within the estimation bounds. The closest value found is shown.",
       "estimation-warning": "The existing load on the estimated span was ignored.",
       "conformity-input-error": "The conformity inputs are missing or invalid."
     },
