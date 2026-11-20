@@ -41,6 +41,9 @@ Paths are relative to `src/app/`, except `stellar-engine/`, relative to the repo
 | `features/studio/obstacles/presentation/components/conformity/conformity.model.ts` | `ConformityRuleResult`, `ResultRow`, `ConformityOption` |
 | `features/studio/obstacles/presentation/components/conformity/conformity-plot.model.ts` | `ConformityPlotResponse`: the figure data contract |
 | `features/studio/obstacles/presentation/components/conformity/helpers/createConformityPlot.ts` | Plotly rendering of the figure |
+| `features/studio/obstacles/presentation/components/conformity/conformity-export.interfaces.ts` | Types of the JSON export contract |
+| `features/studio/obstacles/presentation/components/conformity/conformity-export.constantes.ts` | Export file name prefix, units, file picker types |
+| `features/studio/obstacles/presentation/components/conformity/conformity-export.helpers.ts` | Pure builders of the export JSON and file name |
 | `features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component.ts` | Eligibility checks and modal hosting |
 | `shared/domain/models/obstacle.model.ts` | `ConformityFormData`, the inputs saved with the obstacle |
 
@@ -603,6 +606,27 @@ the plot follows its container with a `ResizeObserver`.
 
 The loading state is exposed with `isCalculating`, and the results are announced to assistive
 technologies through a polite `<output>` live region.
+
+### Export
+
+The **Export** button of the dialog footer (`conformity-export-btn`) is enabled by `canExport`, true once
+results are displayed. `calculate()` stores the form and point index it computed from in a private signal;
+`exportConformity()` reads that snapshot, not the live form, so the file always matches the displayed results.
+The snapshot is cleared with the results (new obstacle, dialog closed).
+
+The file is built by the pure helpers of `conformity-export.helpers.ts` and saved with
+`showSaveFilePicker` (the "Browse…" dialog), falling back to a Blob download when the API is missing or fails.
+Cancelling the picker does nothing. Without results, snapshot, point or section, an error is notified
+(`studio.conformity.export-invalid-data-error`). The dialog stays open.
+
+- File name: `Export Distances de conformité_<obstacle>_<section>_<YYYY-MM-DD>.json`.
+- Content: `{ distancesConformityCheck: [ { metaData, obstacleData, conformityInput, conformityChecks } ] }`.
+  Values are raw (not rounded) `{ value, unit }` pairs; a missing value (for example the lateral side of
+  an `overhang` obstacle) is `{ value: null, unit }`.
+- `voltage` comes from `voltage_idr`: `"<number> KV"` gives `{ value: <number>, unit: 'KV' }`, any other
+  label (for example *HORS TENSION*) is kept raw with `unit: null`.
+- `cableSwingingAngle` is not computed: always `{ value: null, unit: '°' }`.
+- `minimumCase` is only present for `cable_track` obstacles.
 
 ### Tests
 

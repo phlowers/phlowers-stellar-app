@@ -221,6 +221,16 @@ qui donnent la *trajectoire* du câble. L’obstacle doit rester **hors** de tou
 
 ---
 
+## Exporter
+
+Une fois les résultats affichés, **Export** génère un fichier JSON contenant l’obstacle, les entrées du formulaire
+et les distances de chaque règle sélectionnée, tels qu’affichés dans les résultats. La fenêtre « Parcourir… »
+s’ouvre pour choisir l’emplacement d’enregistrement (les navigateurs sans cette fenêtre téléchargent directement le fichier).
+Le fichier s’appelle `Export Distances de conformité_<obstacle>_<canton>_<date>.json`. La modale reste ouverte.
+Si les données sont incomplètes, un message d’erreur s’affiche et aucun fichier n’est créé.
+
+---
+
 ## Enregistrer
 
 **Enregistrer** conserve les choix du formulaire (zone de vent, cases à cocher, températures, règles sélectionnées et point).
@@ -228,7 +238,7 @@ Les résultats eux-mêmes ne sont pas enregistrés : lorsque vous rouvrez la fen
 le calcul est relancé automatiquement.
 
 :::{note}
-**Rapport** et **Export** sont affichés dans la fenêtre mais ne sont pas encore disponibles.
+**Rapport** est affiché dans la fenêtre mais n’est pas encore disponible.
 :::
 
 ---

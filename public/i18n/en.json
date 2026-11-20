@@ -1051,6 +1051,7 @@
       "minimum-distance-case-label": "Minimum distance case",
       "no-conformity-config-error": "Cannot calculate conformity: obstacle type has no conformity configuration",
       "calculation-failed-error": "Calculation failed: {{ errorMessage }}",
+      "export-invalid-data-error": "Export failed: the conformity data is incomplete or invalid",
       "cable-altitude-label": "Cable altitude",
       "cable-line-axis-distance-label": "Cable line axis distance",
       "distance-to-comply-label": "Distance to comply",
