@@ -69,19 +69,37 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
 
     working_study = deepcopy(study)
     group_points = working_study.position_engine.get_group_points()
-    ground_supports = group_points.supports.coords[:, 0, :].copy()
+    # Real supports only: virtual supports shift the raw support indices
+    ground_supports = (
+        group_points.all_points_virtual_separated()["supports"]
+        .coords[:, 0, :]
+        .copy()
+    )
+    engine_span_indices: dict[int, int] = {}
     for span in request.spans:
         if not 0 <= span.span_index < len(ground_supports) - 1:
             raise ConformityInputError(
                 f"spanIndex {span.span_index} is out of range"
             )
+        engine_span_index = (
+            working_study.manipulation.span_index_after_virtual_support(
+                span.span_index
+            )
+        )
+        if engine_span_index is None:
+            raise ConformityInputError(
+                f"Span {span.span_index} is split by a virtual support: "
+                "forest trenches are not available on this span"
+            )
+        engine_span_indices[span.span_index] = engine_span_index
 
+    # Obstacles, curves and sags are all addressed by the engine span index
     projectors: dict[int, SpanPointsProjector] = {}
     for span in request.spans:
         obstacle_uuid = f"forest-trench-{span.span_index}"
         obstacle = {
             "uuid": obstacle_uuid,
-            "supportIndex": span.span_index,
+            "supportIndex": engine_span_indices[span.span_index],
             "name": obstacle_uuid,
             "type": "floor",
             "altitudeType": "absolute",
@@ -95,7 +113,7 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
         add_single_obstacle(
             {"obstacles": [obstacle]},
             working_study,
-            support_index=span.span_index,
+            support_index=engine_span_indices[span.span_index],
         )
         points = np.array(
             [
@@ -103,7 +121,7 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
                 for point_index in range(len(span.distances))
             ]
         )
-        projectors[span.span_index] = SpanPointsProjector(
+        projectors[engine_span_indices[span.span_index]] = SpanPointsProjector(
             ground_supports, span.span_index, points
         )
 
@@ -145,7 +163,9 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
     ) -> dict[int, float]:
         sag_by_span = solved_study.balance_engine.get_data_spans()["sag"]
         return {
-            span.span_index: float(sag_by_span[span.span_index])
+            span.span_index: float(
+                sag_by_span[engine_span_indices[span.span_index]]
+            )
             for span in request.spans
         }
 
@@ -162,9 +182,11 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
         ]
     )
 
+    wind_minus = request.parameters.wind_minus
     output_spans = []
     for span in request.spans:
         span_index = span.span_index
+        engine_span_index = engine_span_indices[span_index]
         length = float(
             np.linalg.norm(
                 ground_supports[span_index + 1, :2]
@@ -208,22 +230,28 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
                         f"Missing lateral distance for rule {rule_type}"
                     )
 
+                # Wind - swaps the two states: the limit follows the cable
+                # position, not the scenario name
+                lateral_direction = 1.0 if wind_minus else -1.0
                 for scenario, target, plot_data, direction in (
                     (
                         lateral_scenario,
                         point_output["lateral"],
                         lateral_plot[rule_type],
-                        -1.0,
+                        lateral_direction,
                     ),
                     (
                         inverse_scenario,
                         point_output["lateralInverse"],
                         lateral_inverse_plot[rule_type],
-                        1.0,
+                        -lateral_direction,
                     ),
                 ):
                     cable_point = _point_at_state(
-                        results, scenario.target_state, span_index, point_index
+                        results,
+                        scenario.target_state,
+                        engine_span_index,
+                        point_index,
                     )
                     axis_distance = cable_point["lateral"]
                     limit_axis_distance = (
@@ -249,7 +277,10 @@ def run(python_inputs: dict, study: SectionStudy) -> dict:
                         f"Missing overhang distance for rule {rule_type}"
                     )
                 cable_point = _point_at_state(
-                    results, scenario.target_state, span_index, point_index
+                    results,
+                    scenario.target_state,
+                    engine_span_index,
+                    point_index,
                 )
                 height_above_ground = (
                     cable_point["altitude"] - ground_elevation

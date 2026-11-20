@@ -4,6 +4,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+from copy import deepcopy
+
 import numpy as np
 import pytest
 
@@ -114,3 +116,35 @@ def test_slice_ground_rejects_out_of_range_span(solved_study):
             },
             solved_study,
         )
+
+
+def test_slice_ground_uses_real_supports_after_virtual_support(solved_study):
+    study = deepcopy(solved_study)
+    study.set_virtual_support(
+        {
+            0: {
+                "x": 100.0,
+                "y": 0.0,
+                "z": 60.0,
+                "insulator_length": 3.0,
+                "insulator_mass": 500.0,
+                "hanging_cable_point_from_left_support": 100.0,
+            }
+        }
+    )
+
+    result = slice_ground(
+        {
+            "spanIndex": 1,
+            "nPoints": 3,
+            "referenceSupport": "LEFT",
+            "floorPoints": [],
+        },
+        study,
+    )
+
+    assert result["length"] == pytest.approx(
+        _span_length(solved_study, span_index=1)
+    )
+    assert result["altitudes"][0] == pytest.approx(70.0)
+    assert result["altitudes"][-1] == pytest.approx(20.0)
