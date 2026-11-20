@@ -33,8 +33,9 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
   [PythonErrorCode.EstimateOnSplitSupportError]: 'shared.python-errors.estimate-on-split-support-error',
   [PythonErrorCode.EstimationInputError]: 'shared.python-errors.estimation-input-error',
   [PythonErrorCode.EstimationNotConvergedError]: 'shared.python-errors.estimation-not-converged-error',
-  [PythonErrorCode.EstimationTargetAboveBoundsError]: 'shared.python-errors.estimation-target-above-bounds-error',
-  [PythonErrorCode.EstimationTargetBelowBoundsError]: 'shared.python-errors.estimation-target-below-bounds-error',
+  [PythonErrorCode.EstimationNotConvergedWarning]: 'shared.python-errors.estimation-not-converged-warning',
+  [PythonErrorCode.EstimationTargetAboveBoundsWarning]: 'shared.python-errors.estimation-target-above-bounds-warning',
+  [PythonErrorCode.EstimationTargetBelowBoundsWarning]: 'shared.python-errors.estimation-target-below-bounds-warning',
   [PythonErrorCode.EstimationWarning]: 'shared.python-errors.estimation-warning',
   [PythonErrorCode.ConformityInputError]: 'shared.python-errors.conformity-input-error'
 };
@@ -67,13 +68,18 @@ export const formatPythonError = (
  *
  * @param diagnostics - The diagnostics returned by the worker task
  * @param translocoService - The translation service (injected by caller)
+ * @param params - Interpolation parameters of the messages (e.g. the search bounds of an estimation)
  * @returns The localized warning messages, without duplicates nor unmapped codes
  */
-export const formatPythonWarnings = (diagnostics: PythonDiagnostic[], translocoService: TranslocoService): string[] => {
+export const formatPythonWarnings = (
+  diagnostics: PythonDiagnostic[],
+  translocoService: TranslocoService,
+  params?: Record<string, unknown>
+): string[] => {
   const warningCodes = new Set(
     diagnostics.filter((diagnostic) => diagnostic.origin === 'warning').map((diagnostic) => diagnostic.code)
   );
   return [...warningCodes]
-    .map((code) => formatPythonError(code, translocoService))
+    .map((code) => formatPythonError(code, translocoService, params))
     .filter((message): message is string => message !== null);
 };

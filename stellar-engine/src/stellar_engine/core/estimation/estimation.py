@@ -30,12 +30,8 @@ Raises (each class name is a ``PythonErrorCode`` on the frontend side, except
     ObstacleNotFoundError: ``obstacleUuid`` is not registered in the study.
     ConformityInputError: ``pointIndex`` is out of the obstacle points (not
         reachable from the UI).
-    EstimationNotConvergedError: The target is not reachable within bounds.
-    EstimationTargetAboveBoundsError: ``EstimationNotConvergedError`` subclass
-        raised by ``estimate_temperature`` (when ``bounds`` is given) if the
-        search stopped at the upper bound: the target needs a larger value.
-    EstimationTargetBelowBoundsError: Same, at the lower bound: the target
-        needs a smaller value.
+    EstimationNotConvergedError: The distance to the obstacle cannot be
+        computed at the search bounds (no result).
     InvalidManipulationIndex: ``spanIndex`` or ``supportIndex`` is out of
         range (mechaphlowers).
     EstimateOnSplitSupportError: ``spanIndex`` is split by a virtual
@@ -46,12 +42,22 @@ Raises (each class name is a ``PythonErrorCode`` on the frontend side, except
         (mechaphlowers).
 
 Warns (forwarded to the frontend through the captured Python warnings):
+    EstimationNotConvergedWarning: The target is not reachable within bounds:
+        the result is still returned, with ``converged`` false, and holds the
+        closest value found.
+    EstimationTargetAboveBoundsWarning: ``EstimationNotConvergedWarning``
+        subclass warned by ``estimate_temperature`` (when ``bounds`` is
+        given) if the search stopped at the upper bound: the target needs a
+        larger value.
+    EstimationTargetBelowBoundsWarning: Same, at the lower bound: the target
+        needs a smaller value.
     BalanceEngineWarning: The study had not been adjusted yet; mechaphlowers
         then runs the adjustment on its internal copy (mechaphlowers).
 """
 
 import logging
 import math
+import warnings
 from collections.abc import Callable
 from typing import Literal
 
@@ -76,8 +82,9 @@ from stellar_engine.core.estimation.validation import (
 from stellar_engine.entities.errors import (
     EstimationInputError,
     EstimationNotConvergedError,
-    EstimationTargetAboveBoundsError,
-    EstimationTargetBelowBoundsError,
+    EstimationNotConvergedWarning,
+    EstimationTargetAboveBoundsWarning,
+    EstimationTargetBelowBoundsWarning,
     _Errors,
 )
 
@@ -132,23 +139,43 @@ def _engine_span_index(study: SectionStudy, span_index: int) -> int:
     return engine_span_index
 
 
-def _raise_if_stopped_at_bound(
-    variable: str, value: float, bounds: tuple[float, float]
+def _warn_not_converged(
+    variable: str,
+    value: float,
+    bounds: tuple[float, float] | None,
+    report_bound_side: bool,
 ) -> None:
-    """Raise the side-specific error when an unreached search ended on a bound.
+    """Warn that the target was not reached, on which side if known.
 
     mechaphlowers returns the bound closest to the target when the objective
-    does not change sign over the bounds.
+    does not change sign over the bounds: with ``report_bound_side``, the
+    warning then tells on which side of the bounds the target lies.
     """
-    lower, upper = bounds
-    if math.isclose(value, upper):
-        raise EstimationTargetAboveBoundsError(
-            _Errors.estimation_target_beyond_bound(variable, "upper", upper)
-        )
-    if math.isclose(value, lower):
-        raise EstimationTargetBelowBoundsError(
-            _Errors.estimation_target_beyond_bound(variable, "lower", lower)
-        )
+    if report_bound_side and bounds is not None:
+        lower, upper = bounds
+        if math.isclose(value, upper):
+            warnings.warn(
+                _Errors.estimation_target_beyond_bound(
+                    variable, "upper", upper
+                ),
+                EstimationTargetAboveBoundsWarning,
+                stacklevel=2,
+            )
+            return
+        if math.isclose(value, lower):
+            warnings.warn(
+                _Errors.estimation_target_beyond_bound(
+                    variable, "lower", lower
+                ),
+                EstimationTargetBelowBoundsWarning,
+                stacklevel=2,
+            )
+            return
+    warnings.warn(
+        _Errors.estimation_not_converged(variable, value, bounds or "default"),
+        EstimationNotConvergedWarning,
+        stacklevel=2,
+    )
 
 
 def _solve(
@@ -159,15 +186,16 @@ def _solve(
 ) -> dict:
     """Run the estimation and convert mechaphlowers failures to Stellar errors.
 
-    ``report_bound_side`` tells, when the search stops on a bound, on which
-    side of the bounds the target lies. Only valid for a distance that varies
-    monotonically with the estimated variable (the temperature).
+    A result that did not converge is returned with ``converged`` false and a
+    warning: ``EstimationNotConvergedWarning``, or one of its subclasses
+    telling on which side of the bounds the target lies, when
+    ``report_bound_side`` is set and the search stopped at a bound. Only valid
+    for a distance that varies monotonically with the estimated variable (the
+    temperature).
 
     Raises:
-        EstimationNotConvergedError: If the target is not reached, or if the
-            objective is NaN at the bounds (plain ``ValueError``). Its
-            subclasses tell on which side of the bounds the target lies, when
-            ``report_bound_side`` is set and the search stopped at a bound.
+        EstimationNotConvergedError: If the objective is NaN at the bounds
+            (plain ``ValueError``).
         SolverError: Forwarded unchanged, like the typed ``ValueError``
             subclasses of mechaphlowers, to keep their own frontend code.
     """
@@ -184,13 +212,7 @@ def _solve(
         ) from error
     logger.debug("%s estimation result: %s", variable, result)
     if not result.converged:
-        if report_bound_side and bounds is not None:
-            _raise_if_stopped_at_bound(variable, result.value, bounds)
-        raise EstimationNotConvergedError(
-            _Errors.estimation_not_converged(
-                variable, result.value, bounds or "default"
-            )
-        )
+        _warn_not_converged(variable, result.value, bounds, report_bound_side)
     return {
         "value": float(result.value),
         "residual": float(result.residual),
@@ -209,10 +231,11 @@ def estimate_temperature(inputs: dict, study: SectionStudy) -> dict:
     Raises:
         SolverError: If the balance solver fails for a trial temperature
             (``ConvergenceError``, ``SuspectedChainReversal``).
-        EstimationNotConvergedError: If the target is not reachable within
-            the bounds, or the distance is NaN at the bounds.
+        EstimationNotConvergedError: If the distance is NaN at the bounds.
 
     Warns:
+        EstimationNotConvergedWarning: If the target is not reachable within
+            the bounds (or one of its bound-side subclasses).
         BalanceEngineWarning: If the study has not been adjusted yet.
     """
     span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
@@ -283,10 +306,13 @@ def estimate_minimum_distance_wind(inputs: dict, study: SectionStudy) -> dict:
         ``iterations``: number of distance evaluations.
 
     Raises:
-        EstimationNotConvergedError: If the minimum lies on a bound (possibly
-            the solvable limit), or the distance is NaN at the bounds.
+        EstimationNotConvergedError: If the distance is NaN at the bounds.
         SolverError: If the balance solver fails even without wind, or the
             chains still reverse after the retries.
+
+    Warns:
+        EstimationNotConvergedWarning: If the minimum lies on a bound
+            (possibly the solvable limit): the bound is returned.
     """
     span_index = _engine_span_index(study, _index(inputs, "spanIndex"))
     obstacle_point = _obstacle_point(inputs, study)

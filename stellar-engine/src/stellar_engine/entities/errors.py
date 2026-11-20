@@ -145,12 +145,19 @@ class EstimationInputError(ValueError):
 
 
 class EstimationNotConvergedError(ValueError):
-    """Raised when an estimation cannot reach the target within its bounds."""
+    """Raised when an estimation has no result because the distance to the obstacle cannot be computed at its bounds."""
 
 
-class EstimationTargetAboveBoundsError(EstimationNotConvergedError):
-    """Raised when the target needs a value above the upper search bound."""
+class EstimationNotConvergedWarning(UserWarning):
+    """Warned when an estimation did not reach the target within its bounds.
+
+    The closest value found is still returned.
+    """
 
 
-class EstimationTargetBelowBoundsError(EstimationNotConvergedError):
-    """Raised when the target needs a value below the lower search bound."""
+class EstimationTargetAboveBoundsWarning(EstimationNotConvergedWarning):
+    """Warned when the target needs a value above the upper search bound."""
+
+
+class EstimationTargetBelowBoundsWarning(EstimationNotConvergedWarning):
+    """Warned when the target needs a value below the lower search bound."""

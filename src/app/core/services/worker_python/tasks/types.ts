@@ -193,12 +193,14 @@ export enum PythonErrorCode {
   EstimateOnSplitSupportError = 'EstimateOnSplitSupportError',
   // Raised when an estimation input is missing or invalid
   EstimationInputError = 'EstimationInputError',
-  // Raised when an estimation cannot reach its target within the search bounds
+  // Raised when the distance to the obstacle cannot be computed at the estimation search bounds
   EstimationNotConvergedError = 'EstimationNotConvergedError',
-  // Raised when the estimation target needs a value above the upper search bound
-  EstimationTargetAboveBoundsError = 'EstimationTargetAboveBoundsError',
-  // Raised when the estimation target needs a value below the lower search bound
-  EstimationTargetBelowBoundsError = 'EstimationTargetBelowBoundsError',
+  // Warning raised when an estimation cannot reach its target within the search bounds (closest value returned)
+  EstimationNotConvergedWarning = 'EstimationNotConvergedWarning',
+  // Warning raised when the estimation target needs a value above the upper search bound
+  EstimationTargetAboveBoundsWarning = 'EstimationTargetAboveBoundsWarning',
+  // Warning raised when the estimation target needs a value below the lower search bound
+  EstimationTargetBelowBoundsWarning = 'EstimationTargetBelowBoundsWarning',
   // Warning raised when an existing load on the estimation target span is ignored
   EstimationWarning = 'EstimationWarning',
   // Raised when a conformity input (ground slicing, forest trenches...) is missing or invalid

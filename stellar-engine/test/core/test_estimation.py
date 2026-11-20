@@ -30,6 +30,7 @@ from stellar_engine.entities.errors import (
     ConformityInputError,
     EstimationInputError,
     EstimationNotConvergedError,
+    EstimationNotConvergedWarning,
     ObstacleNotFoundError,
 )
 
@@ -469,23 +470,19 @@ def test_estimate_zero_target_distance_is_delegated_to_the_engine(
 
 
 @pytest.mark.parametrize(
-    "estimate, inputs, expected_error",
+    "estimate, inputs",
     [
-        (estimation.estimate_temperature, {}, EstimationNotConvergedError),
-        (
-            estimation.estimate_load,
-            {"loadPositionDistance": 100.0},
-            EstimationNotConvergedError,
-        ),
+        (estimation.estimate_temperature, {}),
+        (estimation.estimate_load, {"loadPositionDistance": 100.0}),
         # the wind pushes the cable away: the engine returns a non-converged bound
-        (estimation.estimate_wind, {}, EstimationNotConvergedError),
+        (estimation.estimate_wind, {}),
     ],
 )
 def test_estimate_zero_target_distance_is_answered_by_the_engine(
-    study: SectionStudy, estimate, inputs: dict, expected_error
+    study: SectionStudy, estimate, inputs: dict
 ):
-    with pytest.raises(expected_error):
-        estimate(
+    with pytest.warns(EstimationNotConvergedWarning):
+        result = estimate(
             {
                 "spanIndex": SPAN_INDEX,
                 "obstaclePoint": OBSTACLE,
@@ -495,15 +492,17 @@ def test_estimate_zero_target_distance_is_answered_by_the_engine(
             study,
         )
 
+    assert result["converged"] is False
+
 
 def test_estimate_load_on_the_support_does_not_move_the_cable(
     study: SectionStudy,
 ):
     # a zero load position puts the load on the left support of the span
-    with pytest.raises(
-        EstimationNotConvergedError, match="target is not reachable"
+    with pytest.warns(
+        EstimationNotConvergedWarning, match="target is not reachable"
     ):
-        estimation.estimate_load(
+        result = estimation.estimate_load(
             {
                 "spanIndex": SPAN_INDEX,
                 "obstaclePoint": OBSTACLE,
@@ -514,15 +513,17 @@ def test_estimate_load_on_the_support_does_not_move_the_cable(
             study,
         )
 
+    assert result["converged"] is False
 
-def test_estimate_unreachable_target_raises_not_converged(
+
+def test_estimate_unreachable_target_warns_not_converged(
     study: SectionStudy,
 ):
-    with pytest.raises(
-        EstimationNotConvergedError,
+    with pytest.warns(
+        EstimationNotConvergedWarning,
         match="Temperature estimation did not converge",
     ):
-        estimation.estimate_temperature(
+        result = estimation.estimate_temperature(
             {
                 **VALID_TEMPERATURE_INPUTS,
                 "targetDistance": 1000.0,
@@ -530,6 +531,9 @@ def test_estimate_unreachable_target_raises_not_converged(
             },
             study,
         )
+
+    assert result["converged"] is False
+    assert set(result) == RESULT_KEYS
 
 
 def test_estimate_nan_distance_raises_not_converged(
@@ -848,10 +852,14 @@ def test_estimate_minimum_distance_wind_on_a_bound_is_not_converged(
     study: SectionStudy,
 ):
     # the minimum (about -830 Pa) lies beyond the lower bound
-    with pytest.raises(
-        EstimationNotConvergedError, match="last value: -500.0"
+    with pytest.warns(
+        EstimationNotConvergedWarning, match="last value: -500.0"
     ):
-        minimum_distance_wind(study, SWUNG_OBSTACLE, bounds=[-500.0, 0.0])
+        result = minimum_distance_wind(
+            study, SWUNG_OBSTACLE, bounds=[-500.0, 0.0]
+        )
+
+    assert result["value"] == pytest.approx(-500.0)
 
 
 def test_estimate_minimum_distance_wind_with_chains_reversing_at_a_bound(
@@ -879,12 +887,14 @@ def test_estimate_minimum_distance_wind_with_a_minimum_beyond_the_solvable_wind(
             new_temperature=15.0, wind_pressure=1500.0
         )
 
-    with pytest.raises(
-        EstimationNotConvergedError, match=r"last value: -100\d"
+    with pytest.warns(
+        EstimationNotConvergedWarning, match=r"last value: -100\d"
     ):
-        minimum_distance_wind(
+        result = minimum_distance_wind(
             study, [250.0, 30.0, 80.0], bounds=[-3000.0, 0.0]
         )
+
+    assert result["value"] == pytest.approx(-1000.0, abs=50.0)
 
 
 def test_is_state_solvable_probes_a_copy_of_the_balance_engine(

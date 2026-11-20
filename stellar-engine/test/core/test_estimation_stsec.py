@@ -25,8 +25,8 @@ from stellar_engine.core.conformity.runner import find_obstacle_point
 from stellar_engine.core.estimation import estimation
 from stellar_engine.core.study import initialize_study
 from stellar_engine.entities.errors import (
-    EstimationTargetAboveBoundsError,
-    EstimationTargetBelowBoundsError,
+    EstimationTargetAboveBoundsWarning,
+    EstimationTargetBelowBoundsWarning,
 )
 from stellar_engine.utils import import_stsec, stsec_to_study_inputs
 
@@ -132,15 +132,18 @@ def vertical_distance_at(
 def test_one_meter_needs_more_than_the_upper_bound(
     study_and_obstacle_uuid: tuple[SectionStudy, str],
 ):
-    """The 1 m target is reached above 250 °C: the error says so."""
+    """The 1 m target is reached above 250 °C: the warning says so."""
     study, obstacle_uuid = study_and_obstacle_uuid
 
-    with pytest.raises(
-        EstimationTargetAboveBoundsError, match="above the upper bound 250.0"
+    with pytest.warns(
+        EstimationTargetAboveBoundsWarning, match="above the upper bound 250.0"
     ):
-        estimation.estimate_temperature(
+        result = estimation.estimate_temperature(
             estimate_inputs(obstacle_uuid, UI_BOUNDS), study
         )
+
+    assert result["converged"] is False
+    assert result["value"] == pytest.approx(UI_BOUNDS[1])
 
 
 def test_target_above_the_cable_needs_less_than_the_lower_bound(
@@ -148,16 +151,19 @@ def test_target_above_the_cable_needs_less_than_the_lower_bound(
 ):
     study, obstacle_uuid = study_and_obstacle_uuid
 
-    with pytest.raises(
-        EstimationTargetBelowBoundsError, match="below the lower bound -50.0"
+    with pytest.warns(
+        EstimationTargetBelowBoundsWarning, match="below the lower bound -50.0"
     ):
-        estimation.estimate_temperature(
+        result = estimation.estimate_temperature(
             {
                 **estimate_inputs(obstacle_uuid, UI_BOUNDS),
                 "targetDistance": 20,
             },
             study,
         )
+
+    assert result["converged"] is False
+    assert result["value"] == pytest.approx(UI_BOUNDS[0])
 
 
 def test_target_is_beyond_the_upper_bound(
