@@ -53,17 +53,16 @@ Drop this nested override once a TypeDoc release supports `minimatch` 11.
 
 #### SBOM (Software Bill of Materials)
 
-Generate a single CycloneDX 1.5 XML SBOM covering the Angular (npm) and Python (`stellar-engine`) runtime dependencies (dev dependencies excluded):
+Generate one CycloneDX 1.5 XML SBOM per ecosystem, covering the Angular (npm) and Python (`stellar-engine`) runtime dependencies (dev dependencies excluded):
 
 ```shell
-npm run sbom           # Angular + Python, merged into sbom/sbom-complet.xml
-npm run sbom:angular   # Angular only  -> sbom/sbom-angular.json (from package-lock.json)
-npm run sbom:python    # Python only   -> sbom/sbom-python.json  (from stellar-engine/uv.lock)
+npm run sbom:angular   # Angular only  -> sbom/sbom-angular.xml (from package-lock.json)
+npm run sbom:python    # Python only   -> sbom/sbom-python.xml  (from stellar-engine/uv.lock)
 ```
 
-`npm run sbom` runs `scripts/sbom-ng.sh` and `scripts/sbom-py.sh`, then merges both JSON files into XML with `cyclonedx merge`.
-It requires the [CycloneDX CLI](https://github.com/CycloneDX/cyclonedx-cli/releases) (a standalone binary, not an npm/pip package) on the `PATH`,
-or its location in the `CYCLONEDX_CLI` environment variable. The `sbom/` output folder (override with `SBOM_DIR`) is git-ignored.
+The Python SBOM is produced by [`cyclonedx-py`](https://github.com/CycloneDX/cyclonedx-python) (run through `uvx`, or set `CYCLONEDX_PY`) on a temporary runtime-only environment installed from `stellar-engine/uv.lock`, so it does not rely on the experimental `uv export`.
+The `sbom/` output folder (override with `SBOM_DIR`) is git-ignored.
+Relative `SBOM_DIR` values are resolved from the directory where the command is invoked.
 The scripts are not part of the CI.
 
 #### Running local documentation
