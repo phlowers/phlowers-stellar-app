@@ -194,7 +194,7 @@
     {
       "ruleType": "RULE_1",
       "ruleName": "RULE_1",
-      "color": "#FF0000",
+      "color": "#A80000",
       "lateralPoint": {
         "temperature": 15,
         "pressure": "WindZoneInput",
@@ -209,7 +209,7 @@
     {
       "ruleType": "RULE_2",
       "ruleName": "RULE_2",
-      "color": "#FFA500",
+      "color": "#005289",
       "lateralPoint": {
         "temperature": null,
         "pressure": "WindZoneInput",
@@ -224,7 +224,7 @@
     {
       "ruleType": "RULE_3",
       "ruleName": "RULE_3",
-      "color": "#0000FF",
+      "color": "#9760A0",
       "lateralPoint": {
         "temperature": 17,
         "pressure": "WindZoneInput",
