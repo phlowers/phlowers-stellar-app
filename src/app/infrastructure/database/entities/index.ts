@@ -26,6 +26,9 @@ export type {
 } from './catalog-obstacle-rule-definition.entity';
 export type { CatalogObstacleDistanceEntity, ObstacleVoltageDistanceMap } from './catalog-obstacle-distance.entity';
 export type { CatalogObstacleWindZoneEntity } from './catalog-obstacle-wind-zone.entity';
-export type { CatalogObstacleConformityConfigEntity } from './catalog-obstacle-conformity-config.entity';
+export type {
+  CatalogObstacleConformityConfigEntity,
+  ForestTrenchesChartSeriesStyle
+} from './catalog-obstacle-conformity-config.entity';
 export { OBSTACLE_CONFORMITY_CONFIG_KEY } from './catalog-obstacle-conformity-config.entity';
 export type { MetadataEntity } from './metadata.entity';

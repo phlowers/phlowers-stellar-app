@@ -129,7 +129,8 @@ export const parseRfc9557 = (value: unknown): Date | null => {
   } else if (typeof value === 'number') {
     date = new Date(value);
   } else if (typeof value === 'string' && value.trim() !== '') {
-    date = new Date(value.trim().replace(/(\[[^\]]*\])+$/, ''));
+    // Strip the trailing RFC 9557 suffix(es), e.g. `[Europe/Paris]` or `[u-ca=iso8601]`
+    date = new Date(value.trim().replace(/(\[[^[\]]*\])+$/, ''));
   } else {
     return null;
   }

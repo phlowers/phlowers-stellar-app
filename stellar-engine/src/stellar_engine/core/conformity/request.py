@@ -6,11 +6,13 @@
 
 """Validated conformity request parsed from the python task inputs."""
 
+import math
 from dataclasses import dataclass
 
 from stellar_engine.core.conformity.scenarios import RuleClimaticCondition
 from stellar_engine.entities.conformity import (
     ConformityParametersInput,
+    ConformityPlot,
     ElectricTensionMapper,
     RuleDistanceInput,
     TensionRules,
@@ -20,7 +22,7 @@ from stellar_engine.entities.errors import ConformityInputError
 
 def _check_dict_value_nonnegative_integer_or_bool(
     dictionary: dict, key: str, default: int | None = None
-) -> object:
+) -> int:
     """Validate and normalize an index-like input value.
 
     If the value is missing (None) and a default is provided, return that default.
@@ -53,6 +55,53 @@ def _rule_types(items: list, name: str) -> None:
     rule_types = [item.rule_type for item in items]
     if len(set(rule_types)) != len(rule_types):
         raise ConformityInputError(f"Duplicate ruleType in {name}")
+
+
+def _parse_shared_inputs(
+    python_inputs: dict,
+) -> tuple[
+    str,
+    ConformityParametersInput,
+    tuple[RuleClimaticCondition, ...],
+    dict[str, TensionRules],
+]:
+    """Parse the tension, form, rules, and distances shared by conformity tools."""
+    electric_tension_code = python_inputs.get("electricTension")
+    if not isinstance(electric_tension_code, str):
+        raise ConformityInputError(
+            "Invalid electric tension code: missing or non-string value"
+        )
+    electric_tension = ElectricTensionMapper.get_code(electric_tension_code)
+    if electric_tension is None:
+        raise ConformityInputError(
+            f"Invalid electric tension code: {electric_tension_code}"
+        )
+
+    parameters = ConformityParametersInput.from_dict(
+        python_inputs.get("form", {})
+    )
+
+    rules_distances_data = python_inputs.get("rulesDistances")
+    if not isinstance(rules_distances_data, list) or not rules_distances_data:
+        raise ConformityInputError("rulesDistances must be a non-empty list")
+    rule_distances = [
+        RuleDistanceInput.from_dict(data) for data in rules_distances_data
+    ]
+    _rule_types(rule_distances, "rulesDistances")
+
+    rules_data = python_inputs.get("rulesClimaticConditions")
+    if not isinstance(rules_data, list) or not rules_data:
+        raise ConformityInputError(
+            "rulesClimaticConditions must be a non-empty list"
+        )
+    rules = RuleClimaticCondition.build_rules_climatic_conditions(
+        rules_data, wind_zone_pressure=parameters.wind_pressure
+    )
+    _rule_types(rules, "rulesClimaticConditions")
+    tension_rules = TensionRules.build_tension_rules(
+        electric_tension, rule_distances
+    )
+    return electric_tension_code, parameters, tuple(rules), tension_rules
 
 
 @dataclass(frozen=True)
@@ -88,46 +137,9 @@ class ConformityRequest:
         point_index = _check_dict_value_nonnegative_integer_or_bool(
             python_inputs, "pointIndex", 0
         )
-
-        electric_tension_code = python_inputs.get("electricTension")
-        if not isinstance(electric_tension_code, str):
-            raise ConformityInputError(
-                "Invalid electric tension code: missing or non-string value"
-            )
-        electric_tension = ElectricTensionMapper.get_code(
-            electric_tension_code
+        _, parameters, rules, tension_rules = _parse_shared_inputs(
+            python_inputs
         )
-        if electric_tension is None:
-            raise ConformityInputError(
-                f"Invalid electric tension code: {electric_tension_code}"
-            )
-
-        parameters = ConformityParametersInput.from_dict(
-            python_inputs.get("form", {})
-        )
-
-        rules_distances_data = python_inputs.get("rulesDistances")
-        if (
-            not isinstance(rules_distances_data, list)
-            or not rules_distances_data
-        ):
-            raise ConformityInputError(
-                "rulesDistances must be a non-empty list"
-            )
-        rule_distances = [
-            RuleDistanceInput.from_dict(data) for data in rules_distances_data
-        ]
-        _rule_types(rule_distances, "rulesDistances")
-
-        rules_data = python_inputs.get("rulesClimaticConditions")
-        if not isinstance(rules_data, list) or not rules_data:
-            raise ConformityInputError(
-                "rulesClimaticConditions must be a non-empty list"
-            )
-        rules = RuleClimaticCondition.build_rules_climatic_conditions(
-            rules_data, wind_zone_pressure=parameters.wind_pressure
-        )
-        _rule_types(rules, "rulesClimaticConditions")
 
         return cls(
             obstacle_uuid=obstacle_uuid,
@@ -135,8 +147,119 @@ class ConformityRequest:
             span_index=span_index,
             point_index=point_index,
             parameters=parameters,
-            rules=tuple(rules),
-            tension_rules=TensionRules.build_tension_rules(
-                electric_tension, rule_distances
-            ),
+            rules=rules,
+            tension_rules=tension_rules,
         )
+
+
+@dataclass(frozen=True)
+class ForestTrenchSpanInput:
+    """Ground points and section span index for one forest-trenches span."""
+
+    span_index: int
+    distances: tuple[float, ...]
+    altitudes: tuple[float, ...]
+
+
+@dataclass(frozen=True)
+class ForestTrenchRequest:
+    """Validated request for the multi-point forest-trenches simulation."""
+
+    electric_tension: str
+    parameters: ConformityParametersInput
+    rules: tuple[RuleClimaticCondition, ...]
+    tension_rules: dict[str, TensionRules]
+    overhang_rules: tuple[str, ...]
+    lateral_rules: tuple[str, ...]
+    spans: tuple[ForestTrenchSpanInput, ...]
+
+    @classmethod
+    def from_dict(cls, python_inputs: dict) -> "ForestTrenchRequest":
+        """Parse and validate the forest-trenches task inputs."""
+        (
+            electric_tension,
+            parameters,
+            rules,
+            tension_rules,
+        ) = _parse_shared_inputs(python_inputs)
+        if parameters.conformity_plot != ConformityPlot.FOREST_TRENCHES:
+            raise ConformityInputError(
+                "conformityPlot must be 'forest_trenches'"
+            )
+
+        overhang_rules = python_inputs.get("overhangRules")
+        if not isinstance(overhang_rules, list) or not all(
+            isinstance(rule, str) for rule in overhang_rules
+        ):
+            raise ConformityInputError(
+                "overhangRules must be a list of strings"
+            )
+        lateral_rules = python_inputs.get("lateralRules")
+        if not isinstance(lateral_rules, list) or not all(
+            isinstance(rule, str) for rule in lateral_rules
+        ):
+            raise ConformityInputError(
+                "lateralRules must be a list of strings"
+            )
+
+        spans_data = python_inputs.get("spans")
+        if not isinstance(spans_data, list) or not spans_data:
+            raise ConformityInputError("spans must be a non-empty list")
+        spans = []
+        seen_span_indices = set()
+        for span_data in spans_data:
+            if not isinstance(span_data, dict):
+                raise ConformityInputError("span entries must be dictionaries")
+            span_index = _check_dict_value_nonnegative_integer_or_bool(
+                span_data, "spanIndex"
+            )
+            if span_index in seen_span_indices:
+                raise ConformityInputError(
+                    f"Duplicate spanIndex in spans: {span_index}"
+                )
+            seen_span_indices.add(span_index)
+
+            distances = span_data.get("distances")
+            altitudes = span_data.get("altitudes")
+            if (
+                not isinstance(distances, list)
+                or not isinstance(altitudes, list)
+                or len(distances) < 2
+                or len(distances) != len(altitudes)
+            ):
+                raise ConformityInputError(
+                    "span distances and altitudes must be equal-length lists with at least two points"
+                )
+            if not all(_is_finite_number(value) for value in distances):
+                raise ConformityInputError(
+                    "span distances must be finite numbers"
+                )
+            if not all(_is_finite_number(value) for value in altitudes):
+                raise ConformityInputError(
+                    "span altitudes must be finite numbers"
+                )
+            spans.append(
+                ForestTrenchSpanInput(
+                    span_index=span_index,
+                    distances=tuple(float(value) for value in distances),
+                    altitudes=tuple(float(value) for value in altitudes),
+                )
+            )
+
+        return cls(
+            electric_tension=electric_tension,
+            parameters=parameters,
+            rules=rules,
+            tension_rules=tension_rules,
+            overhang_rules=tuple(overhang_rules),
+            lateral_rules=tuple(lateral_rules),
+            spans=tuple(spans),
+        )
+
+
+def _is_finite_number(value: object) -> bool:
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and math.isfinite(value)
+    )
