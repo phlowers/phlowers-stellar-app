@@ -42,7 +42,8 @@ def slice_ground(python_inputs: dict, study: SectionStudy) -> dict:
         raise ConformityInputError("floorPoints must be an array")
 
     group_points = study.position_engine.get_group_points()
-    supports = group_points.supports.coords[:, 0, :]
+    real_supports = group_points.all_points_virtual_separated()["supports"]
+    supports = real_supports.coords[:, 0, :]
     if not 0 <= span_index < len(supports) - 1:
         raise SupportOutOfRangeError(
             f"Support index {span_index} out of range for the section"
