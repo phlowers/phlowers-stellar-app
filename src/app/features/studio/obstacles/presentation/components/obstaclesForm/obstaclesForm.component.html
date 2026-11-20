@@ -431,7 +431,14 @@
       <app-icon icon="description" aria-hidden="true" />
       <ng-container>{{ 'common.report' | transloco }}</ng-container>
     </button>
-    <button app-btn btnStyle="outlined" type="button" data-testid="conformity-export-btn" disabled>
+    <button
+      app-btn
+      btnStyle="outlined"
+      type="button"
+      data-testid="conformity-export-btn"
+      [disabled]="!conformityRef()?.canExport()"
+      (click)="conformityRef()?.exportConformity()"
+    >
       <app-icon icon="download" aria-hidden="true" />
       <ng-container>{{ 'common.export' | transloco }}</ng-container>
     </button>

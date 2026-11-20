@@ -59,6 +59,11 @@ import {
   resizeConformityPlot
 } from './helpers/createConformityPlot';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotService } from '@services/plot/plot.service';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { buildConformityExportFilename, buildConformityExportJson } from './conformity-export.helpers';
+import { CONFORMITY_EXPORT_FILE_PICKER_TYPES } from './conformity-export.constantes';
+import { ConformityCalculatedInputs } from './conformity-export.interfaces';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
@@ -100,6 +105,8 @@ export class ConformityComponent implements OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
   private readonly translocoService = inject(TranslocoService);
+  private readonly plotService = inject(PlotService);
+  private readonly logger = inject(LoggerService);
 
   readonly isOpen = input<boolean>(false);
 
@@ -123,6 +130,9 @@ export class ConformityComponent implements OnDestroy {
   private readonly _conformityResults = signal<Record<string, ConformityRuleResult> | null>(null);
   /** Computed results, set only by `calculate`. Null hides the results section. */
   readonly conformityResults = this._conformityResults.asReadonly();
+
+  /** Form and point the displayed results were computed from, so the export matches them even after edits. */
+  private readonly calculatedInputs = signal<ConformityCalculatedInputs | null>(null);
 
   /** Graph data feeding the `#conformity-plot` cross-section, set alongside the results. */
   private readonly _conformityPlotData = signal<ConformityPlotResponse | null>(null);
@@ -422,6 +432,14 @@ export class ConformityComponent implements OnDestroy {
    * later only fill still-empty fields instead of clobbering user edits. */
   private lastPopulatedUuid: string | null | undefined = undefined;
 
+  /** Identifies the latest calculation; bumped on close/obstacle change so a pending one cannot publish stale results. */
+  private calculationRun = 0;
+
+  private invalidatePendingCalculation(): void {
+    this.calculationRun++;
+    this.isCalculating.set(false);
+  }
+
   /** Populate the form from the saved conformity data (falling back to defaults) when the obstacle
    * changes, and top up still-empty fields as async config/options resolve. */
   private readonly populateForm = effect(() => {
@@ -434,7 +452,9 @@ export class ConformityComponent implements OnDestroy {
       const isNewObstacle = uuid !== this.lastPopulatedUuid;
       if (isNewObstacle) {
         this.lastPopulatedUuid = uuid;
+        this.invalidatePendingCalculation();
         this._conformityResults.set(null);
+        this.calculatedInputs.set(null);
         this._conformityPlotData.set(null);
         this._ruleColorsByType.set({});
       }
@@ -477,7 +497,9 @@ export class ConformityComponent implements OnDestroy {
   private readonly clearResultsOnClose = effect(() => {
     if (!this.isOpen())
       untracked(() => {
+        this.invalidatePendingCalculation();
         this._conformityResults.set(null);
+        this.calculatedInputs.set(null);
         this._conformityPlotData.set(null);
         this._ruleColorsByType.set({});
         this.isGraphEnlarged.set(false);
@@ -520,6 +542,14 @@ export class ConformityComponent implements OnDestroy {
       { injector: this.injector }
     );
   });
+
+  /** Rules currently displayed (live selection) that have calculated results, so the export matches the table and plot. */
+  private readonly exportRules = computed(() => {
+    const results = this._conformityResults();
+    return results ? this.selectedConformityColumns().filter((option) => results[option.value]) : [];
+  });
+
+  readonly canExport = computed(() => this.calculatedInputs() !== null && this.exportRules().length > 0);
 
   /** Auto-display results when reopening a saved conformity whose inputs are all present. */
   private readonly autoCalculate = effect(() => {
@@ -569,6 +599,7 @@ export class ConformityComponent implements OnDestroy {
         ? computeOverhangZoneWidth(this.spanService.section()?.supports ?? [], obstacle.supportUuid)
         : undefined;
 
+    const run = ++this.calculationRun;
     this.isCalculating.set(true);
     this.calculationError.set(null);
 
@@ -627,6 +658,7 @@ export class ConformityComponent implements OnDestroy {
       if (conformityTaskError || !conformityTaskOutput) {
         throw new Error(conformityTaskError ?? 'Conformity task failed');
       }
+      if (run !== this.calculationRun) return;
 
       const plotData: ConformityPlotResponse = {
         obstacle: conformityTaskOutput.obstacle,
@@ -634,17 +666,75 @@ export class ConformityComponent implements OnDestroy {
       };
       const results: Record<string, ConformityRuleResult> = conformityTaskOutput.results;
       this._conformityResults.set(results);
+      this.calculatedInputs.set({ form: v, pointIndex: conformityInputs.pointIndex });
       this._ruleColorsByType.set(Object.fromEntries(rules.map((r) => [r.rule_type, r.color])));
       this._conformityPlotData.set(plotData);
     } catch (error) {
+      if (run !== this.calculationRun) return;
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(errorMessage);
       this.notificationService.error(
         this.translocoService.translate('studio.conformity.calculation-failed-error', { errorMessage })
       );
     } finally {
-      this.isCalculating.set(false);
+      if (run === this.calculationRun) this.isCalculating.set(false);
     }
+  }
+
+  async exportConformity(): Promise<void> {
+    const obstacle = this.obstacleData();
+    const results = this._conformityResults();
+    const inputs = this.calculatedInputs();
+    const point = inputs ? (this.positions()[inputs.pointIndex] ?? null) : null;
+    if (!obstacle || !results || !inputs || !point || !this.exportRules().length) {
+      this.notificationService.error(this.translocoService.translate('studio.conformity.export-invalid-data-error'));
+      return;
+    }
+    const section = this.spanService.section();
+    const rules = this.exportRules().map(({ value, label }) => ({ value, label }));
+    const json = buildConformityExportJson({
+      section,
+      study: this.plotService.study(),
+      obstacle,
+      point,
+      pointLabel: this.translocoService.translate('common.point-index-label', { index: inputs.pointIndex + 1 }),
+      spanLabel: this.spanLabel(),
+      referenceSupportLabel: this.referenceSupportLabel(),
+      form: {
+        windZone: inputs.form.windZone,
+        windMinus: inputs.form.windMinus ?? false,
+        redZonePresence: inputs.form.redZonePresence ?? false
+      },
+      rules,
+      results,
+      conformityType: this.conformityType()
+    });
+    await this.saveExportFile(json, buildConformityExportFilename(obstacle.name, section?.name ?? null));
+  }
+
+  private async saveExportFile(json: string, filename: string): Promise<void> {
+    if (globalThis.showSaveFilePicker) {
+      try {
+        const handle = await globalThis.showSaveFilePicker({
+          suggestedName: filename,
+          types: CONFORMITY_EXPORT_FILE_PICKER_TYPES
+        });
+        const writable = await handle.createWritable();
+        await writable.write(json);
+        await writable.close();
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        this.logger.error('Failed to save conformity export via showSaveFilePicker', error);
+      }
+    }
+
+    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    const a = this.document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   private generateMockResult(isCableTrack: boolean, conformityCompliance: boolean): ConformityRuleResult {

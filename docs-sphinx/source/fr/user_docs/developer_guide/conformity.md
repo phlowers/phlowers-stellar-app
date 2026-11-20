@@ -43,6 +43,9 @@ Les chemins sont relatifs à `src/app/`, sauf pour `stellar-engine/`, relatif à
 | `features/studio/obstacles/presentation/components/conformity/conformity.model.ts` | `ConformityRuleResult`, `ResultRow`, `ConformityOption` |
 | `features/studio/obstacles/presentation/components/conformity/conformity-plot.model.ts` | `ConformityPlotResponse` : contrat des données de la figure |
 | `features/studio/obstacles/presentation/components/conformity/helpers/createConformityPlot.ts` | Rendu Plotly de la figure |
+| `features/studio/obstacles/presentation/components/conformity/conformity-export.interfaces.ts` | Types du contrat JSON d’export |
+| `features/studio/obstacles/presentation/components/conformity/conformity-export.constantes.ts` | Préfixe du nom de fichier, unités, types du sélecteur de fichier |
+| `features/studio/obstacles/presentation/components/conformity/conformity-export.helpers.ts` | Constructeurs purs du JSON d’export et du nom de fichier |
 | `features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component.ts` | Vérifications d’éligibilité et hôte de la modale |
 | `shared/domain/models/obstacle.model.ts` | `ConformityFormData`, données saisies enregistrées avec l’obstacle |
 
@@ -607,6 +610,32 @@ réduits et le tracé suit son conteneur avec un `ResizeObserver`.
 
 L’état de chargement est exposé via `isCalculating`, et les résultats sont annoncés aux
 technologies d’assistance par une zone live polie du type `<output>`.
+
+### Export
+
+Le bouton **Export** du pied de la modale (`conformity-export-btn`) est activé par `canExport`, vrai dès que
+des résultats sont affichés. `calculate()` mémorise dans un signal privé le formulaire et l’indice de point
+utilisés ; `exportConformity()` lit cet instantané et non le formulaire courant, de sorte que le fichier
+correspond toujours aux résultats affichés. L’instantané est effacé avec les résultats (nouvel obstacle,
+modale fermée).
+
+Le fichier est construit par les helpers purs de `conformity-export.helpers.ts` et enregistré avec
+`showSaveFilePicker` (fenêtre « Parcourir… »), avec repli sur un téléchargement Blob si l’API est absente
+ou échoue. Annuler le sélecteur ne fait rien. Sans résultats, instantané, point ou section, une erreur est
+notifiée (`studio.conformity.export-invalid-data-error`). La modale reste ouverte.
+
+- Nom du fichier : `Export Distances de conformité_<obstacle>_<canton>_<AAAA-MM-JJ>.json`.
+- Contenu : `{ distancesConformityCheck: [ { metaData, obstacleData, conformityInput, conformityChecks } ] }`.
+  Les valeurs sont brutes (non arrondies), sous forme `{ value, unit }` ; une valeur absente (par exemple
+  le côté latéral d’un obstacle `overhang`) vaut `{ value: null, unit }`.
+- `obstacleData.altitudeType` (`absolute`, `relative`, `relative_cable`) et `lateralDistanceType`
+  (`SPAN_AXIS`, `LINE_AXIS`) donnent la référence de `height` et `lateralDistance`, exportés tels que
+  saisis et non normalisés.
+- Seules les règles actuellement affichées (sélectionnées et calculées) sont exportées.
+- `voltage` provient de `voltage_idr` : `"<nombre> KV"` donne `{ value: <nombre>, unit: 'KV' }`, tout autre
+  libellé (par exemple *HORS TENSION*) est conservé tel quel avec `unit: null`.
+- `cableSwingingAngle` n’est pas calculé : toujours `{ value: null, unit: '°' }`.
+- `minimumCase` n’est présent que pour les obstacles `cable_track`.
 
 ### Tests
 
