@@ -51,6 +51,21 @@ TypeDoc (documentation build only) is pinned to `minimatch` 10.2.6: `minimatch` 
 (GHSA-g3hv-75wg-m249, fixed only in `minimatch` 11) on the trusted glob patterns of the docs build.
 Drop this nested override once a TypeDoc release supports `minimatch` 11.
 
+#### SBOM (Software Bill of Materials)
+
+Generate a single CycloneDX 1.5 XML SBOM covering the Angular (npm) and Python (`stellar-engine`) runtime dependencies (dev dependencies excluded):
+
+```shell
+npm run sbom      # Angular + Python, merged into sbom/sbom-complet.xml
+npm run sbom:ng   # Angular only  -> sbom/sbom-angular.json (from package-lock.json)
+npm run sbom:py   # Python only   -> sbom/sbom-python.json  (from stellar-engine/uv.lock)
+```
+
+`npm run sbom` runs `scripts/sbom-ng.sh` and `scripts/sbom-py.sh`, then merges both JSON files into XML with `cyclonedx merge`.
+It requires the [CycloneDX CLI](https://github.com/CycloneDX/cyclonedx-cli/releases) (a standalone binary, not an npm/pip package) on the `PATH`,
+or its location in the `CYCLONEDX_CLI` environment variable. The `sbom/` output folder (override with `SBOM_DIR`) is git-ignored.
+The scripts are not part of the CI.
+
 #### Running local documentation
 
 The documentation is built with Sphinx. First, go to the `docs-sphinx` folder and prepare the Python environment:

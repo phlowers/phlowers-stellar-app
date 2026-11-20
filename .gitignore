@@ -93,3 +93,6 @@ dev-mock/oidc-claims.json
 plan.md
 .ideas/*
 docs-sphinx/source/_build/*
+
+# SBOM output
+/sbom/
