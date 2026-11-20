@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { Support } from '@shared/domain/models/support.model';
-import { computeOverhangZoneWidth, getVisibleConformityCommonRows } from './conformity.helpers';
+import {
+  computeOverhangZoneWidth,
+  getEffectiveWindPressure,
+  getElectricTensionLabel,
+  getVisibleConformityCommonRows
+} from './conformity.helpers';
 import { ResultRow } from './conformity.model';
 
 const supports = [
@@ -40,11 +45,39 @@ describe('getVisibleConformityCommonRows', () => {
     expect(getVisibleConformityCommonRows(rows, 'cable_track')).toEqual([rows[0]]);
   });
 
+  describe('getEffectiveWindPressure', () => {
+    const windZones = [
+      { label: 'Zone 1', normal: 100, red_zone: 250 },
+      { label: 'Zone 2', normal: 150, red_zone: 300 }
+    ];
+
+    it('uses the normal pressure when the red zone is disabled', () => {
+      expect(getEffectiveWindPressure(windZones, 'Zone 1', false)).toBe(100);
+    });
+
+    it('uses the red-zone pressure when enabled', () => {
+      expect(getEffectiveWindPressure(windZones, 'Zone 2', true)).toBe(300);
+    });
+
+    it('returns null when the selected wind zone is unavailable', () => {
+      expect(getEffectiveWindPressure(windZones, 'missing', false)).toBeNull();
+      expect(getEffectiveWindPressure(windZones, null, false)).toBeNull();
+    });
+  });
+
   it('hides only the compliance line axis distance row for overhang charts', () => {
     expect(getVisibleConformityCommonRows(rows, 'overhang')).toEqual([rows[0], rows[1]]);
   });
 
   it.each(['vegetation', 'unknown', null, undefined])('keeps every row for %s charts', (conformityType) => {
     expect(getVisibleConformityCommonRows(rows, conformityType)).toEqual(rows);
+  });
+});
+
+describe('getElectricTensionLabel', () => {
+  it('returns the voltage or a dash', () => {
+    expect(getElectricTensionLabel('400 KV')).toBe('400 KV');
+    expect(getElectricTensionLabel(undefined)).toBe('-');
+    expect(getElectricTensionLabel(null)).toBe('-');
   });
 });

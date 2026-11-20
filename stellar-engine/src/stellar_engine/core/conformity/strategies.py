@@ -265,6 +265,7 @@ STRATEGIES: dict[ConformityPlot, PlotStrategy] = {
     ConformityPlot.CABLE_TRACK: CableTrackStrategy(),
     ConformityPlot.VEGETATION: VegetationStrategy(),
     ConformityPlot.OVERHANG: OverhangStrategy(),
+    ConformityPlot.FOREST_TRENCHES: OverhangStrategy(),
 }
 
 

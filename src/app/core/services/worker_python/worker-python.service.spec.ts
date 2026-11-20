@@ -6,7 +6,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { WorkerPythonService } from './worker-python.service';
+import { TaskTimeoutError, WorkerPythonService } from './worker-python.service';
 import { Task } from './tasks/types';
 import { firstValueFrom } from 'rxjs';
 import { CatalogCable, InitialCondition, Section, Support } from '@shared/domain';
@@ -381,6 +381,8 @@ describe('WorkerService', () => {
         await vi.advanceTimersByTimeAsync(1000);
 
         await expect(promise).rejects.toThrow('Task initLit timed out after 1000ms');
+        await expect(promise).rejects.toBeInstanceOf(TaskTimeoutError);
+        await expect(promise).rejects.toMatchObject({ task: Task.initLit, timeoutMs: 1000 });
       } finally {
         vi.useRealTimers();
       }

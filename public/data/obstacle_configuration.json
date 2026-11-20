@@ -196,7 +196,7 @@
       "ruleName": "RULE_1",
       "color": "#FF0000",
       "lateralPoint": {
-        "temperature": 17,
+        "temperature": 15,
         "pressure": "WindZoneInput",
         "redZone": false
       },
@@ -253,5 +253,36 @@
       { "label": "300-400", "normal": 300, "redZone": 400 }
     ]
   },
-  "intermediatePointPositions": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+  "intermediatePointPositions": [0.2, 0.4, 0.6, 0.8],
+  "forest_trenches": {
+    "ground_n_slicing_points_choices": [5, 9, 17],
+    "overhang_rules_selected": ["RULE_1"],
+    "lateral_rules_selected": ["RULE_1", "RULE_2"],
+    "chart": {
+      "cable": { "marker": "circle", "line": "solid" },
+      "limit": { "marker": "square-open", "line": "dash" },
+      "overhang_color": "#0000FF"
+    }
+  },
+  "floor_obstacle": {
+    "obstacleType": "floor",
+    "obstacleName": "floor",
+    "details": "",
+    "redZone": true,
+    "conformity": "forest_trenches",
+    "distances": [
+      {
+        "ruleType": "RULE_1",
+        "active": true,
+        "overhang": { "63": 2.0, "90": 2.0, "150": 2.0, "225": 2.0, "400": 2.0 },
+        "lateral": { "63": 3.0, "90": 3.0, "150": 3.0, "225": 0.0, "400": 3.0 }
+      },
+      {
+        "ruleType": "RULE_2",
+        "active": true,
+        "overhang": { "63": 4.0, "90": 4.0, "150": 4.0, "225": 4.0, "400": 4.0 },
+        "lateral": { "63": 5.0, "90": 5.0, "150": 5.0, "225": 5.0, "400": 5.0 }
+      }
+    ]
+  }
 }
