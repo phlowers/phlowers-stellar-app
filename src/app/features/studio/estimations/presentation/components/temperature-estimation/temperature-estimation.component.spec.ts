@@ -138,10 +138,11 @@ describe('TemperatureEstimationComponent', () => {
               'common.min-value-error': 'Min. value: {{ min }}',
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}',
-              'shared.python-errors.estimation-not-converged-error': 'The target cannot be reached',
-              'shared.python-errors.estimation-target-above-bounds-error':
+              'shared.python-errors.estimation-not-converged-error': 'The distance cannot be computed',
+              'shared.python-errors.estimation-not-converged-warning': 'The target cannot be reached',
+              'shared.python-errors.estimation-target-above-bounds-warning':
                 'The target needs more than {{ upperBound }}',
-              'shared.python-errors.estimation-target-below-bounds-error':
+              'shared.python-errors.estimation-target-below-bounds-warning':
                 'The target needs less than {{ lowerBound }}',
               'shared.python-errors.solver-error': 'A solver error occurred.',
               'shared.python-errors.convergence-error': 'The solver failed to converge.',
@@ -527,25 +528,28 @@ describe('TemperatureEstimationComponent', () => {
 
       await calculate();
 
-      expect(mockNotificationService.error).toHaveBeenCalledWith('The target cannot be reached');
+      expect(mockNotificationService.error).toHaveBeenCalledWith('The distance cannot be computed');
       expect(getByTestId('results-frame')).toBeNull();
       expect(calculateBtn().disabled).toBe(false);
     });
 
     it.each([
-      [PythonErrorCode.EstimationTargetAboveBoundsError, 'The target needs more than 250 °C'],
-      [PythonErrorCode.EstimationTargetBelowBoundsError, 'The target needs less than -50 °C']
-    ])('quotes the search bound with its unit on %s', async (code, message) => {
+      [PythonErrorCode.EstimationNotConvergedWarning, 'The target cannot be reached'],
+      [PythonErrorCode.EstimationTargetAboveBoundsWarning, 'The target needs more than 250 °C'],
+      [PythonErrorCode.EstimationTargetBelowBoundsWarning, 'The target needs less than -50 °C']
+    ])('warns on %s and still shows the returned value', async (code, message) => {
       mockWorkerPythonService.runTask.mockResolvedValue({
-        result: null,
-        error: TaskError.SOLVER_DID_NOT_CONVERGE,
-        diagnostics: [{ code, severity: 'error', origin: 'exception', rawText: `${code}: beyond the bounds` }]
+        result: { ...ENGINE_RESULT, converged: false },
+        error: null,
+        diagnostics: [{ code, severity: 'warning', origin: 'warning', rawText: `${code}: beyond the bounds` }]
       });
       fillForm();
 
       await calculate();
 
-      expect(mockNotificationService.error).toHaveBeenCalledWith(message);
+      expect(mockNotificationService.warning).toHaveBeenCalledExactlyOnceWith(message);
+      expect(mockNotificationService.error).not.toHaveBeenCalled();
+      expect(textOf('conformity-temperature-value')).toBe('12.35 °C');
     });
 
     it.each([

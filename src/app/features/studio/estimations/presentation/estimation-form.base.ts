@@ -151,19 +151,18 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
     this.setInputsLocked(true);
     try {
       const { result, error, diagnostics } = await this.workerPythonService.runTask(this.task, inputs);
-      // e.g. BalanceEngineWarning when the study had to be adjusted on the engine side
-      for (const warning of formatPythonWarnings(diagnostics, this.translocoService)) {
+      // e.g. BalanceEngineWarning when the study had to be adjusted on the engine side, or a target out of the bounds
+      // (the closest value found is then still returned)
+      const boundsParams = toBoundsErrorParams(inputs as EstimationBaseInputs, this.boundsUnit(), this.locale);
+      for (const warning of formatPythonWarnings(diagnostics, this.translocoService, boundsParams)) {
         this.notificationService.warning(warning);
       }
       if (error || !result) {
         this.logger.error(this.calculationFailedLog, error);
         this.outcome.set(null);
         this.notificationService.error(
-          formatPythonError(
-            diagnostics.find((d) => d.origin === 'exception')?.code ?? null,
-            this.translocoService,
-            toBoundsErrorParams(inputs as EstimationBaseInputs, this.boundsUnit(), this.locale)
-          ) ?? this.translocoService.translate(this.calculationFailedKey)
+          formatPythonError(diagnostics.find((d) => d.origin === 'exception')?.code ?? null, this.translocoService) ??
+            this.translocoService.translate(this.calculationFailedKey)
         );
         return;
       }
