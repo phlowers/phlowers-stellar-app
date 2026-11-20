@@ -56,9 +56,9 @@ Drop this nested override once a TypeDoc release supports `minimatch` 11.
 Generate a single CycloneDX 1.5 XML SBOM covering the Angular (npm) and Python (`stellar-engine`) runtime dependencies (dev dependencies excluded):
 
 ```shell
-npm run sbom      # Angular + Python, merged into sbom/sbom-complet.xml
-npm run sbom:ng   # Angular only  -> sbom/sbom-angular.json (from package-lock.json)
-npm run sbom:py   # Python only   -> sbom/sbom-python.json  (from stellar-engine/uv.lock)
+npm run sbom           # Angular + Python, merged into sbom/sbom-complet.xml
+npm run sbom:angular   # Angular only  -> sbom/sbom-angular.json (from package-lock.json)
+npm run sbom:python    # Python only   -> sbom/sbom-python.json  (from stellar-engine/uv.lock)
 ```
 
 `npm run sbom` runs `scripts/sbom-ng.sh` and `scripts/sbom-py.sh`, then merges both JSON files into XML with `cyclonedx merge`.
