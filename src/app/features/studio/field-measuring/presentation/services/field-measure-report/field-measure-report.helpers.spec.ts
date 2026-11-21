@@ -378,6 +378,22 @@ describe('field-measure-report helpers', () => {
       expect(findItem(rows, LABEL_KEYS.parameter23)?.value).toBe('-');
     });
 
+    it('should report the PEP result when it is calculated', () => {
+      const rows = buildParameterCalculationRows(
+        measure({ calculationMethod: 'pep', outputs: { ...measure().outputs, pep: papotoResult } }),
+        section,
+        litData,
+        translocoService
+      );
+
+      expect(findItem(rows, LABEL_KEYS.parameter)?.value).toBe('1234 m');
+      expect(findItem(rows, LABEL_KEYS.uncertainty)?.value).toBe('5 m');
+      expect(findItem(rows, LABEL_KEYS.criterion)).toMatchObject({ status: true });
+      expect(findItem(rows, LABEL_KEYS.parameter12)?.value).toBe('1200 m');
+      expect(findItem(rows, LABEL_KEYS.parameter23)?.value).toBe('1210 m');
+      expect(findItem(rows, LABEL_KEYS.parameter13)?.value).toBe('1220 m');
+    });
+
     it.each([
       ['papoto', 'common.papoto-label'],
       ['tangente-aiming', 'field-measuring.calculus-setting.tangent-aiming-radio-label'],

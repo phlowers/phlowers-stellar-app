@@ -56,9 +56,8 @@
       name="calculusType"
       value="PEP"
       [ngModel]="selectedCalculusType()"
-      (ngModelChange)="selectedCalculusType.set($event)"
+      (ngModelChange)="onCalculusTypeChange($event)"
       inputId="pep"
-      [disabled]="true"
       data-testid="pep-radio"
     />
     <label for="pep">{{ 'common.pep-label' | transloco }}</label>
@@ -78,5 +77,5 @@
   <app-tangent-aiming-interior [(measureData)]="measureData" />
 }
 @if (selectedCalculusType() === 'PEP') {
-  <app-pep />
+  <app-pep [(measureData)]="measureData" />
 }

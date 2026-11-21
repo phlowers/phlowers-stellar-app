@@ -27,7 +27,27 @@ describe('resetInactiveCalculusModes', () => {
     expect(result.tangentLeftSupport).toBe('11');
     expect(result.cableTangentAngle).not.toBe(3);
     expect(result.calculationType).toBe('tangente');
-    expect(result.xSight1).toBeNull();
+    expect(result.xSight1).toBe(0);
+    expect(result.pepLeftSupport).toBeNull();
+  });
+
+  it('resets the pep result but keeps the pep inputs when pep is active', () => {
+    const data = createTestMeasureData({
+      calculationMethod: 'pep',
+      pepLeftSupport: '2',
+      xSight1: 8,
+      HL: 5,
+      outputs: { ...createTestMeasureData().outputs, pep: { parameter: 1 } as never }
+    });
+    const active = resetInactiveCalculusModes(data, 'pep', context);
+    expect(active.pepLeftSupport).toBe('2');
+    expect(active.xSight1).toBe(8);
+    expect(active.outputs.pep).not.toBeNull();
+    expect(active.HL).toBeNull();
+
+    const inactive = resetInactiveCalculusModes(data, 'papoto', context);
+    expect(inactive.pepLeftSupport).toBeNull();
+    expect(inactive.outputs.pep).toBeNull();
   });
 
   it('resets papoto inputs and output when tangent aiming is active', () => {
@@ -301,6 +321,18 @@ describe('toUnsavedChangesComparable', () => {
     expect(switched.interiorSpanLength).not.toBeNull();
     expect(toUnsavedChangesComparable(switched, '0')).toEqual(toUnsavedChangesComparable(saved, '0'));
     expect(toUnsavedChangesComparable(saved, '0')).not.toHaveProperty('calculationMethod');
+  });
+
+  it('ignores the PEP defaults of a measure saved before PEP existed, but not a PEP input edit (RG.PEP.ENR-BTN.1)', () => {
+    const legacy = createTestMeasureData({ pepLeftSupport: null, xSight1: null, lengthBetweenSightGD: null });
+    const opened = { ...legacy, pepLeftSupport: '0', xSight1: 0, lengthBetweenSightGD: 0 };
+    expect(toUnsavedChangesComparable(opened, '0')).toEqual(toUnsavedChangesComparable(legacy, '0'));
+    expect(toUnsavedChangesComparable({ ...opened, xSight1: 5 }, '0')).not.toEqual(
+      toUnsavedChangesComparable(legacy, '0')
+    );
+    expect(toUnsavedChangesComparable({ ...opened, pepLeftSupport: '1' }, '0')).not.toEqual(
+      toUnsavedChangesComparable(legacy, '0')
+    );
   });
 
   it('ignores the stale automatic 15°C result but not an input edit', () => {

@@ -7,6 +7,7 @@ import { TANGENT_AIMING_MODES } from './tangent-aiming-modes.constantes';
 import { TANGENT_AIMING_CALCULATION_TYPE } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import { clearAutoParameter15C, PAPOTO_INPUT_DEFAULTS, PEP_INPUT_DEFAULTS } from './helpers';
 import { CalculusModeResetContext } from './calculus-mode-reset.interfaces';
+import { applyPepDefaults } from './components/calculus-setting/pep/pep.helpers';
 
 type CalculationMethod = FieldMeasure['calculationMethod'];
 
@@ -63,7 +64,7 @@ export const CALCULUS_MODE_RESETTERS: Record<
     interiorLeftSupport: context.defaultTangentLeftSupport,
     outputs: { ...data.outputs, tangentAimingInterior: null }
   }),
-  pep: (data) => ({ ...data, ...PEP_INPUT_DEFAULTS })
+  pep: (data) => ({ ...data, ...PEP_INPUT_DEFAULTS, outputs: { ...data.outputs, pep: null } })
 };
 
 /**
@@ -120,9 +121,12 @@ export const toUnsavedChangesComparable = (
 ): Omit<FieldMeasure, 'calculationMethod'> =>
   omit(
     clearAutoParameter15C(
-      Object.values(TANGENT_AIMING_MODES).reduce(
-        (data, mode) => mode.applyDefaults(data, defaultLeftSupport),
-        measureData
+      applyPepDefaults(
+        Object.values(TANGENT_AIMING_MODES).reduce(
+          (data, mode) => mode.applyDefaults(data, defaultLeftSupport),
+          measureData
+        ),
+        defaultLeftSupport
       )
     ),
     'calculationMethod'

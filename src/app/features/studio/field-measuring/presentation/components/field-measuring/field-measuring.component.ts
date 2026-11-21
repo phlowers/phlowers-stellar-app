@@ -249,6 +249,10 @@ export class FieldMeasuringComponent implements OnDestroy {
     if (mode) {
       return mode.isDataValid(measureData);
     }
+    // PEP has no result to report or export yet
+    if (measureData.calculationMethod === 'pep') {
+      return false;
+    }
     return measureData.calculationMethod !== 'papoto' || isPapotoDataValid(measureData);
   });
 

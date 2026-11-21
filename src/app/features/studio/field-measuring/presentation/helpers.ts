@@ -196,14 +196,15 @@ export const PAPOTO_INPUT_DEFAULTS = {
 
 /** Default values of the PEP calculation inputs. */
 export const PEP_INPUT_DEFAULTS = {
-  lengthBetweenSightGD: null,
-  elevationDifferenceBetweenSightGD: null,
-  xSight1: null,
-  xSight2: null,
-  xSight3: null,
-  ySight1: null,
-  ySight2: null,
-  ySight3: null
+  pepLeftSupport: null,
+  lengthBetweenSightGD: 0,
+  elevationDifferenceBetweenSightGD: 0,
+  xSight1: 0,
+  xSight2: 0,
+  xSight3: 0,
+  ySight1: 0,
+  ySight2: 0,
+  ySight3: 0
 } satisfies Partial<FieldMeasure>;
 
 /**
@@ -322,7 +323,8 @@ export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
   parameter15C: null,
   tangentAimingSupport: null,
   tangentAimingExterior: null,
-  tangentAimingInterior: null
+  tangentAimingInterior: null,
+  pep: null
 };
 
 /**
@@ -335,10 +337,13 @@ export const getActiveParameterOutput = (
   measureData: Pick<FieldMeasure, 'calculationMethod' | 'outputs'>
 ): Pick<TangentAimingSupportResult, 'parameter' | 'uncertainty'> | null => {
   const { calculationMethod, outputs } = measureData;
-  const sourceByMethod: Partial<Record<typeof calculationMethod, TangentAimingSupportResult | null>> = {
+  const sourceByMethod: Partial<
+    Record<typeof calculationMethod, Pick<TangentAimingSupportResult, 'parameter' | 'uncertainty'> | null>
+  > = {
     'tangente-aiming': outputs.tangentAimingSupport,
     'tangente-aiming-exterior': outputs.tangentAimingExterior,
-    'tangente-aiming-interior': outputs.tangentAimingInterior
+    'tangente-aiming-interior': outputs.tangentAimingInterior,
+    pep: outputs.pep ?? null
   };
   // A tangent aiming method without result yields null: it must not fall back to the PAPOTO result.
   const source = calculationMethod in sourceByMethod ? sourceByMethod[calculationMethod] : outputs.papoto;
