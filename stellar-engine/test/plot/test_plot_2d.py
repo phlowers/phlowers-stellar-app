@@ -113,5 +113,10 @@ def test_apply_manipulations_span_manip(study_base: SectionStudy):
         {'startSupport': 0, 'endSupport': 3, 'view': '3d'}, study_base
     )
     coords = result["sectionOutput"]["current"]["coords"]
-    assert "virtual_supports" in coords and coords["virtual_supports"] is not None
-    assert "virtual_insulators" in coords and coords["virtual_insulators"] is not None
+    assert (
+        "virtual_supports" in coords and coords["virtual_supports"] is not None
+    )
+    assert (
+        "virtual_insulators" in coords
+        and coords["virtual_insulators"] is not None
+    )
