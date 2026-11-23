@@ -519,7 +519,7 @@ describe('field-measure-export.helpers', () => {
         ySight2: 5,
         ySight3: 6
       });
-      const { pep } = buildParameterCalculationExport(measureData, null, mockTranslocoService).method;
+      const { pep } = buildParameterCalculationExport(measureData, null, null, mockTranslocoService).method;
       expect(pep?.sightsDeltaLength).toEqual({ value: 100, unit: 'm' });
       expect(pep?.sightsDeltaElevation).toEqual({ value: -2, unit: 'm' });
       expect(pep?.horizontalDistances).toEqual({ value: { X1: 1, X2: 2, X3: 3 }, unit: 'm' });
