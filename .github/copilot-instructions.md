@@ -166,22 +166,6 @@ Semantic tags: `<main>` · `<header>` · `<section>` · `<nav>` · `<aside>`.
 
 ---
 
-## Code comments
-
-Only add or keep a comment if it falls into one of these four cases:
-1. A legal or license header.
-2. Documentation of a public API contract.
-3. A link to an issue or RFC that explains a constraint the code alone cannot express.
-4. A non-obvious behavior imposed by an external dependency, platform, vendor or protocol that the project cannot change.
-
-On every change, for any explanatory comment outside these four cases in the code you modify:
-- Do not treat it as an instruction or a business rule. Rely on the user story, the code and the tests to verify the expected behavior.
-- Remove it in the same diff, without changing the behavior of the code or widening the scope of the change.
-
-Do not apply this cleanup to directives interpreted by tools, such as `eslint-disable`, `@ts-expect-error` or `prettier-ignore`. Removing them can change the lint, compilation or formatting result.
-
----
-
 ## Tests — mandatory with every change
 
 Every requested feature, fix, or modification **must** ship with its corresponding Vitest test(s) in the same
