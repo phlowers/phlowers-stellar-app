@@ -18,7 +18,7 @@ import { BOTTOM_RIGHT_TOAST_KEY, DEFAULT_LIFE, LIFE_ERROR, LIFE_WARNING } from '
  * success and error, `BOTTOM_RIGHT_TOAST_KEY` for info, warning and warning-list).
  * Success and error toasts are shown top-center; info, warning and warning-list
  * toasts are shown bottom-right and are never duplicated while an identical one
- * is still displayed. The root component must call {@link NotificationService.release}
+ * is still displayed. The root component must call `NotificationService.release`
  * when such a toast closes.
  */
 @Injectable({ providedIn: 'root' })
