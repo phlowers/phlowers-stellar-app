@@ -6,15 +6,21 @@
  */
 
 import { LateralDistanceType, Obstacle, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import { FormControl } from '@angular/forms';
 import {
+  EffortEstimationFormValue,
   TemperatureEstimationFormValue,
   WindPressureEstimationFormValue
 } from '@features/studio/estimations/domain/estimations.interfaces';
 import {
+  formatEffortForClipboard,
   getDefaultPointIndex,
   getEstimableObstacles,
   getPreselectedObstacleUuid,
+  maxLengthValidator,
+  roundEffortResult,
   toBoundsErrorParams,
+  toEffortEstimationInputs,
   toObstacleOptions,
   toPointOptions,
   toTemperatureEstimationInputs,
@@ -181,6 +187,97 @@ describe('estimations helpers', () => {
       ['no temperature', windFormValue({ temperature: null }), makeObstacle()]
     ])('returns null with %s', (_, value, obstacle) => {
       expect(toWindPressureEstimationInputs(value, obstacle)).toBeNull();
+    });
+  });
+
+  describe('toEffortEstimationInputs', () => {
+    const effortFormValue = (overrides: Partial<EffortEstimationFormValue> = {}): EffortEstimationFormValue => ({
+      span: { index: 2, uuid: 'support-c' },
+      referenceSupport: 'LEFT',
+      distanceToReferenceSupport: 120.5,
+      temperature: 15,
+      direction: 'UP',
+      targetDisplacement: 3,
+      ...overrides
+    });
+
+    it('measures the load position from the left support and moves the cable upward with a traction (negative mass)', () => {
+      expect(toEffortEstimationInputs(effortFormValue(), 400)).toEqual({
+        spanIndex: 2,
+        loadPositionDistance: 120.5,
+        temperature: 15,
+        targetDistance: 3,
+        bounds: [-2000, 0]
+      });
+    });
+
+    it('converts a distance from the right support', () => {
+      expect(
+        toEffortEstimationInputs(effortFormValue({ referenceSupport: 'RIGHT', distanceToReferenceSupport: 100 }), 400)
+          ?.loadPositionDistance
+      ).toBe(300);
+    });
+
+    it('moves the cable downward with a negative displacement and a weight (positive mass)', () => {
+      const inputs = toEffortEstimationInputs(effortFormValue({ direction: 'DOWN' }), 400);
+      expect(inputs?.targetDistance).toBe(-3);
+      expect(inputs?.bounds).toEqual([0, 2000]);
+    });
+
+    it('keeps zero values', () => {
+      expect(
+        toEffortEstimationInputs(
+          effortFormValue({ distanceToReferenceSupport: 0, temperature: 0, targetDisplacement: 0 }),
+          400
+        )
+      ).toEqual({ spanIndex: 2, loadPositionDistance: 0, temperature: 0, targetDistance: 0, bounds: [-2000, 0] });
+    });
+
+    it.each([
+      ['no span', effortFormValue({ span: null }), 400],
+      ['no span length', effortFormValue(), null],
+      ['no reference support', effortFormValue({ referenceSupport: null }), 400],
+      ['no distance', effortFormValue({ distanceToReferenceSupport: null }), 400],
+      ['no temperature', effortFormValue({ temperature: null }), 400],
+      ['no target displacement', effortFormValue({ targetDisplacement: null }), 400]
+    ])('returns null with %s', (_, value, spanLength) => {
+      expect(toEffortEstimationInputs(value, spanLength)).toBeNull();
+    });
+  });
+
+  describe('effort result formatting', () => {
+    it.each([
+      [-12.346, -12.35],
+      [0.004, 0],
+      [-0.004, 0],
+      [4635.8, 4635.8]
+    ])('rounds %s to %s', (value, expected) => {
+      expect(Object.is(roundEffortResult(value), expected)).toBe(true);
+    });
+
+    it('copies the displayed value with the locale decimal separator, without group separator', () => {
+      expect(formatEffortForClipboard(-4635.804, 'en')).toBe('-4635.80');
+      expect(formatEffortForClipboard(4635.806, 'fr')).toBe('4635,81');
+      expect(formatEffortForClipboard(-0.001, 'en')).toBe('0.00');
+    });
+  });
+
+  describe('maxLengthValidator', () => {
+    const validate = (value: number | string | null, max: number | null) =>
+      maxLengthValidator(() => max)(new FormControl(value));
+
+    it('reports the same error as Validators.max above the length', () => {
+      expect(validate(400.01, 400)).toEqual({ max: { max: 400, actual: 400.01 } });
+    });
+
+    it.each([
+      ['at the length', 400, 400],
+      ['below the length', 0, 400],
+      ['without length', 1000, null],
+      ['without value', null, 400],
+      ['with an empty value', '', 400]
+    ])('accepts a value %s', (_, value, max) => {
+      expect(validate(value, max)).toBeNull();
     });
   });
 });

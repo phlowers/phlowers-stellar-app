@@ -77,7 +77,7 @@ export class TemperatureEstimationComponent extends EstimationFormBase<Task.esti
     };
   }
 
-  protected toInputs(value: TemperatureEstimationFormValue, obstacle: Obstacle | null) {
+  protected toObstacleInputs(value: TemperatureEstimationFormValue, obstacle: Obstacle | null) {
     return toTemperatureEstimationInputs(value, obstacle);
   }
 }

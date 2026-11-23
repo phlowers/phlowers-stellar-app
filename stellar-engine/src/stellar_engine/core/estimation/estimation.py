@@ -404,7 +404,9 @@ def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
 
     Returns:
         The usual estimation result, whose ``extra["x_shift"]`` is the shift
-        (m) of the cable abscissa at the load point (initial minus final).
+        (m) of the cable abscissa at the load point (initial minus final),
+        plus ``effort``: the same load as ``value`` in daN (negative for a
+        traction, positive for a weight).
     """
     span_index = _index(inputs, "spanIndex")
     target_distance = _required_float(inputs, "targetDistance")
@@ -414,7 +416,7 @@ def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
     new_temperature = _optional_float(inputs, "temperature")
     wind_pressure = _optional_float(inputs, "windPressure")
     ice_thickness = _ice_thickness_meters(inputs)
-    return _solve(
+    result = _solve(
         "Load",
         lambda kwargs: study.estimation_engine.estimate_load_relative(
             span_index=span_index,
@@ -428,6 +430,10 @@ def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
         ),
         _bounds(inputs),
     )
+    return {
+        **result,
+        "effort": float(units(result["value"], "kg").to("daN").magnitude),
+    }
 
 
 def estimate_rope(inputs: dict, study: SectionStudy) -> dict:

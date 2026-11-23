@@ -6,14 +6,21 @@
  */
 
 import { formatNumber } from '@angular/common';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
-import { EstimateMinimumDistanceWindInputs, EstimateTemperatureInputs } from '@services/worker_python/tasks/types';
+import {
+  EstimateLoadRelativeInputs,
+  EstimateMinimumDistanceWindInputs,
+  EstimateTemperatureInputs
+} from '@services/worker_python/tasks/types';
 import {
   BOUNDS_ERROR_FORMAT,
   CONFORMITY_TEMPERATURE_BOUNDS,
+  EFFORT_MAX_LOAD_MASS,
   MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS
 } from '@features/studio/estimations/domain/estimations.constantes';
 import {
+  EffortEstimationFormValue,
   EstimationObstacleFormValue,
   EstimationObstacleOption,
   EstimationObstaclePointInputs,
@@ -111,4 +118,63 @@ export function toBoundsErrorParams(
     `${formatNumber(bound, locale, BOUNDS_ERROR_FORMAT)} ${unit}`.trim()
   );
   return { lowerBound, upperBound };
+}
+
+/**
+ * Maps the effort estimation form value to the engine inputs, or null while a value or the span length is missing.
+ * The engine measures the load position from the left support and the altitude change upward: a traction (negative
+ * mass) moves the cable up, a weight (positive mass) moves it down, so the mass search interval follows the direction.
+ */
+export function toEffortEstimationInputs(
+  value: EffortEstimationFormValue,
+  spanLength: number | null
+): EstimateLoadRelativeInputs | null {
+  const { span, referenceSupport, distanceToReferenceSupport, temperature, direction, targetDisplacement } = value;
+  if (
+    span === null ||
+    spanLength === null ||
+    referenceSupport === null ||
+    distanceToReferenceSupport === null ||
+    temperature === null ||
+    targetDisplacement === null
+  ) {
+    return null;
+  }
+  const isUp = direction === 'UP';
+  return {
+    spanIndex: span.index,
+    loadPositionDistance:
+      referenceSupport === 'LEFT' ? distanceToReferenceSupport : spanLength - distanceToReferenceSupport,
+    temperature,
+    targetDistance: isUp ? targetDisplacement : -targetDisplacement,
+    bounds: isUp ? [-EFFORT_MAX_LOAD_MASS, 0] : [0, EFFORT_MAX_LOAD_MASS]
+  };
+}
+
+/** Rounds a result to the 2 displayed decimals; adding 0 turns a rounded -0 into 0. */
+export function roundEffortResult(value: number): number {
+  return Math.round(value * 100) / 100 + 0;
+}
+
+/** Text copied to the clipboard for a displayed result: the value as shown, without unit nor group separator. */
+export function formatEffortForClipboard(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: false
+  }).format(roundEffortResult(value));
+}
+
+/**
+ * Validator rejecting values above a length known from the control itself (e.g. the length of the span chosen in the
+ * same form). It reports the same `max` error as `Validators.max` and does nothing while the length is unknown.
+ */
+export function maxLengthValidator(getLength: (control: AbstractControl) => number | null): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const max = getLength(control);
+    if (max === null || control.value === null || control.value === undefined || control.value === '') {
+      return null;
+    }
+    return control.value > max ? { max: { max, actual: control.value } } : null;
+  };
 }

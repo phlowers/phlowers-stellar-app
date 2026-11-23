@@ -756,6 +756,17 @@ export interface MinimumDistanceWindEstimationResult {
 }
 
 /**
+ * Output of the estimateLoadRelative task: `value` is the load mass in kg (negative for a traction, positive for a
+ * weight), `extra.x_shift` the shift of the cable abscissa at the load point in meters (initial minus final).
+ *
+ * @category Worker Types
+ */
+export interface LoadRelativeEstimationResult extends EstimationResult {
+  // Same load as `value` in daN: negative for a traction, positive for a weight
+  effort: number;
+}
+
+/**
  * Obstacle-specific output from Python obstacle registration tasks.
  *
  * @remarks
@@ -1209,8 +1220,8 @@ export interface TaskOutputs {
   [Task.estimateTemperature]: EstimationResult;
   // Output from estimateLoad task: load mass in kg
   [Task.estimateLoad]: EstimationResult;
-  // Output from estimateLoadRelative task: load mass in kg, `extra.x_shift` is the cable abscissa shift in m
-  [Task.estimateLoadRelative]: EstimationResult;
+  // Output from estimateLoadRelative task: load mass in kg and daN, `extra.x_shift` is the cable abscissa shift in m
+  [Task.estimateLoadRelative]: LoadRelativeEstimationResult;
   // Output from estimateWind task: wind pressure in Pa
   [Task.estimateWind]: EstimationResult;
   // Output from estimateMinimumDistanceWind task: wind pressure in Pa with the minimum distance in m

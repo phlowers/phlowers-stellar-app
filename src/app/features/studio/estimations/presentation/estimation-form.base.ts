@@ -5,73 +5,48 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { computed, Directive, inject, LOCALE_ID, Signal, signal } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
-import { TranslocoService } from '@jsverse/transloco';
-import { PlotSpanService } from '@services/plot/plot-span.service';
+import { computed, Directive, inject } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
-import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
-import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { EstimationBaseInputs, Task, TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
-import { formatPythonError, formatPythonWarnings } from '@services/worker_python/tasks/python-error-messages';
-import { NotificationService } from '@core/services/notification/notification.service';
-import { LoggerService } from '@core/services/logger/logger.service';
+import { Task, TaskInputs } from '@services/worker_python/tasks/types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
-import { getRequiredNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
-import { NumberInputErrorParams } from '@shared/helpers/formErrors.interfaces';
-import { EstimationFormValue, EstimationOutcome } from '@features/studio/estimations/domain/estimations.interfaces';
+import { EstimationFormValue } from '@features/studio/estimations/domain/estimations.interfaces';
+import { EstimationCalculationBase } from '@features/studio/estimations/presentation/estimation-calculation.base';
 import {
   getDefaultPointIndex,
   getEstimableObstacles,
   getPreselectedObstacleUuid,
-  toBoundsErrorParams,
   toObstacleOptions,
   toPointOptions
 } from '@features/studio/estimations/presentation/estimations.helpers';
 
+/** Form of an estimation on an obstacle point: the obstacle point and the numeric controls specific to the estimation. */
+type EstimationObstacleForm<TValueKey extends string> = FormGroup<
+  {
+    obstacleUuid: FormControl<string | null>;
+    pointIndex: FormControl<number | null>;
+  } & Record<TValueKey, FormControl<number | null>>
+>;
+
 /**
- * Logic shared by the estimation tabs: obstacle point choice, calculation and clipboard copy. Each tab provides its
- * numeric controls, its engine task and the mapping of its form value to the task inputs.
+ * Logic shared by the estimation tabs targeting an obstacle point: its choice among the obstacles of the section.
+ * Each tab provides its numeric controls, its engine task and the mapping of its form value to the task inputs.
  */
 @Directive()
-export abstract class EstimationFormBase<TTask extends Task, TValueKey extends string> {
-  protected readonly spanService = inject(PlotSpanService);
+export abstract class EstimationFormBase<
+  TTask extends Task,
+  TValueKey extends string
+> extends EstimationCalculationBase<TTask, EstimationObstacleForm<TValueKey>, EstimationFormValue<TValueKey>> {
   private readonly obstaclesService = inject(ObstaclesService);
-  private readonly loadFormsService = inject(LoadFormsService);
-  private readonly workerPythonService = inject(WorkerPythonService);
-  protected readonly translocoService = inject(TranslocoService);
-  private readonly notificationService = inject(NotificationService);
-  private readonly logger = inject(LoggerService);
-  private readonly document = inject(DOCUMENT);
-  protected readonly locale = inject(LOCALE_ID);
 
-  /** Engine task of the estimation. */
-  protected abstract readonly task: TTask;
-  /** Transloco key of the message shown when the calculation fails without engine diagnostic. */
-  protected abstract readonly calculationFailedKey: string;
-  /** Technical log message of a calculation failure. */
-  protected abstract readonly calculationFailedLog: string;
-  /** Transloco key of the unit of the estimated value, quoted with the search bounds in the engine errors. */
-  protected readonly boundsUnitKey: string | null = null;
-
-  private readonly obstacleUuidControl = new FormControl<string | null>(null, Validators.required);
-  private readonly pointIndexControl = new FormControl<number | null>(null, Validators.required);
-
-  readonly form = new FormGroup({
-    obstacleUuid: this.obstacleUuidControl,
-    pointIndex: this.pointIndexControl,
-    ...this.createValueControls()
-  });
-
-  private readonly formValue = toSignal(this.form.valueChanges.pipe(map(() => this.rawValue())), {
-    initialValue: this.rawValue()
-  });
-  private readonly formValid = toSignal(this.form.statusChanges.pipe(map(() => this.form.valid)), {
-    initialValue: this.form.valid
-  });
+  // the controls exist once the form is built by the base constructor; the generic value keys widen their type
+  private get obstacleUuidControl(): FormControl<string | null> {
+    return this.form.controls.obstacleUuid as FormControl<string | null>;
+  }
+  private get pointIndexControl(): FormControl<number | null> {
+    return this.form.controls.pointIndex as FormControl<number | null>;
+  }
 
   /** The hint asking to choose an obstacle is only shown while none is selected. */
   readonly hasObstacle = computed(() => this.formValue().obstacleUuid !== null);
@@ -87,42 +62,13 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
     )
   );
 
-  private readonly inputs = computed(() => this.toInputs(this.formValue(), this.selectedObstacle()));
-
-  readonly isCalculating = signal(false);
-  // The section is published before the engine holds its study and load case: calculating then would use the previous
-  // (or a partially updated) study
-  readonly canCalculate = computed(
-    () =>
-      this.loadFormsService.isEngineSynchronized() &&
-      this.formValid() &&
-      this.inputs() !== null &&
-      !this.isCalculating()
-  );
-
-  private readonly outcome = signal<EstimationOutcome<TaskOutputs[TTask]> | null>(null);
-
-  /**
-   * Engine result; null hides the results frame. The engine study follows the section and the load case: a result
-   * calculated on a previous section, or before the engine study or load case changed, is not shown.
-   */
-  protected readonly result = computed(() => {
-    const outcome = this.outcome();
-    return outcome?.section === this.spanService.section() &&
-      outcome?.engineRevision === this.loadFormsService.engineRevision()
-      ? outcome.result
-      : null;
-  });
-
   constructor() {
+    super();
     // the point list follows the selected obstacle, starting on its first point
     this.obstacleUuidControl.valueChanges.pipe(takeUntilDestroyed()).subscribe((uuid) => {
       const obstacle = this.obstacles().find((candidate) => candidate.uuid === uuid) ?? null;
       this.pointIndexControl.setValue(getDefaultPointIndex(obstacle));
     });
-
-    // results only match the inputs they were calculated from
-    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.outcome.set(null));
 
     // the obstacle selected in the Studio is preselected, once the point list follows it
     this.obstacleUuidControl.setValue(
@@ -134,88 +80,20 @@ export abstract class EstimationFormBase<TTask extends Task, TValueKey extends s
   protected abstract createValueControls(): Record<TValueKey, FormControl<number | null>>;
 
   /** Engine inputs of the form value, or null while a value is missing. */
-  protected abstract toInputs(
+  protected abstract toObstacleInputs(
     value: EstimationFormValue<TValueKey>,
     obstacle: Obstacle | null
   ): TaskInputs[TTask] | null;
 
-  async calculate(): Promise<void> {
-    this.form.markAllAsTouched();
-    const inputs = this.canCalculate() ? this.inputs() : null;
-    if (!inputs) return;
-
-    const section = this.spanService.section();
-    const engineRevision = this.loadFormsService.engineRevision();
-    this.isCalculating.set(true);
-    // the result must match the inputs it is calculated from
-    this.setInputsLocked(true);
-    try {
-      const { result, error, diagnostics } = await this.workerPythonService.runTask(this.task, inputs);
-      // e.g. BalanceEngineWarning when the study had to be adjusted on the engine side, or a target out of the bounds
-      // (the closest value found is then still returned)
-      const boundsParams = toBoundsErrorParams(inputs as EstimationBaseInputs, this.boundsUnit(), this.locale);
-      for (const warning of formatPythonWarnings(diagnostics, this.translocoService, boundsParams)) {
-        this.notificationService.warning(warning);
-      }
-      if (error || !result) {
-        this.logger.error(this.calculationFailedLog, error);
-        this.outcome.set(null);
-        this.notificationService.error(
-          formatPythonError(diagnostics.find((d) => d.origin === 'exception')?.code ?? null, this.translocoService) ??
-            this.translocoService.translate(this.calculationFailedKey)
-        );
-        return;
-      }
-      this.outcome.set({ result, section, engineRevision });
-    } catch (error) {
-      this.logger.error(this.calculationFailedLog, error);
-      this.outcome.set(null);
-      this.notificationService.error(this.translocoService.translate(this.calculationFailedKey));
-    } finally {
-      this.setInputsLocked(false);
-      this.isCalculating.set(false);
-    }
+  protected createForm(): EstimationObstacleForm<TValueKey> {
+    return new FormGroup({
+      obstacleUuid: new FormControl<string | null>(null, Validators.required),
+      pointIndex: new FormControl<number | null>(null, Validators.required),
+      ...this.createValueControls()
+    });
   }
 
-  private boundsUnit(): string {
-    return this.boundsUnitKey === null ? '' : this.translocoService.translate(this.boundsUnitKey);
-  }
-
-  /** Error of a numeric control, once edited or touched. Must be called in an injection context. */
-  protected numberInputError(control: FormControl<number | null>): Signal<NumberInputErrorParams | null> {
-    return toSignal(
-      control.events.pipe(
-        map(() => (control.dirty || control.touched ? getRequiredNumberInputErrorParams(control) : null))
-      ),
-      { initialValue: null }
-    );
-  }
-
-  /** Copies a displayed result to the clipboard, notifying the outcome. */
-  protected async copyToClipboard(text: string): Promise<void> {
-    try {
-      const clipboard = this.document.defaultView?.navigator.clipboard;
-      if (!clipboard) throw new Error('Clipboard API unavailable');
-      await clipboard.writeText(text);
-      this.notificationService.success(this.translocoService.translate('common.copied-to-clipboard'));
-    } catch (error) {
-      this.logger.error('Failed to copy the estimation result', error);
-      this.notificationService.error(this.translocoService.translate('common.copy-to-clipboard-failed'));
-    }
-  }
-
-  private rawValue(): EstimationFormValue<TValueKey> {
-    return this.form.getRawValue() as EstimationFormValue<TValueKey>;
-  }
-
-  // without event: the form value and validity are unchanged
-  private setInputsLocked(locked: boolean): void {
-    for (const control of Object.values<AbstractControl>(this.form.controls)) {
-      if (locked) {
-        control.disable({ emitEvent: false });
-      } else {
-        control.enable({ emitEvent: false });
-      }
-    }
+  protected toInputs(value: EstimationFormValue<TValueKey>): TaskInputs[TTask] | null {
+    return this.toObstacleInputs(value, this.selectedObstacle());
   }
 }

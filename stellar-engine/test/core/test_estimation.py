@@ -200,14 +200,33 @@ def test_estimate_load_relative(study: SectionStudy):
         study,
     )
 
-    assert set(result) == RESULT_KEYS
+    assert set(result) == RESULT_KEYS | {"effort"}
     assert result["converged"] is True
     assert result["value"] > 0.0
+    assert result["effort"] == pytest.approx(result["value"] * 0.981)
     assert set(result["extra"]) == {"x_shift"}
     assert type(result["extra"]["x_shift"]) is float
     np.testing.assert_array_equal(
         study.balance_engine.span_loads.load_mass, masses_before
     )
+
+
+def test_estimate_load_relative_traction_moves_the_cable_up(
+    study: SectionStudy,
+):
+    result = estimation.estimate_load_relative(
+        {
+            "spanIndex": SPAN_INDEX,
+            "targetDistance": 1.0,
+            "loadPositionDistance": 100.0,
+            "bounds": [-1000.0, 0.0],
+        },
+        study,
+    )
+
+    assert result["converged"] is True
+    assert result["value"] < 0.0
+    assert result["effort"] < 0.0
 
 
 def test_estimate_load_relative_does_not_need_an_obstacle(

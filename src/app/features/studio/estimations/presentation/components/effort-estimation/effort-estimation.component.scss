@@ -1,0 +1,5 @@
+@use '../../estimation-form';
+
+@include estimation-form.result-elements;
+
+@include estimation-form.form-block('effort-estimation', 3);
