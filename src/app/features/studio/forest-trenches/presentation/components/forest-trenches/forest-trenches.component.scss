@@ -1,0 +1,313 @@
+@use 'abstract.extracts' as app;
+
+$_plot-heigth--shrink: 18.75rem;
+$_plot-heigth--expand: 75vh;
+$_plot-toggle-btn-height: 1.5625rem;
+
+%_mb-3 {
+  @apply mb-3;
+}
+
+%_mb-4 {
+  @apply mb-4;
+}
+
+%_self-end {
+  align-self: end;
+}
+
+dl,
+fieldset {
+  @apply contents;
+}
+
+dt {
+  @extend %label-style;
+}
+
+dd {
+  @extend %read-only-info;
+}
+
+legend {
+  @extend %heading-xs;
+  padding-bottom: 1rem;
+}
+
+th {
+  @apply text-left;
+  @extend %text-m-600;
+  background-color: var(--primary-50);
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+
+  &[scope='col'] {
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
+  }
+
+  &[scope='row'] {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--star-dust-300);
+}
+
+td {
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+  text-wrap: nowrap;
+}
+
+tr:has(td) {
+  &:nth-child(even) {
+    td {
+      background-color: var(--grey-white);
+    }
+  }
+
+  &:nth-child(odd) {
+    td {
+      background-color: var(--star-dust-50);
+    }
+  }
+}
+
+.form {
+  @apply grid gap-x-8 grid-cols-5 mb-3;
+  align-items: start;
+
+  grid-template-areas:
+    'titleSpan titleSpan titleSpan titleSpan titleSpan'
+    'firstLabel lastLabel nPointsLabel . .'
+    'firstInput lastInput nPointsInput . .'
+    'titleForm titleForm titleForm titleForm titleForm'
+    'tensionLabel windLabel distribTempLabel latTempLabel rulesSelectLabel'
+    'tensionInput windInput distribTempInput latTempInput rulesSelectInput'
+    '. windComplement distribTempComplement latTempComplement .'
+    'configError configError configError configError configError'
+    'submit submit submit submit submit';
+
+  &__title-span {
+    @apply justify-self-start;
+    grid-area: titleSpan;
+  }
+  &__first-support-label {
+    grid-area: firstLabel;
+    @extend %_self-end;
+  }
+  &__first-support-input {
+    grid-area: firstInput;
+    @extend %_mb-3;
+  }
+  &__last-support-label {
+    grid-area: lastLabel;
+    @extend %_self-end;
+  }
+  &__last-support-input {
+    grid-area: lastInput;
+    @extend %_mb-3;
+  }
+  &__n-points-label {
+    grid-area: nPointsLabel;
+    @extend %_self-end;
+  }
+  &__n-points-input {
+    grid-area: nPointsInput;
+    @extend %_mb-3;
+  }
+  &__title-form {
+    @apply justify-self-start;
+    grid-area: titleForm;
+  }
+  &__electric-tension-label {
+    grid-area: tensionLabel;
+    @extend %_self-end;
+  }
+  &__electric-tension-input {
+    grid-area: tensionInput;
+  }
+  &__wind-label {
+    grid-area: windLabel;
+    @extend %_self-end;
+  }
+  &__wind-input {
+    grid-area: windInput;
+  }
+  &__wind-compl {
+    grid-area: windComplement;
+    @apply grid gap-x-1 gap-y-3 items-center mt-3;
+    grid-template-columns: repeat(2, max-content);
+    @extend %_mb-3;
+  }
+  &__distrib-temp-label {
+    grid-area: distribTempLabel;
+    @extend %_self-end;
+  }
+  &__distrib-temp-input {
+    grid-area: distribTempInput;
+  }
+  &__distrib-temp-error {
+    grid-area: distribTempComplement;
+    @extend %_mb-3;
+  }
+  &__lat-temp-label {
+    grid-area: latTempLabel;
+    @extend %_self-end;
+  }
+  &__lat-temp-input {
+    grid-area: latTempInput;
+  }
+  &__lat-temp-compl {
+    grid-area: latTempComplement;
+    @extend %_mb-3;
+  }
+  &__rules-select-label {
+    grid-area: rulesSelectLabel;
+    @extend %_self-end;
+  }
+  &__rules-select-input {
+    grid-area: rulesSelectInput;
+  }
+  &__config-error {
+    grid-area: configError;
+    @extend %_mb-3;
+  }
+  &__submit {
+    @apply justify-self-end;
+    grid-area: submit;
+  }
+}
+
+.results {
+  &__separator {
+    @apply border-t my-3;
+    border-top-color: var(--star-dust-300);
+  }
+
+  &__title {
+    @apply mt-0;
+    @extend %heading-s, %_mb-4;
+    color: var(--star-dust-950);
+  }
+
+  &__cta {
+    @apply flex gap-8 items-end;
+    @extend %_mb-4;
+  }
+
+  &__span-label {
+    @extend %label-style;
+  }
+
+  &__span-select {
+    @apply flex items-stretch border rounded-md h-8; // Forcing height at 32px cause its misaligned wit next button. Not the prettiest but quickfix.
+    border-color: var(--star-dust-700);
+  }
+
+  &__span-button {
+    @apply inline-flex items-center;
+    border-color: var(--star-dust-300);
+    color: var(--star-dust-950);
+    background-color: var(--grey-white);
+    transition:
+      background-color 0.3s linear,
+      outline 0.3s linear;
+
+    &:not(:disabled):hover {
+      background-color: var(--primary-100);
+    }
+
+    &:focus-visible {
+      @extend %focus-state;
+    }
+
+    &:disabled {
+      background-color: var(--grey-0);
+      color: var(--grey-300);
+    }
+
+    &--left {
+      @apply border-r rounded-ss-md rounded-es-md;
+      padding-right: 0.375rem;
+    }
+
+    &--right {
+      @apply border-l rounded-se-md rounded-ee-md;
+      padding-left: 0.375rem;
+    }
+  }
+
+  &__span-button-icon {
+    font-size: 1.25rem;
+  }
+
+  &__span-p-select {
+    @apply flex-1 min-w-0 border-0 shadow-none;
+  }
+
+  &__plot-median-wrapper {
+    display: flex;
+    gap: 1rem;
+    transition: margin-bottom 0.3s ease-in-out;
+    margin-bottom: 2rem;
+  }
+
+  &__figure {
+    flex-grow: 1;
+    text-align: right;
+    height: $_plot-heigth--shrink + $_plot-toggle-btn-height;
+    overflow: hidden;
+    transition: height 0.3s ease-in-out 0.2s;
+  }
+
+  &__plot {
+    height: $_plot-heigth--shrink;
+  }
+
+  &__median {
+    display: block;
+    padding-top: 1.75rem;
+    min-width: 9.1875rem;
+    transition: min-width 0.3s ease-in-out;
+  }
+
+  &__table-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  &__table {
+    color: var(--star-dust-950);
+    border: 1px solid var(--star-dust-300);
+  }
+}
+
+// Enlarged graph: the form is removed with its collapse animation and the table is not rendered.
+:host(.graph-enlarged) {
+  .results {
+    &__separator {
+      display: none;
+    }
+
+    &__plot-median-wrapper {
+      margin-bottom: 0;
+    }
+
+    &__figure {
+      height: calc(#{$_plot-heigth--expand} + #{$_plot-toggle-btn-height});
+    }
+
+    &__plot {
+      height: 75vh;
+    }
+
+    &__median {
+      min-width: 0;
+    }
+  }
+}

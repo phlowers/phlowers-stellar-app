@@ -70,14 +70,14 @@
     </fieldset>
 
     <fieldset>
-      <legend class="form__title-form underline-text">{{ 'studio.conformity.form-legend' | transloco }}</legend>
+      <legend class="form__title-form underline-text">{{ 'common.form-label' | transloco }}</legend>
 
       <dl class="contents">
-        <dt class="form__electric-tension-label">{{ 'studio.conformity.electric-tension-label' | transloco }}</dt>
+        <dt class="form__electric-tension-label">{{ 'common.electric-tension-label' | transloco }}</dt>
         <dd class="form__electric-tension-input">{{ electricTensionLabel() }}</dd>
       </dl>
 
-      <label for="windZone" class="form__wind-label">{{ 'studio.conformity.wind-zone-label' | transloco }}</label>
+      <label for="windZone" class="form__wind-label">{{ 'common.wind-zone-label' | transloco }}</label>
       <p-select
         inputId="windZone"
         formControlName="windZone"
@@ -97,7 +97,7 @@
           [binary]="true"
           data-testid="conformity-wind-minus-checkbox"
         />
-        <label for="windMinus">{{ 'studio.conformity.wind-minus-label' | transloco }}</label>
+        <label for="windMinus">{{ 'common.wind-minus-label' | transloco }}</label>
 
         @if (showRedZonePresence()) {
           <p-checkbox
@@ -106,12 +106,12 @@
             [binary]="true"
             data-testid="conformity-red-zone-checkbox"
           />
-          <label for="redZonePresence">{{ 'studio.conformity.red-zone-presence-label' | transloco }}</label>
+          <label for="redZonePresence">{{ 'common.red-zone-presence-label' | transloco }}</label>
         }
       </div>
 
       <label for="repartitionTemperature" class="form__distrib-temp-label">{{
-        'studio.conformity.repartition-temperature-label' | transloco
+        'common.repartition-temperature-label' | transloco
       }}</label>
       <p-inputgroup class="form__distrib-temp-input">
         <input
@@ -164,7 +164,7 @@
         @if (lateralTemperatureRuleName()) {
           {{ lateralTemperatureRuleName() }} —
         }
-        {{ 'studio.conformity.lateral-distance-temperature-label' | transloco }}
+        {{ 'common.lateral-distance-temperature-label' | transloco }}
       </label>
       <p-inputgroup class="form__lat-temp-input">
         <input
@@ -264,9 +264,9 @@
       >
         <app-icon [icon]="isGraphEnlarged() ? 'fullscreen_exit' : 'fullscreen'" aria-hidden="true" />
         @if (isGraphEnlarged()) {
-          {{ 'studio.conformity.reduce-graphic-view-btn' | transloco }}
+          {{ 'common.reduce-graphic-view-btn' | transloco }}
         } @else {
-          {{ 'studio.conformity.enlarge-graphic-view-btn' | transloco }}
+          {{ 'common.enlarge-graphic-view-btn' | transloco }}
         }
       </button>
       <div id="conformity-plot" class="results__plot"></div>

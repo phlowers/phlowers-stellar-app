@@ -16,6 +16,7 @@ import { CableModification } from './cable-modification.model';
 import { CableSpanManipulation } from './cable-span-manipulation.model';
 import { CableSupportManipulation } from './cable-support-manipulation.model';
 import { StudioViewState } from '@shared/types/plot.types';
+import type { ForestTrenchesInputs } from '@shared/domain/models/forest-trenches.model';
 
 export interface PoseResults {
   temperatures: number[];
@@ -144,6 +145,8 @@ export interface Section {
   obstacles: Obstacle[];
   /** Array of floor (ground) profiles defined per span */
   floors?: Floor[];
+  /** Last successfully calculated forest-trenches form inputs. */
+  forest_trenches?: ForestTrenchesInputs | null;
   /** Array of initial conditions for calculations */
   initial_conditions: InitialCondition[];
   /** UUID of the currently selected initial condition */

@@ -168,6 +168,14 @@ const tasks: Record<
     function: 'get_conformity',
     externalPackages: []
   },
+  [Task.sliceGround]: {
+    function: 'slice_ground',
+    externalPackages: []
+  },
+  [Task.getForestTrenches]: {
+    function: 'get_forest_trenches',
+    externalPackages: []
+  },
   [Task.setCutStrands]: {
     function: 'set_cut_strands',
     externalPackages: []

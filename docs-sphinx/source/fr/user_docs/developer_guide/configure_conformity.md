@@ -6,6 +6,10 @@ quelles règles réglementaires leur sont applicables, les distances légales pa
 climatiques de chaque règle et les zones de vent. Aucun changement de code n’est nécessaire pour ajouter
 un type d’obstacle, une règle ou une zone de vent.
 
+Le fichier configure aussi l’outil **Tranchées forestières** de Studio, par ses blocs `forest_trenches` et
+`floor_obstacle`. Ils sont décrits dans {doc}`app/forest_trenches` et dans
+{ref}`conformity-config-forest-trenches`.
+
 Cette page décrit le fichier. La manière dont le moteur l’utilise est décrite dans {doc}`conformity` ;
 le point de vue utilisateur est présenté dans le {doc}`guide utilisateur <../user_guide/conformity>`.
 
@@ -39,7 +43,10 @@ flowchart LR
 | `obstacles[].distances[]` | `catObstacleDistances` | `CatalogObstacleDistanceEntity` |
 | `rules[]` | `catObstacleRuleDefinitions` | `CatalogObstacleRuleDefinitionEntity` |
 | `windZone.values[]` | `catObstacleWindZones` | `CatalogObstacleWindZoneEntity` |
-| `repartitionTemperatureFields`, `lateralTemperatureFields`, `windZone.default`, `intermediatePointPositions` | `catObstacleConformityConfig` (une ligne, clé `main`) | `CatalogObstacleConformityConfigEntity` |
+| `repartitionTemperatureFields`, `lateralTemperatureFields`, `windZone.default`, `intermediatePointPositions`, `forest_trenches`, `floor_obstacle` (`redZone`, `distances`) | `catObstacleConformityConfig` (une ligne, clé `main`) | `CatalogObstacleConformityConfigEntity` |
+
+Les champs `floor_obstacle.obstacleType`, `obstacleName` et `details` sont validés mais non
+stockés : le sol n’est pas un type d’obstacle du catalogue.
 
 Les entités sont dans `src/app/infrastructure/database/entities/`, et le mapping JSON→entité dans
 `src/app/shared/catalog/csv-import/configs/obstacles.config.helpers.ts`.
@@ -55,11 +62,13 @@ Les entités sont dans `src/app/infrastructure/database/entities/`, et le mappin
   "repartitionTemperatureFields": { "defaultValue": 70 },
   "lateralTemperatureFields": { "defaultValue": 65, "ruleType": "RULE_2", "message": "..." },
   "windZone": { "default": "200", "values": [ /* zones de vent */ ] },
-  "intermediatePointPositions": [0.33, 0.66]
+  "intermediatePointPositions": [0.33, 0.66],
+  "forest_trenches": { /* réglages de l’outil Tranchées forestières de Studio */ },
+  "floor_obstacle": { /* obstacle de sol de l’outil Tranchées forestières */ }
 }
 ```
 
-Les six clés de premier niveau sont obligatoires.
+Les huit clés de premier niveau sont obligatoires.
 
 ---
 
@@ -123,6 +132,7 @@ ce que la figure ne peut pas dessiner. Donnez toujours les deux distances aux ob
 et `cable_track`.
 :::
 
+(conformity-config-distances)=
 ### Distances : `distances[]`
 
 | Champ | Type | Signification |
@@ -246,6 +256,95 @@ Les deux champs de température acceptent des valeurs de 0 à 250 °C avec au pl
 
 ---
 
+(conformity-config-forest-trenches)=
+## Tranchées forestières : `forest_trenches` et `floor_obstacle`
+
+L’outil **Tranchées forestières** de Studio lit deux blocs du fichier. `forest_trenches` contient les
+réglages de l’outil, `floor_obstacle` contient l’obstacle de sol qu’il vérifie. Les deux sont stockés dans
+la ligne unique de `catObstacleConformityConfig`, et l’outil les lit via `getForestTrenchesConfig()`.
+
+```json
+"forest_trenches": {
+  "ground_n_slicing_points_choices": [5, 9, 17],
+  "overhang_rules_selected": ["RULE_1"],
+  "lateral_rules_selected": ["RULE_1", "RULE_2"],
+  "chart": {
+    "cable": { "marker": "circle", "line": "solid" },
+    "limit": { "marker": "square-open", "line": "dash" },
+    "overhang_color": "#0000FF"
+  }
+},
+"floor_obstacle": {
+  "obstacleType": "floor",
+  "obstacleName": "floor",
+  "details": "",
+  "redZone": true,
+  "conformity": "forest_trenches",
+  "distances": [
+    {
+      "ruleType": "RULE_1",
+      "active": true,
+      "overhang": { "63": 2.0, "90": 2.0, "150": 2.0, "225": 2.0, "400": 2.0 },
+      "lateral": { "63": 3.0, "90": 3.0, "150": 3.0, "225": 0.0, "400": 3.0 }
+    },
+    {
+      "ruleType": "RULE_2",
+      "active": true,
+      "overhang": { "63": 4.0, "90": 4.0, "150": 4.0, "225": 4.0, "400": 4.0 },
+      "lateral": { "63": 5.0, "90": 5.0, "150": 5.0, "225": 5.0, "400": 5.0 }
+    }
+  ]
+}
+```
+
+### `forest_trenches`
+
+| Clé | Type | Signification |
+|---|---|---|
+| `ground_n_slicing_points_choices` | tableau non vide d’entiers ≥ 2 | Choix de **Nombre de points de découpage du sol**. Le premier est la valeur par défaut. |
+| `overhang_rules_selected` | tableau de chaînes `ruleType` | Règles proposées par l’outil pour le calcul de surplomb. |
+| `lateral_rules_selected` | tableau de chaînes `ruleType` | Règles proposées par l’outil pour le calcul latéral. |
+| `chart.cable` | `{ marker, line }` | Style des courbes de câble. |
+| `chart.limit` | `{ marker, line }` | Style des courbes limites. |
+| `chart.overhang_color` | chaîne ou `null` | Couleur des courbes de câble de surplomb. `null` conserve la couleur de la règle. |
+
+Les règles proposées par l’outil sont l’union de `overhang_rules_selected` et de
+`lateral_rules_selected`. Une règle présente dans les deux listes est calculée en surplomb et en latéral ;
+une règle présente dans une seule liste n’est calculée que pour ce contrôle.
+
+Les valeurs de `marker` sont les clés de `PLOTLY_MARKER_SYMBOLS` : `circle`, `circle-open`, `square`,
+`square-open`, `diamond`, `diamond-open`, `cross`, `cross-open`, `x`, `x-open`, `triangle-up`,
+`triangle-up-open`, `triangle-down`, `triangle-down-open`, `star`, `star-open`. Les valeurs de `line` sont
+les clés de `PLOTLY_LINE_DASHES` : `none` (marqueurs seuls), `solid`, `dot`, `dash`, `longdash`,
+`dashdot`, `longdashdot`.
+
+### `floor_obstacle`
+
+| Clé | Type | Signification |
+|---|---|---|
+| `obstacleType`, `obstacleName`, `details` | chaîne | Validés seulement, non stockés. |
+| `redZone` | booléen | Valeur par défaut de la case **Présence de zone rouge** de l’outil. La case est toujours affichée. |
+| `conformity` | `"forest_trenches"` | Valeur obligatoire. |
+| `distances[]` | tableau | Même format que [`distances[]`](#conformity-config-distances). Ce sont les distances utilisées par l’outil ; les distances de `obstacles[]` ne le sont pas. |
+
+Le champ `active` d’une entrée de `distances[]` pré-sélectionne la règle dans l’outil.
+
+:::{note}
+Chaque règle sélectionnée dans l’outil a besoin à la fois :
+
+- d’une entrée dans `floor_obstacle.distances[]`, faute de quoi le calcul échoue avec
+  *Missing floor-obstacle distance for rule "…"* ;
+- d’une entrée dans `rules[]`, faute de quoi il échoue avec *Missing climatic definition for rule "…"*.
+
+Une règle `lateral` a besoin d’une table `lateral` non nulle, et une règle de surplomb d’une table
+`overhang` non nulle, faute de quoi le moteur lève une `ConformityInputError`.
+
+Un catalogue enregistré avant l’existence de ces clés n’a pas de configuration `forest_trenches` : l’outil
+affiche alors le message de configuration manquante jusqu’à la mise à jour du catalogue.
+:::
+
+---
+
 ## How to
 
 ### Ajouter un type d’obstacle
@@ -258,6 +357,15 @@ Les deux champs de température acceptent des valeurs de 0 à 250 °C avec au pl
 
 1. Ajoutez une entrée à `rules[]` avec un nouveau `ruleType` et une `color` non utilisée par les autres règles.
 2. Ajoutez une entrée `distances[]` avec ce `ruleType` à chaque type d’obstacle qui doit être vérifié.
+
+### Configurer les tranchées forestières
+
+1. Ajoutez la règle à `forest_trenches.overhang_rules_selected` et/ou
+   `forest_trenches.lateral_rules_selected`.
+2. Ajoutez une entrée `floor_obstacle.distances[]` pour cette règle, avec les cinq tensions.
+3. Vérifiez que la règle existe dans `rules[]`.
+4. Vérifiez le changement avec `npm run test -- obstacles.config` et
+   `npm run test -- forest-trenches`.
 
 ### Modifier une distance ou une condition climatique
 
@@ -278,3 +386,5 @@ les tables.
 - {doc}`conformity` — le module Python de conformité et la couche TypeScript pilotée par sa sortie.
 - {doc}`app/catalog_update` — comment le catalogue atteint la base de données hors ligne.
 - {doc}`../user_guide/conformity` — la vérification de conformité telle que la voit l’utilisateur.
+- {doc}`app/forest_trenches` — l’outil Tranchées forestières, son calcul et sa configuration de catalogue.
+- {doc}`../user_guide/forest_trenches` — l’outil Tranchées forestières tel que le voit l’utilisateur.

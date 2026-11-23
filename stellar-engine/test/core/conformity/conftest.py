@@ -226,3 +226,48 @@ def run_conformity(solved_study):
         return get_conformity(python_inputs, study)
 
     return _run_conformity
+
+
+@pytest.fixture
+def make_forest_trench_inputs(
+    solved_study, make_form, make_rule, make_distances
+):
+    def _make_forest_trench_inputs(span_indices=(0, 1), n_points=5) -> dict:
+        supports = (
+            solved_study.position_engine.get_group_points().supports.coords[
+                :, 0, :
+            ]
+        )
+        spans = []
+        for span_index in span_indices:
+            left = supports[span_index]
+            right = supports[span_index + 1]
+            length = float(np.linalg.norm(right[:2] - left[:2]))
+            spans.append(
+                {
+                    "spanIndex": span_index,
+                    "distances": np.linspace(0, length, n_points).tolist(),
+                    "altitudes": np.linspace(
+                        left[2], right[2], n_points
+                    ).tolist(),
+                }
+            )
+
+        rules = [make_rule("AT")]
+        return {
+            "electricTension": "400 KV",
+            "form": _with_rule_names(
+                make_form(
+                    conformityPlot="forest_trenches",
+                    intermediatePoints=[],
+                ),
+                rules,
+            ),
+            "rulesClimaticConditions": rules,
+            "rulesDistances": [make_distances("AT")],
+            "overhangRules": ["AT"],
+            "lateralRules": ["AT"],
+            "spans": spans,
+        }
+
+    return _make_forest_trench_inputs
