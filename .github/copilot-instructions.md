@@ -157,6 +157,22 @@ Run the targeted specs and report the result. Conventions: `.github/instructions
 
 ---
 
+## Comments — keep them up to date with every change
+
+Every feature, fix, or modification **must** leave the comments of the code it touches accurate, in the same task,
+without being asked: TSDoc of classes, methods and constants, inline comments, and header comments of files or blocks
+whose behavior, parameters, defaults, or contract changed.
+
+- Re-read the comments around each modified line and fix or delete any that became wrong (e.g. "a single `<p-toast>`"
+  after adding a second one).
+- Public API TSDoc (services, helpers, components) must describe the current behavior, including new methods and
+  new obligations for callers.
+- Scope: only the code touched by the change — do not rewrite unrelated comments.
+- Do not add comments that merely restate the code or a constant's name.
+- Update the related developer documentation (`docs-sphinx`, both `en` and `fr`) when the documented behavior changes.
+
+---
+
 ## Dead code
 
 Never delete silently. Log in `./deadcode.md` under "Pending review". Delete only after user validation.
