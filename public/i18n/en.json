@@ -73,7 +73,7 @@
     "loads-label": "Loads",
     "longitude-label": "Longitude",
     "manual-label": "Manual",
-    "marking-label": "Marking",
+    "marking-label": "Cable marking",
     "max-decimals-error": "Max decimals: {{ maxDecimals }}",
     "max-value-error": "Max. value: {{ max }}",
     "meter": "m",
@@ -130,6 +130,8 @@
     "study-label": "Study",
     "study-description-label": "Study's description",
     "success": "Success",
+    "support-emptyFilter": "No support found.",
+    "support-empty": "No support available.",    
     "support-label": "Support",
     "support-name-label": "Support name",
     "support-no-label": "Support no.",
@@ -356,7 +358,7 @@
     "studies-service": {
       "unauthorized-error": "You cannot update a study that you did not create, please duplicate it instead.",
       "unauthorized-summary": "Unauthorized",
-      "imported-from-protov4": "Study imported from protoV4"
+      "imported-from-protov4": "Study imported from Proto V4"
     },
     "app-update-service": {
       "offline-status": {
@@ -380,7 +382,7 @@
     "free-positioning-data": {
       "floor-point": "Floor #{{ index }}",
       "distance-point": "Distance #{{ index }}",
-      "marking-load": "Marking load"
+      "marking-load": "Cable marking"
     },
     "floor-form-service": {
       "cable-below-floor-detail": "The cable passes below the floor of span {{span}}",
@@ -450,7 +452,7 @@
     },
     "studio": {
       "section-caption": "Study's section graph view",
-      "no-cable-found": "No cable found",
+      "no-cable-found": "No cable found: check section's mandatory data.",
       "no-initial-condition": "No valid initial condition selected",
       "calculation-error": "Calculation error",
       "solver-did-not-converge": "Calculation error: 'Solver did not converge'",
@@ -495,8 +497,8 @@
     "position-error-notice": "Maximum support position gap: {{ error }} m on support {{ support }} (threshold {{ threshold }} m). Check your values above the threshold.",
     "from-file": {
       "file-format": "File formats: {{ formats }}",
-      "description": "You can import a section from a JSON file. It will be added to the current study.",
-      "upload-prompt": "Upload a JSON file",
+      "description": "To import a Céleste V5 or Géoliaison canton, click or drop the canton file(s) in the area below. Imported cantons are listed in the \"Cantons\" tab of the current study.",
+      "upload-prompt": "Upload one or several files",
       "import-error": "The imported section could not be found. Please try again."
     }
   },
@@ -507,8 +509,8 @@
       "go-to-study": "Go to study"
     },
     "import": {
-      "description": "You can import multiple files, they will be available in the \"My studies\" tab.",
-      "file-formats": "File formats: .csv, .clst, .stsd",
+      "description": "To import a Céleste V5 or Proto V4 study, click or drop the study file(s) in the area below. Imported studies are listed in the \"My studies\" tab.",
+      "file-formats": "File formats: Stellar study (.stsd), Céleste study (.clst), Proto V4 study (.csv)",
       "error-cable-not-found": "Cable not found in database",
       "error-import": "Error importing study",
       "error-delete": "Error deleting study",
@@ -626,7 +628,7 @@
     "col-chain-v": "Chain V",
     "col-supp-foot-alt": "Supp. foot alt.",
     "col-chain-surface": "Chain surface",
-    "col-tower": "Tower",
+    "col-tower": "Tower file",
     "col-x-lambert": "X Lambert 93",
     "col-y-lambert": "Y Lambert 93",
     "add-before": "Add support before",
@@ -666,7 +668,7 @@
       "frontier-support-label": "Frontier support"
     },
     "cable-length-change": {
-      "cable-modification-label": "Cable modification",
+      "cable-modification-label": "Modification type",
       "cable-length-mod-label": "Cable length mod.",
       "dist-to-ref-support-label": "Dist. to ref. support",
       "delete-aria-label": "delete cable length change"
@@ -677,10 +679,10 @@
     },
     "cable-span-manip": {
       "manipulated-span-label": "Manipulated span",
-      "manipulated-point-dist-ref-support-label": "Manipulated point on the cable (Dist. to ref. support)",
-      "cable-manip-type-label": "Cable manipulation type",
-      "cable-manip-method-label": "Cable manipulation method",
-      "manip-fixed-point-position-label": "Manipulation fixed point position",
+      "manipulated-point-dist-ref-support-label": "Manipulated point on the cable",
+      "cable-manip-type-label": "Manipulation type",
+      "cable-manip-method-label": "Manipulation method",
+      "manip-fixed-point-position-label": "Position of the manipulation fixed point",
       "longitudinal-distance-label": "Longitudinal dist.",
       "lateral-distance-label": "Lateral dist.",
       "dist-calc-between-points-label": "Dist. calc. between points",
@@ -695,10 +697,11 @@
       "with-sling-option": "With sling"
     },
     "cable-support-manip": {
+      "manipulated-support-label": "Manipulated support",
       "manipulation-1-label": "Manipulation 1",
       "manipulation-type-label": "Manipulation type",
-      "vert-displacement-cable-label": "Vert. displacement cable",
-      "displac-manip-type-label": "displac. manip. type",
+      "vert-displacement-cable-label": "Vertical cable movement",
+      "displac-manip-type-label": "Movement type",
       "lateral-distance-label": "Lateral distance",
       "automatic-descent-label": "Automatic descent",
       "length-label": "Length",
@@ -720,8 +723,8 @@
   },
   "field-measuring": {
     "shared": {
-      "dialog-title": "Compute base parameter from terrain measurement",
-      "measure-name-unique-error": "Measure name must be unique.",
+      "dialog-title": "Ground measurements",
+      "measure-name-unique-error": "Ground measurement name must be unique.",
       "wind-speed-label": "Wind speed",
       "wind-direction-label": "Wind direction",
       "sky-cover-label": "Sky cover",
@@ -762,33 +765,33 @@
       }
     },
     "tabs": {
-      "terrain-data": "Terrain data",
+      "terrain-data": "Ground data",
       "parameter-calculation": "Parameter calculation",
       "temperature-calculation": "Temperature calculation",
-      "parameter-15c": "Parameter at 15°C without wind"
+      "parameter-15c": "Parameter at 15°C with no wind"
     },
     "actions": {
       "success-detail": "Data saved successfully"
     },
     "calculus-setting": {
-      "tangent-aiming-radio-label": "Tangent aiming (Support)",
-      "tangent-aiming-exterior-radio-label": "Tangent aiming (Exterior)",
-      "tangent-aiming-interior-radio-label": "Tangent aiming (Interior)"
+      "tangent-aiming-radio-label": "Tangent sights (Support)",
+      "tangent-aiming-exterior-radio-label": "Tangent sights (External)",
+      "tangent-aiming-interior-radio-label": "Tangent sights (Internal)"
     },
     "tangent-aiming-support": {
       "h-acc-distance-label": "Vertical dist. from device to cable attach. of left support",
-      "calculation-failed": "Failed to calculate parameter by tangent aiming"
+      "calculation-failed": "Failed to calculate parameter by tangent sights (Support)"
     },
     "tangent-aiming-exterior": {
-      "calculation-failed": "Failed to calculate parameter by tangent aiming (exterior)"
+      "calculation-failed": "Failed to calculate parameter by tangent sights (Extenal)"
     },
     "tangent-aiming-interior": {
-      "calculation-failed": "Failed to calculate parameter by tangent aiming (interior)"
+      "calculation-failed": "Failed to calculate parameter by tangent sights (Internal)"
     },
     "papoto": {
       "open-help-aria-label": "open PAPOTO help",
       "close-aria-label": "close PAPOTO help",
-      "import-station-data": "Import station's datas",
+      "import-station-data": "Import device's data",
       "mandatory-msg": "All fields are mandatory for calculus setting",
       "measured-vertical-distance-label": "Measured vert. dist. between cable attach.",
       "hl-label": "HL",
@@ -809,7 +812,7 @@
     },
     "field-datas": {
       "mandatory-msg": "All fields are mandatory",
-      "name-label": "Measure name",
+      "name-label": "Ground measurement name",
       "time-label": "Time",
       "ambient-temperature-label": "Ambient temperature"
     },
@@ -818,16 +821,16 @@
       "span-type-label": "Span type",
       "phase-number-label": "Phase number",
       "degree-addon": "°",
-      "azimuth-label": "Azimuth (clockwise — 0° North/South)",
+      "azimuth-placeholder": "Clockwise — 0° N/S",
       "localization-not-available": "Localization not available in study"
     },
     "init": {
-      "create-or-select-intro": "Create a new measurment or select an existing one",
-      "measure-name-label": "Measure's name",
+      "create-or-select-intro": "Create a new measurement or select an existing one",
+      "measure-name-label": "Ground measurement name",
       "create-measurement-button": "Create a new measurement",
-      "choose-existing-measure": "Choose an existing measure",
-      "no-measures-empty-message": "No measures",
-      "no-measures-found-empty-message": "No measures found",
+      "choose-existing-measure": "Choose an existing ground measurement",
+      "no-measures-found-empty-message": "No ground measurement found.",
+      "no-measures-empty-message": "No ground measurement available.",      
       "choose-button": "Choose",
       "tm-prefix": "TM "
     },
@@ -900,9 +903,9 @@
       "wind-incidence": "Wind incidence",
       "measured-solar-flux": "Measured solar flux",
       "temperature-uncertainty": "Temperature uncertainty",
-      "blocked-invalid-tabs": "Report and export unavailable: incomplete or invalid data in {{ tabs }}.",
-      "blocked-invalid-global": "Report and export unavailable: incomplete or invalid name, span, longitude, latitude, altitude or azimuth.",
-      "blocked-unsaved": "Save the measure first."
+      "blocked-invalid-tabs": "Report and export unavailable.  Check data in tab \"{{ tabs }}\".",
+      "blocked-invalid-global": "Report and export unavailable. Check data in header.",
+      "blocked-unsaved": "Report and export unavailable. Fill form's mandatory data and launch calculation."
     }
   },
   "studio": {
@@ -910,10 +913,10 @@
       "lateral-distance-type-label": "Lateral distance type",
       "conformity-label": "Conformity",
       "altitude-type-absolute": "Absolute (NGF)",
-      "altitude-type-relative": "Relative to support",
-      "altitude-type-relative-cable": "Relative to cable attachment",
-      "span-axis-option": "Span axis",
-      "line-axis-option": "Line axis",
+      "altitude-type-relative": "Relative support foot",
+      "altitude-type-relative-cable": "Relative cable attach.",
+      "span-axis-option": "Attachments axis",
+      "line-axis-option": "Supports axis",
       "oblique": "Oblique",
       "vertical": "Vertical",
       "horizontal": "Horizontal"
@@ -982,27 +985,27 @@
     },
     "section-plot-card": {
       "expand-details-aria-label": "Expand details",
-      "vtl-under-chain-title": "VTL (under chain)",
+      "vtl-under-chain-title": "VTL (under chain):",
       "v-label": "V:",
       "t-label": "T:",
       "l-label": "L:",
       "resultant-label": "Resultant:",
       "line-angle-label": "Line angle:",
-      "vtl-under-console-title": "VTL (under console)",
+      "vtl-under-console-title": "VTL (under console):",
       "alt-supp-foot-label": "Alt. supp foot:",
       "chain-displacement-acc-title": "Chain displacement acc.",
       "angle-balancement-label": "Angle balancement:",
       "span-length-label": "Span length:",
       "elevation-label": "Elevation:",
       "parameter-label": "Parameter:",
-      "supp-tension-max-label": "Attach. tension sup. (Tmax):",
+      "supp-tension-max-label": "Attach. high stress (Tmax):",
       "natural-length-l0-label": "Nat. length (L0):",
       "arrow-f1-label": "Arrow F1:",
       "arrow-f2-label": "Arrow F2:",
-      "horizontal-dist-acc-label": "Horizontal dist. between attach.:",
+      "horizontal-dist-acc-label": "Hor. dist. cable attach.:",
       "arc-length-la-label": "Arc length (L):",
-      "th-t0-label": "Horizontal tension (T0):",
-      "inf-tension-acc-label": "Attach. tension inf.:",
+      "th-t0-label": "Hor. tension (T0):",
+      "inf-tension-acc-label": "Attach. low stress:",
       "cable-slope-left-att-label": "Cable slope left att.:",
       "cable-slope-right-att-label": "Cable slope right att.:"
     },
@@ -1010,7 +1013,8 @@
       "x-label": "x:",
       "z-label": "z:",
       "y-label": "y:",
-      "floor": "Floor"
+      "floor": "Floor",
+      "distance": "Distances"
     },
     "studio-page": {
       "working-load-label": "Working load",
@@ -1123,7 +1127,7 @@
     },
     "distance-measuring": {
       "never-saved-hint": "This tab's data is never saved",
-      "reference-hint": "Reference support is left and altitude is taken absolute",
+      "reference-hint": "Reference support is left support and altitude is absolute (NGF).",
       "delete-points-aria-label": "delete points",
       "distance-12-label": "Distance 1-2",
       "distance-23-label": "Distance 2-3",
@@ -1135,9 +1139,10 @@
       "closing-support-point-title": "Closing support point",
       "point-title": "Point {{distance}} m",
       "point-alt-label": "Alt. point.",
-      "delete-floor-aria-label": "delete floor",
+      "delete-floor-aria-label": "delete ground",
       "min-vertical-distance-label": "Minimum vertical distance",
-      "cable-altitude-label": "Cable alt."
+      "cable-altitude-label": "Cable point alt.",
+      "ground-altitude-label": "Ground point alt."      
     },
     "l0-sum": {
       "naturals-lengths-title": "Naturals lengths L0",
@@ -1161,7 +1166,7 @@
     },
     "obstacles-table": {
       "charge-case-label": "Charge case",
-      "all-spans-option": "All spans",
+      "all-spans-option": "All",
       "number-column-label": "No.",
       "obstacle-name-column-label": "Obstacle name",
       "altitude-type-column-label": "Altitude type",
@@ -1283,7 +1288,7 @@
       "right-horizontal-angle-label": "HR horizontal angle at right support",
       "left-vertical-angle-label": "VL vertical angle at left support",
       "right-vertical-angle-label": "VR vertical angle at right support",
-      "tacheometer-horizontal-distance-label": "Tacheometer horizontal distance",
+      "tacheometer-horizontal-distance-label": "Device horizontal distance",
       "adjustment-parameter-label": "Adjustment parameter",
       "calculate-sight-angles": "Calculate the sighting angles at mid-span sag",
       "horizontal-sight-angle-label": "H horizontal sighting angle at mid-span sag",

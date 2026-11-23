@@ -121,7 +121,7 @@
   <div class="form-field">
     <label for="azimuth">
       <span>
-        <ng-container>{{ 'field-measuring.header.azimuth-label' | transloco }}</ng-container>
+        <ng-container>{{ 'common.azimuth-label' | transloco }}</ng-container>
         <sup class="mandatory">*</sup>
       </span>
     </label>
@@ -135,6 +135,7 @@
         [ngModel]="measureData().azimuth"
         (ngModelChange)="onFieldChange('azimuth', $event)"
         required
+        [attr.placeholder]="'field-measuring.header.azimuth-placeholder' | transloco"
       />
       <p-inputgroup-addon>{{ 'field-measuring.header.degree-addon' | transloco }}</p-inputgroup-addon>
     </p-inputgroup>

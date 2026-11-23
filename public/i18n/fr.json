@@ -73,7 +73,7 @@
     "loads-label": "Charges",
     "longitude-label": "Longitude",
     "manual-label": "Manuelle",
-    "marking-label": "Marquage",
+    "marking-label": "Marquage du câble",
     "max-decimals-error": "Décimales max : {{ maxDecimals }}",
     "max-value-error": "Valeur max : {{ max }}",
     "meter": "m",
@@ -130,6 +130,8 @@
     "study-label": "Étude",
     "study-description-label": "Description de l'étude",
     "success": "Succès",
+    "support-emptyFilter": "Aucun support trouvé.",
+    "support-empty": "Aucun support proposé.",
     "support-label": "Support",
     "support-name-label": "Nom de support",
     "support-no-label": "N° de support",
@@ -356,7 +358,7 @@
     "studies-service": {
       "unauthorized-error": "Vous ne pouvez pas mettre à jour une étude que vous n'avez pas créée, veuillez la dupliquer.",
       "unauthorized-summary": "Non autorisé",
-      "imported-from-protov4": "Étude importée du proto V4"
+      "imported-from-protov4": "Étude importée du Proto V4"
     },
     "app-update-service": {
       "offline-status": {
@@ -371,7 +373,7 @@
     },
     "obstacle-form-service": {
       "delete-detail": "Obstacle supprimé",
-      "delete-error-detail": "Échec de la suppression de l'obstacle",
+      "delete-error-detail": "Échec de la suppression de l'obstacle.",
       "conformity-saved-detail": "Données de conformité enregistrées",
       "distance-calculation-error-detail": "Échec du calcul des distances à l'obstacle.",
       "save-detail": "Obstacle enregistré"
@@ -379,7 +381,7 @@
     "free-positioning-data": {
       "floor-point": "Sol #{{ index }}",
       "distance-point": "Distance #{{ index }}",
-      "marking-load": "Charge de balisage"
+      "marking-load": "Marquage du câble"
     },
     "floor-form-service": {
       "cable-below-floor-detail": "Le câble passe sous le sol de la portée {{span}}",
@@ -434,7 +436,7 @@
     "new-study-modal": {
       "edit-title": "Modifier mon étude",
       "study-name-label": "Nom de l'étude",
-      "study-name-hint": "Donnez un nom à votre étude",
+      "study-name-hint": "Nommer la nouvelle étude.",
       "description-placeholder": "Saisir la description de l'étude. Rédiger impérativement des commentaires objectifs, jamais excessifs ni insultants. Toute donnée sensible (origine raciale ou ethnique, opinions politiques, philosophiques ou religieuses, appartenance syndicale, données relatives à la santé ou à la vie sexuelle, infractions, condamnations, mesure de sûreté) doit être exclue. En outre, les commentaires ne doivent pas permettre d'identifier son auteur ni d’identifier des tiers.",
       "study-created-summary": "Étude créée",
       "study-created-detail": "Étude créée avec succès",
@@ -449,7 +451,7 @@
     },
     "studio": {
       "section-caption": "Vue graphique du canton d'étude",
-      "no-cable-found": "Aucun câble trouvé",
+      "no-cable-found": "Aucun câble trouvé : vérifier les données obligatoires du canton.",
       "no-initial-condition": "Aucune condition initiale valide sélectionnée",
       "calculation-error": "Erreur de calcul",
       "solver-did-not-converge": "Erreur de calcul : 'Solver did not converge'",
@@ -494,8 +496,8 @@
     "position-error-notice": "Écart maximal de position des supports : {{ error }} m sur le support {{ support }} (seuil : {{ threshold }} m). Vérifiez vos valeurs au-delà du seuil.",
     "from-file": {
       "file-format": "Formats de fichier : {{ formats }}",
-      "description": "Vous pouvez importer un canton à partir d'un fichier JSON. Il sera ajouté à l'étude en cours.",
-      "upload-prompt": "Importer un fichier JSON",
+      "description": "Pour importer un canton Céleste V5 ou Géoliaison, cliquer ou placer le(s) fichier(s) de canton sur l'emplacement ci-dessous : les cantons importés sont listés dans l'onglet \"Cantons\" de l'étude en cours.",
+      "upload-prompt": "Importer un ou plusieurs fichiers",
       "import-error": "Le canton importé est introuvable. Veuillez réessayer."
     }
   },
@@ -506,8 +508,8 @@
       "go-to-study": "Aller à l'étude"
     },
     "import": {
-      "description": "Pour importer une étude du proto V4 ou de Céleste V5, cliquer ou placer le(s) fichier(s) d'étude sur l'emplacement ci-dessous :\nles études importées sont listées dans l'onglet \"Mes dernières études\".",
-      "file-formats": "Formats de fichiers : .csv, .clst, .stsd",
+      "description": "Pour importer une étude Céleste V5 ou Proto V4, cliquer ou placer le(s) fichier(s) d'étude sur l'emplacement ci-dessous : les études importées sont listées dans l'onglet \"Mes dernières études\".",
+      "file-formats": "Formats de fichier : Etude Stellar (.stsd), Etude Céleste (.clst), Etude proto V4 (.csv)",
       "error-cable-not-found": "Câble non trouvé dans la base de données",
       "error-import": "Erreur lors de l'importation de l'étude",
       "error-delete": "Erreur lors de la suppression de l'étude",
@@ -665,7 +667,7 @@
       "frontier-support-label": "Support frontière"
     },
     "cable-length-change": {
-      "cable-modification-label": "Modification du câble",
+      "cable-modification-label": "Type de modification",
       "cable-length-mod-label": "Modif. longueur câble",
       "dist-to-ref-support-label": "Dist. au support de réf.",
       "delete-aria-label": "Supprimer la modification de longueur du câble"
@@ -676,10 +678,10 @@
     },
     "cable-span-manip": {
       "manipulated-span-label": "Portée manipulée",
-      "manipulated-point-dist-ref-support-label": "Point manipulé sur le câble (Dist. au supp. réf.)",
-      "cable-manip-type-label": "Type de manip. du câble",
-      "cable-manip-method-label": "Moyen de manip. du câble",
-      "manip-fixed-point-position-label": "Position point fixe manipulation",
+      "manipulated-point-dist-ref-support-label": "Point manipulé sur le câble",
+      "cable-manip-type-label": "Type de manipulation",
+      "cable-manip-method-label": "Moyen de manipulation",
+      "manip-fixed-point-position-label": "Position du point fixe de la manipulation",
       "longitudinal-distance-label": "Dist. longitudinale",
       "lateral-distance-label": "Dist. latérale",
       "dist-calc-between-points-label": "Calcul distance entre points",
@@ -694,10 +696,11 @@
       "with-sling-option": "Avec élingue"
     },
     "cable-support-manip": {
+      "manipulated-support-label": "Support manipulé",
       "manipulation-1-label": "Manipulation 1",
       "manipulation-type-label": "Type de manipulation",
-      "vert-displacement-cable-label": "Déplace. verticale câble",
-      "displac-manip-type-label": "Type de déplace. manip.",
+      "vert-displacement-cable-label": "Déplacement vertical câble",
+      "displac-manip-type-label": "Type de déplacement",
       "lateral-distance-label": "Écartement latéral",
       "automatic-descent-label": "Descente automatique",
       "length-label": "Longueur",
@@ -719,8 +722,8 @@
   },
   "field-measuring": {
     "shared": {
-      "dialog-title": "Calculer le paramètre de base à partir des mesures de terrain",
-      "measure-name-unique-error": "Le nom de la mesure doit être unique.",
+      "dialog-title": "Mesures de terrain",
+      "measure-name-unique-error": "Le nom de la mesure de terrain doit être unique.",
       "wind-speed-label": "Vitesse du vent",
       "wind-direction-label": "Direction du vent",
       "sky-cover-label": "Nébulosité",
@@ -761,13 +764,13 @@
       }
     },
     "tabs": {
-      "terrain-data": "Données de terrain",
+      "terrain-data": "Données terrain",
       "parameter-calculation": "Calcul de paramètre",
       "temperature-calculation": "Calcul de température",
       "parameter-15c": "Calcul du paramètre à 15°C sans vent"
     },
     "actions": {
-      "success-detail": "Données enregistrées avec succès"
+      "success-detail": "Mesure de terrain enregistrée avec succès"
     },
     "calculus-setting": {
       "tangent-aiming-radio-label": "Visées tangentes (Support)",
@@ -776,18 +779,18 @@
     },
     "tangent-aiming-support": {
       "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",
-      "calculation-failed": "Échec du calcul du paramètre par visées tangentes"
+      "calculation-failed": "Échec du calcul du paramètre par les visées tangentes (Support)"
     },
     "tangent-aiming-exterior": {
-      "calculation-failed": "Échec du calcul du paramètre par visées tangentes (extérieur)"
+      "calculation-failed": "Échec du calcul du paramètre par les visées tangentes (Extérieur)"
     },
     "tangent-aiming-interior": {
-      "calculation-failed": "Échec du calcul du paramètre par visées tangentes (intérieur)"
+      "calculation-failed": "Échec du calcul du paramètre par les visées tangentes (Intérieur)"
     },
     "papoto": {
       "open-help-aria-label": "ouvrir l'aide de PAPOTO",
       "close-aria-label": "fermer l'aide de PAPOTO",
-      "import-station-data": "Importer les données de la station",
+      "import-station-data": "Importer les données de l'appareil",
       "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
       "measured-vertical-distance-label": "Dist. verticale entre accr. câble mesurée",
       "hl-label": "HG",
@@ -808,7 +811,7 @@
     },
     "field-datas": {
       "mandatory-msg": "Toutes les données sont obligatoires.",
-      "name-label": "Nom de la mesure",
+      "name-label": "Nom de la mesure de terrain",
       "time-label": "Heure",
       "ambient-temperature-label": "Température ambiante"
     },
@@ -817,16 +820,16 @@
       "span-type-label": "Type de canton",
       "phase-number-label": "Numéro de phase électrique",
       "degree-addon": "°",
-      "azimuth-label": "Azimut (sens horaire - 0° Nord/Sud)",
+      "azimuth-placeholder": "Sens horaire (0° N/S)",
       "localization-not-available": "Localisation non disponible dans l'étude"
     },
     "init": {
       "create-or-select-intro": "Créer une nouvelle mesure ou sélectionner une mesure existante",
-      "measure-name-label": "Nom de la mesure",
+      "measure-name-label": "Nom de la mesure de terrain",
       "create-measurement-button": "Créer une nouvelle mesure",
-      "choose-existing-measure": "Choisir une mesure existante",
-      "no-measures-empty-message": "Pas de mesure",
-      "no-measures-found-empty-message": "Pas de mesure trouvée",
+      "choose-existing-measure": "Choisir une mesure de terrain existante",
+      "no-measures-found-empty-message": "Aucune mesure de terrain trouvée",
+      "no-measures-empty-message": "Aucune mesure de terrain proposée.",
       "choose-button": "Choisir",
       "tm-prefix": "MT "
     },
@@ -899,9 +902,9 @@
       "wind-incidence": "Incidence du vent",
       "measured-solar-flux": "Flux solaire mesuré",
       "temperature-uncertainty": "Incertitude température",
-      "blocked-invalid-tabs": "Rapport et export indisponibles : données incomplètes ou invalides dans {{ tabs }}.",
-      "blocked-invalid-global": "Rapport et export indisponibles : nom, tronçon, longitude, latitude, altitude ou azimut incomplet ou invalide.",
-      "blocked-unsaved": "Enregistrez d'abord la mesure."
+      "blocked-invalid-tabs": "Rapport et export indisponibles. Vérifier les données de l'onglet \"{{ tabs }}\".",
+      "blocked-invalid-global": "Rapport et export indisponibles. Vérifier les données de l'entête.",
+      "blocked-unsaved": "Rapport et export indisponibles. Renseigner les données obligatoires du formulaire et lancer le calcul."
     }
   },
   "studio": {
@@ -909,10 +912,10 @@
       "lateral-distance-type-label": "Type de distance latérale",
       "conformity-label": "Conformité",
       "altitude-type-absolute": "Absolue (NGF)",
-      "altitude-type-relative": "Relative au support",
+      "altitude-type-relative": "Relative pied support",
       "altitude-type-relative-cable": "Relative accr. câble",
-      "span-axis-option": "Axe de la portée",
-      "line-axis-option": "Axe de ligne",
+      "span-axis-option": "Axe accr. câble",
+      "line-axis-option": "Axe supports",
       "oblique": "Oblique",
       "vertical": "Verticale",
       "horizontal": "Horizontale"
@@ -981,15 +984,15 @@
     },
     "section-plot-card": {
       "expand-details-aria-label": "Développer les détails",
-      "vtl-under-chain-title": "VHL (sous chaîne)",
+      "vtl-under-chain-title": "VHL (sous chaîne) :",
       "v-label": "V :",
       "t-label": "H :",
       "l-label": "L :",
       "resultant-label": "Résultante :",
       "line-angle-label": "Angle en ligne :",
-      "vtl-under-console-title": "VHL (sous console)",
+      "vtl-under-console-title": "VHL (sous console) :",
       "alt-supp-foot-label": "Alt. pied support :",
-      "chain-displacement-acc-title": "Déplacement chaîne acc.",
+      "chain-displacement-acc-title": "Déplacement chaîne accr. :",
       "angle-balancement-label": "Angle balancement :",
       "span-length-label": "Longueur portée :",
       "elevation-label": "Dénivelé :",
@@ -998,18 +1001,19 @@
       "natural-length-l0-label": "L. naturelle (L0) :",
       "arrow-f1-label": "Flèche F1 :",
       "arrow-f2-label": "Flèche F2 :",
-      "horizontal-dist-acc-label": "Dist. hor. entre accr. :",
+      "horizontal-dist-acc-label": "Dist. hor. accr. câble :",
       "arc-length-la-label": "L. d'arc (L) :",
       "th-t0-label": "Tension hor. (T0) :",
       "inf-tension-acc-label": "Taccr. inf. :",
       "cable-slope-left-att-label": "Pente câble accr. gauche :",
-      "cable-slope-right-att-label": "Pente câble acc. droite :"
+      "cable-slope-right-att-label": "Pente câble accr. droite :"
     },
     "free-positioning": {
       "x-label": "x :",
       "z-label": "z :",
       "y-label": "y :",
-      "floor": "Sol"
+      "floor": "Sol",
+      "distance": "Distances"
     },
     "studio-page": {
       "working-load-label": "Taux de travail",
@@ -1122,7 +1126,7 @@
     },
     "distance-measuring": {
       "never-saved-hint": "Les données de ce formulaire ne sont jamais enregistrées",
-      "reference-hint": "Le support de référence est à gauche et l'altitude est prise en valeur absolue",
+      "reference-hint": "Le support gauche est le support de référence et l'altitude est absolue (NGF).",
       "delete-points-aria-label": "Supprimer les points",
       "distance-12-label": "Distance 1-2",
       "distance-23-label": "Distance 2-3",
@@ -1131,12 +1135,13 @@
     },
     "floor": {
       "reference-support-point-title": "Point du support de référence",
-      "closing-support-point-title": "Point du support de fermeture",
+      "closing-support-point-title": "Point du support fermant",
       "point-title": "Point {{distance}} m",
       "point-alt-label": "Alt. point",
       "delete-floor-aria-label": "supprimer le sol",
       "min-vertical-distance-label": "Distance verticale minimum",
-      "cable-altitude-label": "Alt. câble"
+      "cable-altitude-label": "Alt. point câble",
+      "ground-altitude-label": "Alt. point sol"
     },
     "l0-sum": {
       "naturals-lengths-title": "Longueurs naturelles L0",
@@ -1160,7 +1165,7 @@
     },
     "obstacles-table": {
       "charge-case-label": "Cas de charge",
-      "all-spans-option": "Toutes les portées",
+      "all-spans-option": "Toutes",
       "number-column-label": "N°",
       "obstacle-name-column-label": "Nom d'obstacle",
       "altitude-type-column-label": "Type d'altitude",
@@ -1282,7 +1287,7 @@
       "right-horizontal-angle-label": "Angle HD horizontal au support D",
       "left-vertical-angle-label": "Angle VG vertical au support G",
       "right-vertical-angle-label": "Angle VD vertical au support D",
-      "tacheometer-horizontal-distance-label": "Distance horizontale du tachéomètre",
+      "tacheometer-horizontal-distance-label": "Distance horizontale de l'appareil",
       "adjustment-parameter-label": "Paramètre de réglage",
       "calculate-sight-angles": "Calculer les angles de visée sur la flèche médiane",
       "horizontal-sight-angle-label": "Angle H horizontal de visée à la flèche médiane",

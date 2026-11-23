@@ -22,7 +22,7 @@ export const FREE_POSITIONING_CATEGORIES: readonly FreePositioningCategory[] = [
 export const FREE_POSITIONING_CATEGORY_LABEL_KEYS: Record<FreePositioningCategory, string> = {
   obstacle: 'common.obstacles-label',
   floor: 'studio.free-positioning.floor',
-  distance: 'common.distance-label',
+  distance: 'studio.free-positioning.distance',
   loads: 'common.loads-label'
 };
 
