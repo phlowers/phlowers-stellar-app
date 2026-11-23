@@ -335,6 +335,13 @@ describe('toUnsavedChangesComparable', () => {
     );
   });
 
+  it('detects the emptying of a default-valued PEP input while PEP is active (RG.PEP.ENR-BTN.1)', () => {
+    const saved = createTestMeasureData({ calculationMethod: 'pep', pepLeftSupport: '0', xSight1: 0 });
+    expect(toUnsavedChangesComparable({ ...saved, xSight1: null }, '0')).not.toEqual(
+      toUnsavedChangesComparable(saved, '0')
+    );
+  });
+
   it('ignores the stale automatic 15°C result but not an input edit', () => {
     const data = createTestMeasureData({ calculationMethod: 'tangente-aiming', tangentSpanLength: 10 });
     const withAuto = {

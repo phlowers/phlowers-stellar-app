@@ -8,7 +8,31 @@
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { PEP_FIELD_RULES } from '@features/studio/field-measuring/presentation/components/calculus-setting/pep/pep.constantes';
 import { PepNumericField } from '@features/studio/field-measuring/presentation/components/calculus-setting/pep/pep.interfaces';
+import { NumberInputErrorParams } from '@shared/helpers/formErrors.interfaces';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
+
+const hasValidDecimals = (value: number, decimals: number): boolean =>
+  Number.isInteger(Number((value * 10 ** decimals).toFixed(6)));
+
+/**
+ * Validation error of a numeric input, as the Transloco key and params to display.
+ * @param field - The numeric input
+ * @param value - Its current value
+ * @returns The first violated rule (required, min, max, decimals), or `null` when valid
+ */
+export const getPepFieldError = (
+  field: PepNumericField,
+  value: number | null | undefined
+): NumberInputErrorParams | null => {
+  const { min, max, decimals } = PEP_FIELD_RULES[field];
+  if (typeof value !== 'number') return { key: 'common.required', params: {} };
+  if (value < min) return { key: 'common.min-value-error', params: { min } };
+  if (value > max) return { key: 'common.max-value-error', params: { max } };
+  if (!hasValidDecimals(value, decimals)) {
+    return { key: 'common.max-decimals-error', params: { maxDecimals: decimals } };
+  }
+  return null;
+};
 
 /**
  * Whether the left support is chosen and every numeric input is a number within its bounds and decimals.
@@ -17,16 +41,7 @@ import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
  */
 export const isPepDataValid = (data: FieldMeasure): boolean =>
   data.pepLeftSupport !== null &&
-  (Object.keys(PEP_FIELD_RULES) as PepNumericField[]).every((field) => {
-    const value = data[field];
-    const { min, max, decimals } = PEP_FIELD_RULES[field];
-    return (
-      typeof value === 'number' &&
-      value >= min &&
-      value <= max &&
-      Number.isInteger(Number((value * 10 ** decimals).toFixed(6)))
-    );
-  });
+  (Object.keys(PEP_FIELD_RULES) as PepNumericField[]).every((field) => getPepFieldError(field, data[field]) === null);
 
 /**
  * Options of the left support selector: every support of the section, value = support index (RG.PEP.SUP.1).
@@ -35,6 +50,17 @@ export const isPepDataValid = (data: FieldMeasure): boolean =>
  */
 export const buildPepSupportOptions = (supports: { number: string | null }[]): { label: string; value: string }[] =>
   supports.map((support, index) => ({ label: formatSupportNumber(support.number), value: index.toString() }));
+
+/**
+ * Number displayed for the left support selected in the PEP form, which stores a support index.
+ * @param supports - The section supports
+ * @param pepLeftSupport - The selected support index
+ * @returns The truncated support number, or `null` when none is selected or the support is unknown
+ */
+export const getPepLeftSupportLabel = (
+  supports: { number: string | null }[],
+  pepLeftSupport: string | null | undefined
+): string | null => buildPepSupportOptions(supports).find((option) => option.value === pepLeftSupport)?.label ?? null;
 
 /**
  * Fills the inputs left empty with their default: the departure support of the span (RG.PEP.SUP.3) and 0 for the

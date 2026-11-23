@@ -711,6 +711,14 @@ describe('FieldMeasuringComponent', () => {
       expect(component.canReportOrExport()).toBe(false);
     });
 
+    it('should stay false with PEP on a valid terrain tab, and name the parameter calculation as the reason', async () => {
+      component.measureData.set({ ...validMeasure(), calculationMethod: 'pep' });
+      await component.onSave();
+      component.activeTab.set('terrainData');
+      expect(component.canReportOrExport()).toBe(false);
+      expect(component.reportExportBlockedReason()).toContain('field-measuring.report.blocked-invalid-tabs');
+    });
+
     it('should explain nothing when the buttons are active', async () => {
       component.measureData.set(validMeasure());
       await component.onSave();

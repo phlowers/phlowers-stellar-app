@@ -356,7 +356,7 @@ describe('field-measure-report helpers', () => {
       const rows = buildParameterCalculationRows(
         measure({
           calculationMethod: 'pep',
-          leftSupport: '11',
+          pepLeftSupport: '1',
           lengthBetweenSightGD: 100,
           elevationDifferenceBetweenSightGD: 2,
           xSight2: 3,
@@ -368,6 +368,7 @@ describe('field-measure-report helpers', () => {
       );
 
       expect(findItem(rows, LABEL_KEYS.method)?.value).toBe('common.pep-label');
+      expect(findItem(rows, LABEL_KEYS.leftSupport)?.value).toBe('12');
       expect(findItem(rows, LABEL_KEYS.sightsLength)?.value).toBe('100.00 m');
       expect(findItem(rows, LABEL_KEYS.sightsElevation)?.value).toBe('2.00 m');
       expect(findItem(rows, `${LABEL_KEYS.sightX}:{"index":2}`)?.value).toBe('3.00 m');

@@ -20,6 +20,7 @@ import {
   buildSpanSupportOptions,
   getCalculatedSpanLength
 } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
+import { getPepLeftSupportLabel } from './components/calculus-setting/pep/pep.helpers';
 import { TANGENT_AIMING_REPORT_CONFIGS } from './services/field-measure-report/field-measure-report.constantes';
 import {
   TANGENT_AIMING_CALCULATION_TYPE,
@@ -367,7 +368,8 @@ export const buildParameterCalculationExport = (
     return {
       methodName: translocoService.translate(PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS.pep),
       subMethodName: null,
-      leftSupport: measureData.leftSupport,
+      // The PEP form stores the support index: export the support number it displays
+      leftSupport: getPepLeftSupportLabel(section?.supports ?? [], measureData.pepLeftSupport),
       method: { pep: buildPepMethodExport(measureData) }
     };
   }

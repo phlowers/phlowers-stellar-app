@@ -108,6 +108,10 @@ export const applyActiveTangentAimingDefaults = (
   return isOnlyHiddenInputRefilled ? normalized : mode.invalidateResult(normalized);
 };
 
+/** PEP defaults are only neutralized while PEP is inactive: its inputs are then not displayed, so emptying one is an edit. */
+const withInactivePepDefaults = (measureData: FieldMeasure, defaultLeftSupport: string | null): FieldMeasure =>
+  measureData.calculationMethod === 'pep' ? measureData : applyPepDefaults(measureData, defaultLeftSupport);
+
 /**
  * Projection of a measure used to detect unsaved changes: selecting a calculus mode is a choice, not an edit, so the
  * selected method, the defaults the selection fills in and the stale automatic 15°C result it clears are neutralized.
@@ -121,7 +125,7 @@ export const toUnsavedChangesComparable = (
 ): Omit<FieldMeasure, 'calculationMethod'> =>
   omit(
     clearAutoParameter15C(
-      applyPepDefaults(
+      withInactivePepDefaults(
         Object.values(TANGENT_AIMING_MODES).reduce(
           (data, mode) => mode.applyDefaults(data, defaultLeftSupport),
           measureData

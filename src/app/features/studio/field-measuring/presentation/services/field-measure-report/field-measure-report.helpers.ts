@@ -44,6 +44,7 @@ import {
   TANGENT_AIMING_CALCULATION_TYPE_LABEL_KEYS
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 import { Section, Study } from '@shared/domain';
+import { getPepLeftSupportLabel } from '@features/studio/field-measuring/presentation/components/calculus-setting/pep/pep.helpers';
 import { PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import { buildStudyCartouche, drawTwoColumnBulletSection, formatValue } from '@shared/pdf/pdf-primitives.helpers';
@@ -305,7 +306,11 @@ const buildTangentAimingRows = (
   ];
 };
 
-const buildPepRows = (measureData: FieldMeasure, transloco: TranslocoService): FieldMeasureReportRow[] => {
+const buildPepRows = (
+  measureData: FieldMeasure,
+  section: Section | null,
+  transloco: TranslocoService
+): FieldMeasureReportRow[] => {
   const t = (key: string): string => transloco.translate(key);
   const meters = (label: string, value: number | null): PdfBulletItem =>
     numberItem(label, value, PDF_UNITS.meters, DECIMALS.length);
@@ -319,7 +324,11 @@ const buildPepRows = (measureData: FieldMeasure, transloco: TranslocoService): F
   const intermediate = (key: string, value: number | undefined): PdfBulletItem =>
     numberItem(t(key), value, PDF_UNITS.meters, DECIMALS.parameter);
   return [
-    buildMethodRow(t(METHOD_VALUE_KEYS.pep), measureData.pepLeftSupport, transloco),
+    buildMethodRow(
+      t(METHOD_VALUE_KEYS.pep),
+      getPepLeftSupportLabel(section?.supports ?? [], measureData.pepLeftSupport),
+      transloco
+    ),
     [
       meters(t(LABEL_KEYS.sightsLength), measureData.lengthBetweenSightGD),
       meters(t(LABEL_KEYS.sightsElevation), measureData.elevationDifferenceBetweenSightGD)
@@ -347,7 +356,7 @@ export const buildParameterCalculationRows = (
     case 'papoto':
       return buildPapotoRows(measureData, litData, transloco);
     case 'pep':
-      return buildPepRows(measureData, transloco);
+      return buildPepRows(measureData, section, transloco);
     default:
       return buildTangentAimingRows(
         measureData,

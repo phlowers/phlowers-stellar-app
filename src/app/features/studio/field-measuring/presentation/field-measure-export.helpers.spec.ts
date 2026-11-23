@@ -526,6 +526,20 @@ describe('field-measure-export.helpers', () => {
       expect(pep?.verticalDistances).toEqual({ value: { Y1: 4, Y2: 5, Y3: 6 }, unit: 'm' });
     });
 
+    it('should export the displayed number of the selected pep left support', () => {
+      const measureData = createTestMeasureData({ calculationMethod: 'pep', pepLeftSupport: '1' });
+      const result = buildParameterCalculationExport(measureData, sectionWithSupports, null, mockTranslocoService);
+      expect(result.leftSupport).toBe('P43');
+      expect(
+        buildParameterCalculationExport(
+          { ...measureData, pepLeftSupport: null },
+          sectionWithSupports,
+          null,
+          mockTranslocoService
+        ).leftSupport
+      ).toBeNull();
+    });
+
     it('should export the pep intermediate and calculated parameters when a pep result exists', () => {
       const measureData = createTestMeasureData({
         calculationMethod: 'pep',

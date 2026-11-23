@@ -4,6 +4,14 @@
   // Column width is the longest label (~198px in EN), so the inputs end flush with it; shared by the form and the
   // results to keep them aligned.
   --pep-grid-columns: repeat(4, 12.5rem);
+
+  @include app.max-bp(xl) {
+    --pep-grid-columns: repeat(2, minmax(0, 12.5rem));
+  }
+
+  @include app.max-bp(sm) {
+    --pep-grid-columns: minmax(0, 12.5rem);
+  }
 }
 
 .pep {
@@ -98,6 +106,49 @@
         color: var(--star-dust-900);
       }
     }
+
+    // Two columns, then one, so the form never overflows the dialog on narrow screens or at high zoom
+    @include app.max-bp(xl) {
+      grid-template-areas:
+        'line1 line1'
+        'sights sights';
+
+      label {
+        white-space: normal;
+      }
+
+      &__line1 {
+        grid-template-areas:
+          'supportLabel supportLabel'
+          'supportInput supportInput'
+          'lengthLabel elevationLabel'
+          'lengthInput elevationInput'
+          'lengthDesc elevationDesc';
+      }
+
+      &__sights {
+        grid-template-rows: none;
+        grid-auto-flow: row;
+      }
+    }
+
+    @include app.max-bp(sm) {
+      grid-template-areas:
+        'line1'
+        'sights';
+
+      &__line1 {
+        grid-template-areas:
+          'supportLabel'
+          'supportInput'
+          'lengthLabel'
+          'lengthInput'
+          'lengthDesc'
+          'elevationLabel'
+          'elevationInput'
+          'elevationDesc';
+      }
+    }
   }
 
   &__results {
@@ -116,6 +167,23 @@
       grid-template-areas:
         'param incertainParam . .'
         'param12 param23 param13 crit';
+
+      @include app.max-bp(xl) {
+        grid-template-areas:
+          'param incertainParam'
+          'param12 param23'
+          'param13 crit';
+      }
+
+      @include app.max-bp(sm) {
+        grid-template-areas:
+          'param'
+          'incertainParam'
+          'param12'
+          'param23'
+          'param13'
+          'crit';
+      }
 
       .param {
         grid-area: param;

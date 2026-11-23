@@ -104,12 +104,47 @@ describe('Pep component', () => {
     component.calculate();
     expect(component.measureData().outputs.pep).toEqual(PEP_MOCK_RESULT);
 
-    component.updateField('pepLeftSupport', '2');
+    component.updateField('pepLeftSupport', '0');
     fixture.detectChanges();
-    expect(component.measureData().pepLeftSupport).toBe('2');
+    expect(component.measureData().pepLeftSupport).toBe('0');
     expect(component.measureData().outputs.pep).toBeNull();
-    expect(component.calculatedSpanLength()).toBe(200);
-    expect(component.calculatedElevation()).toBe(-3.25);
+    expect(component.calculatedSpanLength()).toBe(100);
+    expect(component.calculatedElevation()).toBe(5.5);
+  });
+
+  it('should have no span for the last support of the section', () => {
+    setMeasure({ pepLeftSupport: '2' });
+    expect(component.calculatedSpanLength()).toBeNull();
+    expect(component.calculatedElevation()).toBeNull();
+  });
+
+  it('should clear the automatic 15°C result on an input edit, but keep a manual one', () => {
+    const parameter15C = { parameter: 1 } as never;
+    const outputs = { ...createTestMeasureData().outputs, parameter15C };
+    setMeasure({ updateMode15C: 'auto', outputs });
+    component.updateField('xSight1', 5);
+    expect(component.measureData().outputs.parameter15C).toBeNull();
+
+    setMeasure({ updateMode15C: 'manual', outputs });
+    component.updateField('xSight1', 5);
+    expect(component.measureData().outputs.parameter15C).toBe(parameter15C);
+  });
+
+  it('should explain an invalid input and associate the message with it', () => {
+    expect(getByTestId('pep-x-sight-1-input')?.getAttribute('aria-invalid')).toBeNull();
+
+    component.updateField('xSight1', 5001);
+    fixture.detectChanges();
+    const input = getByTestId('pep-x-sight-1-input') as HTMLInputElement;
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(input.getAttribute('aria-errormessage')).toBe('xSight1-error');
+    expect(fixture.nativeElement.querySelector('#xSight1-error')?.textContent).toContain('common.max-value-error');
+
+    component.updateField('lengthBetweenSightGD', null);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('#lengthBetweenSightGD-error')?.textContent).toContain(
+      'common.required'
+    );
   });
 
   it('should disable the calculate button without left support (RG.PEP.CAL-BNT.1)', () => {

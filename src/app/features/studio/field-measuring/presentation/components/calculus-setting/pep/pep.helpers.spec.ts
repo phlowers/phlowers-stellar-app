@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { PepNumericField } from './pep.interfaces';
-import { applyPepDefaults, isPepDataValid } from './pep.helpers';
+import { applyPepDefaults, getPepFieldError, isPepDataValid } from './pep.helpers';
 
 const pepMeasure = (overrides: Partial<FieldMeasure> = {}) =>
   createTestMeasureData({ calculationMethod: 'pep', pepLeftSupport: '1', ...overrides });
@@ -39,6 +39,18 @@ describe('isPepDataValid', () => {
 
   it('rejects an empty numeric input', () => {
     expect(isPepDataValid(pepMeasure({ xSight1: null }))).toBe(false);
+  });
+});
+
+describe('getPepFieldError', () => {
+  it.each<[PepNumericField, number | null, string | null, object]>([
+    ['xSight1', null, 'common.required', {}],
+    ['xSight1', -1, 'common.min-value-error', { min: 0 }],
+    ['ySight1', 1000.01, 'common.max-value-error', { max: 1000 }],
+    ['lengthBetweenSightGD', 12.345, 'common.max-decimals-error', { maxDecimals: 2 }],
+    ['elevationDifferenceBetweenSightGD', -12.34, null, {}]
+  ])('%s = %s gives %s', (field, value, key, params) => {
+    expect(getPepFieldError(field, value)).toEqual(key ? { key, params } : null);
   });
 });
 

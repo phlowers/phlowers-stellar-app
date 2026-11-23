@@ -39,20 +39,30 @@
     <label for="lengthBetweenSightGD" class="spanLength__label">{{
       'field-measuring.pep.length-label' | transloco
     }}</label>
-    <p-inputgroup class="spanLength__input">
-      <input
-        id="lengthBetweenSightGD"
-        type="number"
-        pInputText
-        [ngModel]="measureData().lengthBetweenSightGD"
-        (ngModelChange)="updateField('lengthBetweenSightGD', $event)"
-        [min]="0"
-        aria-describedby="mandatory-pep lengthBetweenSightGD-calculated"
-        required
-        data-testid="pep-length-input"
-      />
-      <p-inputgroup-addon>m</p-inputgroup-addon>
-    </p-inputgroup>
+    <div class="spanLength__input">
+      <p-inputgroup>
+        <input
+          id="lengthBetweenSightGD"
+          type="number"
+          pInputText
+          [ngModel]="measureData().lengthBetweenSightGD"
+          (ngModelChange)="updateField('lengthBetweenSightGD', $event)"
+          [invalid]="!!fieldErrors().lengthBetweenSightGD"
+          [min]="0"
+          aria-describedby="mandatory-pep lengthBetweenSightGD-calculated"
+          [attr.aria-invalid]="fieldErrors().lengthBetweenSightGD ? 'true' : null"
+          [attr.aria-errormessage]="fieldErrors().lengthBetweenSightGD ? 'lengthBetweenSightGD-error' : null"
+          required
+          data-testid="pep-length-input"
+        />
+        <p-inputgroup-addon>m</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (fieldErrors().lengthBetweenSightGD; as error) {
+        <p-message id="lengthBetweenSightGD-error" severity="error" size="small" variant="simple" role="alert">
+          {{ error.key | transloco: error.params }}
+        </p-message>
+      }
+    </div>
     <p id="lengthBetweenSightGD-calculated" class="spanLength__desc">
       <ng-container>{{ 'common.calculated-value-label' | transloco }}</ng-container>
       @if (calculatedSpanLength() !== null) {
@@ -65,19 +75,37 @@
     <label for="elevationDifferenceBetweenSightGD" class="MED__label">{{
       'field-measuring.pep.elevation-diff-label' | transloco
     }}</label>
-    <p-inputgroup class="MED__input">
-      <input
-        id="elevationDifferenceBetweenSightGD"
-        type="number"
-        pInputText
-        [ngModel]="measureData().elevationDifferenceBetweenSightGD"
-        (ngModelChange)="updateField('elevationDifferenceBetweenSightGD', $event)"
-        aria-describedby="mandatory-pep elevationDifferenceBetweenSightGD-calculated"
-        required
-        data-testid="pep-elevation-difference-input"
-      />
-      <p-inputgroup-addon>m</p-inputgroup-addon>
-    </p-inputgroup>
+    <div class="MED__input">
+      <p-inputgroup>
+        <input
+          id="elevationDifferenceBetweenSightGD"
+          type="number"
+          pInputText
+          [ngModel]="measureData().elevationDifferenceBetweenSightGD"
+          (ngModelChange)="updateField('elevationDifferenceBetweenSightGD', $event)"
+          [invalid]="!!fieldErrors().elevationDifferenceBetweenSightGD"
+          aria-describedby="mandatory-pep elevationDifferenceBetweenSightGD-calculated"
+          [attr.aria-invalid]="fieldErrors().elevationDifferenceBetweenSightGD ? 'true' : null"
+          [attr.aria-errormessage]="
+            fieldErrors().elevationDifferenceBetweenSightGD ? 'elevationDifferenceBetweenSightGD-error' : null
+          "
+          required
+          data-testid="pep-elevation-difference-input"
+        />
+        <p-inputgroup-addon>m</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (fieldErrors().elevationDifferenceBetweenSightGD; as error) {
+        <p-message
+          id="elevationDifferenceBetweenSightGD-error"
+          severity="error"
+          size="small"
+          variant="simple"
+          role="alert"
+        >
+          {{ error.key | transloco: error.params }}
+        </p-message>
+      }
+    </div>
     <p id="elevationDifferenceBetweenSightGD-calculated" class="MED__desc">
       <ng-container>{{ 'common.calculated-value-label' | transloco }}</ng-container>
       @if (calculatedElevation() !== null) {
@@ -99,12 +127,20 @@
             pInputText
             [ngModel]="measureData()[sight.xField]"
             (ngModelChange)="updateField(sight.xField, $event)"
+            [invalid]="!!fieldErrors()[sight.xField]"
             aria-describedby="mandatory-pep"
+            [attr.aria-invalid]="fieldErrors()[sight.xField] ? 'true' : null"
+            [attr.aria-errormessage]="fieldErrors()[sight.xField] ? sight.xField + '-error' : null"
             required
             [attr.data-testid]="'pep-x-sight-' + sight.index + '-input'"
           />
           <p-inputgroup-addon>m</p-inputgroup-addon>
         </p-inputgroup>
+        @if (fieldErrors()[sight.xField]; as error) {
+          <p-message [id]="sight.xField + '-error'" severity="error" size="small" variant="simple" role="alert">
+            {{ error.key | transloco: error.params }}
+          </p-message>
+        }
       </div>
 
       <div>
@@ -116,12 +152,20 @@
             pInputText
             [ngModel]="measureData()[sight.yField]"
             (ngModelChange)="updateField(sight.yField, $event)"
+            [invalid]="!!fieldErrors()[sight.yField]"
             aria-describedby="mandatory-pep"
+            [attr.aria-invalid]="fieldErrors()[sight.yField] ? 'true' : null"
+            [attr.aria-errormessage]="fieldErrors()[sight.yField] ? sight.yField + '-error' : null"
             required
             [attr.data-testid]="'pep-y-sight-' + sight.index + '-input'"
           />
           <p-inputgroup-addon>m</p-inputgroup-addon>
         </p-inputgroup>
+        @if (fieldErrors()[sight.yField]; as error) {
+          <p-message [id]="sight.yField + '-error'" severity="error" size="small" variant="simple" role="alert">
+            {{ error.key | transloco: error.params }}
+          </p-message>
+        }
       </div>
     }
   </div>

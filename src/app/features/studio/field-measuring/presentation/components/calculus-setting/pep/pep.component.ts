@@ -5,19 +5,24 @@ import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { MessageModule } from 'primeng/message';
 import { TranslocoModule } from '@jsverse/transloco';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
+import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { getCalculatedSpanLength } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
 import {
+  PEP_FIELD_RULES,
   PEP_MOCK_RESULT,
   PEP_SIGHTS
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/pep/pep.constantes';
+import { PepNumericField } from '@features/studio/field-measuring/presentation/components/calculus-setting/pep/pep.interfaces';
 import {
   buildPepSupportOptions,
+  getPepFieldError,
   isPepDataValid
 } from '@features/studio/field-measuring/presentation/components/calculus-setting/pep/pep.helpers';
 
@@ -30,6 +35,7 @@ import {
     InputTextModule,
     InputGroupModule,
     InputGroupAddonModule,
+    MessageModule,
     IconComponent,
     ButtonComponent,
     TranslocoModule
@@ -48,14 +54,24 @@ export class PepComponent {
 
   readonly sights = PEP_SIGHTS;
 
-  readonly leftSupportOptions = computed(() => buildPepSupportOptions(this.spanService.section()?.supports ?? []));
+  private readonly supports = computed(() => this.spanService.section()?.supports ?? []);
+
+  readonly leftSupportOptions = computed(() => buildPepSupportOptions(this.supports()));
 
   readonly isFormValid = computed(() => isPepDataValid(this.measureData()));
 
-  /** Span starting at the selected left support. */
+  /** Validation error of each numeric input. */
+  readonly fieldErrors = computed(() => {
+    const data = this.measureData();
+    return Object.fromEntries(
+      (Object.keys(PEP_FIELD_RULES) as PepNumericField[]).map((field) => [field, getPepFieldError(field, data[field])])
+    ) as Record<PepNumericField, ReturnType<typeof getPepFieldError>>;
+  });
+
+  /** Span starting at the selected left support, none for the last support of the section. */
   private readonly selectedSpan = computed(() => {
     const leftIndex = Number(this.measureData().pepLeftSupport ?? Number.NaN);
-    return Number.isNaN(leftIndex) ? null : [leftIndex, leftIndex + 1];
+    return Number.isNaN(leftIndex) || leftIndex + 1 >= this.supports().length ? null : [leftIndex, leftIndex + 1];
   });
 
   readonly calculatedSpanLength = computed(() =>
@@ -67,9 +83,11 @@ export class PepComponent {
     getCalculatedSpanLength(this.selectedSpan(), this.plotService.litData()?.output_parameters.elevation)
   );
 
-  /** Writes an input; the previous result no longer matches the inputs. */
+  /** Writes an input; the previous result, and the automatic 15°C one derived from it, no longer match the inputs. */
   updateField<K extends keyof FieldMeasure>(field: K, value: FieldMeasure[K]) {
-    this.measureData.update((d) => ({ ...d, [field]: value, outputs: { ...d.outputs, pep: null } }));
+    this.measureData.update((d) =>
+      clearAutoParameter15C({ ...d, [field]: value, outputs: { ...d.outputs, pep: null } })
+    );
   }
 
   calculate() {
