@@ -10,12 +10,13 @@ mechaphlowers searches evaluate the objective at both bounds and abort on
 the first balance solver failure. ``RobustEstimation`` first reduces the
 bounds to the values the solver can solve around a reference value, then
 retries the search on bounds shrunk toward that reference when a failure
-still occurs inside them. ``is_state_solvable`` is the mechaphlowers probe
-used to build its ``is_solvable`` predicate.
+still occurs inside them. ``is_state_solvable`` and ``LoadSolvabilityProbe``
+are the mechaphlowers probes used to build its ``is_solvable`` predicate.
 """
 
 import logging
 import math
+import warnings
 from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass
@@ -51,6 +52,65 @@ def is_state_solvable(study: SectionStudy, **state) -> bool:
     return True
 
 
+class LoadSolvabilityProbe:
+    """Tell whether the balance solver succeeds with a load mass on a span.
+
+    Solves exactly like the mechaphlowers load searches, through their own
+    objective built on a copy of the balance engine (with the
+    ``fixed_conditions`` and the other loads). mechaphlowers has no public
+    single-mass solve, hence the private builder. The objective is reused
+    while the solves succeed and rebuilt after a failure, as a failed solve
+    poisons the engine. Its warnings are left to the real search.
+
+    ``brackets`` tells whether a mass already solved moves the cable at
+    least by ``target_distance``: no larger mass is needed by the search.
+    """
+
+    def __init__(
+        self,
+        study: SectionStudy,
+        span_index: int,
+        load_position_distance: float,
+        target_distance: float,
+        fixed_conditions: dict[str, float | None],
+    ) -> None:
+        self._study = study
+        self._span_index = span_index
+        self._load_position_distance = load_position_distance
+        self._target_distance = target_distance
+        self._fixed_conditions = fixed_conditions
+        self._objective: Callable[[float], float] | None = None
+        self._displacements: dict[float, float] = {}
+
+    def __call__(self, load_mass: float) -> bool:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            try:
+                if self._objective is None:
+                    engine = self._study.estimation_engine
+                    self._objective, _ = (
+                        engine._build_relative_altitude_objective__load_case(
+                            self._span_index,
+                            0.0,
+                            self._load_position_distance,
+                            self._fixed_conditions,
+                        )
+                    )
+                self._displacements[load_mass] = self._objective(load_mass)
+            except SolverError:
+                self._objective = None
+                return False
+        return True
+
+    def brackets(self, load_mass: float) -> bool:
+        displacement = self._displacements.get(load_mass)
+        if displacement is None:
+            return False
+        return (
+            displacement - self._target_distance
+        ) * self._target_distance >= 0
+
+
 @dataclass(frozen=True)
 class RobustEstimation:
     """Robust search of an estimated variable over bounds.
@@ -65,6 +125,9 @@ class RobustEstimation:
         retries: Retries of the search after a ``retried_errors`` failure.
         shrink: Fraction of each bound (from the reference) kept per retry.
         retried_errors: Solver failures triggering a retry.
+        brackets: Optional; tells whether a solvable value already brackets
+            the searched solution with the reference. The outward scan stops
+            there, as no farther value is needed by the search.
     """
 
     variable: str
@@ -75,6 +138,7 @@ class RobustEstimation:
     retries: int = 3
     shrink: float = 0.75
     retried_errors: tuple[type[Exception], ...] = (SuspectedChainReversal,)
+    brackets: Callable[[float], bool] | None = None
 
     def reference(self, bounds: Bounds) -> float:
         """Return ``neutral`` clamped into ``bounds``."""
@@ -87,7 +151,8 @@ class RobustEstimation:
         The solvable values are not always a single interval (e.g. a much
         stronger wind can solve again on reversed chains). So, from the
         reference, each side is scanned outward by ``step`` up to the first
-        failing value, then the limit is refined by bisection.
+        failing value, then the limit is refined by bisection. The scan stops
+        earlier on a value that ``brackets`` the solution.
 
         When the reference cannot be solved either, the bounds are returned
         unchanged so that the solver error reaches the user.
@@ -112,6 +177,8 @@ class RobustEstimation:
             )
             if not self.is_solvable(trial):
                 break
+            if self.brackets is not None and self.brackets(trial):
+                return trial
             last_solvable = trial
         else:
             return bound

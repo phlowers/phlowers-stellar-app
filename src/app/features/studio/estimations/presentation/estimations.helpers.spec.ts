@@ -207,7 +207,7 @@ describe('estimations helpers', () => {
         loadPositionDistance: 120.5,
         temperature: 15,
         targetDistance: 3,
-        bounds: [-2000, 0]
+        bounds: [-1000, 0]
       });
     });
 
@@ -221,7 +221,7 @@ describe('estimations helpers', () => {
     it('moves the cable downward with a negative displacement and a weight (positive mass)', () => {
       const inputs = toEffortEstimationInputs(effortFormValue({ direction: 'DOWN' }), 400);
       expect(inputs?.targetDistance).toBe(-3);
-      expect(inputs?.bounds).toEqual([0, 2000]);
+      expect(inputs?.bounds).toEqual([0, 1000]);
     });
 
     it('keeps zero values', () => {
@@ -230,7 +230,7 @@ describe('estimations helpers', () => {
           effortFormValue({ distanceToReferenceSupport: 0, temperature: 0, targetDisplacement: 0 }),
           400
         )
-      ).toEqual({ spanIndex: 2, loadPositionDistance: 0, temperature: 0, targetDistance: 0, bounds: [-2000, 0] });
+      ).toEqual({ spanIndex: 2, loadPositionDistance: 0, temperature: 0, targetDistance: 0, bounds: [-1000, 0] });
     });
 
     it.each([

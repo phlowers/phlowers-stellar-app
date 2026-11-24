@@ -384,7 +384,7 @@ describe('EffortEstimationComponent', () => {
         loadPositionDistance: 100,
         temperature: 15,
         targetDistance: 2,
-        bounds: [-2000, 0]
+        bounds: [-1000, 0]
       });
     });
 
@@ -402,7 +402,7 @@ describe('EffortEstimationComponent', () => {
         loadPositionDistance: 150.5,
         temperature: 15,
         targetDistance: -2,
-        bounds: [0, 2000]
+        bounds: [0, 1000]
       });
     });
 

@@ -64,7 +64,7 @@ export const EFFORT_TARGET_DISPLACEMENT_DEFAULT = 0;
  * Largest load mass (kg) searched by the effort estimation: the engine searches [0, max] for a weight (cable moved
  * down) and [-max, 0] for a traction (cable moved up).
  */
-export const EFFORT_MAX_LOAD_MASS = 2000;
+export const EFFORT_MAX_LOAD_MASS = 1000;
 
 /** Number format of the effort and of its displacement along the span axis: always 2 decimals. */
 export const EFFORT_RESULT_FORMAT = '1.2-2';

@@ -4,11 +4,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-"""Temperature estimation on a section imported from a ``.stsec`` file.
+"""Estimations on a section imported from a ``.stsec`` file.
 
 A target vertical distance of 1 m on the point 1 of the obstacle ``ppp`` needs
 about 315 °C, beyond the 250 °C upper bound of the Conformity temperature
 estimation: the error must tell on which side of the bounds the target lies.
+
+Its chains weigh nothing: the 1000 kg bounds of the effort estimation (UI
+``EFFORT_MAX_LOAD_MASS``) reverse them.
 """
 
 from pathlib import Path
@@ -23,8 +26,10 @@ from mechaphlowers.entities.errors import SuspectedChainReversal
 
 from stellar_engine.core.conformity.runner import find_obstacle_point
 from stellar_engine.core.estimation import estimation
+from stellar_engine.core.estimation.robust import LoadSolvabilityProbe
 from stellar_engine.core.study import initialize_study
 from stellar_engine.entities.errors import (
+    EstimationNotConvergedWarning,
     EstimationTargetAboveBoundsWarning,
     EstimationTargetBelowBoundsWarning,
 )
@@ -38,6 +43,10 @@ POINT_INDEX = 0  # "point 1" in the UI
 TARGET_VERTICAL_DISTANCE = 1.0
 # Search interval sent by the UI (CONFORMITY_TEMPERATURE_BOUNDS)
 UI_BOUNDS = [-50.0, 250.0]
+# Effort estimation: mass search intervals sent by the UI per direction (kg)
+UP_BOUNDS = [-1000.0, 0.0]
+DOWN_BOUNDS = [0.0, 1000.0]
+EFFORT_TEMPERATURE = 15.0
 
 # Fictive ASTER600 cable, in catalog units (the file only stores its name)
 CABLE = {
@@ -210,3 +219,62 @@ def test_minimum_distance_wind_with_chains_reversing_at_the_bounds(
 
     assert -1000.0 < result["value"] < 1000.0
     assert result["distance"] > 0
+
+
+def load_relative_inputs(
+    span_index: int, position: float, target: float, bounds: list[float]
+) -> dict:
+    return {
+        "spanIndex": span_index,
+        "loadPositionDistance": position,
+        "targetDistance": target,
+        "temperature": EFFORT_TEMPERATURE,
+        "bounds": bounds,
+    }
+
+
+@pytest.mark.parametrize(
+    ("span_index", "position", "target", "bounds"),
+    [(1, 300.0, 1.0, UP_BOUNDS), (0, 250.0, -1.0, DOWN_BOUNDS)],
+    ids=["up", "down"],
+)
+def test_load_relative_with_chains_reversing_at_the_bound(
+    study_and_obstacle_uuid: tuple[SectionStudy, str],
+    span_index: int,
+    position: float,
+    target: float,
+    bounds: list[float],
+):
+    """The mass search starts from no load: the reversing bound is not tried."""
+    study, _ = study_and_obstacle_uuid
+    far_bound = bounds[0] if target > 0 else bounds[1]
+    probe = LoadSolvabilityProbe(
+        study,
+        span_index,
+        position,
+        target,
+        {"new_temperature": EFFORT_TEMPERATURE},
+    )
+    assert probe(far_bound) is False
+
+    result = estimation.estimate_load_relative(
+        load_relative_inputs(span_index, position, target, bounds), study
+    )
+
+    assert result["converged"] is True
+    assert bounds[0] < result["value"] < bounds[1]
+    assert result["residual"] == pytest.approx(0.0, abs=0.01)
+
+
+def test_load_relative_beyond_the_solvable_masses_stops_at_their_limit(
+    study_and_obstacle_uuid: tuple[SectionStudy, str],
+):
+    study, _ = study_and_obstacle_uuid
+
+    with pytest.warns(EstimationNotConvergedWarning):
+        result = estimation.estimate_load_relative(
+            load_relative_inputs(0, 250.0, 100.0, UP_BOUNDS), study
+        )
+
+    assert result["converged"] is False
+    assert UP_BOUNDS[0] < result["value"] < UP_BOUNDS[1]

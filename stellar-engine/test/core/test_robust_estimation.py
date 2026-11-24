@@ -41,6 +41,22 @@ def test_solvable_bounds_scan_from_the_neutral_value_clamped_in_bounds():
     assert upper == pytest.approx(400.0, abs=1.0)
 
 
+def test_solvable_bounds_stop_on_a_value_bracketing_the_solution():
+    tried = []
+
+    def is_solvable(value):
+        tried.append(value)
+        return True
+
+    estimation = robust(is_solvable, brackets=lambda value: value <= -120.0)
+
+    lower, upper = estimation.solvable_bounds((-1000.0, 1000.0))
+
+    assert lower == -150.0
+    assert upper == 1000.0
+    assert min(tried) == -150.0
+
+
 def test_solvable_bounds_are_unchanged_when_the_reference_fails():
     estimation = robust(lambda _value: False)
 

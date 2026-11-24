@@ -71,7 +71,7 @@ Chaque tâche de recherche de racine réussie renvoie la même structure :
 
 ### Estimation robuste
 
-Les recherches de mechaphlowers évaluent la fonction objectif aux deux bornes et s'arrêtent au premier échec du solveur d'équilibre : une seule valeur d'essai non résoluble fait donc échouer toute l'estimation. `RobustEstimation` (`stellar-engine/src/stellar_engine/core/estimation/robust.py`) rend une recherche 1D robuste à ces valeurs. Elle est indépendante de mechaphlowers : l'estimation fournit un prédicat `is_solvable(value)` et un appelable `search(bounds)`, ce qui permettra de la réutiliser plus tard pour d'autres estimations. `estimate_minimum_distance_wind` en est aujourd'hui la seule utilisatrice.
+Les recherches de mechaphlowers évaluent la fonction objectif aux deux bornes et s'arrêtent au premier échec du solveur d'équilibre : une seule valeur d'essai non résoluble fait donc échouer toute l'estimation. `RobustEstimation` (`stellar-engine/src/stellar_engine/core/estimation/robust.py`) rend une recherche 1D robuste à ces valeurs. Elle est indépendante de mechaphlowers : l'estimation fournit un prédicat `is_solvable(value)` et un appelable `search(bounds)`, ce qui permettra de la réutiliser plus tard pour d'autres estimations. `estimate_minimum_distance_wind` et `estimate_load_relative` l'utilisent.
 
 | Champ | Défaut | Rôle |
 |---|---|---|
@@ -83,6 +83,7 @@ Les recherches de mechaphlowers évaluent la fonction objectif aux deux bornes e
 | `retries` | `3` | Nombre de nouvelles tentatives de la recherche après un échec `retried_errors` |
 | `shrink` | `0.75` | Fraction de chaque borne (depuis la référence) conservée à chaque nouvelle tentative |
 | `retried_errors` | `(SuspectedChainReversal,)` | Échecs du solveur qui déclenchent une nouvelle tentative |
+| `brackets` | `None` | Facultatif : indique si une valeur résoluble encadre déjà la solution avec la référence ; le balayage vers l'extérieur s'y arrête |
 
 Pour le vent, `estimate_minimum_distance_wind` fixe `tolerance=WIND_SOLVABLE_TOLERANCE` (1 Pa), `step=WIND_SOLVABLE_STEP` (50 Pa), `retries=WIND_REVERSAL_RETRIES` (3) et `shrink=WIND_REVERSAL_SHRINK` (0,75), et construit `is_solvable` avec `is_state_solvable` à la température, l'épaisseur de glace et la direction du vent fixées.
 
@@ -103,6 +104,8 @@ Résoluble sur `[-300, 400]`, en échec sur `(400, ~950)` et `(-950, -300)`, pui
 
 `is_state_solvable(study, **state)` est la sonde mechaphlowers derrière `is_solvable` : elle appelle `solve_change_state(**state)` sur une `deepcopy` du moteur d'équilibre de l'étude (sans ses observateurs, pour ne pas copier les moteurs en aval) et renvoie `False` en cas de `SolverError`. Une copie neuve est utilisée à chaque sonde, car un calcul en échec corrompt le moteur, et le moteur est résolu directement, comme dans les recherches d'estimation de mechaphlowers, plutôt que via `SectionStudy.solve_change_state`, dont le démarrage à chaud (warm start) résout plus de cas que la recherche.
 
+`LoadSolvabilityProbe(study, span_index, load_position_distance, target_distance, fixed_conditions)` est la sonde de charge : appelée avec une masse, elle résout via la fonction objectif des recherches de charge de mechaphlowers (`_build_relative_altitude_objective__load_case`, privée, car mechaphlowers n'offre pas de calcul public pour une seule masse), de sorte que les autres charges et les conditions fixées sont appliquées exactement comme dans la recherche. La fonction objectif est réutilisée tant que les calculs réussissent et reconstruite après un `SolverError`, qui la corrompt. La sonde mémorise le déplacement du câble pour chaque masse résolue, et son `brackets(mass)` vaut `True` dès que ce déplacement atteint `target_distance` : le balayage n'a pas besoin d'aller plus loin de l'absence de charge.
+
 ### Charge relative (effort)
 
 `estimateLoadRelative` (`estimate_load_relative`) ne nécessite aucun obstacle : elle estime la masse de charge donnant une variation d'altitude cible du câble à `loadPositionDistance`, par rapport au câble avant la charge. En plus des champs communs, elle renvoie `effort`, la même charge en daN (`units` de mechaphlowers, soit 1 kg = 0,981 daN), et `extra.x_shift`, le décalage (m) de l'abscisse du câble au point de charge (initiale moins finale) :
@@ -119,6 +122,8 @@ Résoluble sur `[-300, 400]`, en échec sur `(400, ~950)` et `(-950, -300)`, pui
 ```
 
 Une masse négative est une traction (le câble monte, `targetDistance` positif), une masse positive un poids (le câble descend). Les `bounds` par défaut de mechaphlowers sont `[0, 2000]` kg (poids uniquement) : une traction nécessite des `bounds` négatives, que l'onglet d'effort envoie selon le sens. L'étude reste intacte ; les charges des autres portées sont conservées et une charge existante sur la portée est remplacée.
+
+Une masse importante retourne les chaînes d'isolateurs (`SuspectedChainReversal`), en particulier une traction sur des chaînes légères, et la recherche de Brent évalue d'abord les deux bornes : la recherche est donc encapsulée dans une `RobustEstimation` (`LoadSolvabilityProbe`, `brackets`, `tolerance=LOAD_LIMIT_TOLERANCE` 10 kg, `step=LOAD_SOLVABLE_STEP` 100 kg, `retries=LOAD_REVERSAL_RETRIES` 3, `shrink=LOAD_REVERSAL_SHRINK` 0,75). Le balayage part de l'absence de charge et s'arrête sur la première masse qui atteint la cible : une cible usuelle ne coûte que quelques sondes ; une cible au-delà des masses résolubles renvoie la limite résoluble, non convergée, avec un `EstimationNotConvergedWarning`. Une borne de masse nulle est remplacée par `NO_LOAD_MASS` (±0,01 kg, la valeur de mechaphlowers pour l'absence de charge) : mechaphlowers ignore une charge d'exactement 0 kg, l'altitude serait alors lue en un autre point de la portée et le changement de signe sur les bornes perdu.
 
 ## Correspondance des erreurs et avertissements
 

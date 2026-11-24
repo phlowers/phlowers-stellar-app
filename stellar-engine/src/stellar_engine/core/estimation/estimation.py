@@ -68,6 +68,7 @@ from mechaphlowers.entities.errors import (
 )
 
 from stellar_engine.core.estimation.robust import (
+    LoadSolvabilityProbe,
     RobustEstimation,
     is_state_solvable,
 )
@@ -94,6 +95,11 @@ logger = logging.getLogger("stellar_engine")
 WIND_DIRECTION: Literal["clockwise", "anticlockwise"] = "clockwise"
 # Our default wind pressure search interval for mechaphlowers (Pa)
 DEFAULT_WIND_BOUNDS = (-1000.0, 1000.0)
+# mechaphlowers default load mass search interval of estimate_load_relative
+DEFAULT_LOAD_RELATIVE_BOUNDS = (0.0, 2000.0)
+# mechaphlowers placeholder mass (kg) for no load: a zero mass drops the load
+# point, so the altitude is then read elsewhere on the span
+NO_LOAD_MASS = 0.01
 
 # ------ Robust estimation parameters ------
 # Step (Pa) of the outward scan looking for the first unsolvable wind
@@ -102,16 +108,24 @@ WIND_SOLVABLE_STEP = 50.0
 WIND_REVERSAL_RETRIES = 3
 # Fraction of each bound (from the reference wind) kept on each retry
 WIND_REVERSAL_SHRINK = 0.75
+# Step (kg) of the outward scan looking for the first unsolvable load mass
+LOAD_SOLVABLE_STEP = 250.0
+# Retries of the relatie load search after a chain reversal
+LOAD_REVERSAL_RETRIES = 3
+# Fraction of each bound (from no load) kept on each retry
+LOAD_REVERSAL_SHRINK = 0.75
 
 # ------ Tolerances ------
 # Precision (Pa) of the limit of the solvable wind pressures
-WIND_SOLVABLE_TOLERANCE = 1.0
+WIND_SOLVABLE_TOLERANCE = 5.0
 # Tolerance for the solvable temperature (degC)
 TEMPERATURE_SOLVABLE_TOLERANCE = 1.0
 # Tolerance for the solvable rope (m)
 ROPE_SOLVABLE_TOLERANCE = 0.1
-# Tolerance for the load (N)
+# Tolerance for the load (kg)
 LOAD_SOLVABLE_TOLERANCE = 1.0
+# Precision (kg) of the limit of the solvable load masses
+LOAD_LIMIT_TOLERANCE = 10.0
 
 
 def _ice_thickness_meters(inputs: dict) -> float | None:
@@ -176,6 +190,16 @@ def _warn_not_converged(
         EstimationNotConvergedWarning,
         stacklevel=2,
     )
+
+
+def _without_zero_mass(bounds: tuple[float, float]) -> tuple[float, float]:
+    """Replace a zero mass bound by ``NO_LOAD_MASS`` inside the bounds."""
+    lower, upper = bounds
+    if upper == 0:
+        upper = -NO_LOAD_MASS
+    if lower == 0:
+        lower = NO_LOAD_MASS
+    return lower, upper
 
 
 def _solve(
@@ -402,6 +426,14 @@ def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
     support of the span), optional ``temperature``, ``windPressure`` and
     ``iceThickness``. Loads on other spans are kept.
 
+    ``RobustEstimation`` first reduces the mass ``bounds`` to the masses the
+    balance solver can solve, scanning outward from no load: a large mass
+    (traction especially) reverses the insulator chains, and the search
+    evaluates both bounds first. The scan stops on the first mass moving the
+    cable by at least ``targetDistance``. If the chains still reverse during the
+    search, the bounds are shrunk toward no load and the search retried, up
+    to ``LOAD_REVERSAL_RETRIES`` times.
+
     Returns:
         The usual estimation result, whose ``extra["x_shift"]`` is the shift
         (m) of the cable abscissa at the load point (initial minus final),
@@ -416,19 +448,41 @@ def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
     new_temperature = _optional_float(inputs, "temperature")
     wind_pressure = _optional_float(inputs, "windPressure")
     ice_thickness = _ice_thickness_meters(inputs)
-    result = _solve(
-        "Load",
-        lambda kwargs: study.estimation_engine.estimate_load_relative(
+    fixed_conditions = {
+        "new_temperature": new_temperature,
+        "wind_pressure": wind_pressure,
+        "ice_thickness": ice_thickness,
+    }
+    probe = LoadSolvabilityProbe(
+        study,
+        span_index,
+        load_position_distance,
+        target_distance,
+        fixed_conditions,
+    )
+    robust_load = RobustEstimation(
+        variable="Load",
+        is_solvable=probe,
+        tolerance=LOAD_LIMIT_TOLERANCE,
+        step=LOAD_SOLVABLE_STEP,
+        retries=LOAD_REVERSAL_RETRIES,
+        shrink=LOAD_REVERSAL_SHRINK,
+        brackets=probe.brackets,
+    )
+
+    def solve(kwargs: dict) -> EstimationResult:
+        return study.estimation_engine.estimate_load_relative(
             span_index=span_index,
             target_distance=target_distance,
             load_position_distance=load_position_distance,
-            new_temperature=new_temperature,
-            wind_pressure=wind_pressure,
-            ice_thickness=ice_thickness,
             tol=LOAD_SOLVABLE_TOLERANCE,
+            **fixed_conditions,
             **kwargs,
-        ),
-        _bounds(inputs),
+        )
+
+    result = robust_load.run(
+        lambda solvable_bounds: _solve("Load", solve, solvable_bounds),
+        _without_zero_mass(_bounds(inputs) or DEFAULT_LOAD_RELATIVE_BOUNDS),
     )
     return {
         **result,
