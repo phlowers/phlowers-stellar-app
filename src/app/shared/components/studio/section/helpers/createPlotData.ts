@@ -1,11 +1,11 @@
 import { PlotObjectsType, PlotOptions } from '@shared/types/plot.types';
-import { createDataObject, DataObject } from './createPlotDataObject';
+import { createDataObject, createVirtualSupportDataObjects, DataObject } from './createPlotDataObject';
 import { GetSectionOutput, SectionCoords } from '@services/worker_python/tasks/types';
 import { Support } from '@shared/domain/models/support.model';
 
 /**
  * Builds an array of Plotly-compatible data objects for all section object types
- * (spans, supports, insulators) from the raw computation output.
+ * (spans, supports, insulators, then the virtual supports and their insulators) from the raw computation output.
  * @category Studio
  * @param params - The raw section output from the Python computation engine.
  * @param options - Plot rendering options (view, side, support range).
@@ -31,6 +31,15 @@ export const createPlotData = (
       ) as DataObject[])
     );
   });
+  dataObjects.push(
+    ...createVirtualSupportDataObjects(
+      params.coords,
+      options.startSupport,
+      options.endSupport,
+      options.view,
+      options.side
+    )
+  );
 
   return dataObjects.flat();
 };

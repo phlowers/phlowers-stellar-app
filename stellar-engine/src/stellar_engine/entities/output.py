@@ -82,6 +82,13 @@ def get_coordinates(
         if "virtual_insulators" in all_points_dict
         else None
     )
+    # virtual_supports[k] belongs to the k-th sorted span index (span indexes
+    # before the virtual supports are inserted)
+    virtual_supports_span_indices = (
+        [int(i) for i in sorted(projected_group_points.virtual_supports_list)]
+        if virtual_supports is not None
+        else None
+    )
 
     # -------function 2: get data-----------
     vtl_under_chain = list(
@@ -120,6 +127,9 @@ def get_coordinates(
         utilization_rate,
     )
 
+    result["coords"]["virtual_supports_span_indices"] = (
+        virtual_supports_span_indices
+    )
     # Build structured obstacles and distances for the frontend renderer
     result["obstacles_formatted"] = format_sparse_points_for_plot(obstacles)
     result["distances_formatted"] = format_distances_for_plot(distances)

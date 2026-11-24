@@ -9,7 +9,7 @@
  * Union type representing the different plot object categories.
  * @category Studio
  */
-export type PlotObjectsType = 'supports' | 'insulators' | 'spans';
+export type PlotObjectsType = 'supports' | 'insulators' | 'spans' | 'virtual_supports';
 
 /**
  * Represents the rendering dimension of the plot.

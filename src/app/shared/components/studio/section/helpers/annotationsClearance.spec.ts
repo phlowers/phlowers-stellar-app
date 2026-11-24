@@ -10,6 +10,7 @@ import { CableModification, CableSupportManipulation, SpanLoad } from '@shared/d
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
 import { createCableSupportManipAnnotations } from './createCableSupportManipAnnotations';
+import { createCableSpanManipAnnotations } from './createCableSpanManipAnnotations';
 import { createCutStrandsAnnotations } from './createCutStrandsAnnotations';
 import { createLoadAnnotations, LoadType } from './createLoadAnnotations';
 import { CreatePlotParams } from './createPlot';
@@ -138,7 +139,8 @@ describe('stacking of the annotations sharing an anchor point', () => {
       PlotlyDrawings.loadPunctual,
       PlotlyDrawings.loadMarking,
       PlotlyDrawings.cableModification,
-      PlotlyDrawings.cableSupportManip
+      PlotlyDrawings.cableSupportManip,
+      PlotlyDrawings.cableSpanManip
     ].forEach((drawing) => {
       expect(drawing.iconSize).toEqual(both(loadOrCableModificationIcon.iconSize));
       expect(drawing.borderPad).toEqual(both(loadOrCableModificationIcon.borderPad));
@@ -175,6 +177,36 @@ describe('stacking of the annotations sharing an anchor point', () => {
       const manipBox = around(-cableSupportManipIcon.ay!, HALF_HEIGHT.loadOrCableModificationIcon);
 
       expect(manipBox.bottom - scissorsBox.top).toBeGreaterThanOrEqual(MIN_GAP);
+    }
+  );
+
+  // The cable span manipulation icon stands on its own anchor, the top of its virtual support (the crane), where only
+  // that support's marker is drawn: the icon box must clear the marker
+  it.each(['2d', '3d'] as const)(
+    `should leave at least ${MIN_GAP} px between the cable span manipulation icon and its crane top marker in %s`,
+    (view) => {
+      const params: CreatePlotParams = {
+        ...makePlotParams(view),
+        supports: [{ uuid: 'span-1' }, { uuid: 'support-2' }] as CreatePlotParams['supports'],
+        litData: {
+          coords: {
+            virtual_supports: [
+              [
+                [5, 0, 0],
+                [5, 0, 20]
+              ]
+            ],
+            virtual_supports_span_indices: [0]
+          },
+          output_parameters: { span_length: [10], loads_coords: {} }
+        } as unknown as CreatePlotParams['litData']
+      };
+      const icon = createCableSpanManipAnnotations(params).at(-1)!;
+
+      const iconBox = around(icon.yshift as number, HALF_HEIGHT.loadOrCableModificationIcon);
+      const markerTop = PlotlyDrawings.virtualSupport.markerSize[view] / 2;
+
+      expect(iconBox.bottom - markerTop).toBeGreaterThanOrEqual(MIN_GAP);
     }
   );
 

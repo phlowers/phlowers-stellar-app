@@ -21,6 +21,7 @@ import { LoadType } from './helpers/createLoadAnnotations';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
 import { CableSupportManipService } from '@features/studio/loads/presentation/services/cableSupportManip.service';
+import { CableSpanManipService } from '@features/studio/loads/presentation/services/cableSpanManip.service';
 import { LOAD_TAB } from '@features/studio/loads/presentation/load-tabs.constantes';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { DistanceMeasuringService } from '@features/studio/distance-measuring/distance-measuring.service';
@@ -303,6 +304,11 @@ describe('SectionPlotComponent', () => {
     clearSelectedSupport: vi.fn(() => mockCableSupportManipService.selectedSupportUuid.set(null))
   };
 
+  const mockCableSpanManipService = {
+    selectedSpanUuid: signal<string | null>(null),
+    selectSpan: vi.fn((uuid: string) => mockCableSpanManipService.selectedSpanUuid.set(uuid))
+  };
+
   const mockObstaclesService = {
     selectedMeasureUuid: signal<string | null>(null),
     activePointIndex: signal<number | null>(null),
@@ -391,6 +397,7 @@ describe('SectionPlotComponent', () => {
         { provide: LoadFormsService, useValue: mockLoadFormsService },
         { provide: CableModificationsService, useValue: mockCableModificationsService },
         { provide: CableSupportManipService, useValue: mockCableSupportManipService },
+        { provide: CableSpanManipService, useValue: mockCableSpanManipService },
         { provide: ObstacleStateService, useValue: mockObstacleStateService },
         { provide: DistanceMeasuringService, useValue: mockDistanceMeasuringService },
         { provide: FloorFormService, useValue: mockFloorFormService },
@@ -1313,6 +1320,8 @@ describe('SectionPlotComponent', () => {
       mockCableModificationsService.selectSpan.mockClear();
       mockCableSupportManipService.selectedSupportUuid.set(null);
       mockCableSupportManipService.selectSupport.mockClear();
+      mockCableSpanManipService.selectedSpanUuid.set(null);
+      mockCableSpanManipService.selectSpan.mockClear();
     });
 
     const makePlotWithCapture = () => {
@@ -1372,6 +1381,30 @@ describe('SectionPlotComponent', () => {
 
       expect(mockCableSupportManipService.selectSupport).not.toHaveBeenCalled();
       expect(mockCableSupportManipService.selectedSupportUuid()).toBeNull();
+      expect(mockSideTabsService.sideTabs()).toBeNull();
+      expect(mockLoadFormsService.activeLoadTab()).toBe('0');
+    });
+
+    it('should open Charges side tab, switch to cable span manipulation tab and pre-select the span', () => {
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({ annotation: { data: { type: 'cableSpanManip', spanUuid: 's1' } } });
+
+      expect(mockSideTabsService.sideTabs()).toBe(0);
+      expect(mockLoadFormsService.activeLoadTab()).toBe(LOAD_TAB.CABLE_SPAN_MANIP);
+      expect(mockCableSpanManipService.selectSpan).toHaveBeenCalledExactlyOnceWith('s1');
+      expect(mockCableSupportManipService.selectSupport).not.toHaveBeenCalled();
+      expect(mockCableModificationsService.selectSpan).not.toHaveBeenCalled();
+    });
+
+    it('should ignore the cable span manipulation icon in the preview, with no Loads panel to consume the selection', () => {
+      fixture.componentRef.setInput('isPreview', true);
+      component.addEventListenersToPlot(makePlotWithCapture());
+
+      capturedHandler!({ annotation: { data: { type: 'cableSpanManip', spanUuid: 's1' } } });
+
+      expect(mockCableSpanManipService.selectSpan).not.toHaveBeenCalled();
+      expect(mockCableSpanManipService.selectedSpanUuid()).toBeNull();
       expect(mockSideTabsService.sideTabs()).toBeNull();
       expect(mockLoadFormsService.activeLoadTab()).toBe('0');
     });

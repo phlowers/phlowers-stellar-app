@@ -6,6 +6,7 @@ import { Distance, GetSectionOutput, ObstacleOutput } from '@services/worker_pyt
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
 import { createCableSupportManipAnnotations } from './createCableSupportManipAnnotations';
+import { createCableSpanManipAnnotations, createCableSpanManipShapes } from './createCableSpanManipAnnotations';
 import { createCutStrandsAnnotations, createCutStrandsShapes } from './createCutStrandsAnnotations';
 import { CableModification, CableSupportManipulation, SpanLoad } from '@shared/domain';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
@@ -193,6 +194,7 @@ const createScene = (
         plotParams.cableSupportManips ?? [],
         plotParams.spanUuidToIndex ?? new Map()
       ),
+      ...createCableSpanManipAnnotations(plotParams),
       ...createCutStrandsAnnotations(plotParams),
       ...createObstaclesAnnotations(plotParams),
       ...createFloorAnnotations(toFloorParams(plotParams)),
@@ -431,12 +433,13 @@ const layout2d = (
         plotParams.cableSupportManips ?? [],
         plotParams.spanUuidToIndex ?? new Map()
       ),
+      ...createCableSpanManipAnnotations(plotParams),
       ...createCutStrandsAnnotations(plotParams),
       ...createObstaclesAnnotations(plotParams),
       ...createFloorAnnotations(toFloorParams(plotParams)),
       ...distanceAnnotations
     ],
-    shapes: createCutStrandsShapes(plotParams)
+    shapes: [...createCableSpanManipShapes(plotParams), ...createCutStrandsShapes(plotParams)]
   };
 };
 

@@ -853,6 +853,61 @@ describe('createPlot', () => {
     });
   });
 
+  describe('cable span manipulation icons', () => {
+    // The engine drew one manipulation in span 0: a virtual support whose top is the fixed point
+    const spanManipParams = () => ({
+      ...createDefaultParams(),
+      endSupport: 1,
+      supports: [{ uuid: 's0' }, { uuid: 's1' }] as Support[],
+      litData: {
+        ...mockLitData,
+        coords: {
+          ...mockLitData.coords,
+          virtual_supports: [
+            [
+              [4, 2, 0],
+              [4, 2, 35]
+            ]
+          ],
+          virtual_insulators: [
+            [
+              [4, 2, 35],
+              [5, 0, 30]
+            ]
+          ],
+          virtual_supports_span_indices: [0]
+        }
+      }
+    });
+    const isSpanManipIcon = (a: { data?: { type?: string } }) => a.data?.type === 'cableSpanManip';
+
+    it('should draw the icon in the 3D scene', () => {
+      createPlot({ ...spanManipParams(), view: '3d' });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as {
+        scene: { annotations: { data?: { type?: string } }[] };
+      };
+      expect(layoutArg.scene.annotations.filter(isSpanManipIcon)).toHaveLength(1);
+    });
+
+    it('should draw the icon in the 2D layout, its dashed line as a shape next to the cut strands one', () => {
+      createPlot({
+        ...spanManipParams(),
+        view: '2d',
+        spanUuidToIndex: new Map([['s0', 0]]),
+        cutStrands: { spanUuid: 's0', supportRef: 'LEFT', distanceSupportRef: null, cutStrands: [1], addMarking: true }
+      });
+
+      const layoutArg = (Plotly.react as Mock).mock.calls[0][2] as {
+        annotations: { data?: { type?: string } }[];
+        shapes: { type?: string; yanchor?: number }[];
+      };
+      expect(layoutArg.annotations.filter(isSpanManipIcon)).toHaveLength(1);
+      expect(layoutArg.shapes).toHaveLength(2);
+      expect(layoutArg.shapes[0]).toMatchObject({ type: 'line', yanchor: 35 });
+    });
+  });
+
   describe('modebar camera reset buttons removal', () => {
     it.each(['resetCameraDefault3d', 'resetCameraLastSave3d', 'resetScale2d', 'zoom3d', 'pan3d'])(
       'should include %s in modeBarButtonsToRemove',

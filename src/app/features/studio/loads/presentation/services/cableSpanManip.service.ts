@@ -4,7 +4,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
@@ -19,6 +19,20 @@ export class CableSpanManipService {
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
   private readonly studiesService = inject(StudiesService);
+
+  // UUID of the span to pre-select in `CableSpanManipComponent`, set when the manipulation icon is clicked on the
+  // section plot. The form calls `clearSelectedSpan` once it has consumed it, so the same span can be re-selected.
+  readonly selectedSpanUuid = signal<string | null>(null);
+
+  /** Pre-select a span in the cable span manipulation form (called from the plot click handler). */
+  selectSpan = (spanUuid: string): void => {
+    this.selectedSpanUuid.set(spanUuid);
+  };
+
+  /** Clear the pre-selection signal so the same span can be re-selected later. */
+  clearSelectedSpan = (): void => {
+    this.selectedSpanUuid.set(null);
+  };
 
   /**
    * Clear any persisted form data in memory for a given span.
