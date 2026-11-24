@@ -55,6 +55,8 @@ guide terms EN→FR), but they're kept in a single table for easier lookup and m
 | conditions nuageuses | sky condition |
 | paramètre (attention en tant que grandeur) | sag parameter |
 | wheel (dans le contexte python/pyodide) | wheel (context python/pyodide)
+| surcharger / surcharge (d'une option, d'une configuration) | to overload / overload |
+| toast (keep, notification affichée à l'utilisateur) | toast |
 
 ## Quotes & typography (English → French only)
 

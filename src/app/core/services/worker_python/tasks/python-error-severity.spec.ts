@@ -37,6 +37,7 @@ describe('PYTHON_ERROR_SEVERITY', () => {
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationNotConvergedWarning]).toBe('warning');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationTargetAboveBoundsWarning]).toBe('warning');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationTargetBelowBoundsWarning]).toBe('warning');
+    expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EngineConfigWarning]).toBe('warning');
   });
 
   it('should have both a severity and a localized message defined for every PythonErrorCode, keeping the two catalogs in sync', () => {

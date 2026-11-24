@@ -44,5 +44,6 @@ export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> 
   [PythonErrorCode.EstimationTargetAboveBoundsWarning]: 'warning',
   [PythonErrorCode.EstimationTargetBelowBoundsWarning]: 'warning',
   [PythonErrorCode.EstimationWarning]: 'warning',
-  [PythonErrorCode.ConformityInputError]: 'error'
+  [PythonErrorCode.ConformityInputError]: 'error',
+  [PythonErrorCode.EngineConfigWarning]: 'warning'
 };

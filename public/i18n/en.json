@@ -414,7 +414,8 @@
       "estimation-target-below-bounds-warning": "The target cannot be reached: it needs less than {{ lowerBound }}. The closest value found is shown.",
       "estimation-not-converged-warning": "The target cannot be reached within the estimation bounds. The closest value found is shown.",
       "estimation-warning": "The existing load on the estimated span was ignored.",
-      "conformity-input-error": "The conformity inputs are missing or invalid."
+      "conformity-input-error": "The conformity inputs are missing or invalid.",
+      "engine-config-warning": "Hidden engine options were modified from the console: results may differ from the default behaviour. See the browser console for the modified values."
     },
     "initial-condition-modal": {
       "create-title": "Create an initial condition",

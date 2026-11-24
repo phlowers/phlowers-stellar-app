@@ -62,6 +62,10 @@ export enum Task {
   setResolution = 'setResolution',
   // Get Python-side configuration constants
   getConfig = 'getConfig',
+  // Get the live value of the hidden mechaphlowers options that can be overloaded
+  getEngineConfig = 'getEngineConfig',
+  // Overload hidden mechaphlowers options (not exposed in the interface)
+  setEngineConfig = 'setEngineConfig',
   // Add obstacles in bulk
   addBulkObstacles = 'addBulkObstacles',
   // Add a single obstacle
@@ -204,7 +208,9 @@ export enum PythonErrorCode {
   // Warning raised when an existing load on the estimation target span is ignored
   EstimationWarning = 'EstimationWarning',
   // Raised when a conformity input (ground slicing, forest trenches...) is missing or invalid
-  ConformityInputError = 'ConformityInputError'
+  ConformityInputError = 'ConformityInputError',
+  // Hidden engine options were overloaded (set from the console)
+  EngineConfigWarning = 'EngineConfigWarning'
 }
 
 /**
@@ -469,6 +475,10 @@ export interface TaskInputs {
   };
   // Inputs for getConfig task: no inputs
   [Task.getConfig]: undefined;
+  // Inputs for getEngineConfig task: no inputs
+  [Task.getEngineConfig]: undefined;
+  // Inputs for setEngineConfig task: mechaphlowers option path (e.g. 'solver.acceleration.banded_jacobian.active') -> value
+  [Task.setEngineConfig]: Record<string, unknown>;
   // Inputs for addBulkObstacles task: all current obstacles to register at once
   [Task.addBulkObstacles]: {
     obstacles: Obstacle[];
@@ -1145,6 +1155,10 @@ export interface TaskOutputs {
   [Task.getConfig]: {
     resolution: number;
   };
+  // Output from getEngineConfig task: live value of every overloadable option
+  [Task.getEngineConfig]: Record<string, unknown>;
+  // Output from setEngineConfig task: the validated options that were overloaded
+  [Task.setEngineConfig]: Record<string, unknown>;
   // Output from addBulkObstacles task: registration acknowledgement
   [Task.addBulkObstacles]: { success: boolean };
   // Output from addSingleObstacle task: registration acknowledgement

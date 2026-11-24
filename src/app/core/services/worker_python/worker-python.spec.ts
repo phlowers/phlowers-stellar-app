@@ -95,6 +95,23 @@ describe('Worker', () => {
       expect(callArgs.packages).toEqual(expect.arrayContaining(allPackages));
     });
 
+    it('should run functions.py (init_config) then api.py before announcing the worker as ready', async () => {
+      vi.resetModules();
+      await import('./worker-python');
+
+      expect(mockPyodide.runPython.mock.calls.map(([content]) => content as string)).toEqual([
+        'functions.py',
+        'api.py'
+      ]);
+      const importTimeCallIndex = mockPostMessage.mock.calls.findIndex(
+        ([message]) => 'importTime' in (message as object)
+      );
+      expect(importTimeCallIndex).toBeGreaterThanOrEqual(0);
+      expect(mockPostMessage.mock.invocationCallOrder[importTimeCallIndex]).toBeGreaterThan(
+        Math.max(...mockPyodide.runPython.mock.invocationCallOrder)
+      );
+    });
+
     // it('should post load time message after Pyodide loads', async () => {
     //   await import('./worker');
     //   await new Promise((resolve) => setTimeout(resolve, 1000));

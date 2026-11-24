@@ -7,7 +7,13 @@
 
 import { TestBed } from '@angular/core/testing';
 import { TaskTimeoutError, WorkerPythonService } from './worker-python.service';
-import { Task } from './tasks/types';
+import { Task, TaskError } from './tasks/types';
+import { CONSOLE_API_NAME, ENGINE_CONFIG_STORAGE_KEY } from './engine-config.constantes';
+import { StellarConsoleApi } from './engine-config.interfaces';
+import { PythonErrorCode } from './tasks/types';
+import { LoggerService } from '@services/logger/logger.service';
+import { NotificationService } from '@services/notification/notification.service';
+import { TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import { CatalogCable, InitialCondition, Section, Support } from '@shared/domain';
 
@@ -174,7 +180,12 @@ describe('WorkerService', () => {
       return 'mocked-url';
     });
 
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: NotificationService, useValue: { warning: vi.fn() } },
+        { provide: TranslocoService, useValue: { translate: vi.fn((key: string) => key) } }
+      ]
+    });
     service = TestBed.inject(WorkerPythonService);
 
     // Spy on worker's postMessage
@@ -244,6 +255,108 @@ describe('WorkerService', () => {
       mockWorker.onmessage!({ data: { id: mockId, result: mockResult } });
 
       expect(service.handlerMap[mockId]).toHaveBeenCalledWith(mockResult, null, []);
+    });
+  });
+
+  describe('engine config', () => {
+    const lastPostedMessage = () => postMessageSpy.mock.calls.at(-1)![0] as { id: string; task: Task; inputs: unknown };
+    const ENGINE_CONFIG = { 'solver.acceleration.banded_jacobian.active': false };
+
+    beforeEach(() => {
+      localStorage.removeItem(ENGINE_CONFIG_STORAGE_KEY);
+    });
+
+    afterEach(() => {
+      delete (globalThis as unknown as Record<string, unknown>)[CONSOLE_API_NAME];
+      localStorage.removeItem(ENGINE_CONFIG_STORAGE_KEY);
+    });
+
+    it('should store the config set from the console and apply it now', async () => {
+      service.setup();
+
+      const promise = (globalThis as unknown as Record<string, StellarConsoleApi>)[CONSOLE_API_NAME].setEngineConfig(
+        ENGINE_CONFIG
+      );
+      const { id, task, inputs } = lastPostedMessage();
+      mockWorker.onmessage!({ data: { id, result: ENGINE_CONFIG } });
+
+      await promise;
+      expect(JSON.parse(localStorage.getItem(ENGINE_CONFIG_STORAGE_KEY)!)).toEqual(ENGINE_CONFIG);
+      expect(task).toBe(Task.setEngineConfig);
+      expect(inputs).toEqual(ENGINE_CONFIG);
+    });
+
+    it('should read the live engine config from Python through the console', async () => {
+      service.setup();
+
+      const promise = (globalThis as unknown as Record<string, StellarConsoleApi>)[CONSOLE_API_NAME].getEngineConfig();
+      const { id, task } = lastPostedMessage();
+      mockWorker.onmessage!({ data: { id, result: ENGINE_CONFIG } });
+
+      expect(task).toBe(Task.getEngineConfig);
+      await expect(promise).resolves.toEqual(ENGINE_CONFIG);
+    });
+
+    it('should send the stored config once the worker is ready', () => {
+      localStorage.setItem(ENGINE_CONFIG_STORAGE_KEY, JSON.stringify(ENGINE_CONFIG));
+      service.setup();
+
+      mockWorker.onmessage!({ data: { importTime: 200 } });
+
+      expect(lastPostedMessage()).toEqual(
+        expect.objectContaining({ task: Task.setEngineConfig, inputs: ENGINE_CONFIG })
+      );
+    });
+
+    it('should send an empty config when nothing is stored', () => {
+      service.setup();
+
+      mockWorker.onmessage!({ data: { importTime: 200 } });
+
+      expect(lastPostedMessage()).toEqual(expect.objectContaining({ task: Task.setEngineConfig, inputs: {} }));
+    });
+
+    it('should log a warning and send an empty config when the stored config is unreadable', () => {
+      const warnSpy = vi.spyOn(TestBed.inject(LoggerService), 'warn').mockImplementation(() => undefined);
+      localStorage.setItem(ENGINE_CONFIG_STORAGE_KEY, '{not json');
+      service.setup();
+
+      mockWorker.onmessage!({ data: { importTime: 200 } });
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Wrong engine configuration'));
+      expect(lastPostedMessage().inputs).toEqual({});
+    });
+
+    it('should show the overload warning to the user', async () => {
+      const notification = TestBed.inject(NotificationService);
+      service.setup();
+
+      mockWorker.onmessage!({ data: { importTime: 200 } });
+      mockWorker.onmessage!({
+        data: {
+          id: lastPostedMessage().id,
+          result: ENGINE_CONFIG,
+          diagnostics: [
+            { code: PythonErrorCode.EngineConfigWarning, severity: 'warning', origin: 'warning', rawText: 'overloaded' }
+          ]
+        }
+      });
+
+      await vi.waitFor(() =>
+        expect(notification.warning).toHaveBeenCalledWith('shared.python-errors.engine-config-warning')
+      );
+    });
+
+    it('should log an error and show nothing when the config cannot be applied', async () => {
+      const errorSpy = vi.spyOn(TestBed.inject(LoggerService), 'error').mockImplementation(() => undefined);
+      const notification = TestBed.inject(NotificationService);
+      service.setup();
+
+      mockWorker.onmessage!({ data: { importTime: 200 } });
+      mockWorker.onmessage!({ data: { id: lastPostedMessage().id, error: TaskError.CALCULATION_ERROR } });
+
+      await vi.waitFor(() => expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('could not be applied')));
+      expect(notification.warning).not.toHaveBeenCalled();
     });
   });
 
