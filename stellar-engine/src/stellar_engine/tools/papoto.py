@@ -38,21 +38,21 @@ def calculate_papoto(inputs):
         V3=V3,
     )
 
-    uncertainty_dict = papoto.uncertainty(draw_number=1000, angle_error=0.01)
-    std_parameter = uncertainty_dict["std_parameter_valid_values"]
+    uncertainty = papoto.uncertainty()
+
     return {
-        "parameter": float(np.round(papoto.parameter[0], DECIMAL_PRECISION)),
+        "parameter": float(
+            np.round(np.atleast_1d(papoto.parameter)[0], DECIMAL_PRECISION)
+        ),
         "parameter_1_2": float(
-            np.round(papoto.parameter_1_2[0], DECIMAL_PRECISION)
+            np.round(np.atleast_1d(papoto.parameter_1_2)[0], DECIMAL_PRECISION)
         ),
         "parameter_2_3": float(
-            np.round(papoto.parameter_2_3[0], DECIMAL_PRECISION)
+            np.round(np.atleast_1d(papoto.parameter_2_3)[0], DECIMAL_PRECISION)
         ),
         "parameter_1_3": float(
-            np.round(papoto.parameter_1_3[0], DECIMAL_PRECISION)
+            np.round(np.atleast_1d(papoto.parameter_1_3)[0], DECIMAL_PRECISION)
         ),
         "checkValidity": bool(papoto.check_validity()[0]),
-        "uncertainty": float(
-            np.round(float(2 * std_parameter), DECIMAL_PRECISION)
-        ),
+        "uncertainty": float(np.round(float(uncertainty), DECIMAL_PRECISION)),
     }
