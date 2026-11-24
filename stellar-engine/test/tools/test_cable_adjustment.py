@@ -4,18 +4,20 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import numpy as np
+
 from stellar_engine.tools import calculate_cable_adjustment
 
 INPUTS = {
     "spanIndex": 0,
     "spanLength": 500.0,
     "leftHorizontalAngle": 0.0,
-    "rightHorizontalAngle": 100.0,
-    "leftVerticalAngle": 95.0,
-    "rightVerticalAngle": 94.0,
+    "rightHorizontalAngle": 90.0,
+    "leftVerticalAngle": 30.0,
+    "rightVerticalAngle": 50.0,
     "support": "LEFT",
-    "tacheometerHorizontalDistance": 95.0,
-    "adjustmentParameter": 1800,
+    "tacheometerHorizontalDistance": 300.0,
+    "adjustmentParameter": 2000,
 }
 
 
@@ -26,6 +28,10 @@ def test_cable_adjustment_output_keys():
 
 def test_cable_adjustment_output_range():
     result = calculate_cable_adjustment(INPUTS)
-    for value in result.values():
-        assert isinstance(value, float)
-        assert 0 <= value <= 4000
+    result_h, result_v = (
+        result["horizontalSightAngle"],
+        result["verticalSightAngle"],
+    )
+    # results comes from mechaphlowers test
+    np.testing.assert_allclose(result_h, 55.752, atol=1e-3)
+    np.testing.assert_allclose(result_v, 33.214, atol=1e-3)
