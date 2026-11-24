@@ -17,8 +17,6 @@ from stellar_engine.utils import (
     stsec_to_study_inputs,
 )
 
-SECTION_FILE = Path(__file__).parent / "fixtures" / "estimation_obstacle.stsec"
-
 
 def envelope(section: dict | None = None, **extra) -> dict:
     return {
@@ -31,8 +29,24 @@ def envelope(section: dict | None = None, **extra) -> dict:
     }
 
 
-def test_import_stsec_file():
-    section_import = import_stsec(SECTION_FILE)
+@pytest.fixture
+def section_file(tmp_path: Path) -> Path:
+    section = {
+        "uuid": "section-uuid",
+        "name": "aa",
+        "supports": [{"uuid": f"support-{index}"} for index in range(3)],
+        "obstacles": [
+            {"uuid": f"obstacle-{name}", "name": name}
+            for name in ("ttt", "aaa", "ppp")
+        ],
+    }
+    path = tmp_path / "section.stsec"
+    path.write_text(json.dumps(envelope(section)), encoding="utf-8")
+    return path
+
+
+def test_import_stsec_file(section_file: Path):
+    section_import = import_stsec(section_file)
 
     section = section_import.section
     assert section["name"] == "aa"
@@ -45,11 +59,11 @@ def test_import_stsec_file():
     assert section_import.coordinates is None
 
 
-def test_import_stsec_accepts_text_and_path_as_str():
-    text = SECTION_FILE.read_text(encoding="utf-8")
+def test_import_stsec_accepts_text_and_path_as_str(section_file: Path):
+    text = section_file.read_text(encoding="utf-8")
 
     from_text = import_stsec(text)
-    from_str_path = import_stsec(str(SECTION_FILE))
+    from_str_path = import_stsec(str(section_file))
 
     assert from_text.section == from_str_path.section
 
@@ -125,8 +139,8 @@ def test_import_stsec_rejects_invalid_json():
         import_stsec("{not json")
 
 
-def test_stsec_to_study_inputs():
-    section_import = import_stsec(SECTION_FILE)
+def test_stsec_to_study_inputs(section_file: Path):
+    section_import = import_stsec(section_file)
 
     inputs = stsec_to_study_inputs(section_import, {"name": "ASTER600"})
 
