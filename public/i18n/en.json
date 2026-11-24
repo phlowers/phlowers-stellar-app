@@ -63,10 +63,10 @@
     "lit-idr-label": "LIT - IDR",
     "lit-adr-label": "LIT - ADR",
     "lit-emptyFilter" : "No LIT found.",
-    "lit-empty" : "No LIT available.",     
+    "lit-empty" : "No LIT available.",
     "link-label": "Link",
     "link-emptyFilter" : "No link found.",
-    "link-empty" : "No link available.",     
+    "link-empty" : "No link available.",
     "load-description-label": "Loads case's description",
     "load-name-label": "Load case",
     "loading": "Loading",
@@ -131,7 +131,7 @@
     "study-description-label": "Study's description",
     "success": "Success",
     "support-emptyFilter": "No support found.",
-    "support-empty": "No support available.",    
+    "support-empty": "No support available.",
     "support-label": "Support",
     "support-name-label": "Support name",
     "support-no-label": "Support no.",
@@ -227,7 +227,7 @@
     }
   },
   "topbar": {
-    "no-user": "no user"
+    "no-user": "No user"
   },
   "changelog": {
     "empty": "No changelogs found"
@@ -593,20 +593,20 @@
     "cable-empty" : "No cable available.",
     "line-team-group": "Line team",
     "line_team-emptyFilter" : "No Line team found.",
-    "line_team-empty" : "No Line team available.",    
+    "line_team-empty" : "No Line team available.",
     "label-maintenance-center": "MC",
-    "maintenance-emptyFilter" : "No MC found.",
-    "maintenance-empty" : "No MC available.",
+    "maintenance_center-emptyFilter" : "No MC found.",
+    "maintenance_center-empty" : "No MC available.",
     "label-regional-team": "RMG",
     "regional_team-emptyFilter" : "NO RMG found.",
-    "regional_team-empty" : "No RMG available.",        
+    "regional_team-empty" : "No RMG available.",
     "label-etl": "Voltage level",
     "voltage-emptyFilter" : "No voltage level found.",
     "voltage-empty" : "No voltage level available.",
-    "label-link-idr": "Link - IDR",  
+    "label-link-idr": "Link - IDR",
     "label-link-adr": "Link - ADR",
     "branch-emptyFilter" : "No branch found.",
-    "branch-empty" : "No branch available.",     
+    "branch-empty" : "No branch available.",
     "placeholder-section-comment": "Enter the section's description. Please ensure that all comments are objective and do not contain excessive, nor offensive language. Any sensitive personal data (racial or ethnic origin, political, philosophical or religious beliefs, trade union membership, health, sexual life, criminal offences, convictions, or security measures) must not be included. Furthermore, comments must not contain information that could identify either their author or any third party.",
     "current-page-report": "Support {first} to {last} of {totalRecords}",
     "name-unique": "Section name must be unique.",
@@ -830,7 +830,7 @@
       "create-measurement-button": "Create a new measurement",
       "choose-existing-measure": "Choose an existing ground measurement",
       "no-measures-found-empty-message": "No ground measurement found.",
-      "no-measures-empty-message": "No ground measurement available.",      
+      "no-measures-empty-message": "No ground measurement available.",
       "choose-button": "Choose",
       "tm-prefix": "TM "
     },
@@ -1142,7 +1142,7 @@
       "delete-floor-aria-label": "delete ground",
       "min-vertical-distance-label": "Minimum vertical distance",
       "cable-altitude-label": "Cable point alt.",
-      "ground-altitude-label": "Ground point alt."      
+      "ground-altitude-label": "Ground point alt."
     },
     "l0-sum": {
       "naturals-lengths-title": "Naturals lengths L0",

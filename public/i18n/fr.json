@@ -227,7 +227,7 @@
     }
   },
   "topbar": {
-    "no-user": "aucun utilisateur"
+    "no-user": "Aucun utilisateur"
   },
   "changelog": {
     "empty": "Aucun changelog trouvé"
@@ -598,14 +598,14 @@
     "maintenance_center-empty" : "Aucun CM proposé.",
     "label-regional-team": "GMR",
     "regional_team-emptyFilter" : "Aucun GMR trouvé.",
-    "regional_team-empty" : "Aucun GMR proposé.",    
+    "regional_team-empty" : "Aucun GMR proposé.",
     "label-etl": "Niveau de tension électrique",
     "voltage-emptyFilter" : "Aucune tension électrique trouvée.",
     "voltage-empty" : "Aucune tension électrique proposée.",
     "label-link-idr": "Liaison - IDR",
     "label-link-adr": "Liaison - ADR",
     "branch-emptyFilter" : "Aucune branche trouvée.",
-    "branch-empty" : "Aucune branche proposée.",    
+    "branch-empty" : "Aucune branche proposée.",
     "placeholder-section-comment": "Saisir la description du canton. Rédiger impérativement des commentaires objectifs, jamais excessifs ni insultants. Toute donnée sensible (origine raciale ou ethnique, opinions politiques, philosophiques ou religieuses, appartenance syndicale, données relatives à la santé ou à la vie sexuelle, infractions, condamnations, mesure de sûreté) doit être exclue. En outre, les commentaires ne doivent pas permettre d'identifier son auteur ni d’identifier des tiers.",
     "current-page-report": "Support {first} à {last} sur {totalRecords}",
     "name-unique": "Le nom du canton doit être unique.",

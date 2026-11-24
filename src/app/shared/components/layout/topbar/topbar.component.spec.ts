@@ -7,7 +7,7 @@ import { AuthService } from '@services/auth/auth.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { signal } from '@angular/core';
 
-import { TranslocoTestingModule } from '@jsverse/transloco';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
 describe('TopbarComponent', () => {
   let component: TopbarComponent;
   let fixture: ComponentFixture<TopbarComponent>;
@@ -44,8 +44,11 @@ describe('TopbarComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         TranslocoTestingModule.forRoot({
-          langs: { en: {} },
-          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          langs: {
+            en: { topbar: { 'no-user': 'No user' } },
+            fr: { topbar: { 'no-user': 'Aucun utilisateur' } }
+          },
+          translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' },
           preloadLangs: true
         }),
         TopbarComponent,
@@ -126,13 +129,14 @@ describe('TopbarComponent', () => {
       expect(userInfo?.textContent).toContain('user@example.com');
     });
 
-    it('should display "No user" when user is null', () => {
+    it('should display "Aucun utilisateur" in French when user is null', () => {
+      TestBed.inject(TranslocoService).setActiveLang('fr');
       currentUserSignal.set(null);
       fixture.detectChanges();
 
       const userInfo = getByTestId('user-info');
       expect(userInfo).toBeTruthy();
-      expect(userInfo?.textContent).toContain('No user');
+      expect(userInfo?.textContent).toContain('Aucun utilisateur');
     });
   });
 
