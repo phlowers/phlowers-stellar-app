@@ -84,7 +84,7 @@ def process_directory_recursively(directory):
     # processed_files = 0
     for root, dirs, files in os.walk(directory):
         for file in files:
-            if file.endswith(".js"):
+            if file.endswith((".js", ".json")):
                 file_path = os.path.join(root, file)
                 replace_in_file(file_path)
 

@@ -27,7 +27,7 @@
     "clear-selection": "Effacer la sélection",
     "close": "Fermer",
     "comment-label": "Commentaire",
-    "counter-weight-label": "Contrepoids",
+    "counter-weight-label": "Contre-poids",
     "create-a-new-study": "Créer une nouvelle étude",
     "create-a-section-label": "Créer un canton",
     "cut-strands-layer-label": "Brins coupés couche {{ layer }}",
@@ -233,7 +233,7 @@
     "empty": "Aucun changelog trouvé"
   },
   "home": {
-    "news-text": "Bienvenue sur l'application Céleste.",
+    "news-text": "Bienvenue sur l'application {APP_NAME}.",
     "news-link-text": "Voir toutes les actualités.",
     "update-title": "Journal des modifications",
     "update-text": "Voir les dernières mises à jour.",
@@ -243,15 +243,15 @@
     "update-new-available": "Une nouvelle mise à jour de l'application est disponible !",
     "offline-card": {
       "title": "État de l'application",
-      "connection-online": "Mode connecté.",
-      "connection-offline": "Mode déconnecté.",
+      "connection-online": "Mode en ligne.",
+      "connection-offline": "Mode hors ligne.",
       "status-ready": "Application disponible.",
-      "status-preparing": "Installation de l'application en cours.",
-      "status-waiting-network": "Réseau trop lent : installation de l'application en attente.",
-      "status-storage-insufficient": "Espace insuffisant : installation de l'application impossible.",
-      "status-not-prepared": "Application non disponible hors ligne.",
-      "update-postponed-network": "Mise à jour reportée : réseau trop lent.",
-      "update-blocked-storage": "Mise à jour impossible : espace insuffisant."
+      "status-preparing": "Préparation de l'application en cours.",
+      "status-waiting-network": "Réseau trop lent : mode en ligne non disponible.",
+      "status-storage-insufficient": "Espace insuffisant : préparation de l'application impossible.",
+      "status-not-prepared": "Application non prête.",
+      "update-postponed-network": "Réseau trop lent : mise à jour de l'application reportée.",
+      "update-blocked-storage": "Espace insuffisant : mise à jour de l'application impossible."
     },
     "no-recent-studies": "Aucune étude récente",
     "go-to-studies": "Aller à mes études"
@@ -279,7 +279,7 @@
   },
   "instruction-manual": {
     "intro-title": "Bienvenue sur l'espace d'aide et de documentation",
-    "intro-text": "Toutes les ressources essentielles pour utiliser l'application Céleste efficacement : prise en main, préparation des études, gestion des cantons, configuration des outils et export des résultats. Choisir simplement le format de consultation souhaité.",
+    "intro-text": "Toutes les ressources essentielles pour utiliser l'application {APP_NAME} efficacement : prise en main, préparation des études, gestion des cantons, configuration des outils et export des résultats. Choisir simplement le format de consultation souhaité.",
     "pdf-title": "Télécharger le manuel PDF",
     "pdf-file-name-label": "Nom du fichier",
     "pdf-size-label": "Taille estimée",
@@ -358,7 +358,7 @@
     "studies-service": {
       "unauthorized-error": "Vous ne pouvez pas mettre à jour une étude que vous n'avez pas créée, veuillez la dupliquer.",
       "unauthorized-summary": "Non autorisé",
-      "imported-from-protov4": "Étude importée du Proto V4"
+      "imported-from-protov4": "Étude tierce importée'"
     },
     "app-update-service": {
       "offline-status": {
@@ -496,7 +496,7 @@
     "position-error-notice": "Écart maximal de position des supports : {{ error }} m sur le support {{ support }} (seuil : {{ threshold }} m). Vérifiez vos valeurs au-delà du seuil.",
     "from-file": {
       "file-format": "Formats de fichier : {{ formats }}",
-      "description": "Pour importer un canton Céleste V5 ou Géoliaison, cliquer ou placer le(s) fichier(s) de canton sur l'emplacement ci-dessous : les cantons importés sont listés dans l'onglet \"Cantons\" de l'étude en cours.",
+      "description": "Pour importer un canton {APP_NAME} ou tiers, cliquer ou placer le(s) fichier(s) de canton sur l'emplacement ci-dessous : les cantons importés sont listés dans l'onglet \"Cantons\" de l'étude en cours.",
       "upload-prompt": "Importer un ou plusieurs fichiers",
       "import-error": "Le canton importé est introuvable. Veuillez réessayer."
     }
@@ -508,8 +508,8 @@
       "go-to-study": "Aller à l'étude"
     },
     "import": {
-      "description": "Pour importer une étude Céleste V5 ou Proto V4, cliquer ou placer le(s) fichier(s) d'étude sur l'emplacement ci-dessous : les études importées sont listées dans l'onglet \"Mes dernières études\".",
-      "file-formats": "Formats de fichier : Etude Stellar (.stsd), Etude Céleste (.clst), Etude proto V4 (.csv)",
+      "description": "Pour importer une étude {APP_NAME} ou tierce, cliquer ou placer le(s) fichier(s) d'étude sur l'emplacement ci-dessous : les études importées sont listées dans l'onglet \"Mes dernières études\".",
+      "file-formats": "Formats de fichier : Etude Stellar (.stsd), Etude {APP_NAME} (.clst), Etude tierce (.csv)",
       "error-cable-not-found": "Câble non trouvé dans la base de données",
       "error-import": "Erreur lors de l'importation de l'étude",
       "error-delete": "Erreur lors de la suppression de l'étude",
@@ -574,9 +574,9 @@
   },
   "section-modal": {
     "choose-type": "Choisir un type de création",
-    "type-local-ref": "A partir du référentiel local",
-    "type-distant-ref": "A partir du référentiel distant",
-    "type-file": "A partir d'un fichier",
+    "type-local-ref": "À partir du référentiel local",
+    "type-distant-ref": "À partir du référentiel distant",
+    "type-file": "À partir d'un fichier",
     "create-btn": "Créer le canton",
     "update-btn": "Mettre à jour le canton",
     "title-view": "Voir un canton de l'étude",
@@ -591,14 +591,14 @@
     "cable-emptyFilter" : "Aucun câble trouvé.",
     "cable-empty" : "Aucun câble proposé.",
     "line-team-group": "Équipe ligne",
-    "line_team-emptyFilter" : "Aucune EEL trouvée.",
-    "line_team-empty" : "Aucune EEL proposée.",
+    "line-team-emptyFilter" : "Aucune EEL trouvée.",
+    "line-team-empty" : "Aucune EEL proposée.",
     "label-maintenance-center": "CM",
-    "maintenance_center-emptyFilter" : "Aucun CM trouvé.",
-    "maintenance_center-empty" : "Aucun CM proposé.",
+    "maintenance-center-emptyFilter" : "Aucun CM trouvé.",
+    "maintenance-center-empty" : "Aucun CM proposé.",
     "label-regional-team": "GMR",
-    "regional_team-emptyFilter" : "Aucun GMR trouvé.",
-    "regional_team-empty" : "Aucun GMR proposé.",
+    "regional-team-emptyFilter" : "Aucun GMR trouvé.",
+    "regional-team-empty" : "Aucun GMR proposé.",
     "label-etl": "Niveau de tension électrique",
     "voltage-emptyFilter" : "Aucune tension électrique trouvée.",
     "voltage-empty" : "Aucune tension électrique proposée.",
@@ -647,7 +647,7 @@
     "choose-hint": "Choisir le set d'accroche dans la liste ou sur le graphique afin d'obtenir la bonne longueur de bras.",
     "label-attachment-set": "Set d'accroche",
     "arm-length": "Longueur de bras",
-    "height-below-console": "Hauteur sous console",
+    "height-below-console": "Hauteur /s console",
     "auto-fill-hint": "Le set d'accroche et la longueur de bras du support seront automatiquement renseignés dans le tableau."
   },
   "location": {
@@ -953,9 +953,9 @@
       "organize-tools-info-text": "Affecter jusqu'à 5 outils à l'accès rapide.",
       "loads-table-label": "Cas de charges",
       "l0-table-label": "Longueurs naturelles L0",
-      "hanging-table-label": "Pose du canton",
+      "hanging-table-label": "Pose du câble",
       "obstacles-table-label": "Obstacles",
-      "grounds-table-label": "Sols",
+      "grounds-table-label": "Sol",
       "profile-option": "Profil",
       "face-option": "Ligne",
       "base-option": "Etat initial",
@@ -1287,7 +1287,7 @@
       "right-horizontal-angle-label": "Angle HD horizontal au support D",
       "left-vertical-angle-label": "Angle VG vertical au support G",
       "right-vertical-angle-label": "Angle VD vertical au support D",
-      "tacheometer-horizontal-distance-label": "Distance horizontale de l'appareil",
+      "device-horizontal-distance-label": "Distance horizontale de l'appareil",
       "adjustment-parameter-label": "Paramètre de réglage",
       "calculate-sight-angles": "Calculer les angles de visée sur la flèche médiane",
       "horizontal-sight-angle-label": "Angle H horizontal de visée à la flèche médiane",

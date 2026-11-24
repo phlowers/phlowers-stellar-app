@@ -27,7 +27,7 @@
     "clear-selection": "Clear selection",
     "close": "Close",
     "comment-label": "Comment",
-    "counter-weight-label": "Counter weight",
+    "counter-weight-label": "Counter-weight",
     "create-a-new-study": "Create a new study",
     "create-a-section-label": "Create a section",
     "cut-strands-layer-label": "Cut strands layer {{ layer }}",
@@ -67,7 +67,7 @@
     "link-label": "Link",
     "link-emptyFilter" : "No link found.",
     "link-empty" : "No link available.",
-    "load-description-label": "Loads case's description",
+    "load-description-label": "Load cases' description",
     "load-name-label": "Load case",
     "loading": "Loading",
     "loads-label": "Loads",
@@ -122,7 +122,7 @@
     "select-point-label": "Select point",
     "sign-in-label": "Sign in",
     "span-label": "Span",
-    "span-length-short-label": "Span l.",
+    "span-length-short-label": "Span length",
     "storage-insufficient-label": "Not enough storage space",
     "studies-label": "Studies",
     "studio": "Studio",
@@ -135,7 +135,7 @@
     "support-label": "Support",
     "support-name-label": "Support name",
     "support-no-label": "Support no.",
-    "supports-list-description-label": "Supports's description",
+    "supports-list-description-label": "Supports' description",
     "symmetric": "Symmetric",
     "tools-label": "Tools",
     "uncertainty-cable-temperature-label": "Uncertainty cable temperature",
@@ -233,7 +233,7 @@
     "empty": "No changelogs found"
   },
   "home": {
-    "news-text": "Welcome to Celeste! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!",
+    "news-text": "Welcome to {APP_NAME}! We are glad to present this new tool made with you. Please contact us to share your ideas and feedbacks to help us upgrade this application!",
     "news-link-text": "View all news",
     "update-title": "Changelogs",
     "update-text": "View latest updates.",
@@ -243,15 +243,15 @@
     "update-new-available": "A new application update is available!",
     "offline-card": {
       "title": "Application status",
-      "connection-online": "Online.",
-      "connection-offline": "No connection.",
-      "status-ready": "Offline mode ready.",
-      "status-preparing": "Preparing offline mode.",
-      "status-waiting-network": "Network too slow: offline mode setup on hold.",
-      "status-storage-insufficient": "Not enough storage: offline mode impossible.",
-      "status-not-prepared": "Offline mode unavailable.",
-      "update-postponed-network": "Update postponed: network too slow.",
-      "update-blocked-storage": "Update blocked: not enough storage."
+      "connection-online": "Online mode.",
+      "connection-offline": "Offline mode.",
+      "status-ready": "Available application.",
+      "status-preparing": "Ongoing application preparation.",
+      "status-waiting-network": "Network too slow: online mode not available.",
+      "status-storage-insufficient": "Insufficient storage: application preparation not possible.",
+      "status-not-prepared": "Application not ready.",
+      "update-postponed-network": "Network too slow: update postponed.",
+      "update-blocked-storage": "Insufficient storage: update not possible."
     },
     "no-recent-studies": "No recent studies",
     "go-to-studies": "Go to my studies"
@@ -279,7 +279,7 @@
   },
   "instruction-manual": {
     "intro-title": "Welcome to the help and documentation area",
-    "intro-text": "Find here all the essential resources to get started with the Celeste application, configure your studies, manage your sections and export your results with ease. Choose the format that suits you best.",
+    "intro-text": "Find here all the essential resources to get started with the {APP_NAME} application, configure your studies, manage your sections and export your results with ease. Choose the format that suits you best.",
     "pdf-title": "Download the PDF manual",
     "pdf-file-name-label": "File name",
     "pdf-size-label": "Estimated size",
@@ -358,7 +358,7 @@
     "studies-service": {
       "unauthorized-error": "You cannot update a study that you did not create, please duplicate it instead.",
       "unauthorized-summary": "Unauthorized",
-      "imported-from-protov4": "Study imported from Proto V4"
+      "imported-from-protov4": "Third party imported study"
     },
     "app-update-service": {
       "offline-status": {
@@ -473,9 +473,9 @@
     },
     "new-load-modal": {
       "create-title": "Create a load case",
-      "generalities": "Generalities",
+      "generalities": "Generality",
       "load-name-error": "The load case name must be unique.",
-      "description-placeholder": "Enter the loads case's description. Please ensure that all comments are objective and do not contain excessive, nor offensive language. Any sensitive personal data (racial or ethnic origin, political, philosophical or religious beliefs, trade union membership, health, sexual life, criminal offences, convictions, or security measures) must not be included. Furthermore, comments must not contain information that could identify either their author or any third party.",
+      "description-placeholder": "Enter the load case's description. Please ensure that all comments are objective and do not contain excessive, nor offensive language. Any sensitive personal data (racial or ethnic origin, political, philosophical or religious beliefs, trade union membership, health, sexual life, criminal offences, convictions, or security measures) must not be included. Furthermore, comments must not contain information that could identify either their author or any third party.",
       "default-name": "CC"
     }
   },
@@ -497,7 +497,7 @@
     "position-error-notice": "Maximum support position gap: {{ error }} m on support {{ support }} (threshold {{ threshold }} m). Check your values above the threshold.",
     "from-file": {
       "file-format": "File formats: {{ formats }}",
-      "description": "To import a Céleste V5 or Géoliaison canton, click or drop the canton file(s) in the area below. Imported cantons are listed in the \"Cantons\" tab of the current study.",
+      "description": "To import a {APP_NAME} or third party canton, click or drop the canton file(s) in the area below. Imported cantons are listed in the \"Cantons\" tab of the current study.",
       "upload-prompt": "Upload one or several files",
       "import-error": "The imported section could not be found. Please try again."
     }
@@ -509,8 +509,8 @@
       "go-to-study": "Go to study"
     },
     "import": {
-      "description": "To import a Céleste V5 or Proto V4 study, click or drop the study file(s) in the area below. Imported studies are listed in the \"My studies\" tab.",
-      "file-formats": "File formats: Stellar study (.stsd), Céleste study (.clst), Proto V4 study (.csv)",
+      "description": "To import a {APP_NAME} or third party study, click or drop the study file(s) in the area below. Imported studies are listed in the \"My studies\" tab.",
+      "file-formats": "File formats: Stellar study (.stsd), {APP_NAME} study (.clst), Third party study (.csv)",
       "error-cable-not-found": "Cable not found in database",
       "error-import": "Error importing study",
       "error-delete": "Error deleting study",
@@ -586,20 +586,20 @@
     "location-removed-after-insert": "The start position could not be computed from the next support: the section is saved without geolocation."
   },
   "manual-section": {
-    "tab-general": "General",
-    "tab-supports": "Supports",
+    "tab-general": "Generality",
+    "tab-supports": "List of supports",
     "tab-graphical": "Graphical view",
     "cable-emptyFilter" : "No cable found.",
     "cable-empty" : "No cable available.",
     "line-team-group": "Line team",
-    "line_team-emptyFilter" : "No Line team found.",
-    "line_team-empty" : "No Line team available.",
+    "line-team-emptyFilter" : "No Line team found.",
+    "line-team-empty" : "No Line team available.",
     "label-maintenance-center": "MC",
-    "maintenance_center-emptyFilter" : "No MC found.",
-    "maintenance_center-empty" : "No MC available.",
+    "maintenance-center-emptyFilter" : "No MC found.",
+    "maintenance-center-empty" : "No MC available.",
     "label-regional-team": "RMG",
-    "regional_team-emptyFilter" : "NO RMG found.",
-    "regional_team-empty" : "No RMG available.",
+    "regional-team-emptyFilter" : "No RMG found.",
+    "regional-team-empty" : "No RMG available.",
     "label-etl": "Voltage level",
     "voltage-emptyFilter" : "No voltage level found.",
     "voltage-empty" : "No voltage level available.",
@@ -617,16 +617,16 @@
   },
   "supports-table": {
     "localization-status": "Waiting for the engine to finish the calculation",
-    "col-number": "N° supp.",
-    "col-attachment-alt": "Attachment alt. (NGF)",
-    "col-attachment-position": "Attachment pos.",
-    "col-angle": "Angle",
+    "col-number": "Support #",
+    "col-attachment-alt": "Cable attach. altitude",
+    "col-attachment-position": "Attachment position",
+    "col-angle": "Inline angle",
     "col-chain-name": "Chain name",
-    "col-chain-length": "Chain l.",
-    "col-chain-weight": "Chain w.",
-    "col-arm-length": "Arm l.",
-    "col-chain-v": "Chain V",
-    "col-supp-foot-alt": "Supp. foot alt.",
+    "col-chain-length": "Chain length",
+    "col-chain-weight": "Chain weight",
+    "col-arm-length": "Arm length",
+    "col-chain-v": "V-chain",
+    "col-supp-foot-alt": "Support foot altitude",
     "col-chain-surface": "Chain surface",
     "col-tower": "Tower file",
     "col-x-lambert": "X Lambert 93",
@@ -648,7 +648,7 @@
     "choose-hint": "Choose the attachment set in the list or on the graph to find the right arm length.",
     "label-attachment-set": "Attachment set",
     "arm-length": "Arm length",
-    "height-below-console": "Height below console",
+    "height-below-console": "Height /b console",
     "auto-fill-hint": "The attachment set and the arm length (m) will be automatically filled in the table."
   },
   "location": {
@@ -783,7 +783,7 @@
       "calculation-failed": "Failed to calculate parameter by tangent sights (Support)"
     },
     "tangent-aiming-exterior": {
-      "calculation-failed": "Failed to calculate parameter by tangent sights (Extenal)"
+      "calculation-failed": "Failed to calculate parameter by tangent sights (External)"
     },
     "tangent-aiming-interior": {
       "calculation-failed": "Failed to calculate parameter by tangent sights (Internal)"
@@ -912,7 +912,7 @@
     "shared": {
       "lateral-distance-type-label": "Lateral distance type",
       "conformity-label": "Conformity",
-      "altitude-type-absolute": "Absolute (NGF)",
+      "altitude-type-absolute": "Absolute",
       "altitude-type-relative": "Relative support foot",
       "altitude-type-relative-cable": "Relative cable attach.",
       "span-axis-option": "Attachments axis",
@@ -952,11 +952,11 @@
       "export-section-aria-label": "Export the section as a Stellar section file",
       "inset-title": "Inset",
       "organize-tools-info-text": "Select and organise the tools with quick access (maximum 5).",
-      "loads-table-label": "Loads table",
-      "l0-table-label": "L0 table",
-      "hanging-table-label": "Hanging table",
-      "obstacles-table-label": "Obstacles table",
-      "grounds-table-label": "Grounds table",
+      "loads-table-label": "Load case",
+      "l0-table-label": "L0 natural lengths",
+      "hanging-table-label": "Cable hanging",
+      "obstacles-table-label": "Obstacles",
+      "grounds-table-label": "Ground",
       "profile-option": "Profile",
       "face-option": "Face",
       "base-option": "Base",
@@ -1127,12 +1127,12 @@
     },
     "distance-measuring": {
       "never-saved-hint": "This tab's data is never saved",
-      "reference-hint": "Reference support is left support and altitude is absolute (NGF).",
+      "reference-hint": "Reference support is left support and altitude is absolute.",
       "delete-points-aria-label": "delete points",
       "distance-12-label": "Distance 1-2",
       "distance-23-label": "Distance 2-3",
       "angle-123-label": "Angle 1-2-3",
-      "add-measurement-points-error": "Failed to add measurement points"
+      "add-measurement-points-error": "Failed to add distances points"
     },
     "floor": {
       "reference-support-point-title": "Reference support point",
@@ -1288,7 +1288,7 @@
       "right-horizontal-angle-label": "HR horizontal angle at right support",
       "left-vertical-angle-label": "VL vertical angle at left support",
       "right-vertical-angle-label": "VR vertical angle at right support",
-      "tacheometer-horizontal-distance-label": "Device horizontal distance",
+      "device-horizontal-distance-label": "Device horizontal distance",
       "adjustment-parameter-label": "Adjustment parameter",
       "calculate-sight-angles": "Calculate the sighting angles at mid-span sag",
       "horizontal-sight-angle-label": "H horizontal sighting angle at mid-span sag",

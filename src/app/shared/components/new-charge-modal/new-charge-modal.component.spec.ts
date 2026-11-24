@@ -136,7 +136,7 @@ describe('NewChargeModalComponent (Jest)', () => {
               'common.close': 'Close',
               'shared.new-load-modal.create-title': 'Create a load case',
               'shared.new-load-modal.default-name': 'CC',
-              'common.description-label': 'Description',
+              'common.load-description-label': 'Loads case\'s description',
               'shared.new-load-modal.description-placeholder': 'Add a description to the load case',
               'shared.new-load-modal.generalities': 'Generalities',
               'common.personnel-presence-label': 'Personnel presence'

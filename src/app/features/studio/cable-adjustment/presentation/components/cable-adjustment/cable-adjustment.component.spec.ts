@@ -106,6 +106,7 @@ describe('CableAdjustmentComponent', () => {
               'common.min-value-error': 'Min. value: {{ min }}',
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}',
+              'studio.cable-adjustment.device-horizontal-distance-label': 'Device horizontal distance',
               'studio.cable-adjustment.aria-help': 'Cable adjustment help',
               'studio.cable-adjustment.calculation-failed': 'Failed to calculate the cable adjustment'
             }
@@ -273,6 +274,7 @@ describe('CableAdjustmentComponent', () => {
     it('keeps the tacheometer distance label on one line', () => {
       const label = fixture.nativeElement.querySelector('label[for="tacheometer-horizontal-distance"]');
       expect(label?.classList).toContain('cable-adjustment__field-label--single-line');
+      expect(label?.textContent.trim()).toBe('Device horizontal distance');
     });
 
     const error = (id: string) => fixture.nativeElement.querySelector(`#${id}-error`)?.textContent?.trim();
