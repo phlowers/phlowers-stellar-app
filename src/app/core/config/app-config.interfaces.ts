@@ -2,4 +2,6 @@
 export interface AppConfig {
   /** Default UI language to activate at startup (e.g. `'fr'`, `'en'`). */
   defaultLang: string;
+  /** Optional application version shown in the sidebar; falls back to the `package.json` version when absent. */
+  appVersion?: string;
 }

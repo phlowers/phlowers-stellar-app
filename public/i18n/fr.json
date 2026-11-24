@@ -290,7 +290,7 @@
     "col-value": "Valeur",
     "build-hash": "Hash du build",
     "build-datetime": "Date et heure du build",
-    "build-version": "Version du build",
+    "build-version": "Version de Stellar",
     "offline-status": "Mode hors ligne",
     "pending-version": "Version en attente",
     "no-pending-version": "Aucune",

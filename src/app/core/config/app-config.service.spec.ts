@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AppConfigService } from './app-config.service';
 import { LoggerService } from '@services/logger/logger.service';
+import { environment } from '@src/environments/environment';
 
 describe('AppConfigService', () => {
   let service: AppConfigService;
@@ -34,6 +35,33 @@ describe('AppConfigService', () => {
     httpMock.expectOne('assets/config/app-config.json').flush({ defaultLang: 'fr' });
 
     await expect(promise).resolves.toBe('fr');
+  });
+
+  it('should default the app version to the package.json version', async () => {
+    const promise = service.loadDefaultLang();
+
+    httpMock.expectOne('assets/config/app-config.json').flush({ defaultLang: 'fr' });
+    await promise;
+
+    expect(service.appVersion()).toBe(environment.version);
+  });
+
+  it('should expose the appVersion configured in the config file', async () => {
+    const promise = service.loadDefaultLang();
+
+    httpMock.expectOne('assets/config/app-config.json').flush({ defaultLang: 'fr', appVersion: ' 01.03.00 ' });
+    await promise;
+
+    expect(service.appVersion()).toBe('01.03.00');
+  });
+
+  it('should ignore a blank appVersion in the config file', async () => {
+    const promise = service.loadDefaultLang();
+
+    httpMock.expectOne('assets/config/app-config.json').flush({ defaultLang: 'fr', appVersion: '  ' });
+    await promise;
+
+    expect(service.appVersion()).toBe(environment.version);
   });
 
   it('should fall back to "en" when the config file request fails', async () => {
