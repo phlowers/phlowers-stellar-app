@@ -95,7 +95,7 @@ describe('Task handlers', () => {
       [Task.estimateLoad, 'estimate_load'],
       [Task.estimateWind, 'estimate_wind'],
       [Task.estimateMinimumDistanceWind, 'estimate_minimum_distance_wind'],
-      [Task.estimateEffort, 'estimate_effort']
+      [Task.estimateEffort, 'estimate_effort'],
       [Task.sliceGround, 'slice_ground'],
       [Task.getForestTrenches, 'get_forest_trenches']
     ])('should call the matching Python function for the %s task', async (task, pythonFunction) => {

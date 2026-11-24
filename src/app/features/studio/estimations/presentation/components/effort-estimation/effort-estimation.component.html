@@ -164,7 +164,12 @@
 <output class="effort-estimation__results" data-testid="results">
   @let effortValue = effort();
   @if (effortValue !== null) {
-    <div class="effort-estimation__results-content" animate.enter="anim-expand-height" data-testid="results-frame">
+    <div
+      class="effort-estimation__results-content"
+      animate.enter="anim-expand-height"
+      animate.leave="anim-collapse-height"
+      data-testid="results-frame"
+    >
       <h2>{{ 'common.results' | transloco }}</h2>
       <div class="effort-estimation__grid">
         <dl class="effort-estimation__field">

@@ -1,5 +1,5 @@
-@use '../../estimation-form';
+@use '../../estimation-form' as form;
 
-@include estimation-form.result-elements;
+@include form.result-elements;
 
-@include estimation-form.form-block('wind-pressure-estimation');
+@include form.form-block('wind-pressure-estimation');

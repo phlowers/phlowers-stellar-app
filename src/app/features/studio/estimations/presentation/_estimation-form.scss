@@ -1,7 +1,6 @@
 @use 'abstract.extracts' as app;
 
 // Layout shared by the estimation tabs, each one keeping its own BEM block: `@include form-block('my-estimation');`
-// `$columns` is the number of fields per row.
 
 // Read-only results: label / value pairs
 @mixin result-elements {
@@ -19,6 +18,7 @@
   }
 }
 
+// `$columns` is the number of fields per row.
 @mixin form-block($block, $columns: 2) {
   .#{$block} {
     display: flex;

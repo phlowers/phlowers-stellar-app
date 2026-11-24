@@ -92,7 +92,12 @@
 <output class="temperature-estimation__results" data-testid="results">
   @let value = temperature();
   @if (value !== null) {
-    <div class="temperature-estimation__results-content" animate.enter="anim-expand-height" data-testid="results-frame">
+    <div
+      class="temperature-estimation__results-content"
+      animate.enter="anim-expand-height"
+      animate.leave="anim-collapse-height"
+      data-testid="results-frame"
+    >
       <h2>{{ 'common.results' | transloco }}</h2>
       <dl class="temperature-estimation__field">
         <dt>{{ 'studio.estimations.conformity-temperature-label' | transloco }}</dt>
