@@ -7,6 +7,8 @@ import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
+import { PlotService } from '@services/plot/plot.service';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
@@ -146,6 +148,7 @@ describe('ConformityComponent', () => {
   };
   let mockSpanService: { section: typeof sectionSignal; getSpanOptions: ReturnType<typeof vi.fn> };
   let mockNotification: { error: ReturnType<typeof vi.fn> };
+  let mockLogger: { error: ReturnType<typeof vi.fn> };
   let mockWorkerPython: { runTaskWithTimeout: ReturnType<typeof vi.fn> };
   /**
    * Configures the TestBed and creates the component, then flushes the async Dexie-backed
@@ -156,6 +159,9 @@ describe('ConformityComponent', () => {
     sectionSignal = signal<Record<string, unknown> | null>({
       obstacles: [obstacle],
       voltage_idr: '400 kV',
+      name: 'Section A',
+      initial_conditions: [],
+      charges: [],
       supports: []
     });
     formValueSignal = signal<{ uuid: string | null }>({ uuid: obstacle.uuid });
@@ -173,6 +179,7 @@ describe('ConformityComponent', () => {
       getSpanOptions: vi.fn().mockReturnValue([{ label: 'Span 1', value: 'support-1' }])
     };
     mockNotification = { error: vi.fn() };
+    mockLogger = { error: vi.fn() };
 
     mockWorkerPython = {
       runTaskWithTimeout: vi
@@ -232,6 +239,10 @@ describe('ConformityComponent', () => {
               'common.no': 'No',
               'common.yes': 'Yes',
               'studio.conformity.distance-to-line-axis-label': 'Distance to line axis',
+              'studio.conformity.export-invalid-data-error': 'Export failed',
+              'common.meter': 'm',
+              'common.celsius': '°C',
+              'common.pascal-unit': 'Pa',
               'common.electric-tension-label': 'Electric tension',
               'common.enlarge-graphic-view-btn': 'Enlarge graphic view',
               'common.form-label': 'Form',
@@ -278,6 +289,8 @@ describe('ConformityComponent', () => {
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: StorageService, useValue: { db: buildDb(dbData) } },
         { provide: NotificationService, useValue: mockNotification },
+        { provide: PlotService, useValue: { study: signal(null) } },
+        { provide: LoggerService, useValue: mockLogger },
         { provide: WorkerPythonService, useValue: mockWorkerPython }
       ]
     }).compileComponents();
@@ -712,6 +725,168 @@ describe('ConformityComponent', () => {
     });
   });
 
+  describe('export', () => {
+    type PickerFn = NonNullable<typeof globalThis.showSaveFilePicker>;
+    const originalPicker = globalThis.showSaveFilePicker;
+
+    afterEach(() => {
+      globalThis.showSaveFilePicker = originalPicker;
+    });
+
+    const mockPicker = () => {
+      const write = vi.fn().mockResolvedValue(undefined);
+      const close = vi.fn().mockResolvedValue(undefined);
+      const picker = vi.fn().mockResolvedValue({ createWritable: () => Promise.resolve({ write, close }) });
+      globalThis.showSaveFilePicker = picker as unknown as PickerFn;
+      return { picker, write, close };
+    };
+
+    it('should not be exportable before a calculation, then become exportable', async () => {
+      await createComponent();
+      expect(component.canExport()).toBe(false);
+
+      await component.calculate();
+
+      expect(component.canExport()).toBe(true);
+    });
+
+    it('should export only the rules still selected and displayed', async () => {
+      await createComponent();
+      component.form.controls.conformity.setValue(['rule_a', 'rule_b']);
+      await component.calculate();
+      component.form.controls.conformity.setValue(['rule_a']);
+      const { write } = mockPicker();
+
+      await component.exportConformity();
+
+      const exported = JSON.parse(write.mock.calls[0][0]).distancesConformityCheck[0];
+      expect(exported.conformityChecks).toHaveLength(1);
+      expect(exported.conformityInput.rules).toHaveLength(1);
+    });
+
+    it('should not be exportable once every calculated rule is deselected', async () => {
+      await createComponent();
+      await component.calculate();
+      component.form.controls.conformity.setValue([]);
+
+      expect(component.canExport()).toBe(false);
+    });
+
+    it('should notify an error and not open the picker when there are no results', async () => {
+      await createComponent();
+      const { picker } = mockPicker();
+
+      await component.exportConformity();
+
+      expect(mockNotification.error).toHaveBeenCalledWith('Export failed');
+      expect(picker).not.toHaveBeenCalled();
+    });
+
+    it('should write the JSON through the file picker using the calculated inputs, not the edited form', async () => {
+      await createComponent();
+      await component.calculate();
+      component.form.controls.windZone.setValue('Z2');
+      const { picker, write, close } = mockPicker();
+
+      await component.exportConformity();
+
+      expect(picker).toHaveBeenCalledWith(
+        expect.objectContaining({
+          suggestedName: expect.stringMatching(
+            /^Export Distances de conformité_My obstacle_Section A_\d{4}-\d{2}-\d{2}\.json$/
+          )
+        })
+      );
+      const exported = JSON.parse(write.mock.calls[0][0]).distancesConformityCheck[0];
+      expect(exported.conformityInput.rules).toEqual(['Rule A']);
+      expect(exported.conformityInput.wind.direction).toBe('Z1');
+      expect(exported.obstacleData.spot).toBe('Point 1');
+      expect(exported.conformityChecks[0].minimumCase).toBeDefined();
+      expect(close).toHaveBeenCalled();
+    });
+
+    it('should export the unit symbols from the common translations', async () => {
+      await createComponent();
+      await component.calculate();
+      const { write } = mockPicker();
+
+      await component.exportConformity();
+
+      const exported = JSON.parse(write.mock.calls[0][0]).distancesConformityCheck[0];
+      expect(exported.obstacleData.height.unit).toBe('m');
+      const [minimumCase] = exported.conformityChecks[0].minimumCase;
+      expect(minimumCase.overhang.temperature.unit).toBe('°C');
+      expect(minimumCase.overhang.pressure.unit).toBe('Pa');
+    });
+
+    it('should flag the export in progress and ignore a second export until the first one ends', async () => {
+      await createComponent();
+      await component.calculate();
+      const { picker, write } = mockPicker();
+      let releaseWrite: () => void = () => undefined;
+      write.mockImplementationOnce(() => new Promise<void>((resolve) => (releaseWrite = resolve)));
+
+      const first = component.exportConformity();
+      await vi.waitFor(() => expect(write).toHaveBeenCalled());
+      expect(component.isExporting()).toBe(true);
+      await component.exportConformity();
+      expect(picker).toHaveBeenCalledTimes(1);
+
+      releaseWrite();
+      await first;
+
+      expect(component.isExporting()).toBe(false);
+    });
+
+    it('should release the export flag when saving the file fails', async () => {
+      await createComponent();
+      await component.calculate();
+      globalThis.showSaveFilePicker = undefined;
+      const createUrl = vi.spyOn(URL, 'createObjectURL').mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      await expect(component.exportConformity()).rejects.toThrow('boom');
+      createUrl.mockRestore();
+
+      expect(component.isExporting()).toBe(false);
+    });
+
+    it('should stay silent when the user cancels the picker', async () => {
+      await createComponent();
+      await component.calculate();
+      globalThis.showSaveFilePicker = vi
+        .fn()
+        .mockRejectedValue(new DOMException('cancelled', 'AbortError')) as unknown as PickerFn;
+      const createUrl = vi.spyOn(URL, 'createObjectURL');
+
+      await component.exportConformity();
+
+      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(createUrl).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['the picker is unavailable', false],
+      ['the picker fails', true]
+    ])('should download a Blob when %s', async (_label, pickerFails) => {
+      await createComponent();
+      await component.calculate();
+      globalThis.showSaveFilePicker = pickerFails
+        ? (vi.fn().mockRejectedValue(new Error('boom')) as unknown as PickerFn)
+        : undefined;
+      vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:x');
+      vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+      const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+      await component.exportConformity();
+
+      expect(click).toHaveBeenCalled();
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:x');
+      expect(mockLogger.error).toHaveBeenCalledTimes(pickerFails ? 1 : 0);
+    });
+  });
+
   describe('conformity plot rendering', () => {
     it('should render the mock plot data with the selected rules and their colors once the plot div exists', async () => {
       await createComponent();
@@ -1089,6 +1264,32 @@ describe('ConformityComponent', () => {
       fixture.componentRef.setInput('isOpen', false);
       fixture.detectChanges();
       expect(component.conformityResults()).toBeNull();
+    });
+
+    it('should drop a calculation that resolves after the modal closed', async () => {
+      await createComponent();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      const original = mockWorkerPython.runTaskWithTimeout.getMockImplementation();
+      let release: (() => void) | null = null;
+      mockWorkerPython.runTaskWithTimeout.mockImplementationOnce(
+        (...args: unknown[]) =>
+          new Promise((resolve) => {
+            release = () => resolve(original?.(...args));
+          })
+      );
+
+      const pending = component.calculate();
+      await vi.waitFor(() => expect(release).not.toBeNull());
+      expect(component.isCalculating()).toBe(true);
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+      expect(component.isCalculating()).toBe(false);
+      (release as unknown as () => void)();
+      await pending;
+
+      expect(component.conformityResults()).toBeNull();
+      expect(component.canExport()).toBe(false);
     });
   });
 });

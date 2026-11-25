@@ -241,6 +241,16 @@ obstacle must stay **outside** all the disks. The disks are fully opaque.
 
 ---
 
+## Export
+
+Once the results are displayed, **Export** generates a JSON file with the obstacle, the form inputs and the
+distances of each selected rule, exactly as shown in the results. The "Browse…" window opens so that you
+choose where to save it (browsers without this window download the file directly). The file is named
+`Export Distances de conformité_<obstacle>_<section>_<date>.json`. The dialog stays open. If the data is
+incomplete, an error message is shown and no file is created.
+
+---
+
 ## Save
 
 **Save** stores the choices of the form (wind zone, checkboxes, temperatures, selected rules and
@@ -248,7 +258,7 @@ point) with the obstacle. The results themselves are not saved: when you reopen 
 obstacle with saved choices, the calculation runs again by itself.
 
 :::{note}
-**Report** and **Export** are shown in the dialog but are not available yet.
+**Report** is shown in the dialog but is not available yet.
 :::
 
 ---
