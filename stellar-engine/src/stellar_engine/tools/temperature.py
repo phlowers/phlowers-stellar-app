@@ -102,9 +102,6 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         .to("m/s")
         .m
     )
-    print("BBBBBBBBBBBB")
-    # print(temp_inputs.windDirection)
-    # wind_angle = DIRECTION_MAP[temp_inputs.windDirection]
     sky_cover = SKY_COVER_MAP[temp_inputs.skyCover]
     thermal_engine.set(
         cable_array=engine.cable_array,
