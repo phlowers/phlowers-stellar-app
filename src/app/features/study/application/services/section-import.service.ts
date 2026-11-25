@@ -70,7 +70,8 @@ import { buildSupportNameEntries } from './catalog-correction/catalog-correction
  * - **CATALOG CORRECTION**: when the adapter asks for it, maintenance, voltage, attachment and chain
  *   values are corrected against the local catalogs, then new support names are added to the catalog.
  * - **MAPPING (coordinates)**: Lambert93 to GPS reprojection when the adapter provides projected coordinates,
- *   then computation of any missing support foot GPS, both delegated to `GeopositioningService`.
+ *   then computation of any missing support foot GPS, both delegated to `GeopositioningService`. The span
+ *   azimuth and support position notices follow, except for a `'guard'` section (no line angle in its file).
  * - **COLLISION_CHECK**: detects whether the UUID already exists in the study.
  * - **PERSISTENCE**: calls `SectionService.createOrUpdateSection`.
  */

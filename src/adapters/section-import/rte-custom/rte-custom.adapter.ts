@@ -48,6 +48,9 @@ import {
  * voltage, support name, attachment set, chain name) and the Lambert93 support foot coordinates.
  * Catalog correction and reprojection are done by the core (`applyCatalogCorrections: true`).
  *
+ * Guard cantons (`CANTON_TYPE` = GARDE) are mapped to a `'guard'` section without phase number nor chain
+ * data, and validated with `ACCROCHE_SET_Z_LAMBERT93` instead of the cable attachment fields.
+ *
  * This adapter is optional: it is enabled in `section-import-adapters.config.ts`.
  */
 @Injectable()
@@ -206,8 +209,9 @@ export class RteCustomAdapter implements SectionImportAdapter {
   }
 
   /**
-   * A guard attachment has no cable nor chain data: its height is the attachment set altitude, while
-   * the line angle, chain and counterweight fields keep the form defaults.
+   * A guard attachment has no cable nor chain data: its height is the attachment set altitude and its
+   * chain fields are not read (form defaults). The line angle and counterweight are still read from the
+   * file and fall back to the form defaults when empty.
    */
   private mapAttachmentToSupport(attachment: Attachment, span: Span, isGuard: boolean): Support {
     const defaults = createEmptySupport();
