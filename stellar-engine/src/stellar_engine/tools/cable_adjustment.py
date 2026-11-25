@@ -23,17 +23,14 @@ def calculate_cable_adjustment(inputs: dict):
 
     Inputs and output angles are in grad. Converts into rad
     """
-    print("AAAAAAAAAAAAAAAAAA")
-    print(inputs)
     table_inputs = CableAdjustmentInputs(**inputs)
-    if table_inputs.support == 'LEFT':
-        side = 'left'
-    elif table_inputs.support == 'RIGHT':
-        side = 'right'
-    else:
-        raise SelectorInputError(
+    side_map = {'LEFT': 'left', 'RIGHT': 'right'}
+    side = side_map.get(
+        table_inputs.support,
+        SelectorInputError(
             f"Expected 'LEFT' or 'RIGHT'. Got {table_inputs.support}"
-        )
+        ),
+    )
     horizontal_angle, vertical_angle = compute_adjustment_angles(
         span_length=table_inputs.spanLength,
         HL=units(table_inputs.leftHorizontalAngle, "grad").to("rad").m,
