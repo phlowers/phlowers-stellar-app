@@ -180,20 +180,20 @@ describe('stacking of the annotations sharing an anchor point', () => {
     }
   );
 
-  // The cable span manipulation icon stands on its own anchor, the top of its virtual support (the crane), where only
-  // that support's marker is drawn: the icon box must clear the marker
+  // The cable span manipulation icon is the lowest of the stack: above the sling marker drawn on the manipulated cable
+  // point, under the cable modification. No load shares that point: a manipulated span has none in the calculation
   it.each(['2d', '3d'] as const)(
-    `should leave at least ${MIN_GAP} px between the cable span manipulation icon and its crane top marker in %s`,
+    `should leave at least ${MIN_GAP} px around the cable span manipulation icon, from its sling marker to the cable modification, in %s`,
     (view) => {
       const params: CreatePlotParams = {
         ...makePlotParams(view),
         supports: [{ uuid: 'span-1' }, { uuid: 'support-2' }] as CreatePlotParams['supports'],
         litData: {
           coords: {
-            virtual_supports: [
+            virtual_insulators: [
               [
-                [5, 0, 0],
-                [5, 0, 20]
+                [0, 0, 5],
+                [0, 0, 0]
               ]
             ],
             virtual_supports_span_indices: [0]
@@ -202,11 +202,14 @@ describe('stacking of the annotations sharing an anchor point', () => {
         } as unknown as CreatePlotParams['litData']
       };
       const icon = createCableSpanManipAnnotations(params).at(-1)!;
+      const { cableModificationIcon } = stackAt(view);
 
       const iconBox = around(icon.yshift as number, HALF_HEIGHT.loadOrCableModificationIcon);
-      const markerTop = PlotlyDrawings.virtualSupport.markerSize[view] / 2;
+      const modificationBox = around(-cableModificationIcon.ay!, HALF_HEIGHT.loadOrCableModificationIcon);
+      const markerTop = PlotlyDrawings.insulator.markerSize[view] / 2;
 
       expect(iconBox.bottom - markerTop).toBeGreaterThanOrEqual(MIN_GAP);
+      expect(modificationBox.bottom - iconBox.top).toBeGreaterThanOrEqual(MIN_GAP);
     }
   );
 

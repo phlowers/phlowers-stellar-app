@@ -93,9 +93,11 @@ export const PlotlyDrawings = {
     icon: '&#xf255;', // FontAwesome hand-back-fist
     iconSize: { '2d': 8, '3d': 8 },
     borderPad: { '2d': 6, '3d': 6 },
-    // pixels above the manipulation fixed point (top of its virtual support), whatever the zoom. The dashed line stops
-    // at the bottom edge of the icon box, worked out from iconSize and borderPad (see getDashedIconLineLength)
-    offsetY: 30,
+    // pixels above the manipulated cable point (cable end of the sling), whatever the zoom. Clears the cut strands
+    // marking (box top at 135 px), which can mark the same point, by at least 4 px, see annotationsClearance.spec.ts. The
+    // dashed line stops at the bottom edge of the icon box, worked out from iconSize and borderPad (see
+    // getDashedIconLineLength)
+    offsetY: 150,
     lineWidth: { '2d': 1, '3d': 1 },
     dashLength: 6,
     dashGap: 4,

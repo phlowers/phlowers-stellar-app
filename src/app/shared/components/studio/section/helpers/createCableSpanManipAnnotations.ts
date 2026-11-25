@@ -10,37 +10,38 @@ import { CreatePlotParams } from './createPlot';
 import { CableSpanManipAnnotationData } from './createCableSpanManipAnnotations.interfaces';
 import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
 import { buildDashedIconLine, buildDashedIconLineShape } from './dashedIconLine.helpers';
-import { findSupportTop, mapAnchorToAxes } from './spanAnchor.helpers';
+import { mapAnchorToAxes } from './spanAnchor.helpers';
 
 type MappedAnchor = ReturnType<typeof mapAnchorToAxes>;
 
-interface FixedPoint {
+interface ManipulatedPoint {
   spanUuid: string;
   anchor: MappedAnchor;
 }
 
 /**
- * Resolves the fixed point of every cable span manipulation drawn on the plot, with the span it belongs to.
+ * Resolves the manipulated cable point of every cable span manipulation drawn on the plot, with the span it belongs to.
  *
  * @remarks
- * The engine models each calculated manipulation as a virtual support standing in its span: the fixed point is the
- * top of that support, where the sling hangs from. `virtual_supports_span_indices` gives the span of each virtual
- * support, and only spans currently visible are kept (`startSupport` ≤ index < `endSupport`).
+ * The engine models each calculated manipulation as a virtual support standing in its span, whose insulator (the sling)
+ * holds the cable. The insulator goes from the support arm to the cable, so the manipulated point is its last point,
+ * whether the cable is lifted or pulled down. `virtual_supports_span_indices` gives the span of each virtual support,
+ * and only spans currently visible are kept (`startSupport` ≤ index < `endSupport`).
  */
-const resolveFixedPoints = (plotParams: CreatePlotParams): FixedPoint[] => {
+const resolveManipulatedPoints = (plotParams: CreatePlotParams): ManipulatedPoint[] => {
   const { litData, supports, startSupport, endSupport, view, side } = plotParams;
   const spanIndices = litData.coords.virtual_supports_span_indices ?? [];
 
   return spanIndices.flatMap((spanIndex, virtualIndex) => {
     if (spanIndex < startSupport || spanIndex >= endSupport) return [];
     const spanUuid = supports?.[spanIndex]?.uuid;
-    const top = findSupportTop(litData.coords.virtual_supports?.[virtualIndex]);
-    return spanUuid && top ? [{ spanUuid, anchor: mapAnchorToAxes(top, view, side) }] : [];
+    const cablePoint = litData.coords.virtual_insulators?.[virtualIndex]?.at(-1);
+    return spanUuid && cablePoint ? [{ spanUuid, anchor: mapAnchorToAxes(cablePoint, view, side) }] : [];
   });
 };
 
 // The dashed line is drawn apart, so the icon stands on its own
-const buildIcon = ({ spanUuid, anchor: { x, y, z } }: FixedPoint, view: CreatePlotParams['view']) =>
+const buildIcon = ({ spanUuid, anchor: { x, y, z } }: ManipulatedPoint, view: CreatePlotParams['view']) =>
   buildClickableIconAnnotation({
     showArrow: false,
     arrowTipX: x,
@@ -56,7 +57,7 @@ const buildIcon = ({ spanUuid, anchor: { x, y, z } }: FixedPoint, view: CreatePl
 
 /**
  * Creates the Plotly annotations of the calculated cable span manipulations on the section plot: a clickable icon
- * `PlotlyDrawings.cableSpanManip.offsetY` px straight above each manipulation fixed point, joined to it by a dashed line.
+ * `PlotlyDrawings.cableSpanManip.offsetY` px straight above each manipulated cable point, joined to it by a dashed line.
  *
  * @remarks
  * Pure function (no DI, no side effects) so it can be unit-tested in isolation.
@@ -70,10 +71,10 @@ const buildIcon = ({ spanUuid, anchor: { x, y, z } }: FixedPoint, view: CreatePl
  * @returns The 3D dashed line annotations followed by the icon of each manipulation, or only the icons in 2D.
  */
 export const createCableSpanManipAnnotations = (plotParams: CreatePlotParams): Partial<Plotly.Annotations>[] =>
-  resolveFixedPoints(plotParams).flatMap((fixedPoint) => {
-    const icon = buildIcon(fixedPoint, plotParams.view);
+  resolveManipulatedPoints(plotParams).flatMap((manipulatedPoint) => {
+    const icon = buildIcon(manipulatedPoint, plotParams.view);
     return plotParams.view === '3d'
-      ? [...buildDashedIconLine(fixedPoint.anchor, PlotlyDrawings.cableSpanManip), icon]
+      ? [...buildDashedIconLine(manipulatedPoint.anchor, PlotlyDrawings.cableSpanManip), icon]
       : [icon];
   });
 
@@ -90,6 +91,6 @@ export const createCableSpanManipAnnotations = (plotParams: CreatePlotParams): P
 export const createCableSpanManipShapes = (plotParams: CreatePlotParams): Partial<Plotly.Shape>[] =>
   plotParams.view === '3d'
     ? []
-    : resolveFixedPoints(plotParams).map(({ anchor }) =>
+    : resolveManipulatedPoints(plotParams).map(({ anchor }) =>
         buildDashedIconLineShape(anchor, PlotlyDrawings.cableSpanManip)
       );

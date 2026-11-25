@@ -854,7 +854,7 @@ describe('createPlot', () => {
   });
 
   describe('cable span manipulation icons', () => {
-    // The engine drew one manipulation in span 0: a virtual support whose top is the fixed point
+    // The engine drew one manipulation in span 0: a virtual support whose sling holds the cable at [5, 0, 30]
     const spanManipParams = () => ({
       ...createDefaultParams(),
       endSupport: 1,
@@ -904,7 +904,7 @@ describe('createPlot', () => {
       };
       expect(layoutArg.annotations.filter(isSpanManipIcon)).toHaveLength(1);
       expect(layoutArg.shapes).toHaveLength(2);
-      expect(layoutArg.shapes[0]).toMatchObject({ type: 'line', yanchor: 35 });
+      expect(layoutArg.shapes[0]).toMatchObject({ type: 'line', yanchor: 30 });
     });
   });
 

@@ -15,8 +15,9 @@ import { CreatePlotParams } from './createPlot';
 type Annotation = Partial<Plotly.Annotations> & { z?: number; data?: { type: string; spanUuid: string } };
 
 /**
- * Three spans (supports 0 to 3). The engine drew two manipulations, listed in span order: one in span 0 whose crane
- * hook (the highest point of its virtual support) is [4, 2, 35], one in span 2 whose hook is [24, -1, 40].
+ * Three spans (supports 0 to 3). The engine drew two manipulations, listed in span order: one in span 0 whose sling
+ * holds the cable at [5, 1, 30] under a crane hook at [4, 2, 35], one in span 2 holding it at [25, -2, 28] under a
+ * hook at [24, -1, 40].
  */
 const makePlotParams = (overrides: Partial<CreatePlotParams> = {}): CreatePlotParams => ({
   documentRef: globalThis.document,
@@ -54,11 +55,11 @@ const makePlotParams = (overrides: Partial<CreatePlotParams> = {}): CreatePlotPa
       virtual_insulators: [
         [
           [4, 2, 35],
-          [5, 0, 30]
+          [5, 1, 30]
         ],
         [
           [24, -1, 40],
-          [25, 0, 30]
+          [25, -2, 28]
         ]
       ],
       virtual_supports_span_indices: [0, 2]
@@ -80,7 +81,7 @@ describe('createCableSpanManipAnnotations', () => {
     it.each([
       ['no span manipulation was calculated', withCoords({ spans: [], supports: [] })],
       ['the span indices are null', withCoords({ spans: [], supports: [], virtual_supports_span_indices: null })],
-      ['the virtual support has no coordinates', withCoords({ virtual_supports_span_indices: [0] })],
+      ['the sling has no coordinates', withCoords({ virtual_supports_span_indices: [0] })],
       ['the span has no support', { supports: undefined }]
     ])('should return [] when %s', (_, overrides) => {
       expect(createCableSpanManipAnnotations(makePlotParams(overrides))).toEqual([]);
@@ -108,25 +109,44 @@ describe('createCableSpanManipAnnotations', () => {
     });
   });
 
+  describe('anchor', () => {
+    it('should be the cable end of the sling, even when it stands above the arm end', () => {
+      const params = makePlotParams(
+        withCoords({
+          virtual_insulators: [
+            [
+              [4, 2, 20],
+              [5, 1, 24]
+            ]
+          ],
+          virtual_supports_span_indices: [0]
+        })
+      );
+      const [icon] = iconsOf(createCableSpanManipAnnotations(params) as Annotation[]);
+
+      expect([icon.x, icon.y, icon.z]).toEqual([5, 1, 24]);
+    });
+  });
+
   describe('axes mapping', () => {
-    it('should keep x, y and z of the fixed point in 3D', () => {
+    it('should keep x, y and z of the manipulated cable point in 3D', () => {
       const [icon] = iconsOf(createCableSpanManipAnnotations(makePlotParams()) as Annotation[]);
-      expect([icon.x, icon.y, icon.z]).toEqual([4, 2, 35]);
+      expect([icon.x, icon.y, icon.z]).toEqual([5, 1, 30]);
     });
 
     it('should plot z on the vertical axis in the 2D profile view', () => {
       const [icon] = createCableSpanManipAnnotations(makePlotParams({ view: '2d', side: 'profile' })) as Annotation[];
-      expect([icon.x, icon.y]).toEqual([4, 35]);
+      expect([icon.x, icon.y]).toEqual([5, 30]);
     });
 
     it('should plot y on the horizontal axis in the 2D face view', () => {
       const [icon] = createCableSpanManipAnnotations(makePlotParams({ view: '2d', side: 'face' })) as Annotation[];
-      expect([icon.x, icon.y]).toEqual([2, 35]);
+      expect([icon.x, icon.y]).toEqual([1, 30]);
     });
   });
 
   describe('icon', () => {
-    it('should sit offsetY pixels straight above the fixed point, in the manipulation color', () => {
+    it('should sit offsetY pixels straight above the manipulated cable point, in the manipulation color', () => {
       const [icon] = iconsOf(createCableSpanManipAnnotations(makePlotParams()) as Annotation[]);
 
       expect(icon.showarrow).toBe(false);
@@ -145,14 +165,14 @@ describe('createCableSpanManipAnnotations', () => {
   });
 
   describe('3D dashed line', () => {
-    it('should be made of arrow-only annotations in the manipulation color, from the fixed point', () => {
+    it('should be made of arrow-only annotations in the manipulation color, from the manipulated cable point', () => {
       const params = makePlotParams({ startSupport: 0, endSupport: 1 });
       const dashes = dashesOf(createCableSpanManipAnnotations(params) as Annotation[]);
 
       expect(dashes.length).toBeGreaterThan(1);
       expect(dashes[0].standoff).toBe(0);
       dashes.forEach((dash) => {
-        expect([dash.x, dash.y, dash.z]).toEqual([4, 2, 35]);
+        expect([dash.x, dash.y, dash.z]).toEqual([5, 1, 30]);
         expect(dash.showarrow).toBe(true);
         expect(dash.arrowcolor).toBe(PlotlyDrawings.cableSpanManip.unselected.color);
         expect(dash.captureevents).toBe(false);
@@ -185,13 +205,13 @@ describe('createCableSpanManipAnnotations', () => {
       annotations.forEach((annotation) => expect(annotation.text).toBe(PlotlyDrawings.cableSpanManip.icon));
     });
 
-    it('should be one dashed shape per manipulation, from its fixed point up to its icon', () => {
+    it('should be one dashed shape per manipulation, from its manipulated cable point up to its icon', () => {
       const shapes = createCableSpanManipShapes(params2d());
 
       expect(shapes).toHaveLength(2);
       expect(shapes.map((shape) => [shape.xanchor, shape.yanchor])).toEqual([
-        [4, 35],
-        [24, 40]
+        [5, 30],
+        [25, 28]
       ]);
       expect(shapes[0]).toMatchObject({
         type: 'line',
