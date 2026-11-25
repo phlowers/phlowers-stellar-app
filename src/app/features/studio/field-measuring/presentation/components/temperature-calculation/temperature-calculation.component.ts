@@ -248,7 +248,7 @@ export class TemperatureCalculationComponent {
         time: data.time ?? null,
         windSpeed: data.windSpeed ?? 0,
         windSpeedUnit: data.windSpeedUnit ?? 'kmh',
-        windDirection: data.windDirection ?? 'North',
+        windIncidence: data.windIncidenceMode === 'perpendicular' ? 90 : (data.windIncidence ?? 90),
         skyCover: data.skyCover!
       });
       if (error) {
