@@ -72,7 +72,7 @@ def test_temp_calculation(balance_engine_base: BalanceEngine):
         "time": datetime.datetime(1970, 3, 21, 22),
         "windSpeed": 10,
         "windSpeedUnit": 'ms',
-        "windDirection": 'East',
+        "windIncidence": 90,
     }
     result = temperature_calculation(inputs, engine=balance_engine_base)
     assert "cableTemperature" in result

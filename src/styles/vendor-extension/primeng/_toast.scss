@@ -9,6 +9,10 @@
     background: transparent;
     box-shadow: none;
 
+    &:hover {
+      background: transparent;
+    }
+
     &:focus-visible {
       @extend %focus-state;
     }

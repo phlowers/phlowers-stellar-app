@@ -8,10 +8,13 @@ import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal, unt
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
+import type { ToastCloseEvent } from 'primeng/types/toast';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { AuthService } from '@services/auth/auth.service';
 import { StorageService } from '@services/storage/storage.service';
+import { NotificationService } from '@services/notification/notification.service';
+import { BOTTOM_RIGHT_TOAST_KEY } from '@services/notification/notification.constantes';
 import { CatalogUpdateService } from '@shared/catalog/services/catalog-update.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 
@@ -34,8 +37,10 @@ const modules = [RouterModule, CommonModule, ToastModule, IconComponent];
 })
 export class AppComponent implements OnInit {
   title = 'phlowers-stellar-app';
+  protected readonly bottomRightToastKey = BOTTOM_RIGHT_TOAST_KEY;
 
   private readonly storageService = inject(StorageService);
+  private readonly notificationService = inject(NotificationService);
   private readonly workerService = inject(WorkerPythonService);
   private readonly authService = inject(AuthService);
   private readonly catalogUpdateService = inject(CatalogUpdateService);
@@ -57,6 +62,10 @@ export class AppComponent implements OnInit {
         this.logger.error('Catalog update failed', err);
       });
     });
+  }
+
+  protected onBottomRightToastClose(event: ToastCloseEvent): void {
+    this.notificationService.release(event.message);
   }
 
   async setupWorker() {

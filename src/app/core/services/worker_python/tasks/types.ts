@@ -436,7 +436,7 @@ export interface TaskInputs {
     time: Date | null;
     windSpeed: number;
     windSpeedUnit: 'kmh' | 'ms';
-    windDirection: string;
+    windIncidence: number;
     skyCover: SkyCover;
   };
   // Inputs for computeDiffuseAndBeamRadiation task

@@ -291,7 +291,7 @@ class TemperatureCalculationInputs:
     time: datetime.datetime
     windSpeed: float
     windSpeedUnit: Literal['kmh', 'ms']
-    windDirection: str
+    windIncidence: float
 
 
 @dataclass
