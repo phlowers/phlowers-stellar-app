@@ -6,6 +6,11 @@
  */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
+import { Toast } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import type { Mock } from 'vitest';
+import { BOTTOM_RIGHT_TOAST_KEY } from '@services/notification/notification.constantes';
 import { AppComponent } from './app.component';
 import { NotificationService } from '@services/notification/notification.service';
 import { OnlineService } from '@services/online/online.service';
@@ -130,6 +135,7 @@ describe('AppComponent', () => {
 
 describe('AppComponent - HTML rendering', () => {
   let fixture: ComponentFixture<AppComponent>;
+  let mockNotification: { success: Mock; error: Mock; info: Mock; warning: Mock; release: Mock };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -171,9 +177,9 @@ describe('AppComponent - HTML rendering', () => {
     TestBed.overrideProvider(OnlineService, {
       useValue: { online$: new BehaviorSubject<boolean>(true) }
     });
-    TestBed.overrideProvider(NotificationService, {
-      useValue: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() }
-    });
+    mockNotification = { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn(), release: vi.fn() };
+    TestBed.overrideProvider(NotificationService, { useValue: mockNotification });
+    TestBed.overrideProvider(MessageService, { useValue: new MessageService() });
     TestBed.overrideProvider(AuthService, { useValue: { currentUser: signal<User | null>(null) } });
     TestBed.overrideProvider(CatalogUpdateService, {
       useValue: { updateCatalogsIfNeeded: vi.fn().mockResolvedValue(undefined) }
@@ -186,6 +192,51 @@ describe('AppComponent - HTML rendering', () => {
   it('should render app-toast', () => {
     const el = getByTestId('app-toast');
     expect(el).toBeTruthy();
+  });
+
+  it('should render a single bottom-right toast for info, warning and warning lists', () => {
+    const toasts = fixture.debugElement.queryAll(By.directive(Toast));
+
+    expect(getByTestId('app-toast-secondary')).toBeTruthy();
+    expect(toasts.map((t) => (t.componentInstance as Toast).position)).toEqual(['top-center', 'bottom-right']);
+    expect((toasts[1].componentInstance as Toast).key).toBe(BOTTOM_RIGHT_TOAST_KEY);
+  });
+
+  it('should release the closed bottom-right toast so it can be displayed again', () => {
+    const message = { key: BOTTOM_RIGHT_TOAST_KEY, severity: 'warn', summary: 'S', detail: 'D' };
+    const toast = fixture.debugElement.query(By.css('[data-testid="app-toast-secondary"]'));
+
+    toast.triggerEventHandler('onClose', { message });
+
+    expect(mockNotification.release).toHaveBeenCalledWith(message);
+  });
+
+  it('should render a warning list as a bulleted list and an info toast with its detail', async () => {
+    const messageService = TestBed.inject(MessageService);
+    messageService.add({
+      key: BOTTOM_RIGHT_TOAST_KEY,
+      severity: 'warn',
+      summary: 'List',
+      data: { warnings: ['first', 'second'] },
+      life: 60000
+    });
+    messageService.add({
+      key: BOTTOM_RIGHT_TOAST_KEY,
+      severity: 'info',
+      summary: 'Note',
+      detail: 'Plain detail',
+      life: 60000
+    });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const root: HTMLElement = fixture.nativeElement;
+    expect(Array.from(root.querySelectorAll('.p-toast-detail li')).map((li) => li.textContent?.trim())).toEqual([
+      'first',
+      'second'
+    ]);
+    expect(root.textContent).toContain('Plain detail');
   });
 
   it.each([['update-dialog'], ['update-now-btn'], ['update-later-btn']])(
