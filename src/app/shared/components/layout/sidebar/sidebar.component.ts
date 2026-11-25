@@ -1,12 +1,19 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, input, OnInit, signal, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  OnInit,
+  signal,
+  ViewEncapsulation
+} from '@angular/core';
 import { SidebarItem } from './sidebar.model';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { environment } from '@src/environments/environment';
+import { AppConfigService } from '@core/config/app-config.service';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { TranslocoModule } from '@jsverse/transloco';
-
-const version = environment.version;
 
 @Component({
   selector: 'app-sidebar',
@@ -35,7 +42,12 @@ export class SidebarComponent implements OnInit {
 
   private readonly bodyTag = signal<HTMLBodyElement | null>(null);
   public expandedStatus = signal<boolean>(this.getInitialExpandedStatus());
-  public appVersion = signal<string>('');
+  private readonly appConfigService = inject(AppConfigService);
+  /** Version shown in the sidebar header; `0.0.00` when the build placeholder was not substituted. */
+  public appVersion = computed<string>(() => {
+    const version = this.appConfigService.appVersion();
+    return version.includes('VERSION') ? '0.0.00' : version;
+  });
   public appLogoRoot = signal<string>('in-app-logo/');
 
   sidebarClass = computed(() => {
@@ -79,14 +91,6 @@ export class SidebarComponent implements OnInit {
       }
 
       this.bodyTag()!.classList.add('has-sidebar--animation');
-    }
-  }
-
-  constructor() {
-    if (version.includes('VERSION')) {
-      this.appVersion.set('0.0.00');
-    } else {
-      this.appVersion.set(version);
     }
   }
 }

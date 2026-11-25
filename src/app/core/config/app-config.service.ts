@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { firstValueFrom, timeout } from 'rxjs';
 import { LoggerService } from '@services/logger/logger.service';
+import { environment } from '@src/environments/environment';
 import { AppConfig } from './app-config.interfaces';
 
 const APP_CONFIG_URL = 'assets/config/app-config.json';
@@ -20,11 +21,16 @@ const LOAD_TIMEOUT_MS = 3000;
  * rebuilding the image.
  *
  * Falls back with a log warning to `'en'` if the file is absent or malformed.
+ * The optional `appVersion` key overrides the `package.json` version (`environment.version`) shown in the sidebar.
  */
 @Injectable({ providedIn: 'root' })
 export class AppConfigService {
   private readonly http = inject(HttpClient);
   private readonly logger = inject(LoggerService);
+
+  private readonly _appVersion = signal<string>(environment.version);
+  /** Version displayed in the sidebar: `appVersion` from the config file, else the `package.json` version. */
+  readonly appVersion = this._appVersion.asReadonly();
 
   /** Resolves the default language to activate at startup. */
   async loadDefaultLang(): Promise<string> {
@@ -32,6 +38,10 @@ export class AppConfigService {
       const config = await firstValueFrom(
         this.http.get<AppConfig>(APP_CONFIG_URL).pipe(timeout({ first: LOAD_TIMEOUT_MS }))
       );
+      const configuredVersion = config?.appVersion?.trim();
+      if (configuredVersion) {
+        this._appVersion.set(configuredVersion);
+      }
       return config?.defaultLang ?? FALLBACK_LANG;
     } catch (error) {
       this.logger.warn('Failed to load app-config.json, falling back to default language', error);

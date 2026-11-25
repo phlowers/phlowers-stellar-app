@@ -290,7 +290,7 @@
     "col-value": "Value",
     "build-hash": "Build Hash",
     "build-datetime": "Build datetime",
-    "build-version": "Build version",
+    "build-version": "Stellar version",
     "offline-status": "Offline mode",
     "pending-version": "Pending version",
     "no-pending-version": "None",
