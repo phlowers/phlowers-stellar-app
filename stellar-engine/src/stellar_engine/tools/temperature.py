@@ -102,7 +102,9 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         .to("m/s")
         .m
     )
-    wind_angle = DIRECTION_MAP[temp_inputs.windDirection]
+    print("BBBBBBBBBBBB")
+    # print(temp_inputs.windDirection)
+    # wind_angle = DIRECTION_MAP[temp_inputs.windDirection]
     sky_cover = SKY_COVER_MAP[temp_inputs.skyCover]
     thermal_engine.set(
         cable_array=engine.cable_array,
@@ -116,7 +118,7 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         intensity=np.array([temp_inputs.transit]),
         ambient_temp=np.array([temp_inputs.ambientTemperature]),
         wind_speed=np.array([wind_speed]),
-        wind_angle=np.array([wind_angle]),
+        wind_angle=np.array([temp_inputs.windIncidence]),
         nebulosity=np.array([sky_cover]),
     )
     temperature_result = thermal_engine.steady_temperature(
