@@ -696,6 +696,75 @@ describe('PlotService', () => {
 
       expect(service.loading()).toBe(false);
     });
+
+    describe('first projection', () => {
+      const sectionWithCharge: Section = {
+        ...mockSection,
+        charges: [
+          {
+            uuid: 'charge-uuid',
+            name: 'Load case 1',
+            personnelPresence: true,
+            description: '',
+            data: {
+              climate: { ...defaultClimaticCharge },
+              spanLoads: [],
+              cableModifParams: [],
+              supportManipParams: [],
+              spanManipParams: []
+            }
+          }
+        ],
+        selected_charge_uuid: 'charge-uuid'
+      };
+
+      beforeEach(() => {
+        mockWorkerPythonService.setReady?.(true);
+        mockCablesService.getCable.mockResolvedValue(mockCable);
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+          if (task === Task.initLit) {
+            return Promise.resolve({ result: { success: true }, error: null });
+          }
+          if (task === Task.refreshProjection) {
+            return Promise.resolve({
+              result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+              error: null
+            });
+          }
+          return Promise.resolve({ result: null, error: null });
+        });
+      });
+
+      it('should be left to the selected charge in the studio, the plot loading until it is applied', async () => {
+        service.isStudioActive.set(true);
+
+        await service.initSectionStudio(sectionWithCharge);
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.refreshProjection, expect.anything());
+        expect(service.litData()).toBeNull();
+        expect(service.loading()).toBe(true);
+        expect(service.engineStudyId()).toBeGreaterThan(0);
+      });
+
+      it.each([
+        ['no charge is selected', { ...sectionWithCharge, selected_charge_uuid: null }],
+        ['the selected charge does not exist', { ...sectionWithCharge, selected_charge_uuid: 'unknown-uuid' }]
+      ])('should be done by the engine study in the studio when %s', async (_, section) => {
+        service.isStudioActive.set(true);
+
+        await service.initSectionStudio(section);
+
+        expect(service.litData()).toEqual(mockGetSectionOutput);
+        expect(service.loading()).toBe(false);
+      });
+
+      it('should be done by the engine study in the section preview, where no charge is applied', async () => {
+        await service.initSectionStudio(sectionWithCharge);
+
+        expect(service.litData()).toEqual(mockGetSectionOutput);
+        expect(service.loading()).toBe(false);
+      });
+    });
   });
 
   describe('high safety', () => {

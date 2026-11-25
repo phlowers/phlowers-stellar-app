@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 import { signal } from '@angular/core';
 import { CableSpanManipComponent } from './cable-span-manip';
 import { PlotService } from '@services/plot/plot.service';
@@ -12,7 +12,7 @@ import { LoadFormsService } from '../../services/loadForms.service';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
-  const fn = vi.fn(() => value) as vi.Mock & { set: vi.Mock };
+  const fn = vi.fn(() => value) as unknown as Mock<() => T> & { set: Mock<(v: T) => void> };
   fn.set = vi.fn((v: T) => {
     value = v;
   });
@@ -65,7 +65,9 @@ describe('CableSpanManipComponent', () => {
       save: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
       clearPersistedFormData: vi.fn(),
-      reloadSection: vi.fn().mockResolvedValue(undefined)
+      reloadSection: vi.fn().mockResolvedValue(undefined),
+      selectedSpanUuid: signal<string | null>(null),
+      clearSelectedSpan: vi.fn(() => mockCableSpanManipService.selectedSpanUuid.set(null))
     } as unknown as vi.Mocked<CableSpanManipService>;
 
     mockChainsService = {
@@ -638,6 +640,72 @@ describe('CableSpanManipComponent', () => {
       expect(component.form.controls.distanceToRefSupport.value).toBe(10);
       expect(component.form.controls.slingLength.value).toBe(3);
       expect(component.hasSavedManipulation()).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // span pre-selection from the section plot
+  // ---------------------------------------------------------------------------
+  describe('span pre-selection from the plot', () => {
+    beforeEach(() => {
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        cable_span_manipulations: [
+          {
+            uuid: 'manip-uuid-2',
+            spanUuid: 'support-uuid-2',
+            chargeUuid: 'charge-uuid-1',
+            referenceSupport: 'RIGHT',
+            distanceToRefSupport: 12,
+            cableManipType: 'with_a_crane',
+            cableManipMethod: 'clamp',
+            longitudinalDistance: 5,
+            lateralDistance: 2,
+            altitude: 30,
+            anchoring: 'with_sling',
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null,
+            slingLength: 4
+          }
+        ]
+      } as unknown as Section);
+    });
+
+    it('should select the span and load its manipulation', () => {
+      mockCableSpanManipService.selectedSpanUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(component.form.controls.spanUuid.value).toBe('support-uuid-2');
+      expect(component.hasSavedManipulation()).toBe(true);
+      expect(component.form.controls.referenceSupport.value).toBe('RIGHT');
+      expect(component.form.controls.distanceToRefSupport.value).toBe(12);
+      expect(component.form.controls.altitude.value).toBe(30);
+    });
+
+    it('should clear the pre-selection once consumed, so the same span can be selected again', () => {
+      mockCableSpanManipService.selectedSpanUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(mockCableSpanManipService.clearSelectedSpan).toHaveBeenCalledOnce();
+      expect(mockCableSpanManipService.selectedSpanUuid()).toBeNull();
+
+      component.form.controls.spanUuid.setValue('support-uuid-1');
+      component.onScopeChange('support-uuid-1');
+      mockCableSpanManipService.selectedSpanUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(component.form.controls.spanUuid.value).toBe('support-uuid-2');
+    });
+
+    it('should leave the form untouched without a pre-selection', () => {
+      component.form.controls.spanUuid.setValue('support-uuid-1');
+      fixture.detectChanges();
+
+      expect(component.form.controls.spanUuid.value).toBe('support-uuid-1');
+      expect(mockCableSpanManipService.clearSelectedSpan).not.toHaveBeenCalled();
     });
   });
 

@@ -11,9 +11,9 @@ The goal is that the look of the app's plots is changed in one place, and that n
 
 ## What it is
 
-A single `as const` object, grouped by **drawn object** (`span`, `support`, `insulator`, `loadPunctual`,
-`cableModification`, `cableSupportManip`, `cutStrands`, `obstacle`, `floor`, `distance`, `freePositioning`,
-`conformity`, `supportPlot`, …), plus a `plot` group for what every plot shares (font, backgrounds, grid).
+A single `as const` object, grouped by **drawn object** (`span`, `support`, `insulator`, `virtualSupport`,
+`loadPunctual`, `cableModification`, `cableSupportManip`, `cableSpanManip`, `cutStrands`, `obstacle`, `floor`,
+`distance`, `freePositioning`, `conformity`, `supportPlot`, …), plus a `plot` group for what every plot shares (font, backgrounds, grid).
 
 ```typescript
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
@@ -37,9 +37,13 @@ Read it directly where it is needed. Do not re-export it through an intermediate
   plain numbers.
 - **Selection looks**: a drawing whose look changes with the selection declares `unselected` and `selected`. An object
   made of several points (obstacle, floor) also declares `inactivePoint`, the look of the other points of the selected
-  object. The icons (loads, cable modification, cable support manipulation, cut strands) only declare `unselected`.
+  object. The icons (loads, cable modification, cable support manipulation, cable span manipulation, cut strands) only
+  declare `unselected`.
 - **Pixels, not data units**: offsets such as `arrowYOffset` or `cutStrands.offsetY` are in pixels, so the gap stays
   the same at any zoom level.
+- **Icon joined by a dashed line**: a group drawn as an icon `offsetY` px above its anchor with a dashed line down to
+  it (`cutStrands`, `cableSpanManip`) declares `offsetY`, `iconSize`, `borderPad`, `lineWidth`, `dashLength`,
+  `dashGap` and `unselected.color`, and is passed as is to the shared helpers of `dashedIconLine.helpers.ts`.
 - **Comment the why**: when a value looks arbitrary (a 40 px gap between two icons, an opacity used instead of an
   alpha), a short comment next to it explains the constraint.
 
@@ -50,7 +54,7 @@ Read it directly where it is needed. Do not re-export it through an intermediate
 1. **Change a look**: edit the value in `PlotlyDrawings`. Nothing else should need to change.
 2. **Draw a new object**: add a group named after the object, following the conventions above, then read it from the
    helper that builds the trace or the annotation.
-3. **Need a computed value** (e.g. `getCutStrandsLineLength`, derived from the icon size and its padding): keep the
+3. **Need a computed value** (e.g. `getDashedIconLineLength`, derived from the icon size and its padding): keep the
    raw numbers in `PlotlyDrawings` and put the computation in a function that reads them. Do not copy the numbers.
 4. **Tests**: assert against `PlotlyDrawings` rather than repeating its values, so a restyle does not break specs.
 

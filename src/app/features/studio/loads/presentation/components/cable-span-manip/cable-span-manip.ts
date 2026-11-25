@@ -213,6 +213,18 @@ export class CableSpanManipComponent implements OnInit {
     untracked(() => this.onScopeChange(this.form.controls.spanUuid.value));
   });
 
+  // Pre-select the span whose manipulation icon was clicked on the section plot: patch the span control and re-run the
+  // pre-fill flow, then clear the signal so the same span can be selected again
+  private readonly _selectSpanFromPlot = effect(() => {
+    const spanUuid = this.cableSpanManipService.selectedSpanUuid();
+    if (!spanUuid) return;
+    untracked(() => {
+      this.form.controls.spanUuid.setValue(spanUuid);
+      this.onScopeChange(spanUuid);
+      this.cableSpanManipService.clearSelectedSpan();
+    });
+  });
+
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.value });
 
   private readonly _syncTemporaryManipulation = effect(() => {

@@ -154,6 +154,26 @@ describe('CableSpanManipService', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // span pre-selection
+  // ---------------------------------------------------------------------------
+  describe('span pre-selection', () => {
+    it('should have no span selected initially', () => {
+      expect(service.selectedSpanUuid()).toBeNull();
+    });
+
+    it('should clear the selection so the same span can be selected again', () => {
+      service.selectSpan('support-uuid-1');
+      expect(service.selectedSpanUuid()).toBe('support-uuid-1');
+
+      service.clearSelectedSpan();
+      expect(service.selectedSpanUuid()).toBeNull();
+
+      service.selectSpan('support-uuid-1');
+      expect(service.selectedSpanUuid()).toBe('support-uuid-1');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // clearPersistedFormData()
   // ---------------------------------------------------------------------------
   describe('clearPersistedFormData()', () => {
