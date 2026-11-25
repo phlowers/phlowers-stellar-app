@@ -21,7 +21,7 @@ interface Band {
   top: number;
 }
 
-// Smallest empty strip wanted between the scissors box and anything stacked below it
+// Smallest empty strip wanted between a box and anything stacked below it
 const MIN_GAP = 4;
 
 // Half heights of the annotation boxes, in pixels. Measured on the boxes Plotly draws (bounding box of the annotation
@@ -42,7 +42,7 @@ const around = (center: number, halfHeight: number): Band => ({
 });
 
 // Every annotation sits on this single point, the worst case: a load, a cable modification, a cable support
-// manipulation and a cut strand marking sharing the same anchor
+// manipulation, a cut strand marking and a cable span manipulation sharing the same anchor
 const makePlotParams = (view: CreatePlotParams['view']): CreatePlotParams => {
   const cutStrands: RrtsCutStrandsData = {
     spanUuid: 'span-1',
@@ -69,6 +69,7 @@ const makePlotParams = (view: CreatePlotParams['view']): CreatePlotParams => {
     distanceType: null,
     cutStrands,
     spanUuidToIndex: new Map([['span-1', 0]]),
+    supports: [{ uuid: 'span-1' }, { uuid: 'support-2' }] as CreatePlotParams['supports'],
     litData: {
       coords: {
         supports: [[[0, 0, 0]]],
@@ -78,7 +79,15 @@ const makePlotParams = (view: CreatePlotParams['view']): CreatePlotParams => {
             [5, 0, 0],
             [10, 0, 0]
           ]
-        ]
+        ],
+        // the sling of the span manipulation, from the arm down to the cable
+        virtual_insulators: [
+          [
+            [0, 0, 5],
+            [0, 0, 0]
+          ]
+        ],
+        virtual_supports_span_indices: [0]
       },
       output_parameters: { span_length: [10], loads_coords: { 0: [0, 0, 0] } }
     } as unknown as CreatePlotParams['litData']
@@ -125,7 +134,8 @@ const stackAt = (view: CreatePlotParams['view']) => {
     params.spanUuidToIndex!
   );
   const scissors = createCutStrandsAnnotations(params).at(-1)!;
-  return { load, cableModificationIcon, cableModificationLabel, cableSupportManipIcon, scissors };
+  const cableSpanManipIcon = createCableSpanManipAnnotations(params).at(-1)!;
+  return { load, cableModificationIcon, cableModificationLabel, cableSupportManipIcon, scissors, cableSpanManipIcon };
 };
 
 describe('stacking of the annotations sharing an anchor point', () => {
@@ -167,7 +177,7 @@ describe('stacking of the annotations sharing an anchor point', () => {
     }
   );
 
-  // The cable support manipulation icon is the highest of the stack, above the scissors
+  // The cable support manipulation icon stands above the scissors
   it.each(['2d', '3d'] as const)(
     `should leave at least ${MIN_GAP} px between the cable support manipulation and the scissors below it in %s`,
     (view) => {
@@ -180,36 +190,23 @@ describe('stacking of the annotations sharing an anchor point', () => {
     }
   );
 
-  // The cable span manipulation icon is the lowest of the stack: above the sling marker drawn on the manipulated cable
-  // point, under the cable modification. No load shares that point: a manipulated span has none in the calculation
+  // The cable span manipulation icon is the highest annotation of a cable point. No load shares that point (a manipulated
+  // span has none in the calculation), and the cable support manipulation stands on a support top, not on the cable
   it.each(['2d', '3d'] as const)(
-    `should leave at least ${MIN_GAP} px around the cable span manipulation icon, from its sling marker to the cable modification, in %s`,
+    `should leave at least ${MIN_GAP} px between the cable span manipulation and the scissors, cable modification and label below it in %s`,
     (view) => {
-      const params: CreatePlotParams = {
-        ...makePlotParams(view),
-        supports: [{ uuid: 'span-1' }, { uuid: 'support-2' }] as CreatePlotParams['supports'],
-        litData: {
-          coords: {
-            virtual_insulators: [
-              [
-                [0, 0, 5],
-                [0, 0, 0]
-              ]
-            ],
-            virtual_supports_span_indices: [0]
-          },
-          output_parameters: { span_length: [10], loads_coords: {} }
-        } as unknown as CreatePlotParams['litData']
+      const { cableModificationIcon, cableModificationLabel, scissors, cableSpanManipIcon } = stackAt(view);
+
+      const manipBox = around(cableSpanManipIcon.yshift as number, HALF_HEIGHT.loadOrCableModificationIcon);
+      const below: Record<string, Band> = {
+        scissors: around(scissors.yshift as number, HALF_HEIGHT.scissors),
+        cableModificationIcon: around(-cableModificationIcon.ay!, HALF_HEIGHT.loadOrCableModificationIcon),
+        cableModificationLabel: around(cableModificationLabel.yshift as number, HALF_HEIGHT.label)
       };
-      const icon = createCableSpanManipAnnotations(params).at(-1)!;
-      const { cableModificationIcon } = stackAt(view);
 
-      const iconBox = around(icon.yshift as number, HALF_HEIGHT.loadOrCableModificationIcon);
-      const modificationBox = around(-cableModificationIcon.ay!, HALF_HEIGHT.loadOrCableModificationIcon);
-      const markerTop = PlotlyDrawings.insulator.markerSize[view] / 2;
-
-      expect(iconBox.bottom - markerTop).toBeGreaterThanOrEqual(MIN_GAP);
-      expect(modificationBox.bottom - iconBox.top).toBeGreaterThanOrEqual(MIN_GAP);
+      Object.entries(below).forEach(([name, band]) => {
+        expect(manipBox.bottom - band.top, `gap above the ${name}`).toBeGreaterThanOrEqual(MIN_GAP);
+      });
     }
   );
 

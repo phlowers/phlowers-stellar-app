@@ -9,17 +9,20 @@ import { Section, Charge, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, PythonErrorCode } from '@services/worker_python/tasks/types';
+import { Task, PythonErrorCode, TaskError } from '@services/worker_python/tasks/types';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { CableModificationsService } from './cableModifications.service';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
-  const fn = vi.fn(() => value) as vi.Mock & { set: vi.Mock };
-  fn.set = vi.fn((v: T) => {
-    value = v;
-  });
-  return fn;
+  return Object.assign(
+    vi.fn(() => value),
+    {
+      set: vi.fn((v: T) => {
+        value = v;
+      })
+    }
+  );
 }
 
 describe('LoadFormsService', () => {
@@ -569,6 +572,22 @@ describe('LoadFormsService', () => {
         await service.initTemporaryLoadData();
 
         expect(service.isApplyingLoadCase()).toBe(false);
+      });
+
+      it('should stop the plot loading once applying the load case failed, for the error to show', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        // A new studio engine study is not projected before its load case is applied
+        mockPlotService.loading.set(true);
+        mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+          task === Task.changeState
+            ? Promise.reject(new Error('Task changeState timed out after 30000ms'))
+            : Promise.resolve(engineIdle)
+        );
+
+        await service.initTemporaryLoadData();
+
+        expect(mockPlotService.error()).toBe(TaskError.CALCULATION_ERROR);
+        expect(mockPlotService.loading()).toBe(false);
       });
 
       it('should clear the previous load case distances before the engine tasks, even when they fail', async () => {
