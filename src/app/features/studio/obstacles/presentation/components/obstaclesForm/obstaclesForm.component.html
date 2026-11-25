@@ -436,6 +436,7 @@
       btnStyle="outlined"
       type="button"
       data-testid="conformity-export-btn"
+      [btnLoading]="conformityRef()?.isExporting() ?? false"
       [disabled]="!conformityRef()?.canExport()"
       (click)="conformityRef()?.exportConformity()"
     >

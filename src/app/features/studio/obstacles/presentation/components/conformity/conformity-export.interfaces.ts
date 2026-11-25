@@ -9,6 +9,7 @@ import { Obstacle, Position3D } from '@shared/domain/models/obstacle.model';
 import { Section, Study } from '@shared/domain';
 import { ObstacleConformityType } from '@infrastructure/database/entities/catalog-obstacle-configuration.entity';
 import { ConformityRuleResult } from './conformity.model';
+import { CONFORMITY_EXPORT_UNITS } from './conformity-export.constantes';
 
 /** A value paired with its unit of measure. */
 export interface ConformityValueUnit<T = number | null> {
@@ -105,7 +106,12 @@ export interface ConformityExportParams {
   rules: { label: string; value: string }[];
   results: Record<string, ConformityRuleResult>;
   conformityType: ObstacleConformityType;
+  /** Unit symbols written in the file; defaults to `CONFORMITY_EXPORT_UNITS`. */
+  units?: ConformityExportUnits;
 }
+
+/** Unit symbols written in the export file. */
+export type ConformityExportUnits = Record<keyof typeof CONFORMITY_EXPORT_UNITS, string>;
 
 /** Form values and point index the displayed conformity results were computed from. */
 export interface ConformityCalculatedInputs {

@@ -240,6 +240,9 @@ describe('ConformityComponent', () => {
               'common.yes': 'Yes',
               'studio.conformity.distance-to-line-axis-label': 'Distance to line axis',
               'studio.conformity.export-invalid-data-error': 'Export failed',
+              'common.meter': 'm',
+              'common.celsius': '°C',
+              'common.pascal-unit': 'Pa',
               'common.electric-tension-label': 'Electric tension',
               'common.enlarge-graphic-view-btn': 'Enlarge graphic view',
               'common.form-label': 'Form',
@@ -802,6 +805,53 @@ describe('ConformityComponent', () => {
       expect(close).toHaveBeenCalled();
     });
 
+    it('should export the unit symbols from the common translations', async () => {
+      await createComponent();
+      await component.calculate();
+      const { write } = mockPicker();
+
+      await component.exportConformity();
+
+      const exported = JSON.parse(write.mock.calls[0][0]).distancesConformityCheck[0];
+      expect(exported.obstacleData.height.unit).toBe('m');
+      const [minimumCase] = exported.conformityChecks[0].minimumCase;
+      expect(minimumCase.overhang.temperature.unit).toBe('°C');
+      expect(minimumCase.overhang.pressure.unit).toBe('Pa');
+    });
+
+    it('should flag the export in progress and ignore a second export until the first one ends', async () => {
+      await createComponent();
+      await component.calculate();
+      const { picker, write } = mockPicker();
+      let releaseWrite: () => void = () => undefined;
+      write.mockImplementationOnce(() => new Promise<void>((resolve) => (releaseWrite = resolve)));
+
+      const first = component.exportConformity();
+      await vi.waitFor(() => expect(write).toHaveBeenCalled());
+      expect(component.isExporting()).toBe(true);
+      await component.exportConformity();
+      expect(picker).toHaveBeenCalledTimes(1);
+
+      releaseWrite();
+      await first;
+
+      expect(component.isExporting()).toBe(false);
+    });
+
+    it('should release the export flag when saving the file fails', async () => {
+      await createComponent();
+      await component.calculate();
+      globalThis.showSaveFilePicker = undefined;
+      const createUrl = vi.spyOn(URL, 'createObjectURL').mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      await expect(component.exportConformity()).rejects.toThrow('boom');
+      createUrl.mockRestore();
+
+      expect(component.isExporting()).toBe(false);
+    });
+
     it('should stay silent when the user cancels the picker', async () => {
       await createComponent();
       await component.calculate();
@@ -1221,7 +1271,7 @@ describe('ConformityComponent', () => {
       fixture.componentRef.setInput('isOpen', true);
       fixture.detectChanges();
       const original = mockWorkerPython.runTaskWithTimeout.getMockImplementation();
-      let release: () => void = () => undefined;
+      let release: (() => void) | null = null;
       mockWorkerPython.runTaskWithTimeout.mockImplementationOnce(
         (...args: unknown[]) =>
           new Promise((resolve) => {
@@ -1230,11 +1280,12 @@ describe('ConformityComponent', () => {
       );
 
       const pending = component.calculate();
-      await vi.waitFor(() => expect(component.isCalculating()).toBe(true));
+      await vi.waitFor(() => expect(release).not.toBeNull());
+      expect(component.isCalculating()).toBe(true);
       fixture.componentRef.setInput('isOpen', false);
       fixture.detectChanges();
       expect(component.isCalculating()).toBe(false);
-      release();
+      (release as unknown as () => void)();
       await pending;
 
       expect(component.conformityResults()).toBeNull();

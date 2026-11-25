@@ -8,13 +8,14 @@
 import { formatRfc9557OrNull, parseRfc9557 } from '@shared/helpers/date-time.helpers';
 import { sanitizeFilenamePart } from '@shared/helpers/filename.helpers';
 import { Section, Study } from '@shared/domain';
-import { CONFORMITY_EXPORT_FILENAME_PREFIX, CONFORMITY_EXPORT_UNITS as UNITS } from './conformity-export.constantes';
+import { CONFORMITY_EXPORT_FILENAME_PREFIX, CONFORMITY_EXPORT_UNITS } from './conformity-export.constantes';
 import {
   ConformityCalculationExport,
   ConformityCheckExport,
   ConformityExport,
   ConformityExportFile,
   ConformityExportParams,
+  ConformityExportUnits,
   ConformityMetaDataExport,
   ConformityMinimumCaseSideExport,
   ConformityValueUnit,
@@ -33,7 +34,9 @@ const valueUnit = (value: number | null | undefined, unit: string): ConformityVa
 export const parseVoltage = (label: string | null | undefined): ConformityVoltageExport => {
   if (!label?.trim()) return { value: null, unit: null };
   const match = NUMERIC_KV_VOLTAGE.exec(label);
-  return match ? { value: Number(match[1].replace(',', '.')), unit: UNITS.kilovolt } : { value: label, unit: null };
+  return match
+    ? { value: Number(match[1].replace(',', '.')), unit: CONFORMITY_EXPORT_UNITS.kilovolt }
+    : { value: label, unit: null };
 };
 
 const buildMetaData = (section: Section | null, study: Study | null): ConformityMetaDataExport => ({
@@ -48,7 +51,7 @@ const buildMetaData = (section: Section | null, study: Study | null): Conformity
   loadCase: section?.charges.find((charge) => charge.uuid === section.selected_charge_uuid)?.name ?? null
 });
 
-const buildCalculation = (result: ConformityRuleResult): ConformityCalculationExport => ({
+const buildCalculation = (result: ConformityRuleResult, UNITS: ConformityExportUnits): ConformityCalculationExport => ({
   cableHeight: {
     overhang: valueUnit(result.overhangCableAltitude, UNITS.meter),
     lateral: valueUnit(result.lateralCableAltitude, UNITS.meter)
@@ -70,7 +73,8 @@ const buildCalculation = (result: ConformityRuleResult): ConformityCalculationEx
 const buildMinimumCaseSide = (
   temperature: number | undefined,
   pressure: number | undefined,
-  distance: number | undefined
+  distance: number | undefined,
+  UNITS: ConformityExportUnits
 ): ConformityMinimumCaseSideExport => ({
   temperature: valueUnit(temperature, UNITS.celsius),
   pressure: valueUnit(pressure, UNITS.pascal),
@@ -79,21 +83,24 @@ const buildMinimumCaseSide = (
 
 export const buildConformityExport = (params: ConformityExportParams): ConformityExport => {
   const { section, study, obstacle, point, results, conformityType } = params;
+  const UNITS = params.units ?? CONFORMITY_EXPORT_UNITS;
   const conformityChecks: ConformityCheckExport[] = params.rules.map(({ label, value }) => {
     const result = results[value];
-    const check: ConformityCheckExport = { rule: label, calculations: [buildCalculation(result)] };
+    const check: ConformityCheckExport = { rule: label, calculations: [buildCalculation(result, UNITS)] };
     if (conformityType === 'cable_track') {
       check.minimumCase = [
         {
           overhang: buildMinimumCaseSide(
             result.overhangTemperature,
             result.overhangWindPressure,
-            result.overhangMinimalDistance
+            result.overhangMinimalDistance,
+            UNITS
           ),
           lateral: buildMinimumCaseSide(
             result.lateralTemperature,
             result.lateralWindPressure,
-            result.lateralMinimalDistance
+            result.lateralMinimalDistance,
+            UNITS
           )
         }
       ];

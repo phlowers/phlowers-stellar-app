@@ -25,6 +25,7 @@ import { from, map, of, startWith, switchMap } from 'rxjs';
 import { CatalogObstacleWindZoneEntity } from '@infrastructure/database/entities/catalog-obstacle-wind-zone.entity';
 import { ObstacleConformityType } from '@infrastructure/database/entities/catalog-obstacle-configuration.entity';
 import { OBSTACLE_CONFORMITY_CONFIG_KEY } from '@infrastructure/database';
+import { CatalogObstacleDistanceEntity, CatalogObstacleRuleDefinitionEntity } from '@infrastructure/database/entities';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -62,8 +63,12 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { buildConformityExportFilename, buildConformityExportJson } from './conformity-export.helpers';
-import { CONFORMITY_EXPORT_FILE_PICKER_TYPES } from './conformity-export.constantes';
-import { ConformityCalculatedInputs } from './conformity-export.interfaces';
+import {
+  CONFORMITY_EXPORT_FILE_PICKER_TYPES,
+  CONFORMITY_EXPORT_UNIT_I18N_KEYS,
+  CONFORMITY_EXPORT_UNITS
+} from './conformity-export.constantes';
+import { ConformityCalculatedInputs, ConformityExportUnits } from './conformity-export.interfaces';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
@@ -549,6 +554,9 @@ export class ConformityComponent implements OnDestroy {
     return results ? this.selectedConformityColumns().filter((option) => results[option.value]) : [];
   });
 
+  /** True while an export is in progress (file picker open or file being written), to prevent double exports. */
+  readonly isExporting = signal(false);
+
   readonly canExport = computed(() => this.calculatedInputs() !== null && this.exportRules().length > 0);
 
   /** Auto-display results when reopening a saved conformity whose inputs are all present. */
@@ -587,68 +595,25 @@ export class ConformityComponent implements OnDestroy {
       this.notificationService.error(this.translocoService.translate('studio.conformity.no-conformity-config-error'));
       return;
     }
-    // Map database value to Python worker expected value
-    // const conformityPlot: 'vegetation' | 'cable_track' | 'overhang' = conformityType: conformityType;
     const v = this.form.getRawValue();
-    const db = this.storageService.db;
-    const selectedRuleTypes = v.conformity ?? [];
-    const obstacleType = obstacle.type ?? '';
     const electricTension = this.spanService.section()?.voltage_idr;
-    const zoneWidth =
-      conformityType === 'overhang'
-        ? computeOverhangZoneWidth(this.spanService.section()?.supports ?? [], obstacle.supportUuid)
-        : undefined;
 
     const run = ++this.calculationRun;
     this.isCalculating.set(true);
     this.calculationError.set(null);
 
     try {
-      const [distances, rules] = await Promise.all([
-        db && obstacleType
-          ? db.catObstacleDistances
-              .where('obstacle_type')
-              .equals(obstacleType)
-              .filter((d) => selectedRuleTypes.includes(d.rule_type))
-              .toArray()
-          : Promise.resolve([]),
-        db && selectedRuleTypes.length
-          ? db.catObstacleRuleDefinitions.where('rule_type').anyOf(selectedRuleTypes).toArray()
-          : Promise.resolve([])
-      ]);
-
+      const { rules, distances } = await this.loadRuleCatalog(obstacle.type ?? '', v.conformity ?? []);
       if (!electricTension) throw new Error('Missing electric tension');
 
-      const conformityInputs: TaskInputs[Task.getConformity] = {
+      const conformityInputs = this.buildConformityInputs(
         obstacle,
-        pointIndex: this.hasMultiplePoints() ? (this.selectedPointValue() ?? 0) : 0,
+        conformityType,
+        v,
         electricTension,
-        form: {
-          windZone: v.windZone,
-          windPressure: this.effectiveWindPressure(),
-          windMinus: v.windMinus ?? false,
-          redZonePresence: v.redZonePresence ?? false,
-          repartitionTemperature: v.repartitionTemperature,
-          lateralDistanceTemperature: v.lateralDistanceTemperature,
-          selectedConformityRules: selectedRuleTypes,
-          conformity: v.conformity,
-          conformityPlot: conformityType,
-          intermediatePoints: this.intermediatePointsConfig(),
-          zoneWidth
-        },
-        rulesClimaticConditions: rules.map((r) => ({
-          ruleType: r.rule_type,
-          ruleName: r.rule_name,
-          lateralPoint: r.lateral_point,
-          overhangPoint: r.overhang_point
-        })),
-        rulesDistances: distances.map((d) => ({
-          ruleType: d.rule_type,
-          lateral: d.lateral,
-          overhang: d.overhang
-        }))
-      };
-
+        rules,
+        distances
+      );
       const { result: conformityTaskOutput, error: conformityTaskError } =
         await this.workerPythonService.runTaskWithTimeout(
           Task.getConformity,
@@ -660,15 +625,13 @@ export class ConformityComponent implements OnDestroy {
       }
       if (run !== this.calculationRun) return;
 
-      const plotData: ConformityPlotResponse = {
-        obstacle: conformityTaskOutput.obstacle,
-        conformity: conformityTaskOutput.conformity
-      };
-      const results: Record<string, ConformityRuleResult> = conformityTaskOutput.results;
-      this._conformityResults.set(results);
+      this._conformityResults.set(conformityTaskOutput.results);
       this.calculatedInputs.set({ form: v, pointIndex: conformityInputs.pointIndex });
       this._ruleColorsByType.set(Object.fromEntries(rules.map((r) => [r.rule_type, r.color])));
-      this._conformityPlotData.set(plotData);
+      this._conformityPlotData.set({
+        obstacle: conformityTaskOutput.obstacle,
+        conformity: conformityTaskOutput.conformity
+      });
     } catch (error) {
       if (run !== this.calculationRun) return;
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -681,7 +644,72 @@ export class ConformityComponent implements OnDestroy {
     }
   }
 
+  /** Reads the catalog distances and rule definitions of the selected rules for the obstacle type. */
+  private async loadRuleCatalog(
+    obstacleType: string,
+    selectedRuleTypes: string[]
+  ): Promise<{ rules: CatalogObstacleRuleDefinitionEntity[]; distances: CatalogObstacleDistanceEntity[] }> {
+    const db = this.storageService.db;
+    const [distances, rules] = await Promise.all([
+      db && obstacleType
+        ? db.catObstacleDistances
+            .where('obstacle_type')
+            .equals(obstacleType)
+            .filter((d) => selectedRuleTypes.includes(d.rule_type))
+            .toArray()
+        : Promise.resolve([]),
+      db && selectedRuleTypes.length
+        ? db.catObstacleRuleDefinitions.where('rule_type').anyOf(selectedRuleTypes).toArray()
+        : Promise.resolve([])
+    ]);
+    return { rules, distances };
+  }
+
+  private buildConformityInputs(
+    obstacle: NonNullable<ReturnType<ConformityComponent['obstacleData']>>,
+    conformityType: NonNullable<ObstacleConformityType>,
+    v: ReturnType<ConformityComponent['form']['getRawValue']>,
+    electricTension: string,
+    rules: CatalogObstacleRuleDefinitionEntity[],
+    distances: CatalogObstacleDistanceEntity[]
+  ): TaskInputs[Task.getConformity] {
+    const zoneWidth =
+      conformityType === 'overhang'
+        ? computeOverhangZoneWidth(this.spanService.section()?.supports ?? [], obstacle.supportUuid)
+        : undefined;
+    return {
+      obstacle,
+      pointIndex: this.hasMultiplePoints() ? (this.selectedPointValue() ?? 0) : 0,
+      electricTension,
+      form: {
+        windZone: v.windZone,
+        windPressure: this.effectiveWindPressure(),
+        windMinus: v.windMinus ?? false,
+        redZonePresence: v.redZonePresence ?? false,
+        repartitionTemperature: v.repartitionTemperature,
+        lateralDistanceTemperature: v.lateralDistanceTemperature,
+        selectedConformityRules: v.conformity ?? [],
+        conformity: v.conformity,
+        conformityPlot: conformityType,
+        intermediatePoints: this.intermediatePointsConfig(),
+        zoneWidth
+      },
+      rulesClimaticConditions: rules.map((r) => ({
+        ruleType: r.rule_type,
+        ruleName: r.rule_name,
+        lateralPoint: r.lateral_point,
+        overhangPoint: r.overhang_point
+      })),
+      rulesDistances: distances.map((d) => ({
+        ruleType: d.rule_type,
+        lateral: d.lateral,
+        overhang: d.overhang
+      }))
+    };
+  }
+
   async exportConformity(): Promise<void> {
+    if (this.isExporting()) return;
     const obstacle = this.obstacleData();
     const results = this._conformityResults();
     const inputs = this.calculatedInputs();
@@ -691,6 +719,12 @@ export class ConformityComponent implements OnDestroy {
       return;
     }
     const section = this.spanService.section();
+    const units: ConformityExportUnits = {
+      ...CONFORMITY_EXPORT_UNITS,
+      meter: this.translocoService.translate(CONFORMITY_EXPORT_UNIT_I18N_KEYS.meter),
+      celsius: this.translocoService.translate(CONFORMITY_EXPORT_UNIT_I18N_KEYS.celsius),
+      pascal: this.translocoService.translate(CONFORMITY_EXPORT_UNIT_I18N_KEYS.pascal)
+    };
     const rules = this.exportRules().map(({ value, label }) => ({ value, label }));
     const json = buildConformityExportJson({
       section,
@@ -707,9 +741,15 @@ export class ConformityComponent implements OnDestroy {
       },
       rules,
       results,
-      conformityType: this.conformityType()
+      conformityType: this.conformityType(),
+      units
     });
-    await this.saveExportFile(json, buildConformityExportFilename(obstacle.name, section?.name ?? null));
+    this.isExporting.set(true);
+    try {
+      await this.saveExportFile(json, buildConformityExportFilename(obstacle.name, section?.name ?? null));
+    } finally {
+      this.isExporting.set(false);
+    }
   }
 
   private async saveExportFile(json: string, filename: string): Promise<void> {

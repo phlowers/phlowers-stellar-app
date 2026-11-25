@@ -142,6 +142,16 @@ describe('buildConformityExport', () => {
     expect(check.calculations[0].cableHeight.lateral).toEqual({ value: null, unit: 'm' });
   });
 
+  it('writes the unit symbols given in params', () => {
+    const units = { meter: 'M', kilovolt: 'KV', degree: '°', celsius: 'C', pascal: 'P' };
+    const exported = buildConformityExport(buildParams({ conformityType: 'cable_track', units }));
+
+    expect(exported.obstacleData.height.unit).toBe('M');
+    expect(exported.conformityChecks[0].calculations[0].cableHeight.overhang.unit).toBe('M');
+    expect(exported.conformityChecks[0].minimumCase?.[0].overhang.temperature.unit).toBe('C');
+    expect(exported.conformityChecks[0].minimumCase?.[0].overhang.pressure.unit).toBe('P');
+  });
+
   it('adds minimumCase for cable_track only', () => {
     const [check] = buildConformityExport(buildParams({ conformityType: 'cable_track' })).conformityChecks;
 

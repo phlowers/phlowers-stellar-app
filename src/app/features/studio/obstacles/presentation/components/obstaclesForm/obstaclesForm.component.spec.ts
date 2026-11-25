@@ -1210,6 +1210,27 @@ describe('ObstaclesFormComponent', () => {
       expect(exportButton().disabled).toBe(false);
       expect(exportSpy).toHaveBeenCalled();
     });
+
+    it('should show the loading state and ignore clicks while an export is in progress', async () => {
+      satisfyAllConditions();
+      await component.openConformityModal();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const exportButton = () =>
+        document.body.querySelector('[data-testid="conformity-export-btn"]') as HTMLButtonElement;
+      const conformity = component.conformityRef()!;
+      const exportSpy = vi.spyOn(conformity, 'exportConformity').mockResolvedValue();
+      vi.spyOn(conformity, 'canExport').mockReturnValue(true);
+
+      conformity.isExporting.set(true);
+      fixture.debugElement.injector.get(ChangeDetectorRef).markForCheck();
+      fixture.detectChanges();
+      exportButton().click();
+
+      expect(exportButton().classList.contains('app-btn-loading')).toBe(true);
+      expect(exportSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe('calculate and save button', () => {

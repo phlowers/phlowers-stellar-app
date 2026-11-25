@@ -15,4 +15,11 @@ export const CONFORMITY_EXPORT_UNITS = {
   pascal: 'Pa'
 } as const;
 
+/** Common i18n keys already holding some of the unit symbols above (no common key exists for KV and degree). */
+export const CONFORMITY_EXPORT_UNIT_I18N_KEYS = {
+  meter: 'common.meter',
+  celsius: 'common.celsius',
+  pascal: 'common.pascal-unit'
+} as const;
+
 export const CONFORMITY_EXPORT_FILE_PICKER_TYPES = [{ description: 'JSON', accept: { 'application/json': ['.json'] } }];

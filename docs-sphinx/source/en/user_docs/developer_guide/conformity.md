@@ -616,7 +616,8 @@ The snapshot is cleared with the results (new obstacle, dialog closed).
 
 The file is built by the pure helpers of `conformity-export.helpers.ts` and saved with
 `showSaveFilePicker` (the "Browse…" dialog), falling back to a Blob download when the API is missing or fails.
-Cancelling the picker does nothing. Without results, snapshot, point or section, an error is notified
+Cancelling the picker does nothing. `isExporting` is true while the file is being saved: the button shows its
+loading state and a second `exportConformity()` call is ignored, which prevents double exports. Without results, snapshot, point or section, an error is notified
 (`studio.conformity.export-invalid-data-error`). The dialog stays open.
 
 - File name: `Export Distances de conformité_<obstacle>_<section>_<YYYY-MM-DD>.json`.
@@ -627,6 +628,9 @@ Cancelling the picker does nothing. Without results, snapshot, point or section,
   (`SPAN_AXIS`, `LINE_AXIS`) give the reference of `height` and `lateralDistance`, which are exported
   as entered and not normalised.
 - Only the rules currently displayed (selected and calculated) are exported.
+- The `m`, `°C` and `Pa` unit symbols come from the common translations (`common.meter`, `common.celsius`,
+  `common.pascal-unit`) and are passed to the helpers as `units`; `KV` and `°` have no common key and stay
+  constants (`CONFORMITY_EXPORT_UNITS`).
 - `voltage` comes from `voltage_idr`: `"<number> KV"` gives `{ value: <number>, unit: 'KV' }`, any other
   label (for example *HORS TENSION*) is kept raw with `unit: null`.
 - `cableSwingingAngle` is not computed: always `{ value: null, unit: '°' }`.

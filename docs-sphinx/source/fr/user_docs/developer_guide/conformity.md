@@ -621,7 +621,9 @@ modale fermée).
 
 Le fichier est construit par les helpers purs de `conformity-export.helpers.ts` et enregistré avec
 `showSaveFilePicker` (fenêtre « Parcourir… »), avec repli sur un téléchargement Blob si l’API est absente
-ou échoue. Annuler le sélecteur ne fait rien. Sans résultats, instantané, point ou section, une erreur est
+ou échoue. Annuler le sélecteur ne fait rien. `isExporting` est vrai pendant l’enregistrement du fichier : le bouton
+affiche son état de chargement et un second appel à `exportConformity()` est ignoré, ce qui évite les
+exports en double. Sans résultats, instantané, point ou section, une erreur est
 notifiée (`studio.conformity.export-invalid-data-error`). La modale reste ouverte.
 
 - Nom du fichier : `Export Distances de conformité_<obstacle>_<canton>_<AAAA-MM-JJ>.json`.
@@ -632,6 +634,9 @@ notifiée (`studio.conformity.export-invalid-data-error`). La modale reste ouver
   (`SPAN_AXIS`, `LINE_AXIS`) donnent la référence de `height` et `lateralDistance`, exportés tels que
   saisis et non normalisés.
 - Seules les règles actuellement affichées (sélectionnées et calculées) sont exportées.
+- Les symboles d’unité `m`, `°C` et `Pa` proviennent des traductions communes (`common.meter`,
+  `common.celsius`, `common.pascal-unit`) et sont transmis aux helpers via `units` ; `KV` et `°` n’ont pas
+  de clé commune et restent des constantes (`CONFORMITY_EXPORT_UNITS`).
 - `voltage` provient de `voltage_idr` : `"<nombre> KV"` donne `{ value: <nombre>, unit: 'KV' }`, tout autre
   libellé (par exemple *HORS TENSION*) est conservé tel quel avec `unit: null`.
 - `cableSwingingAngle` n’est pas calculé : toujours `{ value: null, unit: '°' }`.
