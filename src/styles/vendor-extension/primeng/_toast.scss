@@ -1,3 +1,5 @@
+@use 'abstract.extracts' as app;
+
 .p-toast.p-toast {
   --p-button-rounded-border-radius: 0;
 
@@ -7,10 +9,12 @@
     background: transparent;
     box-shadow: none;
 
-    &:hover,
-    &:focus-visible {
+    &:hover {
       background: transparent;
-      outline: none;
+    }
+
+    &:focus-visible {
+      @extend %focus-state;
     }
   }
 
