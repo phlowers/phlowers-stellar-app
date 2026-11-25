@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ChargesService } from '@services/charges/charges.service';
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
-import { defaultClimaticCharge } from '@shared/domain/helpers/climate.helpers';
+import { defaultClimaticCharge, getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 
 /** Creates a new charge with default climate values and an auto-generated name. */
 const newCharge = (currentCharges: Charge[], defaultNamePrefix: string): Charge => {
@@ -101,13 +101,15 @@ export class NewChargeModalComponent {
   }
 
   async onSubmit() {
+    const baseClimate = getBaseClimate(this.spanService.section());
+
     const charge: Charge = {
       uuid: uuidv4(),
       name: this.name(),
       personnelPresence: this.personnelPresence(),
       description: this.description(),
       data: {
-        climate: { ...defaultClimaticCharge },
+        climate: { ...baseClimate },
         spanLoads: [],
         cableModifParams: [],
         supportManipParams: [],
