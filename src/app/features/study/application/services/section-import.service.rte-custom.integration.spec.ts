@@ -20,6 +20,7 @@ import { ChainsService } from '@shared/catalog/services/chains.service';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { MaintenanceService } from '@shared/catalog/services/maintenance.service';
 import { SECTION_IMPORT_ADAPTERS } from '@shared/import/section-adapter/section-import-adapter';
+import fakeGuardCanton from '@adapters/section-import/rte-custom/fixtures/fake-canton-guard.json';
 import fakeCantonFull from '@adapters/section-import/rte-custom/fixtures/fake-canton-full.json';
 import expectedSection from '@adapters/section-import/rte-custom/fixtures/fake-canton-full.expected-section.json';
 import { RteCustomAdapter } from '@adapters/section-import/rte-custom/rte-custom.adapter';
@@ -87,7 +88,7 @@ const buildStudy = (): Study => ({
 
 describe('RTE custom canton file → Section (integration)', () => {
   let service: SectionImportService;
-  let sectionServiceMock: { createOrUpdateSection: ReturnType<typeof vi.fn> };
+  let sectionServiceMock: Record<'createOrUpdateSection' | 'deleteSection', ReturnType<typeof vi.fn>>;
   let notificationMock: Record<'success' | 'info' | 'warning' | 'error', ReturnType<typeof vi.fn>>;
   let runTaskMock: ReturnType<typeof vi.fn>;
 
@@ -117,7 +118,10 @@ describe('RTE custom canton file → Section (integration)', () => {
   };
 
   beforeEach(() => {
-    sectionServiceMock = { createOrUpdateSection: vi.fn().mockResolvedValue(undefined) };
+    sectionServiceMock = {
+      createOrUpdateSection: vi.fn().mockResolvedValue(undefined),
+      deleteSection: vi.fn().mockResolvedValue(undefined)
+    };
     notificationMock = { success: vi.fn(), info: vi.fn(), warning: vi.fn(), error: vi.fn() };
     runTaskMock = vi.fn(mockReprojection);
 
@@ -192,5 +196,105 @@ describe('RTE custom canton file → Section (integration)', () => {
     expect(notificationMock.success).toHaveBeenCalledTimes(1);
     expect(notificationMock.warning).toHaveBeenCalledTimes(1);
     expect(notificationMock.info).toHaveBeenCalledTimes(2);
+  });
+
+  describe('guard canton files', () => {
+    const GUARD_FOOT_COUNT = 3;
+
+    const guardFile = (json: unknown = fakeGuardCanton) => new File([JSON.stringify(json)], 'guard.json');
+
+    const buildInvalidGuard = () => {
+      const invalid = structuredClone(fakeGuardCanton);
+      invalid.cantons[0].general.CANTON_CUR = 'FAKE-CANTON-GUARD-0002';
+      invalid.cantons[0]['portee unitaire'][0]['accroche depart'].ACCROCHE_SET_Z_LAMBERT93 = null as unknown as string;
+      return invalid;
+    };
+
+    beforeEach(() => {
+      runTaskMock.mockImplementation(() =>
+        Promise.resolve({
+          result: {
+            localization: {
+              latitude: [48.1, 48.2, 48.3],
+              longitude: [2.1, 2.2, 2.3],
+              azimuth: [20, 20],
+              lambert_x: [100, 300, 500],
+              lambert_y: [200, 400, 600]
+            },
+            positionErrorMeter: Array(GUARD_FOOT_COUNT).fill(0),
+            startAzimuth: 20
+          },
+          error: null,
+          pythonErrorCode: null
+        })
+      );
+    });
+
+    it('should import a guard file without phase number, cable altitude nor chain data', async () => {
+      const section = await service.processFile(guardFile(), () => Promise.resolve(true));
+
+      expect(section?.type).toBe('guard');
+      expect(section?.electric_phase_number).toBe(0);
+      expect(section?.supports.map((s) => s.attachmentHeight)).toEqual([42, 43.5, 45]);
+      expect(section?.supports.every((s) => s.chainLength === 0 && s.chainWeight === 0 && !s.chainV)).toBe(true);
+      expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not report azimuth or position gaps, which are meaningless without line angles', async () => {
+      runTaskMock.mockImplementation(() =>
+        Promise.resolve({
+          result: {
+            localization: {
+              latitude: [48.1, 48.2, 48.3],
+              longitude: [2.1, 2.2, 2.3],
+              azimuth: [20, 20],
+              lambert_x: [100, 300, 500],
+              lambert_y: [200, 400, 600]
+            },
+            positionErrorMeter: [0, 3, 6],
+            startAzimuth: 20
+          },
+          error: null,
+          pythonErrorCode: null
+        })
+      );
+
+      await service.processFile(guardFile(), () => Promise.resolve(true));
+
+      expect(notificationMock.success).toHaveBeenCalledTimes(1);
+      expect(notificationMock.info).not.toHaveBeenCalled();
+      expect(notificationMock.warning).not.toHaveBeenCalledWith(expect.stringContaining('position-error-notice'));
+      expect(notificationMock.warning).not.toHaveBeenCalledWith(expect.stringContaining('azimuth-reprojection-notice'));
+    });
+
+    it('should give one result per file when a valid, an invalid and an already imported file are selected', async () => {
+      const study = buildStudy();
+      service.setStudyContext(study);
+      const resolver = vi.fn().mockResolvedValue(false);
+
+      const first = await service.processFile(guardFile(), resolver);
+      study.sections.push(first!);
+      const invalid = await service.processFile(guardFile(buildInvalidGuard()), resolver).catch((e: unknown) => e);
+      const duplicate = await service.processFile(guardFile(), resolver);
+
+      expect(first).not.toBeNull();
+      expect(invalid).toMatchObject({ code: 'RTE_CUSTOM_REQUIRED_FIELDS', stage: 'VALIDATION' });
+      expect(duplicate).toBeNull();
+      expect(resolver).toHaveBeenCalledTimes(1);
+      expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledTimes(1);
+    });
+
+    it('should replace the existing guard canton when the user accepts the collision', async () => {
+      const study = buildStudy();
+      service.setStudyContext(study);
+      const first = await service.processFile(guardFile(), () => Promise.resolve(true));
+      study.sections.push(first!);
+
+      const replaced = await service.processFile(guardFile(), () => Promise.resolve(true));
+
+      expect(replaced?.uuid).toBe(first!.uuid);
+      expect(sectionServiceMock.deleteSection).toHaveBeenCalledWith(study, first);
+      expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledTimes(2);
+    });
   });
 });

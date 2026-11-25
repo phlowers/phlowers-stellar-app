@@ -13,6 +13,8 @@ export interface Attachment {
   ANGLE_LIGNE: string | null;
   ACCROCHE_SET: string | null;
   ACCROCHE_CABLE_Z_LAMBERT93: string | null;
+  /** Altitude of the attachment set; the cable altitude of a guard canton (absent from phase files). */
+  ACCROCHE_SET_Z_LAMBERT93?: string | null;
   HAUTEUR_SOUS_CONSOLE: string | null;
   LONGUEUR_BRAS: string | null;
   CHAINE_DRN_ADR: string | null;

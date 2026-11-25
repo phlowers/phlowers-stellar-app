@@ -12,8 +12,10 @@ import {
   extractAttachmentPosition,
   extractCantonUuid,
   hasCantons,
+  isGuardCantonType,
   isRteCantonFormat,
   pickSupportName,
+  toSectionType,
   validateImportedSectionFields
 } from './rte-custom.helpers';
 
@@ -148,6 +150,30 @@ describe('extractAttachmentPosition', () => {
   });
 });
 
+describe('isGuardCantonType', () => {
+  it('should recognise GARDE whatever its case', () => {
+    expect(isGuardCantonType('GARDE')).toBe(true);
+    expect(isGuardCantonType('garde')).toBe(true);
+  });
+
+  it('should reject other types and missing values', () => {
+    expect(isGuardCantonType('PHASE')).toBe(false);
+    expect(isGuardCantonType(null)).toBe(false);
+    expect(isGuardCantonType(undefined)).toBe(false);
+  });
+});
+
+describe('toSectionType', () => {
+  it('should map the French GARDE to the model type guard', () => {
+    expect(toSectionType('GARDE')).toBe('guard');
+  });
+
+  it('should lowercase the other types and default to an empty string', () => {
+    expect(toSectionType('PHASE')).toBe('phase');
+    expect(toSectionType(null)).toBe('');
+  });
+});
+
 describe('buildSectionName', () => {
   it('should build the full name from branch, type, phase and boundary supports', () => {
     const supports = [
@@ -268,5 +294,37 @@ describe('validateImportedSectionFields', () => {
 
     const errors = validateImportedSectionFields(payload);
     expect(errors.filter((e) => e.field === 'ANGLE_LIGNE')).toHaveLength(1);
+  });
+
+  describe('guard canton', () => {
+    const guardAttachment: Partial<Attachment> = {
+      ACCROCHE_CABLE_Z_LAMBERT93: null,
+      ACCROCHE_SET_Z_LAMBERT93: '42.0',
+      ANGLE_LIGNE: null,
+      CHAINE_DRN_LONGUEUR: null,
+      CHAINE_DRN_POIDS: null
+    };
+    const buildGuardFile = (depart: Partial<Attachment> = {}, arrivee: Partial<Attachment> = {}) =>
+      buildSectionImportFile({
+        general: { CANTON_TYPE: 'GARDE', PHASE_ELECTRIQUE_NUMERO: null },
+        depart: { ...guardAttachment, ...depart },
+        arrivee: { ...guardAttachment, ...arrivee }
+      });
+
+    it('should accept empty cable altitude, line angle, chain length and chain weight', () => {
+      expect(validateImportedSectionFields(buildGuardFile())).toEqual([]);
+    });
+
+    it('should require ACCROCHE_SET_Z_LAMBERT93 on every attachment', () => {
+      const errors = validateImportedSectionFields(buildGuardFile({ ACCROCHE_SET_Z_LAMBERT93: null }));
+      expect(errors).toEqual([{ field: 'ACCROCHE_SET_Z_LAMBERT93', value: null }]);
+    });
+
+    it('should keep requiring the cable altitude and chain data of a phase canton', () => {
+      const errors = validateImportedSectionFields(
+        buildSectionImportFile({ depart: { ACCROCHE_CABLE_Z_LAMBERT93: null, CHAINE_DRN_LONGUEUR: null } })
+      );
+      expect(errors.map((e) => e.field)).toEqual(['ACCROCHE_CABLE_Z_LAMBERT93', 'CHAINE_DRN_LONGUEUR']);
+    });
   });
 });

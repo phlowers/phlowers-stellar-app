@@ -1569,6 +1569,14 @@ describe('SectionImportService', () => {
       const general = (payload['cantons'] as Record<string, unknown>[])[0]['general'] as Record<string, unknown>;
       general['CANTON_TYPE'] = 'GARDE';
       general['PHASE_ELECTRIQUE_NUMERO'] = null;
+      // A guard attachment carries its altitude in ACCROCHE_SET_Z_LAMBERT93.
+      for (const span of (payload['cantons'] as Record<string, unknown>[])[0]['portee unitaire'] as Record<
+        string,
+        Record<string, string | null>
+      >[]) {
+        span['accroche depart']['ACCROCHE_SET_Z_LAMBERT93'] = '25.0';
+        span['accroche arrivee']['ACCROCHE_SET_Z_LAMBERT93'] = '25.0';
+      }
 
       const file = makeJsonFile(payload);
       const result = await service.processFile(file, neverAccept);

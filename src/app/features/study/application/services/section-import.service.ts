@@ -177,10 +177,13 @@ export class SectionImportService implements ImportAdapter<Section> {
 
     // Stage: MAPPING (coordinates)
     const section = await this.applyCoordinates(corrected, payload.coordinates);
-    const azimuthNotice = this.checkSpanAzimuthError(corrected, section);
-    if (azimuthNotice) notices.push(azimuthNotice);
-    const positionNotice = this.buildPositionErrorNotice(section);
-    if (positionNotice) notices.push(positionNotice);
+    // A guard file has no line angle: the reprojection check would compare the real line to a straight one.
+    if (section.type !== 'guard') {
+      const azimuthNotice = this.checkSpanAzimuthError(corrected, section);
+      if (azimuthNotice) notices.push(azimuthNotice);
+      const positionNotice = this.buildPositionErrorNotice(section);
+      if (positionNotice) notices.push(positionNotice);
+    }
 
     // Stage: COLLISION_CHECK + PERSISTENCE
     return this.persistSection(section, study, collisionResolver, notices);

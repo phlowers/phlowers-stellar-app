@@ -106,6 +106,16 @@ export function extractAttachmentPosition(value: string | null): string | null {
   return match ? match[1] : null;
 }
 
+/** Returns `true` when `CANTON_TYPE` designates a guard canton (`GARDE`, case-insensitive). */
+export function isGuardCantonType(cantonType: string | null | undefined): boolean {
+  return cantonType?.toUpperCase() === 'GARDE';
+}
+
+/** Section type of the model (`'guard'` for the French `GARDE`, otherwise the lowercased canton type). */
+export function toSectionType(cantonType: string | null | undefined): string {
+  return isGuardCantonType(cantonType) ? 'guard' : (cantonType?.toLowerCase() ?? '');
+}
+
 /**
  * Builds the section name from canton data components.
  * Rule RG.CAN.NOM:
@@ -123,8 +133,8 @@ export function buildSectionName(
 
   if (rawBranchIdr) parts.push(rawBranchIdr);
 
-  const isGarde = cantonType?.toUpperCase() === 'GARDE';
-  const typeAndPhase = (cantonType ?? '') + (isGarde || !phaseElectriqueNumero ? '' : phaseElectriqueNumero);
+  const typeAndPhase =
+    (cantonType ?? '') + (isGuardCantonType(cantonType) || !phaseElectriqueNumero ? '' : phaseElectriqueNumero);
   if (typeAndPhase) parts.push(typeAndPhase);
 
   const firstSupport = supports[0];
@@ -160,6 +170,10 @@ export function buildSectionName(
  * - accroche depart/arrivee: ACCROCHE_CABLE_Z_LAMBERT93, ANGLE_LIGNE,
  *                            CHAINE_DRN_LONGUEUR, CHAINE_DRN_POIDS,
  *                            HAUTEUR_SOUS_CONSOLE, LONGUEUR_BRAS, PIED_Z_LAMBERT93
+ *
+ * Guard cantons (`CANTON_TYPE` = GARDE) have no cable attachment nor chain data: the
+ * `ACCROCHE_SET_Z_LAMBERT93` altitude replaces `ACCROCHE_CABLE_Z_LAMBERT93`; `ANGLE_LIGNE`,
+ * `CHAINE_DRN_LONGUEUR` and `CHAINE_DRN_POIDS` are not required (form defaults apply).
  */
 export function validateImportedSectionFields(raw: SectionImportFile): FieldError[] {
   const seen = new Set<string>();
@@ -195,15 +209,17 @@ export function validateImportedSectionFields(raw: SectionImportFile): FieldErro
   }
 
   // Attachment-level required fields ("Oui" in US contract interface)
-  const ATTACHMENT_NUMERIC_REQUIRED: readonly (keyof Attachment)[] = [
-    'ACCROCHE_CABLE_Z_LAMBERT93',
-    'ANGLE_LIGNE',
-    'CHAINE_DRN_LONGUEUR',
-    'CHAINE_DRN_POIDS',
-    'HAUTEUR_SOUS_CONSOLE',
-    'LONGUEUR_BRAS',
-    'PIED_Z_LAMBERT93'
-  ];
+  const ATTACHMENT_NUMERIC_REQUIRED: readonly (keyof Attachment)[] = isGuardCantonType(general.CANTON_TYPE)
+    ? ['ACCROCHE_SET_Z_LAMBERT93', 'HAUTEUR_SOUS_CONSOLE', 'LONGUEUR_BRAS', 'PIED_Z_LAMBERT93']
+    : [
+        'ACCROCHE_CABLE_Z_LAMBERT93',
+        'ANGLE_LIGNE',
+        'CHAINE_DRN_LONGUEUR',
+        'CHAINE_DRN_POIDS',
+        'HAUTEUR_SOUS_CONSOLE',
+        'LONGUEUR_BRAS',
+        'PIED_Z_LAMBERT93'
+      ];
 
   const checkAttachment = (attachment: Attachment): void => {
     for (const field of ATTACHMENT_NUMERIC_REQUIRED) {
