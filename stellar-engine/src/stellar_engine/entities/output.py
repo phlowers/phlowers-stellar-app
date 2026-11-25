@@ -85,7 +85,7 @@ def get_coordinates(
     # virtual_supports[k] belongs to the k-th sorted span index (span indexes
     # before the virtual supports are inserted)
     virtual_supports_span_indices = (
-        [int(i) for i in sorted(projected_group_points.virtual_supports_list)]
+        sorted(projected_group_points.virtual_supports_list)
         if virtual_supports is not None
         else None
     )
