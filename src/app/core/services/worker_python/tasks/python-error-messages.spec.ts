@@ -45,6 +45,8 @@ describe('formatPythonError', () => {
               'shared.python-errors.estimate-on-split-support-error':
                 'Estimation is not possible on a span split by a virtual support.',
               'shared.python-errors.estimation-input-error': 'The estimation inputs are missing or invalid.',
+              'shared.python-errors.estimation-load-position-error':
+                'The load position must be strictly inside the span, not on a support.',
               'shared.python-errors.estimation-not-converged-error':
                 'The distance to the obstacle cannot be computed within the estimation bounds.',
               'shared.python-errors.estimation-not-converged-warning':
@@ -80,6 +82,10 @@ describe('formatPythonError', () => {
   it.each([
     [PythonErrorCode.EstimateOnSplitSupportError, 'Estimation is not possible on a span split by a virtual support.'],
     [PythonErrorCode.EstimationInputError, 'The estimation inputs are missing or invalid.'],
+    [
+      PythonErrorCode.EstimationLoadPositionError,
+      'The load position must be strictly inside the span, not on a support.'
+    ],
     [
       PythonErrorCode.EstimationNotConvergedError,
       'The distance to the obstacle cannot be computed within the estimation bounds.'

@@ -68,6 +68,16 @@ class _Errors:
         return f"Estimation input {key} must be {constraint}, got {value}"
 
     @staticmethod
+    def estimation_load_position_out_of_span(
+        key: str, value: float, span_length: float
+    ) -> str:
+        return (
+            f"Estimation input {key} must be strictly between 0 and the span "
+            f"length ({span_length}), got {value}: a load at a support is "
+            f"ignored by the calculation"
+        )
+
+    @staticmethod
     def estimation_invalid_obstacle_point(point: object) -> str:
         return (
             f"Estimation input obstaclePoint must contain 3 finite "
@@ -142,6 +152,13 @@ class SelectorInputError(ValueError):
 
 class EstimationInputError(ValueError):
     """Raised when an estimation input is missing or invalid."""
+
+
+class EstimationLoadPositionError(ValueError):
+    """Raised when the load position of an estimation is not inside its span.
+
+    mechaphlowers ignores a load at a support (position 0 or span length).
+    """
 
 
 class EstimationNotConvergedError(ValueError):

@@ -180,6 +180,11 @@ describe('Task handlers', () => {
         'CALCULATION_ERROR'
       ],
       [
+        'stellar_engine.entities.errors.EstimationLoadPositionError: Estimation input loadPositionDistance must be strictly between 0 and the span length',
+        'EstimationLoadPositionError',
+        'CALCULATION_ERROR'
+      ],
+      [
         'mechaphlowers.entities.errors.EstimateOnSplitSupportError: Span 0 is split by a virtual support',
         'EstimateOnSplitSupportError',
         'CALCULATION_ERROR'

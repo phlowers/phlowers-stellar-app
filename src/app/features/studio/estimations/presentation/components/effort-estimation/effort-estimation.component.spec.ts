@@ -252,11 +252,12 @@ describe('EffortEstimationComponent', () => {
   });
 
   describe('Distance to the reference support (RG.PDS-TRA.DIS)', () => {
-    it('is 0 by default', () => {
-      expect(component.form.controls.distanceToReferenceSupport.value).toBe(0);
+    it('is empty by default, so that no load is placed on a support', () => {
+      expect(component.form.controls.distanceToReferenceSupport.value).toBeNull();
+      expect(component.form.controls.distanceToReferenceSupport.valid).toBe(false);
     });
 
-    it.each(['0', '1.5', '400', '12.34'])('accepts %s on a 400 m span', (value) => {
+    it.each(['0.01', '1.5', '399.99', '12.34'])('accepts %s on a 400 m span', (value) => {
       selectSpan(0);
       typeIn('distance-input', value);
       expect(component.form.controls.distanceToReferenceSupport.valid).toBe(true);
@@ -264,8 +265,10 @@ describe('EffortEstimationComponent', () => {
     });
 
     it.each([
-      ['-0.01', 'Min. value: 0'],
-      ['400.01', 'Max. value: 400'],
+      ['0', 'Min. value: 0.01'],
+      ['-0.01', 'Min. value: 0.01'],
+      ['400', 'Max. value: 399.99'],
+      ['400.01', 'Max. value: 399.99'],
       ['1.234', 'Max decimals: 2']
     ])('rejects %s with "%s"', (value, message) => {
       selectSpan(0);
@@ -279,12 +282,12 @@ describe('EffortEstimationComponent', () => {
 
     it('is limited to the length of the selected span', () => {
       selectSpan(1);
-      expect(getByTestId('distance-input')?.getAttribute('max')).toBe('250.5');
+      expect(getByTestId('distance-input')?.getAttribute('max')).toBe('250.49');
       typeIn('distance-input', '300');
       expect(component.form.controls.distanceToReferenceSupport.valid).toBe(false);
 
       selectSpan(0);
-      expect(getByTestId('distance-input')?.getAttribute('max')).toBe('400');
+      expect(getByTestId('distance-input')?.getAttribute('max')).toBe('399.99');
       expect(component.form.controls.distanceToReferenceSupport.valid).toBe(true);
     });
 
@@ -360,6 +363,12 @@ describe('EffortEstimationComponent', () => {
       expect(calculateBtn().disabled).toBe(true);
 
       typeIn('temperature-input', '15');
+      expect(calculateBtn().disabled).toBe(true);
+
+      typeIn('distance-input', '0');
+      expect(calculateBtn().disabled).toBe(true);
+
+      typeIn('distance-input', '100');
       expect(calculateBtn().disabled).toBe(false);
     });
 

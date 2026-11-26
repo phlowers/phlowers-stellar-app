@@ -31,7 +31,6 @@ import {
   DEFAULT_EFFORT_DIRECTION,
   EFFORT_DIRECTION_OPTIONS,
   EFFORT_DISTANCE_DECIMALS,
-  EFFORT_DISTANCE_DEFAULT,
   EFFORT_DISTANCE_MIN,
   EFFORT_INPUT_LIMITS,
   EFFORT_RESULT_FORMAT,
@@ -49,6 +48,7 @@ import {
 } from '@features/studio/estimations/domain/estimations.interfaces';
 import {
   formatEffortForClipboard,
+  getEffortMaxDistance,
   maxLengthValidator,
   roundEffortResult,
   toEffortEstimationInputs
@@ -97,8 +97,9 @@ export class EffortEstimationComponent extends EstimationCalculationBase<
   readonly spanOptions = this.spanService.getSpanOptionsWithIndex;
   // empty without span
   readonly supportOptions = computed(() => this.spanService.getSupportOptions(this.formValue().span?.uuid ?? null));
-  // the distance to the reference support cannot exceed it
   readonly spanLength = computed(() => getSpanLength(this.spanService.section(), this.formValue().span?.index ?? null));
+  // the distance to the reference support is strictly below the span length
+  readonly maxDistance = computed(() => getEffortMaxDistance(this.spanLength()));
 
   /** Errors of the numeric inputs, once edited or touched. */
   readonly distanceError = this.numberInputError(this.form.controls.distanceToReferenceSupport);
@@ -145,10 +146,10 @@ export class EffortEstimationComponent extends EstimationCalculationBase<
         { value: null, disabled: true },
         Validators.required
       ),
-      distanceToReferenceSupport: new FormControl<number | null>(EFFORT_DISTANCE_DEFAULT, [
+      distanceToReferenceSupport: new FormControl<number | null>(null, [
         Validators.required,
         Validators.min(EFFORT_DISTANCE_MIN),
-        maxLengthValidator((control) => this.spanLengthOf(control)),
+        maxLengthValidator((control) => this.maxDistanceOf(control)),
         maxDecimalsValidator(EFFORT_DISTANCE_DECIMALS)
       ]),
       temperature: createNumberControl(
@@ -171,8 +172,8 @@ export class EffortEstimationComponent extends EstimationCalculationBase<
   }
 
   // Method, not field: the validators run while the base builds the form, before the subclass fields exist
-  private spanLengthOf(control: AbstractControl): number | null {
+  private maxDistanceOf(control: AbstractControl): number | null {
     const span: EstimationSpan | null = control.parent?.get('span')?.value ?? null;
-    return getSpanLength(this.spanService.section(), span?.index ?? null);
+    return getEffortMaxDistance(getSpanLength(this.spanService.section(), span?.index ?? null));
   }
 }

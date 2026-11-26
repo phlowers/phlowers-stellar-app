@@ -17,6 +17,7 @@ import {
   getDefaultPointIndex,
   getEstimableObstacles,
   getPreselectedObstacleUuid,
+  getEffortMaxDistance,
   maxLengthValidator,
   roundEffortResult,
   toBoundsErrorParams,
@@ -225,12 +226,13 @@ describe('estimations helpers', () => {
     });
 
     it('keeps zero values', () => {
-      expect(
-        toEffortEstimationInputs(
-          effortFormValue({ distanceToReferenceSupport: 0, temperature: 0, targetDisplacement: 0 }),
-          400
-        )
-      ).toEqual({ spanIndex: 2, loadPositionDistance: 0, temperature: 0, targetDistance: 0, bounds: [-1000, 0] });
+      expect(toEffortEstimationInputs(effortFormValue({ temperature: 0, targetDisplacement: 0 }), 400)).toEqual({
+        spanIndex: 2,
+        loadPositionDistance: 120.5,
+        temperature: 0,
+        targetDistance: 0,
+        bounds: [-1000, 0]
+      });
     });
 
     it.each([
@@ -259,6 +261,22 @@ describe('estimations helpers', () => {
       expect(formatEffortForClipboard(-4635.804, 'en')).toBe('-4635.80');
       expect(formatEffortForClipboard(4635.806, 'fr')).toBe('4635,81');
       expect(formatEffortForClipboard(-0.001, 'en')).toBe('0.00');
+    });
+  });
+
+  describe('getEffortMaxDistance', () => {
+    it.each([
+      [400, 399.99],
+      [250.5, 250.49],
+      [250.504, 250.5],
+      [0.3, 0.29],
+      [1000.1, 1000.09]
+    ])('keeps a distance strictly below a span of %s m: %s', (spanLength, expected) => {
+      expect(getEffortMaxDistance(spanLength)).toBeCloseTo(expected, 10);
+    });
+
+    it('is null without span length', () => {
+      expect(getEffortMaxDistance(null)).toBeNull();
     });
   });
 

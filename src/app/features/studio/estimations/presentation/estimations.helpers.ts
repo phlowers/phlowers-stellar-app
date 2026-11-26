@@ -16,6 +16,7 @@ import {
 import {
   BOUNDS_ERROR_FORMAT,
   CONFORMITY_TEMPERATURE_BOUNDS,
+  EFFORT_DISTANCE_DECIMALS,
   EFFORT_MAX_LOAD_MASS,
   MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS
 } from '@features/studio/estimations/domain/estimations.constantes';
@@ -163,6 +164,18 @@ export function formatEffortForClipboard(value: number, locale: string): string 
     maximumFractionDigits: 2,
     useGrouping: false
   }).format(roundEffortResult(value));
+}
+
+/**
+ * Largest distance to a reference support accepted on a span: the largest value with the displayed decimals strictly
+ * below the span length, as a load on a support is ignored by the engine. Null while the span length is unknown.
+ */
+export function getEffortMaxDistance(spanLength: number | null): number | null {
+  if (spanLength === null) return null;
+  const scale = 10 ** EFFORT_DISTANCE_DECIMALS;
+  // toFixed(6) absorbs the float error of the product before rounding up to the next unit
+  const unitsBelow = Math.ceil(Number((spanLength * scale).toFixed(6))) - 1;
+  return unitsBelow / scale;
 }
 
 /**

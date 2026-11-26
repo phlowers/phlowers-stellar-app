@@ -51,9 +51,10 @@ export const MINIMUM_DISTANCE_WIND_PRESSURE_FORMAT = '1.0-0';
 /** Number format of the minimum oblique distance: always 2 decimals. */
 export const MINIMUM_OBLIQUE_DISTANCE_FORMAT = '1.2-2';
 
-export const EFFORT_DISTANCE_MIN = 0;
 export const EFFORT_DISTANCE_DECIMALS = 2;
-export const EFFORT_DISTANCE_DEFAULT = 0;
+// Strictly positive, like the strictly-below-span-length maximum (see getEffortMaxDistance): the engine ignores a
+// load on a support (distance 0 or span length) and fails with an unclear error.
+export const EFFORT_DISTANCE_MIN = 10 ** -EFFORT_DISTANCE_DECIMALS;
 
 export const EFFORT_TARGET_DISPLACEMENT_MIN = 0;
 export const EFFORT_TARGET_DISPLACEMENT_MAX = 150;
@@ -72,7 +73,7 @@ export const EFFORT_RESULT_FORMAT = '1.2-2';
 export const DEFAULT_EFFORT_DIRECTION: EffortDirection = 'UP';
 
 export const EFFORT_INPUT_LIMITS = {
-  // the maximum distance is the length of the selected span
+  // the maximum distance depends on the selected span (getEffortMaxDistance)
   distance: { min: EFFORT_DISTANCE_MIN, step: 10 ** -EFFORT_DISTANCE_DECIMALS },
   targetDisplacement: {
     min: EFFORT_TARGET_DISPLACEMENT_MIN,

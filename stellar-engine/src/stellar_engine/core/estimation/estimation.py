@@ -27,6 +27,8 @@ Common inputs:
 Raises (each class name is a ``PythonErrorCode`` on the frontend side, except
 ``ConformityInputError`` which falls back to the caller's generic message):
     EstimationInputError: An input is missing or invalid.
+    EstimationLoadPositionError: ``loadPositionDistance`` is not strictly
+        inside its span (mechaphlowers ignores a load at a support).
     ObstacleNotFoundError: ``obstacleUuid`` is not registered in the study.
     ConformityInputError: ``pointIndex`` is out of the obstacle points (not
         reachable from the UI).
@@ -75,6 +77,7 @@ from stellar_engine.core.estimation.robust import (
 from stellar_engine.core.estimation.validation import (
     _bounds,
     _index,
+    _load_position_in_span,
     _non_negative_float,
     _obstacle_point,
     _optional_float,
@@ -423,7 +426,7 @@ def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
 
     Specific inputs: ``targetDistance`` (m, signed altitude change of the
     cable at the load position), ``loadPositionDistance`` (m from the left
-    support of the span), optional ``temperature``, ``windPressure`` and
+    support of the span, strictly between 0 and the span length), optional ``temperature``, ``windPressure`` and
     ``iceThickness``. Loads on other spans are kept.
 
     ``RobustEstimation`` first reduces the mass ``bounds`` to the masses the
@@ -442,8 +445,8 @@ def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
     """
     span_index = _index(inputs, "spanIndex")
     target_distance = _required_float(inputs, "targetDistance")
-    load_position_distance = _non_negative_float(
-        inputs, "loadPositionDistance"
+    load_position_distance = _load_position_in_span(
+        inputs, "loadPositionDistance", span_index, study
     )
     new_temperature = _optional_float(inputs, "temperature")
     wind_pressure = _optional_float(inputs, "windPressure")

@@ -193,6 +193,8 @@ export enum PythonErrorCode {
   EstimateOnSplitSupportError = 'EstimateOnSplitSupportError',
   // Raised when an estimation input is missing or invalid
   EstimationInputError = 'EstimationInputError',
+  // Raised when the load position of an estimation is not strictly inside its span
+  EstimationLoadPositionError = 'EstimationLoadPositionError',
   // Raised when the distance to the obstacle cannot be computed at the estimation search bounds
   EstimationNotConvergedError = 'EstimationNotConvergedError',
   // Warning raised when an estimation cannot reach its target within the search bounds (closest value returned)

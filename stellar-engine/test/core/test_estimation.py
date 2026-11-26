@@ -29,6 +29,7 @@ from stellar_engine.core.estimation.robust import is_state_solvable
 from stellar_engine.entities.errors import (
     ConformityInputError,
     EstimationInputError,
+    EstimationLoadPositionError,
     EstimationNotConvergedError,
     EstimationNotConvergedWarning,
     ObstacleNotFoundError,
@@ -235,6 +236,54 @@ def test_estimate_load_relative_does_not_need_an_obstacle(
     with pytest.raises(EstimationInputError, match="targetDistance"):
         estimation.estimate_load_relative(
             {"spanIndex": SPAN_INDEX, "loadPositionDistance": 100.0}, study
+        )
+
+
+@pytest.mark.parametrize("position", [0.0, SPAN_LENGTH, SPAN_LENGTH + 1.0])
+def test_estimate_load_relative_rejects_a_position_on_a_support(
+    study: SectionStudy, position: float
+):
+    with pytest.raises(
+        EstimationLoadPositionError, match="loadPositionDistance"
+    ):
+        estimation.estimate_load_relative(
+            {
+                "spanIndex": SPAN_INDEX,
+                "targetDistance": -0.5,
+                "loadPositionDistance": position,
+            },
+            study,
+        )
+
+
+@pytest.mark.parametrize("position", [1.0, SPAN_LENGTH - 1.0])
+def test_estimate_load_relative_accepts_a_position_inside_the_span(
+    study: SectionStudy, position: float
+):
+    result = estimation.estimate_load_relative(
+        {
+            "spanIndex": SPAN_INDEX,
+            "targetDistance": -0.01,
+            "loadPositionDistance": position,
+            "bounds": [0.0, 10.0],
+        },
+        study,
+    )
+
+    assert set(result) == RESULT_KEYS | {"effort"}
+
+
+def test_estimate_load_relative_leaves_an_out_of_range_span_to_mechaphlowers(
+    study: SectionStudy,
+):
+    with pytest.raises(InvalidManipulationIndex):
+        estimation.estimate_load_relative(
+            {
+                "spanIndex": N_SPANS,
+                "targetDistance": -0.5,
+                "loadPositionDistance": 100.0,
+            },
+            study,
         )
 
 

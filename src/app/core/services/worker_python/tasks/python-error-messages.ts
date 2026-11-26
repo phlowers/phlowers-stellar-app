@@ -32,6 +32,7 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
   [PythonErrorCode.ObstacleNotFoundError]: 'shared.python-errors.obstacle-not-found-error',
   [PythonErrorCode.EstimateOnSplitSupportError]: 'shared.python-errors.estimate-on-split-support-error',
   [PythonErrorCode.EstimationInputError]: 'shared.python-errors.estimation-input-error',
+  [PythonErrorCode.EstimationLoadPositionError]: 'shared.python-errors.estimation-load-position-error',
   [PythonErrorCode.EstimationNotConvergedError]: 'shared.python-errors.estimation-not-converged-error',
   [PythonErrorCode.EstimationNotConvergedWarning]: 'shared.python-errors.estimation-not-converged-warning',
   [PythonErrorCode.EstimationTargetAboveBoundsWarning]: 'shared.python-errors.estimation-target-above-bounds-warning',
