@@ -435,6 +435,114 @@ describe('CableSpanManipService', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // saved load case parameters
+  // ---------------------------------------------------------------------------
+  describe('manipulations saved with the load case', () => {
+    const buildManip = (uuid: string, spanUuid: string, chargeUuid: string): CableSpanManipulation => ({
+      ...mockManip,
+      uuid,
+      spanUuid,
+      chargeUuid
+    });
+    const buildCharge = (uuid: string, spanManipParams: CableSpanManipulation[]) =>
+      ({ uuid, data: { spanManipParams } }) as unknown as Section['charges'][0];
+    const storeSection = (section: Partial<Section>) =>
+      mockStudiesService.getStudy.mockResolvedValue({ ...mockStudy, sections: [{ ...mockSectionBase, ...section }] });
+    const updatedSection = () => {
+      const updated = mockStudiesService.updateStudy.mock.calls[0][0] as StudyEntity;
+      return updated.sections.find((s) => s?.uuid === 'section-uuid-1');
+    };
+
+    describe('delete()', () => {
+      it('should also remove the copy saved with the load case, even under another uuid', async () => {
+        storeSection({
+          charges: [buildCharge('charge-uuid-1', [buildManip('charge-copy', 'support-uuid-1', 'charge-uuid-1')])],
+          cable_span_manipulations: [buildManip('section-copy', 'support-uuid-1', 'charge-uuid-1')]
+        });
+
+        await service.delete('section-copy');
+
+        expect(updatedSection()?.cable_span_manipulations).toEqual([]);
+        expect(updatedSection()?.charges[0].data.spanManipParams).toEqual([]);
+      });
+
+      it('should keep the other spans and the other load cases saved parameters', async () => {
+        const otherSpan = buildManip('other-span', 'support-uuid-2', 'charge-uuid-1');
+        const otherCharge = buildManip('other-charge', 'support-uuid-1', 'charge-uuid-2');
+        storeSection({
+          charges: [
+            buildCharge('charge-uuid-1', [buildManip('charge-copy', 'support-uuid-1', 'charge-uuid-1'), otherSpan]),
+            buildCharge('charge-uuid-2', [otherCharge])
+          ],
+          cable_span_manipulations: [buildManip('section-copy', 'support-uuid-1', 'charge-uuid-1')]
+        });
+
+        await service.delete('section-copy');
+
+        expect(updatedSection()?.charges[0].data.spanManipParams).toEqual([otherSpan]);
+        expect(updatedSection()?.charges[1].data.spanManipParams).toEqual([otherCharge]);
+      });
+
+      it('should remove the selected load case copy of a manipulation saved without a load case', async () => {
+        const legacy = { ...mockManip, uuid: 'legacy', chargeUuid: undefined } as unknown as CableSpanManipulation;
+        storeSection({
+          selected_charge_uuid: 'charge-uuid-1',
+          charges: [buildCharge('charge-uuid-1', [buildManip('charge-copy', 'support-uuid-1', 'charge-uuid-1')])],
+          cable_span_manipulations: [legacy]
+        });
+
+        await service.delete('legacy');
+
+        expect(updatedSection()?.charges[0].data.spanManipParams).toEqual([]);
+      });
+    });
+
+    describe('save()', () => {
+      it('should drop the copy saved with the load case, which would win over the saved manipulation', async () => {
+        const otherSpan = buildManip('other-span', 'support-uuid-2', 'charge-uuid-1');
+        const otherCharge = buildManip('other-charge', 'support-uuid-1', 'charge-uuid-2');
+        storeSection({
+          charges: [
+            buildCharge('charge-uuid-1', [buildManip('charge-copy', 'support-uuid-1', 'charge-uuid-1'), otherSpan]),
+            buildCharge('charge-uuid-2', [otherCharge])
+          ]
+        });
+
+        await service.save({ ...mockManip, altitude: 195 });
+
+        expect(updatedSection()?.cable_span_manipulations[0].altitude).toBe(195);
+        expect(updatedSection()?.charges[0].data.spanManipParams).toEqual([otherSpan]);
+        expect(updatedSection()?.charges[1].data.spanManipParams).toEqual([otherCharge]);
+      });
+    });
+
+    describe('deleteFromCharge()', () => {
+      it('should remove the manipulation of the pair from the load case and save the study', async () => {
+        const otherSpan = buildManip('other-span', 'support-uuid-2', 'charge-uuid-1');
+        storeSection({
+          charges: [
+            buildCharge('charge-uuid-1', [buildManip('charge-copy', 'support-uuid-1', 'charge-uuid-1'), otherSpan])
+          ]
+        });
+
+        const removed = await service.deleteFromCharge('support-uuid-1', 'charge-uuid-1');
+
+        expect(removed).toBe(true);
+        expect(updatedSection()?.charges[0].data.spanManipParams).toEqual([otherSpan]);
+      });
+
+      it('should not save the study when the load case has no manipulation for the pair', async () => {
+        storeSection({ charges: [buildCharge('charge-uuid-1', [])] });
+
+        const removed = await service.deleteFromCharge('support-uuid-1', 'charge-uuid-1');
+
+        expect(removed).toBe(false);
+        expect(mockStudiesService.updateStudy).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // reloadSection()
   // ---------------------------------------------------------------------------
   describe('reloadSection()', () => {

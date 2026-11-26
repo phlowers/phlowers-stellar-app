@@ -581,6 +581,34 @@ describe('CableSupportManipService', () => {
       });
     });
 
+    describe('save()', () => {
+      it('should drop the copy saved with the load case, which would win over the saved manipulation', async () => {
+        const otherSupport = buildManip('other-support', 'support-uuid-2', 'charge-uuid-1');
+        const otherCharge = buildManip('other-charge', 'support-uuid-1', 'charge-uuid-2');
+        mockStudiesService.getStudy.mockResolvedValue({
+          ...mockStudy,
+          sections: [
+            {
+              ...mockSectionBase,
+              charges: [
+                buildCharge('charge-uuid-1', [
+                  buildManip('charge-copy', 'support-uuid-1', 'charge-uuid-1'),
+                  otherSupport
+                ]),
+                buildCharge('charge-uuid-2', [otherCharge])
+              ]
+            }
+          ]
+        });
+
+        await service.save(buildManip('saved', 'support-uuid-1', 'charge-uuid-1'));
+
+        expect(updatedSection()?.cable_support_manipulations).toHaveLength(1);
+        expect(updatedSection()?.charges[0].data.supportManipParams).toEqual([otherSupport]);
+        expect(updatedSection()?.charges[1].data.supportManipParams).toEqual([otherCharge]);
+      });
+    });
+
     describe('deleteFromCharge()', () => {
       it('should remove the manipulation of the pair from the load case and save the study', async () => {
         const otherSupport = buildManip('other-support', 'support-uuid-2', 'charge-uuid-1');

@@ -396,6 +396,10 @@ export class CableSupportManipComponent {
       this.clearManip2();
       this.form.reset({ ...CABLE_SUPPORT_MANIP_DEFAULTS, support: this.form.controls.support.value });
       this.hasSavedManipulation.set(false);
+      // Drop the deleted manipulation from the calculation inputs now: the effect doing it would run too late
+      this.syncTemporaryManipulation();
+      // Even with nothing saved, the plot may show a manipulation that was only calculated
+      await this.loadFormsService.calculateLoad();
     } catch {
       this.notificationService.error(
         this.translocoService.translate('loads.cable-support-manip.delete-failed-notification')

@@ -417,7 +417,7 @@ export class CableSpanManipComponent implements OnInit {
     return createdSupportManip;
   }
 
-  deleteForm(): void {
+  async deleteForm(): Promise<void> {
     const spanUuid = this.form.controls.spanUuid.value;
     const chargeUuid = this.spanService.section()?.selected_charge_uuid ?? null;
     // Normalize legacy records (lacking chargeUuid) before filtering.
@@ -430,31 +430,40 @@ export class CableSpanManipComponent implements OnInit {
         ? (normalizedManips.find((m) => m.spanUuid === spanUuid && m.chargeUuid === chargeUuid)?.uuid ?? null)
         : null;
 
-    if (uuid) {
-      this.cableSpanManipService
-        .delete(uuid)
-        .then(async () => {
-          await this.cableSpanManipService.reloadSection();
-          if (spanUuid) {
-            this.cableSpanManipService.clearPersistedFormData(spanUuid);
-          }
-        })
-        .catch((error: unknown) => {
-          this.logger.error('Failed to delete cable span manipulation', error);
-          this.notificationService.error(
-            this.translocoService.translate('shared.global-error-handler.unexpected-error')
-          );
-        });
-    } else if (spanUuid) {
-      this.cableSpanManipService.clearPersistedFormData(spanUuid);
+    this.form.reset({ ...CABLE_SPAN_MANIP_DEFAULTS, spanUuid }, { emitEvent: false });
+    this.hasSavedManipulation.set(false);
+    if (!spanUuid) return;
+
+    const temporaryLoadData = this.plotService.temporaryLoadData;
+    if (temporaryLoadData) {
+      // The calculation below sends these parameters to the engine: the deleted manipulation must not be among them
+      temporaryLoadData.spanManipParams = (temporaryLoadData.spanManipParams ?? []).filter(
+        (m) => m.spanUuid !== spanUuid
+      );
     }
 
-    this.form.reset(
-      { ...CABLE_SPAN_MANIP_DEFAULTS, spanUuid: this.form.controls.spanUuid.value },
-      { emitEvent: false }
-    );
-    this.syncTemporaryManipulation();
-    this.hasSavedManipulation.set(false);
+    this.isLoading.set(true);
+    try {
+      let deleted = false;
+      if (uuid) {
+        await this.cableSpanManipService.delete(uuid);
+        deleted = true;
+      } else if (chargeUuid) {
+        // Applied then saved with the load case only: no section entry, but the plot still shows it
+        deleted = await this.cableSpanManipService.deleteFromCharge(spanUuid, chargeUuid);
+      }
+      if (deleted) {
+        await this.cableSpanManipService.reloadSection();
+      }
+      // Even with nothing saved, the plot may show a manipulation that was only calculated
+      await this.loadFormsService.calculateLoad();
+      this.cableSpanManipService.clearPersistedFormData(spanUuid);
+    } catch (error) {
+      this.logger.error('Failed to delete cable span manipulation', error);
+      this.notificationService.error(this.translocoService.translate('shared.global-error-handler.unexpected-error'));
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   async calculateSpanManip(): Promise<void> {

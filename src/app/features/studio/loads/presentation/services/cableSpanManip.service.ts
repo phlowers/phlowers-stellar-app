@@ -64,21 +64,45 @@ export class CableSpanManipService {
         ...(section.cable_span_manipulations ?? []).filter((m) => !keyMatches(m))
       ];
       section.selected_cable_span_manipulation_uuid = toSave.uuid;
+      // The copy saved with the load case wins over the section record: it would bring the previous values back
+      this.removeFromChargeParams(section, manip.spanUuid, manip.chargeUuid);
     });
   };
 
   /**
-   * Remove a cable span manipulation from the current section.
-   * If the deleted manipulation was selected, the selection is cleared.
+   * Remove a cable span manipulation from the current section, and from the parameters its load case saved.
+   * The load initialization restores those parameters into the engine, so a copy left there would bring the
+   * manipulation back.
+   * If the deleted manipulation was selected, the selection falls back to the first remaining entry, or null.
    * @param uuid UUID of the cable span manipulation to delete
    */
   delete = async (uuid: string): Promise<void> => {
     await this.mutateCurrentSection((section) => {
+      const removed = section.cable_span_manipulations?.find((m) => m.uuid === uuid);
       section.cable_span_manipulations = (section.cable_span_manipulations ?? []).filter((m) => m.uuid !== uuid);
+      // A manipulation saved without a load case is copied into the load case selected when it is edited
+      const chargeUuid = removed?.chargeUuid ?? section.selected_charge_uuid;
+      if (removed && chargeUuid) {
+        this.removeFromChargeParams(section, removed.spanUuid, chargeUuid);
+      }
       if (section.selected_cable_span_manipulation_uuid === uuid) {
         section.selected_cable_span_manipulation_uuid = section.cable_span_manipulations[0]?.uuid ?? null;
       }
     });
+  };
+
+  /**
+   * Remove a manipulation that only lives in the parameters saved with its load case (applied, then saved with the
+   * load case, never saved from the manipulation form).
+   * @param spanUuid UUID of the manipulated span
+   * @param chargeUuid UUID of the load case
+   * @returns whether a manipulation was removed
+   */
+  deleteFromCharge = async (spanUuid: string, chargeUuid: string): Promise<boolean> => {
+    const current = await this.fetchCurrentSection();
+    if (!current || !this.removeFromChargeParams(current.section, spanUuid, chargeUuid)) return false;
+    await this.studiesService.updateStudy(current.study);
+    return true;
   };
 
   /**
@@ -89,6 +113,16 @@ export class CableSpanManipService {
     const current = await this.fetchCurrentSection();
     if (!current) return;
     this.spanService.section.set(current.section);
+  }
+
+  // Matched by (span, load case) and not by uuid: the copy saved with the load case may carry another uuid
+  private removeFromChargeParams(section: Section, spanUuid: string, chargeUuid: string): boolean {
+    const charge = section.charges?.find((c) => c?.uuid === chargeUuid);
+    const params = charge?.data?.spanManipParams;
+    const isTarget = (m: CableSpanManipulation) => m.spanUuid === spanUuid && m.chargeUuid === chargeUuid;
+    if (!charge || !params?.some(isTarget)) return false;
+    charge.data.spanManipParams = params.filter((m) => !isTarget(m));
+    return true;
   }
 
   /** Apply a synchronous mutation to the current section and persist the updated study. */

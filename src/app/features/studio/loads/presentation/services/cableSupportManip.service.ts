@@ -53,6 +53,8 @@ export class CableSupportManipService {
         ...(section.cable_support_manipulations ?? []).filter((m) => !keyMatches(m))
       ];
       section.selected_cable_support_manipulation_uuid = toSave.uuid;
+      // The copy saved with the load case wins over the section record: it would bring the previous values back
+      this.removeFromChargeParams(section, manip.supportUuid, manip.chargeUuid);
     });
   };
 
