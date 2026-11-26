@@ -25,6 +25,7 @@ import { Section } from '@shared/domain';
 const makeSection = (): Section =>
   ({
     uuid: 'section-uuid',
+    cables_amount: 2,
     supports: [
       { uuid: 'support-1', number: '1', spanLength: 400 },
       { uuid: 'support-2', number: '2', spanLength: 250.5 },
@@ -393,7 +394,7 @@ describe('EffortEstimationComponent', () => {
         loadPositionDistance: 100,
         temperature: 15,
         targetDistance: 2,
-        bounds: [-1000, 0]
+        bounds: [-2000, 0]
       });
     });
 
@@ -411,7 +412,7 @@ describe('EffortEstimationComponent', () => {
         loadPositionDistance: 150.5,
         temperature: 15,
         targetDistance: -2,
-        bounds: [0, 1000]
+        bounds: [0, 2000]
       });
     });
 

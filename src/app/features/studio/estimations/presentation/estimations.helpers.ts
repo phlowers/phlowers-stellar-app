@@ -122,13 +122,25 @@ export function toBoundsErrorParams(
 }
 
 /**
+ * Largest load mass (kg) searched by the effort estimation: `EFFORT_MAX_LOAD_MASS` per cable of the bundle.
+ * Falls back to a single cable when the cable count is missing or not a positive integer.
+ */
+export function getEffortMaxLoadMass(cablesAmount: number | null | undefined): number {
+  return typeof cablesAmount === 'number' && Number.isInteger(cablesAmount) && cablesAmount >= 1
+    ? cablesAmount * EFFORT_MAX_LOAD_MASS
+    : EFFORT_MAX_LOAD_MASS;
+}
+
+/**
  * Maps the effort estimation form value to the engine inputs, or null while a value or the span length is missing.
  * The engine measures the load position from the left support and the altitude change upward: a traction (negative
  * mass) moves the cable up, a weight (positive mass) moves it down, so the mass search interval follows the direction.
+ * The interval is scaled by the number of cables of the bundle (see `getEffortMaxLoadMass`).
  */
 export function toEffortEstimationInputs(
   value: EffortEstimationFormValue,
-  spanLength: number | null
+  spanLength: number | null,
+  cablesAmount: number | null | undefined
 ): EstimateLoadRelativeInputs | null {
   const { span, referenceSupport, distanceToReferenceSupport, temperature, direction, targetDisplacement } = value;
   if (
@@ -142,13 +154,14 @@ export function toEffortEstimationInputs(
     return null;
   }
   const isUp = direction === 'UP';
+  const maxLoadMass = getEffortMaxLoadMass(cablesAmount);
   return {
     spanIndex: span.index,
     loadPositionDistance:
       referenceSupport === 'LEFT' ? distanceToReferenceSupport : spanLength - distanceToReferenceSupport,
     temperature,
     targetDistance: isUp ? targetDisplacement : -targetDisplacement,
-    bounds: isUp ? [-EFFORT_MAX_LOAD_MASS, 0] : [0, EFFORT_MAX_LOAD_MASS]
+    bounds: isUp ? [-maxLoadMass, 0] : [0, maxLoadMass]
   };
 }
 

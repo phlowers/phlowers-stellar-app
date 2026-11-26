@@ -21,6 +21,7 @@ import {
   maxLengthValidator,
   roundEffortResult,
   toBoundsErrorParams,
+  getEffortMaxLoadMass,
   toEffortEstimationInputs,
   toObstacleOptions,
   toPointOptions,
@@ -203,7 +204,7 @@ describe('estimations helpers', () => {
     });
 
     it('measures the load position from the left support and moves the cable upward with a traction (negative mass)', () => {
-      expect(toEffortEstimationInputs(effortFormValue(), 400)).toEqual({
+      expect(toEffortEstimationInputs(effortFormValue(), 400, 1)).toEqual({
         spanIndex: 2,
         loadPositionDistance: 120.5,
         temperature: 15,
@@ -212,21 +213,26 @@ describe('estimations helpers', () => {
       });
     });
 
+    it('scales the mass bounds by the bundle cable count', () => {
+      expect(toEffortEstimationInputs(effortFormValue(), 400, 3)?.bounds).toEqual([-3000, 0]);
+      expect(toEffortEstimationInputs(effortFormValue({ direction: 'DOWN' }), 400, 3)?.bounds).toEqual([0, 3000]);
+    });
+
     it('converts a distance from the right support', () => {
       expect(
-        toEffortEstimationInputs(effortFormValue({ referenceSupport: 'RIGHT', distanceToReferenceSupport: 100 }), 400)
+        toEffortEstimationInputs(effortFormValue({ referenceSupport: 'RIGHT', distanceToReferenceSupport: 100 }), 400, 1)
           ?.loadPositionDistance
       ).toBe(300);
     });
 
     it('moves the cable downward with a negative displacement and a weight (positive mass)', () => {
-      const inputs = toEffortEstimationInputs(effortFormValue({ direction: 'DOWN' }), 400);
+      const inputs = toEffortEstimationInputs(effortFormValue({ direction: 'DOWN' }), 400, 1);
       expect(inputs?.targetDistance).toBe(-3);
       expect(inputs?.bounds).toEqual([0, 1000]);
     });
 
     it('keeps zero values', () => {
-      expect(toEffortEstimationInputs(effortFormValue({ temperature: 0, targetDisplacement: 0 }), 400)).toEqual({
+      expect(toEffortEstimationInputs(effortFormValue({ temperature: 0, targetDisplacement: 0 }), 400, 1)).toEqual({
         spanIndex: 2,
         loadPositionDistance: 120.5,
         temperature: 0,
@@ -243,7 +249,22 @@ describe('estimations helpers', () => {
       ['no temperature', effortFormValue({ temperature: null }), 400],
       ['no target displacement', effortFormValue({ targetDisplacement: null }), 400]
     ])('returns null with %s', (_, value, spanLength) => {
-      expect(toEffortEstimationInputs(value, spanLength)).toBeNull();
+      expect(toEffortEstimationInputs(value, spanLength, 1)).toBeNull();
+    });
+  });
+
+  describe('getEffortMaxLoadMass', () => {
+    it.each([
+      [1, 1000],
+      [4, 4000],
+      [null, 1000],
+      [undefined, 1000],
+      [0, 1000],
+      [-2, 1000],
+      [1.5, 1000],
+      [NaN, 1000]
+    ])('returns the max mass for %s cable(s)', (cablesAmount, expected) => {
+      expect(getEffortMaxLoadMass(cablesAmount)).toBe(expected);
     });
   });
 

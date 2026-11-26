@@ -168,7 +168,7 @@ export class EffortEstimationComponent extends EstimationCalculationBase<
   }
 
   protected toInputs(value: EffortEstimationFormValue) {
-    return toEffortEstimationInputs(value, this.spanLength());
+    return toEffortEstimationInputs(value, this.spanLength(), this.spanService.section()?.cables_amount);
   }
 
   // Method, not field: the validators run while the base builds the form, before the subclass fields exist

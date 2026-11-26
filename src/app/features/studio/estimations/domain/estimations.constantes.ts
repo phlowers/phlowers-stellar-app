@@ -62,8 +62,9 @@ export const EFFORT_TARGET_DISPLACEMENT_DECIMALS = 0;
 export const EFFORT_TARGET_DISPLACEMENT_DEFAULT = 0;
 
 /**
- * Largest load mass (kg) searched by the effort estimation: the engine searches [0, max] for a weight (cable moved
- * down) and [-max, 0] for a traction (cable moved up).
+ * Largest load mass (kg) searched per cable of the bundle by the effort estimation. The searched max is this value
+ * × `Section.cables_amount`: the engine searches [0, max] for a weight (cable moved down) and [-max, 0] for a
+ * traction (cable moved up).
  */
 export const EFFORT_MAX_LOAD_MASS = 1000;
 
