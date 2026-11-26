@@ -315,7 +315,7 @@ export class FieldMeasuringComponent implements OnDestroy {
     () => this.isGlobalFormValid() && this.isActiveTabValid() && this.isParameterMethodReportable() && this.isSaved()
   );
 
-  /** Tells why "Rapport" and "Exporter" are inactive: the invalid data and/or the missing save; `null` when active. */
+  /** Tells why "Rapport" and "Exporter" are inactive, one reason at a time (invalid data first, then the missing save); `null` when active. */
   readonly reportExportBlockedReason = computed(() => {
     if (this.canReportOrExport()) {
       return null;
@@ -342,7 +342,7 @@ export class FieldMeasuringComponent implements OnDestroy {
     if (!this.isSaved()) {
       reasons.push(t('field-measuring.report.blocked-unsaved'));
     }
-    return reasons.join(' ');
+    return reasons[0] ?? null;
   });
 
   private async initializeMeasureData(): Promise<void> {

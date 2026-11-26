@@ -733,6 +733,13 @@ describe('FieldMeasuringComponent', () => {
       expect(reason).not.toContain('field-measuring.report.blocked-unsaved');
     });
 
+    it('should give a single reason at a time, the invalid data before the missing save', () => {
+      component.measureData.set({ ...validMeasure(), windSpeed: null });
+      const reason = component.reportExportBlockedReason();
+      expect(reason).toContain('field-measuring.report.blocked-invalid-tabs');
+      expect(reason).not.toContain('field-measuring.report.blocked-unsaved');
+    });
+
     it('should name the missing save as the reason of the inactive buttons', () => {
       component.measureData.set(validMeasure());
       const reason = component.reportExportBlockedReason();
