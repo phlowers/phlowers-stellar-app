@@ -180,7 +180,7 @@
 
 <output class="block">
   @if (isFormValid() && measureData().outputs.pep; as result) {
-    <div class="pep__results">
+    <div class="pep__results" animate.enter="anim-expand-height" animate.leave="anim-collapse-height">
       <h2 class="pep__results__title">{{ 'common.results' | transloco }}</h2>
       <dl class="pep__results__list">
         <div class="param">

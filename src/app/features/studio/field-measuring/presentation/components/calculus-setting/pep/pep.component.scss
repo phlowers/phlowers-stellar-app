@@ -33,12 +33,13 @@
     @extend %tools-grid-layout;
     grid-template-columns: var(--pep-grid-columns);
 
-    label {
-      white-space: nowrap;
-    }
     grid-template-areas:
       'line1 line1 line1 .'
       'sights sights sights .';
+
+    label {
+      white-space: nowrap;
+    }
 
     &__line1 {
       grid-area: line1;
