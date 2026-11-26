@@ -4,6 +4,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import copy
 import json
 import logging
 import math
@@ -149,22 +150,29 @@ def _map_raw_supports(raw_supports: object) -> list[dict[str, Any]]:
     ]
 
 
+def _map_raw_plain_objects(raw_items: object) -> list[Any]:
+    """Keep the plain objects of a list; any other value gives an empty list."""
+    if not isinstance(raw_items, list):
+        return []
+    return [item for item in raw_items if _is_plain_object(item)]
+
+
 def _map_raw_section(raw: dict[str, Any]) -> dict[str, Any]:
-    """Merge a raw section onto the defaults so missing fields are filled."""
+    """Merge a raw section onto the defaults so missing fields are filled.
+
+    The defaults are deep-copied so the lists they hold are never shared
+    between imported sections.
+    """
     raw_uuid = raw.get("uuid")
     section_uuid = (
         raw_uuid.strip() if isinstance(raw_uuid, str) else ""
     ) or str(uuid.uuid4())
     return {
-        **EMPTY_SECTION,
+        **copy.deepcopy(EMPTY_SECTION),
         **raw,
         "uuid": section_uuid,
         "supports": _map_raw_supports(raw.get("supports")),
-        "field_measures": [
-            measure
-            for measure in raw.get("field_measures") or []
-            if _is_plain_object(measure)
-        ],
+        "field_measures": _map_raw_plain_objects(raw.get("field_measures")),
     }
 
 

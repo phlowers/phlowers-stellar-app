@@ -81,6 +81,34 @@ def test_import_stsec_fills_defaults_and_trims_uuid():
     assert second["spanLength"] is None
 
 
+def test_import_stsec_does_not_share_default_lists_between_imports():
+    first = import_stsec(envelope()).section
+    for key in ("obstacles", "floors", "charges", "cable_modifications"):
+        first[key].append({"uuid": "leak"})
+
+    second = import_stsec(envelope()).section
+
+    for key in ("obstacles", "floors", "charges", "cable_modifications"):
+        assert second[key] == []
+
+
+@pytest.mark.parametrize("field_measures", [1, True, "x", {"a": 1}, None])
+def test_import_stsec_ignores_non_list_field_measures(field_measures):
+    section = import_stsec(
+        envelope({"supports": [], "field_measures": field_measures})
+    ).section
+
+    assert section["field_measures"] == []
+
+
+def test_import_stsec_keeps_only_plain_object_field_measures():
+    section = import_stsec(
+        envelope({"supports": [], "field_measures": [{"id": 1}, 3, None]})
+    ).section
+
+    assert section["field_measures"] == [{"id": 1}]
+
+
 def test_import_stsec_generates_missing_section_uuid():
     section = import_stsec({"supports": []}).section
 
