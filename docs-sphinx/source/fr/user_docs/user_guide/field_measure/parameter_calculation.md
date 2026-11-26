@@ -19,8 +19,9 @@ Trois méthodes sont disponibles dans un sélecteur radio :
   - Calcule le paramètre à partir de l'angle de la tangente au câble, selon la position de l'appareil
   - Voir {doc}`tangent_aiming`
 
-- **PEP** (désactivée)
-  - Pas encore disponible dans {{app_name}}
+- **PEP**
+  - Calcule le paramètre à partir des positions de trois visées sur le câble, mesurées avec un télémètre laser
+  - Voir [Mesure PEP](#mesure-pep) ci-dessous. Le résultat est actuellement une valeur **simulée**, le moteur de calcul n'implémentant pas encore PEP
 
 ## Configuration de la mesure PAPOTO
 
@@ -112,6 +113,24 @@ Vérifiez les valeurs saisies et réessayez. Si l'erreur persiste, examinez vos 
 ## Rapport et export
 
 Une fois la mesure enregistrée, **Rapport** et **Exporter** reprennent les saisies et les résultats de la méthode PAPOTO (voir {doc}`terrain_data`). Dans l'export JSON, `parameterCalculation.method.papoto` contient les longueurs et dénivelés mesurés et calculés, les angles horizontaux et verticaux, les paramètres 1-2, 2-3 et 1-3, puis le paramètre calculé avec son incertitude et son critère (`threshold` de 0,5 %, `status` : critère respecté ou non). Le support de gauche est exporté avec le libellé affiché dans le formulaire.
+
+## Mesure PEP
+
+La méthode PEP n'est utilisable que si la distance entre les points sur le câble peut être mesurée avec le télémètre laser. Tous les champs sont **obligatoires**.
+
+| Libellé | Unité | Valeurs autorisées | Signification |
+|---|---|---|---|
+| **Support de gauche** | — | Tous les supports de la section (numéro tronqué à 5 caractères) | Par défaut, le support de départ de la portée sélectionnée |
+| **Dist. horiz. Visée G Visée D** | m | 0 à 5000, 2 décimales max | Distance horizontale entre les visées gauche et droite. La longueur de portée calculée par {{app_name}} est affichée à côté |
+| **Dist. verticale Visée G Visée D** | m | -1000 à 1000, 2 décimales max | Dénivelé entre les visées gauche et droite. Le dénivelé calculé est affiché à côté |
+| **X Visée 1 à 3** | m | 0 à 5000, 2 décimales max | Distance horizontale de chaque visée |
+| **Y Visée 1 à 3** | m | -1000 à 1000, 2 décimales max | Distance verticale de chaque visée |
+
+Les champs numériques valent **0** par défaut. Le bouton **Calculer** est désactivé tant que le support de gauche est vide ou qu'une valeur est hors bornes.
+
+La section **Résultats** (paramètre, incertitude, paramètres 1-2, 2-3 et 1-3, critère 0,5 % avec son icône ✓/✗) est masquée jusqu'au clic sur **Calculer**. Modifier une entrée PEP la masque de nouveau et efface le résultat précédent. Les champs restent modifiables après le calcul.
+
+Toute modification d'une entrée PEP peut être enregistrée. Le résultat PEP est disponible pour l'onglet **Paramètre à 15 °C sans vent** en mode « auto ». Le rapport et l'export d'une mesure ne sont pas encore disponibles avec PEP.
 
 ## Étape suivante
 

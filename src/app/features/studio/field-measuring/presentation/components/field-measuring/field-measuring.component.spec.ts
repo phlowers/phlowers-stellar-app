@@ -703,6 +703,22 @@ describe('FieldMeasuringComponent', () => {
       expect(component.canReportOrExport()).toBe(false);
     });
 
+    it('should be false on the parameter calculation tab with PEP, which has no result to report yet', async () => {
+      component.measureData.set({ ...validMeasure(), calculationMethod: 'pep' });
+      await component.onSave();
+      component.activeTab.set('parameterCalculation');
+      expect(component.isParameterCalculationValid()).toBe(false);
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    it('should stay false with PEP on a valid terrain tab, and name the parameter calculation as the reason', async () => {
+      component.measureData.set({ ...validMeasure(), calculationMethod: 'pep' });
+      await component.onSave();
+      component.activeTab.set('terrainData');
+      expect(component.canReportOrExport()).toBe(false);
+      expect(component.reportExportBlockedReason()).toContain('field-measuring.report.blocked-invalid-tabs');
+    });
+
     it('should explain nothing when the buttons are active', async () => {
       component.measureData.set(validMeasure());
       await component.onSave();
@@ -712,6 +728,13 @@ describe('FieldMeasuringComponent', () => {
     it('should name the invalid data as the reason of the inactive buttons', async () => {
       component.measureData.set({ ...validMeasure(), windSpeed: null });
       await component.onSave();
+      const reason = component.reportExportBlockedReason();
+      expect(reason).toContain('field-measuring.report.blocked-invalid-tabs');
+      expect(reason).not.toContain('field-measuring.report.blocked-unsaved');
+    });
+
+    it('should give a single reason at a time, the invalid data before the missing save', () => {
+      component.measureData.set({ ...validMeasure(), windSpeed: null });
       const reason = component.reportExportBlockedReason();
       expect(reason).toContain('field-measuring.report.blocked-invalid-tabs');
       expect(reason).not.toContain('field-measuring.report.blocked-unsaved');
@@ -1096,6 +1119,66 @@ describe('FieldMeasuringComponent', () => {
       });
     }
   );
+
+  describe('canSave - pep', () => {
+    it('should re-enable the save button after a save when a PEP input is edited (RG.PEP.ENR-BTN.1)', async () => {
+      component.measureData.set(
+        createTestMeasureData({ name: 'Measure 1', calculationMethod: 'pep', pepLeftSupport: '0', xSight1: 10 })
+      );
+      await component.onSave();
+      expect(component.canSave()).toBe(false);
+
+      component.measureData.set({ ...component.measureData(), xSight1: 20 });
+      expect(component.canSave()).toBe(true);
+    });
+
+    it('should save the PEP inputs and reset the inputs of the other methods (RG.PEP.ENR-BTN.2)', async () => {
+      const modifySectionSpy = vi.spyOn(TestBed.inject(PlotService), 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({
+          name: 'Measure 1',
+          calculationMethod: 'pep',
+          pepLeftSupport: '0',
+          xSight1: 10,
+          ySight3: -5,
+          HL: 5,
+          tangentSpanLength: 400
+        })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.calculationMethod).toBe('pep');
+      expect(saved?.pepLeftSupport).toBe('0');
+      expect(saved?.xSight1).toBe(10);
+      expect(saved?.ySight3).toBe(-5);
+      expect(saved?.HL).toBeNull();
+      expect(saved?.tangentSpanLength).not.toBe(400);
+    });
+
+    it('should keep the report and export inactive with PEP even when a result exists (RG.PEP.RAP-BTN.1, EXP-BTN.1)', async () => {
+      const base = createTestMeasureData({ name: 'Measure 1', calculationMethod: 'pep', pepLeftSupport: '0' });
+      component.measureData.set({
+        ...base,
+        outputs: {
+          ...base.outputs,
+          pep: {
+            parameter: 1,
+            uncertainty: 1,
+            parameter_1_2: 1,
+            parameter_2_3: 1,
+            parameter_1_3: 1,
+            checkValidity: true
+          }
+        }
+      });
+      await component.onSave();
+      component.activeTab.set('parameterCalculation');
+      expect(component.isParameterCalculationValid()).toBe(false);
+      expect(component.canReportOrExport()).toBe(false);
+    });
+  });
 
   describe('onSave - tangent aiming (exterior)', () => {
     it('should reset the non displayed field and the other modes, keeping the displayed ones', async () => {

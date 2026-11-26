@@ -2,7 +2,7 @@
 
 ## Objectif
 
-L'onglet **Calcul du paramètre** fournit des méthodes de mesure de terrain pour calculer le paramètre électrique de fléchage à partir d'observations d'angle et de distance sur site. Les méthodes **PAPOTO** et **Tangent Aiming** (variantes Support, Intérieur, Extérieur ; voir {doc}`tangent_aiming`) sont implémentées ; la méthode PEP est un composant d'espace réservé (bouton radio désactivé).
+L'onglet **Calcul du paramètre** fournit des méthodes de mesure de terrain pour calculer le paramètre électrique de fléchage à partir d'observations d'angle et de distance sur site. Les méthodes **PAPOTO** et **Tangent Aiming** (variantes Support, Intérieur, Extérieur ; voir {doc}`tangent_aiming`) sont implémentées ; la méthode PEP dispose de son formulaire et de l'affichage de ses résultats, mais son résultat est simulé (`PEP_MOCK_RESULT`) tant que le moteur n'implémente pas le calcul.
 
 Le paramètre calculé alimente ensuite l'onglet **Paramètre à 15 °C sans vent** en mode « auto », qui utilise le paramètre et l'incertitude de la méthode retenue (`getActiveParameterOutput()` : `outputs.papoto` ou les `outputs.tangentAiming*` de la variante sélectionnée) pour effectuer les calculs thermiques suivants.
 
@@ -11,14 +11,13 @@ Le paramètre calculé alimente ensuite l'onglet **Paramètre à 15 °C sans ven
 L'onglet de calcul du paramètre est implémenté par les composants suivants (chemins relatifs depuis `src/app/features/studio/field-measuring/`) :
 
 - **Sélecteur de méthode et conteneur** : `presentation/components/calculus-setting/calculus-setting.component.ts` et `.html`
-  - Boutons radio pour PAPOTO, Tangent Aiming (Support, Intérieur, Extérieur), PEP (désactivé)
+  - Boutons radio pour PAPOTO, Tangent Aiming (Support, Intérieur, Extérieur), PEP
   - Affichage conditionnel du composant enfant selon la sélection
 - **Formulaire de mesure PAPOTO** : `presentation/components/calculus-setting/papoto/papoto.component.ts` et `.html`
   - Champs de saisie pour la longueur de portée, la différence d'altitude et 12 angles (HL, H1–H3, HR, VL, V1–V3, VR)
   - Boîte de dialogue d'aide avec guidance visuelle (`papoto-help.webp`)
   - Section de résultats (paramètre, incertitude, paramètres 1–2, 2–3, 1–3, critère de validité à 0,5 %)
-  - **Composants de remplacement** (sans logique) :
-    - `presentation/components/calculus-setting/pep/pep.component.ts` (désactivé)
+- **Formulaire PEP** : `presentation/components/calculus-setting/pep/pep.component.ts` (résultat simulé), avec `pep.helpers.ts` (validation, options de support, valeurs par défaut), `pep.constantes.ts` (`PEP_FIELD_RULES`, `PEP_MOCK_RESULT`, `PEP_SIGHTS`) et `pep.interfaces.ts`
 - **Modèle de domaine** : `domain/types.ts` (exporte l'interface `FieldMeasure` avec les champs PAPOTO et `PapotoResult`)
 - **Helpers** : `presentation/helpers.ts` et `presentation/constants.ts`
 - **Mesure de terrain principale** : `presentation/components/field-measuring/field-measuring.component.ts` (cycle de vie, validation, synchronisation des onglets)
@@ -130,12 +129,34 @@ Si l'utilisateur bascule en mode **« manuel »**, les valeurs préremplies auto
 
 ## Rapport et export
 
-Une fois la mesure enregistrée (voir {doc}`terrain_data`), les entrées et le résultat PAPOTO sont exportés dans `parameterCalculation.method.papoto` par `buildPapotoMethodExport` (`presentation/field-measure-export.helpers.ts`) : distances horizontale et verticale entre accrochages mesurées (`spanLength`, `measuredElevationDifference`), calculées (`horizontal_distance` et `elevation` de `litData.output_parameters` pour le support de gauche de la portée), angles horizontaux et verticaux, paramètres intermédiaires 1-2, 2-3 et 1-3, et `calculatedParameter` (`{ parameter, criterion: { threshold: 0.5, unit: "%", status } }`, `PAPOTO_VALIDITY_CRITERION_PERCENT`). `parameterCalculation.leftSupport` est le numéro de support affiché par le formulaire PAPOTO. L'export PEP est un espace réservé : son bloc ne contient que les visées saisies.
+Une fois la mesure enregistrée (voir {doc}`terrain_data`), les entrées et le résultat PAPOTO sont exportés dans `parameterCalculation.method.papoto` par `buildPapotoMethodExport` (`presentation/field-measure-export.helpers.ts`) : distances horizontale et verticale entre accrochages mesurées (`spanLength`, `measuredElevationDifference`), calculées (`horizontal_distance` et `elevation` de `litData.output_parameters` pour le support de gauche de la portée), angles horizontaux et verticaux, paramètres intermédiaires 1-2, 2-3 et 1-3, et `calculatedParameter` (`{ parameter, criterion: { threshold: 0.5, unit: "%", status } }`, `PAPOTO_VALIDITY_CRITERION_PERCENT`). `parameterCalculation.leftSupport` est le numéro de support affiché par le formulaire PAPOTO. L'export PEP est décrit dans la section Méthode PEP ci-dessous.
+
+## Méthode PEP
+
+Le formulaire PEP (`PepComponent`) écrit dans `measureData` (`model` bidirectionnel). Aucune tâche Python n'existe encore : `calculate()` stocke `PEP_MOCK_RESULT` dans `outputs.pep` (forme `PapotoResult`), quelles que soient les entrées. À remplacer par un appel `Task.calculatePep` quand le moteur implémentera PEP.
+
+| Règle | Comportement |
+|---|---|
+| RG.PEP.SUP.1 | Options du support de gauche = tous les supports de la section, valeur = index du support, libellé tronqué à 5 caractères (`buildPepSupportOptions`) |
+| RG.PEP.SUP.3 | À la sélection de PEP (ou à l'ouverture d'une mesure ancienne), un `pepLeftSupport` vide prend le support de départ de la portée (`applyPepDefaults`) |
+| RG.PEP.LON/DEN/XV/YV.1 | Bornes et décimales max par entrée dans `PEP_FIELD_RULES` : longueur et X de 0 à 5000, dénivelé et Y de −1000 à 1000, 2 décimales |
+| RG.PEP.*.2 | Les entrées numériques valent 0 par défaut (`PEP_INPUT_DEFAULTS`, `applyPepDefaults`) |
+| RG.PEP.LON-CAL.1 / DEN-CAL.1 | Longueur / dénivelé calculés lus dans `litData` pour la portée commençant au support de gauche |
+| RG.PEP.CAL-BNT.1 | Bouton Calculer désactivé tant que `isPepDataValid` est faux (pas de support de gauche ou entrée invalide) |
+| RG.PEP.CAL-BNT.2 / RES-CAD.1 | Les résultats ne s'affichent que si le formulaire est valide et `outputs.pep` renseigné ; `updateField` remet `outputs.pep` à `null` à chaque modification |
+| RG.PEP.CRI-RES | Critère 0,5 % affiché oui/non d'après `checkValidity` |
+| RG.PEP.ENR-BTN.1 | Toute modification d'une entrée PEP réactive Enregistrer ; `toUnsavedChangesComparable` applique `applyPepDefaults` pour que les valeurs par défaut d'une mesure ancienne ne soient pas vues comme des modifications |
+
+Quand PEP est inactive, `CALCULUS_MODE_RESETTERS.pep` restaure `PEP_INPUT_DEFAULTS` (`pepLeftSupport: null`, entrées numériques à 0) et efface `outputs.pep`. `getActiveParameterOutput` renvoie `outputs.pep` pour la méthode PEP, ce qui alimente l'onglet 15 °C en mode « auto ».
+
+Le rapport PDF (`buildPepRows`) et l'export JSON (`buildPepMethodExport`) lisent `outputs.pep`, mais `canReportOrExport` reste faux avec PEP (`isParameterCalculationValid` renvoie faux) : aucun des deux ne peut encore être déclenché.
 
 ## Tests
 
 **Tests du composant Angular :**
 - `src/app/features/studio/field-measuring/presentation/components/calculus-setting/papoto/papoto.component.spec.ts`
+- `src/app/features/studio/field-measuring/presentation/components/calculus-setting/pep/pep.component.spec.ts` et `pep.helpers.spec.ts` (règles PEP ci-dessus)
+- `src/app/features/studio/field-measuring/presentation/calculus-mode-reset.helpers.spec.ts`, `helpers.spec.ts`, `field-measure-export.helpers.spec.ts` et `services/field-measure-report/field-measure-report.helpers.spec.ts` (réinitialisation PEP, sortie active, export et rapport)
 
 **Tests Python backend :**
 - `stellar-engine/test/tools/test_papoto.py` (teste la fonction `papoto.calculate_papoto()` et la classe `PapotoParameterMeasure` de mechaphlowers)

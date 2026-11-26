@@ -8,7 +8,7 @@
 import { Section, Study } from '@shared/domain';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { TranslocoService } from '@jsverse/transloco';
-import { FieldMeasure } from '../domain/types';
+import { FieldMeasure, PapotoResult } from '../domain/types';
 import { formatSpanLabel, getActiveParameterOutput, readNumber } from './helpers';
 import {
   formatRfc9557,
@@ -20,6 +20,7 @@ import {
   buildSpanSupportOptions,
   getCalculatedSpanLength
 } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
+import { getPepLeftSupportLabel } from './components/calculus-setting/pep/pep.helpers';
 import { TANGENT_AIMING_REPORT_CONFIGS } from './services/field-measure-report/field-measure-report.constantes';
 import {
   TANGENT_AIMING_CALCULATION_TYPE,
@@ -231,6 +232,24 @@ export const buildTemperatureCalculationExport = (
   };
 };
 
+/** Builds the `intermediateParameters` and `calculatedParameter` blocks shared by PAPOTO and PEP results. */
+const buildResultExport = (result: PapotoResult | null | undefined) => ({
+  intermediateParameters: createValueUnit(
+    {
+      p12: result?.parameter_1_2 ?? null,
+      p23: result?.parameter_2_3 ?? null,
+      p13: result?.parameter_1_3 ?? null
+    },
+    'm'
+  ),
+  calculatedParameter: result
+    ? {
+        parameter: createUncertainValueUnit(result.parameter, 'm', result.uncertainty),
+        criterion: { threshold: PAPOTO_VALIDITY_CRITERION_PERCENT, unit: '%' as const, status: result.checkValidity }
+      }
+    : undefined
+});
+
 /** Builds the PAPOTO method export block, including computed horizontal/vertical distances from `litData`. */
 const buildPapotoMethodExport = (measureData: FieldMeasure, litData: GetSectionOutput | null): PapotoMethodExport => {
   const leftIndex = measureData.span?.[0] ?? null;
@@ -252,20 +271,7 @@ const buildPapotoMethodExport = (measureData: FieldMeasure, litData: GetSectionO
       { VG: measureData.VL, V1: measureData.V1, V2: measureData.V2, V3: measureData.V3, VD: measureData.VR },
       GRADE_EXPORT_UNIT
     ),
-    intermediateParameters: createValueUnit(
-      {
-        p12: papoto?.parameter_1_2 ?? null,
-        p23: papoto?.parameter_2_3 ?? null,
-        p13: papoto?.parameter_1_3 ?? null
-      },
-      'm'
-    ),
-    calculatedParameter: papoto
-      ? {
-          parameter: createUncertainValueUnit(papoto.parameter, 'm', papoto.uncertainty),
-          criterion: { threshold: PAPOTO_VALIDITY_CRITERION_PERCENT, unit: '%', status: papoto.checkValidity }
-        }
-      : undefined
+    ...buildResultExport(papoto)
   };
 };
 
@@ -318,7 +324,7 @@ const buildTangentialSightsMethodExport = (
   };
 };
 
-/** Builds the PEP method export block from raw inputs (method not implemented). */
+/** Builds the PEP method export block from raw inputs and the PEP result. */
 const buildPepMethodExport = (measureData: FieldMeasure): PepMethodExport => ({
   sightsDeltaLength: createValueUnit(measureData.lengthBetweenSightGD, 'm'),
   sightsDeltaElevation: createValueUnit(measureData.elevationDifferenceBetweenSightGD, 'm'),
@@ -330,8 +336,7 @@ const buildPepMethodExport = (measureData: FieldMeasure): PepMethodExport => ({
     { Y1: measureData.ySight1, Y2: measureData.ySight2, Y3: measureData.ySight3 },
     'm'
   ),
-  intermediateParameters: createValueUnit({ p12: null, p23: null, p13: null }, 'm'),
-  calculatedParameter: undefined
+  ...buildResultExport(measureData.outputs.pep)
 });
 
 /**
@@ -363,7 +368,8 @@ export const buildParameterCalculationExport = (
     return {
       methodName: translocoService.translate(PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS.pep),
       subMethodName: null,
-      leftSupport: measureData.leftSupport,
+      // The PEP form stores the support index: export the support number it displays
+      leftSupport: getPepLeftSupportLabel(section?.supports ?? [], measureData.pepLeftSupport),
       method: { pep: buildPepMethodExport(measureData) }
     };
   }

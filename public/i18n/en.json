@@ -785,6 +785,13 @@
       "criterion-label": "0.5% criterion",
       "help-title": "Help (PAPOTO)"
     },
+    "pep": {
+      "usage-msg": "This method can only be used if the distance between the points on the cable can be measured with the laser sight.",
+      "mandatory-msg": "All fields are mandatory for parameter calculation",
+      "length-label": "Horiz. dist. btwn Sight G and Sight D",
+      "elevation-diff-label": "Vert. dist. btwn Sight G and Sight D",
+      "criterion-label": "0.5% criterion"
+    },
     "field-datas": {
       "mandatory-msg": "All fields are mandatory",
       "name-label": "Measure name",

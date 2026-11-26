@@ -86,6 +86,7 @@ export interface FieldMeasure {
   interiorParameter: number | null;
   interiorTangentAngle: number | null;
   // PEP fields
+  pepLeftSupport: string | null;
   lengthBetweenSightGD: number | null;
   elevationDifferenceBetweenSightGD: number | null;
   xSight1: number | null;
@@ -136,6 +137,8 @@ export interface FieldMeasureOutputs {
   tangentAimingExterior: TangentAimingSupportResult | null;
   /** Tangent aiming (interior) calculation result, if computed. */
   tangentAimingInterior: TangentAimingSupportResult | null;
+  /** PEP calculation result, if computed (absent from measures saved before PEP existed). */
+  pep?: PapotoResult | null;
 }
 
 /** Result of the tangent aiming (support) parameter calculation. */

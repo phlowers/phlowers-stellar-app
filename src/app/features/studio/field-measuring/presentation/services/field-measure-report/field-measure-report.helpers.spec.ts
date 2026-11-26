@@ -356,7 +356,7 @@ describe('field-measure-report helpers', () => {
       const rows = buildParameterCalculationRows(
         measure({
           calculationMethod: 'pep',
-          leftSupport: '11',
+          pepLeftSupport: '1',
           lengthBetweenSightGD: 100,
           elevationDifferenceBetweenSightGD: 2,
           xSight2: 3,
@@ -368,6 +368,7 @@ describe('field-measure-report helpers', () => {
       );
 
       expect(findItem(rows, LABEL_KEYS.method)?.value).toBe('common.pep-label');
+      expect(findItem(rows, LABEL_KEYS.leftSupport)?.value).toBe('12');
       expect(findItem(rows, LABEL_KEYS.sightsLength)?.value).toBe('100.00 m');
       expect(findItem(rows, LABEL_KEYS.sightsElevation)?.value).toBe('2.00 m');
       expect(findItem(rows, `${LABEL_KEYS.sightX}:{"index":2}`)?.value).toBe('3.00 m');
@@ -376,6 +377,22 @@ describe('field-measure-report helpers', () => {
       expect(findItem(rows, LABEL_KEYS.parameter)?.value).toBe('-');
       expect(findItem(rows, LABEL_KEYS.criterion)).toMatchObject({ value: '-', status: undefined });
       expect(findItem(rows, LABEL_KEYS.parameter23)?.value).toBe('-');
+    });
+
+    it('should report the PEP result when it is calculated', () => {
+      const rows = buildParameterCalculationRows(
+        measure({ calculationMethod: 'pep', outputs: { ...measure().outputs, pep: papotoResult } }),
+        section,
+        litData,
+        translocoService
+      );
+
+      expect(findItem(rows, LABEL_KEYS.parameter)?.value).toBe('1234 m');
+      expect(findItem(rows, LABEL_KEYS.uncertainty)?.value).toBe('5 m');
+      expect(findItem(rows, LABEL_KEYS.criterion)).toMatchObject({ status: true });
+      expect(findItem(rows, LABEL_KEYS.parameter12)?.value).toBe('1200 m');
+      expect(findItem(rows, LABEL_KEYS.parameter23)?.value).toBe('1210 m');
+      expect(findItem(rows, LABEL_KEYS.parameter13)?.value).toBe('1220 m');
     });
 
     it.each([

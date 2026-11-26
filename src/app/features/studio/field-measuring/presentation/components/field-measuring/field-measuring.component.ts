@@ -249,8 +249,14 @@ export class FieldMeasuringComponent implements OnDestroy {
     if (mode) {
       return mode.isDataValid(measureData);
     }
+    if (!this.isParameterMethodReportable()) {
+      return false;
+    }
     return measureData.calculationMethod !== 'papoto' || isPapotoDataValid(measureData);
   });
+
+  /** PEP has no real result to report or export yet, whatever the displayed tab (RG.PEP.RAP-BTN.1, EXP-BTN.1). */
+  private readonly isParameterMethodReportable = computed(() => this.measureData().calculationMethod !== 'pep');
 
   /** Validity of the "Temperature calculation" tab (RG.MES.EXP-BTN.2). */
   readonly isTemperatureCalculationValid = computed(() => isTemperatureDataValid(this.measureData()));
@@ -305,9 +311,11 @@ export class FieldMeasuringComponent implements OnDestroy {
   });
 
   /** The "Rapport" and "Exporter" buttons: active when the global form and the displayed tab are valid and saved. */
-  readonly canReportOrExport = computed(() => this.isGlobalFormValid() && this.isActiveTabValid() && this.isSaved());
+  readonly canReportOrExport = computed(
+    () => this.isGlobalFormValid() && this.isActiveTabValid() && this.isParameterMethodReportable() && this.isSaved()
+  );
 
-  /** Tells why "Rapport" and "Exporter" are inactive: the invalid data and/or the missing save; `null` when active. */
+  /** Tells why "Rapport" and "Exporter" are inactive, one reason at a time (invalid data first, then the missing save); `null` when active. */
   readonly reportExportBlockedReason = computed(() => {
     if (this.canReportOrExport()) {
       return null;
@@ -326,11 +334,15 @@ export class FieldMeasuringComponent implements OnDestroy {
     }
     if (!this.isActiveTabValid()) {
       reasons.push(t('field-measuring.report.blocked-invalid-tabs', { tabs: t(activeTabTitleKey) }));
+    } else if (!this.isParameterMethodReportable()) {
+      reasons.push(
+        t('field-measuring.report.blocked-invalid-tabs', { tabs: t(SECTION_TITLE_KEYS.parameterCalculation) })
+      );
     }
     if (!this.isSaved()) {
       reasons.push(t('field-measuring.report.blocked-unsaved'));
     }
-    return reasons.join(' ');
+    return reasons[0] ?? null;
   });
 
   private async initializeMeasureData(): Promise<void> {
