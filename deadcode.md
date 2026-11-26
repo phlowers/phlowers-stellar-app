@@ -4,6 +4,14 @@
 
 ## Pending review
 
+### Unused `formatExportMeasureDate` (field measure export)
+
+- **Source**: `src/app/features/studio/field-measuring/presentation/field-measure-export.helpers.ts` (`formatExportMeasureDate`).
+- **Evidence**: the measure date and time are merged into a single `measure.date` built by `formatExportMeasureTime`; the only remaining consumer of `formatExportMeasureDate` is its own spec block.
+- **Removal impact**: Remove the function, its `describe('formatExportMeasureDate')` block and its import in `field-measure-export.helpers.spec.ts`; `isValidDate` and `zonedWallClockToDate` stay used by `formatExportMeasureTime`.
+- **Detected on**: 2026-11-26.
+- **Status**: PENDING REVIEW; deletion requires user validation.
+
 ### Unused `hasUnsavedChanges` signal (field measuring)
 
 - **Source**: `src/app/features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component.ts` (`hasUnsavedChanges`).

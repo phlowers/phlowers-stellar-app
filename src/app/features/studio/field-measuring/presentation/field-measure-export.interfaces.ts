@@ -49,7 +49,6 @@ export interface GeneralExport {
 export interface MeasureExport {
   name: string;
   date: string | null;
-  time: string | null;
   season: string | null;
   voltage: ValueUnit<string | null>;
   sectionType: string | null;

@@ -107,9 +107,10 @@ export const formatExportMeasureDate = (date: Date | null): string | null =>
     : null;
 
 /**
- * Formats the measure time as `YYYY-MM-DDTHH:mm:ss.SSS±HH:MM[Zone]`: the clock of `time` on the measure day, with
+ * Formats the measure time as `YYYY-MM-DDTHH:mm:ss.000±HH:MM[Zone]`: the clock of `time` on the measure day, with
  * the offset (daylight saving time included) of that day. The time field only stores a clock time on an arbitrary
- * day, whose offset may differ from the measure date's.
+ * day, whose offset may differ from the measure date's. Milliseconds are always `000`: the time picker does not
+ * collect them, those of the stored `Date` only come from the instant the measure was created.
  * @param time - The measure time (or `null`)
  * @param date - The measure date giving the day (or `null` to use the day of `time`)
  * @returns The formatted date-time, or `null` when `time` is `null` or invalid
@@ -126,8 +127,7 @@ export const formatExportMeasureTime = (time: Date | null, date: Date | null = n
       day: day.getDate(),
       hour: time.getHours(),
       minute: time.getMinutes(),
-      second: time.getSeconds(),
-      millisecond: time.getMilliseconds()
+      second: time.getSeconds()
     })
   );
 };
@@ -164,8 +164,7 @@ export const getSectionTypeKey = (spanType: string): string => {
  */
 export const buildMeasureExport = (measureData: FieldMeasure, translocoService: TranslocoService): MeasureExport => ({
   name: measureData.name,
-  date: formatExportMeasureDate(measureData.date),
-  time: formatExportMeasureTime(measureData.time, measureData.date),
+  date: formatExportMeasureTime(measureData.time, measureData.date),
   season: measureData.season ? translocoService.translate(SEASON_EXPORT_KEYS[measureData.season]) : null,
   voltage: createValueUnit(measureData.voltage, 'KV'),
   sectionType: measureData.spanType ? translocoService.translate(getSectionTypeKey(measureData.spanType)) : null,
