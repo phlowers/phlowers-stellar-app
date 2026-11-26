@@ -5,7 +5,7 @@
 // - drawings whose look changes with the selection declare their `unselected` and `selected` looks (obstacle, floor,
 //   free-positioning points); objects made of several points (obstacle, floor) also declare `inactivePoint`,
 //   the look of the other points of the selected object. The icons (loads, cable modification, cable support
-//   manipulation, cut strands) only declare `unselected`, plus the tooltip of the cut strands
+//   manipulation, cable span manipulation, cut strands) only declare `unselected`, plus the tooltip of the cut strands
 // Conformity rule zone colors are excluded: they come from the catalog json config.
 export const PlotlyDrawings = {
   plot: {
@@ -35,7 +35,14 @@ export const PlotlyDrawings = {
     lineWidth: { '2d': 4, '3d': 8 },
     markerSize: { '2d': 6, '3d': 4 }
   },
-  // shared by loadPunctual, loadMarking, cableModification, cableSupportManip and cutStrands
+  // the temporary support of a cable span manipulation (e.g. the crane), set apart from the real supports. Its sling
+  // keeps the insulator look
+  virtualSupport: {
+    color: '#B45309',
+    lineWidth: { '2d': 4, '3d': 8 },
+    markerSize: { '2d': 4, '3d': 3 }
+  },
+  // shared by loadPunctual, loadMarking, cableModification, cableSupportManip, cableSpanManip and cutStrands
   clickableIconAnnotation: {
     // The solid face of FontAwesome, drawn by weight 900. Not the 'FontAwesome' alias: it serves some glyphs, such as
     // the hand-back-fist, from the regular (outline) face. The inner quotes are needed by the digit of the name, and
@@ -82,12 +89,26 @@ export const PlotlyDrawings = {
     arrowYOffset: -160,
     unselected: { color: '#5B3A75' }
   },
+  cableSpanManip: {
+    icon: '&#xf255;', // FontAwesome hand-back-fist
+    iconSize: { '2d': 8, '3d': 8 },
+    borderPad: { '2d': 6, '3d': 6 },
+    // pixels above the manipulated cable point (cable end of the sling), whatever the zoom. Clears the cut strands
+    // marking (box top at 135 px), which can mark the same point, by at least 4 px, see annotationsClearance.spec.ts. The
+    // dashed line stops at the bottom edge of the icon box, worked out from iconSize and borderPad (see
+    // getDashedIconLineLength)
+    offsetY: 150,
+    lineWidth: { '2d': 1, '3d': 1 },
+    dashLength: 6,
+    dashGap: 4,
+    unselected: { color: '#5B3A75' }
+  },
   cutStrands: {
     icon: '&#xf0c4;', // FontAwesome scissors
     iconSize: { '2d': 12, '3d': 12 },
     borderPad: { '2d': 6, '3d': 6 },
     // pixels, never data units: the gap stays the same at any zoom level. The dashed line stops at the bottom edge of
-    // the icon box, worked out from iconSize and borderPad (see getCutStrandsLineLength). Clears the cable modification
+    // the icon box, worked out from iconSize and borderPad (see getDashedIconLineLength). Clears the cable modification
     // label (top at ~105 px) by at least 4 px, see annotationsClearance.spec.ts
     offsetY: 122,
     lineWidth: { '2d': 1, '3d': 1 },

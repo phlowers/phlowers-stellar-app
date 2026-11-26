@@ -8,11 +8,9 @@ import { TestBed } from '@angular/core/testing';
 import { MessageService } from 'primeng/api';
 import { vi, type Mock } from 'vitest';
 import { NotificationService } from './notification.service';
+import { DEFAULT_LIFE, LIFE_ERROR, LIFE_WARNING } from './notification.constantes';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
-const DEFAULT_LIFE = 5000;
-const LIFE_WARNING = 7000;
-const LIFE_ERROR = 10000;
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -110,6 +108,7 @@ describe('NotificationService', () => {
       service.info('For your information');
 
       expect(mockMessageService.add).toHaveBeenCalledWith({
+        key: 'bottom-right',
         severity: 'info',
         summary: expect.any(String),
         detail: 'For your information',
@@ -121,6 +120,7 @@ describe('NotificationService', () => {
       service.info('Note', 'FYI');
 
       expect(mockMessageService.add).toHaveBeenCalledWith({
+        key: 'bottom-right',
         severity: 'info',
         summary: 'FYI',
         detail: 'Note',
@@ -134,6 +134,7 @@ describe('NotificationService', () => {
       service.warning('Proceed with caution');
 
       expect(mockMessageService.add).toHaveBeenCalledWith({
+        key: 'bottom-right',
         severity: 'warn',
         summary: expect.any(String),
         detail: 'Proceed with caution',
@@ -145,11 +146,78 @@ describe('NotificationService', () => {
       service.warning('Be careful', 'Attention');
 
       expect(mockMessageService.add).toHaveBeenCalledWith({
+        key: 'bottom-right',
         severity: 'warn',
         summary: 'Attention',
         detail: 'Be careful',
         life: LIFE_WARNING
       });
+    });
+  });
+
+  describe('deduplication', () => {
+    it('should not display the same warning twice while it is still shown', () => {
+      service.warning('Same');
+      service.warning('Same');
+
+      expect(mockMessageService.add).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not display the same info twice while it is still shown', () => {
+      service.info('Same');
+      service.info('Same');
+
+      expect(mockMessageService.add).toHaveBeenCalledTimes(1);
+    });
+
+    it('should display different messages', () => {
+      service.warning('One');
+      service.warning('Two');
+
+      expect(mockMessageService.add).toHaveBeenCalledTimes(2);
+    });
+
+    it('should display the message again once its toast has been released', () => {
+      service.warning('Same');
+      const added = mockMessageService.add.mock.calls[0][0];
+      service.release(added);
+      service.warning('Same');
+
+      expect(mockMessageService.add).toHaveBeenCalledTimes(2);
+    });
+
+    it('should display a warning list again once its toast has been released', () => {
+      service.warningList(['a']);
+      service.release(mockMessageService.add.mock.calls[0][0]);
+      service.warningList(['a']);
+
+      expect(mockMessageService.add).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not merge an info and a warning with the same text', () => {
+      service.info('Same', 'T');
+      service.warning('Same', 'T');
+
+      expect(mockMessageService.add).toHaveBeenCalledTimes(2);
+    });
+
+    it('should deduplicate warning lists on the bottom-right key', () => {
+      service.warningList(['a', 'b']);
+      service.warningList(['a', 'b']);
+
+      expect(mockMessageService.add).toHaveBeenCalledTimes(1);
+      expect(mockMessageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({ key: 'bottom-right', data: { warnings: ['a', 'b'] } })
+      );
+    });
+
+    it('should never deduplicate success and error toasts', () => {
+      service.success('Same');
+      service.success('Same');
+      service.error('Same');
+      service.error('Same');
+
+      expect(mockMessageService.add).toHaveBeenCalledTimes(4);
     });
   });
 });

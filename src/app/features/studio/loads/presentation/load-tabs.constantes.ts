@@ -9,5 +9,6 @@
 export const LOAD_TAB = {
   SPAN_LOAD: '1',
   CABLE_MODIFICATION: '2',
-  CABLE_SUPPORT_MANIP: '3'
+  CABLE_SUPPORT_MANIP: '3',
+  CABLE_SPAN_MANIP: '4'
 } as const;

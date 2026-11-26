@@ -235,6 +235,8 @@ export interface SectionCoords {
   virtual_supports: number[][][] | null;
   // Coordinates of the insulators of the virtual support
   virtual_insulators: number[][][] | null;
+  // Span index (before insertion) of each virtual support, in the order of `virtual_supports`
+  virtual_supports_span_indices?: number[] | null;
   // Coordinates of applied loads by support UUID
   loads: Record<string, number[]>;
 }
@@ -428,7 +430,7 @@ export interface TaskInputs {
     time: Date | null;
     windSpeed: number;
     windSpeedUnit: 'kmh' | 'ms';
-    windDirection: string;
+    windIncidence: number;
     skyCover: SkyCover;
   };
   // Inputs for computeDiffuseAndBeamRadiation task

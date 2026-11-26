@@ -81,13 +81,13 @@ export class PlotService {
   private currentSectionUuid: string | null = null;
   // High safety of the engine study, to skip redundant setHighSafety calls. Null while no engine study is ready
   private highSafety: boolean | null = null;
+  private readonly selectedCharge = computed(() => {
+    const section = this.spanService.section();
+    return section?.charges?.find((charge) => charge.uuid === section.selected_charge_uuid);
+  });
   // Staff presence on the selected charge requires high safety in the engine study.
   // Without selected charge, staff is assumed present: the safest case
-  private readonly selectedChargeHighSafety = computed(() => {
-    const section = this.spanService.section();
-    const selectedCharge = section?.charges?.find((charge) => charge.uuid === section.selected_charge_uuid);
-    return selectedCharge?.personnelPresence ?? true;
-  });
+  private readonly selectedChargeHighSafety = computed(() => this.selectedCharge()?.personnelPresence ?? true);
   // Cut strands of the engine study, to skip redundant setCutStrands calls. Null while no engine study is ready
   private cutStrands: number[] | null = null;
   private readonly savedCutStrands = computed(() => toEngineCutStrands(this.spanService.savedCutStrands()), {
@@ -283,13 +283,23 @@ export class PlotService {
       if (isSuperseded()) return;
     }
 
-    // initLit initializes the study — refreshProjection gets the actual render data
-    await this.refreshProjection();
+    // Projecting before the selected charge is applied would draw the section without it first, then redraw it (and
+    // move the camera) once it is calculated: the plot stays loading until LoadFormsService projects it instead
+    if (!this.willApplySelectedCharge()) {
+      // initLit initializes the study — refreshProjection gets the actual render data
+      await this.refreshProjection();
+    }
     if (isSuperseded()) return;
     // Signals LoadFormsService to apply the selected charge (loads, climate…) on top of this new study
     this.engineStudySectionUuid.set(section.uuid);
     this.engineStudyId.set(++this.engineStudyCount);
   };
+
+  // In the studio, LoadFormsService applies the selected charge (manipulations, loads, climate) on top of each new
+  // engine study, then projects it. Read from the latest section: the selected charge may have changed during initLit
+  private willApplySelectedCharge(): boolean {
+    return untracked(() => this.isStudioActive() && this.selectedCharge() !== undefined);
+  }
 
   refreshProjection = async () => {
     this.loading.set(true);

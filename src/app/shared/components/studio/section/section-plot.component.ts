@@ -30,6 +30,7 @@ import { mergeCableSupportManips } from '@shared/domain/helpers/cable-support-ma
 import { LoadType } from './helpers/createLoadAnnotations';
 import { CableModificationsService } from '@features/studio/loads/presentation/services/cableModifications.service';
 import { CableSupportManipService } from '@features/studio/loads/presentation/services/cableSupportManip.service';
+import { CableSpanManipService } from '@features/studio/loads/presentation/services/cableSpanManip.service';
 import { LOAD_TAB } from '@features/studio/loads/presentation/load-tabs.constantes';
 import { SideTabsService } from '@services/side-tabs/side-tabs.service';
 import { debounceTime, tap } from 'rxjs';
@@ -77,6 +78,7 @@ export class SectionPlotComponent implements OnDestroy {
   private readonly loadFormsService = inject(LoadFormsService);
   private readonly cableModificationsService = inject(CableModificationsService);
   private readonly cableSupportManipService = inject(CableSupportManipService);
+  private readonly cableSpanManipService = inject(CableSpanManipService);
   private readonly logger = inject(LoggerService);
   private readonly obstacleStateService = inject(ObstacleStateService);
   private readonly distanceMeasuringService = inject(DistanceMeasuringService);
@@ -406,6 +408,13 @@ export class SectionPlotComponent implements OnDestroy {
           this.sideTabsService.sideTabs.set(0);
           this.loadFormsService.activeLoadTab.set(LOAD_TAB.CABLE_SUPPORT_MANIP);
           this.cableSupportManipService.selectSupport(data.supportUuid);
+          break;
+        case 'cableSpanManip':
+          // Same as the support manipulation: the preview has no Loads panel to consume the selection
+          if (this.isPreview()) break;
+          this.sideTabsService.sideTabs.set(0);
+          this.loadFormsService.activeLoadTab.set(LOAD_TAB.CABLE_SPAN_MANIP);
+          this.cableSpanManipService.selectSpan(data.spanUuid);
           break;
         case 'cutStrands':
           // The preview edits a copy of the section: the saved entry is only shown there

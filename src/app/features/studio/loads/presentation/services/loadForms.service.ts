@@ -183,6 +183,9 @@ export class LoadFormsService {
     } catch (err) {
       this.lastLoadedChargeUuid.set(null); // Allow retry on next signal change
       this.plotService.error.set(TaskError.CALCULATION_ERROR);
+      // A new studio engine study is only projected once its load case is applied (see initSectionStudio): without
+      // this, the plot would stay on the loading spinner instead of showing the error
+      this.plotService.loading.set(false);
       this.logger.error('initTemporaryLoadData failed', err);
     } finally {
       this.endLoadCaseChange();
