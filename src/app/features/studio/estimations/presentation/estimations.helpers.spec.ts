@@ -168,13 +168,13 @@ describe('estimations helpers', () => {
       ...overrides
     });
 
-    it('maps the form to the engine inputs on the obstacle span, bounded to [-3000; 3000] Pa', () => {
+    it('maps the form to the engine inputs on the obstacle span, bounded to [-500; 500] Pa', () => {
       expect(toWindPressureEstimationInputs(windFormValue(), makeObstacle())).toEqual({
         spanIndex: 1,
         obstacleUuid: 'obstacle-a',
         pointIndex: 1,
         temperature: -12.5,
-        bounds: [-1000, 1000]
+        bounds: [-500, 500]
       });
     });
 

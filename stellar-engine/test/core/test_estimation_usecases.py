@@ -185,7 +185,7 @@ def test_target_is_beyond_the_upper_bound(study_with_obstacle: SectionStudy):
 def test_minimum_distance_wind_with_chains_reversing_at_the_bounds(
     study_with_obstacle: SectionStudy,
 ):
-    """The UI bounds (±1000 Pa) reverse the chains at 25 °C: still solvable."""
+    """Wider bounds (±1000 Pa) reverse the chains at 25 °C: still solvable."""
     for pressure in (-1000.0, 1000.0):
         with pytest.raises(SuspectedChainReversal):
             study_with_obstacle.copy().solve_change_state(

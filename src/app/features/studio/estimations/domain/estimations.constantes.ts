@@ -43,7 +43,7 @@ export const CABLE_TEMPERATURE_LIMITS = {
 } as const;
 
 /** Search interval (Pa) of the wind pressure giving the minimum distance, also its displayed range. */
-export const MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS: readonly [number, number] = [-360, 360];
+export const MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS: readonly [number, number] = [-500, 500];
 
 /** Number format of the wind pressure giving the minimum distance: no decimal. */
 export const MINIMUM_DISTANCE_WIND_PRESSURE_FORMAT = '1.0-0';

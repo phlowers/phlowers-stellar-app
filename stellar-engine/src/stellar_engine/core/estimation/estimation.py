@@ -97,7 +97,7 @@ logger = logging.getLogger("stellar_engine")
 # Wind direction used by the mechaphlowers estimations: our default
 WIND_DIRECTION: Literal["clockwise", "anticlockwise"] = "clockwise"
 # Our default wind pressure search interval for mechaphlowers (Pa)
-DEFAULT_WIND_BOUNDS = (-1000.0, 1000.0)
+DEFAULT_WIND_BOUNDS = (-500.0, 500.0)
 # mechaphlowers default load mass search interval of estimate_load_relative
 DEFAULT_LOAD_RELATIVE_BOUNDS = (0.0, 2000.0)
 # mechaphlowers placeholder mass (kg) for no load: a zero mass drops the load

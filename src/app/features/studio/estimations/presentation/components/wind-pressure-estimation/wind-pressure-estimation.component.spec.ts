@@ -271,7 +271,7 @@ describe('WindPressureEstimationComponent', () => {
       expect(calculateBtn().disabled).toBe(false);
     });
 
-    it('estimates the minimum distance wind pressure on the obstacle point, bounded to [-1000; 1000] Pa', async () => {
+    it('estimates the minimum distance wind pressure on the obstacle point, bounded to [-500; 500] Pa', async () => {
       fillForm();
 
       await calculate();
@@ -281,7 +281,7 @@ describe('WindPressureEstimationComponent', () => {
         obstacleUuid: 'obstacle-b',
         pointIndex: 0,
         temperature: -12.5,
-        bounds: [-1000, 1000]
+        bounds: [-500, 500]
       });
     });
 
