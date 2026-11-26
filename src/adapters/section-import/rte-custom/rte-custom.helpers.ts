@@ -108,12 +108,13 @@ export function extractAttachmentPosition(value: string | null): string | null {
 
 /** Returns `true` when `CANTON_TYPE` designates a guard canton (`GARDE`, case-insensitive). */
 export function isGuardCantonType(cantonType: string | null | undefined): boolean {
-  return cantonType?.toUpperCase() === 'GARDE';
+  return typeof cantonType === 'string' && cantonType.toUpperCase() === 'GARDE';
 }
 
 /** Section type of the model (`'guard'` for the French `GARDE`, otherwise the lowercased canton type). */
 export function toSectionType(cantonType: string | null | undefined): string {
-  return isGuardCantonType(cantonType) ? 'guard' : (cantonType?.toLowerCase() ?? '');
+  if (isGuardCantonType(cantonType)) return 'guard';
+  return typeof cantonType === 'string' ? cantonType.toLowerCase() : '';
 }
 
 /**

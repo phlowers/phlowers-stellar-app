@@ -161,6 +161,10 @@ describe('isGuardCantonType', () => {
     expect(isGuardCantonType(null)).toBe(false);
     expect(isGuardCantonType(undefined)).toBe(false);
   });
+
+  it('should not throw on a non-string value coming from an imported JSON', () => {
+    expect(isGuardCantonType(123 as unknown as string)).toBe(false);
+  });
 });
 
 describe('toSectionType', () => {
@@ -318,6 +322,15 @@ describe('validateImportedSectionFields', () => {
     it('should require ACCROCHE_SET_Z_LAMBERT93 on every attachment', () => {
       const errors = validateImportedSectionFields(buildGuardFile({ ACCROCHE_SET_Z_LAMBERT93: null }));
       expect(errors).toEqual([{ field: 'ACCROCHE_SET_Z_LAMBERT93', value: null }]);
+    });
+
+    it('should report a non-string CANTON_TYPE instead of throwing', () => {
+      const file = buildGuardFile();
+      (file.cantons[0].general as unknown as Record<string, unknown>)['CANTON_TYPE'] = 123;
+
+      const errors = validateImportedSectionFields(file);
+
+      expect(errors).toContainEqual({ field: 'CANTON_TYPE', value: 123 });
     });
 
     it('should keep requiring the cable altitude and chain data of a phase canton', () => {

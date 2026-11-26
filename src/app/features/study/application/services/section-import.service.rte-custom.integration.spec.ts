@@ -240,14 +240,14 @@ describe('RTE custom canton file → Section (integration)', () => {
       expect(sectionServiceMock.createOrUpdateSection).toHaveBeenCalledTimes(1);
     });
 
-    it('should not report azimuth or position gaps, which are meaningless without line angles', async () => {
+    it('should report the azimuth gap but not the position gap of a guard file', async () => {
       runTaskMock.mockImplementation(() =>
         Promise.resolve({
           result: {
             localization: {
               latitude: [48.1, 48.2, 48.3],
               longitude: [2.1, 2.2, 2.3],
-              azimuth: [20, 20],
+              azimuth: [35, 20],
               lambert_x: [100, 300, 500],
               lambert_y: [200, 400, 600]
             },
@@ -262,9 +262,9 @@ describe('RTE custom canton file → Section (integration)', () => {
       await service.processFile(guardFile(), () => Promise.resolve(true));
 
       expect(notificationMock.success).toHaveBeenCalledTimes(1);
-      expect(notificationMock.info).not.toHaveBeenCalled();
+      expect(notificationMock.warning).toHaveBeenCalledWith(expect.stringContaining('azimuth-reprojection-notice'));
       expect(notificationMock.warning).not.toHaveBeenCalledWith(expect.stringContaining('position-error-notice'));
-      expect(notificationMock.warning).not.toHaveBeenCalledWith(expect.stringContaining('azimuth-reprojection-notice'));
+      expect(notificationMock.info).not.toHaveBeenCalledWith(expect.stringContaining('position-error-notice'));
     });
 
     it('should give one result per file when a valid, an invalid and an already imported file are selected', async () => {

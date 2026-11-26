@@ -50,7 +50,7 @@ Les positions sont la source de vérité. Après un import avec coordonnées, le
 | Écart d'azimut de travée (fichier vs calculé, en degrés) | `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG` = 1° | notice d'information | notice d'avertissement |
 | Écart de position d'un support (mètres, maximum et son support) | `POSITION_ERROR_THRESHOLD_METERS` = 1 m | notice d'information | notice d'avertissement |
 
-Les notices sont affichées après l'import lorsque l'écart peut être calculé (le contrôle d'azimut nécessite un azimut dans le fichier, le contrôle de position nécessite une erreur finie), et le vecteur d'erreurs complet est journalisé. Un avertissement invite l'utilisateur à vérifier les valeurs importées. Ces deux notices sont ignorées pour une section de garde (`type === 'guard'`), dont le fichier n'a pas d'angle de ligne.
+Les notices sont affichées après l'import lorsque l'écart peut être calculé (le contrôle d'azimut nécessite un azimut dans le fichier, le contrôle de position nécessite une erreur finie), et le vecteur d'erreurs complet est journalisé. Un avertissement invite l'utilisateur à vérifier les valeurs importées. Seul le contrôle de position est ignoré pour une section de garde (`type === 'guard'`), dont le fichier n'a pas d'angle de ligne ; le contrôle d'azimut est conservé.
 
 Si la validation WGS84 échoue, les GPS de pied sont conservés, les azimuts du fichier restent inchangés et un avertissement est journalisé.
 
