@@ -151,11 +151,13 @@ export class LoadFormsService {
       section?.cable_support_manipulations,
       currentChargeUuid
     );
+    // Section manipulations saved without a load case belong to the selected one, as in the manipulation form
     newData.spanManipParams = [
       ...spanManipParams,
       ...(section?.cable_span_manipulations?.filter(
         (spanManip) =>
-          !spanManipParams.some((p) => p.spanUuid === spanManip.spanUuid && spanManip.chargeUuid === currentChargeUuid)
+          (spanManip.chargeUuid == null || spanManip.chargeUuid === currentChargeUuid) &&
+          !spanManipParams.some((p) => p.spanUuid === spanManip.spanUuid)
       ) ?? [])
     ];
     this.plotService.temporaryLoadData = newData;
@@ -243,7 +245,7 @@ export class LoadFormsService {
     const supportManipPythonInputs: SupportManipInputs[] = [];
     for (const supportManip of temporaryLoadData.supportManipParams) {
       const supportIndex = this.spanService.getSupportIndex(supportManip.supportUuid);
-      if (supportIndex < 0 && supportManip.chargeUuid !== this.spanService.section()?.selected_charge_uuid) continue;
+      if (supportIndex < 0) continue;
       const inputs = { ...omit(supportManip, ['uuid', 'supportUuid', 'chargeUuid']), supportIndex };
       supportManipPythonInputs.push(inputs);
     }
@@ -251,7 +253,7 @@ export class LoadFormsService {
     const spanManipPythonInputs: SpanManipInputs[] = [];
     for (const spanManip of temporaryLoadData.spanManipParams) {
       const spanIndex = this.spanService.getSupportIndex(spanManip.spanUuid);
-      if (spanIndex < 0 && spanManip.chargeUuid !== this.spanService.section()?.selected_charge_uuid) continue;
+      if (spanIndex < 0) continue;
       const inputs = { ...omit(spanManip, ['uuid', 'spanUuid', 'chargeUuid', 'chainName']), spanIndex };
       spanManipPythonInputs.push(inputs);
     }

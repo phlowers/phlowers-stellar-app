@@ -14,6 +14,7 @@ from mechaphlowers.data.catalog.catalog import (
 )
 
 from stellar_engine.core import manipulations
+from stellar_engine.plot import obstacles
 from stellar_engine.plot.plot_2d import refresh_projection
 
 
@@ -171,3 +172,49 @@ def test_virtual_supports_span_indices_none_without_span_manip(
 
     coords = result["sectionOutput"]["current"]["coords"]
     assert coords["virtual_supports_span_indices"] is None
+
+
+def _drawn_obstacle(study: SectionStudy, span_index: int) -> list:
+    """Registers an obstacle on a span, as the studio does, and returns its
+    plotted points."""
+    obstacle = {
+        'uuid': 'floor',
+        'supportIndex': span_index,
+        'type': 'floor',
+        'altitudeType': 'absolute',
+        'lateralDistanceType': 'SPAN_AXIS',
+        'referenceSupport': 'LEFT',
+        'positions': [{'x': 0, 'y': 0, 'z': 10}, {'x': 500, 'y': 0, 'z': 10}],
+    }
+    obstacles.add_bulk_obstacles({'obstacles': [obstacle]}, study)
+    result = refresh_projection(
+        {'startSupport': 0, 'endSupport': 3, 'view': '3d'}, study
+    )
+    return result["obstacles"][0]["points"]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="#1384: obstacle span indices ignore the virtual supports",
+)
+@pytest.mark.parametrize(
+    "span_index", [0, 1], ids=["manipulated_span", "following_span"]
+)
+def test_span_manip_does_not_move_obstacles(
+    study_base: SectionStudy, span_index: int
+):
+    study_base.solve_adjustment()
+    expected = _drawn_obstacle(study_base, span_index)
+
+    inputs = {
+        'cableModifParams': [],
+        "supportManipParams": [],
+        "spanManipParams": [_span_manip(0, 30)],
+    }
+    manipulations.apply_manipulations(inputs, study_base)
+    study_base.solve_change_state()
+
+    np.testing.assert_allclose(
+        _drawn_obstacle(study_base, span_index), expected, atol=1e-6
+    )

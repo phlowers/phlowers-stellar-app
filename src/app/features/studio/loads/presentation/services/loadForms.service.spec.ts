@@ -421,6 +421,97 @@ describe('LoadFormsService', () => {
         expect(mockPlotService.temporaryLoadData?.supportManipParams).toEqual([]);
         expect(appliedSupportManips()).toEqual([]);
       });
+
+      it('should not send the engine a manipulation whose support no longer exists', async () => {
+        const orphan = { ...buildSupportManip('orphan', 'charge-uuid-1', 5), supportUuid: 'deleted-support-uuid' };
+
+        await initWith([], [orphan]);
+
+        expect(appliedSupportManips()).toEqual([]);
+      });
+    });
+
+    describe('span manipulations', () => {
+      const buildSpanManip = (uuid: string, chargeUuid: string | undefined, altitude: number) => ({
+        uuid,
+        spanUuid: 'support-uuid-1',
+        chargeUuid,
+        referenceSupport: 'LEFT' as const,
+        distanceToRefSupport: 20,
+        cableManipType: 'with_a_crane' as const,
+        cableManipMethod: 'clamp' as const,
+        longitudinalDistance: 25,
+        lateralDistance: 10,
+        altitude,
+        anchoring: 'with_sling' as const,
+        chainName: null,
+        chainLength: null,
+        chainWeight: null,
+        chainSurface: null,
+        counterWeight: null,
+        slingLength: 5
+      });
+      const initWith = (chargeManips: ReturnType<typeof buildSpanManip>[], sectionManips: typeof chargeManips) => {
+        mockSpanService.section.mockReturnValue({
+          ...mockSection,
+          selected_charge_uuid: 'charge-uuid-1',
+          charges: [{ ...mockCharge, data: { ...mockChargeData, spanManipParams: chargeManips } }],
+          cable_span_manipulations: sectionManips
+        } as unknown as Section);
+        return service.initTemporaryLoadData();
+      };
+      const appliedSpanManips = () => {
+        const call = mockWorkerPythonService.runTask.mock.calls.find(([task]) => task === Task.applyManipulations);
+        return call?.[1].spanManipParams as { spanIndex: number; altitude: number }[];
+      };
+
+      it('should complete the saved parameters with the section manipulations of the selected load case', async () => {
+        const sectionOnly = { ...buildSpanManip('section-only', 'charge-uuid-1', 30), spanUuid: 'support-uuid-2' };
+
+        await initWith([buildSpanManip('charge-copy', 'charge-uuid-1', 10)], [sectionOnly]);
+
+        expect(mockPlotService.temporaryLoadData?.spanManipParams.map((m) => m.uuid)).toEqual([
+          'charge-copy',
+          'section-only'
+        ]);
+      });
+
+      it('should keep the manipulation saved with the load case over the section one on the same span', async () => {
+        await initWith(
+          [buildSpanManip('charge-copy', 'charge-uuid-1', 10)],
+          [buildSpanManip('section-copy', 'charge-uuid-1', 20)]
+        );
+
+        expect(mockPlotService.temporaryLoadData?.spanManipParams.map((m) => m.uuid)).toEqual(['charge-copy']);
+        expect(appliedSpanManips()).toEqual([expect.objectContaining({ spanIndex: 0, altitude: 10 })]);
+      });
+
+      it('should not apply the section manipulations of the other load cases to the engine', async () => {
+        await initWith([], [buildSpanManip('other-case', 'charge-uuid-2', 70)]);
+
+        expect(mockPlotService.temporaryLoadData?.spanManipParams).toEqual([]);
+        expect(appliedSpanManips()).toEqual([]);
+      });
+
+      it('should apply a section manipulation saved without a load case to the selected one', async () => {
+        await initWith([], [buildSpanManip('legacy', undefined, 40)]);
+
+        expect(appliedSpanManips()).toEqual([expect.objectContaining({ spanIndex: 0, altitude: 40 })]);
+      });
+
+      it('should keep the manipulation saved with the load case over one saved without a load case', async () => {
+        await initWith([buildSpanManip('charge-copy', 'charge-uuid-1', 10)], [buildSpanManip('legacy', undefined, 40)]);
+
+        expect(appliedSpanManips()).toEqual([expect.objectContaining({ spanIndex: 0, altitude: 10 })]);
+      });
+
+      it('should not send the engine a manipulation whose span no longer exists', async () => {
+        const orphan = { ...buildSpanManip('orphan', 'charge-uuid-1', 50), spanUuid: 'deleted-support-uuid' };
+
+        await initWith([], [orphan]);
+
+        expect(appliedSpanManips()).toEqual([]);
+      });
     });
 
     it('should use empty array as fallback when charge spanLoads is null', () => {
