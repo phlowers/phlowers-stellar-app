@@ -3,14 +3,18 @@ import { signal } from '@angular/core';
 
 import { ConformityComponent } from './conformity.component';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
+import { PlotService } from '@services/plot/plot.service';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { Obstacle, ReferenceSupport, LateralDistanceType } from '@shared/domain/models/obstacle.model';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
 import { Task } from '@services/worker_python/tasks/types';
 import { createConformityPlot, purgeConformityPlot, resizeConformityPlot } from './helpers/createConformityPlot';
 import { CONFORMITY_PLOT_MOCK } from './conformity-plot.mock';
+import { CONFORMITY_TASK_TIMEOUT_MS } from './conformity.constantes';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
 vi.mock('./helpers/createConformityPlot');
@@ -144,7 +148,8 @@ describe('ConformityComponent', () => {
   };
   let mockSpanService: { section: typeof sectionSignal; getSpanOptions: ReturnType<typeof vi.fn> };
   let mockNotification: { error: ReturnType<typeof vi.fn> };
-  let mockWorkerPython: { runTask: ReturnType<typeof vi.fn> };
+  let mockLogger: { error: ReturnType<typeof vi.fn> };
+  let mockWorkerPython: { runTaskWithTimeout: ReturnType<typeof vi.fn> };
   /**
    * Configures the TestBed and creates the component, then flushes the async Dexie-backed
    * signals (wind zones, conformity config, options) so derived state is fully resolved.
@@ -154,6 +159,9 @@ describe('ConformityComponent', () => {
     sectionSignal = signal<Record<string, unknown> | null>({
       obstacles: [obstacle],
       voltage_idr: '400 kV',
+      name: 'Section A',
+      initial_conditions: [],
+      charges: [],
       supports: []
     });
     formValueSignal = signal<{ uuid: string | null }>({ uuid: obstacle.uuid });
@@ -171,35 +179,38 @@ describe('ConformityComponent', () => {
       getSpanOptions: vi.fn().mockReturnValue([{ label: 'Span 1', value: 'support-1' }])
     };
     mockNotification = { error: vi.fn() };
+    mockLogger = { error: vi.fn() };
 
     mockWorkerPython = {
-      runTask: vi.fn().mockImplementation((_task: Task, inputs: { form: { selectedConformityRules?: string[] } }) => {
-        const rules = inputs.form.selectedConformityRules ?? [];
-        const results = Object.fromEntries(
-          rules.map((ruleType) => [
-            ruleType,
-            {
-              overhangCableAltitude: 42,
-              lateralCableAltitude: 38,
-              overhangCableLineAxisDistance: 150,
-              lateralCableLineAxisDistance: 120,
-              overhangDistanceToComply: 5,
-              lateralDistanceToComply: 3,
-              overhangComplianceAltitude: 7,
-              lateralComplianceLineAxisDistance: 4,
-              conformityCompliance: true
-            }
-          ])
-        );
-        return Promise.resolve({
-          result: {
-            obstacle: CONFORMITY_PLOT_MOCK.obstacle,
-            conformity: CONFORMITY_PLOT_MOCK.conformity,
-            results
-          },
-          error: null
-        });
-      })
+      runTaskWithTimeout: vi
+        .fn()
+        .mockImplementation((_task: Task, inputs: { form: { selectedConformityRules?: string[] } }) => {
+          const rules = inputs.form.selectedConformityRules ?? [];
+          const results = Object.fromEntries(
+            rules.map((ruleType) => [
+              ruleType,
+              {
+                overhangCableAltitude: 42,
+                lateralCableAltitude: 38,
+                overhangCableLineAxisDistance: 150,
+                lateralCableLineAxisDistance: 120,
+                overhangDistanceToComply: 5,
+                lateralDistanceToComply: 3,
+                overhangComplianceAltitude: 7,
+                lateralComplianceLineAxisDistance: 4,
+                conformityCompliance: true
+              }
+            ])
+          );
+          return Promise.resolve({
+            result: {
+              obstacle: CONFORMITY_PLOT_MOCK.obstacle,
+              conformity: CONFORMITY_PLOT_MOCK.conformity,
+              results
+            },
+            error: null
+          });
+        })
     };
 
     await TestBed.configureTestingModule({
@@ -216,7 +227,7 @@ describe('ConformityComponent', () => {
               'studio.conformity.distance-to-comply-label': 'Distance to comply',
               'studio.conformity.compliance-altitude-label': 'Compliance altitude',
               'studio.conformity.compliance-line-axis-distance-label': 'Compliance line axis distance',
-              'studio.conformity.temperature-label': 'Temperature',
+              'common.temperature-label': 'Temperature',
               'studio.conformity.wind-pressure-label': 'Wind pressure',
               'studio.conformity.minimal-distance-label': 'Minimal distance',
               'studio.conformity.altitude-point-label': 'Altitude point',
@@ -228,11 +239,15 @@ describe('ConformityComponent', () => {
               'common.no': 'No',
               'common.yes': 'Yes',
               'studio.conformity.distance-to-line-axis-label': 'Distance to line axis',
-              'studio.conformity.electric-tension-label': 'Electric tension',
-              'studio.conformity.enlarge-graphic-view-btn': 'Enlarge graphic view',
-              'studio.conformity.form-legend': 'Form',
+              'studio.conformity.export-invalid-data-error': 'Export failed',
+              'common.meter': 'm',
+              'common.celsius': '°C',
+              'common.pascal-unit': 'Pa',
+              'common.electric-tension-label': 'Electric tension',
+              'common.enlarge-graphic-view-btn': 'Enlarge graphic view',
+              'common.form-label': 'Form',
               'studio.conformity.lateral-column-suffix': 'lateral',
-              'studio.conformity.lateral-distance-temperature-label': 'Lateral distance temperature',
+              'common.lateral-distance-temperature-label': 'Lateral distance temperature',
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.min-value-error': 'Min. value: {{ min }}',
               'studio.conformity.minimum-distance-case-label': 'Minimum distance case',
@@ -243,16 +258,16 @@ describe('ConformityComponent', () => {
               'studio.conformity.obstacle-point-label': "Obstacle's point",
               'studio.conformity.overhang-column-suffix': 'overhang',
               'common.point-index-label': 'Point {{ index }}',
-              'studio.conformity.red-zone-presence-label': 'Red zone presence',
-              'studio.conformity.reduce-graphic-view-btn': 'Reduce graphic view',
+              'common.red-zone-presence-label': 'Red zone presence',
+              'common.reduce-graphic-view-btn': 'Reduce graphic view',
               'studio.conformity.reference-support-distance-label': 'Reference support distance',
-              'studio.conformity.repartition-temperature-label': 'Repartition temperature',
+              'common.repartition-temperature-label': 'Repartition temperature',
               'studio.conformity.results-updated-text': 'Conformity results updated.',
               'studio.conformity.type-label': 'Type',
               'studio.conformity.unknown-compliance-label': 'Unknown',
               'studio.conformity.visualisation-graph-caption': 'Conformity visualisation graph',
-              'studio.conformity.wind-minus-label': 'Wind -',
-              'studio.conformity.wind-zone-label': 'Wind zone',
+              'common.wind-minus-label': 'Wind -',
+              'common.wind-zone-label': 'Wind zone',
               'studio.shared.conformity-label': 'Conformity',
               'studio.shared.lateral-distance-type-label': 'Lateral distance type',
               'common.reference-support-label': 'Reference support',
@@ -267,9 +282,15 @@ describe('ConformityComponent', () => {
       ],
       providers: [
         { provide: ObstacleFormService, useValue: mockFormService },
+        {
+          provide: ObstaclesService,
+          useValue: { activePointIndex: signal<number | null>(null), selectedMeasureUuid: signal<string | null>(null) }
+        },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: StorageService, useValue: { db: buildDb(dbData) } },
         { provide: NotificationService, useValue: mockNotification },
+        { provide: PlotService, useValue: { study: signal(null) } },
+        { provide: LoggerService, useValue: mockLogger },
         { provide: WorkerPythonService, useValue: mockWorkerPython }
       ]
     }).compileComponents();
@@ -654,25 +675,27 @@ describe('ConformityComponent', () => {
       await createComponent();
       component.form.controls.selectedPoint.setValue(1);
       fixture.detectChanges();
-      mockWorkerPython.runTask.mockClear();
+      mockWorkerPython.runTaskWithTimeout.mockClear();
 
       await component.calculate();
 
-      expect(mockWorkerPython.runTask).toHaveBeenCalledWith(
+      expect(mockWorkerPython.runTaskWithTimeout).toHaveBeenCalledWith(
         Task.getConformity,
-        expect.objectContaining({ pointIndex: 1 })
+        expect.objectContaining({ pointIndex: 1 }),
+        CONFORMITY_TASK_TIMEOUT_MS
       );
     });
 
     it('should send point index 0 for a single-point obstacle', async () => {
       await createComponent();
-      mockWorkerPython.runTask.mockClear();
+      mockWorkerPython.runTaskWithTimeout.mockClear();
 
       await component.calculate();
 
-      expect(mockWorkerPython.runTask).toHaveBeenCalledWith(
+      expect(mockWorkerPython.runTaskWithTimeout).toHaveBeenCalledWith(
         Task.getConformity,
-        expect.objectContaining({ pointIndex: 0 })
+        expect.objectContaining({ pointIndex: 0 }),
+        CONFORMITY_TASK_TIMEOUT_MS
       );
     });
 
@@ -702,6 +725,168 @@ describe('ConformityComponent', () => {
     });
   });
 
+  describe('export', () => {
+    type PickerFn = NonNullable<typeof globalThis.showSaveFilePicker>;
+    const originalPicker = globalThis.showSaveFilePicker;
+
+    afterEach(() => {
+      globalThis.showSaveFilePicker = originalPicker;
+    });
+
+    const mockPicker = () => {
+      const write = vi.fn().mockResolvedValue(undefined);
+      const close = vi.fn().mockResolvedValue(undefined);
+      const picker = vi.fn().mockResolvedValue({ createWritable: () => Promise.resolve({ write, close }) });
+      globalThis.showSaveFilePicker = picker as unknown as PickerFn;
+      return { picker, write, close };
+    };
+
+    it('should not be exportable before a calculation, then become exportable', async () => {
+      await createComponent();
+      expect(component.canExport()).toBe(false);
+
+      await component.calculate();
+
+      expect(component.canExport()).toBe(true);
+    });
+
+    it('should export only the rules still selected and displayed', async () => {
+      await createComponent();
+      component.form.controls.conformity.setValue(['rule_a', 'rule_b']);
+      await component.calculate();
+      component.form.controls.conformity.setValue(['rule_a']);
+      const { write } = mockPicker();
+
+      await component.exportConformity();
+
+      const exported = JSON.parse(write.mock.calls[0][0]).distancesConformityCheck[0];
+      expect(exported.conformityChecks).toHaveLength(1);
+      expect(exported.conformityInput.rules).toHaveLength(1);
+    });
+
+    it('should not be exportable once every calculated rule is deselected', async () => {
+      await createComponent();
+      await component.calculate();
+      component.form.controls.conformity.setValue([]);
+
+      expect(component.canExport()).toBe(false);
+    });
+
+    it('should notify an error and not open the picker when there are no results', async () => {
+      await createComponent();
+      const { picker } = mockPicker();
+
+      await component.exportConformity();
+
+      expect(mockNotification.error).toHaveBeenCalledWith('Export failed');
+      expect(picker).not.toHaveBeenCalled();
+    });
+
+    it('should write the JSON through the file picker using the calculated inputs, not the edited form', async () => {
+      await createComponent();
+      await component.calculate();
+      component.form.controls.windZone.setValue('Z2');
+      const { picker, write, close } = mockPicker();
+
+      await component.exportConformity();
+
+      expect(picker).toHaveBeenCalledWith(
+        expect.objectContaining({
+          suggestedName: expect.stringMatching(
+            /^Export Distances de conformité_My obstacle_Section A_\d{4}-\d{2}-\d{2}\.json$/
+          )
+        })
+      );
+      const exported = JSON.parse(write.mock.calls[0][0]).distancesConformityCheck[0];
+      expect(exported.conformityInput.rules).toEqual(['Rule A']);
+      expect(exported.conformityInput.wind.direction).toBe('Z1');
+      expect(exported.obstacleData.spot).toBe('Point 1');
+      expect(exported.conformityChecks[0].minimumCase).toBeDefined();
+      expect(close).toHaveBeenCalled();
+    });
+
+    it('should export the unit symbols from the common translations', async () => {
+      await createComponent();
+      await component.calculate();
+      const { write } = mockPicker();
+
+      await component.exportConformity();
+
+      const exported = JSON.parse(write.mock.calls[0][0]).distancesConformityCheck[0];
+      expect(exported.obstacleData.height.unit).toBe('m');
+      const [minimumCase] = exported.conformityChecks[0].minimumCase;
+      expect(minimumCase.overhang.temperature.unit).toBe('°C');
+      expect(minimumCase.overhang.pressure.unit).toBe('Pa');
+    });
+
+    it('should flag the export in progress and ignore a second export until the first one ends', async () => {
+      await createComponent();
+      await component.calculate();
+      const { picker, write } = mockPicker();
+      let releaseWrite: () => void = () => undefined;
+      write.mockImplementationOnce(() => new Promise<void>((resolve) => (releaseWrite = resolve)));
+
+      const first = component.exportConformity();
+      await vi.waitFor(() => expect(write).toHaveBeenCalled());
+      expect(component.isExporting()).toBe(true);
+      await component.exportConformity();
+      expect(picker).toHaveBeenCalledTimes(1);
+
+      releaseWrite();
+      await first;
+
+      expect(component.isExporting()).toBe(false);
+    });
+
+    it('should release the export flag when saving the file fails', async () => {
+      await createComponent();
+      await component.calculate();
+      globalThis.showSaveFilePicker = undefined;
+      const createUrl = vi.spyOn(URL, 'createObjectURL').mockImplementation(() => {
+        throw new Error('boom');
+      });
+
+      await expect(component.exportConformity()).rejects.toThrow('boom');
+      createUrl.mockRestore();
+
+      expect(component.isExporting()).toBe(false);
+    });
+
+    it('should stay silent when the user cancels the picker', async () => {
+      await createComponent();
+      await component.calculate();
+      globalThis.showSaveFilePicker = vi
+        .fn()
+        .mockRejectedValue(new DOMException('cancelled', 'AbortError')) as unknown as PickerFn;
+      const createUrl = vi.spyOn(URL, 'createObjectURL');
+
+      await component.exportConformity();
+
+      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(createUrl).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['the picker is unavailable', false],
+      ['the picker fails', true]
+    ])('should download a Blob when %s', async (_label, pickerFails) => {
+      await createComponent();
+      await component.calculate();
+      globalThis.showSaveFilePicker = pickerFails
+        ? (vi.fn().mockRejectedValue(new Error('boom')) as unknown as PickerFn)
+        : undefined;
+      vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:x');
+      vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+      const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+      await component.exportConformity();
+
+      expect(click).toHaveBeenCalled();
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:x');
+      expect(mockLogger.error).toHaveBeenCalledTimes(pickerFails ? 1 : 0);
+    });
+  });
+
   describe('conformity plot rendering', () => {
     it('should render the mock plot data with the selected rules and their colors once the plot div exists', async () => {
       await createComponent();
@@ -717,6 +902,30 @@ describe('ConformityComponent', () => {
         document,
         CONFORMITY_PLOT_MOCK,
         expect.objectContaining({ selectedRuleTypes: ['rule_a'], conformityType: 'cable_track' })
+      );
+    });
+
+    it('should show the plot legend only when the graph is enlarged', async () => {
+      await createComponent();
+      vi.spyOn(document, 'getElementById').mockReturnValue(document.createElement('div'));
+      component.form.controls.conformity.setValue(['rule_a']);
+      fixture.detectChanges();
+      await component.calculate();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(mockCreateConformityPlot).toHaveBeenLastCalledWith(
+        document,
+        CONFORMITY_PLOT_MOCK,
+        expect.objectContaining({ showLegend: false })
+      );
+
+      component.toggleGraphSize();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(mockCreateConformityPlot).toHaveBeenLastCalledWith(
+        document,
+        CONFORMITY_PLOT_MOCK,
+        expect.objectContaining({ showLegend: true })
       );
     });
 
@@ -798,6 +1007,36 @@ describe('ConformityComponent', () => {
   });
 
   describe('getValue', () => {
+    it('should expose worker border coordinates unchanged and preserve its compliance verdict', async () => {
+      await createComponent();
+      mockWorkerPython.runTaskWithTimeout.mockResolvedValueOnce({
+        result: {
+          obstacle: CONFORMITY_PLOT_MOCK.obstacle,
+          conformity: CONFORMITY_PLOT_MOCK.conformity,
+          results: {
+            rule_a: {
+              overhangCableAltitude: 27,
+              lateralCableAltitude: 30,
+              overhangCableLineAxisDistance: 0,
+              lateralCableLineAxisDistance: 5,
+              overhangDistanceToComply: 3,
+              lateralDistanceToComply: 2,
+              overhangComplianceAltitude: 24,
+              lateralComplianceLineAxisDistance: -7,
+              conformityCompliance: false
+            }
+          }
+        },
+        error: null
+      });
+
+      await component.calculate();
+
+      expect(component.getValue('rule_a', 'overhangComplianceAltitude')).toBe(24);
+      expect(component.getValue('rule_a', 'lateralComplianceLineAxisDistance')).toBe(-7);
+      expect(component.getConformityCompliance('rule_a')).toBe(false);
+    });
+
     it('should return null for a null key', async () => {
       await createComponent();
       await component.calculate();
@@ -858,6 +1097,130 @@ describe('ConformityComponent', () => {
       expect(fixture.nativeElement.querySelector('.results__table')).toBeTruthy();
       expect(fixture.nativeElement.querySelector('.compliance')).toBeTruthy();
     });
+
+    it('should hide compliance border rows for the cable-track conformity type', async () => {
+      await createComponent();
+      await component.calculate();
+      fixture.detectChanges();
+
+      const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
+      expect(component.commonRows.map((row) => row.label)).toEqual([
+        'Cable altitude',
+        'Cable line axis distance',
+        'Distance to comply'
+      ]);
+      expect(tableText).not.toContain('Compliance altitude');
+      expect(tableText).not.toContain('Compliance line axis distance');
+    });
+
+    it('should keep compliance border rows for the vegetation conformity type', async () => {
+      dbData.configurations = [{ obstacle_type: 'House', red_zone: false, conformity: 'vegetation' }];
+      await createComponent();
+      await component.calculate();
+      fixture.detectChanges();
+
+      const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
+      expect(tableText).toContain('Compliance altitude');
+      expect(tableText).toContain('Compliance line axis distance');
+    });
+
+    it('should only hide the compliance line axis distance row for the overhang conformity type', async () => {
+      dbData.configurations = [{ obstacle_type: 'House', red_zone: false, conformity: 'overhang' }];
+      await createComponent();
+      await component.calculate();
+      fixture.detectChanges();
+
+      const tableText = fixture.nativeElement.querySelector('.results__table')?.textContent ?? '';
+      expect(tableText).toContain('Compliance altitude');
+      expect(tableText).not.toContain('Compliance line axis distance');
+    });
+  });
+
+  describe('default obstacle point', () => {
+    const twoPoints = [
+      { x: 1, y: 1, z: 1 },
+      { x: 2, y: 2, z: 2 }
+    ];
+
+    async function openWithActivePoint(
+      activeIndex: number | null,
+      selectedMeasureUuid: string | null = obstacle.uuid
+    ): Promise<void> {
+      await createComponent();
+      const obstaclesService = TestBed.inject(ObstaclesService);
+      obstaclesService.selectedMeasureUuid.set(selectedMeasureUuid);
+      obstaclesService.activePointIndex.set(activeIndex);
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+
+    async function reopenWithActivePoint(activeIndex: number | null): Promise<void> {
+      TestBed.inject(ObstaclesService).activePointIndex.set(activeIndex);
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+    }
+
+    it('should preselect the point selected in the obstacle tab when opening', async () => {
+      obstacle = { ...defaultObstacle(), positions: twoPoints };
+      await openWithActivePoint(1);
+
+      expect(component.form.controls.selectedPoint.value).toBe(1);
+    });
+
+    it('should keep the saved point over the obstacle tab selection', async () => {
+      obstacle = {
+        ...defaultObstacle(),
+        positions: twoPoints,
+        conformityData: {
+          selectedPoint: 0,
+          windZone: 'Z1',
+          windMinus: false,
+          redZonePresence: false,
+          repartitionTemperature: 15,
+          lateralDistanceTemperature: 5,
+          conformity: ['rule_a']
+        }
+      };
+      await openWithActivePoint(1);
+
+      expect(component.form.controls.selectedPoint.value).toBe(0);
+    });
+
+    it.each([null, 5])('should leave the point empty for the obstacle tab selection %s', async (activeIndex) => {
+      obstacle = { ...defaultObstacle(), positions: twoPoints };
+      await openWithActivePoint(activeIndex);
+
+      expect(component.form.controls.selectedPoint.value).toBeNull();
+    });
+
+    it('should ignore the active index when the selected measure is another obstacle or a floor', async () => {
+      obstacle = { ...defaultObstacle(), positions: twoPoints };
+      await openWithActivePoint(1, 'floor-1');
+
+      expect(component.form.controls.selectedPoint.value).toBeNull();
+    });
+
+    it.each([null, 5])('should clear a stale point when reopening with the active index %s', async (activeIndex) => {
+      obstacle = { ...defaultObstacle(), positions: twoPoints };
+      await openWithActivePoint(1);
+      expect(component.form.controls.selectedPoint.value).toBe(1);
+
+      await reopenWithActivePoint(activeIndex);
+
+      expect(component.form.controls.selectedPoint.value).toBeNull();
+      expect(component.canCalculate()).toBe(false);
+    });
+
+    it('should not preselect a point for a single-point obstacle', async () => {
+      await openWithActivePoint(0);
+
+      expect(component.form.controls.selectedPoint.value).toBeNull();
+    });
   });
 
   describe('isOpen auto-calculate and reset', () => {
@@ -901,6 +1264,32 @@ describe('ConformityComponent', () => {
       fixture.componentRef.setInput('isOpen', false);
       fixture.detectChanges();
       expect(component.conformityResults()).toBeNull();
+    });
+
+    it('should drop a calculation that resolves after the modal closed', async () => {
+      await createComponent();
+      fixture.componentRef.setInput('isOpen', true);
+      fixture.detectChanges();
+      const original = mockWorkerPython.runTaskWithTimeout.getMockImplementation();
+      let release: (() => void) | null = null;
+      mockWorkerPython.runTaskWithTimeout.mockImplementationOnce(
+        (...args: unknown[]) =>
+          new Promise((resolve) => {
+            release = () => resolve(original?.(...args));
+          })
+      );
+
+      const pending = component.calculate();
+      await vi.waitFor(() => expect(release).not.toBeNull());
+      expect(component.isCalculating()).toBe(true);
+      fixture.componentRef.setInput('isOpen', false);
+      fixture.detectChanges();
+      expect(component.isCalculating()).toBe(false);
+      (release as unknown as () => void)();
+      await pending;
+
+      expect(component.conformityResults()).toBeNull();
+      expect(component.canExport()).toBe(false);
     });
   });
 });

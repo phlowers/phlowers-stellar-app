@@ -26,7 +26,7 @@ import { PlotService } from '@services/plot/plot.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { getActiveParameterOutput } from '@features/studio/field-measuring/presentation/helpers';
+import { getActiveParameterOutput, isManual15CDataValid } from '@features/studio/field-measuring/presentation/helpers';
 
 /** Component for computing the cable parameter at 15°C without wind, supporting auto and manual modes. */
 @Component({
@@ -94,17 +94,8 @@ export class ParameterCalculation15WithoutWindComponent {
   readonly activeParameterOutput = computed(() => getActiveParameterOutput(this.measureData()));
 
   isFormValid = computed(() => {
-    const isManual = this.measureData().updateMode15C === 'manual';
-    if (isManual) {
-      const manualData = this.measureData().manualParameterCalculation15CWithoutWind;
-      return (
-        isNumber(manualData?.cableTemperatureCalibration) &&
-        isNumber(manualData?.parameterPapoto) &&
-        isNumber(manualData?.parameterUncertaintyPapoto) &&
-        manualData.parameterUncertaintyPapoto >= 0 &&
-        isNumber(manualData?.cableTemperatureCalibrationUncertainty) &&
-        manualData.cableTemperatureCalibrationUncertainty >= 0
-      );
+    if (this.measureData().updateMode15C === 'manual') {
+      return isManual15CDataValid(this.measureData());
     }
     return (
       isNumber(this.activeParameterOutput()?.parameter) &&

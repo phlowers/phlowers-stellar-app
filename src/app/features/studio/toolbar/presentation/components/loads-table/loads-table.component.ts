@@ -43,6 +43,7 @@ import {
 import { LoadsReportData } from '@features/studio/toolbar/presentation/services/loads-data-report/loads-data-report.interfaces';
 import { LoadsReportService } from '@features/studio/toolbar/presentation/services/loads-data-report/loads-data-report.service';
 import { ClimateRow, CableModifRow, SpanLoadRow, SupportManipRow, SpanManipRow } from './loads-table.interfaces';
+import { getDateLocale } from '@shared/helpers/modification-date.helpers';
 
 @Component({
   selector: 'app-loads-table',
@@ -363,7 +364,7 @@ export class LoadsTableComponent {
     );
 
     const data: LoadsReportData = {
-      date: new Date().toLocaleDateString(this.getLocaleForDate()),
+      date: new Date().toLocaleDateString(getDateLocale(this.translocoService.getActiveLang())),
       author: study?.author_email ?? '-',
       studyTitle: study?.title ?? '-',
       studyDescription: study?.description ?? '',
@@ -403,11 +404,6 @@ export class LoadsTableComponent {
     };
 
     await this.loadsReportService.generateReport(data);
-  }
-
-  private getLocaleForDate(): string {
-    const activeLang = this.translocoService.getActiveLang();
-    return activeLang === 'en' ? 'en-US' : 'fr-FR';
   }
 
   getSymmetryLabel(type: SymmetryType): string {

@@ -6,6 +6,10 @@ regulatory rules apply to them, the legal distances per voltage, the climatic co
 rule and the wind zones. No code change is needed to add an obstacle type, a rule or a wind
 zone.
 
+The file also configures the Studio **Forest trenches** tool, through its `forest_trenches` and
+`floor_obstacle` blocks. They are described in {doc}`app/forest_trenches` and in
+{ref}`conformity-config-forest-trenches`.
+
 This page describes the file. How the engine uses it is described in {doc}`conformity`; what the
 user sees is described in the {doc}`user guide <../user_guide/conformity>`.
 
@@ -39,7 +43,10 @@ flowchart LR
 | `obstacles[].distances[]` | `catObstacleDistances` | `CatalogObstacleDistanceEntity` |
 | `rules[]` | `catObstacleRuleDefinitions` | `CatalogObstacleRuleDefinitionEntity` |
 | `windZone.values[]` | `catObstacleWindZones` | `CatalogObstacleWindZoneEntity` |
-| `repartitionTemperatureFields`, `lateralTemperatureFields`, `windZone.default`, `intermediatePointPositions` | `catObstacleConformityConfig` (one row, key `main`) | `CatalogObstacleConformityConfigEntity` |
+| `repartitionTemperatureFields`, `lateralTemperatureFields`, `windZone.default`, `intermediatePointPositions`, `forest_trenches`, `floor_obstacle` (`redZone`, `distances`) | `catObstacleConformityConfig` (one row, key `main`) | `CatalogObstacleConformityConfigEntity` |
+
+The `floor_obstacle.obstacleType`, `obstacleName` and `details` fields are validated but not
+stored: the floor obstacle is not an obstacle type of the catalog.
 
 Entities are in `src/app/infrastructure/database/entities/`, the JSON-to-entity mapping in
 `src/app/shared/catalog/csv-import/configs/obstacles.config.helpers.ts`.
@@ -55,11 +62,13 @@ Entities are in `src/app/infrastructure/database/entities/`, the JSON-to-entity 
   "repartitionTemperatureFields": { "defaultValue": 70 },
   "lateralTemperatureFields": { "defaultValue": 65, "ruleType": "RULE_2", "message": "..." },
   "windZone": { "default": "200", "values": [ /* wind zones */ ] },
-  "intermediatePointPositions": [0.33, 0.66]
+  "intermediatePointPositions": [0.33, 0.66],
+  "forest_trenches": { /* Studio Forest trenches tool settings */ },
+  "floor_obstacle": { /* floor obstacle of the Forest trenches tool */ }
 }
 ```
 
-All six top-level keys are mandatory.
+All eight top-level keys are mandatory.
 
 ---
 
@@ -123,6 +132,7 @@ distance, which the figure cannot draw. Always give both distances to `vegetatio
 `cable_track` obstacles.
 :::
 
+(conformity-config-distances)=
 ### Distances: `distances[]`
 
 | Field | Type | Meaning |
@@ -246,6 +256,96 @@ The two temperature fields accept 0 to 250 °C with at most 2 decimals
 
 ---
 
+(conformity-config-forest-trenches)=
+## Forest trenches: `forest_trenches` and `floor_obstacle`
+
+The Studio **Forest trenches** tool reads two blocks of the file. `forest_trenches` holds the
+settings of the tool, `floor_obstacle` holds the floor obstacle it checks. Both are stored in the
+singleton row of `catObstacleConformityConfig`, and the tool reads them through
+`getForestTrenchesConfig()`.
+
+```json
+"forest_trenches": {
+  "ground_n_slicing_points_choices": [5, 9, 17],
+  "overhang_rules_selected": ["RULE_1"],
+  "lateral_rules_selected": ["RULE_1", "RULE_2"],
+  "chart": {
+    "cable": { "marker": "circle", "line": "solid" },
+    "limit": { "marker": "square-open", "line": "dash" },
+    "overhang_color": "#0000FF"
+  }
+},
+"floor_obstacle": {
+  "obstacleType": "floor",
+  "obstacleName": "floor",
+  "details": "",
+  "redZone": true,
+  "conformity": "forest_trenches",
+  "distances": [
+    {
+      "ruleType": "RULE_1",
+      "active": true,
+      "overhang": { "63": 2.0, "90": 2.0, "150": 2.0, "225": 2.0, "400": 2.0 },
+      "lateral": { "63": 3.0, "90": 3.0, "150": 3.0, "225": 0.0, "400": 3.0 }
+    },
+    {
+      "ruleType": "RULE_2",
+      "active": true,
+      "overhang": { "63": 4.0, "90": 4.0, "150": 4.0, "225": 4.0, "400": 4.0 },
+      "lateral": { "63": 5.0, "90": 5.0, "150": 5.0, "225": 5.0, "400": 5.0 }
+    }
+  ]
+}
+```
+
+### `forest_trenches`
+
+| Key | Type | Meaning |
+|---|---|---|
+| `ground_n_slicing_points_choices` | non-empty array of integers ≥ 2 | Choices of **Number of ground slicing points**. The first one is the default. |
+| `overhang_rules_selected` | array of `ruleType` strings | Rules offered by the tool for the overhang calculation. |
+| `lateral_rules_selected` | array of `ruleType` strings | Rules offered by the tool for the lateral calculation. |
+| `chart.cable` | `{ marker, line }` | Style of the cable curves. |
+| `chart.limit` | `{ marker, line }` | Style of the limit curves. |
+| `chart.overhang_color` | string or `null` | Color of the overhang cable curves. `null` keeps the color of the rule. |
+
+The rules offered by the tool are the union of `overhang_rules_selected` and
+`lateral_rules_selected`. A rule listed in both lists is computed as overhang and as lateral; a
+rule listed in only one list is computed for that check only.
+
+The `marker` values are the keys of `PLOTLY_MARKER_SYMBOLS`: `circle`, `circle-open`, `square`,
+`square-open`, `diamond`, `diamond-open`, `cross`, `cross-open`, `x`, `x-open`, `triangle-up`,
+`triangle-up-open`, `triangle-down`, `triangle-down-open`, `star`, `star-open`. The `line` values
+are the keys of `PLOTLY_LINE_DASHES`: `none` (markers only), `solid`, `dot`, `dash`, `longdash`,
+`dashdot`, `longdashdot`.
+
+### `floor_obstacle`
+
+| Key | Type | Meaning |
+|---|---|---|
+| `obstacleType`, `obstacleName`, `details` | string | Validated only, not stored. |
+| `redZone` | boolean | Default of the **Red zone presence** checkbox of the tool. The checkbox is always shown. |
+| `conformity` | `"forest_trenches"` | Mandatory value. |
+| `distances[]` | array | Same format as [`distances[]`](#conformity-config-distances). These are the distances used by the tool; the distances of `obstacles[]` are not. |
+
+The `active` flag of a `distances[]` entry pre-selects the rule in the tool.
+
+:::{note}
+Each rule selected in the tool needs both:
+
+- an entry in `floor_obstacle.distances[]`, otherwise the calculation fails with
+  *Missing floor-obstacle distance for rule "…"*;
+- an entry in `rules[]`, otherwise it fails with *Missing climatic definition for rule "…"*.
+
+A `lateral` rule needs a non-null `lateral` map, and an `overhang` rule needs a non-null
+`overhang` map, otherwise the engine raises a `ConformityInputError`.
+
+A catalog stored before these keys existed has no `forest_trenches` configuration: the tool then
+shows the missing-configuration message until the catalog is updated.
+:::
+
+---
+
 ## Recipes
 
 ### Add an obstacle type
@@ -259,6 +359,15 @@ The two temperature fields accept 0 to 250 °C with at most 2 decimals
 1. Add an entry to `rules[]` with a new `ruleType` and a `color` not used by the other rules.
 2. Add a `distances[]` entry with this `ruleType` to each obstacle type that must be checked
    against it.
+
+### Configure forest trenches
+
+1. Add the rule to `forest_trenches.overhang_rules_selected` and/or
+   `forest_trenches.lateral_rules_selected`.
+2. Add a `floor_obstacle.distances[]` entry for this rule, with the five voltages.
+3. Check that the rule exists in `rules[]`.
+4. Check the change with `npm run test -- obstacles.config` and
+   `npm run test -- forest-trenches`.
 
 ### Change a distance or a climatic condition
 
@@ -278,3 +387,5 @@ Edit the value. Nothing else is needed: the next catalog update rewrites the tab
 - {doc}`conformity` — the Python conformity module and the TypeScript layer driven by its output.
 - {doc}`app/catalog_update` — how the catalog reaches the offline database.
 - {doc}`../user_guide/conformity` — the conformity check as the user sees it.
+- {doc}`app/forest_trenches` — the Forest trenches tool, its calculation and its catalog configuration.
+- {doc}`../user_guide/forest_trenches` — the Forest trenches tool as the user sees it.

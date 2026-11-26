@@ -17,12 +17,7 @@
 import type jsPDF from 'jspdf';
 
 import { PDF_UNITS } from '@shared/pdf/pdf-layout.constantes';
-import {
-  drawSectionTitle,
-  drawTitledBulletSection,
-  drawTwoColumnBullets,
-  formatValue
-} from '@shared/pdf/pdf-primitives.helpers';
+import { drawTitledBulletSection, drawTitledTwoColumnBullets, formatValue } from '@shared/pdf/pdf-primitives.helpers';
 import { PdfBulletItem } from '@shared/pdf/pdf-report.interfaces';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { DEFAULT_CUT_STRANDS, getCableStrandLayers } from '@shared/domain/helpers/cut-strands.helpers';
@@ -154,7 +149,6 @@ export function drawSectionStateSection(
   cutStrandsLabel: (layer: number) => string,
   startY: number
 ): number {
-  const y = drawSectionTitle(doc, labels.sectionStateTitle, startY);
   const left: PdfBulletItem[] = [
     { label: labels.maxParameter, value: formatValue(data.maxParameter, PDF_UNITS.meters, 0) },
     ...data.cutStrands.map(({ layer, count }) => ({ label: cutStrandsLabel(layer), value: String(count) }))
@@ -163,5 +157,5 @@ export function drawSectionStateSection(
     { label: labels.maxStressRate, value: formatValue(data.maxStressRate, PDF_UNITS.percent, 1) }
   ];
 
-  return drawTwoColumnBullets(doc, left, right, y);
+  return drawTitledTwoColumnBullets(doc, labels.sectionStateTitle, left, right, startY);
 }

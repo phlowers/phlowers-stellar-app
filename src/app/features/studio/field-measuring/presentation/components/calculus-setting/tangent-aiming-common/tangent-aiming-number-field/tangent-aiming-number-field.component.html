@@ -1,0 +1,25 @@
+@let field = view();
+<label [for]="field.id">{{ field.labelKey | transloco }}</label>
+<p-inputgroup>
+  <input
+    [id]="field.id"
+    type="number"
+    pInputText
+    [formControl]="control()"
+    [invalid]="!!error()"
+    [attr.min]="rule().min"
+    [attr.max]="rule().max"
+    [attr.step]="field.step"
+    [attr.aria-describedby]="ariaDescribedBy()"
+    [attr.aria-invalid]="error() ? 'true' : null"
+    [attr.aria-errormessage]="error() ? field.id + '-error' : null"
+    required
+    [attr.data-testid]="field.testId"
+  />
+  <p-inputgroup-addon>{{ field.unitKey | transloco }}</p-inputgroup-addon>
+</p-inputgroup>
+@if (error()) {
+  <p-message [id]="field.id + '-error'" severity="error" size="small" variant="simple" role="alert">
+    {{ error() }}
+  </p-message>
+}

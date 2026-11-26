@@ -9,17 +9,20 @@ import { Section, Charge, SymmetryType } from '@shared/domain';
 import { Study } from '@shared/domain/models/study.model';
 import { ChargeData, LoadType } from '@shared/domain/models/charge.model';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, PythonErrorCode } from '@services/worker_python/tasks/types';
+import { Task, PythonErrorCode, TaskError } from '@services/worker_python/tasks/types';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { CableModificationsService } from './cableModifications.service';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
-  const fn = vi.fn(() => value) as vi.Mock & { set: vi.Mock };
-  fn.set = vi.fn((v: T) => {
-    value = v;
-  });
-  return fn;
+  return Object.assign(
+    vi.fn(() => value),
+    {
+      set: vi.fn((v: T) => {
+        value = v;
+      })
+    }
+  );
 }
 
 describe('LoadFormsService', () => {
@@ -29,7 +32,7 @@ describe('LoadFormsService', () => {
   let plotOptionsServiceMock: vi.Mocked<PlotOptionsService>;
   let mockChargesService: vi.Mocked<ChargesService>;
   let mockWorkerPythonService: { runTask: ReturnType<typeof vi.fn> };
-  let mockObstacleStateService: { syncObstacles: ReturnType<typeof vi.fn> };
+  let mockObstacleStateService: { syncObstacles: ReturnType<typeof vi.fn>; setDistances: ReturnType<typeof vi.fn> };
   let mockCableModificationsService: Pick<CableModificationsService, 'previewCableModification' | 'clearPreview'>;
 
   const mockSection: Section = {
@@ -107,10 +110,8 @@ describe('LoadFormsService', () => {
     selected_cable_modification_uuid: null,
     cable_span_manipulations: [],
     selected_cable_span_manipulation_uuid: null,
-    start_latitude: null,
-    start_longitude: null,
     start_azimuth: null,
-    mean_reprojection_diff_meters: null
+    position_error_meters: null
   };
 
   const mockChargeData: ChargeData = {
@@ -156,6 +157,9 @@ describe('LoadFormsService', () => {
       diagnostics: createSignalMock([]),
       pythonErrorCode: createSignalMock(null),
       workerReady: createSignalMock(false),
+      engineStudyId: createSignalMock(0),
+      engineStudySectionUuid: createSignalMock<string | null>(null),
+      isStudioActive: createSignalMock(true),
       refreshProjection: vi.fn().mockResolvedValue(undefined)
     } as unknown as vi.Mocked<PlotService>;
     mockSpanService = {
@@ -181,7 +185,8 @@ describe('LoadFormsService', () => {
     };
 
     mockObstacleStateService = {
-      syncObstacles: vi.fn().mockResolvedValue(null)
+      syncObstacles: vi.fn().mockResolvedValue(null),
+      setDistances: vi.fn()
     };
 
     mockCableModificationsService = {
@@ -249,7 +254,7 @@ describe('LoadFormsService', () => {
   describe('constructor effect gating', () => {
     it('should not call setLoads when worker is not ready even if a charge is selected', () => {
       mockPlotService.workerReady.mockReturnValue(false);
-      mockPlotService.litData.mockReturnValue(null);
+      mockPlotService.engineStudyId.mockReturnValue(0);
       mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'charge-uuid-1',
@@ -261,23 +266,40 @@ describe('LoadFormsService', () => {
       expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
     });
 
-    it('should not call setLoads when worker is ready but section studio has not finished initializing (litData null)', () => {
+    it('should not call setLoads when worker is ready but section studio has not finished initializing', () => {
       mockPlotService.workerReady.mockReturnValue(true);
-      mockPlotService.litData.mockReturnValue(null);
-      mockSpanService.section.mockReturnValue({
-        ...mockSection,
-        selected_charge_uuid: 'charge-uuid-1',
-        charges: [mockCharge]
-      } as Section);
-
-      TestBed.flushEffects();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
-    });
-
-    it('should call setLoads once worker is ready and litData is set (section studio initialized)', async () => {
-      mockPlotService.workerReady.mockReturnValue(true);
+      // A stale projection may already have set litData
       mockPlotService.litData.mockReturnValue({} as ReturnType<typeof mockPlotService.litData>);
+      mockPlotService.engineStudyId.mockReturnValue(0);
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+
+      TestBed.flushEffects();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+    });
+
+    it('should not apply the charge case outside the studio (section preview)', () => {
+      mockPlotService.workerReady.mockReturnValue(true);
+      mockPlotService.engineStudyId.mockReturnValue(1);
+      mockPlotService.isStudioActive.mockReturnValue(false);
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+
+      TestBed.flushEffects();
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalled();
+    });
+
+    it('should call setLoads once worker is ready and section studio is initialized', async () => {
+      mockPlotService.workerReady.mockReturnValue(true);
+      mockPlotService.engineStudyId.mockReturnValue(1);
       mockSpanService.section.mockReturnValue({
         ...mockSection,
         selected_charge_uuid: 'charge-uuid-1',
@@ -340,6 +362,65 @@ describe('LoadFormsService', () => {
 
       expect(mockPlotService.temporaryLoadData).toBeDefined();
       expect(mockPlotService.temporaryLoadData?.climate).toEqual(mockChargeData.climate);
+    });
+
+    describe('support manipulations', () => {
+      const buildSupportManip = (uuid: string, chargeUuid: string, shiftingClampLength: number) => ({
+        uuid,
+        supportUuid: 'support-uuid-1',
+        chargeUuid,
+        manip1: {
+          type: 'shifting' as const,
+          vertDisplacement: null,
+          anchoring: null,
+          lateralDistance: null,
+          ropeLength: null,
+          shiftingClampLength
+        },
+        manip2: null
+      });
+      const initWith = (chargeManips: ReturnType<typeof buildSupportManip>[], sectionManips: typeof chargeManips) => {
+        mockSpanService.section.mockReturnValue({
+          ...mockSection,
+          selected_charge_uuid: 'charge-uuid-1',
+          charges: [{ ...mockCharge, data: { ...mockChargeData, supportManipParams: chargeManips } }],
+          cable_support_manipulations: sectionManips
+        } as unknown as Section);
+        return service.initTemporaryLoadData();
+      };
+      const appliedSupportManips = () => {
+        const call = mockWorkerPythonService.runTask.mock.calls.find(([task]) => task === Task.applyManipulations);
+        return call?.[1].supportManipParams as { manip1: { shiftingClampLength: number } }[];
+      };
+
+      it('should complete the saved parameters with the section manipulations of the selected load case', async () => {
+        const sectionOnly = { ...buildSupportManip('section-only', 'charge-uuid-1', 3), supportUuid: 'support-uuid-2' };
+
+        await initWith([buildSupportManip('charge-copy', 'charge-uuid-1', 1)], [sectionOnly]);
+
+        expect(mockPlotService.temporaryLoadData?.supportManipParams.map((m) => m.uuid)).toEqual([
+          'charge-copy',
+          'section-only'
+        ]);
+      });
+
+      it('should keep the manipulation saved with the load case over the section one on the same support', async () => {
+        await initWith(
+          [buildSupportManip('charge-copy', 'charge-uuid-1', 1)],
+          [buildSupportManip('section-copy', 'charge-uuid-1', 2)]
+        );
+
+        expect(mockPlotService.temporaryLoadData?.supportManipParams.map((m) => m.uuid)).toEqual(['charge-copy']);
+        expect(appliedSupportManips()).toHaveLength(1);
+        expect(appliedSupportManips()[0].manip1.shiftingClampLength).toBe(1);
+      });
+
+      it('should not apply the section manipulations of the other load cases to the engine', async () => {
+        await initWith([], [buildSupportManip('other-case', 'charge-uuid-2', 7)]);
+
+        expect(mockPlotService.temporaryLoadData?.supportManipParams).toEqual([]);
+        expect(appliedSupportManips()).toEqual([]);
+      });
     });
 
     it('should use empty array as fallback when charge spanLoads is null', () => {
@@ -418,6 +499,219 @@ describe('LoadFormsService', () => {
       );
       expect(setLoadsCall).toBeDefined();
       expect((setLoadsCall![1] as { spanLoads: unknown[] }).spanLoads.length).toBeGreaterThan(0);
+    });
+
+    it('should re-apply the saved climate of the same charge once the engine study is rebuilt', async () => {
+      mockSpanService.section.mockReturnValue({
+        ...mockSection,
+        selected_charge_uuid: 'charge-uuid-1',
+        charges: [mockCharge]
+      } as Section);
+      const changeStateCalls = () =>
+        (mockWorkerPythonService.runTask as ReturnType<typeof vi.fn>).mock.calls.filter(
+          ([task]) => task === Task.changeState
+        );
+
+      mockPlotService.engineStudyId.mockReturnValue(1);
+      await service.initTemporaryLoadData();
+      await service.initTemporaryLoadData();
+      expect(changeStateCalls()).toHaveLength(1);
+
+      // Studio reopened or page reloaded: initSectionStudio built a new study with the base climate
+      mockPlotService.engineStudyId.mockReturnValue(2);
+      await service.initTemporaryLoadData();
+      expect(changeStateCalls()).toHaveLength(2);
+      expect(changeStateCalls()[1][1]).toEqual({ climate: mockChargeData.climate });
+    });
+
+    describe('isApplyingLoadCase', () => {
+      const engineIdle = { result: null, error: null };
+      const sectionWithCharge = (chargeUuid: string) =>
+        ({
+          ...mockSection,
+          selected_charge_uuid: chargeUuid,
+          charges: [mockCharge, { ...mockCharge, uuid: 'charge-uuid-2' }]
+        }) as Section;
+
+      // Keeps every changeState task pending until the test settles it, as a busy engine would
+      const holdChangeState = () => {
+        const pending: ((outcome: unknown) => void)[] = [];
+        mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+          task === Task.changeState ? new Promise((resolve) => pending.push(resolve)) : Promise.resolve(engineIdle)
+        );
+        return pending;
+      };
+
+      it('should stay true while the engine tasks before the projection are pending', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        const pending = holdChangeState();
+        expect(service.isApplyingLoadCase()).toBe(false);
+
+        const switching = service.initTemporaryLoadData();
+        await vi.waitFor(() => expect(pending).toHaveLength(1));
+
+        // The projection, which sets the plot loading, has not started yet
+        expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
+        expect(service.isApplyingLoadCase()).toBe(true);
+
+        pending[0](engineIdle);
+        await switching;
+
+        expect(mockPlotService.refreshProjection).toHaveBeenCalled();
+        expect(service.isApplyingLoadCase()).toBe(false);
+      });
+
+      it('should be false again once applying the load case failed', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+          task === Task.changeState
+            ? Promise.reject(new Error('Task changeState timed out after 30000ms'))
+            : Promise.resolve(engineIdle)
+        );
+
+        await service.initTemporaryLoadData();
+
+        expect(service.isApplyingLoadCase()).toBe(false);
+      });
+
+      it('should stop the plot loading once applying the load case failed, for the error to show', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        // A new studio engine study is not projected before its load case is applied
+        mockPlotService.loading.set(true);
+        mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+          task === Task.changeState
+            ? Promise.reject(new Error('Task changeState timed out after 30000ms'))
+            : Promise.resolve(engineIdle)
+        );
+
+        await service.initTemporaryLoadData();
+
+        expect(mockPlotService.error()).toBe(TaskError.CALCULATION_ERROR);
+        expect(mockPlotService.loading()).toBe(false);
+      });
+
+      it('should clear the previous load case distances before the engine tasks, even when they fail', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+          task === Task.changeState
+            ? Promise.reject(new Error('Task changeState timed out after 30000ms'))
+            : Promise.resolve(engineIdle)
+        );
+
+        await service.initTemporaryLoadData();
+
+        expect(mockObstacleStateService.setDistances).toHaveBeenCalledWith([]);
+        expect(mockPlotService.refreshProjection).not.toHaveBeenCalled();
+      });
+
+      it('should keep the distances when re-entering for the same load case', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        mockWorkerPythonService.runTask.mockResolvedValue(engineIdle);
+        await service.initTemporaryLoadData();
+        mockObstacleStateService.setDistances.mockClear();
+
+        await service.initTemporaryLoadData();
+
+        expect(mockObstacleStateService.setDistances).not.toHaveBeenCalled();
+      });
+
+      it('should stay true until the last of two overlapping switches is projected', async () => {
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+        const pending = holdChangeState();
+        const first = service.initTemporaryLoadData();
+        await vi.waitFor(() => expect(pending).toHaveLength(1));
+
+        // Quick switch to another load case while the first one is still being applied
+        mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-2'));
+        const second = service.initTemporaryLoadData();
+        await vi.waitFor(() => expect(pending).toHaveLength(2));
+
+        pending[0](engineIdle);
+        await first;
+        expect(service.isApplyingLoadCase()).toBe(true);
+
+        pending[1](engineIdle);
+        await second;
+        expect(service.isApplyingLoadCase()).toBe(false);
+      });
+    });
+  });
+
+  describe('engine synchronization', () => {
+    const sectionWithCharge = (chargeUuid: string | null) =>
+      ({ ...mockSection, selected_charge_uuid: chargeUuid, charges: [mockCharge] }) as Section;
+
+    // The mocks are not reactive: set them before the first read of the service computeds
+    const setEngineStudy = (studyId: number, sectionUuid: string | null = mockSection.uuid) => {
+      mockPlotService.engineStudyId.mockReturnValue(studyId);
+      mockPlotService.engineStudySectionUuid.mockReturnValue(sectionUuid);
+    };
+
+    it('should not be synchronized while the engine study is not built', () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge(null));
+      setEngineStudy(0, null);
+
+      expect(service.isEngineSynchronized()).toBe(false);
+    });
+
+    it('should not be synchronized while the engine study belongs to another section', () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge(null));
+      setEngineStudy(1, 'previous-section-uuid');
+
+      expect(service.isEngineSynchronized()).toBe(false);
+    });
+
+    it('should be synchronized without selected load case once the engine study is built', () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge(null));
+      setEngineStudy(1);
+
+      expect(service.isEngineSynchronized()).toBe(true);
+    });
+
+    it('should wait for the selected load case to be pushed to the engine study', async () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+      setEngineStudy(1);
+      let resolveChangeState!: (outcome: unknown) => void;
+      mockWorkerPythonService.runTask.mockImplementation((task: Task) =>
+        task === Task.changeState
+          ? new Promise((resolve) => (resolveChangeState = resolve))
+          : Promise.resolve({ result: null, error: null })
+      );
+      expect(service.isEngineSynchronized()).toBe(false);
+
+      const applying = service.initTemporaryLoadData();
+      await vi.waitFor(() => expect(resolveChangeState).toBeDefined());
+      expect(service.isEngineSynchronized()).toBe(false);
+
+      resolveChangeState({ result: null, error: null });
+      await applying;
+
+      expect(service.isEngineSynchronized()).toBe(true);
+    });
+
+    it('should not be synchronized once applying the load case failed', async () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+      setEngineStudy(1);
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task setLoads timed out'));
+
+      await service.initTemporaryLoadData();
+
+      expect(service.isEngineSynchronized()).toBe(false);
+    });
+
+    it('should change the engine revision when a load case is applied, calculated or deleted', async () => {
+      mockSpanService.section.mockReturnValue(sectionWithCharge('charge-uuid-1'));
+      setEngineStudy(1);
+      const revisions = [service.engineRevision()];
+
+      await service.initTemporaryLoadData();
+      revisions.push(service.engineRevision());
+      await service.calculateLoad();
+      revisions.push(service.engineRevision());
+      await service.deleteLoad();
+      revisions.push(service.engineRevision());
+
+      expect(new Set(revisions).size).toBe(revisions.length);
     });
   });
 
@@ -575,7 +869,7 @@ describe('LoadFormsService', () => {
 
       await service.calculateLoad();
 
-      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.applyManipulations, expect.any(Object));
       expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.changeState, expect.any(Object));
     });
 
@@ -624,39 +918,6 @@ describe('LoadFormsService', () => {
 
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(true);
       expect(mockPlotService.loading.set).toHaveBeenCalledWith(false);
-    });
-
-    it('should not run any cable modification task when the section has none', async () => {
-      mockPlotService.temporaryLoadData = mockChargeData;
-      mockSpanService.section.mockReturnValue(mockSection);
-
-      await service.calculateLoad();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
-    });
-
-    it('should skip cable modifications whose span uuid is not in the support list', async () => {
-      mockPlotService.temporaryLoadData = {
-        ...mockChargeData,
-        cableModifParams: [
-          {
-            uuid: 'mod-orphan',
-            spanUuid: 'unknown-support',
-            supportRef: 'LEFT',
-            modificationType: 'lengthening',
-            modifiedLengthCable: 0.5,
-            distanceSupportRef: 100
-          }
-        ]
-      };
-      mockSpanService.getSupportIndex.mockReturnValue(-1);
-      mockSpanService.section.mockReturnValue({
-        ...mockSection
-      } as Section);
-
-      await service.calculateLoad();
-
-      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.shortenLengthenCable, expect.any(Object));
     });
   });
 

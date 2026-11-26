@@ -66,6 +66,7 @@ export class InitComponent implements OnDestroy, OnInit {
           })) || []
         );
         this.newMeasureNameControl.setValue(newMeasureName);
+        this.preselectLastMeasure(section?.selected_field_measure_uuid);
       }
     });
   }
@@ -83,10 +84,20 @@ export class InitComponent implements OnDestroy, OnInit {
 
   newMeasureNameControl = new FormControl('', Validators.required);
   isNameAlreadyTaken = signal(false);
+  private hasPreselected = false;
   chooseMeasureControl = new FormControl<string | null>(null, Validators.required);
   readonly chooseMeasureValue = toSignal(this.chooseMeasureControl.valueChanges, {
     initialValue: this.chooseMeasureControl.value
   });
+
+  /** Restores the last selected measure once, so later section updates don't override the user's choice. */
+  private preselectLastMeasure(measureUuid: string | undefined): void {
+    if (this.hasPreselected || !measureUuid) return;
+    this.hasPreselected = true;
+    if (this.measures().some((measure) => measure.value === measureUuid)) {
+      this.chooseMeasureControl.setValue(measureUuid);
+    }
+  }
 
   onMeasureSelected(measure: { label: string; value: string } | null | undefined): void {
     this.chooseMeasureControl.setValue(measure?.value ?? null);

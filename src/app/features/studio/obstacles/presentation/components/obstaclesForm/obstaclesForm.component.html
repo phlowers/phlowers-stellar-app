@@ -59,7 +59,7 @@
   </div>
 
   <div class="obstacles-form__grid-2-cols">
-    <label for="obstacleName" class="name-label">{{ 'studio.obstacles-form.obstacle-name-label' | transloco }}</label>
+    <label for="obstacleName" class="name-label">{{ 'common.obstacle-name-label' | transloco }}</label>
 
     <input
       pInputText
@@ -431,7 +431,15 @@
       <app-icon icon="description" aria-hidden="true" />
       <ng-container>{{ 'common.report' | transloco }}</ng-container>
     </button>
-    <button app-btn btnStyle="outlined" type="button" data-testid="conformity-export-btn" disabled>
+    <button
+      app-btn
+      btnStyle="outlined"
+      type="button"
+      data-testid="conformity-export-btn"
+      [btnLoading]="conformityRef()?.isExporting() ?? false"
+      [disabled]="!conformityRef()?.canExport()"
+      (click)="conformityRef()?.exportConformity()"
+    >
       <app-icon icon="download" aria-hidden="true" />
       <ng-container>{{ 'common.export' | transloco }}</ng-container>
     </button>

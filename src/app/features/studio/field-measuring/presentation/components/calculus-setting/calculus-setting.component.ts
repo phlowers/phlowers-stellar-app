@@ -4,16 +4,14 @@ import { RadioButton } from 'primeng/radiobutton';
 import { PapotoComponent } from './papoto/papoto.component';
 import { TangentAimingSupportComponent } from './tangent-aiming-support/tangent-aiming-support.component';
 import { TangentAimingExteriorComponent } from './tangent-aiming-exterior/tangent-aiming-exterior.component';
-import { TangentAimingInteriorComponent } from './tangent-aiming-interior/tangent-aiming-interior.component';
+import { TangentAimingInteriorComponent } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-interior/tangent-aiming-interior.component';
 import { PepComponent } from './pep/pep.component';
+import { applyPepDefaults } from './pep/pep.helpers';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { TranslocoModule } from '@jsverse/transloco';
-import {
-  applyTangentAimingSupportDefaults,
-  getDefaultLeftSupport
-} from './tangent-aiming-support/tangent-aiming-support.helpers';
-import { applyTangentAimingExteriorDefaults } from './tangent-aiming-exterior/tangent-aiming-exterior.helpers';
+import { getDefaultLeftSupport } from '@features/studio/field-measuring/presentation/components/calculus-setting/tangent-aiming-common/tangent-aiming-common.helpers';
 import { clearAutoParameter15C } from '@features/studio/field-measuring/presentation/helpers';
+import { TANGENT_AIMING_MODES } from '@features/studio/field-measuring/presentation/tangent-aiming-modes.constantes';
 import { CALCULUS_TYPE_BY_METHOD } from './calculus-setting.constantes';
 
 @Component({
@@ -43,25 +41,20 @@ export class CalculusSettingComponent {
     computation: (method) => CALCULUS_TYPE_BY_METHOD[method] ?? 'PAPOTO'
   });
 
-  /** Selects a method and persists it in the measure (PEP is not selectable yet); the auto 15°C result of the previous method is stale. */
+  /** Selects a method and persists it in the measure; the auto 15°C result of the previous method is stale. */
   onCalculusTypeChange(type: string): void {
     this.selectedCalculusType.set(type);
-    if (type === 'PAPOTO') {
-      this.measureData.update((d) => clearAutoParameter15C({ ...d, calculationMethod: 'papoto' }));
-    } else if (type === 'TANGENT_AIMING_SUPPORT') {
-      this.measureData.update((d) =>
-        clearAutoParameter15C({
-          ...applyTangentAimingSupportDefaults(d, getDefaultLeftSupport(d.span)),
-          calculationMethod: 'tangente-aiming'
-        })
-      );
-    } else if (type === 'TANGENT_AIMING_EXTERIOR') {
-      this.measureData.update((d) =>
-        clearAutoParameter15C({
-          ...applyTangentAimingExteriorDefaults(d, getDefaultLeftSupport(d.span)),
-          calculationMethod: 'tangente-aiming-exterior'
-        })
-      );
+    const method = (Object.keys(CALCULUS_TYPE_BY_METHOD) as FieldMeasure['calculationMethod'][]).find(
+      (m) => CALCULUS_TYPE_BY_METHOD[m] === type
+    );
+    const mode = method && TANGENT_AIMING_MODES[method];
+    if (method === 'papoto' || method === 'pep' || mode) {
+      const defaultLeftSupport = getDefaultLeftSupport(this.measureData().span);
+      const withDefaults = (d: FieldMeasure): FieldMeasure => {
+        if (mode) return mode.applyDefaults(d, defaultLeftSupport);
+        return method === 'pep' ? applyPepDefaults(d, defaultLeftSupport) : d;
+      };
+      this.measureData.update((d) => clearAutoParameter15C({ ...withDefaults(d), calculationMethod: method }));
     }
   }
   leftSupportOption = computed(() => {

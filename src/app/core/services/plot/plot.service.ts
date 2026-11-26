@@ -14,7 +14,6 @@ import {
 } from '@services/worker_python/tasks/types';
 import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnostic.interfaces';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { PlotResolutionService } from './plot-resolution.service';
 import { PlotOptionsService } from './plot-options.service';
 import { PlotSpanService } from './plot-span.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -51,6 +50,11 @@ export class PlotService {
   loading = signal<boolean>(true);
   subscription: Subscription | null = null;
   workerReady = signal<boolean>(false);
+  /** Id of the engine study built by the last completed initSectionStudio; 0 while none is ready. */
+  readonly engineStudyId = signal(0);
+  /** UUID of the section the engine study of `engineStudyId` was built for; null while none is ready. */
+  readonly engineStudySectionUuid = signal<string | null>(null);
+  private engineStudyCount = 0;
 
   isStudioActive = signal<boolean>(false);
   study = signal<Study | null>(null);
@@ -60,7 +64,6 @@ export class PlotService {
   // Whether the outputs in litData account for at least one cut strand
   readonly isCutStrandApplied = computed(() => hasCutStrand(this.projectedCutStrands()));
 
-  private readonly resolutionService = inject(PlotResolutionService);
   private readonly plotOptionsService = inject(PlotOptionsService);
   private readonly spanService = inject(PlotSpanService);
   private readonly workerPythonService = inject(WorkerPythonService);
@@ -78,13 +81,13 @@ export class PlotService {
   private currentSectionUuid: string | null = null;
   // High safety of the engine study, to skip redundant setHighSafety calls. Null while no engine study is ready
   private highSafety: boolean | null = null;
+  private readonly selectedCharge = computed(() => {
+    const section = this.spanService.section();
+    return section?.charges?.find((charge) => charge.uuid === section.selected_charge_uuid);
+  });
   // Staff presence on the selected charge requires high safety in the engine study.
   // Without selected charge, staff is assumed present: the safest case
-  private readonly selectedChargeHighSafety = computed(() => {
-    const section = this.spanService.section();
-    const selectedCharge = section?.charges?.find((charge) => charge.uuid === section.selected_charge_uuid);
-    return selectedCharge?.personnelPresence ?? true;
-  });
+  private readonly selectedChargeHighSafety = computed(() => this.selectedCharge()?.personnelPresence ?? true);
   // Cut strands of the engine study, to skip redundant setCutStrands calls. Null while no engine study is ready
   private cutStrands: number[] | null = null;
   private readonly savedCutStrands = computed(() => toEngineCutStrands(this.spanService.savedCutStrands()), {
@@ -149,6 +152,8 @@ export class PlotService {
     this.isStudioActive.set(false);
     this.spanService.section.set(null);
     this.study.set(null);
+    this.engineStudyId.set(0);
+    this.engineStudySectionUuid.set(null);
     this.currentSectionUuid = null;
     this.highSafety = null;
     this.cutStrands = null;
@@ -184,13 +189,22 @@ export class PlotService {
     }
     this.plotOptionsService.plotOptionsChange(
       values,
-      () => this.loading(),
+      () => this.loading() || !this.isEngineStudyCurrent(),
       () => this.refreshProjection()
     );
   }
 
+  // The engine study still belongs to the previous section (or none) until initSectionStudio replaces it: projecting
+  // before that would render the previous section's obstacles and floors
+  private isEngineStudyCurrent(): boolean {
+    const sectionUuid = this.spanService.section()?.uuid;
+    return !!sectionUuid && sectionUuid === this.currentSectionUuid;
+  }
+
   initSectionStudio = async (section: Section) => {
     this.currentSectionUuid = section?.uuid ?? null;
+    this.engineStudyId.set(0);
+    this.engineStudySectionUuid.set(null);
     // The engine study is being replaced: high safety and cut strands are applied once the new one exists
     this.highSafety = null;
     this.cutStrands = null;
@@ -207,7 +221,10 @@ export class PlotService {
       return;
     }
     this.loading.set(true);
+    // The studio may be left, or another section opened, while the awaits below are pending
+    const isSuperseded = () => this.currentSectionUuid !== section.uuid;
     const cable = await this.cableService.getCable(section.cable_name);
+    if (isSuperseded()) return;
     if (!cable) {
       this.logger.error('no cable found: ', section.cable_name);
       this.loading.set(false);
@@ -218,6 +235,7 @@ export class PlotService {
       section: alignSectionSpanLoadsToSupports(section),
       cable
     });
+    if (isSuperseded()) return;
     this.error.set(error);
     this.diagnostics.set(diagnostics);
 
@@ -229,12 +247,14 @@ export class PlotService {
 
     // A new engine study has no high safety. Read the latest section, the selected charge may have changed during initLit
     await this.applyHighSafety(untracked(() => this.selectedChargeHighSafety()));
+    if (isSuperseded()) return;
 
     // A new engine study has no cut strands either: the saved ones are part of the section, like high safety
     this.cutStrands = NO_CUT_STRANDS;
     const savedCutStrands = untracked(() => this.savedCutStrands());
     if (!isEqual(savedCutStrands, this.cutStrands)) {
       await this.applyCutStrands(savedCutStrands);
+      if (isSuperseded()) return;
     }
 
     // When no charge is selected, apply base climate so the engine reflects
@@ -243,6 +263,7 @@ export class PlotService {
     // if (!section.selected_charge_uuid) {
     const baseClimate = getBaseClimate(section);
     await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate, reload: true });
+    if (isSuperseded()) return;
     // }
 
     // Floors are registered as a specific obstacle type to reuse the obstacle worker's
@@ -259,42 +280,71 @@ export class PlotService {
         obstacles,
         untracked(() => this.plotOptionsService.plotOptions())
       );
+      if (isSuperseded()) return;
     }
 
-    // initLit initializes the study — refreshProjection gets the actual render data
-    await this.refreshProjection();
+    // Projecting before the selected charge is applied would draw the section without it first, then redraw it (and
+    // move the camera) once it is calculated: the plot stays loading until LoadFormsService projects it instead
+    if (!this.willApplySelectedCharge()) {
+      // initLit initializes the study — refreshProjection gets the actual render data
+      await this.refreshProjection();
+    }
+    if (isSuperseded()) return;
+    // Signals LoadFormsService to apply the selected charge (loads, climate…) on top of this new study
+    this.engineStudySectionUuid.set(section.uuid);
+    this.engineStudyId.set(++this.engineStudyCount);
   };
+
+  // In the studio, LoadFormsService applies the selected charge (manipulations, loads, climate) on top of each new
+  // engine study, then projects it. Read from the latest section: the selected charge may have changed during initLit
+  private willApplySelectedCharge(): boolean {
+    return untracked(() => this.isStudioActive() && this.selectedCharge() !== undefined);
+  }
 
   refreshProjection = async () => {
     this.loading.set(true);
-    const plotOptions = this.plotOptionsService.plotOptions();
-    // The engine study calculates the outputs with the cut strands it holds when the projection is requested
-    const cutStrands = this.cutStrands ?? NO_CUT_STRANDS;
-    const { result, error, diagnostics } = await this.workerPythonService.runTask(Task.refreshProjection, {
-      startSupport: plotOptions.startSupport,
-      endSupport: plotOptions.endSupport,
-      view: plotOptions.view
-    });
-    this.litData.set(result?.sectionOutput?.current ?? null);
-    this.baseLitData.set(result?.sectionOutput?.base ?? null);
-    const currentLitData = result?.sectionOutput?.current ?? null;
-    // Only a successful current output was calculated with them
-    this.projectedCutStrands.set(!error && currentLitData ? cutStrands : NO_CUT_STRANDS);
-    const obstacles = result?.obstacles ?? [];
-    if (currentLitData && obstacles.length > 0) {
-      this.litData.set({ ...currentLitData, obstacles });
+    const sectionUuid = this.currentSectionUuid;
+    // runTask rejects on timeout or when the worker is unavailable: the plot must not stay loading
+    try {
+      const plotOptions = this.plotOptionsService.plotOptions();
+      // The engine study calculates the outputs with the cut strands it holds when the projection is requested
+      const cutStrands = this.cutStrands ?? NO_CUT_STRANDS;
+      const { result, error, diagnostics } = await this.workerPythonService
+        .runTask(Task.refreshProjection, {
+          startSupport: plotOptions.startSupport,
+          endSupport: plotOptions.endSupport,
+          view: plotOptions.view
+        })
+        .catch((error_: unknown) => {
+          // The previous distances belong to a state the cable has left: unavailable, not stale
+          this.obstacleStateService.setDistances([]);
+          throw error_;
+        });
+      // The studio was left, or another section opened, meanwhile: this output belongs to the previous section
+      if (this.currentSectionUuid !== sectionUuid) return;
+      this.litData.set(result?.sectionOutput?.current ?? null);
+      this.baseLitData.set(result?.sectionOutput?.base ?? null);
+      const currentLitData = result?.sectionOutput?.current ?? null;
+      // Only a successful current output was calculated with them
+      this.projectedCutStrands.set(!error && currentLitData ? cutStrands : NO_CUT_STRANDS);
+      const obstacles = result?.obstacles ?? [];
+      if (currentLitData && obstacles.length > 0) {
+        this.litData.set({ ...currentLitData, obstacles });
+      }
+      this.obstacleStateService.setDistances(
+        this.withFloorFallbackDistances(result?.distances ?? [], obstacles, currentLitData)
+      );
+      this.distanceMeasuringPoints.set(result?.distanceMeasuringPoints ?? []);
+      this.error.set(error);
+      this.diagnostics.set(this.withoutFloorIntersectionWarnings(diagnostics));
+
+      const scalingFactors = untracked(() => this.plotOptionsService.scalingFactors());
+      await this.updateAspectRatio(scalingFactors, plotOptions);
+    } finally {
+      if (this.currentSectionUuid === sectionUuid) {
+        this.loading.set(false);
+      }
     }
-    this.obstacleStateService.setDistances(
-      this.withFloorFallbackDistances(result?.distances ?? [], obstacles, currentLitData)
-    );
-    this.distanceMeasuringPoints.set(result?.distanceMeasuringPoints ?? []);
-    this.error.set(error);
-    this.diagnostics.set(this.withoutFloorIntersectionWarnings(diagnostics));
-
-    const scalingFactors = untracked(() => this.plotOptionsService.scalingFactors());
-    await this.updateAspectRatio(scalingFactors, plotOptions);
-
-    this.loading.set(false);
   };
 
   /**
@@ -423,7 +473,6 @@ export class PlotService {
       try {
         await this.refreshProjection();
       } catch (error) {
-        this.loading.set(false);
         this.reportCutStrandsSyncFailure(error);
       }
     }

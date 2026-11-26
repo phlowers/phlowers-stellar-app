@@ -10,6 +10,7 @@ import logging
 import numpy as np
 from mechaphlowers import SectionStudy, units
 from mechaphlowers.core.geometry.distances import DistanceResult
+from mechaphlowers.core.geometry.points import Points, SparsePoints
 from mechaphlowers.utils import ArrayTools
 
 from stellar_engine.entities.errors import GeneratedPointsNoneError
@@ -59,25 +60,36 @@ def get_coordinates(
         projected_group_points = base_group_points.change_frame(
             frame_index=middle_span
         )
-
-        span, supports, insulators = (
-            projected_group_points.spans,
-            projected_group_points.supports,
-            projected_group_points.insulators,
-        )
-        obstacles = projected_group_points.obstacles
-        distances = projected_group_points.distances
-        additional_points = projected_group_points.additional_points
-
     else:
-        span, supports, insulators = (
-            base_group_points.spans,
-            base_group_points.supports,
-            base_group_points.insulators,
-        )
-        obstacles = base_group_points.obstacles
-        distances = base_group_points.distances
-        additional_points = base_group_points.additional_points
+        projected_group_points = base_group_points
+    all_points_dict = projected_group_points.all_points_virtual_separated()
+    span, supports, insulators = (
+        all_points_dict["spans"],
+        all_points_dict["supports"],
+        all_points_dict["insulators"],
+    )
+    obstacles = projected_group_points.obstacles
+    distances = projected_group_points.distances
+    additional_points = projected_group_points.additional_points
+
+    virtual_supports = (
+        all_points_dict["virtual_supports"]
+        if "virtual_supports" in all_points_dict
+        else None
+    )
+    virtual_insulators = (
+        all_points_dict["virtual_insulators"]
+        if "virtual_insulators" in all_points_dict
+        else None
+    )
+    # virtual_supports[k] belongs to the k-th sorted span index (span indexes
+    # before the virtual supports are inserted)
+    virtual_supports_span_indices = (
+        sorted(projected_group_points.virtual_supports_list)
+        if virtual_supports is not None
+        else None
+    )
+
     # -------function 2: get data-----------
     vtl_under_chain = list(
         study.balance_engine.balance_model.vhl_under_chain().vhl
@@ -106,6 +118,8 @@ def get_coordinates(
         insulators,
         obstacles,
         distances,
+        virtual_supports,
+        virtual_insulators,
         vtl_under_chain,
         vtl_under_console,
         loads_coords,
@@ -113,13 +127,15 @@ def get_coordinates(
         utilization_rate,
     )
 
+    result["coords"]["virtual_supports_span_indices"] = (
+        virtual_supports_span_indices
+    )
     # Build structured obstacles and distances for the frontend renderer
     result["obstacles_formatted"] = format_sparse_points_for_plot(obstacles)
     result["distances_formatted"] = format_distances_for_plot(distances)
     result["distanceMeasuringPoints"] = format_sparse_points_for_plot(
         additional_points
     )
-
     return result
 
 
@@ -183,17 +199,19 @@ def format_distances_for_plot(distances):
 
 
 def get_exchange_studio(
-    study,
-    span,
-    supports,
-    insulators,
-    obstacles,
-    distances,
-    vtl_under_chain,
-    vtl_under_console,
-    loads_coords,
-    line_angle_rad,
-    utilization_rate,
+    study: SectionStudy,
+    span: Points | None,
+    supports: Points | None,
+    insulators: Points | None,
+    obstacles: SparsePoints | None,
+    distances: dict | None,
+    virtual_supports: Points | None,
+    virtual_insulators: Points | None,
+    vtl_under_chain: list,
+    vtl_under_console: list,
+    loads_coords: dict,
+    line_angle_rad: np.ndarray,
+    utilization_rate: np.ndarray,
 ):
     if span is None:
         raise GeneratedPointsNoneError(
@@ -215,6 +233,14 @@ def get_exchange_studio(
         logger.debug(
             "Distances data is None. Proceeding without distance coordinates."
         )
+    if virtual_supports is None:
+        logger.debug(
+            "virtual_supports data is None. Proceeding without virtual supports."
+        )
+    if virtual_insulators is None:
+        logger.debug(
+            "virtual_insulators data is None. Proceeding without virtual insulators."
+        )
 
     result = {
         "coords": {
@@ -226,6 +252,12 @@ def get_exchange_studio(
             else None,
             "distances": to_serializable(distances)
             if distances is not None
+            else None,
+            "virtual_supports": to_serializable(virtual_supports.coords)
+            if virtual_supports is not None
+            else None,
+            "virtual_insulators": to_serializable(virtual_insulators.coords)
+            if virtual_insulators is not None
             else None,
             "loads": to_serializable(loads_coords),
         },

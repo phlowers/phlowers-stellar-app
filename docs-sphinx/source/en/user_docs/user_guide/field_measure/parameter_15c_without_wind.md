@@ -41,9 +41,11 @@ When in **Manual** mode, you must enter all of the following:
 | **Cable temperature** | °C | Cable temperature at the time of measurement | 18.5 |
 | **Uncertainty cable temperature** | °C | Temperature measurement uncertainty | 1.8 |
 
-All four fields are **mandatory**. If any field is missing or empty when you click **Calculate setting parameter at 15°C**, you will see the error:
+All four fields are **mandatory**. The **Calculate setting parameter at 15°C** button stays **disabled** while any of these values is missing (or invalid); a note above the form reminds you:
 
 > **All fields are mandatory for parameter calculation at 15°C**
+
+In **Auto** mode, the button is therefore only enabled once a parameter (PAPOTO or tangent aiming) **and** a cable temperature have been calculated in the previous tabs.
 
 ## How to Calculate
 

@@ -9,15 +9,16 @@ ARG CI_COMMIT_SHA
 # link in the app and the published PDF file name always match.
 ARG APP_NAME=Stellar
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.7 /uv /uvx /bin/
 
 WORKDIR /usr/src/app
 
 COPY . /usr/src/app
 
-RUN npm install
+RUN npm ci
 
-RUN uv python install 3.13
+# 3.14: set-up script and stellar-engine (Pyodide runtime); 3.13: Sphinx docs venv below.
+RUN uv python install 3.14.10 3.13.18
 
 RUN npm run set-up-mechaphlowers
 
@@ -29,7 +30,7 @@ RUN apk add --no-cache make pango fontconfig ttf-dejavu
 # The PDFs are copied after the build so they stay out of the service worker
 # precache list. Served as /docs/<lang>/<app>_documentation.pdf.
 RUN cd docs-sphinx \
-    && uv venv --clear --python 3.13 \
+    && uv venv --clear --python 3.13.18 \
     && uv pip install -r requirements.txt \
     && SPHINX_APP_NAME="${APP_NAME}" make publish-pdf
 

@@ -4,6 +4,8 @@ import { ToolbarDialogService } from './toolbar-dialog.service';
 import { FieldMeasuringComponent } from '@features/studio/field-measuring/presentation/components/field-measuring/field-measuring.component';
 import { InitComponent } from '@features/studio/field-measuring/presentation/components/init/init.component';
 import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
+import { EstimationsComponent } from '@features/studio/estimations/presentation/components/estimations/estimations.component';
+import { ForestTrenchesComponent } from '@features/studio/forest-trenches/presentation/components/forest-trenches/forest-trenches.component';
 
 describe('ToolbarDialogService', () => {
   let service: ToolbarDialogService;
@@ -33,6 +35,15 @@ describe('ToolbarDialogService', () => {
 
     it('should initialize with empty templates', () => {
       expect(service.templates()).toEqual({});
+    });
+  });
+
+  describe('notifyShown', () => {
+    it('should increment the shown count each time the dialog finished opening', () => {
+      expect(service.shownCount()).toBe(0);
+      service.notifyShown();
+      service.notifyShown();
+      expect(service.shownCount()).toBe(2);
     });
   });
 
@@ -176,6 +187,13 @@ describe('ToolbarDialogService', () => {
       expect(service.getComponent()).toBe(FieldMeasuringComponent);
     });
 
+    it('should return the Forest Trenches component after opening the tool', () => {
+      service.openTool('forest-trenches');
+
+      expect(service.getComponent()).toBe(ForestTrenchesComponent);
+      expect(service.getDialogStyle()).toEqual({ width: '86.5625rem', 'max-width': '90%' });
+    });
+
     it('should return null for other-tool in init phase check', () => {
       service.openTool('other-tool');
       // other-tool has no initComponent, so it opens directly in main phase
@@ -202,6 +220,15 @@ describe('ToolbarDialogService', () => {
       expect(service.isOpen()).toBe(true);
       expect(service.phase()).toBe('main');
       expect(service.getComponent()).toBe(CableAdjustmentComponent);
+      expect(service.getDialogStyle()).toEqual({ width: '43.5rem', 'max-width': '90%' });
+    });
+
+    it('should open estimations directly in main phase with its dialog style', () => {
+      service.openTool('estimations');
+      expect(service.currentTool()).toBe('estimations');
+      expect(service.isOpen()).toBe(true);
+      expect(service.phase()).toBe('main');
+      expect(service.getComponent()).toBe(EstimationsComponent);
       expect(service.getDialogStyle()).toEqual({ width: '43.5rem', 'max-width': '90%' });
     });
 

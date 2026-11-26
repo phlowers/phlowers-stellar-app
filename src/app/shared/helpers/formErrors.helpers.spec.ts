@@ -6,7 +6,7 @@
  */
 
 import { FormControl, FormGroup } from '@angular/forms';
-import { getControlErrorIds, getNumberInputErrorParams } from './formErrors.helpers';
+import { getControlErrorIds, getNumberInputErrorParams, getRequiredNumberInputErrorParams } from './formErrors.helpers';
 
 describe('getControlErrorIds', () => {
   it('should return null when the control does not exist', () => {
@@ -99,5 +99,25 @@ describe('getNumberInputErrorParams', () => {
     control.setErrors({ max: { max: 20, actual: 50 }, maxDecimals: { maxDecimals: 2 } });
 
     expect(getNumberInputErrorParams(control)).toEqual({ key: 'common.max-value-error', params: { max: 20 } });
+  });
+});
+
+describe('getRequiredNumberInputErrorParams', () => {
+  it('should return the required key before any number error', () => {
+    const control = new FormControl(null);
+    control.setErrors({ required: true, min: { min: 10, actual: null } });
+
+    expect(getRequiredNumberInputErrorParams(control)).toEqual({ key: 'common.required', params: {} });
+  });
+
+  it('should fall back to the number error without required error', () => {
+    const control = new FormControl(5);
+    control.setErrors({ min: { min: 10, actual: 5 } });
+
+    expect(getRequiredNumberInputErrorParams(control)).toEqual({ key: 'common.min-value-error', params: { min: 10 } });
+  });
+
+  it('should return null when the control is null', () => {
+    expect(getRequiredNumberInputErrorParams(null)).toBeNull();
   });
 });

@@ -13,6 +13,10 @@ import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
+import { WorkerPythonService } from '@services/worker_python/worker-python.service';
+import { Task } from '@services/worker_python/tasks/types';
+
+const TASK_RESULT = { parameter: 2000.2, uncertainty: 13.3, criterion: 1, checkValidity: true };
 
 const validMeasure = (overrides?: Partial<FieldMeasure>): FieldMeasure =>
   helpers.applyTangentAimingExteriorDefaults(
@@ -27,6 +31,7 @@ describe('TangentAimingExterior component', () => {
   const litData = signal<unknown>(null);
   const logger = { error: vi.fn(), warn: vi.fn(), info: vi.fn(), log: vi.fn() };
   const notification = { error: vi.fn() };
+  const workerPythonService = { runTask: vi.fn() };
 
   const getByTestId = (id: string): HTMLElement | null => fixture.nativeElement.querySelector(`[data-testid="${id}"]`);
   const setInput = (id: string, value: string) => {
@@ -40,12 +45,13 @@ describe('TangentAimingExterior component', () => {
     component.form.controls.leftSupport.setValue('0');
     setInput('span-length-input', '100');
     setInput('h-acc-distance-input', '10');
-    setInput('vertical-acc-angle-left-input', '5');
-    setInput('vertical-acc-angle-right-input', '6');
+    setInput('vertical-acc-angle-left-input', '5.123');
+    setInput('vertical-acc-angle-right-input', '6.123');
   };
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    workerPythonService.runTask.mockResolvedValue({ result: TASK_RESULT, error: null, diagnostics: [] });
     litData.set(null);
     await TestBed.configureTestingModule({
       imports: [
@@ -61,6 +67,7 @@ describe('TangentAimingExterior component', () => {
         provideHttpClientTesting(),
         { provide: LoggerService, useValue: logger },
         { provide: NotificationService, useValue: notification },
+        { provide: WorkerPythonService, useValue: workerPythonService },
         {
           provide: PlotSpanService,
           useValue: { section: signal({ supports: [{ number: 'ABCDEFG' }, { number: 'S2' }] }) }
@@ -96,7 +103,7 @@ describe('TangentAimingExterior component', () => {
     expect(component.form.controls.leftSupport.value).toBe('0');
   });
 
-  it('should render the common fields, the parameter field and hide the tangent angle by default', () => {
+  it('should render the common fields, the tangent angle field and hide the parameter by default', () => {
     [
       'help-btn',
       'left-support-select',
@@ -105,37 +112,36 @@ describe('TangentAimingExterior component', () => {
       'vertical-acc-angle-left-input',
       'vertical-acc-angle-right-input',
       'calculation-type-selector',
-      'parameter-input'
+      'tangent-angle-input'
     ].forEach((id) => expect(getByTestId(id)).toBeTruthy());
-    expect(getByTestId('tangent-angle-input')).toBeNull();
-  });
-
-  it('should show the tangent angle and hide the parameter when the type is tangente', () => {
-    component.updateCalculationType('tangente');
-    fixture.detectChanges();
-    expect(getByTestId('tangent-angle-input')).toBeTruthy();
     expect(getByTestId('parameter-input')).toBeNull();
   });
 
-  it('should expose parameter and tangent calculation type options', () => {
-    expect(component.calculationTypeOptions().map((o) => o.value)).toEqual(['parametre', 'tangente']);
+  it('should show the parameter and hide the tangent angle when the type is parametre', () => {
+    component.updateCalculationType('parametre');
+    fixture.detectChanges();
+    expect(getByTestId('parameter-input')).toBeTruthy();
+    expect(getByTestId('tangent-angle-input')).toBeNull();
+  });
+
+  it('should expose both the parameter and tangent calculation type options as enabled', () => {
+    expect(component.calculationTypeOptions().map(({ value }) => value)).toEqual(['parametre', 'tangente']);
   });
 
   it('should disable the calculate button until the form is valid, then enable it', () => {
     const button = () => getByTestId('calculate-tangent-aiming-exterior-btn') as HTMLButtonElement;
     expect(button().disabled).toBe(true);
     fillCommonFields();
-    setInput('parameter-input', '1000');
+    setInput('tangent-angle-input', '101.456');
     expect(button().disabled).toBe(false);
   });
 
   it('should only require the displayed type field', () => {
     fillCommonFields();
-    component.updateCalculationType('tangente');
-    fixture.detectChanges();
     expect(component.isFormValid()).toBe(false);
     setInput('tangent-angle-input', '10');
     expect(component.isFormValid()).toBe(true);
+    expect(component.form.controls.parameter.value).toBeNull();
   });
 
   it('should show an error message once an invalid field is touched', () => {
@@ -149,12 +155,20 @@ describe('TangentAimingExterior component', () => {
     expect(fixture.nativeElement.querySelector('#taeSpanLength-error')).toBeTruthy();
   });
 
+  it('should flag the left support select as invalid when it has an error', () => {
+    expect(getByTestId('left-support-select')?.classList).not.toContain('p-invalid');
+    vi.spyOn(component, 'getError').mockReturnValue('Required');
+    fixture.componentRef.setInput('measureData', { ...component.measureData() });
+    fixture.detectChanges();
+    expect(getByTestId('left-support-select')?.classList).toContain('p-invalid');
+  });
+
   it('should show "-" when the calculated span length is unavailable', () => {
     expect(fixture.nativeElement.querySelector('#taeSpanLength-calculated').textContent).toContain('-');
   });
 
   it('should show the calculated span length of the selected span', () => {
-    litData.set({ output_parameters: { span_length: [123.456, 50] } });
+    litData.set({ output_parameters: { span_length: [999, 999], horizontal_distance: [123.456, 50] } });
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('#taeSpanLength-calculated').textContent).toContain('123.46');
   });
@@ -168,22 +182,18 @@ describe('TangentAimingExterior component', () => {
     fixture.detectChanges();
     await component.calculate();
     fixture.detectChanges();
-    expect(component.measureData().outputs.tangentAimingExterior).toEqual({
-      parameter: 1000,
-      uncertainty: 1.5,
-      criterion: 1,
-      checkValidity: true
-    });
-    expect(getByTestId('tangent-aiming-exterior-parameter')?.textContent?.trim()).toBe('1000 m');
-    expect(getByTestId('tangent-aiming-exterior-uncertainty')?.textContent?.trim()).toBe('1.5 m');
+    expect(component.measureData().outputs.tangentAimingExterior).toEqual(TASK_RESULT);
+    expect(getByTestId('tangent-aiming-exterior-parameter')?.textContent?.trim()).toBe('2000 m');
+    expect(getByTestId('tangent-aiming-exterior-uncertainty')?.textContent?.trim()).toBe('13.3 m');
     expect(getByTestId('tangent-aiming-exterior-criterion')?.textContent).toContain('Yes');
     expect(getByTestId('tangent-aiming-exterior-criterion-ok')).toBeTruthy();
   });
 
   it('should render the not respected icon when the criterion fails', async () => {
-    vi.spyOn(helpers, 'calculateTangentAimingExteriorMock').mockResolvedValueOnce({
-      result: { parameter: 10, uncertainty: 2, criterion: 5, checkValidity: false },
-      error: null
+    workerPythonService.runTask.mockResolvedValueOnce({
+      result: { parameter: 2000, uncertainty: 150, criterion: 7.5, checkValidity: false },
+      error: null,
+      diagnostics: []
     });
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
@@ -202,30 +212,83 @@ describe('TangentAimingExterior component', () => {
     expect(component.measureData().exteriorHAccDistance).toBe(12);
   });
 
+  it('should calculate on the parametre type with the parameter replacing the tangent angle', async () => {
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    expect(component.canCalculate()).toBe(true);
+    component.updateCalculationType('parametre');
+    fixture.detectChanges();
+    setInput('parameter-input', '1800');
+    fixture.detectChanges();
+    expect(component.canCalculate()).toBe(true);
+    await component.calculate();
+    const inputs = workerPythonService.runTask.mock.calls[0][1];
+    expect(inputs).toMatchObject({ calculationType: 'parametre', parameter: 1800 });
+    expect(inputs).not.toHaveProperty('angleToCableTangent');
+    expect(component.measureData().outputs.tangentAimingExterior).toEqual(TASK_RESULT);
+  });
+
   it('should clear the result when the calculation type changes', async () => {
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
     await component.calculate();
-    component.updateCalculationType('tangente');
-    expect(component.measureData().exteriorCalculationType).toBe('tangente');
+    component.updateCalculationType('parametre');
+    expect(component.measureData().exteriorCalculationType).toBe('parametre');
+    expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
+  });
+
+  it('should run the tangent aiming task with a negative distance and store its result', async () => {
+    componentRef.setInput(
+      'measureData',
+      validMeasure({
+        exteriorSpanLength: 400,
+        exteriorHAccDistance: 50,
+        exteriorVerticalAccAngleLeft: 93.66,
+        exteriorVerticalAccAngleRight: 99.29,
+        exteriorTangentAngle: 101.4
+      })
+    );
+    fixture.detectChanges();
+    await component.calculate();
+    fixture.detectChanges();
+    expect(workerPythonService.runTask).toHaveBeenCalledWith(Task.calculateTangentAiming, {
+      spanLength: 400,
+      calculationType: 'tangente',
+      angleToCableTangent: 101.4,
+      angleToLeftSupport: 93.66,
+      angleToRightSupport: 99.29,
+      inputHeight: 0,
+      distance: -50
+    });
+    expect(component.measureData().outputs.tangentAimingExterior).toEqual(TASK_RESULT);
+    expect(getByTestId('tangent-aiming-exterior-parameter')?.textContent?.trim()).toBe('2000 m');
+  });
+
+  it('should keep the result empty when the task returns no result', async () => {
+    workerPythonService.runTask.mockResolvedValueOnce({ result: null, error: null, diagnostics: [] });
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    await component.calculate();
+    expect(logger.error).toHaveBeenCalled();
+    expect(notification.error).toHaveBeenCalled();
+    expect(component.hasError()).toBe(true);
     expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
   });
 
   it('should not calculate when the form is invalid', async () => {
-    const spy = vi.spyOn(helpers, 'calculateTangentAimingExteriorMock');
     await component.calculate();
-    expect(spy).not.toHaveBeenCalled();
+    expect(workerPythonService.runTask).not.toHaveBeenCalled();
     expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
   });
 
   it('should log and notify when the calculation fails', async () => {
-    vi.spyOn(helpers, 'calculateTangentAimingExteriorMock').mockResolvedValueOnce({ result: null, error: 'boom' });
+    workerPythonService.runTask.mockResolvedValueOnce({ result: null, error: 'boom', diagnostics: [] });
     componentRef.setInput('measureData', validMeasure());
     fixture.detectChanges();
     await component.calculate();
     fixture.detectChanges();
     expect(logger.error).toHaveBeenCalled();
-    expect(notification.error).toHaveBeenCalled();
+    expect(notification.error).toHaveBeenCalledWith('field-measuring.tangent-aiming-exterior.calculation-failed');
     expect(component.hasError()).toBe(true);
     expect(getByTestId('calculation-error')).toBeTruthy();
     expect(component.isCalculating()).toBe(false);
@@ -251,7 +314,7 @@ describe('TangentAimingExterior component', () => {
     it('should clear it in auto mode when the calculation type changes', () => {
       componentRef.setInput('measureData', withParameter15C('auto'));
       fixture.detectChanges();
-      component.updateCalculationType('tangente');
+      component.updateCalculationType('parametre');
       expect(component.measureData().outputs.parameter15C).toBeNull();
     });
 
@@ -259,7 +322,7 @@ describe('TangentAimingExterior component', () => {
       componentRef.setInput('measureData', withParameter15C('manual'));
       fixture.detectChanges();
       setInput('h-acc-distance-input', '12');
-      component.updateCalculationType('tangente');
+      component.updateCalculationType('parametre');
       expect(component.measureData().outputs.parameter15C).toEqual(parameter15C);
     });
   });
@@ -268,6 +331,18 @@ describe('TangentAimingExterior component', () => {
     componentRef.setInput('measureData', validMeasure({ span: [1, 2] }));
     fixture.detectChanges();
     expect(component.supportOptions().map((option) => option.value)).toEqual(['1', '2']);
+  });
+
+  it('should invalidate the result and allow a new calculation when the span changes but the support is shared', async () => {
+    componentRef.setInput('measureData', validMeasure({ exteriorLeftSupport: '1' }));
+    fixture.detectChanges();
+    await component.calculate();
+    expect(component.measureData().outputs.tangentAimingExterior).not.toBeNull();
+    componentRef.setInput('measureData', { ...component.measureData(), span: [1, 2] });
+    fixture.detectChanges();
+    expect(component.measureData().exteriorLeftSupport).toBe('1');
+    expect(component.measureData().outputs.tangentAimingExterior).toBeNull();
+    expect(component.canCalculate()).toBe(true);
   });
 
   it('should fall back to the departure support and invalidate the results when the span changes', async () => {
@@ -328,5 +403,18 @@ describe('TangentAimingExterior component', () => {
     setInput('h-acc-distance-input', '12');
     expect(component.measureData().cableHAccDistance).toBe(7);
     expect(component.measureData().outputs.tangentAimingSupport).toBe(support);
+  });
+
+  it('should keep the calculate button enabled before and after a calculation on a valid form', async () => {
+    const button = () => getByTestId('calculate-tangent-aiming-exterior-btn') as HTMLButtonElement;
+    componentRef.setInput('measureData', validMeasure());
+    fixture.detectChanges();
+    expect(button().disabled).toBe(false);
+    await component.calculate();
+    fixture.detectChanges();
+    expect(button().disabled).toBe(false);
+    setInput('h-acc-distance-input', '12');
+    expect(component.measureData().exteriorHAccDistance).toBe(12);
+    expect(button().disabled).toBe(false);
   });
 });

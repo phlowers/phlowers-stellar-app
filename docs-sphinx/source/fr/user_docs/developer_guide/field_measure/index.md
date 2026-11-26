@@ -11,7 +11,7 @@ un seul modèle `FieldMeasure` (`@shared/domain/models/field-measure.model`).
 | Onglet | Composant | Tâches du worker |
 |---|---|---|
 | Données terrain | `FieldDatasComponent` | — |
-| Calcul du paramètre | `CalculusSettingComponent` (`PapotoComponent`, `TangentAimingComponent`, `PepComponent`) | `calculatePapoto` |
+| Calcul du paramètre | `CalculusSettingComponent` (`PapotoComponent`, `TangentAimingSupportComponent`, `TangentAimingInteriorComponent`, `TangentAimingExteriorComponent`, `PepComponent`) | `calculatePapoto`, `calculateTangentAiming` |
 | Calcul de température | `TemperatureCalculationComponent` | `getWindIncidence`, `estimateSkyCover`, `temperatureCalculation`, `diffuseAndBeamRadiationsCalculation` |
 | Paramètre à 15 °C sans vent | `ParameterCalculation15WithoutWindComponent` | `calculateParameter15CWithoutWind` |
 
@@ -20,6 +20,7 @@ un seul modèle `FieldMeasure` (`@shared/domain/models/field-measure.model`).
 
 terrain_data
 parameter_calculation
+tangent_aiming
 temperature_calculation
 parameter_15c_without_wind
 ```

@@ -40,6 +40,10 @@ const tasks: Record<
     function: 'calculate_papoto',
     externalPackages: []
   },
+  [Task.calculateTangentAiming]: {
+    function: 'calculate_tangent_aiming',
+    externalPackages: []
+  },
   [Task.calculateGuying]: {
     function: 'calculate_guying',
     externalPackages: []
@@ -92,8 +96,8 @@ const tasks: Record<
     function: 'clear_obstacles',
     externalPackages: []
   },
-  [Task.shortenLengthenCable]: {
-    function: 'shorten_lengthen_cable',
+  [Task.applyManipulations]: {
+    function: 'apply_manipulations',
     externalPackages: []
   },
   [Task.getAspectRatio]: {
@@ -108,12 +112,24 @@ const tasks: Record<
     function: 'compute_localization',
     externalPackages: []
   },
+  [Task.convertCoordinates]: {
+    function: 'convert_coordinates',
+    externalPackages: []
+  },
   [Task.importLambert]: {
     function: 'import_lambert',
     externalPackages: []
   },
   [Task.importLambertAndValidate]: {
     function: 'import_lambert_and_validate',
+    externalPackages: []
+  },
+  [Task.validateGpsPositions]: {
+    function: 'validate_gps_positions',
+    externalPackages: []
+  },
+  [Task.computeStartFromNextSupport]: {
+    function: 'compute_start_from_next_support',
     externalPackages: []
   },
   [Task.getEquivalentSpan]: {
@@ -152,6 +168,14 @@ const tasks: Record<
     function: 'get_conformity',
     externalPackages: []
   },
+  [Task.sliceGround]: {
+    function: 'slice_ground',
+    externalPackages: []
+  },
+  [Task.getForestTrenches]: {
+    function: 'get_forest_trenches',
+    externalPackages: []
+  },
   [Task.setCutStrands]: {
     function: 'set_cut_strands',
     externalPackages: []
@@ -170,6 +194,26 @@ const tasks: Record<
   },
   [Task.setHighSafety]: {
     function: 'set_high_safety',
+    externalPackages: []
+  },
+  [Task.estimateRope]: {
+    function: 'estimate_rope',
+    externalPackages: []
+  },
+  [Task.estimateTemperature]: {
+    function: 'estimate_temperature',
+    externalPackages: []
+  },
+  [Task.estimateLoad]: {
+    function: 'estimate_load',
+    externalPackages: []
+  },
+  [Task.estimateWind]: {
+    function: 'estimate_wind',
+    externalPackages: []
+  },
+  [Task.estimateMinimumDistanceWind]: {
+    function: 'estimate_minimum_distance_wind',
     externalPackages: []
   }
 };

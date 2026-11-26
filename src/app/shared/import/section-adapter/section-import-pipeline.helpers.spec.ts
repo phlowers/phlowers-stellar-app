@@ -6,74 +6,12 @@
  */
 import { Section, Support } from '@shared/domain';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
-import {
-  applyFootCoordinates,
-  areCoordinatesComplete,
-  buildReprojectionAngles,
-  getMissingRequiredFields
-} from './section-import-pipeline.helpers';
+import { getMissingRequiredFields } from './section-import-pipeline.helpers';
 
 /** Builds a minimal Support for helper tests, overriding only the fields under test. */
 const buildSupport = (overrides: Partial<Support> = {}): Support => ({
   ...createEmptySupport(),
   ...overrides
-});
-
-describe('buildReprojectionAngles', () => {
-  it('should return spanLength/lineAngle arrays with NaN/0 placeholders on the last support', () => {
-    const supports = [
-      buildSupport({ spanLength: 100, spanAngle: 5 }),
-      buildSupport({ spanLength: 200, spanAngle: 10 }),
-      buildSupport({ spanLength: 300, spanAngle: 15 })
-    ];
-    const { spanLength, lineAngle } = buildReprojectionAngles(supports);
-
-    expect(spanLength.slice(0, 2)).toEqual([100, 200]);
-    expect(Number.isNaN(spanLength[2])).toBe(true);
-    expect(lineAngle).toEqual([5, 10, 0]);
-  });
-});
-
-describe('applyFootCoordinates', () => {
-  it('should set footLatitude/footLongitude by index', () => {
-    const supports = [buildSupport(), buildSupport()];
-    const result = applyFootCoordinates(supports, [45.1, 45.2], [3.1, 3.2]);
-
-    expect(result[0].footLatitude).toBe(45.1);
-    expect(result[0].footLongitude).toBe(3.1);
-    expect(result[1].footLatitude).toBe(45.2);
-    expect(result[1].footLongitude).toBe(3.2);
-  });
-
-  it('should default to null when the coordinate array is shorter than the supports array', () => {
-    const supports = [buildSupport(), buildSupport()];
-    const result = applyFootCoordinates(supports, [45.1], [3.1]);
-
-    expect(result[1].footLatitude).toBeNull();
-    expect(result[1].footLongitude).toBeNull();
-  });
-
-  it('should not mutate the original support objects', () => {
-    const supports = [buildSupport()];
-    const result = applyFootCoordinates(supports, [45.1], [3.1]);
-
-    expect(supports[0].footLatitude).toBeNull();
-    expect(result[0]).not.toBe(supports[0]);
-  });
-});
-
-describe('areCoordinatesComplete', () => {
-  it('should be true when x and y hold one number per support', () => {
-    expect(areCoordinatesComplete({ crs: 'LAMBERT93', x: [1, 2], y: [3, 4] }, 2)).toBe(true);
-  });
-
-  it('should be false when an entry is null', () => {
-    expect(areCoordinatesComplete({ crs: 'LAMBERT93', x: [1, null], y: [3, 4] }, 2)).toBe(false);
-  });
-
-  it('should be false when the arrays do not match the supports count', () => {
-    expect(areCoordinatesComplete({ crs: 'WGS84', x: [1], y: [3] }, 2)).toBe(false);
-  });
 });
 
 describe('getMissingRequiredFields', () => {

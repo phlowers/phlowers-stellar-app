@@ -16,7 +16,10 @@ import { TabsModule } from 'primeng/tabs';
 import { CheckboxModule } from 'primeng/checkbox';
 import { PopoverModule } from 'primeng/popover';
 import { Study } from '@shared/domain';
+import { Rfc9557ToDatePipe } from '@shared/pipes/rfc9557-to-date.pipe';
+import { sortStudiesByField } from './studies-table.helpers';
 import { CommonModule, DatePipe } from '@angular/common';
+import { getDateLocale } from '@shared/helpers/modification-date.helpers';
 import { RouterLink } from '@angular/router';
 import { StudiesService } from '@services/studies/studies.service';
 import { DEFAULT_TABLE_ROWS_PER_PAGE, TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
@@ -38,9 +41,10 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     TableModule,
     CheckboxModule,
     PopoverModule,
-    DatePipe,
     CommonModule,
+    DatePipe,
     RouterLink,
+    Rfc9557ToDatePipe,
     TranslocoModule
   ],
   templateUrl: './studies-table.component.html',
@@ -66,13 +70,12 @@ export class StudiesTableComponent {
   private readonly activeLang = toSignal(this.transloco.langChanges$, {
     initialValue: this.transloco.getActiveLang()
   });
-  /** Recomputed whenever the active language changes so the date format stays in sync. */
-  public dateFormat = computed<string>(() => {
-    this.activeLang();
-    return this.transloco.translate('studies.table.date-format');
+  /** Emits the translated date format each time the language (and its translations) changes. */
+  public dateFormat = toSignal(this.transloco.selectTranslate('common.modification-date-format'), {
+    initialValue: ''
   });
-  /** Locale used to render localized month names (e.g. "septembre" vs "September"). */
-  public dateLocale = computed<string>(() => (this.activeLang() === 'en' ? 'en-US' : 'fr-FR'));
+  /** Locale used to render localized month names and AM/PM (e.g. "septembre" vs "September"). */
+  public dateLocale = computed(() => getDateLocale(this.activeLang()));
 
   openExportDialog = (uuid: string) => {
     this.studiesService.exportDialogData.set({
@@ -85,5 +88,10 @@ export class StudiesTableComponent {
   onSort(event: SortEvent) {
     this.sortField.set(event.field as string);
     this.sortOrder.set(event.order as number);
+  }
+
+  /** Custom sort of the table: the modification date is sorted by instant, not by text. */
+  sortStudies(event: SortEvent) {
+    sortStudiesByField(event.data as Study[], event.field as string, event.order as number);
   }
 }

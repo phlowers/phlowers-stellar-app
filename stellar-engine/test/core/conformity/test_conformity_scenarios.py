@@ -510,12 +510,12 @@ def test_both_lateral_and_overhang_produces_three_scenarios(
     assert len(overhang_scenarios) == 1, "Should have 1 overhang scenario"
 
     lateral_distances = [s.security_distance for s in lateral_scenarios]
-    assert (
-        lateral_distances[0] == lateral_distances[1]
-    ), "Both lateral scenarios should have the same security distance"
-    assert (
-        lateral_distances[0] != overhang_scenarios[0].security_distance
-    ), "Lateral and overhang security distances should be different"
+    assert lateral_distances[0] == lateral_distances[1], (
+        "Both lateral scenarios should have the same security distance"
+    )
+    assert lateral_distances[0] != overhang_scenarios[0].security_distance, (
+        "Lateral and overhang security distances should be different"
+    )
 
 
 def test_multiple_rules_scenario_count(
@@ -657,15 +657,15 @@ def test_cable_track_with_intermediate_points_produces_intermediate_scenarios(
         [s for s in scenarios if s.conformity_point == "intermediate"]
     )
 
-    assert (
-        overhang_count == 1
-    ), f"Expected 1 overhang scenario, but got {overhang_count}"
-    assert (
-        lateral_count == 1
-    ), f"Expected 1 lateral scenario, but got {lateral_count}"
-    assert (
-        lateral_inverse_count == 1
-    ), f"Expected 1 lateral_inverse scenario, but got {lateral_inverse_count}"
+    assert overhang_count == 1, (
+        f"Expected 1 overhang scenario, but got {overhang_count}"
+    )
+    assert lateral_count == 1, (
+        f"Expected 1 lateral scenario, but got {lateral_count}"
+    )
+    assert lateral_inverse_count == 1, (
+        f"Expected 1 lateral_inverse scenario, but got {lateral_inverse_count}"
+    )
 
     # Intermediate scenarios: 2 per intermediate fraction (forward and inverse)
     assert intermediate_count == 4, (

@@ -174,11 +174,9 @@ export class RteCustomAdapter implements SectionImportAdapter {
         eel_designation: firstSpan?.EEL_DESIGNATION ?? undefined,
         initial_conditions: [],
         selected_initial_condition_uuid: undefined,
-        start_latitude: null,
-        start_longitude: null,
         start_azimuth: null,
         supports,
-        mean_reprojection_diff_meters: null
+        position_error_meters: null
       },
       lambertX,
       lambertY

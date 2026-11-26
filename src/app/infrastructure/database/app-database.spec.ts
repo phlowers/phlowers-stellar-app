@@ -366,4 +366,126 @@ describe('AppDatabase', () => {
     expect(section['maintenance_center_names']).toBeUndefined();
     expect(section['regional_maintenance_center_names']).toBeUndefined();
   });
+
+  it('should register version 11 as a data-only upgrade purging all section geolocation data', async () => {
+    const { AppDatabase } = await import('@infrastructure/database/app-database');
+
+    new AppDatabase();
+
+    const versionCall = dexieState.instances[0].versionCalls[10];
+    expect(versionCall.version).toBe(11);
+    expect(versionCall.schema).toBeUndefined();
+    expect(versionCall.upgrade).toBeInstanceOf(Function);
+  });
+
+  describe('version 11 upgrade', () => {
+    const runUpgrade = async (study: unknown) => {
+      const { AppDatabase } = await import('@infrastructure/database/app-database');
+      new AppDatabase();
+      const upgrade = dexieState.instances[0].versionCalls[10].upgrade!;
+      let modifyCallback: ((s: unknown) => void) | undefined;
+      const tx = {
+        table: (name: string) => {
+          expect(name).toBe('studies');
+          return {
+            toCollection: () => ({
+              modify: (cb: (s: unknown) => void) => {
+                modifyCallback = cb;
+                return Promise.resolve();
+              }
+            })
+          };
+        }
+      };
+      await upgrade(tx);
+      modifyCallback!(study);
+    };
+
+    it('should drop the legacy section keys and reset the start azimuth and support geolocation', async () => {
+      const study = {
+        sections: [
+          {
+            start_latitude: 45.5,
+            start_longitude: 3.5,
+            start_azimuth: 90,
+            mean_reprojection_diff_meters: 0.3,
+            supports: [
+              { footLatitude: 45.5, footLongitude: 3.5, spanAzimut: 12 },
+              { footLatitude: 45.6, footLongitude: 3.6, spanAzimut: 13 }
+            ]
+          }
+        ]
+      };
+
+      await runUpgrade(study);
+
+      const section = study.sections[0] as Record<string, unknown>;
+      expect('start_latitude' in section).toBe(false);
+      expect('start_longitude' in section).toBe(false);
+      expect('mean_reprojection_diff_meters' in section).toBe(false);
+      expect(section['start_azimuth']).toBeNull();
+      expect(study.sections[0].supports).toEqual([
+        { footLatitude: null, footLongitude: null, spanAzimut: null },
+        { footLatitude: null, footLongitude: null, spanAzimut: null }
+      ]);
+    });
+
+    it('should not copy the legacy start GPS onto the first support', async () => {
+      const study = {
+        sections: [
+          {
+            start_latitude: 1,
+            start_longitude: 2,
+            supports: [{ footLatitude: null, footLongitude: null, spanAzimut: null }]
+          }
+        ]
+      };
+
+      await runUpgrade(study);
+
+      expect(study.sections[0].supports).toEqual([{ footLatitude: null, footLongitude: null, spanAzimut: null }]);
+    });
+
+    it('should keep the other section and support fields untouched', async () => {
+      const study = {
+        sections: [
+          {
+            uuid: 'section-uuid',
+            name: 'Section name',
+            start_latitude: 1,
+            start_longitude: 2,
+            start_azimuth: 10,
+            supports: [
+              { uuid: 'support-uuid', spanLength: 100, spanAngle: 5, footLatitude: 1, footLongitude: 2, spanAzimut: 3 }
+            ]
+          }
+        ]
+      };
+
+      await runUpgrade(study);
+
+      expect(study.sections[0]).toMatchObject({ uuid: 'section-uuid', name: 'Section name' });
+      expect(study.sections[0].supports[0]).toEqual({
+        uuid: 'support-uuid',
+        spanLength: 100,
+        spanAngle: 5,
+        footLatitude: null,
+        footLongitude: null,
+        spanAzimut: null
+      });
+    });
+
+    it('should tolerate sections without supports and studies without sections', async () => {
+      const study = { sections: [{ start_latitude: 1, start_longitude: 2, start_azimuth: 3 }] };
+
+      await runUpgrade(study);
+
+      const section = study.sections[0] as Record<string, unknown>;
+      expect('start_latitude' in section).toBe(false);
+      expect(section['start_azimuth']).toBeNull();
+      expect(section['supports']).toBeUndefined();
+
+      await expect(runUpgrade({})).resolves.toBeUndefined();
+    });
+  });
 });

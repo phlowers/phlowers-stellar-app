@@ -15,11 +15,13 @@ Trois méthodes sont disponibles dans un sélecteur radio :
   - Plus précise avec 3 points de mesure ; fournit un contrôle de validité
   - C'est la méthode que vous utiliserez
 
-- **Visée tangentielle** (désactivée)
-  - Pas encore disponible dans {{app_name}}
+- **Visées tangentes** (Support, Intérieur ou Extérieur)
+  - Calcule le paramètre à partir de l'angle de la tangente au câble, selon la position de l'appareil
+  - Voir {doc}`tangent_aiming`
 
-- **PEP** (désactivée)
-  - Pas encore disponible dans {{app_name}}
+- **PEP**
+  - Calcule le paramètre à partir des positions de trois visées sur le câble, mesurées avec un télémètre laser
+  - Voir [Mesure PEP](#mesure-pep) ci-dessous. Le résultat est actuellement une valeur **simulée**, le moteur de calcul n'implémentant pas encore PEP
 
 ## Configuration de la mesure PAPOTO
 
@@ -30,10 +32,10 @@ Tous les champs du formulaire PAPOTO sont **obligatoires**. Vous devez les rempl
 | Libellé | Unité | Signification |
 |---|---|---|
 | **Support de gauche** | — | Sélectionnez l'extrémité de la portée considérée comme le support « gauche » (les deux options sont les supports de la portée sélectionnée). Cela détermine la manière dont les angles horizontaux sont mesurés. |
-| **Longueur mesurée de la portée** | m | Distance entre les deux points d'attache du câble sur les supports. |
-| **Diff. d'altitude des attaches mesurées** | m | Différence de hauteur verticale entre les points d'attache gauche et droit. Si le côté droit est plus haut, la valeur est positive. |
+| **Dist. horizontale entre accr. câble mesurée** | m | Distance horizontale entre les deux points d'attache du câble sur les supports. |
+| **Dist. verticale entre accr. câble mesurée** | m | Différence de hauteur verticale entre les points d'attache gauche et droit. Si le côté droit est plus haut, la valeur est positive. |
 
-Dans {{app_name}}, deux champs **Valeur calculée** (lecture seule) affichent la longueur de la portée et la différence d'altitude calculées à partir de l'analyse du terrain. Comparez-les avec vos valeurs mesurées pour valider vos mesures.
+Dans {{app_name}}, deux champs **Valeur calculée** (lecture seule) affichent la distance horizontale et la distance verticale entre les accrochages du câble, calculées à partir de l'analyse du terrain. Comparez-les avec vos valeurs mesurées pour valider vos mesures.
 
 ### Angles de mesure
 
@@ -107,6 +109,28 @@ Cela peut se produire si :
 - les données d'entrée sont incohérentes
 
 Vérifiez les valeurs saisies et réessayez. Si l'erreur persiste, examinez vos mesures de terrain.
+
+## Rapport et export
+
+Une fois la mesure enregistrée, **Rapport** et **Exporter** reprennent les saisies et les résultats de la méthode PAPOTO (voir {doc}`terrain_data`). Dans l'export JSON, `parameterCalculation.method.papoto` contient les longueurs et dénivelés mesurés et calculés, les angles horizontaux et verticaux, les paramètres 1-2, 2-3 et 1-3, puis le paramètre calculé avec son incertitude et son critère (`threshold` de 0,5 %, `status` : critère respecté ou non). Le support de gauche est exporté avec le libellé affiché dans le formulaire.
+
+## Mesure PEP
+
+La méthode PEP n'est utilisable que si la distance entre les points sur le câble peut être mesurée avec le télémètre laser. Tous les champs sont **obligatoires**.
+
+| Libellé | Unité | Valeurs autorisées | Signification |
+|---|---|---|---|
+| **Support de gauche** | — | Tous les supports de la section (numéro tronqué à 5 caractères) | Par défaut, le support de départ de la portée sélectionnée |
+| **Dist. horiz. Visée G Visée D** | m | 0 à 5000, 2 décimales max | Distance horizontale entre les visées gauche et droite. La longueur de portée calculée par {{app_name}} est affichée à côté |
+| **Dist. verticale Visée G Visée D** | m | -1000 à 1000, 2 décimales max | Dénivelé entre les visées gauche et droite. Le dénivelé calculé est affiché à côté |
+| **X Visée 1 à 3** | m | 0 à 5000, 2 décimales max | Distance horizontale de chaque visée |
+| **Y Visée 1 à 3** | m | -1000 à 1000, 2 décimales max | Distance verticale de chaque visée |
+
+Les champs numériques valent **0** par défaut. Le bouton **Calculer** est désactivé tant que le support de gauche est vide ou qu'une valeur est hors bornes.
+
+La section **Résultats** (paramètre, incertitude, paramètres 1-2, 2-3 et 1-3, critère 0,5 % avec son icône ✓/✗) est masquée jusqu'au clic sur **Calculer**. Modifier une entrée PEP la masque de nouveau et efface le résultat précédent. Les champs restent modifiables après le calcul.
+
+Toute modification d'une entrée PEP peut être enregistrée. Le résultat PEP est disponible pour l'onglet **Paramètre à 15 °C sans vent** en mode « auto ». Le rapport et l'export d'une mesure ne sont pas encore disponibles avec PEP.
 
 ## Étape suivante
 

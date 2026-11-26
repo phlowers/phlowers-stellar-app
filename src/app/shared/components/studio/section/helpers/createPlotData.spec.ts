@@ -1,12 +1,13 @@
 import { createPlotData } from './createPlotData';
 import { PlotOptions } from '@shared/types/plot.types';
-import { createDataObject } from './createPlotDataObject';
+import { createDataObject, createVirtualSupportDataObjects } from './createPlotDataObject';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import { Support } from '@shared/domain/models/support.model';
 
 // Mock the createDataObject function
 vi.mock('./createPlotDataObject');
 const mockCreateDataObject = vi.mocked(createDataObject);
+const mockCreateVirtualSupportDataObjects = vi.mocked(createVirtualSupportDataObjects);
 
 const mockSupports: Support[] = [
   {
@@ -75,6 +76,8 @@ describe('createPlotData', () => {
         spans: [[[100, 200, 300, 400, 500]]],
         obstacles: null,
         distances: null,
+        virtual_supports: null,
+        virtual_insulators: null,
         loads: {}
       },
       output_parameters: {
@@ -126,6 +129,8 @@ describe('createPlotData', () => {
         supportUuid: 's0'
       }
     ]);
+    // No span manipulation by default
+    mockCreateVirtualSupportDataObjects.mockReturnValue([]);
   });
 
   describe('basic functionality', () => {
@@ -251,6 +256,8 @@ describe('createPlotData', () => {
           spans: [],
           obstacles: null,
           distances: null,
+          virtual_supports: null,
+          virtual_insulators: null,
           loads: {}
         },
         output_parameters: {
@@ -372,6 +379,26 @@ describe('createPlotData', () => {
       const result = createPlotData(mockParams, mockOptions, mockSupports);
 
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('virtual supports', () => {
+    it('should append the virtual supports after the spans, supports and insulators', () => {
+      const virtualSupport = { type: 'scatter' as const, name: 'virtual_supports', supportUuid: undefined };
+      mockCreateVirtualSupportDataObjects.mockReturnValue([virtualSupport]);
+
+      const result = createPlotData(mockParams, mockOptions, mockSupports);
+
+      expect(result).toHaveLength(4);
+      expect(result.at(-1)).toBe(virtualSupport);
+    });
+
+    it('should build them from the section coordinates and the plot options', () => {
+      const options: PlotOptions = { view: '3d', side: 'face', invert: false, startSupport: 1, endSupport: 3 };
+
+      createPlotData(mockParams, options, mockSupports);
+
+      expect(mockCreateVirtualSupportDataObjects).toHaveBeenCalledWith(mockParams.coords, 1, 3, '3d', 'face');
     });
   });
 });

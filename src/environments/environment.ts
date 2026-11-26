@@ -10,5 +10,6 @@ export const environment = {
   version: '{BUILD_VERSION}',
   gitHash: '{GIT_HASH}',
   appName: '{APP_NAME}',
+  timeZone: 'Europe/Paris',
   changelogUrl: 'https://api.github.com/repos/phlowers/mechaphlowers/releases'
 };

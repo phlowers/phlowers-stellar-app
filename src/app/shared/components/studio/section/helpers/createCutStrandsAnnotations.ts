@@ -10,15 +10,12 @@ import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { CreatePlotParams } from './createPlot';
 import { CutStrandsAnnotationData } from './createCutStrandsAnnotations.interfaces';
-import { getCutStrandsLabel, getCutStrandsLineLength } from './createCutStrandsAnnotations.constantes';
+import { getCutStrandsLabel } from './createCutStrandsAnnotations.constantes';
 import { buildClickableIconAnnotation } from './createClickableIconAnnotation';
-import { mapAnchorToAxes, resolveAnchorCoord } from './spanAnchor.helpers';
+import { buildDashedIconLine, buildDashedIconLineShape } from './dashedIconLine.helpers';
+import { findSupportTop, mapAnchorToAxes, resolveAnchorCoord } from './spanAnchor.helpers';
 
 type MappedAnchor = ReturnType<typeof mapAnchorToAxes>;
-
-// Highest point of a support: the one its number is written on
-const findSupportTop = (support: number[][] | undefined): number[] | null =>
-  support?.length ? support.reduce((top, point) => (point[2] > top[2] ? point : top), support[0]) : null;
 
 /**
  * Resolves the point the marking hangs from.
@@ -39,70 +36,6 @@ const resolveAnchor = (
   }
   return resolveAnchorCoord(litData, spanIndex, { supportRef, distanceSupportRef: cutStrands.distanceSupportRef });
 };
-
-// z is a non-standard Plotly annotation property used for 3D rendering
-const atAnchor = ({ x, y, z }: MappedAnchor) => ({ xref: 'x' as const, yref: 'y' as const, x, y, z });
-
-/**
- * Dashed line of the 3D view, from the anchor point up to the icon.
- *
- * @remarks
- * A Plotly annotation arrow cannot be dashed, and shapes do not exist in 3D. Each dash is therefore its own
- * arrow-only annotation: its tail sits `end` pixels above the anchor and `standoff` pulls its tip `start` pixels
- * away from the anchor. Both offsets are in pixels, so the line keeps its length at any zoom level or camera angle.
- */
-const buildDashedLine = (anchor: MappedAnchor): Partial<Plotly.Annotations>[] => {
-  const dashes: Partial<Plotly.Annotations>[] = [];
-  const lineLength = getCutStrandsLineLength('3d');
-  for (
-    let start = 0;
-    start < lineLength;
-    start += PlotlyDrawings.cutStrands.dashLength + PlotlyDrawings.cutStrands.dashGap
-  ) {
-    const end = Math.min(start + PlotlyDrawings.cutStrands.dashLength, lineLength);
-    dashes.push({
-      ...atAnchor(anchor),
-      ax: 0,
-      ay: -end,
-      standoff: start,
-      text: '',
-      showarrow: true,
-      // A dash, not an arrow: never a head
-      arrowhead: 0,
-      arrowcolor: PlotlyDrawings.cutStrands.unselected.color,
-      arrowwidth: PlotlyDrawings.cutStrands.lineWidth['3d'],
-      captureevents: false
-    } as Partial<Plotly.Annotations>);
-  }
-  return dashes;
-};
-
-/**
- * Dashed line of the 2D view, from the anchor point up to the icon.
- *
- * @remarks
- * A single shape, anchored on the data point and sized in pixels: the line keeps its length at any zoom level, like
- * the 3D one.
- */
-const buildDashedLineShape = ({ x, y }: MappedAnchor): Partial<Plotly.Shape> => ({
-  type: 'line',
-  xref: 'x',
-  yref: 'y',
-  xsizemode: 'pixel',
-  ysizemode: 'pixel',
-  xanchor: x,
-  yanchor: y,
-  x0: 0,
-  x1: 0,
-  y0: 0,
-  y1: getCutStrandsLineLength('2d'),
-  line: {
-    color: PlotlyDrawings.cutStrands.unselected.color,
-    width: PlotlyDrawings.cutStrands.lineWidth['2d'],
-    // Plotly takes a dash pattern in pixels, which its typings do not list
-    dash: `${PlotlyDrawings.cutStrands.dashLength}px,${PlotlyDrawings.cutStrands.dashGap}px` as Plotly.Dash
-  }
-});
 
 // Clicking the icon opens the RRTS tool. The dashed line is drawn apart, so the icon stands on its own
 const buildIcon = (
@@ -165,7 +98,7 @@ export const createCutStrandsAnnotations = (plotParams: CreatePlotParams): Parti
   if (!anchor) return [];
 
   const icon = buildIcon(anchor, plotParams.view, plotParams.translocoService);
-  return plotParams.view === '3d' ? [...buildDashedLine(anchor), icon] : [icon];
+  return plotParams.view === '3d' ? [...buildDashedIconLine(anchor, PlotlyDrawings.cutStrands), icon] : [icon];
 };
 
 /**
@@ -181,5 +114,5 @@ export const createCutStrandsAnnotations = (plotParams: CreatePlotParams): Parti
 export const createCutStrandsShapes = (plotParams: CreatePlotParams): Partial<Plotly.Shape>[] => {
   if (plotParams.view === '3d') return [];
   const anchor = resolveMarkingAnchor(plotParams);
-  return anchor ? [buildDashedLineShape(anchor)] : [];
+  return anchor ? [buildDashedIconLineShape(anchor, PlotlyDrawings.cutStrands)] : [];
 };

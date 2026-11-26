@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule, DatePipe } from '@angular/common';
+import { Rfc9557ToDatePipe } from '@shared/pipes/rfc9557-to-date.pipe';
 import { AccordionModule } from 'primeng/accordion';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { TagComponent } from '@shared/components/atoms/tag/tag.component';
@@ -26,6 +27,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
     CommonModule,
     DatePipe,
     ExportDialogComponent,
+    Rfc9557ToDatePipe,
     TranslocoModule
   ],
   templateUrl: './study-header.component.html',

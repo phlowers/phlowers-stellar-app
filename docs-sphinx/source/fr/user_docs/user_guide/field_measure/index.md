@@ -10,6 +10,7 @@ Ouvrez-le depuis la barre d'outils du studio, puis créez une nouvelle mesure ou
 
 terrain_data
 parameter_calculation
+tangent_aiming
 temperature_calculation
 parameter_15c_without_wind
 ```

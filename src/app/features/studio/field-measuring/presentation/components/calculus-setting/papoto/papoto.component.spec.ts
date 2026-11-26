@@ -30,7 +30,8 @@ describe('Papoto component', () => {
     plotServiceMock = {
       litData: signal({
         output_parameters: {
-          span_length: [100, 150, 200],
+          span_length: [999, 999, 999],
+          horizontal_distance: [100, 150, 200],
           elevation: [5.5, 10.75, -3.25]
         }
       })
@@ -325,18 +326,18 @@ describe('Papoto component', () => {
     });
   });
 
-  describe('Calculated Span Length', () => {
+  describe('Calculated Horizontal Distance', () => {
     it('should return null when selectedSpan is empty', () => {
       fixture.detectChanges();
 
-      expect(component.calculatedSpanLength()).toBeNull();
+      expect(component.calculatedHorizontalDistance()).toBeNull();
     });
 
     it('should return null when selectedSpan has only one element', () => {
       component.updateField('span', [0]);
       fixture.detectChanges();
 
-      expect(component.calculatedSpanLength()).toBeNull();
+      expect(component.calculatedHorizontalDistance()).toBeNull();
     });
 
     it('should return null when litData is not available', () => {
@@ -344,34 +345,34 @@ describe('Papoto component', () => {
       component.updateField('span', [0, 1]);
       fixture.detectChanges();
 
-      expect(component.calculatedSpanLength()).toBeNull();
+      expect(component.calculatedHorizontalDistance()).toBeNull();
     });
 
-    it('should return null when span_length field is not available in litData', () => {
+    it('should return null when horizontal_distance field is not available in litData', () => {
       plotServiceMock.litData.set({
         output_parameters: { elevation: [5.5, 10.75] }
       } as Partial<GetSectionOutput> as GetSectionOutput);
       component.updateField('span', [0, 1]);
       fixture.detectChanges();
 
-      expect(component.calculatedSpanLength()).toBeNull();
+      expect(component.calculatedHorizontalDistance()).toBeNull();
     });
 
-    it('should return correct span length from litData for given span', () => {
+    it('should return correct horizontal distance from litData for given span', () => {
       component.updateField('span', [0, 1]);
       fixture.detectChanges();
 
-      expect(component.calculatedSpanLength()).toBe(100);
+      expect(component.calculatedHorizontalDistance()).toBe(100);
     });
 
     it('should update when selectedSpan changes to different index', () => {
       component.updateField('span', [0, 1]);
       fixture.detectChanges();
-      expect(component.calculatedSpanLength()).toBe(100);
+      expect(component.calculatedHorizontalDistance()).toBe(100);
 
       component.updateField('span', [1, 2]);
       fixture.detectChanges();
-      expect(component.calculatedSpanLength()).toBe(150);
+      expect(component.calculatedHorizontalDistance()).toBe(150);
     });
   });
 
@@ -399,7 +400,7 @@ describe('Papoto component', () => {
 
     it('should return null when elevation field is not available in litData', () => {
       plotServiceMock.litData.set({
-        output_parameters: { span_length: [100, 150] }
+        output_parameters: { horizontal_distance: [100, 150] }
       } as Partial<GetSectionOutput> as GetSectionOutput);
       component.updateField('span', [0, 1]);
       fixture.detectChanges();

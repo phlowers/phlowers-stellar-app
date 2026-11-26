@@ -122,8 +122,21 @@ describe('ExportDialogComponent', () => {
 
       component.exportStudy();
 
-      expect(mockStudiesService.downloadStudy).toHaveBeenCalledWith('test-uuid', 'export-name');
+      expect(mockStudiesService.downloadStudy).toHaveBeenCalledWith('test-uuid', 'export-name', 'clst');
       expect(mockStudiesService.exportDialogData?.()).toBeNull();
+    });
+
+    it('should download study as stsd when stsd format is selected', () => {
+      component.form.patchValue({ filename: 'export-name', exportFormat: 'stsd' });
+
+      component.exportStudy();
+
+      expect(mockStudiesService.downloadStudy).toHaveBeenCalledWith('test-uuid', 'export-name', 'stsd');
+    });
+
+    it('should default to clst format', () => {
+      expect(component.form.value.exportFormat).toBe('clst');
+      expect(component.exportFormats().map((f) => f.value)).toEqual(['clst', 'stsd']);
     });
 
     it('should not download when form is invalid', () => {

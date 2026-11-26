@@ -35,7 +35,7 @@ User-facing text → **Transloco**, never `$localize` or `i18n` attributes (see
 
 ## Angular — mandatory patterns
 
-Every component: `standalone: true` · `ChangeDetectionStrategy.OnPush` · `inject()` (no constructor DI) · `input()`/`output()` (no `@Input`/`@Output`).  
+Every component: no `standalone: true` (default since Angular 20) · `ChangeDetectionStrategy.OnPush` · `inject()` (no constructor DI) · `input()`/`output()` (no `@Input`/`@Output`).  
 State: `signal()` / `computed()` / `effect()` — no plain mutable properties.  
 Observables in components: always `toSignal()`.  
 Control flow: `@if` / `@for` / `@switch` — never `*ngIf` / `*ngFor`.
@@ -77,6 +77,23 @@ the legacy default) instead of writing a parallel version.
 ## UUID
 
 Always `import { v4 as uuidv4 } from 'uuid'` — never `crypto.randomUUID()`.
+
+---
+
+## Dates — RFC 9557 raw format
+
+Every raw date string written by the app (persisted timestamps, `.stsec` / `.stsd` / `.clst` exports, JSON export of a
+field measure) is RFC 9557: `2026-11-06T16:46:15.869+01:00[Europe/Paris]`. The zone comes from `environment.timeZone`
+(fallback `Europe/Paris`). Helpers: `@shared/helpers/date-time.helpers` (docs: `developer_guide/app/date_time_format.md`).
+
+- Write: `nowRfc9557()` / `formatRfc9557(date)` — never `new Date().toISOString()` for a stored or exported date.
+- Read: `parseRfc9557(value)` — never `new Date(value)` or the `date` pipe directly on a raw string (neither accepts
+  `[Zone]`). In templates: `{{ value | rfc9557ToDate | date: format }}`. Old `...Z` values must keep working.
+- Sort / compare raw dates with `compareRfc9557`, never as text (`localeCompare`, Dexie `orderBy`).
+- In memory and towards Pyodide, dates stay `Date` objects; only strings written to storage or files are RFC 9557.
+- Only the raw format is standard: displayed formats (`date` pipe, `toLocaleDateString`, PDF) are separate and unchanged.
+- Field measure `date` / `time` in files: `serializeFieldMeasureDates` / `normalizeFieldMeasureDates`.
+- Tests touching dates run in several zones (`TZ=Europe/Paris`, `UTC`, `America/New_York`); never assert a `Z` string.
 
 ---
 
@@ -148,6 +165,30 @@ Semantic tags: `<main>` · `<header>` · `<section>` · `<nav>` · `<aside>`.
 - Stop exploring once you have enough context to act; prefer a targeted search over repeated
   broad scans of the repository.
 - Keep responses concise: state what changed and why, skip restating unchanged code.
+
+---
+
+## Tests — mandatory with every change
+
+Every requested feature, fix, or modification **must** ship with its corresponding Vitest test(s) in the same
+task, without being asked: add new specs or update the existing ones so the new behavior is pinned down.
+Run the targeted specs and report the result. Conventions: `.github/instructions/testing.instructions.md`.
+
+---
+
+## Comments — keep them up to date with every change
+
+Every feature, fix, or modification **must** leave the comments of the code it touches accurate, in the same task,
+without being asked: TSDoc of classes, methods and constants, inline comments, and header comments of files or blocks
+whose behavior, parameters, defaults, or contract changed.
+
+- Re-read the comments around each modified line and fix or delete any that became wrong (e.g. "a single `<p-toast>`"
+  after adding a second one).
+- Public API TSDoc (services, helpers, components) must describe the current behavior, including new methods and
+  new obligations for callers.
+- Scope: only the code touched by the change — do not rewrite unrelated comments.
+- Do not add comments that merely restate the code or a constant's name.
+- Update the related developer documentation (`docs-sphinx`, both `en` and `fr`) when the documented behavior changes.
 
 ---
 

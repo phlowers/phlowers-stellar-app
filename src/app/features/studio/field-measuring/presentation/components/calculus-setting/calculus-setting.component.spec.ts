@@ -67,6 +67,15 @@ describe('CalculusSetting component', () => {
     expect(component.measureData().calculationMethod).toBe('tangente-aiming-exterior');
   });
 
+  it('should display the tangent aiming interior component when selected and persist the method', () => {
+    component.onCalculusTypeChange('TANGENT_AIMING_INTERIOR');
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.css('app-tangent-aiming-interior'))).toBeTruthy();
+    expect(fixture.debugElement.query(By.css('app-papoto'))).toBeFalsy();
+    expect(component.measureData().calculationMethod).toBe('tangente-aiming-interior');
+  });
+
   it('should keep the exterior selection when the measure is edited', () => {
     expect(component.selectedCalculusType()).toBe('PAPOTO');
     component.onCalculusTypeChange('TANGENT_AIMING_EXTERIOR');
@@ -135,6 +144,18 @@ describe('CalculusSetting component', () => {
   });
 
   describe('method persistence', () => {
+    it('should persist the PEP method and select the departure support of the span by default (RG.PEP.SUP.3)', () => {
+      component.measureData.update((d) => ({ ...d, span: [3, 4] }));
+      component.onCalculusTypeChange('PEP');
+      const data = component.measureData();
+      expect(data.calculationMethod).toBe('pep');
+      expect(data.pepLeftSupport).toBe('3');
+    });
+
+    it('should not fill the PEP support when selecting PAPOTO', () => {
+      component.onCalculusTypeChange('PAPOTO');
+      expect(component.measureData().pepLeftSupport).toBeNull();
+    });
     it('should persist the tangent aiming method and apply its defaults on selection', () => {
       component.onCalculusTypeChange('TANGENT_AIMING_SUPPORT');
       const data = component.measureData();
@@ -158,10 +179,33 @@ describe('CalculusSetting component', () => {
       expect(data.calculationMethod).toBe('tangente-aiming-exterior');
       expect(data.exteriorParameter).toBe(20);
       expect(data.exteriorSpanLength).toBe(0);
-      expect(data.exteriorCalculationType).toBe('parametre');
+      expect(data.exteriorCalculationType).toBe('tangente');
       expect(data.cableParameter).toBe(before.cableParameter);
       expect(data.leftSupport).toBe(before.leftSupport);
       expect(component.selectedCalculusType()).toBe('TANGENT_AIMING_EXTERIOR');
+    });
+
+    it('should persist the interior method and apply its defaults without touching the other modes', () => {
+      const before = component.measureData();
+      component.onCalculusTypeChange('TANGENT_AIMING_INTERIOR');
+      const data = component.measureData();
+      expect(data.calculationMethod).toBe('tangente-aiming-interior');
+      expect(data.interiorParameter).toBe(20);
+      expect(data.interiorSpanLength).toBe(0);
+      expect(data.interiorHAccDistance).toBe(0);
+      expect(data.interiorVerticalAccAngleLeft).toBe(0);
+      expect(data.interiorVerticalAccAngleRight).toBe(0);
+      expect(data.exteriorParameter).toBe(before.exteriorParameter);
+      expect(data.cableParameter).toBe(before.cableParameter);
+      expect(component.selectedCalculusType()).toBe('TANGENT_AIMING_INTERIOR');
+    });
+
+    it('should keep the values of the interior mode when switching away and back', () => {
+      component.onCalculusTypeChange('TANGENT_AIMING_INTERIOR');
+      component.measureData.update((d) => ({ ...d, interiorHAccDistance: 7 }));
+      component.onCalculusTypeChange('TANGENT_AIMING_EXTERIOR');
+      component.onCalculusTypeChange('TANGENT_AIMING_INTERIOR');
+      expect(component.measureData().interiorHAccDistance).toBe(7);
     });
 
     it('should keep the values of the exterior mode when switching away and back', () => {
@@ -185,7 +229,7 @@ describe('CalculusSetting component', () => {
         return { ...base, outputs: { ...base.outputs, parameter15C } };
       };
 
-      it.each(['PAPOTO', 'TANGENT_AIMING_SUPPORT', 'TANGENT_AIMING_EXTERIOR'])(
+      it.each(['PAPOTO', 'TANGENT_AIMING_SUPPORT', 'TANGENT_AIMING_EXTERIOR', 'TANGENT_AIMING_INTERIOR'])(
         'should clear it in auto mode when selecting %s',
         (type) => {
           componentRef.setInput('measureData', withParameter15C('auto'));
@@ -203,15 +247,21 @@ describe('CalculusSetting component', () => {
       });
     });
 
-    it('should not persist PEP', () => {
+    it('should persist PEP as calculationMethod', () => {
       component.onCalculusTypeChange('PEP');
-      expect(component.measureData().calculationMethod).toBe('papoto');
+      expect(component.measureData().calculationMethod).toBe('pep');
     });
 
     it('should restore the selection from a saved measure', () => {
       componentRef.setInput('measureData', createTestMeasureData({ calculationMethod: 'tangente-aiming' }));
       fixture.detectChanges();
       expect(component.selectedCalculusType()).toBe('TANGENT_AIMING_SUPPORT');
+    });
+
+    it('should restore the interior selection from a saved measure', () => {
+      componentRef.setInput('measureData', createTestMeasureData({ calculationMethod: 'tangente-aiming-interior' }));
+      fixture.detectChanges();
+      expect(component.selectedCalculusType()).toBe('TANGENT_AIMING_INTERIOR');
     });
   });
 
@@ -231,8 +281,14 @@ describe('CalculusSetting component', () => {
       expect(getByTestId('tangent-aiming-exterior-radio')).toBeTruthy();
     });
 
-    it('should render pep-radio', () => {
-      expect(getByTestId('pep-radio')).toBeTruthy();
+    it('should render tangent-aiming-interior-radio', () => {
+      expect(getByTestId('tangent-aiming-interior-radio')).toBeTruthy();
+    });
+
+    it('should render an enabled pep-radio', () => {
+      const pepRadio = getByTestId('pep-radio')?.querySelector('input') as HTMLInputElement | null;
+      expect(pepRadio).toBeTruthy();
+      expect(pepRadio?.disabled).toBe(false);
     });
   });
 });

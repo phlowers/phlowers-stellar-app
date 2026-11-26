@@ -6,6 +6,8 @@
  */
 import { Section, Support } from '@shared/domain';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
+import { normalizeFieldMeasureDates } from '@shared/domain/helpers/field-measure.helpers';
+import { FieldMeasure } from '@shared/domain/models/field-measure.model';
 import { SectionImportCoordinates, SectionImportCrs } from '@shared/import/section-adapter/section-import-adapter';
 import { STELLAR_SECTION_FORMAT } from '@shared/import/section-adapter/section-import-adapter.constantes';
 import { STELLAR_JSON_CRS_VALUES } from './stellar-json.constantes';
@@ -50,8 +52,17 @@ export function mapRawToSection(raw: Record<string, unknown>): Section {
     ...emptySection,
     ...raw,
     uuid,
-    supports: mapRawSupports(raw['supports'])
+    supports: mapRawSupports(raw['supports']),
+    field_measures: mapRawFieldMeasures(raw['field_measures'])
   } as Section;
+}
+
+/** Field measure dates are strings in a file: they are turned back into `Date` instances. */
+function mapRawFieldMeasures(rawMeasures: unknown): FieldMeasure[] {
+  if (!Array.isArray(rawMeasures)) return [];
+  return rawMeasures
+    .filter(isPlainObject)
+    .map((measure) => normalizeFieldMeasureDates(measure as unknown as FieldMeasure));
 }
 
 function mapRawSupports(rawSupports: unknown): Support[] {

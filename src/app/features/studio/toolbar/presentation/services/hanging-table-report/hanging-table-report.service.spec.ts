@@ -35,6 +35,7 @@ vi.mock('jspdf', () => {
     rect: vi.fn(),
     addPage: vi.fn(),
     getNumberOfPages: vi.fn().mockReturnValue(1),
+    internal: { pageSize: { getWidth: vi.fn().mockReturnValue(210), getHeight: vi.fn().mockReturnValue(297) } },
     getTextWidth: vi.fn().mockReturnValue(30),
     splitTextToSize: vi.fn().mockImplementation((text: string) => [text]),
     save: vi.fn()
@@ -158,9 +159,7 @@ describe('HangingTableReportService', () => {
     );
 
     const doc = await getMockDoc();
-    const temperatureLabelCalls = doc.text.mock.calls.filter(
-      (call) => call[0] === 'studio.conformity.temperature-label'
-    );
+    const temperatureLabelCalls = doc.text.mock.calls.filter((call) => call[0] === 'common.temperature-label');
     expect(temperatureLabelCalls).toHaveLength(1);
     expect(doc.addPage).not.toHaveBeenCalled();
   });

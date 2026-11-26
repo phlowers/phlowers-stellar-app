@@ -29,6 +29,12 @@ export interface ConformityPlotOptions {
   ruleColors: Record<string, string>;
   /** Obstacle conformity type, selecting the zone / disk styling. */
   conformityType: ObstacleConformityType;
+  /** Display name per rule type, used as legend entry. Falls back to the rule type. */
+  ruleLabels?: Record<string, string>;
+  /** Legend entry of the cable points. */
+  cablePointsLabel: string;
+  /** Whether the legend is drawn (only when the figure is enlarged). */
+  showLegend?: boolean;
 }
 
 /** Convert a `#rrggbb` hex color to an `rgba()` string with the given alpha. */
@@ -67,7 +73,7 @@ function zoneFillTrace(zonePoints: ConformityZoneCorner[], color: string): Data 
  * Bright hard border traced along the task-provided `zoneBorder` polyline, with a hoverable
  * marker at every intersection (vertex).
  */
-function zoneBorderTrace(zoneBorder: ConformityPlotXY[], color: string): Data {
+function zoneBorderTrace(zoneBorder: ConformityPlotXY[], color: string, legend?: string): Data {
   return {
     x: zoneBorder.map((p) => p.x),
     y: zoneBorder.map((p) => p.y),
@@ -76,12 +82,31 @@ function zoneBorderTrace(zoneBorder: ConformityPlotXY[], color: string): Data {
     line: { color, width: PlotlyDrawings.conformity.borderWidth },
     marker: { color, size: PlotlyDrawings.conformity.borderMarkerSize },
     hovertemplate: HOVER_TEMPLATE,
-    showlegend: false
+    ...legendProps(legend)
+  };
+}
+
+/** Legend entry of a trace when `name` is given; hidden otherwise. */
+function legendProps(name?: string): { name?: string; showlegend: boolean } {
+  return name === undefined ? { showlegend: false } : { name, showlegend: true };
+}
+
+/** Legend-only entry (no point drawn) for a rule whose zone is made of shapes. */
+function legendSwatchTrace(name: string, color: string): Data {
+  return {
+    x: [null],
+    y: [null],
+    type: 'scatter',
+    mode: 'markers',
+    marker: { color, size: PlotlyDrawings.conformity.cablePoint.markerSize, symbol: 'square' },
+    hoverinfo: 'skip',
+    name,
+    showlegend: true
   };
 }
 
 /** Cable candidate points of a zone (overhang / vegetation), all in the single cable color. */
-function zonePointsTrace(points: ConformityCablePoint[]): Data {
+function zonePointsTrace(points: ConformityCablePoint[], legend?: string): Data {
   return {
     x: points.map((p) => p.x),
     y: points.map((p) => p.y),
@@ -92,7 +117,7 @@ function zonePointsTrace(points: ConformityCablePoint[]): Data {
       size: PlotlyDrawings.conformity.cablePoint.markerSize
     },
     hovertemplate: HOVER_TEMPLATE,
-    showlegend: false
+    ...legendProps(legend)
   };
 }
 
@@ -113,12 +138,12 @@ function diskShapes(points: ConformityCablePoint[], color: string): Partial<Shap
 }
 
 /** Center markers of the `cable_track` disks, in the single cable color (like `zonePointsTrace`). */
-function diskCentersTrace(points: ConformityCablePoint[]): Data {
-  return zonePointsTrace(points);
+function diskCentersTrace(points: ConformityCablePoint[], legend?: string): Data {
+  return zonePointsTrace(points, legend);
 }
 
 /** Obstacle point(s), drawn on top for every conformity type. */
-function obstacleTrace(response: ConformityPlotResponse): Data {
+function obstacleTrace(response: ConformityPlotResponse, showLegend: boolean): Data {
   return {
     x: response.obstacle.points.map((p) => p.x),
     y: response.obstacle.points.map((p) => p.y),
@@ -130,7 +155,7 @@ function obstacleTrace(response: ConformityPlotResponse): Data {
       symbol: PlotlyDrawings.conformity.obstaclePoint.symbol
     },
     hovertemplate: `${response.obstacle.name}: ${HOVER_TEMPLATE}`,
-    showlegend: false
+    ...legendProps(showLegend ? response.obstacle.name : undefined)
   };
 }
 
@@ -142,6 +167,8 @@ function obstacleTrace(response: ConformityPlotResponse): Data {
  * - `overhang` / `vegetation`: filled zone with a bright border following the task's
  *   `zoneBorder`; cable points as markers in the cable point color.
  * - `cable_track`: no zone box; cable points drawn as rule-colored disks sized by `radius`.
+ *
+ * When `showLegend` is set, a legend (rules, cable points, obstacle) is drawn in the upper left corner.
  */
 export function createConformityPlot(
   documentRef: Document,
@@ -154,6 +181,9 @@ export function createConformityPlot(
   // Response key order is the stacking priority; draw reversed so the first key lands on top.
   const ruleTypes = Object.keys(response.conformity).filter((rt) => options.selectedRuleTypes.includes(rt));
 
+  const showLegend = options.showLegend ?? false;
+  const ruleLabel = (ruleType: string): string => options.ruleLabels?.[ruleType] ?? ruleType;
+
   const traces: Data[] = [];
   const shapes: Partial<Shape>[] = [];
 
@@ -163,18 +193,24 @@ export function createConformityPlot(
     const color = options.ruleColors[ruleType] ?? PlotlyDrawings.conformity.defaultZoneColor;
     if (isCableTrack) {
       shapes.push(...diskShapes(rule.points, color));
+      if (showLegend) traces.push(legendSwatchTrace(ruleLabel(ruleType), color));
     } else {
-      traces.push(zoneFillTrace(rule.zonePlot.zonePoints, color), zoneBorderTrace(rule.zonePlot.zoneBorder, color));
+      traces.push(
+        zoneFillTrace(rule.zonePlot.zonePoints, color),
+        zoneBorderTrace(rule.zonePlot.zoneBorder, color, showLegend ? ruleLabel(ruleType) : undefined)
+      );
     }
   }
 
   // Cable points on top of every zone fill.
-  for (const ruleType of ruleTypes) {
+  ruleTypes.forEach((ruleType, index) => {
     const rule = response.conformity[ruleType];
-    traces.push(isCableTrack ? diskCentersTrace(rule.points) : zonePointsTrace(rule.points));
-  }
+    // One shared legend entry for the cable points, carried by the first cable points trace.
+    const legend = showLegend && index === 0 ? options.cablePointsLabel : undefined;
+    traces.push(isCableTrack ? diskCentersTrace(rule.points, legend) : zonePointsTrace(rule.points, legend));
+  });
 
-  traces.push(obstacleTrace(response));
+  traces.push(obstacleTrace(response, showLegend));
 
   const layout: Partial<Layout> = {
     ...getPlotlyBaseLayout(),
@@ -187,7 +223,15 @@ export function createConformityPlot(
       scaleanchor: 'x',
       scaleratio: 1
     },
-    shapes
+    shapes,
+    showlegend: showLegend,
+    legend: {
+      x: 0.01,
+      y: 0.99,
+      xanchor: 'left',
+      yanchor: 'top',
+      bgcolor: 'rgba(255, 255, 255, 0.8)'
+    }
   };
 
   const config: Partial<Config> = {

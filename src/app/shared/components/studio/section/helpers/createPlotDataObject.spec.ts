@@ -1,7 +1,8 @@
 import { PlotData } from 'plotly.js-dist-min';
-import { createDataObject } from './createPlotDataObject';
+import { createDataObject, createVirtualSupportDataObjects } from './createPlotDataObject';
 import { Support } from '@shared/domain/models/support.model';
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
+import { SectionCoords } from '@services/worker_python/tasks/types';
 
 const createMockSupport = (overrides: Partial<Support> = {}): Support => ({
   uuid: 'test-uuid',
@@ -324,6 +325,98 @@ describe('createPlotDataObject', () => {
       expect(result).toHaveLength(2);
       expect((result[0] as Partial<PlotData>).x).toEqual([]);
       expect((result[0] as Partial<PlotData>).y).toEqual([]);
+    });
+  });
+
+  describe('createVirtualSupportDataObjects function', () => {
+    // A manipulation in span 0 then one in span 2: crane from the ground up to the hook, then the sling down to the cable
+    const coords = {
+      spans: [],
+      supports: [],
+      insulators: [],
+      virtual_supports: [
+        [
+          [4, 2, 0],
+          [4, 2, 35]
+        ],
+        [
+          [24, -1, 0],
+          [24, -1, 40]
+        ]
+      ],
+      virtual_insulators: [
+        [
+          [4, 2, 35],
+          [5, 0, 30]
+        ],
+        [
+          [24, -1, 40],
+          [25, 0, 30]
+        ]
+      ],
+      virtual_supports_span_indices: [0, 2]
+    } as unknown as SectionCoords;
+
+    it('should draw each virtual support in its own style, then its insulator in the insulator style', () => {
+      const result = createVirtualSupportDataObjects(coords, 0, 1, '2d', 'profile') as Partial<PlotData>[];
+
+      expect(result.map((data) => data.name)).toEqual(['virtual_supports', 'insulators']);
+      expect(result[0].line).toEqual({
+        color: PlotlyDrawings.virtualSupport.color,
+        dash: 'solid',
+        width: PlotlyDrawings.virtualSupport.lineWidth['2d']
+      });
+      expect(result[0].marker).toEqual({ size: PlotlyDrawings.virtualSupport.markerSize['2d'] });
+      expect(result[1].line?.color).toBe(PlotlyDrawings.insulator.color);
+    });
+
+    it('should not number the virtual supports nor link them to a real support', () => {
+      const [support] = createVirtualSupportDataObjects(coords, 0, 1, '2d', 'profile');
+
+      expect((support as Partial<PlotData>).mode).toBe('lines+markers');
+      expect((support as Partial<PlotData>).text).toEqual([]);
+      expect(support.supportUuid).toBeUndefined();
+    });
+
+    it('should use the 3D style and keep the 3 axes in 3D', () => {
+      const [support] = createVirtualSupportDataObjects(coords, 0, 1, '3d', 'profile') as Partial<PlotData>[];
+
+      expect(support.type).toBe('scatter3d');
+      expect(support.line?.width).toBe(PlotlyDrawings.virtualSupport.lineWidth['3d']);
+      expect([support.x, support.y, support.z]).toEqual([
+        [4, 4],
+        [2, 2],
+        [0, 35]
+      ]);
+    });
+
+    it('should map the axes of the 2D face view', () => {
+      const [support] = createVirtualSupportDataObjects(coords, 0, 1, '2d', 'face') as Partial<PlotData>[];
+
+      expect([support.x, support.y]).toEqual([
+        [2, 2],
+        [0, 35]
+      ]);
+    });
+
+    it.each([
+      [0, 3, [4, 24]],
+      [1, 3, [24]],
+      // endSupport belongs to the next span: the span starting there is not displayed
+      [0, 2, [4]],
+      [1, 2, []]
+    ])('should only draw the spans visible from support %i to %i', (startSupport, endSupport, expectedX) => {
+      const result = createVirtualSupportDataObjects(coords, startSupport, endSupport, '2d', 'profile');
+
+      expect(
+        result.filter((data) => data.name === 'virtual_supports').map((data) => (data as Partial<PlotData>).x?.[0])
+      ).toEqual(expectedX);
+    });
+
+    it('should draw nothing without a span manipulation', () => {
+      expect(
+        createVirtualSupportDataObjects({ ...coords, virtual_supports_span_indices: null }, 0, 3, '2d', 'profile')
+      ).toEqual([]);
     });
   });
 });

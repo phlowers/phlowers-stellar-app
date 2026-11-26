@@ -16,15 +16,17 @@ The terrain data tab is implemented by the following components and support file
 - **Helpers**: `presentation/helpers.ts` (e.g., `createInitialMeasureData`, `buildTimeModeOptions`, option builders)
 - **Constants**: `presentation/constants.ts` (field bounds, option keys, export mappings)
 - **Export helpers**: `presentation/field-measure-export.helpers.ts` (JSON export structure)
+- **PDF report**: `presentation/services/field-measure-report/` (`*.helpers.ts` for the data and drawing, `*.service.ts` for the generation)
 
 ## Workflow
 
 1. **Init Phase**: User opens the Field Measuring tool. The `InitComponent` allows creating a new measurement (with auto-generated name) or selecting an existing one.
 2. **Main Phase**: Once a measure is selected or created, `FieldMeasuringComponent` displays a dialog with four tabs. The **Terrain Data** tab is shown by default.
 3. **Data Entry**: User fills in location and environmental fields via `HeaderComponent` (shared) and `FieldDatasComponent` (tab-specific).
-4. **Validation**: `FieldMeasuringComponent` computes `isFormValid` by checking all mandatory fields and their bounds.
+4. **Validation**: `FieldMeasuringComponent` computes `isGlobalFormValid` (name and header) and `isTerrainDataValid` (Terrain Data tab) by checking all mandatory fields and their bounds.
 5. **Save**: Calls `PlotService.modifySection()` to persist the measure to the section's `field_measures` array.
-6. **Export**: Calls `buildFieldMeasureExportJson()` to generate a JSON export (if all tabs pass validation).
+6. **Export**: `onExport()` calls `buildFieldMeasureExportJson()` on the last saved snapshot (`lastSavedMeasureData`), once `canReportOrExport()` is true (global form valid, displayed tab valid, no unsaved change), then saves the file (see the Export section below).
+7. **Report**: Calls `buildFieldMeasureReportData()` then `FieldMeasureReportService.generateReport()` to generate a PDF report of the saved measure (same enabling condition as the export).
 
 ## Data Model
 
@@ -40,7 +42,7 @@ The measure data is typed as `FieldMeasure` (from `domain/types.ts`), which incl
   - `ambientTemperature` (number, °C): range -50 to 99
   - `windSpeed` (number): range 0 to 50
   - `windSpeedUnit` ('kmh' | 'ms'): km/h or m/s
-  - `windDirection` (string): one of 8 compass directions (North, North-East, …)
+  - `windDirection` (string): one of 16 compass directions (North, North-North-East, North-East, …)
   - `skyCover` (SkyCover enum N0–N8): nebulosity scale
 - **Location data** (Header, shared):
   - `span` (number[] | null): `[leftSupportIndex, rightSupportIndex]`
@@ -48,7 +50,7 @@ The measure data is typed as `FieldMeasure` (from `domain/types.ts`), which incl
   - `latitude` (number, degrees): range -90 to 90
   - `altitude` (number, m): range -100 to 9000; auto-calculated from span's support heights
   - `azimuth` (number, degrees): range -180 to 180
-- **Outputs** (computed): `papoto` (PapotoResult | null), `cableTemperature` (TemperatureCalculationResult | null), `parameter15C` (Parameter15CResult | null)
+- **Outputs** (computed): `papoto` (PapotoResult | null), `cableTemperature` (TemperatureCalculationResult | null), `parameter15C` (Parameter15CResult | null), `tangentAimingSupport` / `tangentAimingExterior` / `tangentAimingInterior` (TangentAimingSupportResult | null, see {doc}`tangent_aiming`)
 
 Additional fields exist for other tabs (parameter calculation, temperature, parameter at 15°C); see the model for full details.
 
@@ -68,9 +70,8 @@ Additional fields exist for other tabs (parameter calculation, temperature, para
 - On span or reference-support change, the component also attempts to auto-fill longitude/latitude/azimuth from the study localization for that span.
 
 **Automatic localization resolution:**
-- The logic lives in `HeaderComponent.fillLocalization()` and uses the same worker contract as the section-data view: `Task.computeLocalization`.
-- `buildSectionLocalizationPayload()` builds the payload from the section's `start_latitude`, `start_longitude`, `start_azimuth`, and each support's `spanLength` / `spanAngle`.
-- `getSpanLocalization()` selects the corresponding support localization from the computed arrays, preferring the selected reference support and falling back to the left support when needed.
+- The logic lives in `HeaderComponent.fillLocalization()` and uses `GeopositioningService.resolveLocalization()`: the stored foot GPS / `spanAzimut` of the supports, or an on-the-fly `Task.computeLocalization` (from the first support foot GPS, `start_azimuth` and each support's `spanLength` / `spanAngle`) when they are not stored.
+- `getSpanLocalization()` selects the corresponding support localization from the resolved arrays, preferring the selected reference support and falling back to the left support when needed.
 - If no finite values are available, the app shows the translated info message `field-measuring.header.localization-not-available` (text: “Localization not available in study”).
 
 ### FieldDatasComponent
@@ -88,7 +89,7 @@ Additional fields exist for other tabs (parameter calculation, temperature, para
 - **Time / Season**: season toggle (Summer/Winter) + time picker (24-hour format).
 - **Ambient temperature**: number input (°C), range -50 to 99.
 - **Wind speed**: number input (0–50) + unit toggle (km/h or m/s).
-- **Wind direction**: dropdown (8 compass directions).
+- **Wind direction**: dropdown (16 compass directions).
 - **Sky cover**: dropdown (N0–N8 nebulosity scale).
 
 All fields display a mandatory-field info message (`field-measuring.field-datas.mandatory-msg`).
@@ -107,7 +108,7 @@ All fields display a mandatory-field info message (`field-measuring.field-datas.
 
 ## Validation Rules
 
-### Field Bounds (FieldMeasuringComponent.isFormValid)
+### Field Bounds (FieldMeasuringComponent.isGlobalFormValid / isTerrainDataValid)
 
 All fields are mandatory and checked for range:
 - `name`: non-empty, unique
@@ -121,7 +122,13 @@ All fields are mandatory and checked for range:
 - `windDirection`, `skyCover`: required
 - `transit` (optional field in other tabs): if present, 0–4000 Amperes
 
-**Export Validation:** The export button is enabled only if `isFormValid()` AND all other tabs (Parameter Calculation, Temperature Calculation, Parameter at 15°C) are also valid.
+**Export and report:** both buttons are enabled only when `canReportOrExport()` is true: the global form (`isGlobalFormValid`: name, span, longitude, latitude, altitude, azimuth) valid, the displayed tab valid (`isTerrainDataValid`, `isParameterCalculationValid`, `isTemperatureCalculationValid` or `isParameter15CValid`, the other tabs are ignored) and no unsaved change (`isSaved`: same calculation method as the last saved snapshot and no edited input, see `hasEditedInputs`).
+
+- `isParameterCalculationValid` delegates to `TANGENT_AIMING_MODES[method].isDataValid` for the three tangent aiming variants, to `isPapotoDataValid` for PAPOTO, and is always true for the PEP placeholder.
+- `isParameter15CValid` is always true in `auto` mode (the tab has no editable input) and uses `isManual15CDataValid` in `manual` mode.
+- While the buttons are disabled, `reportExportBlockedReason()` computes the message displayed in the footer (`data-testid="report-export-blocked-reason"`), built from the `field-measuring.report.blocked-invalid-global`, `blocked-invalid-tabs` and `blocked-unsaved` keys.
+
+**Calculate buttons:** each tab disables its own button until its inputs are valid: `isPapotoDataValid` (PAPOTO), `canCalculate()` of `TangentAimingFormBase` (valid form, `tangente` calculation type, no calculation running), `isTemperatureDataValid` (temperature), and `isFormValid()` (15°C: in `auto` mode a parameter, its uncertainty and a cable temperature with its uncertainty must exist in `outputs`; in `manual` mode `isManual15CDataValid`). The temperature **Estimate** button also requires the worker to be ready (`canEstimateSkyCover`).
 
 **Uniqueness Check:** `isNameAlreadyTaken` computed property checks if `measureData().name` matches any existing measure (excluding self by UUID).
 
@@ -130,16 +137,33 @@ All fields are mandatory and checked for range:
 ### Save
 
 - **Handler**: `FieldMeasuringComponent.onSave()`
-- **Condition**: enabled when `isFormValid() && hasUnsavedChanges()`
+- **Condition**: enabled when `canSave()`: non-empty, unique name and `hasEditedInputs()` (any edited input, whatever the tab; field validity is not required)
 - **Action**: calls `PlotService.modifySection({ field_measures: [...updated...] })` to persist
 - **Snapshot**: `lastSavedMeasureData` signal is updated; `hasUnsavedChanges` is recomputed
 
 ### Export
 
 - **Handler**: `FieldMeasuringComponent.onExport()`
-- **Condition**: enabled when `isFormValid() && isParameterCalculationValid && isTemperatureCalculationValid && isParameterAt15CValid`
+- **Condition**: enabled when `canReportOrExport()`
+- **Source**: `lastSavedMeasureData()` (the saved snapshot), with the current section (`SpanService`), study and `litData` (`PlotService`)
 - **Output**: JSON file (via `buildFieldMeasureExportJson()`) with study/section metadata and measure data
-- **Filename**: `Export Mesure de terrain_<measure name>_<section name>_<date>.json`
+- **Saving**: `saveExportFile()` uses `showSaveFilePicker` when available (typed in `field-measure-export.window.d.ts`; a user cancellation, `AbortError`, is silently ignored; other errors are logged through `LoggerService` and fall back to the download), otherwise downloads the file through a temporary `<a download>` link
+- **Filename**: `Export Mesure de terrain_<measure name>_<section name>_<date>.json` (`buildFieldMeasureExportFilename()`)
+- **Structure**: `{ groundMeasurement: [ { general, measure, span, temperatureCalculation, parameterCalculation, zeroWindCalculation } ] }`, typed in `field-measure-export.interfaces.ts`
+- **`measure`**: `season` is translated (`ETE`/`HIVER` in French, `SUMMER`/`WINTER` in English, keys `field-measuring.export-labels.season.*`); `date` and `time` are RFC 9557 date-times (`YYYY-MM-DDTHH:mm:ss.SSS±HH:MM[Zone]`, like `general.date`, zone from `environment.timeZone`, see [raw date format](../app/date_time_format.md)) with the offset in force on the measure day, daylight saving time included: `date` is the midnight of the measure day, `time` is the entered time on that day
+- **`parameterCalculation`**: only the block of the retained method is present in `method`.
+  - `leftSupport` is the support number shown by the form: the PAPOTO label as stored, or for tangent aiming the number resolved from the stored support index (`buildSpanSupportOptions`).
+  - Tangent aiming exports `methodName: "VISEES_TANGENTES"` and `subMethodName` `SUPPORT` / `EXTERIEUR` / `INTERIEUR`. The `tangentialSights` block reads the fields of the retained variant through `TANGENT_AIMING_REPORT_CONFIGS`. In the Support variant the entered distance is exported as `leftSupportMeasures.verticalDistance` (no left vertical angle); the other variants export `horizontalDistance` and `verticalAngle`.
+  - `calculatedParameter.criterion` is `{ threshold, unit: "%", status }`, with `threshold` = `0.5` for PAPOTO and `1` for tangent aiming (`PAPOTO_VALIDITY_CRITERION_PERCENT`, `TANGENT_AIMING_VALIDITY_CRITERION_PERCENT`). It is absent while the method is not calculated.
+  - The PEP block is still a placeholder.
+
+### Report
+
+- **Handler**: `FieldMeasuringComponent.onReport()`
+- **Condition**: enabled when `canReportOrExport()` (all calculation methods, including tangent aiming)
+- **Output**: A4 portrait PDF (jsPDF, Nunito font): study / section cartouche then one paragraph per tab. Only the retained parameter calculation method (and sub-method) and the values of the retained "Update values" mode are reported; conditional data (phase number, parameter or tangent angle) are present only when their condition is met
+- **Units**: those of US.MES.RAP (sight angles in `gr`, wind speed in m/s, etc.), defined in `field-measure-report.constantes.ts`
+- **Filename**: `Rapport Mesure de terrain_<measure name>_<section name>_<generation date and time>.pdf`
 
 ## Mermaid Diagram: Workflow
 
@@ -171,6 +195,7 @@ The following spec files cover the terrain data functionality:
 - `presentation/components/init/init.component.spec.ts` – Init screen (create/select)
 - `presentation/components/field-measuring/field-measuring.component.spec.ts` – Dialog, validation, save/export
 - `presentation/field-measure-export.helpers.spec.ts` – JSON export structure
+- `presentation/helpers.spec.ts` – shared helpers (validity, filename)
 - `presentation/components/temperature-calculation/temperature-calculation.component.spec.ts` – Linked tab
 - `presentation/components/parameter-calculation-15-without-wind/parameter-calculation-15-without-wind.component.spec.ts` – Linked tab
 - `presentation/components/calculus-setting/calculus-setting.component.spec.ts` – Linked tab

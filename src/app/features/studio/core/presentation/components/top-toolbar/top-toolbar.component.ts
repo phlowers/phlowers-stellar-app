@@ -237,15 +237,6 @@ export class StudioTopToolbarComponent implements OnInit {
       }
     },
     {
-      id: 4,
-      label: this.translocoService.translate('studio.top-toolbar.cable-marking-tool'),
-      checked: false,
-      disabled: true,
-      action: () => {
-        alert('click Cable marking');
-      }
-    },
-    {
       id: 5,
       label: this.translocoService.translate('studio.top-toolbar.strand-rrts-tool'),
       checked: false,
@@ -258,18 +249,9 @@ export class StudioTopToolbarComponent implements OnInit {
       id: 6,
       label: this.translocoService.translate('studio.top-toolbar.forest-trenches-tool'),
       checked: false,
-      disabled: true,
+      disabled: false,
       action: () => {
-        alert('click Forest trenches');
-      }
-    },
-    {
-      id: 7,
-      label: this.translocoService.translate('studio.top-toolbar.height-and-lateral-distance-tool'),
-      checked: false,
-      disabled: true,
-      action: () => {
-        alert('click Height & lateral distance');
+        this.toolbarDialogService.openTool('forest-trenches');
       }
     },
     {
@@ -279,6 +261,15 @@ export class StudioTopToolbarComponent implements OnInit {
       disabled: false,
       action: () => {
         this.toolbarDialogService.openTool('cable-adjustment');
+      }
+    },
+    {
+      id: 9,
+      label: this.translocoService.translate('studio.estimations.title'),
+      checked: false,
+      disabled: false,
+      action: () => {
+        this.toolbarDialogService.openTool('estimations');
       }
     }
   ]);

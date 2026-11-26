@@ -2,24 +2,22 @@
 
 ## Purpose
 
-The **Parameter Calculation** tab provides field measurement methods to compute the electrical sag parameter from on-site angle and distance observations. Currently, only the **PAPOTO** method is implemented; the Tangent Aiming and PEP methods are placeholder components (disabled radio buttons).
+The **Parameter Calculation** tab provides field measurement methods to compute the electrical sag parameter from on-site angle and distance observations. The **PAPOTO** and **Tangent Aiming** methods (Support, Interior and Exterior variants; see {doc}`tangent_aiming`) are implemented; the PEP method has its form and its result display, but its result is mocked (`PEP_MOCK_RESULT`) until the engine implements the calculation.
 
-The computed parameter feeds the **Parameter at 15°C without wind** tab in "auto" mode, which uses `outputs.papoto.parameter` and `outputs.papoto.uncertainty` to perform subsequent thermal calculations.
+The computed parameter feeds the **Parameter at 15°C without wind** tab in "auto" mode, which uses the parameter and uncertainty of the retained method (`getActiveParameterOutput()`: `outputs.papoto` or the `outputs.tangentAiming*` of the selected variant) to perform subsequent thermal calculations.
 
 ## Component Tree and Files
 
 The parameter calculation tab is implemented by the following components (relative paths from `src/app/features/studio/field-measuring/`):
 
 - **Method selector & container**: `presentation/components/calculus-setting/calculus-setting.component.ts` and `.html`
-  - Radio buttons for PAPOTO, Tangent Aiming (disabled), PEP (disabled)
+  - Radio buttons for PAPOTO, Tangent Aiming (Support, Interior, Exterior), PEP
   - Conditional rendering of child component based on selection
 - **PAPOTO measurement form**: `presentation/components/calculus-setting/papoto/papoto.component.ts` and `.html`
   - Input fields for span length, elevation difference, and 12 angles (HL, H1–H3, HR, VL, V1–V3, VR)
   - Help dialog with visual guidance (`papoto-help.webp` image)
   - Results section (parameter, uncertainty, parameters 1–2, 2–3, 1–3, 0.5% validity criterion)
-  - **Placeholder components** (no logic):
-    - `presentation/components/calculus-setting/tangent-aiming/tangent-aiming.component.ts` (disabled)
-    - `presentation/components/calculus-setting/pep/pep.component.ts` (disabled)
+- **PEP form**: `presentation/components/calculus-setting/pep/pep.component.ts` (mocked result), with `pep.helpers.ts` (validation, support options, defaults), `pep.constantes.ts` (`PEP_FIELD_RULES`, `PEP_MOCK_RESULT`, `PEP_SIGHTS`) and `pep.interfaces.ts`
 - **Domain model**: `domain/types.ts` (exports `FieldMeasure` interface with PAPOTO fields and `PapotoResult`)
 - **Helpers**: `presentation/helpers.ts` and `presentation/constants.ts`
 - **Main field measuring**: `presentation/components/field-measuring/field-measuring.component.ts` (lifecycle, validation, tab synchronization)
@@ -124,15 +122,41 @@ Error details are logged in the browser console but are not exposed to the end u
 
 When the user opens the **Parameter at 15°C without wind** tab in **"auto"** update mode:
 
-1. `parameterPapoto` is populated from `outputs.papoto.parameter`
-2. `parameterUncertaintyPapoto` is populated from `outputs.papoto.uncertainty`
+1. The parameter is taken from `getActiveParameterOutput()` (`outputs.papoto.parameter` for PAPOTO)
+2. The uncertainty is taken from the same output (`outputs.papoto.uncertainty` for PAPOTO)
 
 If the user switches to **"manual"** mode, the auto-populated values are preserved and become editable. Any change to PAPOTO inputs (HL, H1, etc., or span length) clears the stale result (`outputs.papoto = null`), forcing recalculation if needed.
+
+## Report and export
+
+Once the measure is saved (see {doc}`terrain_data`), the PAPOTO inputs and result are exported in `parameterCalculation.method.papoto` by `buildPapotoMethodExport` (`presentation/field-measure-export.helpers.ts`): measured horizontal and vertical distances between attachments (`spanLength`, `measuredElevationDifference`), calculated ones (`horizontal_distance` and `elevation` from `litData.output_parameters` for the left support of the span), horizontal and vertical angles, intermediate parameters 1-2, 2-3 and 1-3, and `calculatedParameter` (`{ parameter, criterion: { threshold: 0.5, unit: "%", status } }`, `PAPOTO_VALIDITY_CRITERION_PERCENT`). `parameterCalculation.leftSupport` is the support number displayed by the PAPOTO form. The PEP export is described in the PEP method section below.
+
+## PEP Method
+
+The PEP form (`PepComponent`) writes into `measureData` (two-way `model`). No Python task exists yet: `calculate()` stores `PEP_MOCK_RESULT` in `outputs.pep` (`PapotoResult` shape), whatever the inputs. Replace it by a `Task.calculatePep` call once the engine implements PEP.
+
+| Rule | Behaviour |
+|---|---|
+| RG.PEP.SUP.1 | Left support options = every section support, value = support index, label truncated to 5 characters (`buildPepSupportOptions`) |
+| RG.PEP.SUP.3 | When PEP is selected (or a legacy measure is opened), an empty `pepLeftSupport` defaults to the departure support of the span (`applyPepDefaults`) |
+| RG.PEP.LON/DEN/XV/YV.1 | Bounds and max decimals per input in `PEP_FIELD_RULES`: length and X in 0–5000, elevation and Y in −1000–1000, 2 decimals |
+| RG.PEP.*.2 | Numeric inputs default to 0 (`PEP_INPUT_DEFAULTS`, `applyPepDefaults`) |
+| RG.PEP.LON-CAL.1 / DEN-CAL.1 | Calculated span length / elevation read from `litData` for the span starting at the left support |
+| RG.PEP.CAL-BNT.1 | Calculate button disabled while `isPepDataValid` is false (no left support or an invalid input) |
+| RG.PEP.CAL-BNT.2 / RES-CAD.1 | Results are shown only when the form is valid and `outputs.pep` is set; `updateField` resets `outputs.pep` to `null` on any edit |
+| RG.PEP.CRI-RES | 0.5% criterion shown as yes/no from `checkValidity` |
+| RG.PEP.ENR-BTN.1 | Any PEP input edit re-enables Save; `toUnsavedChangesComparable` applies `applyPepDefaults` so the defaults of a legacy measure are not seen as edits |
+
+When PEP is inactive, `CALCULUS_MODE_RESETTERS.pep` restores `PEP_INPUT_DEFAULTS` (`pepLeftSupport: null`, numeric inputs 0) and clears `outputs.pep`. `getActiveParameterOutput` returns `outputs.pep` for the PEP method, which feeds the 15°C tab in "auto" mode.
+
+The PDF report (`buildPepRows`) and the JSON export (`buildPepMethodExport`) read `outputs.pep`, but `canReportOrExport` stays false with PEP (`isParameterCalculationValid` returns false), so neither can be triggered yet.
 
 ## Tests
 
 **Angular component tests:**
 - `src/app/features/studio/field-measuring/presentation/components/calculus-setting/papoto/papoto.component.spec.ts`
+- `src/app/features/studio/field-measuring/presentation/components/calculus-setting/pep/pep.component.spec.ts` and `pep.helpers.spec.ts` (PEP rules above)
+- `src/app/features/studio/field-measuring/presentation/calculus-mode-reset.helpers.spec.ts`, `helpers.spec.ts`, `field-measure-export.helpers.spec.ts` and `services/field-measure-report/field-measure-report.helpers.spec.ts` (PEP reset, active output, export and report)
 
 **Python backend tests:**
 - `stellar-engine/test/tools/test_papoto.py` (tests the `papoto.calculate_papoto()` function and `PapotoParameterMeasure` class from mechaphlowers)

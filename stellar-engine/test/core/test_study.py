@@ -204,3 +204,26 @@ class TestInitStudy:
             ].to_numpy(),
             np.array([0.01, 0.01]),
         )
+
+    def test_initial_temperature(self, input_dict_2_supports: dict):
+        input_dict_2_supports["section"]["initial_conditions"][0][
+            "base_temperature"
+        ] = 7
+        study, base_study = initialize_study(input_dict_2_supports)
+        expected_temp = np.array([7, np.nan])
+        np.testing.assert_array_equal(
+            study.balance_engine.section_array.data[
+                "sagging_temperature"
+            ].to_numpy(),
+            expected_temp,
+        )
+        np.testing.assert_array_equal(
+            base_study.balance_engine.section_array.data[
+                "sagging_temperature"
+            ].to_numpy(),
+            expected_temp,
+        )
+        np.testing.assert_array_equal(
+            base_study.balance_engine.balance_model.current_temperature,
+            np.array([7]),
+        )

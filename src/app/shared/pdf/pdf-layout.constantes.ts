@@ -19,6 +19,9 @@ export const LANDSCAPE_PAGE = { width: 297, height: 210 } as const;
 /** Content area width (page width minus left and right margins). */
 export const CONTENT_WIDTH = PAGE_SIZE.width - PAGE_MARGIN.left - PAGE_MARGIN.right;
 
+// Lowest baseline of the content on a portrait page (page height minus bottom margin), above the footer
+export const CONTENT_BOTTOM = PAGE_SIZE.height - PAGE_MARGIN.bottom;
+
 /** Line height in mm. */
 export const LINE_HEIGHT = 5;
 
@@ -59,6 +62,13 @@ export const FONT_SIZES = {
   appName: 8
 } as const;
 
+// Spacing (mm) jsPDF leaves between the lines of a multi-line value: FONT_SIZES.value at its default line height
+// factor (1.15), converted from pt (1 pt = 25.4 / 72 mm)
+export const VALUE_LINE_SPACING = (FONT_SIZES.value * 1.15 * 25.4) / 72;
+
+// Width (mm) available to one column of a two-column bullet section, minus the indent kept before the next column
+export const TWO_COLUMN_WIDTH = CONTENT_WIDTH / 2 - PARAGRAPH_INDENT;
+
 /** Application name displayed in the PDF header. */
 export const APP_NAME = environment.appName;
 
@@ -80,5 +90,8 @@ export const PDF_UNITS = {
   celsius: '°C',
   cra: '%CRA',
   centimeters: 'cm',
-  squareMeters: 'm\u00B2'
+  squareMeters: 'm\u00B2',
+  metersPerSecond: 'm/s',
+  ampere: 'A',
+  wattsPerSquareMeter: 'W/m\u00B2'
 } as const;

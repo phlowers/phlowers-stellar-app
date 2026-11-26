@@ -41,6 +41,9 @@ Paths are relative to `src/app/`, except `stellar-engine/`, relative to the repo
 | `features/studio/obstacles/presentation/components/conformity/conformity.model.ts` | `ConformityRuleResult`, `ResultRow`, `ConformityOption` |
 | `features/studio/obstacles/presentation/components/conformity/conformity-plot.model.ts` | `ConformityPlotResponse`: the figure data contract |
 | `features/studio/obstacles/presentation/components/conformity/helpers/createConformityPlot.ts` | Plotly rendering of the figure |
+| `features/studio/obstacles/presentation/components/conformity/conformity-export.interfaces.ts` | Types of the JSON export contract |
+| `features/studio/obstacles/presentation/components/conformity/conformity-export.constantes.ts` | Export file name prefix, units, file picker types |
+| `features/studio/obstacles/presentation/components/conformity/conformity-export.helpers.ts` | Pure builders of the export JSON and file name |
 | `features/studio/obstacles/presentation/components/obstaclesForm/obstaclesForm.component.ts` | Eligibility checks and modal hosting |
 | `shared/domain/models/obstacle.model.ts` | `ConformityFormData`, the inputs saved with the obstacle |
 
@@ -344,12 +347,12 @@ the scenarios did not produce is `null`.
 | `overhangCableLineAxisDistance` | Distance to the line axis (`x` in the plane, measured from the axis of the span) of the cable point in the `overhang` scenario. |
 | `lateralCableLineAxisDistance` | Distance to the line axis (`x` in the plane, measured from the axis of the span) of the cable point in the `lateral` scenario. |
 | `overhangDistanceToComply`, `lateralDistanceToComply` | Security distance of the rule at the voltage. |
-| `overhangComplianceAltitude` | Gap between the obstacle and the `overhang` point minus `overhangDistanceToComply`, negative when too close. For `vegetation` and `overhang` the gap is **signed**, so it is also negative when the obstacle is **above the cable**. Filled for `cable_track`, `vegetation` and `overhang`. See [Compliance values](#conformity-compliance-values). |
-| `lateralComplianceLineAxisDistance` | Distance from the obstacle to the closest lateral side point minus `lateralDistanceToComply`, negative when too close. Filled for `cable_track` and `vegetation`. See [Compliance values](#conformity-compliance-values). |
+| `overhangComplianceAltitude` | Altitude (`y` in the plane) of the zone border, not the margin to the obstacle. Filled for `cable_track`, `vegetation` and `overhang`. See [Compliance values](#conformity-compliance-values). |
+| `lateralComplianceLineAxisDistance` | Lateral coordinate (`x` in the plane) of the zone border, not the margin to the obstacle. Filled for `cable_track` and `vegetation`. See [Compliance values](#conformity-compliance-values). |
 | `overhangTemperature`, `lateralTemperature` | Temperature (°C) of the scenario producing the closest overhang / lateral side point. |
 | `overhangWindPressure`, `lateralWindPressure` | Wind pressure (Pa) of the scenario producing the closest overhang / lateral side point. |
 | `overhangMinimalDistance`, `lateralMinimalDistance` | Euclidean distance, in the distance plane, from the obstacle to the closest overhang / lateral side point. |
-| `conformityCompliance` | `true` / `false`, or `null` when neither compliance value above is filled. |
+| `conformityCompliance` | `true` / `false`, or `null` when neither internal compliance margin is available. |
 
 :::{note}
 The **lateral side** groups the `lateral`, `lateral_inverse` and `intermediate` scenarios
@@ -361,36 +364,49 @@ so `lateralWindPressure` is negative when the `lateral_inverse` point is the clo
 (conformity-compliance-values)=
 #### Compliance values
 
-The compliance values are computed per graph type from the obstacle point and the projected cable
-points, all in the plane (the `PlotStrategy` of the graph type, applied by
-`ConformityTableResult.from_outcomes()`). The *lateral side points* are the points of
+The table returns **border coordinates**, not signed margins. These use the same coordinate
+system as the obstacle and projected cable points. The *lateral side points* are the points of
 the `lateral`, `lateral_inverse` and `intermediate` scenarios.
 
 | Graph type | `overhangComplianceAltitude` | `lateralComplianceLineAxisDistance` |
 |---|---|---|
-| `cable_track` | Euclidean distance obstacle to overhang point, minus distance to comply. | Euclidean distance obstacle to the closest lateral side point, minus distance to comply. |
-| `vegetation` | $y_{overhang} - y_{obstacle}$ minus distance to comply (signed: negative when the obstacle is above the cable). | $\min \lvert x_{obstacle} - x_{side} \rvert$ over the lateral side points, minus distance to comply. |
+| `cable_track` | `y` of the circle boundary toward the obstacle, for the closest overhang point. | `x` of the circle boundary toward the obstacle, for the closest lateral side point. |
+| `vegetation` | Lowest `y` of the plotted zone border (lowest scenario altitude minus the overhang distance). | `x` of the outer left or right plotted border nearest to the obstacle; the left border wins ties. |
 | `overhang` | Same as `vegetation`. | `null`. |
 
-A value is `null` when the point or the distance it needs is missing (for example a `null`
-lateral distance).
+For a circle centered at cable point $C$, radius $d$, and obstacle $O$, the boundary point is
+$C + d (O-C) / \lVert O-C \rVert$. When $O=C$, use the bottom of the circle for the altitude
+and its rightmost point for the lateral coordinate.
+
+For example, an obstacle at altitude 25 m with an old overhang margin of -1 m now receives a
+border altitude of 24 m. The compliance verdict is unchanged. A negative coordinate alone does
+not mean non-compliance.
+
+A value is `null` when the required scenario or distance is missing (for example a `null`
+lateral distance), or when that graph type does not judge the lateral side.
 
 #### Compliance
 
-`conformityCompliance` is derived from these two values, not from per-scenario verdicts
-(`PlotStrategy.is_compliant()`):
+`conformityCompliance` still uses the **internal signed margins**, independently of the returned
+border coordinates (`PlotStrategy.is_compliant()`). These margins are not returned in the table:
+
+| Graph type | Overhang margin | Lateral margin |
+|---|---|---|
+| `cable_track` | Euclidean distance obstacle to overhang point, minus distance to comply. | Euclidean distance obstacle to the closest lateral side point, minus distance to comply. |
+| `vegetation` | $y_{overhang} - y_{obstacle}$ minus distance to comply (signed). | $\min \lvert x_{obstacle} - x_{side} \rvert$ over the lateral side points, minus distance to comply. |
+| `overhang` | Same as `vegetation`. | Not used. |
 
 | Graph type | `conformityCompliance` is `false` when |
 |---|---|
-| `cable_track`, `overhang` | A filled value is negative. A value of exactly 0 complies. |
+| `cable_track`, `overhang` | An available margin is negative. A margin of exactly 0 complies. |
 | `vegetation` | The obstacle is **inside the U** (see below). |
 
-The verdict is `null` when no value is filled.
+The verdict is `null` when no margin is available.
 
 For `vegetation`, the obstacle is inside the U when it is too close vertically
-(`overhangComplianceAltitude < 0`) **and** either too close laterally
-(`lateralComplianceLineAxisDistance < 0`, or no lateral value) or horizontally between the
-lateral side points. Without overhang value, only the lateral value is judged. The obstacle can
+(`overhang margin < 0`) **and** either too close laterally
+(`lateral margin < 0`, or no lateral margin) or horizontally between the
+lateral side points. Without an overhang margin, only the lateral margin is judged. The obstacle can
 therefore be too close on one axis and still comply, as long as it is not inside the U
 (`test_vegetation_u_shape_compliance_is_judged_per_rule`). The figure zone is a visual aid; the
 verdict is this test.
@@ -590,6 +606,35 @@ the plot follows its container with a `ResizeObserver`.
 
 The loading state is exposed with `isCalculating`, and the results are announced to assistive
 technologies through a polite `<output>` live region.
+
+### Export
+
+The **Export** button of the dialog footer (`conformity-export-btn`) is enabled by `canExport`, true once
+results are displayed. `calculate()` stores the form and point index it computed from in a private signal;
+`exportConformity()` reads that snapshot, not the live form, so the file always matches the displayed results.
+The snapshot is cleared with the results (new obstacle, dialog closed).
+
+The file is built by the pure helpers of `conformity-export.helpers.ts` and saved with
+`showSaveFilePicker` (the "Browse…" dialog), falling back to a Blob download when the API is missing or fails.
+Cancelling the picker does nothing. `isExporting` is true while the file is being saved: the button shows its
+loading state and a second `exportConformity()` call is ignored, which prevents double exports. Without results, snapshot, point or section, an error is notified
+(`studio.conformity.export-invalid-data-error`). The dialog stays open.
+
+- File name: `Export Distances de conformité_<obstacle>_<section>_<YYYY-MM-DD>.json`.
+- Content: `{ distancesConformityCheck: [ { metaData, obstacleData, conformityInput, conformityChecks } ] }`.
+  Values are raw (not rounded) `{ value, unit }` pairs; a missing value (for example the lateral side of
+  an `overhang` obstacle) is `{ value: null, unit }`.
+- `obstacleData.altitudeType` (`absolute`, `relative`, `relative_cable`) and `lateralDistanceType`
+  (`SPAN_AXIS`, `LINE_AXIS`) give the reference of `height` and `lateralDistance`, which are exported
+  as entered and not normalised.
+- Only the rules currently displayed (selected and calculated) are exported.
+- The `m`, `°C` and `Pa` unit symbols come from the common translations (`common.meter`, `common.celsius`,
+  `common.pascal-unit`) and are passed to the helpers as `units`; `KV` and `°` have no common key and stay
+  constants (`CONFORMITY_EXPORT_UNITS`).
+- `voltage` comes from `voltage_idr`: `"<number> KV"` gives `{ value: <number>, unit: 'KV' }`, any other
+  label (for example *HORS TENSION*) is kept raw with `unit: null`.
+- `cableSwingingAngle` is not computed: always `{ value: null, unit: '°' }`.
+- `minimumCase` is only present for `cable_track` obstacles.
 
 ### Tests
 

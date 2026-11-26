@@ -1,61 +1,18 @@
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
+import { syncDisplayedControls } from '../tangent-aiming-common/tangent-aiming-common.helpers';
 import {
   applyTangentAimingSupportDefaults,
-  buildSpanSupportOptions,
-  calculateTangentAimingSupportMock,
   createTangentAimingSupportForm,
-  getDefaultLeftSupport,
   getDisplayedInputFields,
+  invalidateTangentAimingSupportResult,
   isTangentAimingSupportDataValid,
   resetNonDisplayedParameterFields,
-  getSpanKey,
-  resolveLeftSupport,
-  resolveSpanLeftSupport,
-  syncDisplayedControls,
-  toTangentAimingSupportInputs
+  toTangentAimingSupportInputs,
+  toTangentAimingTaskInputs
 } from './tangent-aiming-support.helpers';
 
 describe('tangent-aiming-support helpers', () => {
-  it('should build span support options with a 5-character label, empty without a full span', () => {
-    const supports = [{ number: 'ABCDEFG' }, { number: null }, { number: 'S3' }];
-    expect(buildSpanSupportOptions(supports, [1, 2])).toEqual([
-      { label: '-', value: '1' },
-      { label: 'S3', value: '2' }
-    ]);
-    expect(buildSpanSupportOptions(supports, [0, 1])[0]).toEqual({ label: 'ABCDE', value: '0' });
-    expect(buildSpanSupportOptions(supports, [])).toEqual([]);
-    expect(buildSpanSupportOptions(supports, null)).toEqual([]);
-    expect(buildSpanSupportOptions(supports, [2, 7])[1]).toEqual({ label: '-', value: '7' });
-  });
-
-  it('should keep the left support when it belongs to the span, else use the departure support', () => {
-    expect(resolveLeftSupport('4', [3, 4])).toBe('4');
-    expect(resolveLeftSupport('0', [3, 4])).toBe('3');
-    expect(resolveLeftSupport(null, [3, 4])).toBe('3');
-    expect(resolveLeftSupport('3', null)).toBeNull();
-  });
-
-  it('should restore the support remembered for the span on a span change, else use its departure support', () => {
-    const memory = { '3-4': '3' };
-    const previous = { spanKey: '4-5', leftSupport: '4' };
-    expect(resolveSpanLeftSupport('4', [3, 4], previous, memory)).toBe('3');
-    expect(resolveSpanLeftSupport('4', [2, 3], previous, memory)).toBe('2');
-    expect(resolveSpanLeftSupport('4', [4, 5], previous, memory)).toBe('4');
-    expect(resolveSpanLeftSupport('4', [3, 4], null, memory)).toBe('4');
-    expect(resolveSpanLeftSupport('3', [3, 4], { spanKey: '3-4', leftSupport: '4' }, memory)).toBe('3');
-  });
-
-  it('should build a span key', () => {
-    expect(getSpanKey([3, 4])).toBe('3-4');
-    expect(getSpanKey(null)).toBe('');
-  });
-
-  it('should default the left support to the first support of the span', () => {
-    expect(getDefaultLeftSupport([3, 4])).toBe('3');
-    expect(getDefaultLeftSupport([])).toBeNull();
-    expect(getDefaultLeftSupport(null)).toBeNull();
-  });
-
   it('should list the displayed fields by calculation type', () => {
     expect(getDisplayedInputFields('parametre')).toContain('cableParameter');
     expect(getDisplayedInputFields('parametre')).not.toContain('cableTangentAngle');
@@ -65,10 +22,10 @@ describe('tangent-aiming-support helpers', () => {
 
   it('should disable only the hidden control', () => {
     const form = createTangentAimingSupportForm();
-    syncDisplayedControls(form, 'parametre');
+    syncDisplayedControls(form, getDisplayedInputFields('parametre'));
     expect(form.controls.cableTangentAngle.disabled).toBe(true);
     expect(form.controls.cableParameter.enabled).toBe(true);
-    syncDisplayedControls(form, 'tangente');
+    syncDisplayedControls(form, getDisplayedInputFields('tangente'));
     expect(form.controls.cableTangentAngle.enabled).toBe(true);
     expect(form.controls.cableParameter.disabled).toBe(true);
   });
@@ -83,13 +40,63 @@ describe('tangent-aiming-support helpers', () => {
       cableVerticalAccAngle: 0,
       cableParameter: 20,
       cableTangentAngle: 0,
-      calculationType: 'parametre'
+      calculationType: 'tangente'
     });
+  });
+
+  it('should keep the chosen calculation type', () => {
+    const data = { ...createTestMeasureData(), calculationType: 'parametre' as const, cableParameter: 1500 };
+    expect(applyTangentAimingSupportDefaults(data, '0')).toMatchObject({
+      calculationType: 'parametre',
+      cableParameter: 1500
+    });
+  });
+
+  it('should default the calculation type to tangente when missing', () => {
+    const data = { ...createTestMeasureData(), calculationType: undefined } as unknown as FieldMeasure;
+    expect(applyTangentAimingSupportDefaults(data, '0').calculationType).toBe('tangente');
   });
 
   it('should not override an already chosen left support', () => {
     const data = { ...createTestMeasureData(), tangentLeftSupport: '5' };
     expect(applyTangentAimingSupportDefaults(data, '2').tangentLeftSupport).toBe('5');
+  });
+
+  it('should clear the support result and automatic 15°C result without changing other outputs', () => {
+    const data = createTestMeasureData({ updateMode15C: 'auto' });
+    const withOutputs = {
+      ...data,
+      outputs: {
+        ...data.outputs,
+        tangentAimingSupport: { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true },
+        parameter15C: { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 },
+        papoto: { parameter: 4, uncertainty: 5 }
+      }
+    };
+
+    const result = invalidateTangentAimingSupportResult(withOutputs);
+
+    expect(result.outputs.tangentAimingSupport).toBeNull();
+    expect(result.outputs.parameter15C).toBeNull();
+    expect(result.outputs.papoto).toEqual({ parameter: 4, uncertainty: 5 });
+  });
+
+  it('should keep a manual 15°C result when clearing the support result', () => {
+    const data = createTestMeasureData({ updateMode15C: 'manual' });
+    const parameter15C = { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 };
+    const withOutputs = {
+      ...data,
+      outputs: {
+        ...data.outputs,
+        tangentAimingSupport: { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true },
+        parameter15C
+      }
+    };
+
+    const result = invalidateTangentAimingSupportResult(withOutputs);
+
+    expect(result.outputs.tangentAimingSupport).toBeNull();
+    expect(result.outputs.parameter15C).toBe(parameter15C);
   });
 
   it('should reset only the hidden numeric field', () => {
@@ -116,17 +123,24 @@ describe('tangent-aiming-support helpers', () => {
     });
 
     it('should reject out-of-bound or too precise values', () => {
-      expect(isTangentAimingSupportDataValid({ ...valid, cableParameter: 19 })).toBe(false);
-      expect(isTangentAimingSupportDataValid({ ...valid, cableParameter: 20.5 })).toBe(false);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 201 })).toBe(false);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 1.234 })).toBe(true);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 1.2345 })).toBe(false);
+      expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'parametre', cableParameter: 19 })).toBe(
+        false
+      );
+      expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'parametre', cableParameter: 20.5 })).toBe(
+        false
+      );
       expect(isTangentAimingSupportDataValid({ ...valid, tangentSpanLength: 5001 })).toBe(false);
       expect(isTangentAimingSupportDataValid({ ...valid, cableHAccDistance: 1.234 })).toBe(false);
     });
 
     it('should ignore the hidden field', () => {
-      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 999 })).toBe(true);
-      expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'tangente', cableParameter: 1 })).toBe(true);
-      expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'tangente', cableTangentAngle: 999 })).toBe(
-        false
+      expect(isTangentAimingSupportDataValid({ ...valid, cableParameter: 1 })).toBe(true);
+      expect(isTangentAimingSupportDataValid({ ...valid, cableTangentAngle: 999 })).toBe(false);
+      expect(isTangentAimingSupportDataValid({ ...valid, calculationType: 'parametre', cableTangentAngle: 999 })).toBe(
+        true
       );
     });
   });
@@ -136,11 +150,34 @@ describe('tangent-aiming-support helpers', () => {
     expect(toTangentAimingSupportInputs(data)).toMatchObject({ leftSupport: '1', parameter: 30 });
   });
 
-  it('should return a constant mock result', async () => {
-    const { result, error } = await calculateTangentAimingSupportMock(
-      toTangentAimingSupportInputs(createTestMeasureData())
-    );
-    expect(error).toBeNull();
-    expect(result?.checkValidity).toBe(true);
+  it('should map the measure to the tangent aiming task inputs (sighting device below the left support)', () => {
+    const inputs = toTangentAimingSupportInputs({
+      ...createTestMeasureData(),
+      tangentSpanLength: 400,
+      cableHAccDistance: 10,
+      cableVerticalAccAngle: 98.4,
+      cableTangentAngle: 100
+    });
+    expect(toTangentAimingTaskInputs(inputs)).toEqual({
+      calculationType: 'tangente',
+      angleToCableTangent: 100,
+      angleToLeftSupport: 0,
+      angleToRightSupport: 98.4,
+      spanLength: 400,
+      inputHeight: 10,
+      distance: 0
+    });
+  });
+
+  it('should send the parameter instead of the tangent angle on the parametre type', () => {
+    const inputs = toTangentAimingSupportInputs({
+      ...createTestMeasureData(),
+      calculationType: 'parametre',
+      cableParameter: 1800,
+      cableTangentAngle: null
+    });
+    const taskInputs = toTangentAimingTaskInputs(inputs);
+    expect(taskInputs).toMatchObject({ calculationType: 'parametre', parameter: 1800 });
+    expect(taskInputs).not.toHaveProperty('angleToCableTangent');
   });
 });

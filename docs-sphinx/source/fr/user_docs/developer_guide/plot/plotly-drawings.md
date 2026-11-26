@@ -11,9 +11,10 @@ tracé ne contienne de `'#2563eb'` ou de `size: 14` codés en dur.
 
 ## Ce que c'est
 
-Un unique objet `as const`, regroupé par **objet dessiné** (`span`, `support`, `insulator`, `loadPunctual`,
-`cableModification`, `cutStrands`, `obstacle`, `floor`, `distance`, `freePositioning`, `conformity`, `supportPlot`,
-…), plus un groupe `plot` pour ce que tous les tracés partagent (police, arrière-plans, grille).
+Un unique objet `as const`, regroupé par **objet dessiné** (`span`, `support`, `insulator`, `virtualSupport`,
+`loadPunctual`, `cableModification`, `cableSupportManip`, `cableSpanManip`, `cutStrands`, `obstacle`, `floor`,
+`distance`, `freePositioning`, `conformity`, `supportPlot`, …), plus un groupe `plot` pour ce que tous les tracés partagent (police, arrière-plans,
+grille).
 
 ```typescript
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
@@ -37,10 +38,14 @@ Lisez-le directement là où il est nécessaire. Ne le ré-exportez pas via un f
   conformité : 2D, tracé des supports : 3D) utilise de simples nombres.
 - **Apparences de sélection** : un dessin dont l'apparence change avec la sélection déclare `unselected` et
   `selected`. Un objet composé de plusieurs points (obstacle, sol) déclare également `inactivePoint`, l'apparence des
-  autres points de l'objet sélectionné. Les icônes (charges, modification de câble, brins coupés) ne déclarent que
-  `unselected`.
+  autres points de l'objet sélectionné. Les icônes (charges, modification de câble, manipulation de câble sur support,
+  manipulation de câble dans la portée, brins coupés) ne déclarent que `unselected`.
 - **Des pixels, pas des unités de données** : les décalages tels que `arrowYOffset` ou `cutStrands.offsetY` sont en
   pixels, afin que l'écart reste identique quel que soit le niveau de zoom.
+- **Icône reliée par un trait pointillé** : un groupe dessiné comme une icône à `offsetY` px au-dessus de son point
+  d'ancrage, reliée à celui-ci par un trait pointillé (`cutStrands`, `cableSpanManip`), déclare `offsetY`, `iconSize`,
+  `borderPad`, `lineWidth`, `dashLength`, `dashGap` et `unselected.color`, et est passé tel quel aux helpers partagés
+  de `dashedIconLine.helpers.ts`.
 - **Commenter le pourquoi** : lorsqu'une valeur semble arbitraire (un écart de 40 px entre deux icônes, une opacité
   utilisée à la place d'un alpha), un court commentaire à côté explique la contrainte.
 
@@ -52,7 +57,7 @@ Lisez-le directement là où il est nécessaire. Ne le ré-exportez pas via un f
    changer.
 2. **Dessiner un nouvel objet** : ajoutez un groupe nommé d'après l'objet, en suivant les conventions ci-dessus, puis
    lisez-le depuis le helper qui construit la trace ou l'annotation.
-3. **Besoin d'une valeur calculée** (par ex. `getCutStrandsLineLength`, dérivée de la taille de l'icône et de sa marge interne / padding) : gardez les nombres bruts dans `PlotlyDrawings` et placez le calcul dans une fonction qui les lit. Ne
+3. **Besoin d'une valeur calculée** (par ex. `getDashedIconLineLength`, dérivée de la taille de l'icône et de sa marge interne / padding) : gardez les nombres bruts dans `PlotlyDrawings` et placez le calcul dans une fonction qui les lit. Ne
    copiez pas les nombres.
 4. **Tests** : vérifiez par rapport à `PlotlyDrawings` plutôt que de répéter ses valeurs, afin qu'un changement de
    style ne casse pas les specs.

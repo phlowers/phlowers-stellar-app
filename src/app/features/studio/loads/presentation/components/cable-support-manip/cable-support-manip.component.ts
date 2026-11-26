@@ -34,6 +34,7 @@ import {
 } from './cable-support-manip.interfaces';
 import { CABLE_SUPPORT_MANIP_BOUNDS, conditionalRangeValidators } from './cable-support-manip.constantes';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
+import { LoadFormsService } from '../../services/loadForms.service';
 
 @Component({
   selector: 'app-cable-support-manip',
@@ -57,12 +58,13 @@ export class CableSupportManipComponent {
   private readonly fb = inject(FormBuilder);
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
+  private readonly loadFormsService = inject(LoadFormsService);
   private readonly cableSupportManipService = inject(CableSupportManipService);
   private readonly notificationService = inject(NotificationService);
   private readonly translocoService = inject(TranslocoService);
 
   readonly isLoading = signal(false);
-  readonly isCalculating = computed(() => this.plotService.loading());
+  readonly isCalculating = signal(false);
   readonly hasSavedManipulation = signal(false);
   /** Disables manip2 animations for one render cycle during programmatic load-case changes. */
   readonly disableManip2Anim = signal(false);
@@ -144,7 +146,7 @@ export class CableSupportManipComponent {
     {
       label: this.translocoService.translate('loads.shared.with-chain-option'),
       value: 'with_chain' as SupportAnchoringType,
-      disabled: true
+      disabled: false
     }
   ];
 
@@ -221,6 +223,18 @@ export class CableSupportManipComponent {
     // enter/leave transitions when switching load cases rapidly.
     this.disableManip2Anim.set(true);
     untracked(() => this.onSupportChange(this.form.controls.support.value));
+  });
+
+  // Pre-select the support whose manipulation icon was clicked on the section plot: patch the support control and
+  // re-run the pre-fill flow, then clear the signal so the same support can be selected again
+  private readonly _selectSupportFromPlot = effect(() => {
+    const supportUuid = this.cableSupportManipService.selectedSupportUuid();
+    if (!supportUuid) return;
+    untracked(() => {
+      this.form.controls.support.setValue(supportUuid);
+      this.onSupportChange(supportUuid);
+      this.cableSupportManipService.clearSelectedSupport();
+    });
   });
 
   // Re-enable manip2 animations after each render cycle so that
@@ -365,8 +379,15 @@ export class CableSupportManipComponent {
 
     this.isLoading.set(true);
     try {
+      let deleted = false;
       if (uuid) {
         await this.cableSupportManipService.delete(uuid);
+        deleted = true;
+      } else if (supportUuid && chargeUuid) {
+        // Applied then saved with the load case only: no section entry, but the plot still shows it
+        deleted = await this.cableSupportManipService.deleteFromCharge(supportUuid, chargeUuid);
+      }
+      if (deleted) {
         await this.cableSupportManipService.reloadSection();
         this.notificationService.success(
           this.translocoService.translate('loads.cable-support-manip.deleted-notification')
@@ -384,10 +405,14 @@ export class CableSupportManipComponent {
     }
   }
 
-  calculate(): void {
+  async calculateSupportManip(): Promise<void> {
     if (this.isFormInvalid()) return;
-    // Python task placeholder — to be wired once the calculation API is defined.
-    // Make this async and toggle isLoading around the call at that point.
+    this.isCalculating.set(true);
+    try {
+      await this.loadFormsService.calculateLoad();
+    } finally {
+      this.isCalculating.set(false);
+    }
   }
 
   isFormInvalid(): boolean {

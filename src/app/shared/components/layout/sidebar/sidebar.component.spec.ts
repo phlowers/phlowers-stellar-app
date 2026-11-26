@@ -2,18 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, signal } from '@angular/core';
 import { SidebarComponent } from './sidebar.component';
 import { SidebarItem } from './sidebar.model';
+import { AppConfigService } from '@core/config/app-config.service';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
-// Mock environment
-vi.mock('@src/environments/environment', () => ({
-  environment: {
-    version: '1.2.3'
-  }
-}));
-
 // Create a test host component to provide inputs to our component
 @Component({
   imports: [SidebarComponent, RouterLink, RouterLinkActive],
@@ -79,8 +73,10 @@ describe('SidebarComponent', () => {
   let hostFixture: ComponentFixture<TestHostComponent>;
   let component: SidebarComponent;
   let mockBodyClassList: { add: vi.Mock; remove: vi.Mock };
+  const configuredVersion = signal('1.2.3');
 
   beforeEach(async () => {
+    configuredVersion.set('1.2.3');
     // Mock document.querySelector to return a mocked body element
     mockBodyClassList = {
       add: vi.fn(),
@@ -108,6 +104,7 @@ describe('SidebarComponent', () => {
         TestHostComponent
       ],
       providers: [
+        { provide: AppConfigService, useValue: { appVersion: configuredVersion } },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -134,8 +131,23 @@ describe('SidebarComponent', () => {
     expect(mockBodyClassList.add).toHaveBeenCalledWith('has-sidebar--expanded');
   });
 
-  it('should initialize with proper appVersion when environment version is set', () => {
+  it('should initialize with proper appVersion from the app config service', () => {
     expect(component.appVersion()).toBe('1.2.3');
+  });
+
+  it('should follow the app config version when it changes', () => {
+    configuredVersion.set('01.03.00');
+    hostFixture.detectChanges();
+
+    expect(component.appVersion()).toBe('01.03.00');
+    const versionEl = hostFixture.debugElement.query(By.css('.stelBar-header__version-display'));
+    expect(versionEl.nativeElement.textContent.trim()).toBe('v.01.03.00');
+  });
+
+  it('should fall back to 0.0.00 when the build version placeholder was not substituted', () => {
+    configuredVersion.set('{BUILD_VERSION}');
+
+    expect(component.appVersion()).toBe('0.0.00');
   });
 
   it('should toggle menu and update DOM classes correctly', () => {

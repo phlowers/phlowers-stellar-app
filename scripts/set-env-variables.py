@@ -40,7 +40,9 @@ def get_git_revision_hash() -> str:
 
 git_hash = get_git_revision_hash()
 if not GIT_HASH_PATTERN.match(git_hash):
-    print(f"Error: invalid git hash '{git_hash}'. Set CI_COMMIT_SHA to the built commit SHA or build from a git checkout.")
+    print(
+        f"Error: invalid git hash '{git_hash}'. Set CI_COMMIT_SHA to the built commit SHA or build from a git checkout."
+    )
     sys.exit(1)
 
 env_variables = [

@@ -22,6 +22,10 @@
     transition:
       transform 0.3s ease-out,
       background-color 0.3s ease-in;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
   }
 
   &:hover {

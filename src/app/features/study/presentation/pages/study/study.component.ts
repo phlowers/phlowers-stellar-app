@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, from, switchMap } from 'rxjs';
 import { StudyHeaderComponent } from '@features/study/presentation/components/study-header/study-header.component';
 import { StudiesService } from '@services/studies/studies.service';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
 import { SectionService } from '@services/section/section.service';
 import {
   DuplicateInitialConditionFunctionsInput,
@@ -21,6 +22,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SectionsTabComponent } from '@features/study/presentation/components/sections-tab/sectionsTab.component';
 import { NotificationService } from '@services/notification/notification.service';
 import { NewStudyModalComponent } from '@shared/components/new-study-modal/new-study-modal.component';
+import { compareRfc9557 } from '@shared/helpers/date-time.helpers';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /**
@@ -55,6 +57,7 @@ export class StudyComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly studiesService = inject(StudiesService);
   private readonly sectionService = inject(SectionService);
+  private readonly geopositioning = inject(GeopositioningService);
   private readonly initialConditionService = inject(InitialConditionService);
   private readonly router = inject(Router);
   private readonly notificationService = inject(NotificationService);
@@ -77,7 +80,7 @@ export class StudyComponent implements OnInit {
         if (study) {
           this.study.set({
             ...study,
-            sections: study.sections.toSorted((a, b) => -a.created_at.localeCompare(b.created_at))
+            sections: study.sections.toSorted((a, b) => compareRfc9557(a.created_at, b.created_at, -1))
           });
         } else {
           void this.router.navigate(['/studies']);
@@ -100,7 +103,7 @@ export class StudyComponent implements OnInit {
           if (study) {
             this.study.set({
               ...study,
-              sections: study.sections.toSorted((a, b) => -a.created_at.localeCompare(b.created_at))
+              sections: study.sections.toSorted((a, b) => compareRfc9557(a.created_at, b.created_at, -1))
             });
           } else {
             void this.router.navigate(['/studies']);
@@ -138,7 +141,8 @@ export class StudyComponent implements OnInit {
 
     const existingSection = studyWithSections.sections.some((s) => s?.uuid === section?.uuid);
 
-    const { removedGeometryBoundObjects } = await this.sectionService.createOrUpdateSection(studyWithSections, section);
+    const previous = studyWithSections.sections.find((s) => s?.uuid === section?.uuid);
+    const { removedGeometryBoundObjects } = await this.geopositioning.save(studyWithSections, previous, section);
 
     this.notificationService.success(
       existingSection

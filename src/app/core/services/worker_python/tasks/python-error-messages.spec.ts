@@ -7,7 +7,8 @@
 
 import { TestBed } from '@angular/core/testing';
 import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
-import { formatPythonError } from './python-error-messages';
+import { formatPythonError, formatPythonWarnings } from './python-error-messages';
+import { PythonDiagnostic } from './python-diagnostic.interfaces';
 import { PythonErrorCode } from './types';
 
 describe('formatPythonError', () => {
@@ -38,7 +39,16 @@ describe('formatPythonError', () => {
               'shared.python-errors.invalid-manipulation-keys': 'The manipulation keys provided are invalid.',
               'shared.python-errors.invalid-manipulation-range': 'The manipulation range provided is invalid.',
               'shared.python-errors.support-out-of-range-error': 'The support is out of the valid range.',
-              'shared.python-errors.generated-points-none-error': 'No generated points were found after computation.'
+              'shared.python-errors.generated-points-none-error': 'No generated points were found after computation.',
+              'shared.python-errors.obstacle-not-found-error':
+                'The obstacle is not registered in the calculation engine.',
+              'shared.python-errors.estimate-on-split-support-error':
+                'Estimation is not possible on a span split by a virtual support.',
+              'shared.python-errors.estimation-input-error': 'The estimation inputs are missing or invalid.',
+              'shared.python-errors.estimation-not-converged-error':
+                'The target cannot be reached within the estimation bounds.',
+              'shared.python-errors.estimation-warning': 'The existing load on the estimated span was ignored.',
+              'shared.python-errors.conformity-input-error': 'The conformity inputs are missing or invalid.'
             }
           },
           translocoConfig: {
@@ -61,10 +71,52 @@ describe('formatPythonError', () => {
     expect(formatPythonError(PythonErrorCode.SolverError, translocoService)).toBe('A solver error occurred.');
   });
 
+  it.each([
+    [PythonErrorCode.EstimateOnSplitSupportError, 'Estimation is not possible on a span split by a virtual support.'],
+    [PythonErrorCode.EstimationInputError, 'The estimation inputs are missing or invalid.'],
+    [PythonErrorCode.EstimationNotConvergedError, 'The target cannot be reached within the estimation bounds.'],
+    [PythonErrorCode.EstimationWarning, 'The existing load on the estimated span was ignored.'],
+    [PythonErrorCode.ObstacleNotFoundError, 'The obstacle is not registered in the calculation engine.'],
+    [PythonErrorCode.ConformityInputError, 'The conformity inputs are missing or invalid.']
+  ])('should return the localized message for %s', (code, expected) => {
+    expect(formatPythonError(code, translocoService)).toBe(expected);
+  });
+
   it.each(Object.values(PythonErrorCode))('should format code %s to a non-null, non-empty message', (code) => {
     const message = formatPythonError(code, translocoService);
     expect(message).not.toBeNull();
     expect(typeof message).toBe('string');
     expect(message?.length).toBeGreaterThan(0);
+  });
+
+  describe('formatPythonWarnings', () => {
+    const diagnostic = (code: PythonErrorCode, origin: PythonDiagnostic['origin']): PythonDiagnostic => ({
+      code,
+      severity: 'warning',
+      origin,
+      rawText: `${code}: raw`
+    });
+
+    it('returns one message per captured warning code, in order', () => {
+      const messages = formatPythonWarnings(
+        [
+          diagnostic(PythonErrorCode.BalanceEngineWarning, 'warning'),
+          diagnostic(PythonErrorCode.EstimationWarning, 'warning'),
+          diagnostic(PythonErrorCode.BalanceEngineWarning, 'warning')
+        ],
+        translocoService
+      );
+
+      expect(messages).toEqual([
+        'A balance engine warning was raised.',
+        'The existing load on the estimated span was ignored.'
+      ]);
+    });
+
+    it('ignores exception diagnostics', () => {
+      expect(
+        formatPythonWarnings([diagnostic(PythonErrorCode.ConvergenceError, 'exception')], translocoService)
+      ).toEqual([]);
+    });
   });
 });

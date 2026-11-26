@@ -22,13 +22,21 @@ DECIMAL_PRECISION = 1
 
 DIRECTION_MAP = {
     'North': 0,
+    'North-North-East': 22.5,
     'North-East': 45,
+    'East-North-East': 67.5,
     'East': 90,
+    'East-South-East': 112.5,
     'South-East': 135,
+    'South-South-East': 157.5,
     'South': 180,
+    'South-South-West': 202.5,
     'South-West': 225,
+    'West-South-West': 247.5,
     'West': 270,
+    'West-North-West': 292.5,
     'North-West': 315,
+    'North-North-West': 337.5,
 }
 
 SKY_COVER_MAP = {
@@ -94,7 +102,6 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         .to("m/s")
         .m
     )
-    wind_angle = DIRECTION_MAP[temp_inputs.windDirection]
     sky_cover = SKY_COVER_MAP[temp_inputs.skyCover]
     thermal_engine.set(
         cable_array=engine.cable_array,
@@ -108,7 +115,7 @@ def temperature_calculation(inputs: dict, engine: BalanceEngine):
         intensity=np.array([temp_inputs.transit]),
         ambient_temp=np.array([temp_inputs.ambientTemperature]),
         wind_speed=np.array([wind_speed]),
-        wind_angle=np.array([wind_angle]),
+        wind_angle=np.array([temp_inputs.windIncidence]),
         nebulosity=np.array([sky_cover]),
     )
     temperature_result = thermal_engine.steady_temperature(

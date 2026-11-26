@@ -8,11 +8,15 @@ application_update
 catalog_update
 custom_components
 cut_strands
+date_time_format
 engine_worker
+estimation
+forest_trenches
 how_to_add_error_codes
 i18n
 obstacles_floors_and_distances
 offline_database
+pdf_reports
 plot_refresh_pipeline
 theme_styles
 generic_import_pipeline

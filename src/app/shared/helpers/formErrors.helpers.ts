@@ -47,3 +47,13 @@ export function getNumberInputErrorParams(control: AbstractControl | null): Numb
   }
   return null;
 }
+
+/**
+ * Same as {@link getNumberInputErrorParams}, with the `required` error first (`common.required`).
+ */
+export function getRequiredNumberInputErrorParams(control: AbstractControl | null): NumberInputErrorParams | null {
+  if (control?.errors?.['required']) {
+    return { key: 'common.required', params: {} };
+  }
+  return getNumberInputErrorParams(control);
+}

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { vi } from 'vitest';
+import { vi, type Mock } from 'vitest';
 import { signal } from '@angular/core';
 import { CableSpanManipComponent } from './cable-span-manip';
 import { PlotService } from '@services/plot/plot.service';
@@ -8,10 +8,11 @@ import { CableSpanManipService } from '../../services/cableSpanManip.service';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { Section } from '@shared/domain';
 import { TranslocoTestingModule } from '@jsverse/transloco';
+import { LoadFormsService } from '../../services/loadForms.service';
 
 function createSignalMock<T>(initialValue: T) {
   let value = initialValue;
-  const fn = vi.fn(() => value) as vi.Mock & { set: vi.Mock };
+  const fn = vi.fn(() => value) as unknown as Mock<() => T> & { set: Mock<(v: T) => void> };
   fn.set = vi.fn((v: T) => {
     value = v;
   });
@@ -27,8 +28,6 @@ const mockSection: Partial<Section> = {
   cable_span_manipulations: [],
   selected_cable_span_manipulation_uuid: null,
   selected_charge_uuid: 'charge-uuid-1',
-  start_latitude: null,
-  start_longitude: null,
   start_azimuth: null
 };
 
@@ -39,6 +38,7 @@ describe('CableSpanManipComponent', () => {
   let mockPlotSpanService: vi.Mocked<PlotSpanService>;
   let mockCableSpanManipService: vi.Mocked<CableSpanManipService>;
   let mockChainsService: { getChains: vi.Mock };
+  let mockLoadFormsService: vi.Mocked<LoadFormsService>;
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -65,12 +65,19 @@ describe('CableSpanManipComponent', () => {
       save: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
       clearPersistedFormData: vi.fn(),
-      reloadSection: vi.fn().mockResolvedValue(undefined)
+      reloadSection: vi.fn().mockResolvedValue(undefined),
+      selectedSpanUuid: signal<string | null>(null),
+      clearSelectedSpan: vi.fn(() => mockCableSpanManipService.selectedSpanUuid.set(null))
     } as unknown as vi.Mocked<CableSpanManipService>;
 
     mockChainsService = {
       getChains: vi.fn().mockResolvedValue([])
     };
+
+    mockLoadFormsService = {
+      calculateLoad: vi.fn().mockResolvedValue(undefined),
+      saveTemporaryLoadDataInSection: vi.fn().mockResolvedValue(undefined)
+    } as unknown as vi.Mocked<LoadFormsService>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -96,7 +103,8 @@ describe('CableSpanManipComponent', () => {
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockPlotSpanService },
         { provide: CableSpanManipService, useValue: mockCableSpanManipService },
-        { provide: ChainsService, useValue: mockChainsService }
+        { provide: ChainsService, useValue: mockChainsService },
+        { provide: LoadFormsService, useValue: mockLoadFormsService }
       ]
     }).compileComponents();
 
@@ -116,11 +124,6 @@ describe('CableSpanManipComponent', () => {
   describe('isCalculating computed', () => {
     it('should reflect plotService.loading() as false by default', () => {
       expect(component.isCalculating()).toBe(false);
-    });
-
-    it('should be true when plotService.loading() is true', () => {
-      mockPlotService.loading.set(true);
-      expect(component.isCalculating()).toBe(true);
     });
   });
 
@@ -637,6 +640,72 @@ describe('CableSpanManipComponent', () => {
       expect(component.form.controls.distanceToRefSupport.value).toBe(10);
       expect(component.form.controls.slingLength.value).toBe(3);
       expect(component.hasSavedManipulation()).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // span pre-selection from the section plot
+  // ---------------------------------------------------------------------------
+  describe('span pre-selection from the plot', () => {
+    beforeEach(() => {
+      mockPlotSpanService.section.set({
+        ...mockSection,
+        cable_span_manipulations: [
+          {
+            uuid: 'manip-uuid-2',
+            spanUuid: 'support-uuid-2',
+            chargeUuid: 'charge-uuid-1',
+            referenceSupport: 'RIGHT',
+            distanceToRefSupport: 12,
+            cableManipType: 'with_a_crane',
+            cableManipMethod: 'clamp',
+            longitudinalDistance: 5,
+            lateralDistance: 2,
+            altitude: 30,
+            anchoring: 'with_sling',
+            chainName: null,
+            chainLength: null,
+            chainWeight: null,
+            chainSurface: null,
+            counterWeight: null,
+            slingLength: 4
+          }
+        ]
+      } as unknown as Section);
+    });
+
+    it('should select the span and load its manipulation', () => {
+      mockCableSpanManipService.selectedSpanUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(component.form.controls.spanUuid.value).toBe('support-uuid-2');
+      expect(component.hasSavedManipulation()).toBe(true);
+      expect(component.form.controls.referenceSupport.value).toBe('RIGHT');
+      expect(component.form.controls.distanceToRefSupport.value).toBe(12);
+      expect(component.form.controls.altitude.value).toBe(30);
+    });
+
+    it('should clear the pre-selection once consumed, so the same span can be selected again', () => {
+      mockCableSpanManipService.selectedSpanUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(mockCableSpanManipService.clearSelectedSpan).toHaveBeenCalledOnce();
+      expect(mockCableSpanManipService.selectedSpanUuid()).toBeNull();
+
+      component.form.controls.spanUuid.setValue('support-uuid-1');
+      component.onScopeChange('support-uuid-1');
+      mockCableSpanManipService.selectedSpanUuid.set('support-uuid-2');
+      fixture.detectChanges();
+
+      expect(component.form.controls.spanUuid.value).toBe('support-uuid-2');
+    });
+
+    it('should leave the form untouched without a pre-selection', () => {
+      component.form.controls.spanUuid.setValue('support-uuid-1');
+      fixture.detectChanges();
+
+      expect(component.form.controls.spanUuid.value).toBe('support-uuid-1');
+      expect(mockCableSpanManipService.clearSelectedSpan).not.toHaveBeenCalled();
     });
   });
 

@@ -1,5 +1,25 @@
 import { TranslocoService } from '@jsverse/transloco';
-import { ResultRow } from './conformity.model';
+import { ConformityRuleResult, ResultRow } from './conformity.model';
+
+// A cable track solves one climate state per scenario (about 40 for the default rules), well past the 30 s worker default.
+export const CONFORMITY_TASK_TIMEOUT_MS = 90_000;
+
+export const CABLE_TRACK_HIDDEN_RESULT_KEYS: readonly (keyof ConformityRuleResult)[] = [
+  'overhangComplianceAltitude',
+  'lateralComplianceLineAxisDistance'
+];
+
+/** The overhang border is a horizontal line: only its altitude is relevant, not a line axis distance. */
+export const OVERHANG_HIDDEN_RESULT_KEYS: readonly (keyof ConformityRuleResult)[] = [
+  'lateralComplianceLineAxisDistance'
+];
+
+/** Result keys whose rows are masked, per conformity chart type. */
+export const HIDDEN_RESULT_KEYS_BY_CONFORMITY_TYPE: Readonly<Record<string, readonly (keyof ConformityRuleResult)[]>> =
+  {
+    cable_track: CABLE_TRACK_HIDDEN_RESULT_KEYS,
+    overhang: OVERHANG_HIDDEN_RESULT_KEYS
+  };
 
 export const CONFORMITY_BOUNDS = {
   repartitionTemperature: { step: 0.01, min: 0, max: 250 },
@@ -78,7 +98,7 @@ export function getConformityCommonRows(transloco: TranslocoService): ResultRow[
 export function getConformityCableTrackRows(transloco: TranslocoService): ResultRow[] {
   return [
     {
-      label: transloco.translate('studio.conformity.temperature-label'),
+      label: transloco.translate('common.temperature-label'),
       overhangKey: 'overhangTemperature',
       lateralKey: 'lateralTemperature',
       unit: '°C'

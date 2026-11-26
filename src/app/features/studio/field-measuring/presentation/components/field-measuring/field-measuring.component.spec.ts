@@ -3,7 +3,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { TabsModule } from 'primeng/tabs';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { FieldMeasuringComponent } from './field-measuring.component';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { createTestMeasureData } from '../../helpers';
@@ -18,6 +18,7 @@ import { Section, SkyCover, Study } from '@shared/domain';
 import { LinesService } from '@shared/catalog/services/lines.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { TRANSIT_BOUNDS } from '../../constants';
+import { FieldMeasureReportService } from '../../services/field-measure-report/field-measure-report.service';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 
 import { TranslocoModule, TranslocoTestingModule } from '@jsverse/transloco';
@@ -92,6 +93,7 @@ describe('FieldMeasuringComponent', () => {
   let component: FieldMeasuringComponent;
   let fixture: ComponentFixture<FieldMeasuringComponent>;
   let toolbarDialogService: ToolbarDialogService;
+  let mockReportService: { generateReport: ReturnType<typeof vi.fn> };
 
   const getByTestId = (testId: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(`[data-testid="${testId}"]`);
@@ -136,6 +138,8 @@ describe('FieldMeasuringComponent', () => {
       litData: signal<GetSectionOutput | null>(null)
     } as unknown as PlotService;
 
+    mockReportService = { generateReport: vi.fn().mockResolvedValue(undefined) };
+
     const mockLinesService = {
       getLines: vi.fn().mockResolvedValue([])
     } as unknown as LinesService;
@@ -177,7 +181,8 @@ describe('FieldMeasuringComponent', () => {
         { provide: PlotService, useValue: mockPlotService },
         { provide: PlotSpanService, useValue: mockSpanService },
         { provide: LinesService, useValue: mockLinesService },
-        { provide: CablesService, useValue: mockCablesService }
+        { provide: CablesService, useValue: mockCablesService },
+        { provide: FieldMeasureReportService, useValue: mockReportService }
       ]
     })
       .overrideComponent(FieldMeasuringComponent, {
@@ -208,7 +213,7 @@ describe('FieldMeasuringComponent', () => {
       const measureData = component.measureData();
       expect(measureData).toBeDefined();
       expect(measureData.calculationMethod).toBe('papoto');
-      expect(measureData.calculationType).toBe('parametre');
+      expect(measureData.calculationType).toBe('tangente');
       expect(measureData.diffuseSolarFlux).toBe(123);
       expect(measureData.diffuseDirectSolarFlux).toBe(246);
     });
@@ -334,7 +339,8 @@ describe('FieldMeasuringComponent', () => {
           cableTemperature: null,
           parameter15C: null,
           tangentAimingSupport: null,
-          tangentAimingExterior: null
+          tangentAimingExterior: null,
+          tangentAimingInterior: null
         }
       });
       component.measureData.set(measureDataWithOutput);
@@ -365,7 +371,8 @@ describe('FieldMeasuringComponent', () => {
           cableTemperature: null,
           parameter15C: null,
           tangentAimingSupport: null,
-          tangentAimingExterior: null
+          tangentAimingExterior: null,
+          tangentAimingInterior: null
         }
       });
       component.measureData.set(measureDataWithOutput);
@@ -411,7 +418,8 @@ describe('FieldMeasuringComponent', () => {
             cableTemperature: null,
             parameter15C: null,
             tangentAimingSupport: null,
-            tangentAimingExterior: null
+            tangentAimingExterior: null,
+            tangentAimingInterior: null
           }
         });
         component.measureData.set(measureDataWithOutput);
@@ -479,7 +487,8 @@ describe('FieldMeasuringComponent', () => {
             parameter15CPlusUncertainty: 490
           },
           tangentAimingSupport: null,
-          tangentAimingExterior: null
+          tangentAimingExterior: null,
+          tangentAimingInterior: null
         },
         ...overrides
       });
@@ -557,6 +566,25 @@ describe('FieldMeasuringComponent', () => {
       delete (globalThis as typeof globalThis & { showSaveFilePicker?: unknown }).showSaveFilePicker;
     });
 
+    it('should export the saved snapshot, not the unsaved live data', async () => {
+      component.measureData.set(createFullyValidMeasureData());
+      await component.onSave();
+      const saved = component.measureData();
+      component.measureData.set({ ...saved, outputs: { ...saved.outputs, parameter15C: null } });
+      const createObjectUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+      const revokeObjectUrlSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+      const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+      await component.onExport();
+
+      const blobArg = createObjectUrlSpy.mock.calls[0][0] as Blob;
+      expect(await blobArg.text()).toContain('480');
+
+      createObjectUrlSpy.mockRestore();
+      revokeObjectUrlSpy.mockRestore();
+      clickSpy.mockRestore();
+    });
+
     it('should not fall back to the Blob download when the user cancels the save picker', async () => {
       component.measureData.set(createFullyValidMeasureData());
 
@@ -582,7 +610,8 @@ describe('FieldMeasuringComponent', () => {
             cableTemperature: null,
             parameter15C: null,
             tangentAimingSupport: null,
-            tangentAimingExterior: null
+            tangentAimingExterior: null,
+            tangentAimingInterior: null
           }
         })
       );
@@ -603,61 +632,9 @@ describe('FieldMeasuringComponent', () => {
     });
   });
 
-  describe('canExport', () => {
-    it('should be false when the form is invalid', () => {
-      component.measureData.set(createTestMeasureData({ name: 'Invalid' }));
-      expect(component.canExport()).toBe(false);
-    });
-
-    it('should be true when the form is valid and the measure has computed outputs', () => {
-      component.measureData.set(
-        createTestMeasureData({
-          name: 'MT 1',
-          span: [0, 1],
-          longitude: 1,
-          latitude: 1,
-          altitude: 100,
-          azimuth: 10,
-          windSpeed: 5,
-          ambientTemperature: 20,
-          windDirection: 'N',
-          skyCover: SkyCover.N0,
-          transit: (TRANSIT_BOUNDS.min + TRANSIT_BOUNDS.max) / 2,
-          measuredDiffusedPlusDirectSolarFlux: 100,
-          leftSupport: '0',
-          spanLength: 100,
-          measuredElevationDifference: 5,
-          HL: 1,
-          H1: 2,
-          H2: 3,
-          H3: 4,
-          HR: 5,
-          VL: 1,
-          V1: 2,
-          V2: 3,
-          V3: 4,
-          VR: 5,
-          outputs: {
-            papoto: {
-              parameter: 500,
-              parameter_1_2: 1,
-              parameter_2_3: 2,
-              parameter_1_3: 3,
-              checkValidity: true,
-              uncertainty: 0.1
-            },
-            cableTemperature: null,
-            parameter15C: null,
-            tangentAimingSupport: null,
-            tangentAimingExterior: null
-          }
-        })
-      );
-      expect(component.canExport()).toBe(true);
-    });
-
-    it('should be false when the form is valid but not yet computed nor saved', () => {
-      const measureData = createTestMeasureData({
+  describe('canReportOrExport', () => {
+    const validMeasure = () =>
+      createTestMeasureData({
         name: 'MT 1',
         span: [0, 1],
         longitude: 1,
@@ -667,20 +644,215 @@ describe('FieldMeasuringComponent', () => {
         windSpeed: 5,
         ambientTemperature: 20,
         windDirection: 'N',
-        skyCover: SkyCover.N0
+        skyCover: SkyCover.N0,
+        transit: (TRANSIT_BOUNDS.min + TRANSIT_BOUNDS.max) / 2,
+        measuredDiffusedPlusDirectSolarFlux: 100,
+        leftSupport: '0',
+        spanLength: 100,
+        measuredElevationDifference: 5,
+        HL: 1,
+        H1: 2,
+        H2: 3,
+        H3: 4,
+        HR: 5,
+        VL: 1,
+        V1: 2,
+        V2: 3,
+        V3: 4,
+        VR: 5
       });
-      component.measureData.set(measureData);
-      expect(component.canExport()).toBe(false);
+
+    it('should be false when the form is invalid, even once saved', async () => {
+      component.measureData.set({ ...validMeasure(), windSpeed: null });
+      await component.onSave();
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    it('should be false when the form is valid but not saved', () => {
+      component.measureData.set(validMeasure());
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    it('should be true when the form is valid and saved', async () => {
+      component.measureData.set(validMeasure());
+      await component.onSave();
+      expect(component.canReportOrExport()).toBe(true);
+    });
+
+    it('should stay true when opening only cleared a stale automatic 15°C result (no input edited since the save)', async () => {
+      const base = validMeasure();
+      component.measureData.set({
+        ...base,
+        outputs: {
+          ...base.outputs,
+          parameter15C: { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 }
+        }
+      });
+      await component.onSave();
+      const saved = component.measureData();
+      component.measureData.set({ ...saved, outputs: { ...saved.outputs, parameter15C: null } });
+      expect(component.hasEditedInputs()).toBe(false);
+      expect(component.canReportOrExport()).toBe(true);
+    });
+
+    it('should be false when only the calculus method was switched since the save', async () => {
+      component.measureData.set(validMeasure());
+      await component.onSave();
+      component.measureData.set({ ...component.measureData(), calculationMethod: 'tangente-aiming' });
+      expect(component.hasEditedInputs()).toBe(false);
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    it('should be false on the parameter calculation tab with PEP, which has no result to report yet', async () => {
+      component.measureData.set({ ...validMeasure(), calculationMethod: 'pep' });
+      await component.onSave();
+      component.activeTab.set('parameterCalculation');
+      expect(component.isParameterCalculationValid()).toBe(false);
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    it('should stay false with PEP on a valid terrain tab, and name the parameter calculation as the reason', async () => {
+      component.measureData.set({ ...validMeasure(), calculationMethod: 'pep' });
+      await component.onSave();
+      component.activeTab.set('terrainData');
+      expect(component.canReportOrExport()).toBe(false);
+      expect(component.reportExportBlockedReason()).toContain('field-measuring.report.blocked-invalid-tabs');
+    });
+
+    it('should explain nothing when the buttons are active', async () => {
+      component.measureData.set(validMeasure());
+      await component.onSave();
+      expect(component.reportExportBlockedReason()).toBeNull();
+    });
+
+    it('should name the invalid data as the reason of the inactive buttons', async () => {
+      component.measureData.set({ ...validMeasure(), windSpeed: null });
+      await component.onSave();
+      const reason = component.reportExportBlockedReason();
+      expect(reason).toContain('field-measuring.report.blocked-invalid-tabs');
+      expect(reason).not.toContain('field-measuring.report.blocked-unsaved');
+    });
+
+    it('should give a single reason at a time, the invalid data before the missing save', () => {
+      component.measureData.set({ ...validMeasure(), windSpeed: null });
+      const reason = component.reportExportBlockedReason();
+      expect(reason).toContain('field-measuring.report.blocked-invalid-tabs');
+      expect(reason).not.toContain('field-measuring.report.blocked-unsaved');
+    });
+
+    it('should name the missing save as the reason of the inactive buttons', () => {
+      component.measureData.set(validMeasure());
+      const reason = component.reportExportBlockedReason();
+      expect(reason).toContain('field-measuring.report.blocked-unsaved');
+      expect(reason).not.toContain('field-measuring.report.blocked-invalid-tabs');
+    });
+
+    it('should become false again once an input is edited after the save', async () => {
+      component.measureData.set(validMeasure());
+      await component.onSave();
+      component.onFieldChange('windSpeed', 12);
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    it('should ignore the invalid data of a tab that is not displayed', async () => {
+      component.measureData.set({ ...validMeasure(), transit: null, windSpeed: null });
+      await component.onSave();
+      component.activeTab.set('parameterCalculation');
+      expect(component.canReportOrExport()).toBe(true);
+      component.activeTab.set('parameterAt15CWithoutWind');
+      expect(component.canReportOrExport()).toBe(true);
+    });
+
+    it('should be false on every tab when the global form is invalid, even once saved', async () => {
+      component.measureData.set({ ...validMeasure(), longitude: null });
+      await component.onSave();
+      component.activeTab.set('parameterCalculation');
+      expect(component.canReportOrExport()).toBe(false);
+      expect(component.reportExportBlockedReason()).toContain('field-measuring.report.blocked-invalid-global');
+    });
+
+    it('should be false when the displayed tab is invalid, even once saved', async () => {
+      component.measureData.set({ ...validMeasure(), transit: null });
+      await component.onSave();
+      component.activeTab.set('temperatureCalculation');
+      expect(component.canReportOrExport()).toBe(false);
+      expect(component.reportExportBlockedReason()).toContain('field-measuring.report.blocked-invalid-tabs');
+    });
+
+    it.each([
+      ['parameterCalculation', { HL: null }],
+      [
+        'parameterAt15CWithoutWind',
+        { updateMode15C: 'manual' as const, manualParameterCalculation15CWithoutWind: null }
+      ]
+    ] as const)('should be false when the displayed %s tab is invalid, even once saved', async (tab, invalid) => {
+      component.measureData.set({ ...validMeasure(), ...invalid });
+      await component.onSave();
+      component.activeTab.set(tab);
+      expect(component.canReportOrExport()).toBe(false);
+    });
+
+    describe('manual 15°C tab (RG: all four fields required, uncertainties positive, cable temperature signed)', () => {
+      const manual15C = {
+        parameterPapoto: 1000,
+        parameterUncertaintyPapoto: 10,
+        cableTemperatureCalibration: -5,
+        cableTemperatureCalibrationUncertainty: 2
+      };
+
+      it.each([
+        ['accept a negative cable temperature', manual15C, true],
+        ['reject a missing parameter uncertainty', { ...manual15C, parameterUncertaintyPapoto: undefined }, false],
+        ['reject a negative parameter uncertainty', { ...manual15C, parameterUncertaintyPapoto: -1 }, false],
+        [
+          'reject a negative temperature uncertainty',
+          { ...manual15C, cableTemperatureCalibrationUncertainty: -1 },
+          false
+        ]
+      ] as const)('should %s', async (_label, manualData, expected) => {
+        component.measureData.set({
+          ...validMeasure(),
+          updateMode15C: 'manual',
+          manualParameterCalculation15CWithoutWind: manualData
+        });
+        await component.onSave();
+        component.activeTab.set('parameterAt15CWithoutWind');
+        expect(component.isParameter15CValid()).toBe(expected);
+        expect(component.canReportOrExport()).toBe(expected);
+      });
     });
   });
 
   describe('onReport', () => {
-    it('should log report data', () => {
-      const consoleSpy = vi.spyOn(console, 'log');
+    it('should generate the report of the current measure with its study context', async () => {
+      component.measureData.set(createTestMeasureData({ name: 'Measure 1', span: [0, 1] }));
 
-      component.onReport();
+      await component.onReport();
 
-      expect(consoleSpy).toHaveBeenCalledWith('Report', component.measureData());
+      expect(mockReportService.generateReport).toHaveBeenCalledTimes(1);
+      const data = mockReportService.generateReport.mock.calls[0][0];
+      expect(data.measureName).toBe('Measure 1');
+      expect(data.sections).toHaveLength(4);
+    });
+
+    it('should report the saved measure, not the unsaved edits', async () => {
+      component.measureData.set(createTestMeasureData({ name: 'Saved name', calculationMethod: 'papoto' }));
+      await component.onSave();
+      component.measureData.set({ ...component.measureData(), name: 'Edited name', calculationMethod: 'pep' });
+
+      await component.onReport();
+
+      const data = mockReportService.generateReport.mock.calls[0][0];
+      expect(data.measureName).toBe('Saved name');
+      expect(data.sections[1].rows[0][0]?.value).toBe('common.papoto-label');
+    });
+
+    it('should generate the report for a tangent aiming method too', async () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming-interior' }));
+
+      await component.onReport();
+
+      expect(mockReportService.generateReport).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -754,14 +926,33 @@ describe('FieldMeasuringComponent', () => {
       expect(saved?.cableParameter).toBe(100);
       expect(saved?.cableTangentAngle).toBeNull();
       expect(component.measureData().cableTangentAngle).toBeNull();
-      expect(component.hasUnsavedChanges()).toBe(false);
+    });
+
+    it('should persist the default span length when it is left empty', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming',
+          calculationType: 'parametre',
+          tangentLeftSupport: '0',
+          tangentSpanLength: null,
+          cableParameter: 100
+        })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.tangentSpanLength).toBe(0);
+      expect(component.measureData().tangentSpanLength).toBe(0);
     });
 
     it('should reset the papoto inputs when tangent aiming is active', async () => {
       const plotService = TestBed.inject(PlotService);
       const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
       component.measureData.set(
-        createTestMeasureData({ calculationMethod: 'tangente-aiming', HL: 5, leftSupport: '1', cableParameter: 100 })
+        createTestMeasureData({ calculationMethod: 'tangente-aiming', HL: 5, leftSupport: '1', cableTangentAngle: 100 })
       );
 
       await component.onSave();
@@ -769,7 +960,7 @@ describe('FieldMeasuringComponent', () => {
       const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
       expect(saved?.HL).toBeNull();
       expect(saved?.leftSupport).toBeNull();
-      expect(saved?.cableParameter).toBe(100);
+      expect(saved?.cableTangentAngle).toBe(100);
     });
 
     it('should reset tangent aiming to defaults when papoto is active', async () => {
@@ -785,7 +976,6 @@ describe('FieldMeasuringComponent', () => {
       expect(saved?.HL).toBe(5);
       expect(saved?.tangentSpanLength).not.toBe(12);
       expect(saved?.cableTangentAngle).not.toBe(5);
-      expect(component.hasUnsavedChanges()).toBe(false);
     });
 
     it('should validate the tab through the tangent aiming rules', () => {
@@ -798,7 +988,7 @@ describe('FieldMeasuringComponent', () => {
           tangentSpanLength: 10,
           cableHAccDistance: 1,
           cableVerticalAccAngle: 1,
-          cableParameter: 100
+          cableTangentAngle: 100
         })
       );
       expect(component.isParameterCalculationValid()).toBe(true);
@@ -816,6 +1006,177 @@ describe('FieldMeasuringComponent', () => {
         }
       });
       expect(component.hasComputedOutputs()).toBe(true);
+    });
+  });
+
+  describe.each(['tangente-aiming', 'tangente-aiming-exterior', 'tangente-aiming-interior'] as const)(
+    'canSave - %s',
+    (calculationMethod) => {
+      const outputKey = {
+        'tangente-aiming': 'tangentAimingSupport',
+        'tangente-aiming-exterior': 'tangentAimingExterior',
+        'tangente-aiming-interior': 'tangentAimingInterior'
+      }[calculationMethod] as 'tangentAimingSupport';
+      const result = { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true };
+      const validMeasure = () =>
+        createTestMeasureData({
+          name: 'Measure 1',
+          calculationMethod,
+          tangentLeftSupport: '0',
+          tangentSpanLength: 10,
+          cableHAccDistance: 1,
+          cableVerticalAccAngle: 1,
+          cableTangentAngle: 100,
+          exteriorLeftSupport: '0',
+          exteriorSpanLength: 10,
+          exteriorHAccDistance: 1,
+          exteriorVerticalAccAngleLeft: 1,
+          exteriorVerticalAccAngleRight: 1,
+          exteriorTangentAngle: 100,
+          interiorLeftSupport: '0',
+          interiorSpanLength: 10,
+          interiorHAccDistance: 1,
+          interiorVerticalAccAngleLeft: 1,
+          interiorVerticalAccAngleRight: 1,
+          interiorTangentAngle: 100
+        });
+
+      it('should enable the save button without calculation', () => {
+        component.measureData.set(validMeasure());
+        expect(component.canSave()).toBe(true);
+      });
+
+      it('should enable the save button once the measure has been calculated', () => {
+        const base = validMeasure();
+        component.measureData.set({ ...base, outputs: { ...base.outputs, [outputKey]: result } });
+        expect(component.canSave()).toBe(true);
+      });
+
+      it('should enable the save button even when the parameter inputs are incomplete', () => {
+        const base = validMeasure();
+        component.measureData.set({
+          ...base,
+          tangentSpanLength: null,
+          exteriorSpanLength: null,
+          interiorSpanLength: null
+        });
+        expect(component.isParameterCalculationValid()).toBe(false);
+        expect(component.canSave()).toBe(true);
+      });
+
+      it('should enable the save button even when the terrain data is incomplete', () => {
+        component.measureData.set({ ...validMeasure(), windSpeed: null, longitude: null });
+        expect(component.isGlobalFormValid()).toBeFalsy();
+        expect(component.isTerrainDataValid()).toBeFalsy();
+        expect(component.canSave()).toBe(true);
+      });
+
+      it('should disable the save button when the measure has no name', () => {
+        component.measureData.set({ ...validMeasure(), name: '  ' });
+        expect(component.canSave()).toBe(false);
+      });
+
+      it('should disable the save button when the name is already taken', () => {
+        component.measureData.set(validMeasure());
+        vi.spyOn(component, 'isNameAlreadyTaken').mockReturnValue(true);
+        expect(component.canSave()).toBe(false);
+      });
+
+      it('should re-enable the save button after a save when a parameter input is edited without calculation', async () => {
+        const base = validMeasure();
+        component.measureData.set({ ...base, outputs: { ...base.outputs, [outputKey]: result } });
+        await component.onSave();
+        expect(component.canSave()).toBe(false);
+        const saved = component.measureData();
+        component.measureData.set({
+          ...saved,
+          interiorHAccDistance: 3,
+          outputs: { ...saved.outputs, [outputKey]: null }
+        });
+        expect(component.canSave()).toBe(true);
+      });
+
+      it('should keep the save button disabled after a save when only the calculus mode is switched', async () => {
+        const base = validMeasure();
+        component.measureData.set({ ...base, outputs: { ...base.outputs, [outputKey]: result } });
+        await component.onSave();
+        const saved = component.measureData();
+        const otherMethod = (['tangente-aiming', 'tangente-aiming-exterior', 'tangente-aiming-interior'] as const).find(
+          (method) => method !== calculationMethod
+        )!;
+        component.measureData.set({ ...saved, calculationMethod: otherMethod });
+        expect(component.hasEditedInputs()).toBe(false);
+        expect(component.canSave()).toBe(false);
+      });
+
+      it('should re-enable the save button after a save when a terrain field is edited', async () => {
+        const base = validMeasure();
+        component.measureData.set({ ...base, outputs: { ...base.outputs, [outputKey]: result } });
+        await component.onSave();
+        expect(component.canSave()).toBe(false);
+        component.onFieldChange('windSpeed', 12);
+        expect(component.canSave()).toBe(true);
+      });
+    }
+  );
+
+  describe('canSave - pep', () => {
+    it('should re-enable the save button after a save when a PEP input is edited (RG.PEP.ENR-BTN.1)', async () => {
+      component.measureData.set(
+        createTestMeasureData({ name: 'Measure 1', calculationMethod: 'pep', pepLeftSupport: '0', xSight1: 10 })
+      );
+      await component.onSave();
+      expect(component.canSave()).toBe(false);
+
+      component.measureData.set({ ...component.measureData(), xSight1: 20 });
+      expect(component.canSave()).toBe(true);
+    });
+
+    it('should save the PEP inputs and reset the inputs of the other methods (RG.PEP.ENR-BTN.2)', async () => {
+      const modifySectionSpy = vi.spyOn(TestBed.inject(PlotService), 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({
+          name: 'Measure 1',
+          calculationMethod: 'pep',
+          pepLeftSupport: '0',
+          xSight1: 10,
+          ySight3: -5,
+          HL: 5,
+          tangentSpanLength: 400
+        })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.calculationMethod).toBe('pep');
+      expect(saved?.pepLeftSupport).toBe('0');
+      expect(saved?.xSight1).toBe(10);
+      expect(saved?.ySight3).toBe(-5);
+      expect(saved?.HL).toBeNull();
+      expect(saved?.tangentSpanLength).not.toBe(400);
+    });
+
+    it('should keep the report and export inactive with PEP even when a result exists (RG.PEP.RAP-BTN.1, EXP-BTN.1)', async () => {
+      const base = createTestMeasureData({ name: 'Measure 1', calculationMethod: 'pep', pepLeftSupport: '0' });
+      component.measureData.set({
+        ...base,
+        outputs: {
+          ...base.outputs,
+          pep: {
+            parameter: 1,
+            uncertainty: 1,
+            parameter_1_2: 1,
+            parameter_2_3: 1,
+            parameter_1_3: 1,
+            checkValidity: true
+          }
+        }
+      });
+      await component.onSave();
+      component.activeTab.set('parameterCalculation');
+      expect(component.isParameterCalculationValid()).toBe(false);
+      expect(component.canReportOrExport()).toBe(false);
     });
   });
 
@@ -839,7 +1200,6 @@ describe('FieldMeasuringComponent', () => {
       expect(saved?.exteriorParameter).toBe(100);
       expect(saved?.exteriorTangentAngle).toBeNull();
       expect(saved?.HL).toBeNull();
-      expect(component.hasUnsavedChanges()).toBe(false);
     });
 
     it('should validate the tab through the exterior rules and gate the report/export buttons', () => {
@@ -854,7 +1214,7 @@ describe('FieldMeasuringComponent', () => {
           exteriorHAccDistance: 1,
           exteriorVerticalAccAngleLeft: 1,
           exteriorVerticalAccAngleRight: 1,
-          exteriorParameter: 100
+          exteriorTangentAngle: 100
         })
       );
       expect(component.isParameterCalculationValid()).toBe(true);
@@ -875,7 +1235,64 @@ describe('FieldMeasuringComponent', () => {
     });
   });
 
-  describe('hasUnsavedChanges', () => {
+  describe('onSave - tangent aiming (interior)', () => {
+    it('should persist the displayed fields and reset the other modes', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming-interior',
+          interiorTangentAngle: 100,
+          interiorHAccDistance: 4000,
+          HL: 5,
+          exteriorSpanLength: 300
+        })
+      );
+
+      await component.onSave();
+
+      const saved = modifySectionSpy.mock.calls[0][0].field_measures?.at(-1);
+      expect(saved?.interiorTangentAngle).toBe(100);
+      expect(saved?.interiorParameter).toBeNull();
+      expect(saved?.interiorHAccDistance).toBe(4000);
+      expect(saved?.HL).toBeNull();
+      expect(saved?.exteriorSpanLength).toBe(0);
+    });
+
+    it('should validate the tab through the interior rules and gate the report/export buttons', () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming-interior' }));
+      expect(component.isTangentAimingMethod()).toBe(true);
+      expect(component.isParameterCalculationValid()).toBe(false);
+      component.measureData.set(
+        createTestMeasureData({
+          calculationMethod: 'tangente-aiming-interior',
+          interiorLeftSupport: '0',
+          interiorSpanLength: 10,
+          interiorHAccDistance: 1,
+          interiorVerticalAccAngleLeft: 1,
+          interiorVerticalAccAngleRight: 1,
+          interiorTangentAngle: 100
+        })
+      );
+      expect(component.isParameterCalculationValid()).toBe(true);
+    });
+
+    it('should take the interior result into account for computed outputs', () => {
+      component.measureData.set(createTestMeasureData({ calculationMethod: 'tangente-aiming-interior' }));
+      expect(component.hasComputedOutputs()).toBe(false);
+      const base = component.measureData();
+      component.measureData.set({
+        ...base,
+        outputs: {
+          ...base.outputs,
+          tangentAimingInterior: { parameter: 1, uncertainty: 1, criterion: 1, checkValidity: true }
+        }
+      });
+      expect(component.hasComputedOutputs()).toBe(true);
+    });
+  });
+
+  describe('hasEditedInputs', () => {
     it('should be false right after initialization and true after an edit', async () => {
       toolbarDialogService.openTool('field-measuring');
       toolbarDialogService.proceedToMainComponent();
@@ -884,11 +1301,11 @@ describe('FieldMeasuringComponent', () => {
       await new Promise((resolve) => setTimeout(resolve, 50));
       fixture.detectChanges();
 
-      expect(component.hasUnsavedChanges()).toBe(false);
+      expect(component.hasEditedInputs()).toBe(false);
 
       component.onFieldChange('windSpeed', 12);
 
-      expect(component.hasUnsavedChanges()).toBe(true);
+      expect(component.hasEditedInputs()).toBe(true);
     });
 
     it('should become false again after a successful save', async () => {
@@ -903,15 +1320,39 @@ describe('FieldMeasuringComponent', () => {
       fixture.detectChanges();
 
       component.onFieldChange('windSpeed', 12);
-      expect(component.hasUnsavedChanges()).toBe(true);
+      expect(component.hasEditedInputs()).toBe(true);
 
       await component.onSave();
 
-      expect(component.hasUnsavedChanges()).toBe(false);
+      expect(component.hasEditedInputs()).toBe(false);
+    });
+
+    it('should count a new automatic 15°C result as an edit, and a cleared one as neutral', async () => {
+      const plotService = TestBed.inject(PlotService);
+      vi.spyOn(plotService, 'modifySection').mockResolvedValue(undefined);
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      fixture.detectChanges();
+
+      component.onFieldChange('windSpeed', 12);
+      await component.onSave();
+      const saved = component.measureData();
+      expect(component.canSave()).toBe(false);
+
+      const parameter15C = { parameter15CMinusUncertainty: 1, parameter15C: 2, parameter15CPlusUncertainty: 3 };
+      component.measureData.set({ ...saved, outputs: { ...saved.outputs, parameter15C } });
+      expect(component.hasEditedInputs()).toBe(true);
+
+      component.measureData.set({ ...saved, outputs: { ...saved.outputs, parameter15C: null } });
+      expect(component.hasEditedInputs()).toBe(false);
     });
   });
 
-  describe('isFormValid - transit bounds', () => {
+  describe('isTerrainDataValid - transit bounds', () => {
     const validBase = {
       name: 'Test',
       span: [1, 2],
@@ -927,32 +1368,32 @@ describe('FieldMeasuringComponent', () => {
 
     it('should return true when transit is null (progressive save allowed)', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: null }));
-      expect(component.isFormValid()).toBeTruthy();
+      expect(component.isTerrainDataValid()).toBeTruthy();
     });
 
     it('should return true when transit is within bounds', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: 2000 }));
-      expect(component.isFormValid()).toBeTruthy();
+      expect(component.isTerrainDataValid()).toBeTruthy();
     });
 
     it('should return true when transit is at minimum boundary', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.min }));
-      expect(component.isFormValid()).toBeTruthy();
+      expect(component.isTerrainDataValid()).toBeTruthy();
     });
 
     it('should return true when transit is at maximum boundary', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.max }));
-      expect(component.isFormValid()).toBeTruthy();
+      expect(component.isTerrainDataValid()).toBeTruthy();
     });
 
     it('should return false when transit is below minimum', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.min - 1 }));
-      expect(component.isFormValid()).toBeFalsy();
+      expect(component.isTerrainDataValid()).toBeFalsy();
     });
 
     it('should return false when transit is above maximum', () => {
       component.measureData.set(createTestMeasureData({ ...validBase, transit: TRANSIT_BOUNDS.max + 1 }));
-      expect(component.isFormValid()).toBeFalsy();
+      expect(component.isTerrainDataValid()).toBeFalsy();
     });
   });
 
@@ -1080,6 +1521,153 @@ describe('FieldMeasuringComponent', () => {
       // Verify that data from section was populated
       expect(measureData.voltage).toBeDefined();
       expect(measureData.link).toBeDefined();
+    });
+
+    it('should revive date and time stored as ISO strings (imported study)', async () => {
+      const spanService = TestBed.inject(PlotSpanService) as unknown as { section: WritableSignal<Section | null> };
+      const measureDate = new Date(2026, 6, 14, 10, 30);
+      const importedMeasure = {
+        ...createTestMeasureData({ uuid: 'imported-uuid', season: 'winter' }),
+        date: measureDate.toISOString(),
+        time: measureDate.toISOString()
+      } as unknown as FieldMeasure;
+      spanService.section.set({
+        ...spanService.section()!,
+        field_measures: [importedMeasure],
+        selected_field_measure_uuid: 'imported-uuid'
+      });
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      const measureData = component.measureData();
+      expect(measureData.date).toBeInstanceOf(Date);
+      expect(measureData.date?.getTime()).toBe(measureDate.getTime());
+      expect(measureData.time).toBeInstanceOf(Date);
+      expect(measureData.time?.getTime()).toBe(measureDate.getTime());
+      expect(measureData.season).toBe('winter');
+    });
+
+    it('should default the calculation type and inputs of an interior measure saved without them', async () => {
+      const spanService = TestBed.inject(PlotSpanService);
+      const sectionSignal = spanService.section as ReturnType<typeof signal<Section | null>>;
+      const section = sectionSignal() as Section;
+      const legacy = {
+        ...createTestMeasureData({ uuid: 'legacy-interior', calculationMethod: 'tangente-aiming-interior' }),
+        interiorCalculationType: undefined,
+        interiorParameter: undefined
+      } as unknown as FieldMeasure;
+      sectionSignal.set({ ...section, field_measures: [legacy], selected_field_measure_uuid: 'legacy-interior' });
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(component.measureData()).toMatchObject({ interiorCalculationType: 'tangente', interiorParameter: 20 });
+    });
+
+    it('should open a support measure saved with the parametre type on the parametre type', async () => {
+      const spanService = TestBed.inject(PlotSpanService);
+      const sectionSignal = spanService.section as ReturnType<typeof signal<Section | null>>;
+      const section = sectionSignal() as Section;
+      const legacy = createTestMeasureData({
+        uuid: 'legacy-support',
+        calculationMethod: 'tangente-aiming',
+        calculationType: 'parametre',
+        cableParameter: 1500,
+        cableTangentAngle: null
+      });
+      sectionSignal.set({ ...section, field_measures: [legacy], selected_field_measure_uuid: 'legacy-support' });
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(component.measureData()).toMatchObject({
+        calculationType: 'parametre',
+        cableTangentAngle: 0,
+        cableParameter: 1500
+      });
+    });
+  });
+
+  describe('last saved tab', () => {
+    it('should store the active tab in the saved measure', async () => {
+      const plotService = TestBed.inject(PlotService);
+      const modifySectionSpy = vi.spyOn(plotService, 'modifySection');
+      component.measureData.set(createTestMeasureData({ uuid: 'tab-measure' }));
+      component.activeTab.set('parameterCalculation');
+
+      await component.onSave();
+
+      expect(modifySectionSpy.mock.calls[0][0].field_measures?.at(-1)?.savedTab).toBe('parameterCalculation');
+      expect(component.measureData().savedTab).toBe('parameterCalculation');
+    });
+
+    it.each(['parameterCalculation', 'temperatureCalculation', 'parameterAt15CWithoutWind'] as const)(
+      'should reopen a measure saved on the %s tab on that tab',
+      async (savedTab) => {
+        const spanService = TestBed.inject(PlotSpanService);
+        const sectionSignal = spanService.section as ReturnType<typeof signal<Section | null>>;
+        const section = sectionSignal() as Section;
+        sectionSignal.set({
+          ...section,
+          field_measures: [{ ...createTestMeasureData({ uuid: 'saved-measure' }), savedTab }],
+          selected_field_measure_uuid: 'saved-measure'
+        });
+
+        toolbarDialogService.openTool('field-measuring');
+        toolbarDialogService.proceedToMainComponent();
+        toolbarDialogService.completePendingTransition();
+        fixture.detectChanges();
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        expect(component.activeTab()).toBe(savedTab);
+      }
+    );
+
+    it('should open on the terrain data tab when the measure has no saved tab', async () => {
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(component.activeTab()).toBe('terrainData');
+    });
+  });
+
+  describe('measure saved before the interior output existed', () => {
+    it('should load the missing outputs as null so the interior result is not considered computed', async () => {
+      const spanService = TestBed.inject(PlotSpanService);
+      const sectionSignal = spanService.section as ReturnType<typeof signal<Section | null>>;
+      const section = sectionSignal() as Section;
+      const legacyMeasure = createTestMeasureData({
+        uuid: 'legacy-measure',
+        calculationMethod: 'tangente-aiming-interior'
+      });
+      const { tangentAimingInterior: _omitted, ...legacyOutputs } = legacyMeasure.outputs;
+      sectionSignal.set({
+        ...section,
+        field_measures: [{ ...legacyMeasure, outputs: legacyOutputs as FieldMeasure['outputs'] }],
+        selected_field_measure_uuid: 'legacy-measure'
+      });
+
+      toolbarDialogService.openTool('field-measuring');
+      toolbarDialogService.proceedToMainComponent();
+      toolbarDialogService.completePendingTransition();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(component.measureData().outputs.tangentAimingInterior).toBeNull();
+      expect(component.hasComputedOutputs()).toBe(false);
     });
   });
 

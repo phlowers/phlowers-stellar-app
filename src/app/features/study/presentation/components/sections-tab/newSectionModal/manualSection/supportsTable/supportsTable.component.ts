@@ -19,10 +19,13 @@ import { IconComponent } from '@shared/components/atoms/icon/icon.component';
 import { CreateEditView } from '@shared/types';
 import { PopoverModule } from 'primeng/popover';
 import { TableModule } from 'primeng/table';
+import { Select } from 'primeng/select';
 import { Section, Support, CatalogChain } from '@shared/domain';
 import { ChainsService } from '@shared/catalog/services/chains.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Localization, Task } from '@core/services/worker_python/tasks/types';
+import { Localization } from '@core/services/worker_python/tasks/types';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
+import { CRS } from '@shared/domain/helpers/geopositioning.constantes';
 import { AttachmentSetModalComponent } from '@features/study/presentation/components/sections-tab/newSectionModal/manualSection/supportsTable/attachmentSetModal/attachmentSetModal.component';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
@@ -35,15 +38,17 @@ import { TABLE_ROWS_PER_PAGE_OPTIONS } from '@shared/constants/tablePagination';
 import {
   buildCopyColumnChanges,
   buildFieldChangeUpdates,
+  filterSupportNames,
   buildSupportNameFilterTables,
   buildSupplementaryChains,
   findSupplementaryNames,
   getSupportFieldValues
 } from './helpers';
+import { SUPPORT_NAME_OPTIONS_BATCH_SIZE } from './supportsTable.constantes';
 import { SUPPORT_FIELD_LIMITS } from '@shared/domain/helpers/support-limits.constantes';
 import { KeyedLatestRequestTracker } from '@shared/helpers/latestRequestTracker';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
-import { LOCATION_CONFIG } from '../location/location.constantes';
+import { LoggerService } from '@core/services/logger/logger.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { ExpandableSelectField } from './supportsTable.types';
 
@@ -59,6 +64,7 @@ import { ExpandableSelectField } from './supportsTable.types';
     DecimalPipe,
     FormsModule,
     TableModule,
+    Select,
     PopoverModule,
     ButtonComponent,
     IconComponent,
@@ -106,12 +112,22 @@ export class SupportsTableComponent implements OnInit {
   supportFilterTable = signal<string[]>([]);
   supplementarySupportFilterTable = signal<string[]>([]);
   allSupportFilterTable = computed(() => [...this.supportFilterTable(), ...this.supplementarySupportFilterTable()]);
+  private readonly supportNameFilter = signal('');
+  private readonly supportNameVisibleCount = signal(SUPPORT_NAME_OPTIONS_BATCH_SIZE);
+  private readonly matchingSupportNameOptions = computed(() =>
+    filterSupportNames(this.allSupportFilterTable(), this.supportNameFilter())
+  );
+  readonly visibleSupportNameOptions = computed(() =>
+    this.matchingSupportNameOptions().slice(0, this.supportNameVisibleCount())
+  );
   private readonly attachmentSetRestrictionsBySupportUuid = signal<Record<string, number[]>>({});
   private readonly chainsService = inject(ChainsService);
   private readonly attachmentService = inject(AttachmentService);
   private readonly allCatalogSupportNames = toSignal(this.attachmentService.distinctSupportNames$);
   readonly catalogLoaded = computed(() => this.allCatalogSupportNames() !== undefined);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly geopositioning = inject(GeopositioningService);
+  private readonly logger = inject(LoggerService);
   readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
   private readonly transloco = inject(TranslocoService);
   localization = signal<Localization | null>(null);
@@ -181,46 +197,41 @@ export class SupportsTableComponent implements OnInit {
     });
   }
 
-  private hasLocalizationInputs(section: Section | null | undefined, supports: Support[]): boolean {
-    return (
-      supports.length > 0 &&
-      !!section &&
-      !supports.slice(0, -1).some((s) => s.spanLength == null || s.spanAngle == null)
-    );
-  }
-
-  private buildLocalizationPayload(section: Section, supports: Support[]) {
-    const lastIndex = supports.length - 1;
-    return {
-      startLatitude: section.start_latitude ?? LOCATION_CONFIG.latitude.default,
-      startLongitude: section.start_longitude ?? LOCATION_CONFIG.longitude.default,
-      startAzimuth: section.start_azimuth ?? LOCATION_CONFIG.azimuth.default,
-      spanLength: supports.map((s, i) => (i === lastIndex ? Number.NaN : s.spanLength!)),
-      lineAngle: supports.map((s, i) => (i === lastIndex ? 0 : s.spanAngle!))
-    };
-  }
-
   private async computeLocalization(): Promise<void> {
     if (this.mode() !== 'view') return;
 
     const section = this.section();
-    const supports = this.supports();
+    if (!section || !this.workerReady()) return;
 
-    if (!this.hasLocalizationInputs(section, supports)) return;
-    if (!this.workerReady()) return;
+    const located = { ...section, supports: this.supports() };
+    if (!this.geopositioning.getStartGps(located)) {
+      this.localization.set(null);
+      return;
+    }
 
     this.localizationLoading.set(true);
 
     try {
-      const { result, error } = await this.workerPythonService.runTask(
-        Task.computeLocalization,
-        this.buildLocalizationPayload(section!, supports)
-      );
-      if (result && !error) {
-        this.localization.set(result);
+      const resolved = await this.geopositioning.resolveLocalization(located);
+      if (!resolved) {
+        this.logger.warn('Supports table: localization unavailable although a start GPS is set');
+        return;
       }
-    } catch {
-      // runTask failure — localizationLoading is cleared in finally
+
+      const points = resolved.latitude.map((latitude, i) => ({ latitude, longitude: resolved.longitude[i] }));
+      const projected = await this.geopositioning.toCrs(points, CRS.LAMBERT93);
+      if (!projected) {
+        this.logger.warn('Supports table: Lambert projection unavailable although a start GPS is set');
+        return;
+      }
+
+      this.localization.set({
+        ...resolved,
+        lambert_x: projected.map((point) => point.x),
+        lambert_y: projected.map((point) => point.y)
+      });
+    } catch (error: unknown) {
+      this.logger.warn('Supports table: localization failed', error);
     } finally {
       this.localizationLoading.set(false);
     }
@@ -237,7 +248,7 @@ export class SupportsTableComponent implements OnInit {
    * default action opens the picker) and `focusin` (for keyboard-driven opening), each
    * forcing a synchronous change-detection pass so the options exist before the picker paints.
    */
-  private readonly expandOptionFields = ['chainName', 'name', 'attachmentPosition'] as const;
+  private readonly expandOptionFields = ['chainName', 'attachmentPosition'] as const;
 
   private expandedSelectUuid(key: string): string {
     const field = this.expandOptionFields.find((f) => key.startsWith(f));
@@ -288,18 +299,13 @@ export class SupportsTableComponent implements OnInit {
    * Hiding options directly on the DOM (rather than through a signal) keeps a keystroke
    * from re-rendering every row of the table.
    */
-  onOptionFilterInput(event: Event, field: 'chainName' | 'name') {
+  onOptionFilterInput(event: Event) {
     const input = event.target as HTMLInputElement;
     const query = input.value.trim().toLowerCase();
     this.selectableOptions(input).forEach((option) => {
       option.hidden = !option.text.toLowerCase().includes(query);
     });
-    // Keeps a typed value that is absent from the catalog selectable, as the PrimeNG filter did.
-    if (field === 'chainName') {
-      this.onChainNameFilter({ filter: input.value });
-    } else {
-      this.onSupportNameFilter({ filter: input.value });
-    }
+    this.onChainNameFilter({ filter: input.value });
   }
 
   /**
@@ -341,13 +347,30 @@ export class SupportsTableComponent implements OnInit {
   }
 
   onSupportNameFilter(event: { filter: string }) {
+    const filter = event.filter.trim();
+    this.supportNameFilter.set(filter);
+    this.supportNameVisibleCount.set(SUPPORT_NAME_OPTIONS_BATCH_SIZE);
+
     const notFoundNames = findSupplementaryNames(
-      [...getSupportFieldValues(this.supports(), 'name'), event.filter],
+      [...getSupportFieldValues(this.supports(), 'name'), filter],
       this.supportFilterTable()
     );
-    if (notFoundNames.length) {
-      this.supplementarySupportFilterTable.set(notFoundNames);
+    this.supplementarySupportFilterTable.set(notFoundNames);
+  }
+
+  onSupportNameLazyLoad(event: { first: number; last: number }): void {
+    const visibleCount = this.supportNameVisibleCount();
+    const totalMatches = this.matchingSupportNameOptions().length;
+    if (event.first === 0 || event.last < visibleCount || visibleCount >= totalMatches) {
+      return;
     }
+
+    this.supportNameVisibleCount.set(Math.min(visibleCount + SUPPORT_NAME_OPTIONS_BATCH_SIZE, totalMatches));
+  }
+
+  resetSupportNameFilter(): void {
+    this.supportNameFilter.set('');
+    this.supportNameVisibleCount.set(SUPPORT_NAME_OPTIONS_BATCH_SIZE);
   }
 
   /** Latest derived-field resolution per support UUID, used to drop stale async results. */

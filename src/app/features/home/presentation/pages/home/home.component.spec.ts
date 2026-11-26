@@ -12,6 +12,7 @@ import { CardStudyComponent } from '@shared/components/atoms/card-study/card-stu
 import { CardInfoComponent } from '@shared/components/atoms/card-info/card-info.component';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
+import { formatRfc9557 } from '@shared/helpers/date-time.helpers';
 import { provideRouter } from '@angular/router';
 
 import { TranslocoTestingModule } from '@jsverse/transloco';
@@ -256,6 +257,25 @@ describe('HomeComponent', () => {
           updated_at_offline: expect.any(String)
         }))
       );
+    });
+
+    it('should display the same relative time for a legacy ISO date and an RFC 9557 date of the same instant', async () => {
+      const instant = new Date(Date.now() - 3 * 3600 * 1000);
+      const rfc9557 = formatRfc9557(instant);
+      studiesServiceMock.getLatestStudies.mockResolvedValue([
+        { ...mockStudies[0], uuid: 'legacy', updated_at_offline: instant.toISOString() },
+        { ...mockStudies[0], uuid: 'rfc', updated_at_offline: rfc9557 },
+        { ...mockStudies[0], uuid: 'bad', updated_at_offline: 'not-a-date' }
+      ]);
+
+      (studiesServiceMock.ready as BehaviorSubject<boolean>).next(true);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const [legacy, rfc, bad] = component.latestStudies() ?? [];
+      expect(legacy.updated_at_offline).not.toBe('');
+      expect(rfc.updated_at_offline).toBe(legacy.updated_at_offline);
+      expect(bad.updated_at_offline).toBe('');
     });
 
     it('should not load studies when studies service is not ready', () => {

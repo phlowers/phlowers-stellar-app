@@ -1,12 +1,14 @@
 import Plotly, { Camera, Data, Layout, ModeBarDefaultButtons, ModeBarButton, Icon } from 'plotly.js-dist-min';
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.constantes';
-import { AspectRatio, ScalingFactors, Side, SelectedDisplayOptions, View } from '@shared/types/plot.types';
+import { AspectRatio, ScalingFactors, Side, SelectedDisplayOptions, View, Zoom2d } from '@shared/types/plot.types';
 import { Distance, GetSectionOutput, ObstacleOutput } from '@services/worker_python/tasks/types';
 import { createLoadAnnotations } from './createLoadAnnotations';
 import { createCableModificationAnnotations } from './createCableModificationAnnotations';
+import { createCableSupportManipAnnotations } from './createCableSupportManipAnnotations';
+import { createCableSpanManipAnnotations, createCableSpanManipShapes } from './createCableSpanManipAnnotations';
 import { createCutStrandsAnnotations, createCutStrandsShapes } from './createCutStrandsAnnotations';
-import { CableModification, SpanLoad } from '@shared/domain';
+import { CableModification, CableSupportManipulation, SpanLoad } from '@shared/domain';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
 import { createDistanceVisuals } from './createDistanceTraces';
@@ -82,6 +84,8 @@ export interface CreatePlotParams {
   cableModifications?: readonly CableModification[];
   /** Lookup mapping a span uuid (left support uuid) to its absolute support index. */
   spanUuidToIndex?: ReadonlyMap<string, number>;
+  /** Saved cable support manipulations of the displayed load case, shown as clickable annotations on their support. */
+  cableSupportManips?: readonly CableSupportManipulation[];
   /** Saved RRTS cut strands, whose marking is drawn when it asks for one. */
   cutStrands?: RrtsCutStrandsData | null;
   /**
@@ -185,6 +189,12 @@ const createScene = (
         plotParams.cableModifications ?? [],
         plotParams.spanUuidToIndex ?? new Map()
       ),
+      ...createCableSupportManipAnnotations(
+        plotParams,
+        plotParams.cableSupportManips ?? [],
+        plotParams.spanUuidToIndex ?? new Map()
+      ),
+      ...createCableSpanManipAnnotations(plotParams),
       ...createCutStrandsAnnotations(plotParams),
       ...createObstaclesAnnotations(plotParams),
       ...createFloorAnnotations(toFloorParams(plotParams)),
@@ -418,12 +428,18 @@ const layout2d = (
         plotParams.cableModifications ?? [],
         plotParams.spanUuidToIndex ?? new Map()
       ),
+      ...createCableSupportManipAnnotations(
+        plotParams,
+        plotParams.cableSupportManips ?? [],
+        plotParams.spanUuidToIndex ?? new Map()
+      ),
+      ...createCableSpanManipAnnotations(plotParams),
       ...createCutStrandsAnnotations(plotParams),
       ...createObstaclesAnnotations(plotParams),
       ...createFloorAnnotations(toFloorParams(plotParams)),
       ...distanceAnnotations
     ],
-    shapes: createCutStrandsShapes(plotParams)
+    shapes: [...createCableSpanManipShapes(plotParams), ...createCutStrandsShapes(plotParams)]
   };
 };
 
@@ -505,3 +521,13 @@ export const purgePlot = (documentRef: Document, plotId: string): void => {
  */
 export const applyRestoreCamera = (plotId: string, camera: Camera): Promise<void> =>
   Plotly.relayout(plotId, { 'scene.camera': camera as unknown } as Record<string, unknown>) as unknown as Promise<void>;
+
+/**
+ * Applies saved 2D axis ranges to a Plotly 2D plot via `Plotly.relayout`.
+ * Called after the first render following a back-navigation.
+ *
+ * @param plotId - The DOM element ID of the Plotly plot container.
+ * @param zoom - The axis ranges to restore.
+ */
+export const applyRestoreZoom2d = (plotId: string, zoom: Zoom2d): Promise<void> =>
+  Plotly.relayout(plotId, { 'xaxis.range': zoom.x, 'yaxis.range': zoom.y }) as unknown as Promise<void>;

@@ -11,7 +11,8 @@ import { SortEvent } from 'primeng/api';
 import { StudiesTableComponent } from './studies-table.component';
 import { Study } from '@shared/domain';
 import { MessageService } from 'primeng/api';
-import { TranslocoTestingModule } from '@jsverse/transloco';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
+import { formatRfc9557 } from '@shared/helpers/date-time.helpers';
 
 describe('StudiesTableComponent', () => {
   let component: StudiesTableComponent;
@@ -58,7 +59,10 @@ describe('StudiesTableComponent', () => {
       imports: [
         StudiesTableComponent,
         TranslocoTestingModule.forRoot({
-          langs: { en: {}, fr: {} },
+          langs: {
+            en: { 'common.modification-date-format': "MMMM d'.' y, hh:mm a" },
+            fr: { 'common.modification-date-format': "d MMMM y, 'à' HH:mm" }
+          },
           translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' }
         })
       ],
@@ -94,6 +98,47 @@ describe('StudiesTableComponent', () => {
     it('should handle undefined studies input', () => {
       fixture.componentRef.setInput('studies', undefined as unknown as Study[]);
       expect(component.studies()).toBeUndefined();
+    });
+  });
+
+  describe('Modification date display', () => {
+    const localDate = new Date(2026, 8, 10, 16, 32).toISOString();
+    const renderDate = (): string => {
+      fixture.componentRef.setInput('studies', [{ ...mockStudy1, updated_at_offline: localDate }]);
+      fixture.detectChanges();
+      return getByTestId('study-modification-date')!.textContent!.trim();
+    };
+
+    it('should render the date in French format', () => {
+      TestBed.inject(TranslocoService).setActiveLang('fr');
+      expect(renderDate()).toBe('10 septembre 2026, à 16:32');
+    });
+
+    it('should render the date in American English format', () => {
+      expect(renderDate()).toBe('September 10. 2026, 04:32 PM');
+    });
+
+    it('should update the date when the language changes', () => {
+      expect(renderDate()).toBe('September 10. 2026, 04:32 PM');
+
+      TestBed.inject(TranslocoService).setActiveLang('fr');
+      fixture.detectChanges();
+      expect(getByTestId('study-modification-date')!.textContent!.trim()).toBe('10 septembre 2026, à 16:32');
+    });
+
+    it('should render the same text for an RFC 9557 date as for the legacy ISO date of the same instant', () => {
+      const legacyText = renderDate();
+      fixture.componentRef.setInput('studies', [
+        { ...mockStudy1, updated_at_offline: formatRfc9557(new Date(2026, 8, 10, 16, 32)) }
+      ]);
+      fixture.detectChanges();
+      expect(getByTestId('study-modification-date')!.textContent!.trim()).toBe(legacyText);
+    });
+
+    it('should render nothing, without error, for an unreadable date', () => {
+      fixture.componentRef.setInput('studies', [{ ...mockStudy1, updated_at_offline: 'not-a-date' }]);
+      expect(() => fixture.detectChanges()).not.toThrow();
+      expect(getByTestId('study-modification-date')!.textContent!.trim()).toBe('');
     });
   });
 
@@ -156,6 +201,51 @@ describe('StudiesTableComponent', () => {
 
       expect(component.sortField()).toBe('title');
       expect(component.sortOrder()).toBeUndefined();
+    });
+
+    describe('modification date column', () => {
+      // Chronological order: oldest (07:59Z) < summer (08:00Z) < winter (09:00Z) < newest (09:30Z)
+      const dated = (uuid: string, updated_at_offline: string): Study => ({ ...mockStudy1, uuid, updated_at_offline });
+      const studies = [
+        dated('winter', '2026-12-01T10:00:00.000+01:00[Europe/Paris]'),
+        dated('oldest', '2026-07-01T07:59:00.000Z'),
+        dated('newest', '2026-12-01T09:30:00.000Z'),
+        dated('summer', '2026-07-01T10:00:00.000+02:00[Europe/Paris]')
+      ];
+      const displayedOrder = () =>
+        getAllByTestId('study-row').map((row) =>
+          row.querySelector('[data-testid="open-study-btn"]')?.getAttribute('href')
+        );
+      const clickDateHeader = () => {
+        fixture.nativeElement.querySelector('th#updated_at_offline').click();
+        fixture.detectChanges();
+      };
+
+      it('should sort by instant, ascending then descending, when the date header is clicked', () => {
+        fixture.componentRef.setInput('studies', [...studies]);
+        fixture.detectChanges();
+
+        clickDateHeader();
+        expect(displayedOrder()).toEqual(['/study/oldest', '/study/summer', '/study/winter', '/study/newest']);
+
+        clickDateHeader();
+        expect(displayedOrder()).toEqual(['/study/newest', '/study/winter', '/study/summer', '/study/oldest']);
+        expect(component.sortField()).toBe('updated_at_offline');
+        expect(component.sortOrder()).toBe(-1);
+      });
+
+      it('should keep the default text sort on the other columns', () => {
+        fixture.componentRef.setInput('studies', [
+          { ...mockStudy1, uuid: 'b', title: 'Bravo' },
+          { ...mockStudy1, uuid: 'a', title: 'Alpha' }
+        ]);
+        fixture.detectChanges();
+
+        fixture.nativeElement.querySelector('th#title').click();
+        fixture.detectChanges();
+
+        expect(displayedOrder()).toEqual(['/study/a', '/study/b']);
+      });
     });
   });
 

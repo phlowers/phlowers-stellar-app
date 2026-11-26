@@ -8,6 +8,8 @@ import { HangingTableComponent } from '../components/hanging-table/hanging-table
 import { ObstaclesTableComponent } from '../components/obstacles-table/obstacles-table.component';
 import { StrandRrtsComponent } from '../components/strand-rrts/strand-rrts.component';
 import { CableAdjustmentComponent } from '@features/studio/cable-adjustment/presentation/components/cable-adjustment/cable-adjustment.component';
+import { EstimationsComponent } from '@features/studio/estimations/presentation/components/estimations/estimations.component';
+import { ForestTrenchesComponent } from '@features/studio/forest-trenches/presentation/components/forest-trenches/forest-trenches.component';
 import {
   DialogPhase,
   LoadTableContext,
@@ -25,9 +27,16 @@ export class ToolbarDialogService {
   readonly currentTool = signal<Tool | null>(null);
   readonly isOpen = signal(false);
   readonly phase = signal<DialogPhase>('main');
+  /** Incremented each time the dialog finished its opening animation (layout measures are only reliable afterwards). */
+  readonly shownCount = signal(0);
   readonly templates = signal<ToolTemplates>({});
   readonly loadTableContext = signal<LoadTableContext | null>(null);
   readonly strandRrtsContext = signal<StrandRrtsContext | null>(null);
+
+  /** Signals that the dialog finished its opening animation. */
+  notifyShown(): void {
+    this.shownCount.update((count) => count + 1);
+  }
 
   private readonly toolMap: Record<Tool, ToolConfig> = {
     'field-measuring': {
@@ -63,6 +72,14 @@ export class ToolbarDialogService {
     'cable-adjustment': {
       component: CableAdjustmentComponent,
       dialogStyle: { width: '43.5rem', 'max-width': '90%' }
+    },
+    estimations: {
+      component: EstimationsComponent,
+      dialogStyle: { width: '43.5rem', 'max-width': '90%' }
+    },
+    'forest-trenches': {
+      component: ForestTrenchesComponent,
+      dialogStyle: { width: '86.5625rem', 'max-width': '90%' }
     },
     'other-tool': {
       component: null!

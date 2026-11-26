@@ -1,10 +1,13 @@
 import { Section, Support } from '@shared/domain';
-import { Localization, Task, TaskInputs } from '@services/worker_python/tasks/types';
+import { FootLocalization } from '@shared/domain/helpers/geopositioning.interfaces';
+import { normalizeAzimuth } from '@shared/domain/helpers/geopositioning.helpers';
 import { FieldMeasure, FieldMeasureOutputs, TangentAimingSupportResult } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { TranslocoService } from '@jsverse/transloco';
+import { isNumber } from 'lodash';
+import { isDaylightSavingTime } from '@shared/domain/helpers/field-measure.helpers';
 import {
   SelectOption,
   TranslatableSelectOption,
@@ -12,8 +15,10 @@ import {
   TIME_MODE_OPTION_KEYS,
   SKY_COVER_OPTION_SOURCES,
   LEFT_SUPPORT_OPTION_KEYS,
-  MEASURED_SOLAR_FLUX_BOUNDS
+  MEASURED_SOLAR_FLUX_BOUNDS,
+  TRANSIT_BOUNDS
 } from './constants';
+import { TANGENT_AIMING_CALCULATION_TYPE } from './components/calculus-setting/tangent-aiming-common/tangent-aiming-common.constantes';
 
 /**
  * Builds select options from translatable option keys, resolving each label through Transloco.
@@ -93,57 +98,21 @@ export const formatSpanLabel = (section: Section | null, span: number[] | null):
   return `${formatSupportLabel(supports, leftIndex)} - ${formatSupportLabel(supports, rightIndex)}`;
 };
 
-/**
- * Normalizes an azimuth (degrees) into the `]-180, 180]` range accepted by the field measure form.
- * @param azimuth - The azimuth in degrees
- * @returns The normalized azimuth
- */
-const normalizeAzimuth = (azimuth: number): number => {
-  const positive = ((azimuth % 360) + 360) % 360;
-  return positive > 180 ? positive - 360 : positive;
-};
-
-/**
- * Builds the `computeLocalization` task inputs from the section start point and span geometry
- * (same computation as the "view section data" supports table).
- * @param section - The current section
- * @returns The task inputs, or `null` when the section has no start localization or incomplete span geometry
- */
-export const buildSectionLocalizationPayload = (
-  section: Section | null
-): TaskInputs[Task.computeLocalization] | null => {
-  const supports = section?.supports ?? [];
-  const lastIndex = supports.length - 1;
-  if (
-    !section ||
-    supports.length === 0 ||
-    section.start_latitude == null ||
-    section.start_longitude == null ||
-    section.start_azimuth == null ||
-    supports.slice(0, -1).some((support) => support.spanLength == null || support.spanAngle == null)
-  ) {
-    return null;
-  }
-  return {
-    startLatitude: section.start_latitude,
-    startLongitude: section.start_longitude,
-    startAzimuth: section.start_azimuth,
-    spanLength: supports.map((support, i) => (i === lastIndex ? Number.NaN : support.spanLength!)),
-    lineAngle: supports.map((support, i) => (i === lastIndex ? 0 : support.spanAngle!))
-  };
-};
+/** Reads a numeric field of the measure by key. */
+export const readNumber = (measureData: FieldMeasure, key: keyof FieldMeasure): number | null =>
+  measureData[key] as number | null;
 
 /**
  * Picks the localization of the reference support of a span from the computed section localization.
  * Uses the span's left support when no support of the span matches `referenceSupport`.
- * @param localization - The computed section localization (one entry per support)
+ * @param localization - The resolved section localization (one entry per support)
  * @param section - The current section, used to resolve support labels
  * @param span - The `[leftIndex, rightIndex]` support indices of the span (or `null`)
  * @param referenceSupport - The stored support index, or a legacy support label (or `null`)
  * @returns The support localization, or `null` when it is not available
  */
 export const getSpanLocalization = (
-  localization: Localization,
+  localization: FootLocalization,
   section: Section | null,
   span: number[] | null,
   referenceSupport: string | null
@@ -170,22 +139,22 @@ export const getSpanLocalization = (
  * @param name - The raw measure name
  * @returns A sanitized, filename-safe string (falls back to `field-measure` when empty after sanitizing)
  */
-const sanitizeFilename = (name: string): string =>
+export const sanitizeFilename = (name: string): string =>
   name
     .trim()
     // eslint-disable-next-line no-control-regex
     .replace(/[\\/:*?"<>|\x00-\x1f]/g, '') || 'field-measure';
 
 /**
- * Formats a generation date as `YYYY-MM-DD` in local time.
- * @param date - The generation date
+ * Formats a date as `YYYY-MM-DD` (or `YYYY-MM-DD HH-mm` with `withTime`) in local time.
+ * @param date - The date to format
+ * @param withTime - Appends the hours and minutes (`-` separated, usable in a file name)
  * @returns The formatted date segment
  */
-const formatGenerationDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+export const formatGenerationDate = (date: Date, withTime = false): string => {
+  const pad = (value: number): string => String(value).padStart(2, '0');
+  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return withTime ? `${day} ${pad(date.getHours())}-${pad(date.getMinutes())}` : day;
 };
 
 /**
@@ -208,19 +177,6 @@ export const buildFieldMeasureExportFilename = (
     formatGenerationDate(generationDate)
   ].join('_');
 
-/**
- * Determines if the current date is in Daylight Saving Time (DST)
- * Compares current timezone offset with standard time offset
- * @param date - The date to check (defaults to current date)
- * @returns true if in DST (summer), false otherwise (winter)
- */
-function isDaylightSavingTime(date: Date = new Date()): boolean {
-  const january = new Date(date.getFullYear(), 0, 1);
-  const july = new Date(date.getFullYear(), 6, 1);
-  const stdTimezoneOffset = Math.max(january.getTimezoneOffset(), july.getTimezoneOffset());
-  return date.getTimezoneOffset() < stdTimezoneOffset;
-}
-
 /** Default values of the papoto calculation inputs. */
 export const PAPOTO_INPUT_DEFAULTS = {
   leftSupport: null,
@@ -240,14 +196,15 @@ export const PAPOTO_INPUT_DEFAULTS = {
 
 /** Default values of the PEP calculation inputs. */
 export const PEP_INPUT_DEFAULTS = {
-  lengthBetweenSightGD: null,
-  elevationDifferenceBetweenSightGD: null,
-  xSight1: null,
-  xSight2: null,
-  xSight3: null,
-  ySight1: null,
-  ySight2: null,
-  ySight3: null
+  pepLeftSupport: null,
+  lengthBetweenSightGD: 0,
+  elevationDifferenceBetweenSightGD: 0,
+  xSight1: 0,
+  xSight2: 0,
+  xSight3: 0,
+  ySight1: 0,
+  ySight2: 0,
+  ySight3: 0
 } satisfies Partial<FieldMeasure>;
 
 /**
@@ -290,7 +247,7 @@ export const createInitialMeasureData = (
     ...PAPOTO_INPUT_DEFAULTS,
     cableHAccDistance: null,
     cableVerticalAccAngle: null,
-    calculationType: 'parametre',
+    calculationType: TANGENT_AIMING_CALCULATION_TYPE,
     cableTangentAngle: null,
     cableParameter: null,
     tangentLeftSupport: null,
@@ -300,9 +257,17 @@ export const createInitialMeasureData = (
     exteriorHAccDistance: null,
     exteriorVerticalAccAngleLeft: null,
     exteriorVerticalAccAngleRight: null,
-    exteriorCalculationType: 'parametre',
+    exteriorCalculationType: TANGENT_AIMING_CALCULATION_TYPE,
     exteriorParameter: null,
     exteriorTangentAngle: null,
+    interiorLeftSupport: null,
+    interiorSpanLength: null,
+    interiorHAccDistance: null,
+    interiorVerticalAccAngleLeft: null,
+    interiorVerticalAccAngleRight: null,
+    interiorCalculationType: TANGENT_AIMING_CALCULATION_TYPE,
+    interiorParameter: null,
+    interiorTangentAngle: null,
     ...PEP_INPUT_DEFAULTS,
     transit: null,
     windIncidence: null,
@@ -357,12 +322,14 @@ export const initialFieldMeasureOutputs: FieldMeasureOutputs = {
   cableTemperature: null,
   parameter15C: null,
   tangentAimingSupport: null,
-  tangentAimingExterior: null
+  tangentAimingExterior: null,
+  tangentAimingInterior: null,
+  pep: null
 };
 
 /**
  * Returns the parameter and uncertainty produced by the calculation method currently selected for the field measure:
- * the tangent aiming (support) result for the `tangente-aiming` method, the PAPOTO result otherwise.
+ * the tangent aiming (support or exterior) result for the tangent aiming methods, the PAPOTO result otherwise.
  * @param measureData - The field measure, providing the calculation method and its outputs
  * @returns The active `parameter` and `uncertainty`, or `null` when the selected method has no result yet
  */
@@ -370,12 +337,16 @@ export const getActiveParameterOutput = (
   measureData: Pick<FieldMeasure, 'calculationMethod' | 'outputs'>
 ): Pick<TangentAimingSupportResult, 'parameter' | 'uncertainty'> | null => {
   const { calculationMethod, outputs } = measureData;
-  const source =
-    calculationMethod === 'tangente-aiming'
-      ? outputs.tangentAimingSupport
-      : calculationMethod === 'tangente-aiming-exterior'
-        ? outputs.tangentAimingExterior
-        : outputs.papoto;
+  const sourceByMethod: Partial<
+    Record<typeof calculationMethod, Pick<TangentAimingSupportResult, 'parameter' | 'uncertainty'> | null>
+  > = {
+    'tangente-aiming': outputs.tangentAimingSupport,
+    'tangente-aiming-exterior': outputs.tangentAimingExterior,
+    'tangente-aiming-interior': outputs.tangentAimingInterior,
+    pep: outputs.pep ?? null
+  };
+  // A tangent aiming method without result yields null: it must not fall back to the PAPOTO result.
+  const source = calculationMethod in sourceByMethod ? sourceByMethod[calculationMethod] : outputs.papoto;
   return source ? { parameter: source.parameter, uncertainty: source.uncertainty } : null;
 };
 
@@ -387,3 +358,69 @@ export const getActiveParameterOutput = (
  */
 export const clearAutoParameter15C = (data: FieldMeasure): FieldMeasure =>
   data.updateMode15C === 'manual' ? data : { ...data, outputs: { ...data.outputs, parameter15C: null } };
+
+/**
+ * Drops the manual 15°C inputs when the update mode is automatic: only the data of the retained mode are saved.
+ * @param data - The field measure
+ * @returns The measure without manual 15°C inputs unless the mode is manual
+ */
+export const resetInactive15CMode = (data: FieldMeasure): FieldMeasure =>
+  data.updateMode15C === 'manual' ? data : { ...data, manualParameterCalculation15CWithoutWind: null };
+
+/**
+ * Whether every PAPOTO input is filled.
+ * @param data - The field measure
+ * @returns `true` when the PAPOTO form can be calculated
+ */
+export const isPapotoDataValid = (data: FieldMeasure): boolean =>
+  !!(
+    data.leftSupport &&
+    data.spanLength != null &&
+    data.measuredElevationDifference != null &&
+    data.HL != null &&
+    data.H1 != null &&
+    data.H2 != null &&
+    data.H3 != null &&
+    data.HR != null &&
+    data.VL != null &&
+    data.V1 != null &&
+    data.V2 != null &&
+    data.V3 != null &&
+    data.VR != null
+  );
+
+/**
+ * Whether the "Temperature calculation" inputs are filled and within their bounds.
+ * @param data - The field measure
+ * @returns `true` when the temperature calculation form is valid
+ */
+export const isTemperatureDataValid = (data: FieldMeasure): boolean => {
+  const { transit, measuredDiffusedPlusDirectSolarFlux: solarFlux } = data;
+  const isTransitOutOfBounds = isNumber(transit) && (transit < TRANSIT_BOUNDS.min || transit > TRANSIT_BOUNDS.max);
+  const isSolarFluxOutOfBounds =
+    isNumber(solarFlux) && (solarFlux < MEASURED_SOLAR_FLUX_BOUNDS.min || solarFlux > MEASURED_SOLAR_FLUX_BOUNDS.max);
+  return (
+    data.cableName !== null &&
+    transit !== null &&
+    data.skyCover !== null &&
+    !isTransitOutOfBounds &&
+    !isSolarFluxOutOfBounds
+  );
+};
+
+/**
+ * Whether the manual "Parameter at 15°C without wind" inputs are filled, uncertainties being positive.
+ * @param data - The field measure
+ * @returns `true` when the manual inputs are valid
+ */
+export const isManual15CDataValid = (data: FieldMeasure): boolean => {
+  const manualData = data.manualParameterCalculation15CWithoutWind;
+  return (
+    isNumber(manualData?.cableTemperatureCalibration) &&
+    isNumber(manualData?.parameterPapoto) &&
+    isNumber(manualData?.parameterUncertaintyPapoto) &&
+    manualData.parameterUncertaintyPapoto >= 0 &&
+    isNumber(manualData?.cableTemperatureCalibrationUncertainty) &&
+    manualData.cableTemperatureCalibrationUncertainty >= 0
+  );
+};

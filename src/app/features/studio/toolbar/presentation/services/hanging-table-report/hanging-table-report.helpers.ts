@@ -42,11 +42,6 @@ export function buildHangingTableRows(results: PoseResults): HangingTableResultR
   }));
 }
 
-/** Maps the active Transloco language to the locale used for the report date. */
-export function getReportDateLocale(activeLang: string): string {
-  return activeLang === 'en' ? 'en-US' : 'fr-FR';
-}
-
 /** Draws the study & canton metadata section (page 1, portrait, 1 column). Returns the next Y. */
 export function drawStudyAndCantonSection(
   doc: jsPDF,

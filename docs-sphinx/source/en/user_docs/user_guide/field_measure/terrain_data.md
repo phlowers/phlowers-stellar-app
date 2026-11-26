@@ -53,7 +53,7 @@ Below the read-only info, enter the **location where you recorded the measuremen
 
 ### Automatic localization from the study
 
-When a span is selected, {{app_name}} tries to pre-fill the longitude, latitude and azimuth using the localization already stored in the current study for that span.
+When a span is selected, {{app_name}} tries to pre-fill the longitude, latitude and azimuth using the localization already stored in the current study for that span. Geolocation is optional: if the study section has no start position, these fields stay empty and you enter them manually.
 
 The value used depends on the selected span and the selected reference support:
 - The app takes the studied localization for the selected span.
@@ -75,7 +75,7 @@ Enter the environmental conditions you observed during measurement:
 | **Season** | — | Summer / Winter | Yes | {{app_name}} auto-detects this based on daylight-saving time rules. You may override it if needed. |
 | **Ambient temperature** | °C | −50 to +99 | Yes | Air temperature at the measurement location. |
 | **Wind speed** | km/h or m/s | 0 to 50 | Yes | Average wind speed during measurement. Choose your preferred unit (km/h or m/s) via the toggle. |
-| **Wind direction** | — | 8 compass points | Yes | Direction from which the wind blows (North, North-East, East, South-East, South, South-West, West, North-West). |
+| **Wind direction** | — | 16 compass points | Yes | Direction from which the wind blows (North, North-North-East, North-East, East-North-East, East, East-South-East, South-East, South-South-East, South, South-South-West, South-West, West-South-West, West, West-North-West, North-West, North-North-West). |
 | **Sky cover** | N0 to N8 (nebulosity) | 9 values | Yes | Cloud cover on a scale from N0 (clear sky) to N8 (fully covered). N0, N3, N4, N7 are unlabeled; N1 = Sunny, N2 = Partly Cloudy, N5 = Cloudy, N6 = Covered Sky, N8 = Covered/Smoky. |
 
 ```{note}
@@ -88,17 +88,56 @@ As you type, {{app_name}} validates your entries:
 
 - **Measure name duplicate**: If your name matches an existing measure, an error message appears below the name field: **Measure name must be unique.** Edit the name to resolve it.
 - **Invalid ranges**: If a number field (e.g., wind speed) falls outside its allowed range, {{app_name}} may highlight the field when you try to save.
-- **Empty mandatory field**: If you leave any required field blank, the **Save** and **Export** buttons remain disabled.
+- **Empty mandatory field**: The **Save** button only requires a name that is not empty and not already used by another measure.
 
-Once all fields are valid and you have made changes, the **Save** button becomes enabled. If all four tabs (Terrain Data, Parameter Calculation, Temperature Calculation, Parameter at 15°C without Wind) are valid, the **Export** button also becomes enabled.
+As soon as you edit any input of the measure (whatever the tab), the **Save** button becomes enabled, even if the measure is incomplete. The **Report** and **Export** buttons are enabled only when the global form (name, span, longitude, latitude, altitude, azimuth) and the displayed tab (Terrain Data, Parameter Calculation, Temperature Calculation or Parameter at 15°C without Wind) are valid and saved.
 
 ## Dialog Actions
 
 At the bottom of the dialog, three buttons control the measurement session:
 
-- **Report** (disabled in current version): Reserved for future reporting functionality.
-- **Export**: Generates a JSON file with all measurement data and computed results. Enabled only when all tabs are valid. The file name follows the pattern: `Export Mesure de terrain_<measure name>_<section name>_<date>.json`.
-- **Save**: Persists your entries to the database. Enabled when the form is valid and you have made unsaved changes.
+| Button | Enabled when… | Action |
+|---|---|---|
+| **Save** | the measure has a non-empty, unique name and at least one input has been edited since the last save (even if the measure is incomplete) | Saves your entries in the study |
+| **Report** | the global form and the displayed tab are valid **and** the measure is saved (no pending change) | Generates a PDF |
+| **Export** | same conditions as **Report** | Generates a JSON file |
+
+While **Report** and **Export** are disabled, a message above the buttons gives the reason:
+
+- "Report and export unavailable: incomplete or invalid name, span, longitude, latitude, altitude or azimuth.";
+- "Report and export unavailable: incomplete or invalid data in *the displayed tab*.";
+- "Save the measure first."
+
+```{note}
+Only the **displayed** tab is checked: to check another tab, display it. In the **Parameter at 15°C without wind** tab, the **Auto** mode is always considered valid (it has no input); in **Manual** mode, the four values must be valid. Clicking **Report** or **Export** does not close the dialog.
+```
+
+### Report
+
+**Report** generates a PDF file (A4 portrait) listing the data of the four tabs of the saved measure: only the retained parameter calculation method (and sub-method) and the values displayed for the "Update values" choice are reported. The file name follows the pattern: `Rapport Mesure de terrain_<measure name>_<section name>_<generation date and time>.pdf`.
+
+### JSON export
+
+**Export** generates a JSON file meant for a third-party application. It contains the **last saved version** of the measure: fields that are not filled or not calculated are exported empty (`null`) or absent.
+
+- **File name**: `Export Mesure de terrain_<measure name>_<section name>_<date>.json`.
+- **Saving**: if your browser supports it, a "Save as" window lets you choose the folder and the name; closing this window cancels the export. Otherwise, the file is downloaded to the browser's download folder.
+- **Content**:
+
+| Block | Content |
+|---|---|
+| `general` | author, study date, study name, LIT code and name, section, initial condition and load case of the current state |
+| `measure` | name, date and time as RFC 9557 date-times with the timezone offset of the measure day, daylight saving time included (for example `2026-11-06T16:46:15.869+01:00[Europe/Paris]`), season (`SUMMER` / `WINTER` in English), voltage, section type, cable, number of cables, phase number |
+| `span` | span, longitude, latitude, altitude, azimuth |
+| `temperatureCalculation` | temperature conditions (ambient, wind, solar flux, transit) and results (cable temperature and solar flux) |
+| `parameterCalculation` | retained method, sub-method, left support, inputs and results of the retained method only |
+| `zeroWindCalculation` | mode (auto or manual), input parameter and temperature, parameter at 15°C and bounds |
+
+For the **Tangent aiming** method, `methodName` is `VISEES_TANGENTES` and `subMethodName` is `SUPPORT`, `INTERIEUR` or `EXTERIEUR`. The calculated parameter comes with its criterion (`threshold`: 0.5% for PAPOTO, 1% for tangent aiming; `status`: criterion met or not). The left support is exported with the label displayed in the form.
+
+```{note}
+The **PEP** method is not available yet: its export will be added with the method.
+```
 
 ## Tips
 

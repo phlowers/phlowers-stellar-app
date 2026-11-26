@@ -65,6 +65,8 @@ describe('PlotService', () => {
       spans: [[[7, 8, 9]]],
       obstacles: null,
       distances: null,
+      virtual_supports: null,
+      virtual_insulators: null,
       loads: {}
     },
     output_parameters: {
@@ -259,10 +261,8 @@ describe('PlotService', () => {
     selected_cable_modification_uuid: null,
     cable_span_manipulations: [],
     selected_cable_span_manipulation_uuid: null,
-    start_latitude: null,
-    start_longitude: null,
     start_azimuth: null,
-    mean_reprojection_diff_meters: null
+    position_error_meters: null
   };
 
   beforeEach(() => {
@@ -396,6 +396,57 @@ describe('PlotService', () => {
     });
   });
 
+  describe('projection refresh on a stale engine study', () => {
+    const projection = {
+      result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+      error: null
+    };
+
+    beforeEach(() => {
+      service.loading.set(false);
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(task === Task.refreshProjection ? projection : { result: null, error: null })
+      );
+    });
+
+    it('should not project a view change before the engine study belongs to the opened section', () => {
+      spanService.section.set(mockSection);
+
+      service.plotOptionsChange({ view: '2d' });
+
+      expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.refreshProjection, expect.anything());
+    });
+
+    it('should project a view change once the engine study belongs to the opened section', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(task === Task.refreshProjection ? projection : { result: { success: true }, error: null })
+      );
+      await service.initSectionStudio(mockSection);
+      service.loading.set(false);
+      mockWorkerPythonService.runTask.mockClear();
+
+      service.plotOptionsChange({ view: '2d' });
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(Task.refreshProjection, expect.anything());
+    });
+
+    it('should ignore the projection of a studio left while it was being computed', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) =>
+        Promise.resolve(task === Task.refreshProjection ? projection : { result: { success: true }, error: null })
+      );
+      const init = service.initSectionStudio(mockSection);
+      service.resetAll();
+      await init;
+
+      expect(service.litData()).toBeNull();
+      expect(service.loading()).toBe(false);
+    });
+  });
+
   describe('free positioning view restore', () => {
     const savedOptions: PlotOptions = { view: '3d', side: 'face', startSupport: 2, endSupport: 6, invert: true };
     const fpOptions: PlotOptions = { view: '2d', side: 'profile', startSupport: 3, endSupport: 4, invert: false };
@@ -478,6 +529,30 @@ describe('PlotService', () => {
 
       expect(service.error()).toBeNull();
       expect(service.litData()).toEqual(mockGetSectionOutput);
+    });
+
+    it('should expose a new engine study id only once the study is fully initialized', async () => {
+      mockWorkerPythonService.setReady?.(true);
+      mockCablesService.getCable.mockResolvedValue(mockCable);
+      mockWorkerPythonService.runTask.mockResolvedValue({ result: { success: true }, error: null });
+
+      const firstInit = service.initSectionStudio(mockSection);
+      expect(service.engineStudyId()).toBe(0);
+      expect(service.engineStudySectionUuid()).toBeNull();
+      await firstInit;
+      const firstId = service.engineStudyId();
+      expect(firstId).toBeGreaterThan(0);
+      expect(service.engineStudySectionUuid()).toBe(mockSection.uuid);
+
+      const secondInit = service.initSectionStudio(mockSection);
+      expect(service.engineStudyId()).toBe(0);
+      expect(service.engineStudySectionUuid()).toBeNull();
+      await secondInit;
+      expect(service.engineStudyId()).toBeGreaterThan(firstId);
+
+      service.resetAll();
+      expect(service.engineStudyId()).toBe(0);
+      expect(service.engineStudySectionUuid()).toBeNull();
     });
 
     it('should set error when workerPythonService is not ready', async () => {
@@ -621,6 +696,75 @@ describe('PlotService', () => {
 
       expect(service.loading()).toBe(false);
     });
+
+    describe('first projection', () => {
+      const sectionWithCharge: Section = {
+        ...mockSection,
+        charges: [
+          {
+            uuid: 'charge-uuid',
+            name: 'Load case 1',
+            personnelPresence: true,
+            description: '',
+            data: {
+              climate: { ...defaultClimaticCharge },
+              spanLoads: [],
+              cableModifParams: [],
+              supportManipParams: [],
+              spanManipParams: []
+            }
+          }
+        ],
+        selected_charge_uuid: 'charge-uuid'
+      };
+
+      beforeEach(() => {
+        mockWorkerPythonService.setReady?.(true);
+        mockCablesService.getCable.mockResolvedValue(mockCable);
+        mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+          if (task === Task.initLit) {
+            return Promise.resolve({ result: { success: true }, error: null });
+          }
+          if (task === Task.refreshProjection) {
+            return Promise.resolve({
+              result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [] },
+              error: null
+            });
+          }
+          return Promise.resolve({ result: null, error: null });
+        });
+      });
+
+      it('should be left to the selected charge in the studio, the plot loading until it is applied', async () => {
+        service.isStudioActive.set(true);
+
+        await service.initSectionStudio(sectionWithCharge);
+
+        expect(mockWorkerPythonService.runTask).not.toHaveBeenCalledWith(Task.refreshProjection, expect.anything());
+        expect(service.litData()).toBeNull();
+        expect(service.loading()).toBe(true);
+        expect(service.engineStudyId()).toBeGreaterThan(0);
+      });
+
+      it.each([
+        ['no charge is selected', { ...sectionWithCharge, selected_charge_uuid: null }],
+        ['the selected charge does not exist', { ...sectionWithCharge, selected_charge_uuid: 'unknown-uuid' }]
+      ])('should be done by the engine study in the studio when %s', async (_, section) => {
+        service.isStudioActive.set(true);
+
+        await service.initSectionStudio(section);
+
+        expect(service.litData()).toEqual(mockGetSectionOutput);
+        expect(service.loading()).toBe(false);
+      });
+
+      it('should be done by the engine study in the section preview, where no charge is applied', async () => {
+        await service.initSectionStudio(sectionWithCharge);
+
+        expect(service.litData()).toEqual(mockGetSectionOutput);
+        expect(service.loading()).toBe(false);
+      });
+    });
   });
 
   describe('high safety', () => {
@@ -630,7 +774,13 @@ describe('PlotService', () => {
       name: 'Load case 1',
       personnelPresence,
       description: '',
-      data: { climate: { ...defaultClimaticCharge }, spanLoads: [], cableModifParams: [] }
+      data: {
+        climate: { ...defaultClimaticCharge },
+        spanLoads: [],
+        cableModifParams: [],
+        supportManipParams: [],
+        spanManipParams: []
+      }
     });
 
     const sectionWithStaff = (personnelPresence: boolean): Section => ({
@@ -1206,6 +1356,40 @@ describe('PlotService', () => {
     it('should set loading to false after completion', async () => {
       await service.refreshProjection();
 
+      expect(service.loading()).toBe(false);
+    });
+
+    it('should set loading to false when the projection task rejects', async () => {
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task refreshProjection timed out after 30000ms'));
+
+      await expect(service.refreshProjection()).rejects.toThrow('timed out');
+      expect(service.loading()).toBe(false);
+    });
+
+    it('should clear the previous distances when the projection task rejects', async () => {
+      obstacleStateService.setDistances([{ obstacleUuid: 'obs-uuid', points: [{ pointIndex: 0 } as DistancePoint] }]);
+      mockWorkerPythonService.runTask.mockRejectedValue(new Error('Task refreshProjection timed out after 30000ms'));
+
+      await expect(service.refreshProjection()).rejects.toThrow('timed out');
+
+      expect(obstacleStateService.distances()).toEqual([]);
+    });
+
+    it('should keep the new distances when only the aspect ratio task rejects', async () => {
+      const obstacleDistance = { obstacleUuid: 'obs-uuid', points: [{ pointIndex: 0 } as DistancePoint] };
+      mockWorkerPythonService.runTask.mockImplementation((task: unknown) => {
+        if (task === Task.refreshProjection) {
+          return Promise.resolve({
+            result: { sectionOutput: mockGetSectionWithBaseOutput, obstacles: [], distances: [obstacleDistance] },
+            error: null
+          });
+        }
+        return Promise.reject(new Error('Task getAspectRatio timed out after 30000ms'));
+      });
+
+      await expect(service.refreshProjection()).rejects.toThrow('timed out');
+
+      expect(obstacleStateService.distances()).toEqual([obstacleDistance]);
       expect(service.loading()).toBe(false);
     });
 

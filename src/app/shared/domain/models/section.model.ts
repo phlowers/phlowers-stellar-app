@@ -16,6 +16,7 @@ import { CableModification } from './cable-modification.model';
 import { CableSpanManipulation } from './cable-span-manipulation.model';
 import { CableSupportManipulation } from './cable-support-manipulation.model';
 import { StudioViewState } from '@shared/types/plot.types';
+import type { ForestTrenchesInputs } from '@shared/domain/models/forest-trenches.model';
 
 export interface PoseResults {
   temperatures: number[];
@@ -74,9 +75,9 @@ export interface Section {
   name: string;
   /** Short display name */
   short_name: string;
-  /** ISO 8601 timestamp of creation */
+  /** RFC 9557 timestamp of creation (older values may be ISO 8601 ending with `Z`) */
   created_at: string;
-  /** ISO 8601 timestamp of last update */
+  /** RFC 9557 timestamp of last update (older values may be ISO 8601 ending with `Z`) */
   updated_at: string;
   /** Reference to catalog entry */
   internal_catalog_id: string;
@@ -144,6 +145,8 @@ export interface Section {
   obstacles: Obstacle[];
   /** Array of floor (ground) profiles defined per span */
   floors?: Floor[];
+  /** Last successfully calculated forest-trenches form inputs. */
+  forest_trenches?: ForestTrenchesInputs | null;
   /** Array of initial conditions for calculations */
   initial_conditions: InitialCondition[];
   /** UUID of the currently selected initial condition */
@@ -174,14 +177,12 @@ export interface Section {
   cable_support_manipulations?: CableSupportManipulation[];
   /** UUID of the currently selected cable support manipulation */
   selected_cable_support_manipulation_uuid?: string | null;
-  /** Latitude of the first support */
-  start_latitude: number | null;
-  /** Longitude of the first support */
-  start_longitude: number | null;
-  /** Azimuth of the first support */
+  /** Azimuth of the first support (the start GPS is the foot of `supports[0]`) */
   start_azimuth: number | null;
   /** Saved studio view state (camera, scale, resolution, span selection). */
   studio_view_state?: StudioViewState;
-  /** Mean absolute error (meters) between surveyed Lambert93 foot coordinates and the app's span/angle data model reprojection, computed on canton import */
-  mean_reprojection_diff_meters: number | null;
+  /**
+   * Distance (m) between each imported support GPS position and the position rebuilt from the section geometry (span lengths and angles), recorded at import; `null` when not computed.
+   */
+  position_error_meters: (number | null)[] | null;
 }

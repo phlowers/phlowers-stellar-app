@@ -23,8 +23,8 @@ Step 1: BUILD STELLAR-ENGINE
 Step 2: DOWNLOAD PYODIDE RUNTIME
   └─ Fetch Pyodide runtime from NPM registry
 
-Step 3: DOWNLOAD PACKAGES
-  └─ Extract deps from built wheel → pip download with constraints.in
+Étape 3 : TÉLÉCHARGEMENT DES PACKAGES
+  └─ Export des dépendances d'exécution de uv.lock (avec empreintes) → pip download --require-hashes
 
 Step 4: CDN REPLACEMENT
   └─ Replace pip wheels with wasm32 versions from CDN (or local CDN directory)
@@ -64,8 +64,16 @@ Toutes les dépendances transitives (thermohl, numpy, pandas, pandera, etc.) son
 
 | Fichier | Rôle |
 |------|---------|
-| `stellar-engine/pyproject.toml` | Définition du package stellar-engine |
-| `scripts/constraints.in` | Contraintes de version pour la compatibilité CDN Pyodide |
+| `stellar-engine/pyproject.toml` | Définition du package stellar-engine ; `[tool.uv] constraint-dependencies` fige les packages d'exécution sur les versions du CDN Pyodide |
+| `stellar-engine/uv.lock` | Source unique de vérité des versions et empreintes des packages Python ; exporté à la volée et imposé par `pip download --require-hashes` |
+
+### Vérifications d'intégrité
+
+- **Tarball Pyodide** : son empreinte SHA-512 est comparée au champ `integrity` de `package-lock.json`. Pour changer de version de Pyodide, utiliser `npm install` et non une modification du script.
+- **Wheels PyPI** : `pip download --require-hashes --only-binary=:all:` n'accepte que les empreintes de `stellar-engine/uv.lock` (exporté avec `uv export --locked`, qui échoue si le lock est obsolète). Après toute modification des dépendances de `stellar-engine` ou des versions Pyodide figées, exécuter `uv lock` dans `stellar-engine/` puis versionner le résultat.
+- **Wheels du CDN** : l'empreinte SHA-256 de chaque wheel doit correspondre à celle déclarée dans le `pyodide-lock.json` du tarball vérifié (y compris avec `--local-cdn-dir`).
+- Avec `--local-mechaphlowers`, l'empreinte du wheel local est calculée à la volée ; ses dépendances doivent en revanche figurer dans `uv.lock`.
+- Au moindre écart, le script s'interrompt avec un code de sortie différent de zéro.
 
 ---
 
@@ -117,7 +125,7 @@ Placez un fichier `.whl` de mechaphlowers dans `stellar-engine/input/`. Le scrip
 
 ```
 public/pyodide/
-├── pyodide.asm.wasm, pyodide.asm.js, python_stdlib.zip, pyodide-lock.json
+├── pyodide.asm.wasm, pyodide.asm.mjs, python_stdlib.zip, pyodide-lock.json
 ├── numpy-2.2.5-cp313-cp313-pyodide_2025_0_wasm32.whl     (CDN)
 ├── pandas-2.3.1-cp313-cp313-pyodide_2025_0_wasm32.whl    (CDN)
 ├── mechaphlowers-0.5.3-cp313-none-any.whl                (PyPI, compiled)

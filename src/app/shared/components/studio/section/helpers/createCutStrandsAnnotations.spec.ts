@@ -10,7 +10,7 @@ import { TranslocoService } from '@jsverse/transloco';
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { RrtsCutStrandsData } from '@shared/domain/models/section.model';
 import { createCutStrandsAnnotations, createCutStrandsShapes } from './createCutStrandsAnnotations';
-import { getCutStrandsLineLength } from './createCutStrandsAnnotations.constantes';
+import { getDashedIconLineLength } from './dashedIconLine.helpers';
 import { CreatePlotParams } from './createPlot';
 
 type Annotation = Partial<Plotly.Annotations> & { z?: number; hovertext?: string; data?: { type: string } };
@@ -263,8 +263,13 @@ describe('createCutStrandsAnnotations', () => {
     it('should start at the anchor point and stop before the icon', () => {
       const dashes = dashesOf(createCutStrandsAnnotations(makePlotParams()) as Annotation[]);
 
+      const lineLength = getDashedIconLineLength(PlotlyDrawings.cutStrands, '3d');
+      const top = Math.max(...dashes.map((dash) => -dash.ay!));
+
       expect(dashes[0].standoff).toBe(0);
-      expect(Math.max(...dashes.map((dash) => -dash.ay!))).toBe(getCutStrandsLineLength('3d'));
+      // The last dash is cut at the icon, or stops short of it when the line ends in a gap between two dashes
+      expect(top).toBeLessThanOrEqual(lineLength);
+      expect(lineLength - top).toBeLessThanOrEqual(PlotlyDrawings.cutStrands.dashGap);
     });
 
     it('should draw dashes of the same length, spaced by the same gap', () => {
@@ -337,7 +342,7 @@ describe('createCutStrandsAnnotations', () => {
         x0: 0,
         x1: 0,
         y0: 0,
-        y1: getCutStrandsLineLength('2d')
+        y1: getDashedIconLineLength(PlotlyDrawings.cutStrands, '2d')
       });
     });
 
@@ -353,17 +358,5 @@ describe('createCutStrandsAnnotations', () => {
     ])('should not be drawn when %s', (_, overrides) => {
       expect(createCutStrandsShapes(params2d(overrides))).toEqual([]);
     });
-  });
-});
-
-describe('getCutStrandsLineLength', () => {
-  // The icon box is centered offsetY px above the anchor; it wraps the glyph (about iconSize tall), its padding and
-  // its 1 px border
-  it.each(['2d', '3d'] as const)('should stop the %s line at most 1 px below the icon box', (view) => {
-    const { offsetY, iconSize, borderPad } = PlotlyDrawings.cutStrands;
-    const boxBottom = offsetY - (iconSize[view] / 2 + borderPad[view] + 1);
-
-    expect(getCutStrandsLineLength(view)).toBeLessThan(boxBottom);
-    expect(getCutStrandsLineLength(view)).toBeGreaterThanOrEqual(boxBottom - 1);
   });
 });

@@ -68,13 +68,12 @@
   <button
     app-btn
     type="button"
-    btnSize="m"
     [btnLoading]="loading()"
     [disabled]="loading()"
     (click)="onExport()"
     data-testid="l0-export-btn"
   >
-    <app-icon icon="download" />
+    <app-icon icon="download" aria-hidden="true" />
     <span>{{ 'common.export' | transloco }}</span>
   </button>
 </ng-template>

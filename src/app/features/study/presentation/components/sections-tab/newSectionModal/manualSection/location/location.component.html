@@ -1,5 +1,17 @@
 <p class="title" id="support1location">{{ 'location.title' | transloco }}</p>
 
+@if (isPartiallyFilled()) {
+  <p-message
+    data-testid="location-incomplete-error"
+    severity="error"
+    size="small"
+    variant="simple"
+    class="error-incomplete"
+  >
+    {{ 'location.incomplete-error' | transloco }}
+  </p-message>
+}
+
 <label class="label-lat" for="location-latitude">{{ 'common.latitude-label' | transloco }}</label>
 <p-inputgroup class="input-lat">
   <input

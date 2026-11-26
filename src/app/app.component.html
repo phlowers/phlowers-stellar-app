@@ -1,15 +1,28 @@
 <router-outlet></router-outlet>
 <p-toast position="top-center" data-testid="app-toast"></p-toast>
-<p-toast key="warning-list" position="top-center">
+<p-toast
+  [key]="bottomRightToastKey"
+  position="bottom-right"
+  data-testid="app-toast-secondary"
+  (onClose)="onBottomRightToastClose($event)"
+>
   <ng-template pTemplate="message" let-message>
-    <app-icon icon="warning" aria-hidden="true" />
-    <div class="p-toast-message-text">
-      <span class="p-toast-summary">{{ message.summary }}</span>
-      <ul class="p-toast-detail m-0">
-        @for (warning of message.data.warnings; track warning) {
-          <li>{{ warning }}</li>
-        }
-      </ul>
-    </div>
+    @if (message.data?.warnings) {
+      <app-icon icon="warning" aria-hidden="true" />
+      <div class="p-toast-message-text">
+        <span class="p-toast-summary">{{ message.summary }}</span>
+        <ul class="p-toast-detail m-0">
+          @for (warning of message.data.warnings; track warning) {
+            <li>{{ warning }}</li>
+          }
+        </ul>
+      </div>
+    } @else {
+      <app-icon [icon]="message.severity === 'warn' ? 'warning' : 'info'" aria-hidden="true" />
+      <div class="p-toast-message-text">
+        <span class="p-toast-summary">{{ message.summary }}</span>
+        <div class="p-toast-detail">{{ message.detail }}</div>
+      </div>
+    }
   </ng-template>
 </p-toast>

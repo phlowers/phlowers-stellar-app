@@ -150,7 +150,7 @@ def _closest(obstacle, scenario_points, conformity_points):
 
 
 @pytest.mark.parametrize("obstacle_position", OBSTACLE_POSITIONS)
-def test_cable_track_overhang_compliance_altitude_is_euclidean_distance_minus_distance_to_comply(
+def test_cable_track_overhang_compliance_altitude_is_circle_border_altitude(
     compute_conformity, obstacle_position
 ):
     obstacle, overhang, _, table = compute_conformity(
@@ -160,7 +160,10 @@ def test_cable_track_overhang_compliance_altitude_is_euclidean_distance_minus_di
     )
 
     assert table["overhangComplianceAltitude"] == pytest.approx(
-        _euclidean(obstacle, overhang) - OVERHANG_D
+        overhang["y"]
+        + (obstacle["y"] - overhang["y"])
+        * OVERHANG_D
+        / _euclidean(obstacle, overhang)
     )
 
 
@@ -175,9 +178,12 @@ def test_cable_track_lateral_compliance_line_axis_distance_uses_closest_lateral_
         obstacle_position=obstacle_position,
     )
 
-    closest = min(_euclidean(obstacle, p) for p in lateral_points)
+    closest = min(lateral_points, key=lambda p: _euclidean(obstacle, p))
     assert table["lateralComplianceLineAxisDistance"] == pytest.approx(
-        closest - LATERAL_D
+        closest["x"]
+        + (obstacle["x"] - closest["x"])
+        * LATERAL_D
+        / _euclidean(obstacle, closest)
     )
 
 
@@ -193,17 +199,19 @@ def test_cable_track_lateral_compliance_line_axis_distance_uses_closest_lateral_
 def test_cable_track_compliance_false_when_any_side_is_negative(
     compute_conformity, lateral_d, overhang_d, expected
 ):
-    *_, table = compute_conformity(
+    obstacle, overhang, lateral_points, table = compute_conformity(
         "cable_track",
         lateral_d=lateral_d,
         overhang_d=overhang_d,
         intermediate_points=[0.5],
     )
 
-    assert (table["overhangComplianceAltitude"] < 0) is (overhang_d == HUGE_D)
-    assert (table["lateralComplianceLineAxisDistance"] < 0) is (
-        lateral_d == HUGE_D
+    assert (_euclidean(obstacle, overhang) - overhang_d < 0) is (
+        overhang_d == HUGE_D
     )
+    assert (
+        min(_euclidean(obstacle, p) for p in lateral_points) - lateral_d < 0
+    ) is (lateral_d == HUGE_D)
     assert table["conformityCompliance"] is expected
 
 
@@ -213,29 +221,30 @@ def test_cable_track_compliance_false_when_any_side_is_negative(
 
 
 @pytest.mark.parametrize("obstacle_position", OBSTACLE_POSITIONS)
-def test_vegetation_overhang_compliance_altitude_is_signed_altitude_gap_minus_distance_to_comply(
+def test_vegetation_overhang_compliance_altitude_is_lower_zone_border(
     compute_conformity, obstacle_position
 ):
-    obstacle, overhang, _, table = compute_conformity(
+    _, overhang, lateral_points, table = compute_conformity(
         "vegetation", obstacle_position=obstacle_position
     )
 
     assert table["overhangComplianceAltitude"] == pytest.approx(
-        overhang["y"] - obstacle["y"] - OVERHANG_D
+        min(p["y"] for p in [overhang, *lateral_points]) - OVERHANG_D
     )
 
 
 @pytest.mark.parametrize("obstacle_position", OBSTACLE_POSITIONS)
-def test_vegetation_lateral_compliance_line_axis_distance_is_closest_x_gap_minus_distance_to_comply(
+def test_vegetation_lateral_compliance_line_axis_distance_is_nearest_outer_border(
     compute_conformity, obstacle_position
 ):
-    obstacle, _, lateral_points, table = compute_conformity(
+    obstacle, overhang, lateral_points, table = compute_conformity(
         "vegetation", obstacle_position=obstacle_position
     )
 
-    closest_gap = min(abs(obstacle["x"] - p["x"]) for p in lateral_points)
+    xs = [p["x"] for p in [overhang, *lateral_points]]
+    borders = [min(xs) - LATERAL_D, max(xs) + LATERAL_D]
     assert table["lateralComplianceLineAxisDistance"] == pytest.approx(
-        closest_gap - LATERAL_D
+        min(borders, key=lambda x: abs(x - obstacle["x"]))
     )
 
 
@@ -251,21 +260,24 @@ def test_vegetation_lateral_compliance_line_axis_distance_is_closest_x_gap_minus
 def test_vegetation_compliance_false_only_when_both_sides_are_negative(
     compute_conformity, lateral_d, overhang_d, expected
 ):
-    *_, table = compute_conformity(
+    obstacle, overhang, lateral_points, table = compute_conformity(
         "vegetation", lateral_d=lateral_d, overhang_d=overhang_d
     )
 
-    assert (table["overhangComplianceAltitude"] < 0) is (overhang_d == HUGE_D)
-    assert (table["lateralComplianceLineAxisDistance"] < 0) is (
-        lateral_d == HUGE_D
+    assert (overhang["y"] - obstacle["y"] - overhang_d < 0) is (
+        overhang_d == HUGE_D
     )
+    assert (
+        min(abs(obstacle["x"] - p["x"]) for p in lateral_points) - lateral_d
+        < 0
+    ) is (lateral_d == HUGE_D)
     assert table["conformityCompliance"] is expected
 
 
 def test_vegetation_compliance_false_when_obstacle_between_lateral_points_and_overhang_negative(
     compute_conformity,
 ):
-    obstacle, _, lateral_points, table = compute_conformity(
+    obstacle, overhang, lateral_points, table = compute_conformity(
         "vegetation",
         lateral_d=TINY_D,
         overhang_d=HUGE_D,
@@ -274,36 +286,36 @@ def test_vegetation_compliance_false_when_obstacle_between_lateral_points_and_ov
 
     lateral_xs = [p["x"] for p in lateral_points]
     assert min(lateral_xs) < obstacle["x"] < max(lateral_xs)
-    assert table["lateralComplianceLineAxisDistance"] > 0
-    assert table["overhangComplianceAltitude"] < 0
+    assert min(abs(obstacle["x"] - p["x"]) for p in lateral_points) > TINY_D
+    assert overhang["y"] - obstacle["y"] - HUGE_D < 0
     assert table["conformityCompliance"] is False
 
 
 def test_vegetation_obstacle_above_cable_inside_lateral_band_is_not_compliant(
     compute_conformity,
 ):
-    *_, table = compute_conformity(
+    obstacle, _, _, table = compute_conformity(
         "vegetation",
         lateral_d=TINY_D,
         overhang_d=TINY_D,
         obstacle_position={"x": 10, "y": 10, "z": 65},
     )
 
-    assert table["overhangComplianceAltitude"] < 0
+    assert table["overhangComplianceAltitude"] < obstacle["y"]
     assert table["conformityCompliance"] is False
 
 
 def test_vegetation_obstacle_above_cable_outside_lateral_band_is_compliant(
     compute_conformity,
 ):
-    *_, table = compute_conformity(
+    obstacle, _, _, table = compute_conformity(
         "vegetation",
         lateral_d=TINY_D,
         overhang_d=TINY_D,
         obstacle_position={"x": 10, "y": 5, "z": 65},
     )
 
-    assert table["overhangComplianceAltitude"] < 0
+    assert table["overhangComplianceAltitude"] < obstacle["y"]
     assert table["conformityCompliance"] is True
 
 
@@ -342,27 +354,27 @@ def test_vegetation_u_shape_compliance_is_judged_per_rule(
 
 @pytest.mark.parametrize("obstacle_position", OBSTACLE_POSITIONS)
 @pytest.mark.parametrize("lateral_d", [None, LATERAL_D])
-def test_overhang_compliance_altitude_is_signed_altitude_gap_minus_distance_to_comply(
+def test_overhang_compliance_altitude_is_lower_zone_border(
     compute_conformity, obstacle_position, lateral_d
 ):
-    obstacle, overhang, _, table = compute_conformity(
+    _, overhang, lateral_points, table = compute_conformity(
         "overhang", lateral_d=lateral_d, obstacle_position=obstacle_position
     )
 
     assert table["overhangComplianceAltitude"] == pytest.approx(
-        overhang["y"] - obstacle["y"] - OVERHANG_D
+        min(p["y"] for p in [overhang, *lateral_points]) - OVERHANG_D
     )
 
 
 def test_overhang_obstacle_above_cable_is_not_compliant(compute_conformity):
-    *_, table = compute_conformity(
+    obstacle, _, _, table = compute_conformity(
         "overhang",
         lateral_d=None,
         overhang_d=TINY_D,
         obstacle_position={"x": 10, "y": 5, "z": 65},
     )
 
-    assert table["overhangComplianceAltitude"] < 0
+    assert table["overhangComplianceAltitude"] < obstacle["y"]
     assert table["conformityCompliance"] is False
 
 
@@ -388,11 +400,13 @@ def test_overhang_only_fills_compliance_altitude(
 def test_overhang_compliance_false_only_when_compliance_altitude_is_negative(
     compute_conformity, lateral_d, overhang_d, expected
 ):
-    *_, table = compute_conformity(
+    obstacle, overhang, _, table = compute_conformity(
         "overhang", lateral_d=lateral_d, overhang_d=overhang_d
     )
 
-    assert (table["overhangComplianceAltitude"] < 0) is (overhang_d == HUGE_D)
+    assert (overhang["y"] - obstacle["y"] - overhang_d < 0) is (
+        overhang_d == HUGE_D
+    )
     assert table["conformityCompliance"] is expected
 
 

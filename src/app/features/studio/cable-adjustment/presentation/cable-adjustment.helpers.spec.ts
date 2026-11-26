@@ -9,10 +9,11 @@ import { Section } from '@shared/domain';
 import { CableAdjustmentFormValue } from '@features/studio/cable-adjustment/domain/cable-adjustment.interfaces';
 import {
   createAngleControl,
-  createNumberControl,
+  findCurrentSpanOption,
   getSpanLength,
   toCableAdjustmentInputs,
-  toDisplayedResults
+  toDisplayedResults,
+  wrapAngle
 } from '@features/studio/cable-adjustment/presentation/cable-adjustment.helpers';
 
 const makeFormValue = (overrides: Partial<CableAdjustmentFormValue> = {}): CableAdjustmentFormValue => ({
@@ -28,29 +29,6 @@ const makeFormValue = (overrides: Partial<CableAdjustmentFormValue> = {}): Cable
 });
 
 describe('cable-adjustment helpers', () => {
-  describe('createNumberControl', () => {
-    it('defaults to null', () => {
-      expect(createNumberControl(0, 10, 1).value).toBeNull();
-    });
-
-    it.each([0, 10, 5.5])('accepts %s', (value) => {
-      const control = createNumberControl(0, 10, 1);
-      control.setValue(value);
-      expect(control.valid).toBe(true);
-    });
-
-    it.each([
-      [-0.1, 'min'],
-      [10.1, 'max'],
-      [1.23, 'maxDecimals'],
-      [null, 'required']
-    ])('rejects %s with a %s error', (value, errorKey) => {
-      const control = createNumberControl(0, 10, 1);
-      control.setValue(value);
-      expect(control.hasError(errorKey)).toBe(true);
-    });
-  });
-
   describe('createAngleControl', () => {
     it('defaults to 0', () => {
       expect(createAngleControl().value).toBe(0);
@@ -124,11 +102,55 @@ describe('cable-adjustment helpers', () => {
     });
   });
 
+  describe('findCurrentSpanOption', () => {
+    const options = [
+      { label: 'A - B', value: { index: 0, uuid: 'support-a' } },
+      { label: 'B - C', value: { index: 1, uuid: 'support-b' } },
+      { label: 'C - D', value: null }
+    ];
+
+    it('returns the span starting at the current support', () => {
+      expect(findCurrentSpanOption(options, 1)).toEqual({ index: 1, uuid: 'support-b' });
+    });
+
+    it('returns null when no span matches or the option has no value', () => {
+      expect(findCurrentSpanOption(options, 2)).toBeNull();
+      expect(findCurrentSpanOption(options, 7)).toBeNull();
+      expect(findCurrentSpanOption([], 0)).toBeNull();
+    });
+  });
+
+  describe('wrapAngle', () => {
+    it.each([
+      [0, 0],
+      [73.8, 73.8],
+      [200, 200],
+      [-200, 200],
+      [-199.99, -199.99],
+      [201, -199],
+      [399.99, -0.01],
+      [400, 0],
+      [-250, 150],
+      [73.802, 73.8],
+      [96.918, 96.92],
+      [-0.001, 0]
+    ])('wraps %s to %s', (angle, expected) => {
+      expect(wrapAngle(angle)).toBe(expected);
+    });
+  });
+
   describe('toDisplayedResults', () => {
-    it('rounds both sighting angles to the grade', () => {
-      expect(toDisplayedResults({ horizontalSightAngle: 73.802, verticalSightAngle: 96.418 })).toEqual({
-        horizontalSightAngle: 74,
-        verticalSightAngle: 96
+    it('rounds both sighting angles to 2 decimals', () => {
+      expect(toDisplayedResults({ horizontalSightAngle: 73.802, verticalSightAngle: 96.918 })).toEqual({
+        horizontalSightAngle: 73.8,
+        verticalSightAngle: 96.92
+      });
+    });
+
+    it('keeps both sighting angles in the input limits', () => {
+      expect(toDisplayedResults({ horizontalSightAngle: 250, verticalSightAngle: -210 })).toEqual({
+        horizontalSightAngle: -150,
+        verticalSightAngle: 190
       });
     });
   });

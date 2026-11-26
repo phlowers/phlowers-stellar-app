@@ -262,28 +262,17 @@ describe('L0SumComponent', () => {
       expect(lines[0]).toBe(
         'COMMON.SPAN-LABEL;STUDIO.L0-SUM.CSV-SPAN-LENGTH-LABEL;STUDIO.L0-SUM.CSV-L0-LABEL;STUDIO.L0-SUM.CSV-CUMULATED-L0-LABEL'
       );
-      expect(lines.slice(1, 3)).toEqual(['"=""1-2""";101.25;100;100', '"=""2-3""";201;200.5;300.5']);
+      expect(lines.slice(1, 3)).toEqual(['1-2;101.25;100;100', '2-3;201;200.5;300.5']);
       expect(lines).toHaveLength(7);
-    });
-
-    it('should export a span built from a support number starting with "=" as text, not as a formula', async () => {
-      (TestBed.inject(PlotSpanService).section as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-        supports: [{ number: '=1+1' }, { number: '2' }]
-      });
-      const formulaFixture = TestBed.createComponent(L0SumComponent);
-      formulaFixture.detectChanges();
-
-      formulaFixture.componentInstance.onExport();
-
-      const lines = (await readBlobAsText(blobs[0])).split('\r\n');
-      expect(lines[1]).toBe('"=""=1+1-2""";101.25;100;100');
     });
 
     // The footer is rendered by the toolbar dialog, not in the component view
     const renderExportButton = (target: ComponentFixture<L0SumComponent>): HTMLButtonElement => {
       const view = target.componentInstance.footerTemplate()!.createEmbeddedView(null);
       view.detectChanges();
-      return view.rootNodes.find((node) => node instanceof HTMLButtonElement)!;
+      return view.rootNodes.find(
+        (node) => node instanceof HTMLButtonElement && node.matches('[data-testid="l0-export-btn"]')
+      )!;
     };
 
     it('should enable the export button once the data is loaded', () => {

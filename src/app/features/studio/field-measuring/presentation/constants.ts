@@ -29,13 +29,21 @@ export const SPAN_OPTIONS: SelectOption[] = [
 /** Available wind direction option keys for field measuring. */
 export const WIND_DIRECTION_OPTION_KEYS: TranslatableSelectOption[] = [
   { labelKey: 'field-measuring.shared.wind-direction.north', value: 'North' },
+  { labelKey: 'field-measuring.shared.wind-direction.north-north-east', value: 'North-North-East' },
   { labelKey: 'field-measuring.shared.wind-direction.north-east', value: 'North-East' },
+  { labelKey: 'field-measuring.shared.wind-direction.east-north-east', value: 'East-North-East' },
   { labelKey: 'field-measuring.shared.wind-direction.east', value: 'East' },
+  { labelKey: 'field-measuring.shared.wind-direction.east-south-east', value: 'East-South-East' },
   { labelKey: 'field-measuring.shared.wind-direction.south-east', value: 'South-East' },
+  { labelKey: 'field-measuring.shared.wind-direction.south-south-east', value: 'South-South-East' },
   { labelKey: 'field-measuring.shared.wind-direction.south', value: 'South' },
+  { labelKey: 'field-measuring.shared.wind-direction.south-south-west', value: 'South-South-West' },
   { labelKey: 'field-measuring.shared.wind-direction.south-west', value: 'South-West' },
+  { labelKey: 'field-measuring.shared.wind-direction.west-south-west', value: 'West-South-West' },
   { labelKey: 'field-measuring.shared.wind-direction.west', value: 'West' },
-  { labelKey: 'field-measuring.shared.wind-direction.north-west', value: 'North-West' }
+  { labelKey: 'field-measuring.shared.wind-direction.west-north-west', value: 'West-North-West' },
+  { labelKey: 'field-measuring.shared.wind-direction.north-west', value: 'North-West' },
+  { labelKey: 'field-measuring.shared.wind-direction.north-north-west', value: 'North-North-West' }
 ];
 
 /** Time mode option keys (summer / winter). */
@@ -79,6 +87,15 @@ export const LEFT_SUPPORT_OPTION_KEYS: TranslatableSelectOption[] = [
 /** PAPOTO validity criterion threshold (0.5%), not exposed by `PapotoResult` — used for the JSON export. */
 export const PAPOTO_VALIDITY_CRITERION_PERCENT = 0.5;
 
+/** Tangential sights validity criterion threshold (1%), not exposed by the tangent aiming result — used for the JSON export. */
+export const TANGENT_AIMING_VALIDITY_CRITERION_PERCENT = 1;
+
+/** Maps the internal `season` value to a Transloco key for JSON export label. */
+export const SEASON_EXPORT_KEYS: Record<FieldMeasure['season'], string> = {
+  summer: 'field-measuring.export-labels.season.summer',
+  winter: 'field-measuring.export-labels.season.winter'
+};
+
 /** Maps the internal `windSpeedUnit` value to a Transloco key for JSON export label. */
 export const WIND_SPEED_UNIT_EXPORT_KEYS: Record<FieldMeasure['windSpeedUnit'], string> = {
   kmh: 'field-measuring.export-labels.wind-speed-unit.kmh',
@@ -87,7 +104,10 @@ export const WIND_SPEED_UNIT_EXPORT_KEYS: Record<FieldMeasure['windSpeedUnit'], 
 
 /** Maps the translatable `calculationMethod` values (papoto/pep) to a Transloco key for JSON export label. */
 export const PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS: Record<
-  Exclude<FieldMeasure['calculationMethod'], 'tangente-aiming' | 'tangente-aiming-exterior'>,
+  Exclude<
+    FieldMeasure['calculationMethod'],
+    'tangente-aiming' | 'tangente-aiming-exterior' | 'tangente-aiming-interior'
+  >,
   string
 > = {
   papoto: 'common.papoto-label',
@@ -100,14 +120,18 @@ export const PARAMETER_CALCULATION_METHOD_TRANSLATION_KEYS: Record<
  */
 export const TANGENTIAL_SIGHTS_METHOD_NAME_EXPORT_VALUE = 'VISEES_TANGENTES' as const;
 
+/** Fixed (non-translatable) `subMethodName` export value of each tangential sights calculation method. */
+export const TANGENTIAL_SIGHTS_SUB_METHOD_NAME_EXPORT_VALUES = {
+  'tangente-aiming': 'SUPPORT',
+  'tangente-aiming-exterior': 'EXTERIEUR',
+  'tangente-aiming-interior': 'INTERIEUR'
+} as const;
+
 /** Maps the internal `updateMode15C` value to a Transloco key for JSON export label. */
 export const UPDATE_MODE_15C_EXPORT_KEYS: Record<FieldMeasure['updateMode15C'], string> = {
   auto: 'field-measuring.export-labels.update-mode-15c.auto',
   manual: 'field-measuring.export-labels.update-mode-15c.manual'
 };
 
-/** Maps the internal `calculationType` value to a Transloco key for JSON export label. */
-export const CALCULATION_TYPE_EXPORT_KEYS: Record<string, string> = {
-  tangente: 'field-measuring.export-labels.calculation-type.angle-tangent',
-  other: 'field-measuring.export-labels.calculation-type.parameter'
-};
+/** Unit of the angles exported from the PAPOTO and tangent aiming forms, which are entered in grades. */
+export const GRADE_EXPORT_UNIT = 'gr';

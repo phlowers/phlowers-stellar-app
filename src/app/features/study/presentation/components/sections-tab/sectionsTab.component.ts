@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Section, InitialCondition, Study } from '@shared/domain';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
@@ -20,6 +21,7 @@ import { CheckboxModule, CheckboxChangeEvent } from 'primeng/checkbox';
 import { createEmptySection } from '@shared/domain/helpers/sections.helpers';
 import { RouterLink } from '@angular/router';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
+import { Rfc9557ToDatePipe } from '@shared/pipes/rfc9557-to-date.pipe';
 import { cloneDeep } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
@@ -36,6 +38,7 @@ import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { NotificationService } from '@services/notification/notification.service';
 import { SectionExportService } from '@services/section/section-export.service';
+import { getDateLocale } from '@shared/helpers/modification-date.helpers';
 
 /**
  * Tab component displaying all sections and initial conditions of a study.
@@ -60,6 +63,7 @@ import { SectionExportService } from '@services/section/section-export.service';
     RouterLink,
     SelectWithButtonsComponent,
     ToolbarDialogComponent,
+    Rfc9557ToDatePipe,
     TranslocoModule
   ],
   templateUrl: './sectionsTab.component.html',
@@ -88,6 +92,13 @@ export class SectionsTabComponent {
   readonly popover = viewChild<Popover>('popover');
   private readonly toolbarDialogService = inject(ToolbarDialogService);
   readonly transloco = inject(TranslocoService);
+  private readonly activeLang = toSignal(this.transloco.langChanges$, { initialValue: this.transloco.getActiveLang() });
+  /** Emits the translated date format each time the language (and its translations) changes. */
+  readonly dateFormat = toSignal(this.transloco.selectTranslate('common.modification-date-format'), {
+    initialValue: ''
+  });
+  /** Locale used to render localized month names and AM/PM (e.g. "septembre" vs "September"). */
+  readonly dateLocale = computed(() => getDateLocale(this.activeLang()));
 
   private readonly plotService = inject(PlotService);
   private readonly spanService = inject(PlotSpanService);
@@ -163,7 +174,7 @@ export class SectionsTabComponent {
     const typeCode = rawType === 'garde' ? 'guard' : rawType;
 
     const data: CantonReportData = {
-      date: new Date().toLocaleDateString(this.getLocaleForDate()),
+      date: new Date().toLocaleDateString(getDateLocale(this.transloco.getActiveLang())),
       author: study?.author_email ?? '',
       studyTitle: study?.title ?? '',
       studyDescription: study?.description ?? '',
@@ -202,11 +213,6 @@ export class SectionsTabComponent {
     };
 
     await this.sectionDataReportService.generateReport(data);
-  }
-
-  private getLocaleForDate(): string {
-    const activeLang = this.transloco.getActiveLang();
-    return activeLang === 'en' ? 'en-US' : 'fr-FR';
   }
 
   openNewSectionModalCreate() {

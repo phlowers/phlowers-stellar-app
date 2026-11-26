@@ -1,5 +1,7 @@
 import type { SpanLoadAnnotationData } from './helpers/createLoadAnnotations';
 import type { CableModificationAnnotationData } from './helpers/createCableModificationAnnotations.interfaces';
+import type { CableSupportManipAnnotationData } from './helpers/createCableSupportManipAnnotations.interfaces';
+import type { CableSpanManipAnnotationData } from './helpers/createCableSpanManipAnnotations.interfaces';
 import type { CutStrandsAnnotationData } from './helpers/createCutStrandsAnnotations.interfaces';
 import type { FloorAnnotationData } from './helpers/createFloorTraces.interfaces';
 import type { ObstacleAnnotationData } from './helpers/obstacles';
@@ -11,6 +13,8 @@ export interface ClickAnnotationEvent {
       | ObstacleAnnotationData
       | SpanLoadAnnotationData
       | CableModificationAnnotationData
+      | CableSupportManipAnnotationData
+      | CableSpanManipAnnotationData
       | CutStrandsAnnotationData
       | FloorAnnotationData;
   };

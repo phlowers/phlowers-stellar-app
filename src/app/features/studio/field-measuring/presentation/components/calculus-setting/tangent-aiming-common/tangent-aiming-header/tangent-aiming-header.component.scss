@@ -1,0 +1,11 @@
+@use 'abstract.extracts' as app;
+
+.tangent-aiming-header {
+  @apply flex flex-wrap items-center gap-4 my-4;
+
+  &__mandatory-msg {
+    @apply flex items-center gap-1 m-0;
+    @extend %text-s-600;
+    color: var(--star-dust-950);
+  }
+}

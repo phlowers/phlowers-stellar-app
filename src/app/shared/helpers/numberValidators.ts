@@ -5,7 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl, FormControl, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 
 /**
  * Validator factory rejecting values with more than `maxDecimals` decimal places. The error
@@ -21,4 +21,19 @@ export function maxDecimalsValidator(maxDecimals: number): ValidatorFn {
     const pattern = maxDecimals === 0 ? /^-?\d+$/ : new RegExp(String.raw`^-?\d+(\.\d{1,${maxDecimals}})?$`);
     return pattern.test(control.value.toString()) ? null : { maxDecimals: { maxDecimals } };
   };
+}
+
+/** Creates a required number control bounded to [min; max] with at most `decimals` decimals. */
+export function createNumberControl(
+  min: number,
+  max: number,
+  decimals: number,
+  value: number | null = null
+): FormControl<number | null> {
+  return new FormControl<number | null>(value, [
+    Validators.required,
+    Validators.min(min),
+    Validators.max(max),
+    maxDecimalsValidator(decimals)
+  ]);
 }

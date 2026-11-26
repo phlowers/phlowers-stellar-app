@@ -25,6 +25,7 @@ import { from, map, of, startWith, switchMap } from 'rxjs';
 import { CatalogObstacleWindZoneEntity } from '@infrastructure/database/entities/catalog-obstacle-wind-zone.entity';
 import { ObstacleConformityType } from '@infrastructure/database/entities/catalog-obstacle-configuration.entity';
 import { OBSTACLE_CONFORMITY_CONFIG_KEY } from '@infrastructure/database';
+import { CatalogObstacleDistanceEntity, CatalogObstacleRuleDefinitionEntity } from '@infrastructure/database/entities';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -33,17 +34,24 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputText } from 'primeng/inputtext';
 import { MessageModule } from 'primeng/message';
 import { ObstacleFormService } from '@services/obstacles-form/obstaclesForm.service';
+import { ObstaclesService } from '@services/obstacles/obstacles.service';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import {
   CONFORMITY_BOUNDS,
+  CONFORMITY_TASK_TIMEOUT_MS,
   getAltitudeTypeLabels,
   getConformityCableTrackRows,
   getConformityCommonRows,
   getLateralDistanceTypeLabels
 } from './conformity.constantes';
-import { ConformityOption, ConformityRuleResult } from './conformity.model';
-import { computeOverhangZoneWidth } from './conformity.helpers';
+import { ConformityOption, ConformityRuleResult, ResultRow } from './conformity.model';
+import {
+  computeOverhangZoneWidth,
+  getEffectiveWindPressure,
+  getElectricTensionLabel,
+  getVisibleConformityCommonRows
+} from './conformity.helpers';
 import { ConformityPlotResponse } from './conformity-plot.model';
 import {
   createConformityPlot,
@@ -52,6 +60,15 @@ import {
   resizeConformityPlot
 } from './helpers/createConformityPlot';
 import { PlotSpanService } from '@services/plot/plot-span.service';
+import { PlotService } from '@services/plot/plot.service';
+import { LoggerService } from '@core/services/logger/logger.service';
+import { buildConformityExportFilename, buildConformityExportJson } from './conformity-export.helpers';
+import {
+  CONFORMITY_EXPORT_FILE_PICKER_TYPES,
+  CONFORMITY_EXPORT_UNIT_I18N_KEYS,
+  CONFORMITY_EXPORT_UNITS
+} from './conformity-export.constantes';
+import { ConformityCalculatedInputs, ConformityExportUnits } from './conformity-export.interfaces';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { StorageService } from '@services/storage/storage.service';
 import { NotificationService } from '@services/notification/notification.service';
@@ -85,6 +102,7 @@ import { Task, TaskInputs } from '@services/worker_python/tasks/types';
 export class ConformityComponent implements OnDestroy {
   private readonly fb = inject(FormBuilder);
   readonly obstacleFormService = inject(ObstacleFormService);
+  private readonly obstaclesService = inject(ObstaclesService);
   private readonly spanService = inject(PlotSpanService);
   private readonly storageService = inject(StorageService);
   private readonly notificationService = inject(NotificationService);
@@ -92,6 +110,8 @@ export class ConformityComponent implements OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
   private readonly translocoService = inject(TranslocoService);
+  private readonly plotService = inject(PlotService);
+  private readonly logger = inject(LoggerService);
 
   readonly isOpen = input<boolean>(false);
 
@@ -115,6 +135,9 @@ export class ConformityComponent implements OnDestroy {
   private readonly _conformityResults = signal<Record<string, ConformityRuleResult> | null>(null);
   /** Computed results, set only by `calculate`. Null hides the results section. */
   readonly conformityResults = this._conformityResults.asReadonly();
+
+  /** Form and point the displayed results were computed from, so the export matches them even after edits. */
+  private readonly calculatedInputs = signal<ConformityCalculatedInputs | null>(null);
 
   /** Graph data feeding the `#conformity-plot` cross-section, set alongside the results. */
   private readonly _conformityPlotData = signal<ConformityPlotResponse | null>(null);
@@ -220,8 +243,7 @@ export class ConformityComponent implements OnDestroy {
   });
 
   readonly electricTensionLabel = computed(() => {
-    const voltage = this.spanService.section()?.voltage_idr;
-    return voltage ?? '-';
+    return getElectricTensionLabel(this.spanService.section()?.voltage_idr);
   });
 
   private readonly altitudeTypeLabels = getAltitudeTypeLabels(this.translocoService);
@@ -243,7 +265,16 @@ export class ConformityComponent implements OnDestroy {
     return this.obstacleFormService.supportsOptions().find((o) => o.value === ref)?.label ?? ref;
   });
 
-  readonly commonRows = getConformityCommonRows(this.translocoService);
+  private readonly allCommonRows = getConformityCommonRows(this.translocoService);
+  private readonly visibleCommonRows = computed(() =>
+    getVisibleConformityCommonRows(this.allCommonRows, this.conformityType())
+  );
+
+  /** Signal-backed accessor that keeps the template binding unchanged. */
+  get commonRows(): ResultRow[] {
+    return this.visibleCommonRows();
+  }
+
   readonly cableTrackRows = getConformityCableTrackRows(this.translocoService);
 
   readonly BOUNDS = CONFORMITY_BOUNDS;
@@ -338,10 +369,7 @@ export class ConformityComponent implements OnDestroy {
   readonly windZoneOptions = computed(() => this.windZones().map((z) => ({ label: z.label, value: z.label })));
 
   readonly effectiveWindPressure = computed(() => {
-    const label = this.formValue().windZone;
-    const zone = this.windZones().find((z) => z.label === label);
-    if (!zone) return null;
-    return this.redZonePresenceValue() ? zone.red_zone : zone.normal;
+    return getEffectiveWindPressure(this.windZones(), this.formValue().windZone, this.redZonePresenceValue());
   });
 
   readonly conformityOptions = toSignal(
@@ -394,9 +422,28 @@ export class ConformityComponent implements OnDestroy {
     return !this.hasMultiplePoints() || this.selectedPointValue() !== null;
   });
 
+  /**
+   * Point selected in the obstacle tab, null when the obstacle has a single point or no valid selection.
+   * The index is shared with floors, so it only applies when the selected measure is this obstacle.
+   */
+  private activeObstaclePointIndex(): number | null {
+    const index = this.obstaclesService.activePointIndex();
+    if (this.obstacleUuid() !== this.obstaclesService.selectedMeasureUuid()) return null;
+    if (!this.hasMultiplePoints() || index === null || index >= this.positions().length) return null;
+    return index;
+  }
+
   /** Tracks which obstacle the form was last fully populated for, so async config/options arriving
    * later only fill still-empty fields instead of clobbering user edits. */
   private lastPopulatedUuid: string | null | undefined = undefined;
+
+  /** Identifies the latest calculation; bumped on close/obstacle change so a pending one cannot publish stale results. */
+  private calculationRun = 0;
+
+  private invalidatePendingCalculation(): void {
+    this.calculationRun++;
+    this.isCalculating.set(false);
+  }
 
   /** Populate the form from the saved conformity data (falling back to defaults) when the obstacle
    * changes, and top up still-empty fields as async config/options resolve. */
@@ -410,7 +457,9 @@ export class ConformityComponent implements OnDestroy {
       const isNewObstacle = uuid !== this.lastPopulatedUuid;
       if (isNewObstacle) {
         this.lastPopulatedUuid = uuid;
+        this.invalidatePendingCalculation();
         this._conformityResults.set(null);
+        this.calculatedInputs.set(null);
         this._conformityPlotData.set(null);
         this._ruleColorsByType.set({});
       }
@@ -425,7 +474,7 @@ export class ConformityComponent implements OnDestroy {
       };
 
       const c = this.form.controls;
-      fill(c.selectedPoint, saved?.selectedPoint ?? null);
+      fill(c.selectedPoint, saved?.selectedPoint ?? this.activeObstaclePointIndex());
       fill(c.windZone, saved?.windZone ?? defaults.windZone);
       fill(c.repartitionTemperature, saved?.repartitionTemperature ?? defaults.repartitionTemperature);
       fill(c.lateralDistanceTemperature, saved?.lateralDistanceTemperature ?? defaults.lateralDistanceTemperature);
@@ -437,11 +486,25 @@ export class ConformityComponent implements OnDestroy {
     });
   });
 
+  /**
+   * Preselect the point selected in the obstacle tab when opening, unless a saved point exists.
+   * Without a valid active point the selection is cleared so a reopen never keeps a stale point.
+   */
+  private readonly selectActivePointOnOpen = effect(() => {
+    if (!this.isOpen()) return;
+    untracked(() => {
+      if (this.savedConformityData()?.selectedPoint != null) return;
+      this.form.controls.selectedPoint.setValue(this.activeObstaclePointIndex());
+    });
+  });
+
   /** Clear results when the modal closes so a reopen starts from a clean slate. */
   private readonly clearResultsOnClose = effect(() => {
     if (!this.isOpen())
       untracked(() => {
+        this.invalidatePendingCalculation();
         this._conformityResults.set(null);
+        this.calculatedInputs.set(null);
         this._conformityPlotData.set(null);
         this._ruleColorsByType.set({});
         this.isGraphEnlarged.set(false);
@@ -458,6 +521,8 @@ export class ConformityComponent implements OnDestroy {
     const selectedRuleTypes = this.selectedConformityValues() ?? [];
     const ruleColors = this._ruleColorsByType();
     const conformityType = this.conformityType();
+    const showLegend = this.isGraphEnlarged();
+    const ruleLabels = Object.fromEntries(this.conformityOptions().map((o) => [o.value, o.label]));
     if (!data) {
       untracked(() => {
         this.disconnectPlotResize();
@@ -468,13 +533,31 @@ export class ConformityComponent implements OnDestroy {
     afterNextRender(
       () => {
         if (this.document.getElementById(CONFORMITY_PLOT_ID)) {
-          createConformityPlot(this.document, data, { selectedRuleTypes, ruleColors, conformityType });
+          createConformityPlot(this.document, data, {
+            selectedRuleTypes,
+            ruleColors,
+            conformityType,
+            ruleLabels,
+            cablePointsLabel: this.translocoService.translate('studio.conformity.cable-points-legend'),
+            showLegend
+          });
           this.observePlotResize();
         }
       },
       { injector: this.injector }
     );
   });
+
+  /** Rules currently displayed (live selection) that have calculated results, so the export matches the table and plot. */
+  private readonly exportRules = computed(() => {
+    const results = this._conformityResults();
+    return results ? this.selectedConformityColumns().filter((option) => results[option.value]) : [];
+  });
+
+  /** True while an export is in progress (file picker open or file being written), to prevent double exports. */
+  readonly isExporting = signal(false);
+
+  readonly canExport = computed(() => this.calculatedInputs() !== null && this.exportRules().length > 0);
 
   /** Auto-display results when reopening a saved conformity whose inputs are all present. */
   private readonly autoCalculate = effect(() => {
@@ -512,92 +595,186 @@ export class ConformityComponent implements OnDestroy {
       this.notificationService.error(this.translocoService.translate('studio.conformity.no-conformity-config-error'));
       return;
     }
-    // Map database value to Python worker expected value
-    // const conformityPlot: 'vegetation' | 'cable_track' | 'overhang' = conformityType: conformityType;
     const v = this.form.getRawValue();
-    const db = this.storageService.db;
-    const selectedRuleTypes = v.conformity ?? [];
-    const obstacleType = obstacle.type ?? '';
     const electricTension = this.spanService.section()?.voltage_idr;
-    const zoneWidth =
-      conformityType === 'overhang'
-        ? computeOverhangZoneWidth(this.spanService.section()?.supports ?? [], obstacle.supportUuid)
-        : undefined;
 
+    const run = ++this.calculationRun;
     this.isCalculating.set(true);
     this.calculationError.set(null);
 
     try {
-      const [distances, rules] = await Promise.all([
-        db && obstacleType
-          ? db.catObstacleDistances
-              .where('obstacle_type')
-              .equals(obstacleType)
-              .filter((d) => selectedRuleTypes.includes(d.rule_type))
-              .toArray()
-          : Promise.resolve([]),
-        db && selectedRuleTypes.length
-          ? db.catObstacleRuleDefinitions.where('rule_type').anyOf(selectedRuleTypes).toArray()
-          : Promise.resolve([])
-      ]);
-
+      const { rules, distances } = await this.loadRuleCatalog(obstacle.type ?? '', v.conformity ?? []);
       if (!electricTension) throw new Error('Missing electric tension');
 
-      const conformityInputs: TaskInputs[Task.getConformity] = {
+      const conformityInputs = this.buildConformityInputs(
         obstacle,
-        pointIndex: this.hasMultiplePoints() ? (this.selectedPointValue() ?? 0) : 0,
+        conformityType,
+        v,
         electricTension,
-        form: {
-          windZone: v.windZone,
-          windPressure: this.effectiveWindPressure(),
-          windMinus: v.windMinus ?? false,
-          redZonePresence: v.redZonePresence ?? false,
-          repartitionTemperature: v.repartitionTemperature,
-          lateralDistanceTemperature: v.lateralDistanceTemperature,
-          selectedConformityRules: selectedRuleTypes,
-          conformity: v.conformity,
-          conformityPlot: conformityType,
-          intermediatePoints: this.intermediatePointsConfig(),
-          zoneWidth
-        },
-        rulesClimaticConditions: rules.map((r) => ({
-          ruleType: r.rule_type,
-          ruleName: r.rule_name,
-          lateralPoint: r.lateral_point,
-          overhangPoint: r.overhang_point
-        })),
-        rulesDistances: distances.map((d) => ({
-          ruleType: d.rule_type,
-          lateral: d.lateral,
-          overhang: d.overhang
-        }))
-      };
-
-      const { result: conformityTaskOutput, error: conformityTaskError } = await this.workerPythonService.runTask(
-        Task.getConformity,
-        conformityInputs
+        rules,
+        distances
       );
+      const { result: conformityTaskOutput, error: conformityTaskError } =
+        await this.workerPythonService.runTaskWithTimeout(
+          Task.getConformity,
+          conformityInputs,
+          CONFORMITY_TASK_TIMEOUT_MS
+        );
       if (conformityTaskError || !conformityTaskOutput) {
         throw new Error(conformityTaskError ?? 'Conformity task failed');
       }
+      if (run !== this.calculationRun) return;
 
-      const plotData: ConformityPlotResponse = {
+      this._conformityResults.set(conformityTaskOutput.results);
+      this.calculatedInputs.set({ form: v, pointIndex: conformityInputs.pointIndex });
+      this._ruleColorsByType.set(Object.fromEntries(rules.map((r) => [r.rule_type, r.color])));
+      this._conformityPlotData.set({
         obstacle: conformityTaskOutput.obstacle,
         conformity: conformityTaskOutput.conformity
-      };
-      const results: Record<string, ConformityRuleResult> = conformityTaskOutput.results;
-      this._conformityResults.set(results);
-      this._ruleColorsByType.set(Object.fromEntries(rules.map((r) => [r.rule_type, r.color])));
-      this._conformityPlotData.set(plotData);
+      });
     } catch (error) {
+      if (run !== this.calculationRun) return;
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.calculationError.set(errorMessage);
       this.notificationService.error(
         this.translocoService.translate('studio.conformity.calculation-failed-error', { errorMessage })
       );
     } finally {
-      this.isCalculating.set(false);
+      if (run === this.calculationRun) this.isCalculating.set(false);
     }
+  }
+
+  /** Reads the catalog distances and rule definitions of the selected rules for the obstacle type. */
+  private async loadRuleCatalog(
+    obstacleType: string,
+    selectedRuleTypes: string[]
+  ): Promise<{ rules: CatalogObstacleRuleDefinitionEntity[]; distances: CatalogObstacleDistanceEntity[] }> {
+    const db = this.storageService.db;
+    const [distances, rules] = await Promise.all([
+      db && obstacleType
+        ? db.catObstacleDistances
+            .where('obstacle_type')
+            .equals(obstacleType)
+            .filter((d) => selectedRuleTypes.includes(d.rule_type))
+            .toArray()
+        : Promise.resolve([]),
+      db && selectedRuleTypes.length
+        ? db.catObstacleRuleDefinitions.where('rule_type').anyOf(selectedRuleTypes).toArray()
+        : Promise.resolve([])
+    ]);
+    return { rules, distances };
+  }
+
+  private buildConformityInputs(
+    obstacle: NonNullable<ReturnType<ConformityComponent['obstacleData']>>,
+    conformityType: NonNullable<ObstacleConformityType>,
+    v: ReturnType<ConformityComponent['form']['getRawValue']>,
+    electricTension: string,
+    rules: CatalogObstacleRuleDefinitionEntity[],
+    distances: CatalogObstacleDistanceEntity[]
+  ): TaskInputs[Task.getConformity] {
+    const zoneWidth =
+      conformityType === 'overhang'
+        ? computeOverhangZoneWidth(this.spanService.section()?.supports ?? [], obstacle.supportUuid)
+        : undefined;
+    return {
+      obstacle,
+      pointIndex: this.hasMultiplePoints() ? (this.selectedPointValue() ?? 0) : 0,
+      electricTension,
+      form: {
+        windZone: v.windZone,
+        windPressure: this.effectiveWindPressure(),
+        windMinus: v.windMinus ?? false,
+        redZonePresence: v.redZonePresence ?? false,
+        repartitionTemperature: v.repartitionTemperature,
+        lateralDistanceTemperature: v.lateralDistanceTemperature,
+        selectedConformityRules: v.conformity ?? [],
+        conformity: v.conformity,
+        conformityPlot: conformityType,
+        intermediatePoints: this.intermediatePointsConfig(),
+        zoneWidth
+      },
+      rulesClimaticConditions: rules.map((r) => ({
+        ruleType: r.rule_type,
+        ruleName: r.rule_name,
+        lateralPoint: r.lateral_point,
+        overhangPoint: r.overhang_point
+      })),
+      rulesDistances: distances.map((d) => ({
+        ruleType: d.rule_type,
+        lateral: d.lateral,
+        overhang: d.overhang
+      }))
+    };
+  }
+
+  async exportConformity(): Promise<void> {
+    if (this.isExporting()) return;
+    const obstacle = this.obstacleData();
+    const results = this._conformityResults();
+    const inputs = this.calculatedInputs();
+    const point = inputs ? (this.positions()[inputs.pointIndex] ?? null) : null;
+    if (!obstacle || !results || !inputs || !point || !this.exportRules().length) {
+      this.notificationService.error(this.translocoService.translate('studio.conformity.export-invalid-data-error'));
+      return;
+    }
+    const section = this.spanService.section();
+    const units: ConformityExportUnits = {
+      ...CONFORMITY_EXPORT_UNITS,
+      meter: this.translocoService.translate(CONFORMITY_EXPORT_UNIT_I18N_KEYS.meter),
+      celsius: this.translocoService.translate(CONFORMITY_EXPORT_UNIT_I18N_KEYS.celsius),
+      pascal: this.translocoService.translate(CONFORMITY_EXPORT_UNIT_I18N_KEYS.pascal)
+    };
+    const rules = this.exportRules().map(({ value, label }) => ({ value, label }));
+    const json = buildConformityExportJson({
+      section,
+      study: this.plotService.study(),
+      obstacle,
+      point,
+      pointLabel: this.translocoService.translate('common.point-index-label', { index: inputs.pointIndex + 1 }),
+      spanLabel: this.spanLabel(),
+      referenceSupportLabel: this.referenceSupportLabel(),
+      form: {
+        windZone: inputs.form.windZone,
+        windMinus: inputs.form.windMinus ?? false,
+        redZonePresence: inputs.form.redZonePresence ?? false
+      },
+      rules,
+      results,
+      conformityType: this.conformityType(),
+      units
+    });
+    this.isExporting.set(true);
+    try {
+      await this.saveExportFile(json, buildConformityExportFilename(obstacle.name, section?.name ?? null));
+    } finally {
+      this.isExporting.set(false);
+    }
+  }
+
+  private async saveExportFile(json: string, filename: string): Promise<void> {
+    if (globalThis.showSaveFilePicker) {
+      try {
+        const handle = await globalThis.showSaveFilePicker({
+          suggestedName: filename,
+          types: CONFORMITY_EXPORT_FILE_PICKER_TYPES
+        });
+        const writable = await handle.createWritable();
+        await writable.write(json);
+        await writable.close();
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        this.logger.error('Failed to save conformity export via showSaveFilePicker', error);
+      }
+    }
+
+    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    const a = this.document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   private generateMockResult(isCableTrack: boolean, conformityCompliance: boolean): ConformityRuleResult {

@@ -8,10 +8,17 @@
 import { inject, Injectable, signal, untracked } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
-import { AspectRatio, ScalingFactors, PlotOptions, PLOT_ID, SelectedDisplayOptions } from '@shared/types/plot.types';
+import {
+  AspectRatio,
+  ScalingFactors,
+  PlotOptions,
+  PLOT_ID,
+  SelectedDisplayOptions,
+  Zoom2d
+} from '@shared/types/plot.types';
 import { Camera } from 'plotly.js-dist-min';
 import { isEqual } from 'lodash';
-import { checkIfProjectionNeedRefresh, getLiveCamera } from './plot-options.utils';
+import { checkIfProjectionNeedRefresh, getLiveCamera, getLiveZoom2d } from './plot-options.utils';
 import {
   FreePositioningSavedView,
   FreePositioningSource
@@ -51,6 +58,10 @@ export class PlotOptionsService {
    * after the restore relayout completes.
    */
   readonly pendingCameraRestore = signal<Camera | null>(null);
+  /** Last zoomed/panned 2D axis ranges, `null` while the 2D plot is auto-ranged. */
+  readonly zoom2d = signal<Zoom2d | null>(null);
+  /** 2D zoom to apply via Plotly.relayout after the first render, cleared by SectionPlotComponent. */
+  readonly pendingZoom2dRestore = signal<Zoom2d | null>(null);
   readonly isFreePositioningMode = signal<boolean>(false);
   /** Which feature currently drives free positioning mode, so the studio page can render the matching plot. */
   readonly freePositioningSource = signal<FreePositioningSource | null>(null);
@@ -112,6 +123,22 @@ export class PlotOptionsService {
     return camera;
   }
 
+  /**
+   * Synchronise the 2D zoom signal with the axis ranges read from the DOM.
+   * Skips the signal write when the value is unchanged (deep-equal).
+   */
+  refreshZoom2d(): void {
+    const zoom = getLiveZoom2d(this.document, PLOT_ID);
+    if (
+      !isEqual(
+        zoom,
+        untracked(() => this.zoom2d())
+      )
+    ) {
+      this.zoom2d.set(zoom);
+    }
+  }
+
   /** Update the scaling factors signal (user-controlled input from scale-view). */
   setScalingFactors(factors: ScalingFactors): void {
     this.scalingFactors.set(factors);
@@ -161,6 +188,8 @@ export class PlotOptionsService {
     this.plotOptions.set({ ...defaultPlotOptions });
     this.camera.set(null);
     this.pendingCameraRestore.set(null);
+    this.zoom2d.set(null);
+    this.pendingZoom2dRestore.set(null);
     this.isFreePositioningMode.set(false);
     this.freePositioningSource.set(null);
     this.frozenSpan.set(0);

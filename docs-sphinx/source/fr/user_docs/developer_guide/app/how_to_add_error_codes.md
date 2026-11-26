@@ -291,6 +291,14 @@ Cela produit au maximum :
 Les diagnostics avec `origin: 'warning'` ne sont jamais routés via
 `notificationService.error()` — seules les exceptions peuvent produire une erreur bloquante.
 
+**Où et comment les toasts sont affichés.** Les toasts `success()` et `error()` s'affichent en haut
+au centre. Les toasts `info()`, `warning()` et `warningList()` partagent un seul `<p-toast>` en bas à
+droite dans `AppComponent` (clé `BOTTOM_RIGHT_TOAST_KEY`, définie dans `notification.constantes.ts`).
+Tant qu'un toast identique (même sévérité, résumé, détail et données) est encore affiché,
+`NotificationService` ne l'ajoute pas une seconde fois. `AppComponent` appelle
+`NotificationService.release()` sur l'événement `onClose` du toast : le même message peut donc être
+réaffiché une fois fermé (fin du délai ou fermeture manuelle).
+
 ### 2.6 — Pourquoi `origin` existe
 
 `origin` (`'exception' | 'warning'`) est ce qui permet à `StudioComponent` de fusionner ce qui

@@ -1,6 +1,6 @@
 {
   "name": "phlowers-stellar-app",
-  "version": "1.9.2",
+  "version": "1.10.1",
   "packageManager": "npm@10.9.8",
   "scripts": {
     "ng": "ng",
@@ -15,7 +15,7 @@
     "lint-check-blocked": "eslint . --quiet",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "coverage": "vitest run --coverage",
+    "coverage": "vitest run --coverage --maxWorkers=2",
     "test:watch": "vitest",
     "e2e": "playwright test",
     "e2e:headed": "playwright test --headed",
@@ -32,6 +32,8 @@
     "create-mock-data": "uv run ./scripts/create_mock_data.py",
     "create-assets-list-for-service-worker": "uv run --no-cache ./scripts/create_assets_list_for_service_worker.py",
     "cyclonedx": "npx @cyclonedx/cyclonedx-npm --ignore-npm-errors --output-file bom.xml --output-format XML",
+    "sbom:angular": "bash scripts/sbom-ng.sh",
+    "sbom:python": "bash scripts/sbom-py.sh",
     "docs": "cd docs-sphinx && make html",
     "docs:en": "cd docs-sphinx && make html-en",
     "docs:fr": "cd docs-sphinx && make html-fr",
@@ -57,22 +59,22 @@
   },
   "private": true,
   "engines": {
-    "node": "22.23.4"
+    "node": "24.22.2"
   },
   "config": {
-    "mechaphlowers": "0.6.0rc2",
+    "mechaphlowers": "0.14.1",
     "thermohl": "1.4.0"
   },
   "dependencies": {
     "@angular-slider/ngx-slider": "21.0.0",
     "@angular/cdk": "21.2.14",
-    "@angular/common": "21.2.18",
-    "@angular/compiler": "21.2.18",
-    "@angular/core": "21.2.18",
-    "@angular/forms": "21.2.18",
-    "@angular/platform-browser": "21.2.18",
-    "@angular/platform-browser-dynamic": "21.2.18",
-    "@angular/router": "21.2.18",
+    "@angular/common": "21.2.26",
+    "@angular/compiler": "21.2.26",
+    "@angular/core": "21.2.26",
+    "@angular/forms": "21.2.26",
+    "@angular/platform-browser": "21.2.26",
+    "@angular/platform-browser-dynamic": "21.2.26",
+    "@angular/router": "21.2.26",
     "@eslint/js": "9.27.0",
     "@fortawesome/fontawesome-free": "7.3.0",
     "@jsverse/transloco": "8.4.0",
@@ -90,7 +92,7 @@
     "plotly.js-dist-min": "3.7.0",
     "primeicons": "7.0.0",
     "primeng": "21.1.9",
-    "pyodide": "0.29.4",
+    "pyodide": "314.0.7",
     "rxjs": "7.8.1",
     "tailwindcss-primeui": "0.5.1",
     "tslib": "2.3.0",
@@ -108,8 +110,15 @@
     "marked": "$marked",
     "uuid": "14.0.0",
     "tar": "7.5.21",
-    "brace-expansion": "2.0.1",
-    "minimatch": "10.0.3",
+    "minimatch": "11.0.4",
+    "typedoc": {
+      "minimatch": "10.2.6"
+    },
+    "glob": "14.0.2",
+    "vite": "7.3.7",
+    "@analogjs/vite-plugin-nitro": {
+      "esbuild": "$esbuild"
+    },
     "rolldown": "1.0.0",
     "copy-webpack-plugin": {
       "serialize-javascript": "7.0.5"
@@ -126,21 +135,21 @@
     }
   },
   "devDependencies": {
-    "@analogjs/platform": "2.6.3",
-    "@analogjs/vite-plugin-angular": "2.6.3",
-    "@analogjs/vitest-angular": "2.6.3",
+    "@analogjs/platform": "2.9.5",
+    "@analogjs/vite-plugin-angular": "2.9.5",
+    "@analogjs/vitest-angular": "2.9.5",
     "@angular-builders/custom-esbuild": "21.1.0",
     "@angular-eslint/eslint-plugin-template": "21.4.0",
-    "@angular/build": "21.2.19",
-    "@angular/cli": "21.2.19",
-    "@angular/compiler-cli": "21.2.18",
+    "@angular/build": "21.2.29",
+    "@angular/cli": "21.2.29",
+    "@angular/compiler-cli": "21.2.26",
     "@cyclonedx/cyclonedx-npm": "6.0.0",
-    "@jsverse/transloco-schematics": "^8.4.0",
+    "@jsverse/transloco-schematics": "8.4.0",
     "@playwright/test": "1.61.1",
     "@types/lodash": "4.17.24",
     "@types/papaparse": "5.5.2",
     "@types/plotly.js": "2.35.14",
-    "@vitest/coverage-v8": "4.1.10",
+    "@vitest/coverage-v8": "4.1.12",
     "angular-eslint": "21.4.0",
     "autoprefixer": "10.5.2",
     "esbuild": "0.28.2",
@@ -151,14 +160,14 @@
     "eslint-plugin-prefer-arrow": "1.2.3",
     "eslint-plugin-prettier": "4.2.5",
     "jsdom": "26.1.0",
-    "postcss": "^8.5.25",
+    "postcss": "8.5.25",
     "prettier": "3.9.4",
     "tailwindcss": "3.4.19",
     "typedoc": "0.28.20",
     "typescript": "5.9",
     "typescript-eslint": "8.63.0",
     "vite-tsconfig-paths": "6.1.1",
-    "vitest": "4.1.10",
+    "vitest": "4.1.12",
     "vitest-sonar-reporter": "3.0.0",
     "workbox-build": "7.4.1"
   }

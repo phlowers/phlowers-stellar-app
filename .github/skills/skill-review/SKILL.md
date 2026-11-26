@@ -1,5 +1,5 @@
 ---
-name: skill-agent
+name: skill-review
 description: "Execute one approved step from plan.md, or all remaining steps when explicitly requested, with minimal context, targeted validation, tagged stop reasons, and zero scope creep."
 argument-hint: "Step number from plan.md, or 'all' to execute all remaining steps"
 ---

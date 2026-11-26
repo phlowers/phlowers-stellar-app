@@ -53,7 +53,7 @@ Sous les informations en lecture seule, saisissez le **lieu où vous avez enregi
 
 ### Localisation automatique depuis l'étude
 
-Lorsqu'une portée est sélectionnée, {{app_name}} tente de préremplir la longitude, la latitude et l'azimut à partir de la localisation déjà enregistrée dans l'étude en cours pour cette portée.
+Lorsqu'une portée est sélectionnée, {{app_name}} tente de préremplir la longitude, la latitude et l'azimut à partir de la localisation déjà enregistrée dans l'étude en cours pour cette portée. La géolocalisation est facultative : si la section de l'étude n'a pas de position de départ, ces champs restent vides et doivent être saisis manuellement.
 
 La valeur utilisée dépend de la portée sélectionnée et du support de référence choisi :
 - L'application prend la localisation étudiée de la portée sélectionnée.
@@ -75,7 +75,7 @@ Saisissez les conditions environnementales observées lors de la mesure :
 | **Saison** | — | Été / Hiver | Oui | {{app_name}} la détecte automatiquement à partir des règles de l'heure d'été. Vous pouvez la modifier si nécessaire. |
 | **Température ambiante** | °C | −50 à +99 | Oui | Température de l'air au point de mesure. |
 | **Vitesse du vent** | km/h ou m/s | 0 à 50 | Oui | Vitesse moyenne du vent pendant la mesure. Choisissez votre unité préférée (km/h ou m/s) via le bouton de bascule. |
-| **Direction du vent** | — | 8 points cardinaux | Oui | Direction d'où vient le vent (Nord, Nord-Est, Est, Sud-Est, Sud, Sud-Ouest, Ouest, Nord-Ouest). |
+| **Direction du vent** | — | 16 points | Oui | Direction d'où vient le vent (Nord, Nord-Nord-Est, Nord-Est, Est-Nord-Est, Est, Est-Sud-Est, Sud-Est, Sud-Sud-Est, Sud, Sud-Sud-Ouest, Sud-Ouest, Ouest-Sud-Ouest, Ouest, Ouest-Nord-Ouest, Nord-Ouest, Nord-Nord-Ouest), par pas de 22,5°. |
 | **Couverture nuageuse** | N0 à N8 (nébulosité) | 9 valeurs | Oui | Couverture nuageuse sur une échelle de N0 (ciel clair) à N8 (ciel entièrement couvert). N0, N3, N4, N7 sont non étiquetés ; N1 = Ensoleillé, N2 = Partiellement nuageux, N5 = Nuageux, N6 = Ciel couvert, N8 = Couvert / enfumé. |
 
 ```{note}
@@ -88,17 +88,56 @@ Pendant que vous saisissez, {{app_name}} valide vos entrées :
 
 - **Nom de mesure en double** : si votre nom correspond à une mesure existante, un message d'erreur apparaît sous le champ du nom : **Le nom de la mesure doit être unique.** Modifiez le nom pour corriger le problème.
 - **Plages invalides** : si un champ numérique (par exemple, la vitesse du vent) sort de la plage autorisée, {{app_name}} peut mettre le champ en surbrillance lorsque vous essayez d'enregistrer.
-- **Champ obligatoire vide** : si vous laissez un champ requis vide, les boutons **Enregistrer** et **Exporter** restent désactivés.
+- **Champ obligatoire vide** : le bouton **Enregistrer** exige seulement un nom non vide et non déjà utilisé par une autre mesure.
 
-Dès que tous les champs sont valides et que vous avez apporté des modifications, le bouton **Enregistrer** devient actif. Si les quatre onglets (Données terrain, Calcul du paramètre, Calcul de la température, Paramètre à 15 °C sans vent) sont valides, le bouton **Exporter** devient également actif.
+Dès que vous modifiez une saisie de la mesure (quel que soit l'onglet), le bouton **Enregistrer** devient actif, même si la mesure est incomplète. Les boutons **Rapport** et **Exporter** ne sont actifs que lorsque le formulaire global (nom, tronçon, longitude, latitude, altitude, azimut) et l'onglet affiché (Données terrain, Calcul du paramètre, Calcul de la température ou Paramètre à 15 °C sans vent) sont valides et enregistrés.
 
 ## Actions de la boîte de dialogue
 
 Au bas de la boîte de dialogue, trois boutons contrôlent la session de mesure :
 
-- **Rapport** (désactivé dans la version actuelle) : réservé à une future fonctionnalité de reporting.
-- **Exporter** : génère un fichier JSON avec toutes les données de mesure et les résultats calculés. Il est activé uniquement lorsque tous les onglets sont valides. Le nom du fichier suit le motif : `Export Mesure de terrain_<nom de mesure>_<nom de section>_<date>.json`.
-- **Enregistrer** : enregistre vos saisies dans la base de données. Il est activé quand le formulaire est valide et que des modifications non enregistrées sont présentes.
+| Bouton | Actif quand… | Action |
+|---|---|---|
+| **Enregistrer** | la mesure a un nom non vide et unique, et au moins une saisie a été modifiée depuis le dernier enregistrement (même si la mesure est incomplète) | Enregistre vos saisies dans l'étude |
+| **Rapport** | le formulaire global et l'onglet affiché sont valides **et** la mesure est enregistrée (aucune modification en attente) | Génère un PDF |
+| **Exporter** | mêmes conditions que **Rapport** | Génère un fichier JSON |
+
+Tant que **Rapport** et **Exporter** sont inactifs, un message au-dessus des boutons en donne la raison :
+
+- « Rapport et export indisponibles : nom, tronçon, longitude, latitude, altitude ou azimut incomplet ou invalide. » ;
+- « Rapport et export indisponibles : données incomplètes ou invalides dans *l'onglet affiché*. » ;
+- « Enregistrez d'abord la mesure. »
+
+```{note}
+Seul l'onglet **affiché** est contrôlé : pour vérifier un autre onglet, affichez-le. Dans l'onglet **Paramètre à 15 °C sans vent**, le mode **Auto** est toujours considéré comme valide (il n'a aucune saisie) ; en mode **Manuel**, les quatre valeurs doivent être valides. Cliquer sur **Rapport** ou **Exporter** ne ferme pas la boîte de dialogue.
+```
+
+### Rapport
+
+**Rapport** génère un fichier PDF (A4 portrait) listant les données des quatre onglets de la mesure enregistrée : seules la méthode (et la sous-méthode) de calcul du paramètre retenues et les valeurs affichées selon le choix « Mise à jour des valeurs » sont reportées. Le nom du fichier suit le motif : `Rapport Mesure de terrain_<nom de mesure>_<nom de canton>_<date et heure de génération>.pdf`.
+
+### Export JSON
+
+**Exporter** génère un fichier JSON destiné à une application tierce. Il reprend la **dernière version enregistrée** de la mesure : les champs non renseignés ou non calculés sont exportés vides (`null`) ou absents.
+
+- **Nom du fichier** : `Export Mesure de terrain_<nom de mesure>_<nom de canton>_<date>.json`.
+- **Enregistrement** : si votre navigateur le permet, une fenêtre « Enregistrer sous » vous laisse choisir le dossier et le nom ; fermer cette fenêtre annule l'export. Sinon, le fichier est téléchargé dans le dossier de téléchargements du navigateur.
+- **Contenu** :
+
+| Bloc | Contenu |
+|---|---|
+| `general` | auteur, date de l'étude, nom de l'étude, code et nom de la LIT, canton, condition initiale et cas de charges de l'état courant |
+| `measure` | nom, date et heure au format RFC 9557 avec le fuseau horaire du jour de la mesure, heure d'été/hiver incluse (par exemple `2026-11-06T16:46:15.869+01:00[Europe/Paris]`), saison (`ETE` / `HIVER` en français), tension, type de canton, câble, nombre de câbles, numéro de phase |
+| `span` | portée, longitude, latitude, altitude, azimut |
+| `temperatureCalculation` | conditions de température (ambiante, vent, flux solaire, transit) et résultats (température et flux solaire du câble) |
+| `parameterCalculation` | méthode retenue, sous-méthode, support de gauche, saisies et résultats de la méthode retenue uniquement |
+| `zeroWindCalculation` | mode (auto ou manuel), paramètre et température d'entrée, paramètre à 15 °C et bornes |
+
+Pour la méthode **Visées tangentes**, `methodName` vaut `VISEES_TANGENTES` et `subMethodName` vaut `SUPPORT`, `INTERIEUR` ou `EXTERIEUR`. Le paramètre calculé est accompagné de son critère (`threshold` : 0,5 % pour PAPOTO, 1 % pour les visées tangentes ; `status` : critère respecté ou non). Le support de gauche est exporté avec le libellé affiché dans le formulaire.
+
+```{note}
+La méthode **PEP** n'est pas encore disponible : son export sera ajouté avec la méthode.
+```
 
 ## Conseils
 

@@ -8,12 +8,15 @@
 import {
   CableAdjustmentInputs,
   CableAdjustmentResult,
+  CableSpanManipulation,
+  CableSupportManipItem,
   CatalogCable,
   ClimateCharge,
   PapotoResult,
   Section,
   SkyCover,
-  SpanLoad
+  SpanLoad,
+  TangentAimingSupportResult
 } from '@shared/domain';
 import { View } from '@shared/types/plot.types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
@@ -39,6 +42,8 @@ export enum Task {
   getSupportCoordinates = 'getSupportCoordinates',
   // Calculate PAPOTO (field measurement) parameters
   calculatePapoto = 'calculatePapoto',
+  // Calculate the parameter by tangent aiming (ground measurement)
+  calculateTangentAiming = 'calculateTangentAiming',
   // Calculate guying forces and angles
   calculateGuying = 'calculateGuying',
   // Calculate sighting angles at mid-span sag for cable adjustment
@@ -65,8 +70,8 @@ export enum Task {
   deleteObstacle = 'deleteObstacle',
   // Clear all obstacles from the middleware state
   clearObstacles = 'clearObstacles',
-  /** Apply a cable length modification (lengthen or shorten) on a span */
-  shortenLengthenCable = 'shortenLengthenCable',
+  // Apply all manipulations
+  applyManipulations = 'applyManipulations',
   // get aspect ratio for plotting scale
   getAspectRatio = 'getAspectRatio',
   // get wind incidence angle for cable temperature calculation
@@ -75,8 +80,14 @@ export enum Task {
   computeLocalization = 'computeLocalization',
   // compute gps coordinates using imported lambert data
   importLambert = 'importLambert',
+  // convert coordinates between two CRS (EPSG codes)
+  convertCoordinates = 'convertCoordinates',
   // lambert to gps and compare to gps coordinates using section data
   importLambertAndValidate = 'importLambertAndValidate',
+  // gps positions to span azimuths and per-support position error
+  validateGpsPositions = 'validateGpsPositions',
+  // gps of a new support 0 and start azimuth from the next support
+  computeStartFromNextSupport = 'computeStartFromNextSupport',
   // get equivalent span/ruling span value
   getEquivalentSpan = 'getEquivalentSpan',
   // compute pose table at different temperatures
@@ -95,6 +106,10 @@ export enum Task {
   clearMeasureDistanceAnglePoints = 'clearMeasureDistanceAnglePoints',
   // Compute obstacle conformity zones and points
   getConformity = 'getConformity',
+  // Slice a span ground profile at evenly spaced points
+  sliceGround = 'sliceGround',
+  // Compute forest-trenches conformity on sliced ground points
+  getForestTrenches = 'getForestTrenches',
   // Set the number of cut strands per cable layer
   setCutStrands = 'setCutStrands',
   // Get the current number of cut strands per cable layer
@@ -104,7 +119,17 @@ export enum Task {
   // Get the cable utilization rate per span
   getUtilizationRate = 'getUtilizationRate',
   // Set the high-safety flag on the cable
-  setHighSafety = 'setHighSafety'
+  setHighSafety = 'setHighSafety',
+  // Estimate the rope length giving a target vertical distance above an obstacle
+  estimateRope = 'estimateRope',
+  // Estimate the cable temperature giving a target distance to an obstacle
+  estimateTemperature = 'estimateTemperature',
+  // Estimate the load mass giving a target distance to an obstacle
+  estimateLoad = 'estimateLoad',
+  // Estimate the wind pressure giving a target distance to an obstacle
+  estimateWind = 'estimateWind',
+  // Estimate the wind pressure bringing the cable closest to an obstacle
+  estimateMinimumDistanceWind = 'estimateMinimumDistanceWind'
 }
 
 /**
@@ -159,7 +184,19 @@ export enum PythonErrorCode {
   // Raised when generated points (spans, supports, insulators, others) are None after computation.
   GeneratedPointsNoneError = 'GeneratedPointsNoneError',
   // Raised when the provided time is during the night but the computation requires daytime.
-  NightTimeError = 'NightTimeError'
+  NightTimeError = 'NightTimeError',
+  // Raised when an obstacle uuid is not registered in the engine study
+  ObstacleNotFoundError = 'ObstacleNotFoundError',
+  // Raised when an estimation is requested on a span split by a virtual support
+  EstimateOnSplitSupportError = 'EstimateOnSplitSupportError',
+  // Raised when an estimation input is missing or invalid
+  EstimationInputError = 'EstimationInputError',
+  // Raised when an estimation cannot reach its target within the search bounds
+  EstimationNotConvergedError = 'EstimationNotConvergedError',
+  // Warning raised when an existing load on the estimation target span is ignored
+  EstimationWarning = 'EstimationWarning',
+  // Raised when a conformity input (ground slicing, forest trenches...) is missing or invalid
+  ConformityInputError = 'ConformityInputError'
 }
 
 /**
@@ -194,6 +231,12 @@ export interface SectionCoords {
   obstacles: Record<string, number[][]> | null;
   // Distance data from position engine keyed by obstacle UUID (null if none computed)
   distances: Record<string, unknown> | null;
+  // Coordinates of virtual supports
+  virtual_supports: number[][][] | null;
+  // Coordinates of the insulators of the virtual support
+  virtual_insulators: number[][][] | null;
+  // Span index (before insertion) of each virtual support, in the order of `virtual_supports`
+  virtual_supports_span_indices?: number[] | null;
   // Coordinates of applied loads by support UUID
   loads: Record<string, number[]>;
 }
@@ -348,6 +391,18 @@ export interface TaskInputs {
     V3: number;
     VR: number;
   };
+  // Inputs for calculateTangentAiming task (angles in grad, lengths in meters)
+  // The parameter replaces the cable tangent angle when the calculation type is `parametre`
+  [Task.calculateTangentAiming]: {
+    calculationType: 'parametre' | 'tangente';
+    angleToCableTangent?: number;
+    parameter?: number;
+    angleToLeftSupport: number;
+    angleToRightSupport: number;
+    spanLength: number;
+    inputHeight: number;
+    distance: number;
+  };
   // Inputs for calculateGuying task
   [Task.calculateGuying]: {
     altitude: number;
@@ -375,7 +430,7 @@ export interface TaskInputs {
     time: Date | null;
     windSpeed: number;
     windSpeedUnit: 'kmh' | 'ms';
-    windDirection: string;
+    windIncidence: number;
     skyCover: SkyCover;
   };
   // Inputs for computeDiffuseAndBeamRadiation task
@@ -431,13 +486,10 @@ export interface TaskInputs {
   };
   // Inputs for clearObstacles task: no inputs
   [Task.clearObstacles]: undefined;
-  // Inputs for shortenLengthenCable task
-  [Task.shortenLengthenCable]: {
-    spanIndex: number;
-    modificationType: 'lengthening' | 'shortening';
-    modifiedLengthCable: number;
-    distanceSupportRef: number;
-    supportRef: 'LEFT' | 'RIGHT';
+  [Task.applyManipulations]: {
+    cableModifParams: LengthCableInputs[];
+    supportManipParams: SupportManipInputs[];
+    spanManipParams: SpanManipInputs[];
   };
   [Task.getWindIncidence]: {
     azimuth: number;
@@ -458,6 +510,12 @@ export interface TaskInputs {
     spanLength: number[];
     lineAngle: number[];
   };
+  [Task.convertCoordinates]: {
+    sourceCrs: string;
+    targetCrs: string;
+    x: number[];
+    y: number[];
+  };
   [Task.importLambert]: {
     lambert_x: number[];
     lambert_y: number[];
@@ -465,9 +523,21 @@ export interface TaskInputs {
   [Task.importLambertAndValidate]: {
     lambert_x: number[];
     lambert_y: number[];
-    startAzimuth: number;
     spanLength: number[];
     lineAngle: number[];
+  };
+  [Task.validateGpsPositions]: {
+    latitude: number[];
+    longitude: number[];
+    spanLength: (number | null)[];
+    lineAngle: (number | null)[];
+  };
+  [Task.computeStartFromNextSupport]: {
+    latitude: number;
+    longitude: number;
+    nextSpanAzimuth: number;
+    spanLength: number;
+    lineAngle: [number, number];
   };
   // Inputs for getEquivalentSpan task: no inputs
   [Task.getEquivalentSpan]: undefined;
@@ -506,6 +576,10 @@ export interface TaskInputs {
   [Task.clearMeasureDistanceAnglePoints]: undefined;
   // Inputs for getConformity task
   [Task.getConformity]: ConformityTaskInput;
+  // Inputs for sliceGround task
+  [Task.sliceGround]: SliceGroundInput;
+  // Inputs for getForestTrenches task
+  [Task.getForestTrenches]: ForestTrenchesTaskInput;
   // Inputs for setCutStrands task: number of cut strands per layer
   [Task.setCutStrands]: {
     cutStrands: number[];
@@ -520,6 +594,135 @@ export interface TaskInputs {
   [Task.setHighSafety]: {
     highSafety: boolean;
   };
+  // Inputs for estimateRope task
+  [Task.estimateRope]: EstimateRopeInputs;
+  // Inputs for estimateTemperature task
+  [Task.estimateTemperature]: EstimateTemperatureInputs;
+  // Inputs for estimateLoad task
+  [Task.estimateLoad]: EstimateLoadInputs;
+  // Inputs for estimateWind task
+  [Task.estimateWind]: EstimateWindInputs;
+  // Inputs for estimateMinimumDistanceWind task
+  [Task.estimateMinimumDistanceWind]: EstimateMinimumDistanceWindInputs;
+}
+
+/**
+ * Inputs shared by every estimation task.
+ *
+ * @category Worker Types
+ */
+export interface EstimationBaseInputs {
+  // Index of the span (before manipulation) where the obstacle is located
+  spanIndex: number;
+  // Obstacle coordinates [x, y, z] in meters (section frame); ignored when obstacleUuid is set
+  obstaclePoint?: [number, number, number] | null;
+  // Uuid of an obstacle registered in the engine: its point pointIndex is the obstacle point
+  obstacleUuid?: string | null;
+  // Index of the obstacle point, required with obstacleUuid
+  pointIndex?: number | null;
+  // Search interval [lower, upper] of the estimated variable; engine defaults when omitted
+  bounds?: [number, number] | null;
+  // Fixed ice thickness in cm
+  iceThickness?: number | null;
+}
+
+/**
+ * Inputs for the estimateTemperature task (estimated value in °C).
+ *
+ * @category Worker Types
+ */
+export interface EstimateTemperatureInputs extends EstimationBaseInputs {
+  // Target distance between cable and obstacle in meters
+  targetDistance: number;
+  // Fixed wind pressure in Pa
+  windPressure?: number | null;
+}
+
+/**
+ * Inputs for the estimateWind task (estimated value in Pa).
+ *
+ * @category Worker Types
+ */
+export interface EstimateWindInputs extends EstimationBaseInputs {
+  // Target distance between cable and obstacle in meters
+  targetDistance: number;
+  // Fixed cable temperature in °C
+  temperature?: number | null;
+}
+
+/**
+ * Inputs for the estimateMinimumDistanceWind task: no target distance, the distance to the obstacle is minimized
+ * over the wind pressure `bounds` (Pa).
+ *
+ * @category Worker Types
+ */
+export interface EstimateMinimumDistanceWindInputs extends EstimationBaseInputs {
+  // Fixed cable temperature in °C
+  temperature: number;
+}
+
+/**
+ * Inputs for the estimateLoad task (estimated value in kg).
+ *
+ * @category Worker Types
+ */
+export interface EstimateLoadInputs extends EstimationBaseInputs {
+  // Target distance between cable and obstacle in meters
+  targetDistance: number;
+  // Load position from the left support of the span in meters
+  loadPositionDistance: number;
+  // Fixed cable temperature in °C
+  temperature?: number | null;
+  // Fixed wind pressure in Pa
+  windPressure?: number | null;
+}
+
+/**
+ * Inputs for the estimateRope task (estimated value in m).
+ *
+ * @category Worker Types
+ */
+export interface EstimateRopeInputs extends EstimationBaseInputs {
+  // Index of the support (before manipulation) where the rope is set
+  supportIndex: number;
+  // Target vertical distance (cable altitude minus obstacle altitude) in meters
+  targetVerticalDistance: number;
+  // Rope linear mass in kg/m; study or default value when omitted
+  ropeLineicMass?: number | null;
+  // Fixed cable temperature in °C
+  temperature?: number | null;
+  // Fixed wind pressure in Pa
+  windPressure?: number | null;
+}
+
+/**
+ * Output of every estimation task.
+ *
+ * @category Worker Types
+ */
+export interface EstimationResult {
+  // Estimated value (°C, Pa, kg or m depending on the task)
+  value: number;
+  // Final residual of the objective function
+  residual: number;
+  // Number of solver iterations
+  iterations: number;
+  // Whether the solver converged within tolerance
+  converged: boolean;
+}
+
+/**
+ * Output of the estimateMinimumDistanceWind task.
+ *
+ * @category Worker Types
+ */
+export interface MinimumDistanceWindEstimationResult {
+  // Wind pressure (Pa) bringing the cable closest to the obstacle
+  value: number;
+  // Minimum oblique (3D) distance between cable and obstacle in meters
+  distance: number;
+  // Number of distance evaluations
+  iterations: number;
 }
 
 /**
@@ -532,6 +735,28 @@ export interface TaskInputs {
  *
  * @category Worker Types
  */
+
+export interface LengthCableInputs {
+  spanIndex: number;
+  modificationType: 'lengthening' | 'shortening';
+  modifiedLengthCable: number;
+  distanceSupportRef: number;
+  supportRef: 'LEFT' | 'RIGHT';
+}
+
+export interface SupportManipInputs {
+  supportIndex: number;
+  manip1: CableSupportManipItem;
+  manip2: CableSupportManipItem | null;
+}
+
+export interface SpanManipInputs extends Omit<
+  CableSpanManipulation,
+  'uuid' | 'spanUuid' | 'chargeUuid' | 'chainName' | 'chainLength' | 'chainWeight' | 'chainSurface' | 'counterWeight'
+> {
+  spanIndex: number;
+}
+
 export interface ObstacleOutput {
   // Rendered 3D coordinates for each registered obstacle
   obstacles: {
@@ -632,7 +857,7 @@ export interface ConformityFormInput {
   lateralDistanceTemperature: number | null;
   selectedConformityRules: string[];
   conformity: string[] | null;
-  conformityPlot: 'vegetation' | 'cable_track' | 'overhang';
+  conformityPlot: 'vegetation' | 'cable_track' | 'overhang' | 'forest_trenches';
   intermediatePoints: number[];
   // Width (m) of the overhang conformity zone (2 times the arm length); the engine default applies when omitted.
   zoneWidth?: number;
@@ -648,10 +873,103 @@ export interface ConformityTaskInput {
   rulesDistances: ConformityRuleDistanceInput[];
 }
 
+export interface SliceGroundInput {
+  spanIndex: number;
+  nPoints: number;
+  referenceSupport: 'LEFT' | 'RIGHT';
+  floorPoints: ({
+    distance: number | null;
+    altitude: number | null;
+  } | null)[];
+}
+
+export interface SliceGroundOutput {
+  distances: number[];
+  altitudes: number[];
+  length: number;
+}
+
+export interface ForestTrenchesSpanInput {
+  spanIndex: number;
+  distances: number[];
+  altitudes: number[];
+}
+
+export interface ForestTrenchesTaskInput {
+  electricTension: string;
+  form: ConformityFormInput;
+  rulesClimaticConditions: ConformityRuleClimaticConditionInput[];
+  rulesDistances: ConformityRuleDistanceInput[];
+  overhangRules: string[];
+  lateralRules: string[];
+  spans: ForestTrenchesSpanInput[];
+}
+
 // A point in the 2D conformity cross-section: x = lateral distance (m), y = altitude (m).
 export interface ConformityPointOutput {
   x: number;
   y: number;
+}
+
+export interface ForestTrenchesPointOutput {
+  distanceToLeftSupport: number;
+  groundElevation: number;
+  lateral: Record<
+    string,
+    {
+      axisDistance: number;
+      elevation: number;
+      limitAxisDistance: number;
+    }
+  >;
+  lateralInverse: Record<
+    string,
+    {
+      axisDistance: number;
+      elevation: number;
+      limitAxisDistance: number;
+    }
+  >;
+  overhang: Record<
+    string,
+    {
+      elevation: number;
+      heightAboveGround: number;
+      complianceLimitHeightAboveGround: number;
+    }
+  >;
+}
+
+export interface ForestTrenchesPlotOutput {
+  lateral: Record<
+    string,
+    {
+      cable: ConformityPointOutput[];
+      limit: ConformityPointOutput[];
+    }
+  >;
+  lateralInverse: Record<
+    string,
+    {
+      cable: ConformityPointOutput[];
+      limit: ConformityPointOutput[];
+    }
+  >;
+  overhang: Record<string, { cable: ConformityPointOutput[] }>;
+}
+
+export interface ForestTrenchesSpanOutput {
+  spanIndex: number;
+  length: number;
+  // Sag at the overhang scenario state; null without any overhang rule selected.
+  medianF1: number | null;
+  axis: ConformityPointOutput[];
+  plot: ForestTrenchesPlotOutput;
+  points: ForestTrenchesPointOutput[];
+}
+
+export interface ForestTrenchesTaskOutput {
+  spans: ForestTrenchesSpanOutput[];
 }
 
 // A cable candidate point, carrying the disk radius (m) used by `cable_track`.
@@ -743,6 +1061,8 @@ export interface TaskOutputs {
   };
   // Output from calculatePapoto task
   [Task.calculatePapoto]: PapotoResult;
+  // Output from calculateTangentAiming task
+  [Task.calculateTangentAiming]: TangentAimingSupportResult;
   // Output from calculateGuying task
   [Task.calculateGuying]: {
     tensionInGuy: number;
@@ -792,8 +1112,7 @@ export interface TaskOutputs {
   [Task.deleteObstacle]: { success: boolean };
   // Output from clearObstacles task: registration acknowledgement
   [Task.clearObstacles]: { success: boolean };
-  // Output from shortenLengthenCable task: registration acknowledgement
-  [Task.shortenLengthenCable]: { success: boolean };
+  [Task.applyManipulations]: { success: boolean };
   [Task.getAspectRatio]: {
     x: number;
     y: number;
@@ -803,10 +1122,26 @@ export interface TaskOutputs {
     windIncidence: number;
   };
   [Task.computeLocalization]: Localization;
+  [Task.convertCoordinates]: { x: number[]; y: number[] };
   [Task.importLambert]: Localization;
   [Task.importLambertAndValidate]: {
     localization: Localization;
-    meanGpsDiffMeter: number;
+    /** Azimuth (deg) before the deflection at the first support: `azimuth[0] - spanAngle[0]`. */
+    startAzimuth: number;
+    /** Per-support distance (m) between the imported position and the rebuilt one; `NaN` when a span length is missing. */
+    positionErrorMeter: number[];
+  };
+  [Task.validateGpsPositions]: {
+    /** Grid azimuth (deg) of each span, size N-1. */
+    azimuth: number[];
+    startAzimuth: number | null;
+    /** Per-support distance (m) between the GPS position and the rebuilt one, size N. */
+    positionErrorMeter: number[];
+  };
+  [Task.computeStartFromNextSupport]: {
+    latitude: number;
+    longitude: number;
+    startAzimuth: number;
   };
   [Task.getEquivalentSpan]: { equivalentSpan: number };
   [Task.getPoseTable]: PoseResults;
@@ -824,6 +1159,10 @@ export interface TaskOutputs {
   [Task.clearMeasureDistanceAnglePoints]: { success: boolean };
   // Output from getConformity task
   [Task.getConformity]: ConformityTaskOutput;
+  // Output from sliceGround task
+  [Task.sliceGround]: SliceGroundOutput;
+  // Output from getForestTrenches task
+  [Task.getForestTrenches]: ForestTrenchesTaskOutput;
   // Output from setCutStrands task
   [Task.setCutStrands]: { success: boolean };
   // Output from getCutStrands task
@@ -834,4 +1173,14 @@ export interface TaskOutputs {
   [Task.getUtilizationRate]: { utilizationRate: number[] };
   // Output from setHighSafety task
   [Task.setHighSafety]: { success: boolean };
+  // Output from estimateRope task: rope length in m
+  [Task.estimateRope]: EstimationResult;
+  // Output from estimateTemperature task: cable temperature in °C
+  [Task.estimateTemperature]: EstimationResult;
+  // Output from estimateLoad task: load mass in kg
+  [Task.estimateLoad]: EstimationResult;
+  // Output from estimateWind task: wind pressure in Pa
+  [Task.estimateWind]: EstimationResult;
+  // Output from estimateMinimumDistanceWind task: wind pressure in Pa with the minimum distance in m
+  [Task.estimateMinimumDistanceWind]: MinimumDistanceWindEstimationResult;
 }

@@ -20,11 +20,11 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { isEqual } from 'lodash';
-import { buildSectionLocalizationPayload, formatSpanLabel, getSpanLocalization } from '../../helpers';
+import { formatSpanLabel, getSpanLocalization } from '../../helpers';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 import { NotificationService } from '@services/notification/notification.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task } from '@services/worker_python/tasks/types';
+import { GeopositioningService } from '@services/geopositioning/geopositioning.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 
 @Component({
@@ -75,6 +75,7 @@ export class HeaderComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly translocoService = inject(TranslocoService);
   private readonly workerPythonService = inject(WorkerPythonService);
+  private readonly geopositioning = inject(GeopositioningService);
   private readonly workerReady = toSignal(this.workerPythonService.ready$, { initialValue: false });
   private readonly logger = inject(LoggerService);
 
@@ -111,7 +112,13 @@ export class HeaderComponent {
       if (!Array.isArray(span) || span.length !== 2 || isEqual(span, this.previousSpan())) {
         return;
       }
+      const isFirstSpan = this.previousSpan() === null;
       this.previousSpan.set(span);
+      // A measure loaded with its span keeps its saved altitude: opening it must not count as an edit.
+      // A missing altitude is filled by the effect above.
+      if (isFirstSpan) {
+        return;
+      }
       // Only recalculate if the span actually changed (not just a re-render)
       // This prevents unnecessary recalculations
       this.calculateAltitude(span);
@@ -180,13 +187,12 @@ export class HeaderComponent {
   private async fillLocalization(span: number[], referenceSupport: string | null): Promise<void> {
     const source = this.localizationSource;
     const section = this.spanService.section();
-    const payload = buildSectionLocalizationPayload(section);
     let localization: ReturnType<typeof getSpanLocalization> = null;
-    if (payload) {
+    if (section) {
       try {
-        const { result, error } = await this.workerPythonService.runTask(Task.computeLocalization, payload);
-        if (result && !error) {
-          localization = getSpanLocalization(result, section, span, referenceSupport);
+        const resolved = await this.geopositioning.resolveLocalization(section);
+        if (resolved) {
+          localization = getSpanLocalization(resolved, section, span, referenceSupport);
         }
       } catch (error) {
         this.logger.error('Failed to compute the field measure localization', error);

@@ -93,10 +93,8 @@ const mockSectionBase: Section = {
   selected_cable_modification_uuid: null,
   cable_span_manipulations: [],
   selected_cable_span_manipulation_uuid: null,
-  start_latitude: null,
-  start_longitude: null,
   start_azimuth: null,
-  mean_reprojection_diff_meters: null
+  position_error_meters: null
 };
 
 const mockStudy: StudyEntity = {
@@ -153,6 +151,26 @@ describe('CableSpanManipService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  // ---------------------------------------------------------------------------
+  // span pre-selection
+  // ---------------------------------------------------------------------------
+  describe('span pre-selection', () => {
+    it('should have no span selected initially', () => {
+      expect(service.selectedSpanUuid()).toBeNull();
+    });
+
+    it('should clear the selection so the same span can be selected again', () => {
+      service.selectSpan('support-uuid-1');
+      expect(service.selectedSpanUuid()).toBe('support-uuid-1');
+
+      service.clearSelectedSpan();
+      expect(service.selectedSpanUuid()).toBeNull();
+
+      service.selectSpan('support-uuid-1');
+      expect(service.selectedSpanUuid()).toBe('support-uuid-1');
+    });
   });
 
   // ---------------------------------------------------------------------------

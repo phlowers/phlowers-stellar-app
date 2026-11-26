@@ -23,6 +23,22 @@ export interface WorkerLogMessage {
 }
 
 /**
+ * A task did not answer within its timeout.
+ *
+ * @remarks
+ * The worker is not interrupted: it keeps running the task, only its answer is dropped.
+ */
+export class TaskTimeoutError extends Error {
+  constructor(
+    readonly task: string,
+    readonly timeoutMs: number
+  ) {
+    super(`Task ${task} timed out after ${timeoutMs}ms`);
+    this.name = 'TaskTimeoutError';
+  }
+}
+
+/**
  * Service for managing the Python (Pyodide) web worker.
  *
  * @remarks
@@ -222,7 +238,7 @@ export class WorkerPythonService {
       if (timeout !== undefined) {
         timeoutId = globalThis.setTimeout(() => {
           delete this.handlerMap[id];
-          reject(new Error(`Task ${String(task)} timed out after ${timeout}ms`));
+          reject(new TaskTimeoutError(String(task), timeout));
         }, timeout);
       }
 

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { signal } from '@angular/core';
+import { ChangeDetectorRef, signal } from '@angular/core';
 import { ObstaclesFormComponent } from './obstaclesForm.component';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
@@ -105,6 +105,7 @@ describe('ObstaclesFormComponent', () => {
   let mockPlotService: { loading: ReturnType<typeof signal<boolean>> };
   let obstaclesService: {
     activePointIndex: ReturnType<typeof signal<number | null>>;
+    selectedMeasureUuid: ReturnType<typeof signal<string | null>>;
     setCurrentPointIndex: vi.Mock;
     resetCurrentPointIndex: vi.Mock;
   };
@@ -140,6 +141,7 @@ describe('ObstaclesFormComponent', () => {
     const indexSignal = signal<number | null>(null);
     obstaclesService = {
       activePointIndex: indexSignal,
+      selectedMeasureUuid: signal<string | null>(null),
       setCurrentPointIndex: vi.fn((i: unknown) => indexSignal.set(i as number)),
       resetCurrentPointIndex: vi.fn()
     };
@@ -194,7 +196,7 @@ describe('ObstaclesFormComponent', () => {
               'studio.obstacles-form.create-new-obstacle-btn': 'Create new obstacle',
               'common.span-label': 'Span',
               'common.obstacle-type-label': 'Obstacle type',
-              'studio.obstacles-form.obstacle-name-label': 'Obstacle name',
+              'common.obstacle-name-label': 'Obstacle name',
               'common.reference-support-label': 'Reference support',
               'studio.obstacles-form.obstacle-altitude-type-label': 'Obstacle altitude type',
               'studio.shared.lateral-distance-type-label': 'Lateral distance type',
@@ -506,7 +508,7 @@ describe('ObstaclesFormComponent', () => {
                   'studio.obstacles-form.create-new-obstacle-btn': 'Create new obstacle',
                   'common.span-label': 'Span',
                   'common.obstacle-type-label': 'Obstacle type',
-                  'studio.obstacles-form.obstacle-name-label': 'Obstacle name',
+                  'common.obstacle-name-label': 'Obstacle name',
                   'common.reference-support-label': 'Reference support',
                   'studio.obstacles-form.obstacle-altitude-type-label': 'Obstacle altitude type',
                   'studio.shared.lateral-distance-type-label': 'Lateral distance type',
@@ -1186,6 +1188,48 @@ describe('ObstaclesFormComponent', () => {
 
       // The dialog uses appendTo="body", so its content is portalled onto the document body.
       expect(document.body.querySelector('app-conformity')).toBeTruthy();
+    });
+
+    it('should enable the export button only once the conformity can be exported and delegate the click', async () => {
+      satisfyAllConditions();
+      await component.openConformityModal();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const exportButton = () =>
+        document.body.querySelector('[data-testid="conformity-export-btn"]') as HTMLButtonElement;
+      expect(exportButton().disabled).toBe(true);
+
+      const conformity = component.conformityRef()!;
+      const exportSpy = vi.spyOn(conformity, 'exportConformity').mockResolvedValue();
+      vi.spyOn(conformity, 'canExport').mockReturnValue(true);
+      fixture.debugElement.injector.get(ChangeDetectorRef).markForCheck();
+      fixture.detectChanges();
+      exportButton().click();
+
+      expect(exportButton().disabled).toBe(false);
+      expect(exportSpy).toHaveBeenCalled();
+    });
+
+    it('should show the loading state and ignore clicks while an export is in progress', async () => {
+      satisfyAllConditions();
+      await component.openConformityModal();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const exportButton = () =>
+        document.body.querySelector('[data-testid="conformity-export-btn"]') as HTMLButtonElement;
+      const conformity = component.conformityRef()!;
+      const exportSpy = vi.spyOn(conformity, 'exportConformity').mockResolvedValue();
+      vi.spyOn(conformity, 'canExport').mockReturnValue(true);
+
+      conformity.isExporting.set(true);
+      fixture.debugElement.injector.get(ChangeDetectorRef).markForCheck();
+      fixture.detectChanges();
+      exportButton().click();
+
+      expect(exportButton().classList.contains('app-btn-loading')).toBe(true);
+      expect(exportSpy).not.toHaveBeenCalled();
     });
   });
 

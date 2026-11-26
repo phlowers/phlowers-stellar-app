@@ -1,18 +1,26 @@
 import { PlotService } from '@services/plot/plot.service';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotOptionsService } from '@services/plot/plot-options.service';
-import { effect, inject, Injectable, signal } from '@angular/core';
-import { cloneDeep } from 'lodash';
+import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { cloneDeep, omit } from 'lodash';
 import { ChargesService } from '@services/charges/charges.service';
 import { recheckSpanLoads } from '@shared/domain/helpers/span-loads.helpers';
+import { mergeCableSupportManips } from '@shared/domain/helpers/cable-support-manip.helpers';
 import { emptySpanLoad } from '../helpers';
 import { getBaseClimate } from '@shared/domain/helpers/climate.helpers';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { Task, TaskError } from '@services/worker_python/tasks/types';
+import {
+  LengthCableInputs,
+  SpanManipInputs,
+  SupportManipInputs,
+  Task,
+  TaskError
+} from '@services/worker_python/tasks/types';
 import { LoggerService } from '@core/services/logger/logger.service';
-import { CableModification, Section } from '@shared/domain';
+import { Section } from '@shared/domain';
 import { ObstacleStateService } from '@services/obstacle-state/obstacle-state.service';
 import { mapFloorToObstacle } from '@shared/domain/floor/floor-form.helpers';
+import { ChargeData } from '@src/app/shared/domain/models/charge.model';
 
 @Injectable({
   providedIn: 'root'
@@ -60,7 +68,44 @@ export class LoadFormsService {
   }
 
   /** UUID of the charge case last pushed to the Python engine — prevents redundant setLoads on section updates. */
-  private lastLoadedChargeUuid: string | null = null;
+  private readonly lastLoadedChargeUuid = signal<string | null>(null);
+  /** Engine study the charge case was last pushed to — a rebuilt study (studio reopened) needs it again. */
+  private readonly lastLoadedEngineStudyId = signal(0);
+  // Load case switches in flight, counted because a quick switch overlaps the previous one. The engine outputs
+  // (distances…) still belong to the previous load case until the last one is projected, and `plotService.loading`
+  // only covers the final projection, not the engine tasks before it
+  private readonly pendingLoadCases = signal(0);
+  readonly isApplyingLoadCase = computed(() => this.pendingLoadCases() > 0);
+  // Bumped each time a load case change leaves the engine, whatever its outcome
+  private readonly loadCaseRevision = signal(0);
+
+  /**
+   * Whether the engine holds the study of the current section with its selected load case applied: the section is
+   * published before the study is built and the load case pushed, so it alone does not tell the engine is ready.
+   */
+  readonly isEngineSynchronized = computed(() => {
+    const studyId = this.plotService.engineStudyId();
+    const section = this.spanService.section();
+    if (!studyId || this.plotService.engineStudySectionUuid() !== section?.uuid) return false;
+    if (this.isApplyingLoadCase()) return false;
+    const chargeUuid = section.selected_charge_uuid;
+    // Without a (known) selected charge there is no load case to push: the base climate of the study applies
+    if (!chargeUuid || !section.charges?.some((charge) => charge.uuid === chargeUuid)) return true;
+    return this.lastLoadedChargeUuid() === chargeUuid && this.lastLoadedEngineStudyId() === studyId;
+  });
+
+  /** Identifies the state of the engine study and load case: engine results of another revision are outdated. */
+  readonly engineRevision = computed(() => `${this.plotService.engineStudyId()}:${this.loadCaseRevision()}`);
+
+  private beginLoadCaseChange(): void {
+    this.pendingLoadCases.update((count) => count + 1);
+  }
+
+  private endLoadCaseChange(): void {
+    this.pendingLoadCases.update((count) => count - 1);
+    this.loadCaseRevision.update((revision) => revision + 1);
+  }
+
   /**
    * Initialize the temporary load data by getting the selected charge case and checking the span loads,
    * then push all span loads into the Python engine via setLoads.
@@ -70,13 +115,17 @@ export class LoadFormsService {
     const currentChargeUuid = section?.selected_charge_uuid;
     if (!currentChargeUuid) {
       this.plotService.temporaryLoadData = null;
-      this.lastLoadedChargeUuid = null;
+      this.lastLoadedChargeUuid.set(null);
       return;
     }
 
     // Skip entirely when re-entering for the same charge case
     // (e.g. after save writes back to IndexedDB and liveQuery re-fires).
-    if (currentChargeUuid === this.lastLoadedChargeUuid) return;
+    const engineStudyId = this.plotService.engineStudyId();
+    const isAlreadyLoaded = untracked(
+      () => currentChargeUuid === this.lastLoadedChargeUuid() && engineStudyId === this.lastLoadedEngineStudyId()
+    );
+    if (isAlreadyLoaded) return;
 
     const charge = section?.charges?.find((c) => c.uuid === currentChargeUuid);
     if (!charge) {
@@ -86,9 +135,6 @@ export class LoadFormsService {
     const newData = cloneDeep(charge.data);
     const rawSpanLoads = newData.spanLoads || [];
     const rawCableModif = newData.cableModifParams || [];
-    const supportManipParams = (newData.supportManipParams || []).filter(
-      (manip) => manip.chargeUuid === currentChargeUuid
-    );
     const spanManipParams = (newData.spanManipParams || []).filter((manip) => manip.chargeUuid === currentChargeUuid);
     newData.spanLoads = recheckSpanLoads(rawSpanLoads, section?.supports ?? []);
 
@@ -100,15 +146,11 @@ export class LoadFormsService {
       ...rawCableModif,
       ...(section?.cable_modifications?.filter((mod) => !rawCableModif.some((p) => p.spanUuid === mod.spanUuid)) ?? [])
     ];
-    newData.supportManipParams = [
-      ...supportManipParams,
-      ...(section?.cable_support_manipulations?.filter(
-        (suppManip) =>
-          !supportManipParams.some(
-            (p) => p.supportUuid === suppManip.supportUuid && suppManip.chargeUuid === currentChargeUuid
-          )
-      ) ?? [])
-    ];
+    newData.supportManipParams = mergeCableSupportManips(
+      newData.supportManipParams,
+      section?.cable_support_manipulations,
+      currentChargeUuid
+    );
     newData.spanManipParams = [
       ...spanManipParams,
       ...(section?.cable_span_manipulations?.filter(
@@ -119,13 +161,19 @@ export class LoadFormsService {
     this.plotService.temporaryLoadData = newData;
     // Set before async calls so the effect guard prevents concurrent re-entrant
     // invocations (e.g. liveQuery re-firing while setLoads is still in-flight).
-    this.lastLoadedChargeUuid = currentChargeUuid;
+    this.lastLoadedChargeUuid.set(currentChargeUuid);
+    this.lastLoadedEngineStudyId.set(engineStudyId);
 
+    // The cached distances belong to the previous load case: a switch that fails before the projection must not
+    // leave them behind, and a successful projection replaces them
+    this.obstacleStateService.setDistances([]);
+    this.beginLoadCaseChange();
     try {
       // When there are no saved span loads, pass an empty array so the Python engine
       // takes its "no loads" code path instead of receiving zero-weight placeholder
       // entries created by recheckSpanLoads (which would have the wrong array size).
-      await this.applyCableModifications(newData.cableModifParams ?? []);
+      // await this.applyCableModifications(newData.cableModifParams ?? []);
+      await this.setManipulations(this.plotService.temporaryLoadData);
       await this.workerPythonService.runTask(Task.setLoads, {
         spanLoads: rawSpanLoads.length > 0 ? newData.spanLoads : []
       });
@@ -133,9 +181,14 @@ export class LoadFormsService {
       await this.resyncObstacles(section);
       await this.plotService.refreshProjection();
     } catch (err) {
-      this.lastLoadedChargeUuid = null; // Allow retry on next signal change
+      this.lastLoadedChargeUuid.set(null); // Allow retry on next signal change
       this.plotService.error.set(TaskError.CALCULATION_ERROR);
+      // A new studio engine study is only projected once its load case is applied (see initSectionStudio): without
+      // this, the plot would stay on the loading spinner instead of showing the error
+      this.plotService.loading.set(false);
       this.logger.error('initTemporaryLoadData failed', err);
+    } finally {
+      this.endLoadCaseChange();
     }
   };
 
@@ -149,10 +202,11 @@ export class LoadFormsService {
 
   constructor() {
     effect(() => {
-      if (!this.plotService.workerReady()) return;
-      // Wait for initSectionStudio to complete (litData is populated by refreshProjection after initLit succeeds).
-      // Without this gate, setLoads could be posted before initialize_study finishes.
-      if (!this.plotService.litData()) return;
+      // The section preview (manual section modal) also builds engine studies: charge cases belong to the studio only
+      if (!this.plotService.workerReady() || !this.plotService.isStudioActive()) return;
+      // Wait for initSectionStudio to complete: before that, a stale projection can set litData, and the base
+      // climate applied at the end of initSectionStudio would overwrite the charge pushed here.
+      if (!this.plotService.engineStudyId()) return;
       void this.initTemporaryLoadData();
     });
   }
@@ -178,45 +232,41 @@ export class LoadFormsService {
     await this.calculateLoad();
   };
 
-  /**
-   * Sequentially apply cable length modifications in the Python engine.
-   *
-   * @remarks
-   * Must run **awaited and in order**: `manipulations.modify_cable` accumulates into
-   * `study.manipulation.shortening_span` one call at a time, and `Task.changeState`
-   * (called right after) re-solves assuming all prior manipulations already landed.
-   * An unawaited `forEach` here would let `changeState` race ahead of the
-   * `shortenLengthenCable` calls, corrupting the engine state (previously
-   * collapsing/losing other plot annotations after Calculate).
-   *
-   * Must also run **before** `Task.setLoads`: the manipulation solve rebuilds
-   * `study.position_engine`, discarding load coordinates registered beforehand.
-   */
-  private async applyCableModifications(modifications: CableModification[]): Promise<void> {
-    for (const modification of modifications) {
-      const spanIndex = this.spanService.getSupportIndex(modification.spanUuid);
+  private async setManipulations(temporaryLoadData: ChargeData) {
+    const cableModifPythonInputs: LengthCableInputs[] = [];
+    for (const cableModif of temporaryLoadData.cableModifParams) {
+      const spanIndex = this.spanService.getSupportIndex(cableModif.spanUuid);
       if (spanIndex < 0) continue;
-      const inputs = {
-        spanIndex,
-        modificationType: modification.modificationType,
-        modifiedLengthCable: modification.modifiedLengthCable,
-        distanceSupportRef: modification.distanceSupportRef,
-        supportRef: modification.supportRef
-      };
-      await this.workerPythonService.runTask(Task.shortenLengthenCable, inputs); //NOSONAR — must run in order, see remarks above
+      const inputs = { ...omit(cableModif, ['uuid', 'spanUuid']), spanIndex };
+      cableModifPythonInputs.push(inputs);
     }
+    const supportManipPythonInputs: SupportManipInputs[] = [];
+    for (const supportManip of temporaryLoadData.supportManipParams) {
+      const supportIndex = this.spanService.getSupportIndex(supportManip.supportUuid);
+      if (supportIndex < 0 && supportManip.chargeUuid !== this.spanService.section()?.selected_charge_uuid) continue;
+      const inputs = { ...omit(supportManip, ['uuid', 'supportUuid', 'chargeUuid']), supportIndex };
+      supportManipPythonInputs.push(inputs);
+    }
+
+    const spanManipPythonInputs: SpanManipInputs[] = [];
+    for (const spanManip of temporaryLoadData.spanManipParams) {
+      const spanIndex = this.spanService.getSupportIndex(spanManip.spanUuid);
+      if (spanIndex < 0 && spanManip.chargeUuid !== this.spanService.section()?.selected_charge_uuid) continue;
+      const inputs = { ...omit(spanManip, ['uuid', 'spanUuid', 'chargeUuid', 'chainName']), spanIndex };
+      spanManipPythonInputs.push(inputs);
+    }
+
+    const manipPythonInputs = {
+      cableModifParams: cableModifPythonInputs,
+      supportManipParams: supportManipPythonInputs,
+      spanManipParams: spanManipPythonInputs
+    };
+    await this.workerPythonService.runTask(Task.applyManipulations, manipPythonInputs);
   }
 
   /**
    * Re-register all saved obstacles (and floors, treated as obstacles) in the Python engine.
    *
-   * @remarks
-   * `Task.shortenLengthenCable` ends in `SectionStudy.solve_adjustment()`, which — when
-   * manipulations are registered — replaces `study.position_engine` with a fresh instance,
-   * dropping every obstacle previously registered in it. The next `refreshProjection` then
-   * returns an empty `obstacles` list, wiping obstacle/floor annotations from the plot even
-   * though the underlying section data is untouched. Must run after the cable modifications
-   * and before `refreshProjection`. Re-registering an already-known uuid is a no-op.
    */
   private async resyncObstacles(section: Section | null | undefined): Promise<void> {
     const floorObstacles = (section?.floors ?? []).map((floor) =>
@@ -238,6 +288,7 @@ export class LoadFormsService {
     }
     this.plotOptionsService.refreshCamera();
     this.plotService.loading.set(true);
+    this.beginLoadCaseChange();
     try {
       const currentSection = this.spanService.section();
       const checkedSpanLoads = recheckSpanLoads(temporaryLoadData.spanLoads, currentSection?.supports ?? []);
@@ -246,9 +297,7 @@ export class LoadFormsService {
         spanLoads: checkedSpanLoads
       };
 
-      // Must run before setLoads: the manipulation solve rebuilds the engine's position engine,
-      // discarding any load coordinates and obstacles registered beforehand.
-      await this.applyCableModifications(this.plotService.temporaryLoadData?.cableModifParams ?? []);
+      await this.setManipulations(this.plotService.temporaryLoadData);
 
       await this.workerPythonService.runTask(Task.setLoads, {
         spanLoads: checkedSpanLoads
@@ -278,6 +327,7 @@ export class LoadFormsService {
       await this.plotService.refreshProjection();
       this.pendingLoadAlongSpan.set(null);
     } finally {
+      this.endLoadCaseChange();
       this.plotService.loading.set(false);
     }
   };
@@ -299,10 +349,12 @@ export class LoadFormsService {
     if (supportIndex === -1) return;
 
     this.plotService.loading.set(true);
+    this.beginLoadCaseChange();
     try {
       await this.workerPythonService.runTask(Task.deleteLoad, { supportIndex });
       await this.plotService.refreshProjection();
     } finally {
+      this.endLoadCaseChange();
       this.plotService.loading.set(false);
     }
   }
@@ -313,11 +365,16 @@ export class LoadFormsService {
    * The caller is responsible for deleting the charge from the database.
    */
   async deleteLoad(): Promise<void> {
-    await this.workerPythonService.runTask(Task.deleteAllLoads, undefined);
-    const baseClimate = getBaseClimate(this.spanService.section());
-    await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate });
-    this.plotService.temporaryLoadData = null;
-    this.lastLoadedChargeUuid = null;
-    await this.plotService.refreshProjection();
+    this.beginLoadCaseChange();
+    try {
+      await this.workerPythonService.runTask(Task.deleteAllLoads, undefined);
+      const baseClimate = getBaseClimate(this.spanService.section());
+      await this.workerPythonService.runTask(Task.changeState, { climate: baseClimate });
+      this.plotService.temporaryLoadData = null;
+      this.lastLoadedChargeUuid.set(null);
+      await this.plotService.refreshProjection();
+    } finally {
+      this.endLoadCaseChange();
+    }
   }
 }

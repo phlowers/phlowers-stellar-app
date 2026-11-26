@@ -12,17 +12,27 @@ import { StudiesService } from '@services/studies/studies.service';
 import { CablesService } from '@shared/catalog/services/cables.service';
 import { createEmptyStudy } from '@shared/domain/helpers/study.helpers';
 import { createEmptySection, createEmptySupport } from '@shared/domain/helpers/sections.helpers';
+import { normalizeFieldMeasureDates } from '@shared/domain/helpers/field-measure.helpers';
+import { isLegacyLocalizationSection, stripLocalization } from '@shared/domain/helpers/geopositioning.helpers';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { ImportAdapter, UUIDCollisionResolver } from '@shared/import/domain/import-contracts';
 import { studyImportErrors, importSuccessDetail } from './study-import.errors';
-import { parseISO88591Base64, formatProtoV4Support, formatProtoV4Parameters } from './study-import.helpers';
+import {
+  parseISO88591Base64,
+  formatProtoV4Support,
+  formatProtoV4Parameters,
+  isAppStudyFile,
+  isRecord,
+  isStsdFile
+} from './study-import.helpers';
 
 /**
  * Service responsible for all Study import business logic.
  *
- * Implements `ImportAdapter` for `Study` entities, supporting two file formats:
+ * Implements `ImportAdapter` for `Study` entities, supporting three file formats:
  * - `.clst` — proprietary app format (base64-encoded JSON)
+ * - `.stsd` — same as `.clst` but plain (non-encoded) JSON
  * - `.csv`  — Proto V4 format (semicolon-delimited CSV with extra parameter columns)
  *
  * This service is the single source of truth for:
@@ -49,25 +59,25 @@ export class StudyImportService implements ImportAdapter<Study> {
   // ---------------------------------------------------------------------------
 
   /**
-   * Returns `true` if the file is a supported import format (.csv or .clst).
+   * Returns `true` if the file is a supported import format (.csv, .clst or .stsd).
    */
   accepts(file: File): boolean {
-    return file.type === 'text/csv' || file.name.endsWith('.clst');
+    return file.type === 'text/csv' || isAppStudyFile(file.name);
   }
 
   /**
-   * Checks whether a `.clst` file encodes a UUID that already exists in the
+   * Checks whether a `.clst` / `.stsd` file encodes a UUID that already exists in the
    * local database. Always returns `null` for CSV files (no pre-existing UUID).
    *
    * @returns Collision info or `null` if no collision is detected.
    */
   async checkCollision(file: File): Promise<{ uuid: string; label: string } | null> {
-    if (!file.name.endsWith('.clst')) {
+    if (!isAppStudyFile(file.name)) {
       return null;
     }
     try {
       const textContent = await file.text();
-      const decoded = atob(textContent.trim());
+      const decoded = isStsdFile(file.name) ? textContent : atob(textContent.trim());
       const parsed = JSON.parse(decoded) as Record<string, unknown>;
       const uuid = typeof parsed['uuid'] === 'string' ? parsed['uuid'].trim() : '';
       if (!uuid) return null;
@@ -109,9 +119,9 @@ export class StudyImportService implements ImportAdapter<Study> {
   }
 
   /**
-   * Reads and imports a `.clst` file (base64-encoded JSON study).
+   * Reads and imports a `.clst` (base64-encoded JSON) or `.stsd` (plain JSON) study file.
    *
-   * @param file - The `.clst` file to import.
+   * @param file - The `.clst` or `.stsd` file to import.
    * @param collisionResolver - Callback to ask the user whether to replace an
    *   existing study when a UUID collision is detected.
    * @returns The created `Study`, or `null` if the user rejected the collision prompt.
@@ -119,7 +129,7 @@ export class StudyImportService implements ImportAdapter<Study> {
   async loadAppFile(file: File, collisionResolver: UUIDCollisionResolver): Promise<Study | null> {
     try {
       const result = await file.text();
-      return await this.processAppFileContent(result, collisionResolver);
+      return await this.processAppFileContent(result, isStsdFile(file.name), collisionResolver);
     } catch (error: unknown) {
       if (error instanceof Error && error.message in studyImportErrors) {
         throw error;
@@ -164,7 +174,7 @@ export class StudyImportService implements ImportAdapter<Study> {
   }
 
   // ---------------------------------------------------------------------------
-  // Private — CLST processing
+  // Private — CLST / STSD processing
   // ---------------------------------------------------------------------------
 
   private decodeBase64FromText(textContent: string): string {
@@ -193,13 +203,21 @@ export class StudyImportService implements ImportAdapter<Study> {
   }
 
   private transformSections(sections: unknown[]): (Section & { supports: Support[] })[] {
-    return sections.map((section: unknown) => {
-      const sectionObj = section as Section;
-      return {
+    return sections.filter(isRecord).map((rawSection) => {
+      const sectionObj = rawSection as unknown as Section;
+      const section = {
         ...createEmptySection(),
         ...sectionObj,
-        supports: Array.isArray(sectionObj.supports) ? this.transformSupports(sectionObj.supports) : []
+        supports: Array.isArray(sectionObj.supports) ? this.transformSupports(sectionObj.supports) : [],
+        field_measures: Array.isArray(sectionObj.field_measures)
+          ? sectionObj.field_measures.filter((measure) => isRecord(measure)).map(normalizeFieldMeasureDates)
+          : []
       };
+      if (!isLegacyLocalizationSection(rawSection)) {
+        return section;
+      }
+      this.logger.info('Legacy section geolocation dropped on import', { sectionUuid: section.uuid });
+      return stripLocalization(section);
     });
   }
 
@@ -261,8 +279,12 @@ export class StudyImportService implements ImportAdapter<Study> {
     return createdStudy;
   }
 
-  private async processAppFileContent(result: string, collisionResolver: UUIDCollisionResolver): Promise<Study | null> {
-    const decodedContent = this.decodeBase64FromText(result);
+  private async processAppFileContent(
+    result: string,
+    isPlainJson: boolean,
+    collisionResolver: UUIDCollisionResolver
+  ): Promise<Study | null> {
+    const decodedContent = isPlainJson ? result : this.decodeBase64FromText(result);
     const parsedResult = this.parseJsonContent(decodedContent);
     const newStudy = this.buildStudyFromParsedData(parsedResult);
     return this.persistAppStudy(newStudy, collisionResolver);

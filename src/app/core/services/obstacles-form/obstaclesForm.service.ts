@@ -449,6 +449,11 @@ export class ObstacleFormService {
     try {
       // 1. Merge new/updated obstacle into the in-memory section
       this.upsertObstacleInSection(obstacle);
+      // The section already holds the new positions: the previous distances no longer match them. Dropped here,
+      // before anything can fail, so only a successful projection brings them back
+      this.obstacleStateService.setDistances(
+        this.obstacleStateService.distances().filter((distance) => distance.obstacleUuid !== obstacle.uuid)
+      );
 
       // 2. Register the current obstacle in Python worker
       await this.obstacleStateService.addSingleObstacle(obstacle, this.plotOptionsService.plotOptions());

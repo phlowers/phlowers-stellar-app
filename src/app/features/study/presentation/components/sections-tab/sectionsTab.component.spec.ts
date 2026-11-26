@@ -18,7 +18,8 @@ import { PlotSpanService } from '@services/plot/plot-span.service';
 import { Subject } from 'rxjs';
 import { SelectWithButtonsComponent } from '@shared/components/atoms/select-with-buttons/select-with-buttons.component';
 
-import { TranslocoTestingModule } from '@jsverse/transloco';
+import { TranslocoService, TranslocoTestingModule } from '@jsverse/transloco';
+import { formatRfc9557 } from '@shared/helpers/date-time.helpers';
 class MockMaintenanceService {
   ready = { next: vi.fn() };
   getMaintenance = vi.fn().mockResolvedValue([]);
@@ -136,10 +137,8 @@ describe('SectionsTabComponent', () => {
     selected_cable_modification_uuid: null,
     cable_span_manipulations: [],
     selected_cable_span_manipulation_uuid: null,
-    start_latitude: null,
-    start_longitude: null,
     start_azimuth: null,
-    mean_reprojection_diff_meters: null
+    position_error_meters: null
   };
 
   const mockInitialCondition: InitialCondition = {
@@ -206,10 +205,12 @@ describe('SectionsTabComponent', () => {
               'sections-tab.placeholder-view-ic': 'Select IC',
               'sections-tab.placeholder-view-cc': 'Select CC',
               'common.section-type.guard': 'Guard',
-              'common.section-type.phase': 'Phase'
-            }
+              'common.section-type.phase': 'Phase',
+              'common.modification-date-format': "MMMM d'.' y, hh:mm a"
+            },
+            fr: { 'common.modification-date-format': "d MMMM y, 'à' HH:mm" }
           },
-          translocoConfig: { availableLangs: ['en'], defaultLang: 'en' },
+          translocoConfig: { availableLangs: ['en', 'fr'], defaultLang: 'en' },
           preloadLangs: true
         }),
         SectionsTabComponent
@@ -471,6 +472,40 @@ describe('SectionsTabComponent', () => {
 
       const generateBtn = getByTestId('generate-state-btn');
       expect(generateBtn).toBeTruthy();
+    });
+  });
+
+  describe('last modified date display', () => {
+    const localDate = new Date(2026, 8, 10, 16, 32).toISOString();
+    const renderDate = (): string => {
+      fixture.componentRef.setInput('study', { sections: [{ ...mockSection, updated_at: localDate }] });
+      fixture.detectChanges();
+      return getByTestId('section-last-modified')!.textContent!.trim();
+    };
+
+    it('should render the date in French format', () => {
+      TestBed.inject(TranslocoService).setActiveLang('fr');
+      expect(renderDate()).toBe('10 septembre 2026, à 16:32');
+    });
+
+    it('should render the date in American English format', () => {
+      expect(renderDate()).toBe('September 10. 2026, 04:32 PM');
+    });
+
+    it('should render the same text for an RFC 9557 date as for the legacy ISO date of the same instant', () => {
+      const legacyText = renderDate();
+      fixture.componentRef.setInput('study', {
+        sections: [{ ...mockSection, updated_at: formatRfc9557(new Date(2026, 8, 10, 16, 32)) }]
+      });
+      fixture.detectChanges();
+      expect(getByTestId('section-last-modified')!.textContent!.trim()).toBe(legacyText);
+      expect(legacyText).toBe('September 10. 2026, 04:32 PM');
+    });
+
+    it('should render nothing, without error, for an unreadable date', () => {
+      fixture.componentRef.setInput('study', { sections: [{ ...mockSection, updated_at: 'not-a-date' }] });
+      expect(() => fixture.detectChanges()).not.toThrow();
+      expect(getByTestId('section-last-modified')!.textContent!.trim()).toBe('');
     });
   });
 

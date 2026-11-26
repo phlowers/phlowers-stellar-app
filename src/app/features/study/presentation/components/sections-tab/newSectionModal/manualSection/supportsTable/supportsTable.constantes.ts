@@ -1,0 +1,1 @@
+export const SUPPORT_NAME_OPTIONS_BATCH_SIZE = 20;

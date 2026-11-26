@@ -40,11 +40,14 @@
     "edit": "Modifier",
     "eel-label": "EEL",
     "electric-phase-number-label": "Numéro de phase électrique",
+    "electric-tension-label": "Tension électrique",
+    "enlarge-graphic-view-btn": "Agrandir la vue graphique",
     "error": "Erreur",
     "error-parsing-file-label": "Erreur lors de l'analyse du fichier",
     "error-reading-file-label": "Erreur lors de la lecture du fichier",
     "export": "Export",
     "failed-to-generate-report": "Échec de la génération du rapport",
+    "form-label": "Formulaire",
     "free-positioning-label": "Positionnement libre",
     "home-label": "Accueil",
     "ice-indicator-label": "Indicateur de givre",
@@ -52,6 +55,7 @@
     "ice-thickness-before-support-frontier": "Épaisseur du givre avant le support frontière",
     "initial-condition-label": "Condition initiale",
     "instruction-manual-label": "Manuel d'utilisation",
+    "lateral-distance-temperature-label": "Temp. de distance latérale",
     "latitude-label": "Latitude",
     "line-angle-label": "Angle en ligne",
     "line-axis-dist-label": "Dist. axe ligne.",
@@ -69,8 +73,10 @@
     "max-decimals-error": "Décimales max : {{ maxDecimals }}",
     "max-value-error": "Valeur max : {{ max }}",
     "meter": "m",
+    "celsius": "°C",
     "grade-unit": "gr",
     "min-value-error": "Valeur min : {{ min }}",
+    "modification-date-format": "d MMMM y, 'à' HH:mm",
     "my-last-studies-label": "Mes dernières études",
     "network-speed-unknown-label": "Débit réseau inconnu du navigateur",
     "network-too-slow-label": "Réseau trop lent",
@@ -92,9 +98,12 @@
     "previous": "Précédent",
     "punctual-load-label": "Charge ponctuelle",
     "ready": "Prêt",
+    "red-zone-presence-label": "Présence de zone rouge",
+    "reduce-graphic-view-btn": "Réduire la vue graphique",
     "ref-supp-dist-label": "Dist. supp. réf.",
     "ref-support-dist-label": "Dist. supp. réf.",
     "reference-support-label": "Support de référence",
+    "repartition-temperature-label": "Température de répartition",
     "report": "Rapport",
     "report-generated-successfully-label": "Rapport généré avec succès",
     "required": "Requis",
@@ -125,6 +134,8 @@
     "validate": "Valider",
     "vertical-angle-right-support-label": "Angle vertical de l'appareil à l'accr. câble du support de droite",
     "view": "Voir",
+    "wind-minus-label": "Vent -",
+    "wind-zone-label": "Zone de vent",
     "yes": "Oui",
     "you-are-offline-label": "Vous êtes hors ligne",
     "left": "Gauche",
@@ -174,15 +185,25 @@
     "z-label": "Z :",
     "support-name-full-label": "Nom du support",
     "left-support-label": "Support de gauche",
-    "measured-span-length-label": "Longueur de portée mesurée",
+    "measured-horizontal-distance-label": "Dist. horiz. entre accr. câble mesurée",
     "calculated-value-label": "Valeur calculée :",
     "tangent-aiming-help-aria-label": "ouvrir l'aide des visées tangentes",
     "calculation-type-label": "Type de calcul :",
     "calculation-type-tangent": "Tangente",
     "tangent-angle-label": "Angle tangent au câble",
+    "tangent-aiming-mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
+    "tangent-aiming-h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support gauche",
+    "tangent-aiming-vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche",
     "criterion-label": "Critère",
+    "criterion-one-percent-label": "Critère 1 %",
     "criterion-respected": "Critère respecté",
-    "criterion-not-respected": "Critère non respecté"
+    "criterion-not-respected": "Critère non respecté",
+    "obstacle-name-label": "Nom de l'obstacle",
+    "celsius-unit": "°C",
+    "copied-to-clipboard": "Copié dans le presse-papier",
+    "copy-to-clipboard-failed": "Échec de la copie dans le presse-papier",
+    "temperature-label": "Température",
+    "pascal-unit": "Pa"
   },
   "auth": {
     "login-page": {
@@ -269,7 +290,7 @@
     "col-value": "Valeur",
     "build-hash": "Hash du build",
     "build-datetime": "Date et heure du build",
-    "build-version": "Version du build",
+    "build-version": "Version de Stellar",
     "offline-status": "Mode hors ligne",
     "pending-version": "Version en attente",
     "no-pending-version": "Aucune",
@@ -385,7 +406,13 @@
       "invalid-manipulation-range": "La plage de manipulation fournie est invalide.",
       "support-out-of-range-error": "Le support est hors de la plage valide.",
       "generated-points-none-error": "Aucun point généré n'a été trouvé après le calcul.",
-      "night-time-error": "Impossible de calculer la couverture nuageuse si l'heure saisie correspond à la nuit."
+      "night-time-error": "Impossible de calculer la couverture nuageuse si l'heure saisie correspond à la nuit.",
+      "obstacle-not-found-error": "L'obstacle n'est pas enregistré dans le moteur de calcul.",
+      "estimate-on-split-support-error": "L'estimation est impossible sur une portée divisée par un support virtuel.",
+      "estimation-input-error": "Les données de l'estimation sont manquantes ou invalides.",
+      "estimation-not-converged-error": "La cible ne peut pas être atteinte dans les bornes de l'estimation.",
+      "estimation-warning": "La charge existante sur la portée estimée a été ignorée.",
+      "conformity-input-error": "Les données du calcul de conformité sont manquantes ou invalides."
     },
     "initial-condition-modal": {
       "create-title": "Créer une condition initiale",
@@ -458,7 +485,8 @@
       "invalid-envelope": "Le fichier de canton Stellar est invalide.",
       "unsupported-version": "Version {{ version }} du fichier de canton Stellar non prise en charge (maximum pris en charge : {{ maxVersion }})."
     },
-    "reprojection-info": "La reprojection sur le modèle de données {{ appName }} semble ajouter une erreur absolue moyenne de {{ error }} m",
+    "azimuth-reprojection-notice": "Écart maximal des azimuts de portée après reprojection : {{ error }}° (seuil : {{ threshold }}°). Les valeurs calculées ont été conservées.",
+    "position-error-notice": "Écart maximal de position des supports : {{ error }} m sur le support {{ support }} (seuil : {{ threshold }} m). Vérifiez vos valeurs au-delà du seuil.",
     "from-file": {
       "file-format": "Formats de fichier : {{ formats }}",
       "description": "Vous pouvez importer un canton à partir d'un fichier JSON. Il sera ajouté à l'étude en cours.",
@@ -474,7 +502,7 @@
     },
     "import": {
       "description": "Vous pouvez importer plusieurs fichiers, ils seront disponibles dans l'onglet \"Mes études\".",
-      "file-formats": "Formats de fichiers : .csv, .clst",
+      "file-formats": "Formats de fichiers : .csv, .clst, .stsd",
       "error-cable-not-found": "Câble non trouvé dans la base de données",
       "error-import": "Erreur lors de l'importation de l'étude",
       "error-delete": "Erreur lors de la suppression de l'étude",
@@ -487,8 +515,7 @@
       "col-modification-date": "Date de modification",
       "col-description": "Description/commentaire",
       "study-actions-menu": "Menu des actions d'étude",
-      "pagination-report": "Étude {first} à {last} sur {totalRecords}",
-      "date-format": "d MMMM yyyy 'à' HH'h'mm"
+      "pagination-report": "Étude {first} à {last} sur {totalRecords}"
     },
     "tabs": {
       "search-study": "Rechercher une étude",
@@ -547,7 +574,8 @@
     "update-btn": "Mettre à jour le canton",
     "title-view": "Voir un canton de l'étude",
     "title-modify": "Modifier un canton de l'étude",
-    "title-create": "Créer un canton de l'étude"
+    "title-create": "Créer un canton de l'étude",
+    "location-removed-after-insert": "La position de départ n'a pas pu être calculée à partir du support suivant : le canton est enregistré sans géolocalisation."
   },
   "manual-section": {
     "tab-general": "Général",
@@ -603,7 +631,8 @@
     "auto-fill-hint": "Le Set d'accroche et la valeur de L. bras (m) sera automatiquement renseigné dans le tableau."
   },
   "location": {
-    "title": "Coordonnées du support 1 :"
+    "title": "Coordonnées du support 1 :",
+    "incomplete-error": "Renseignez la latitude, la longitude et l'azimut ensemble, ou laissez les trois vides."
   },
   "loads": {
     "shared": {
@@ -679,14 +708,22 @@
       "sky-cover-label": "Nébulosité",
       "cable-temperature-label": "Température du câble",
       "wind-direction": {
-        "north": "Nord",
-        "north-east": "Nord-Est",
-        "east": "Est",
-        "south-east": "Sud-Est",
-        "south": "Sud",
-        "south-west": "Sud-Ouest",
-        "west": "Ouest",
-        "north-west": "Nord-Ouest"
+        "north": "Nord (N)",
+        "north-north-east": "Nord-Nord-Est (NNE)",
+        "north-east": "Nord-Est (NE)",
+        "east-north-east": "Est-Nord-Est (ENE)",
+        "east": "Est (E)",
+        "east-south-east": "Est-Sud-Est (ESE)",
+        "south-east": "Sud-Est (SE)",
+        "south-south-east": "Sud-Sud-Est (SSE)",
+        "south": "Sud (S)",
+        "south-south-west": "Sud-Sud-Ouest (SSO)",
+        "south-west": "Sud-Ouest (SO)",
+        "west-south-west": "Ouest-Sud-Ouest (OSO)",
+        "west": "Ouest (O)",
+        "west-north-west": "Ouest-Nord-Ouest (ONO)",
+        "north-west": "Nord-Ouest (NO)",
+        "north-north-west": "Nord-Nord-Ouest (NNO)"
       },
       "time-mode": {
         "summer": "Été",
@@ -719,11 +756,6 @@
       "tangent-aiming-exterior-radio-label": "Visées tangentes (Extérieur)",
       "tangent-aiming-interior-radio-label": "Visées tangentes (Intérieur)"
     },
-    "tangent-aiming": {
-      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
-      "h-acc-distance-label": "Dist. horizontale de l'appareil à l'accr. câble du support de gauche",
-      "vertical-acc-angle-left-label": "Angle vertical de l'appareil à l'accr. câble du support de gauche"
-    },
     "tangent-aiming-support": {
       "h-acc-distance-label": "Dist. verticale de l'appareil à l'accr. câble du support de gauche",
       "calculation-failed": "Échec du calcul du paramètre par visées tangentes"
@@ -739,7 +771,7 @@
       "close-aria-label": "fermer l'aide de PAPOTO",
       "import-station-data": "Importer les données de la station",
       "mandatory-msg": "Toutes les données sont obligatoires pour le calcul du paramètre.",
-      "elevation-diff-label": "Dénivelé des accr. mesuré",
+      "measured-vertical-distance-label": "Dist. verticale entre accr. câble mesurée",
       "hl-label": "HG",
       "h1-label": "H1",
       "h2-label": "H2",
@@ -755,6 +787,13 @@
       "parameter-1-3-label": "Paramètre 1-3",
       "criterion-label": "Critère 0.5%",
       "help-title": "Aide (PAPOTO)"
+    },
+    "pep": {
+      "usage-msg": "Cette méthode n'est utilisable que si la mesure de la distance des points situés sur le câble avec la visée laser est possible.",
+      "mandatory-msg": "Toutes les données sont obligatoires pour le calcul de paramètre.",
+      "length-label": "Dist. horiz. entre Visée G et Visée D",
+      "elevation-diff-label": "Dist. vert. entre Visée G et Visée D",
+      "criterion-label": "Critère 0,5%"
     },
     "field-datas": {
       "mandatory-msg": "Toutes les données sont obligatoires.",
@@ -818,14 +857,40 @@
         "kmh": "KM/H",
         "ms": "M/S"
       },
+      "season": {
+        "summer": "ETE",
+        "winter": "HIVER"
+      },
       "update-mode-15c": {
         "auto": "AUTO",
         "manual": "MANUELLE"
-      },
-      "calculation-type": {
-        "angle-tangent": "ANGLE_TANGENT",
-        "parameter": "PARAMETRE"
       }
+    },
+    "report": {
+      "title": "Rapport Mesure de terrain",
+      "terrain-data-title": "Données terrain",
+      "measure-date": "Date de mesure",
+      "measure-time": "Heure de mesure",
+      "method": "Méthode",
+      "measured-horizontal-distance": "Dist. horizontale entre accr. câble mesurée",
+      "calculated-horizontal-distance": "Dist. horizontale entre accr. câble calculée",
+      "measured-vertical-distance": "Dist. verticale entre accr. câble mesurée",
+      "calculated-vertical-distance": "Dist. verticale entre accr. câble calculée",
+      "vertical-distance-left": "Dist. verticale appareil accr. câble G",
+      "horizontal-distance-left": "Dist. horizontale appareil accr. câble G",
+      "vertical-angle-left": "Angle vertical appareil accr. câble G",
+      "vertical-angle-right": "Angle vertical appareil accr. câble D",
+      "calculation-type": "Type de calcul",
+      "sights-length": "Longueur Visée G Visée D",
+      "sights-elevation": "Dénivelé Visée G Visée D",
+      "sight-x": "X Visée {{ index }}",
+      "sight-y": "Y Visée {{ index }}",
+      "wind-incidence": "Incidence du vent",
+      "measured-solar-flux": "Flux solaire mesuré",
+      "temperature-uncertainty": "Incertitude température",
+      "blocked-invalid-tabs": "Rapport et export indisponibles : données incomplètes ou invalides dans {{ tabs }}.",
+      "blocked-invalid-global": "Rapport et export indisponibles : nom, tronçon, longitude, latitude, altitude ou azimut incomplet ou invalide.",
+      "blocked-unsaved": "Enregistrez d'abord la mesure."
     }
   },
   "studio": {
@@ -884,12 +949,24 @@
       "measurement-points-option": "Points de mesure",
       "field-measurements-tool": "Mesures terrain",
       "vtl-and-guying-tool": "VHL & Haubanage",
-      "cable-marking-tool": "Marquage câble",
       "strand-rrts-tool": "CRR de brins coupés",
       "forest-trenches-tool": "Tranchées forestières",
-      "height-and-lateral-distance-tool": "Hauteur & distance latérale",
       "cable-adjustment-tool": "Réglage d'un câble",
       "rrts-cut-strands": "CRR de brins coupés"
+    },
+    "estimations": {
+      "title": "Estimations",
+      "conformity-temperature-label": "Température de conformité",
+      "wind-pressure-tab": "Pression vent pour distance mini.",
+      "vertical-effort-tab": "Effort déplacement vert. câble",
+      "choose-obstacle-info": "Pour utiliser l'outil d'estimation vous devez d'abord choisir un obstacle",
+      "target-vertical-distance-label": "Distance verticale cible",
+      "copy-temperature-aria-label": "Copier la température de conformité",
+      "calculation-failed": "Échec de l'estimation de la température de conformité",
+      "wind-pressure-label": "Pression de vent",
+      "minimum-oblique-distance-label": "Distance oblique minimum",
+      "copy-wind-pressure-aria-label": "Copier la pression de vent",
+      "wind-pressure-calculation-failed": "Échec de l'estimation de la pression de vent"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Développer les détails",
@@ -955,7 +1032,6 @@
     },
     "obstacles-form": {
       "create-new-obstacle-btn": "Créer un nouvel obstacle",
-      "obstacle-name-label": "Nom de l'obstacle",
       "obstacle-altitude-type-label": "Type d'altitude d'obstacle",
       "free-positioning-forced-frame-warning": "Le mode de positionnement libre n'est disponible qu'avec un support de référence gauche, un type d'altitude absolue et une distance latérale selon l'axe de la portée. Les réglages actuels de l'obstacle diffèrent, les résultats peuvent donc être incorrects.",
       "delete-point-aria-label": "Supprimer un point",
@@ -968,6 +1044,7 @@
       "multiple-conditions-warning-summary": "Vous ne pouvez pas ouvrir le contrôle de conformité car ces conditions ne sont pas remplies :"
     },
     "conformity": {
+      "cable-points-legend": "Points du câble",
       "obstacle-legend": "Obstacle",
       "obstacle-point-label": "Point de l'obstacle",
       "name-label": "Nom",
@@ -976,18 +1053,9 @@
       "altitude-point-label": "Altitude point",
       "reference-support-distance-label": "Distance au support référence",
       "distance-to-line-axis-label": "Distance axe ligne",
-      "form-legend": "Formulaire",
-      "electric-tension-label": "Tension électrique",
-      "wind-zone-label": "Zone de vent",
-      "wind-minus-label": "Vent -",
-      "red-zone-presence-label": "Présence de zone rouge",
-      "repartition-temperature-label": "Température de répartition",
-      "lateral-distance-temperature-label": "Temp. de distance latérale",
       "calculating-text": "Calcul de la conformité…",
       "results-updated-text": "Résultats de la conformité mis à jour.",
       "visualisation-graph-caption": "Graphique de visualisation de la conformité",
-      "reduce-graphic-view-btn": "Réduire la vue graphique",
-      "enlarge-graphic-view-btn": "Agrandir la vue graphique",
       "overhang-column-suffix": "Surplomb",
       "lateral-column-suffix": "Latéral",
       "compliance-column-label": "Respect conformité",
@@ -995,14 +1063,52 @@
       "minimum-distance-case-label": "Cas distance minimale",
       "no-conformity-config-error": "Impossible de calculer la conformité : le type d'obstacle n'a pas de configuration de conformité",
       "calculation-failed-error": "Échec du calcul : {{ errorMessage }}",
+      "export-invalid-data-error": "Export impossible : les données de conformité sont incomplètes ou invalides",
       "cable-altitude-label": "Altitude câble",
       "cable-line-axis-distance-label": "Distance axe ligne câble",
       "distance-to-comply-label": "Distance à respecter",
       "compliance-altitude-label": "Altitude à respecter",
       "compliance-line-axis-distance-label": "Distance axe ligne respect",
-      "temperature-label": "Température",
       "wind-pressure-label": "Pression du vent",
-      "minimal-distance-label": "Distance mini"
+      "minimal-distance-label": "Distance câble min."
+    },
+    "forest-trenches": {
+      "title": "Tranchées forestières",
+      "missing-configuration": "La configuration des tranchées forestières est absente du catalogue des obstacles. Fermez les autres onglets Stellar, puis rechargez l'application pour mettre à jour les catalogues.",
+      "span-information": "Informations sur les portées",
+      "first-support": "Support de départ",
+      "last-support": "Support d'arrivée",
+      "n-points": "Nombre de points de découpage du sol",
+      "result-span": "Portée",
+      "span-option": "{{ firstSupport }} – {{ lastSupport }}",
+      "previous-span-aria-label": "Portée précédente",
+      "next-span-aria-label": "Portée suivante",
+      "median-f1": "F1 médian à la répartition",
+      "plot-caption": "Vue en plan des tranchées forestières",
+      "plot-distance-axis": "Distance au support de gauche ({{ unit }})",
+      "plot-lateral-axis": "Distance latérale signée depuis l'axe de la portée ({{ unit }})",
+      "plot-axis-label": "Axe de la portée",
+      "plot-overhang-cable-label": "Câble en surplomb {{ ruleName }}",
+      "plot-lateral-cable-label": "Câble latéral {{ ruleName }}",
+      "plot-lateral-inverse-cable-label": "Câble latéral inverse {{ ruleName }}",
+      "plot-lateral-limit-label": "Limite latérale {{ ruleName }}",
+      "plot-lateral-inverse-limit-label": "Limite latérale inverse {{ ruleName }}",
+      "row-distance-to-left-support": "Distance au support de gauche",
+      "row-ground-elevation": "Altitude du sol",
+      "row-cable-altitude-overhang": "Altitude du câble : {{ ruleName }} surplomb ({{ temperature }}°C)",
+      "row-cable-altitude-lateral": "Altitude du câble : {{ ruleName }} latéral ({{ temperature }}°C)",
+      "row-cable-height-overhang": "Hauteur du câble : {{ ruleName }} surplomb ({{ temperature }}°C, par rapport au sol)",
+      "row-axis-cable-lateral": "Axe de la portée au câble : {{ ruleName }} latéral ({{ temperature }}°C)",
+      "row-axis-lateral-limit": "Axe de la portée à la limite latérale : {{ ruleName }}",
+      "row-overhang-compliance-limit-height": "Hauteur limite de conformité en surplomb : {{ ruleName }}",
+      "calculation-failed": "Échec du calcul des tranchées forestières : {{ errorMessage }}",
+      "calculation-timeout": "Le calcul a dépassé {{ seconds }} secondes. Réduisez le nombre de portées ou de points de découpage du sol, puis réessayez.",
+      "calculating-text": "Calcul des tranchées forestières…",
+      "results-updated-text": "Résultats des tranchées forestières mis à jour.",
+      "rules-label": "Règles de tranchées forestières",
+      "notifications": {
+        "saved": "Les paramètres des tranchées forestières ont été enregistrés."
+      }
     },
     "distance-measuring": {
       "never-saved-hint": "Les données de ce formulaire ne sont jamais enregistrées",
@@ -1051,6 +1157,10 @@
       "line-axis-distance-column-label": "Dist. axe ligne",
       "no-obstacles-message": "Aucun obstacle défini pour cette portée.",
       "current-page-report": "{first} à {last} sur {totalRecords}"
+    },
+    "obstacles-report": {
+      "title": "Rapport Tableau des obstacles",
+      "obstacles-title": "Tableau des points d'obstacle"
     },
     "vtl-and-guying": {
       "guying-span-label": "Portée haubanée",

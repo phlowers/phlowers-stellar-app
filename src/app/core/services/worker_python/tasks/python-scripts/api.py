@@ -7,9 +7,11 @@
 import logging
 
 from stellar_engine.core import cut_strands as cut_strands_module
-from stellar_engine.core import geometry, manipulations, pose_table
+from stellar_engine.core import estimation, geometry, manipulations, pose_table
 from stellar_engine.core import initialize_study as stellar_initialize_study
 from stellar_engine.core import loads
+from stellar_engine.core.conformity import forest_trench as forest_trench_simulation
+from stellar_engine.core.conformity import ground as conformity_ground
 from stellar_engine.core.conformity import simulation as conformity_simulation
 from stellar_engine.data import geography
 from stellar_engine.tools import (
@@ -18,6 +20,7 @@ from stellar_engine.tools import (
     param_calibration,
     temperature,
     papoto,
+    tangent_aiming,
 )
 from stellar_engine.plot import (
     plot_2d,
@@ -99,6 +102,11 @@ def compute_diffuse_and_beam_radiations(js_inputs):
 @debug_log
 def calculate_papoto(js_inputs):
     return papoto.calculate_papoto(inputs=js_inputs.to_py())
+
+
+@debug_log
+def calculate_tangent_aiming(js_inputs):
+    return tangent_aiming.calculate_tangent_aiming(inputs=js_inputs.to_py())
 
 
 @debug_log
@@ -294,6 +302,11 @@ def compute_localization(js_inputs):
 
 
 @debug_log
+def convert_coordinates(js_inputs):
+    return geography.convert_coordinates(js_to_python(js_inputs))
+
+
+@debug_log
 def import_lambert(js_inputs):
     result = geography.import_lambert(js_to_python(js_inputs))
     logger.debug(f"Result of import_lambert: {result}")
@@ -305,6 +318,16 @@ def import_lambert_and_validate(js_inputs):
     return geography.import_lambert_and_validate(js_to_python(js_inputs))
 
 
+@debug_log
+def validate_gps_positions(js_inputs):
+    return geography.validate_gps_positions(js_to_python(js_inputs))
+
+
+@debug_log
+def compute_start_from_next_support(js_inputs):
+    return geography.compute_start_from_next_support(js_to_python(js_inputs))
+
+
 # ---------------------------cut strands----------------
 
 
@@ -312,9 +335,7 @@ def import_lambert_and_validate(js_inputs):
 def set_cut_strands(js_inputs):
     global study
     python_inputs = js_to_python(js_inputs)
-    return cut_strands_module.set_cut_strands(
-        study, python_inputs["cutStrands"]
-    )
+    return cut_strands_module.set_cut_strands(study, python_inputs["cutStrands"])
 
 
 @debug_log
@@ -339,8 +360,41 @@ def get_utilization_rate():
 def set_high_safety(js_inputs):
     global study
     python_inputs = js_to_python(js_inputs)
-    return cut_strands_module.set_high_safety(
-        study, python_inputs["highSafety"]
+    return cut_strands_module.set_high_safety(study, python_inputs["highSafety"])
+
+
+# ---------------------------estimation----------------
+
+
+@debug_log
+def estimate_rope(js_inputs):
+    global study
+    return estimation.estimate_rope(js_to_python(js_inputs), study)
+
+
+@debug_log
+def estimate_temperature(js_inputs):
+    global study
+    return estimation.estimate_temperature(js_to_python(js_inputs), study)
+
+
+@debug_log
+def estimate_load(js_inputs):
+    global study
+    return estimation.estimate_load(js_to_python(js_inputs), study)
+
+
+@debug_log
+def estimate_wind(js_inputs):
+    global study
+    return estimation.estimate_wind(js_to_python(js_inputs), study)
+
+
+@debug_log
+def estimate_minimum_distance_wind(js_inputs):
+    global study
+    return estimation.estimate_minimum_distance_wind(
+        js_to_python(js_inputs), study
     )
 
 
@@ -355,6 +409,18 @@ def get_conformity(js_inputs):
     out = conformity_simulation.get_conformity(python_inputs, study)
     logger.debug(f"Conformity output: {out}")
     return out
+
+
+@debug_log
+def slice_ground(js_inputs):
+    global study
+    return conformity_ground.slice_ground(js_to_python(js_inputs), study)
+
+
+@debug_log
+def get_forest_trenches(js_inputs):
+    global study
+    return forest_trench_simulation.run(js_to_python(js_inputs), study)
 
 
 # --------------------------config----------------
@@ -374,6 +440,6 @@ def set_resolution(js_inputs):
 
 
 @debug_log
-def shorten_lengthen_cable(js_inputs):
+def apply_manipulations(js_inputs):
     global study
-    return manipulations.modify_cable(js_to_python(js_inputs), study)
+    return manipulations.apply_manipulations(js_to_python(js_inputs), study)

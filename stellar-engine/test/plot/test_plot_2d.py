@@ -13,6 +13,7 @@ from mechaphlowers.data.catalog.catalog import (
     sample_cable_catalog,
 )
 
+from stellar_engine.core import manipulations
 from stellar_engine.plot.plot_2d import refresh_projection
 
 
@@ -78,3 +79,95 @@ def test_refresh_projection(section_study_simple: SectionStudy):
         inputs,
         section_study_simple,
     )
+
+
+def test_apply_manipulations_span_manip(study_base: SectionStudy):
+    study_base.solve_adjustment()
+
+    inputs = {
+        'cableModifParams': [],
+        "supportManipParams": [],
+        "spanManipParams": [
+            {
+                'referenceSupport': 'LEFT',
+                'distanceToRefSupport': 100,
+                'cableManipType': 'with_a_crane',
+                'cableManipMethod': 'clamp',
+                'longitudinalDistance': 100,
+                'lateralDistance': 2,
+                'altitude': 30,
+                'anchoring': 'with_sling',
+                'chainLength': None,
+                'chainWeight': None,
+                'chainSurface': None,
+                'counterWeight': None,
+                'slingLength': 5,
+                'spanIndex': 0,
+            }
+        ],
+    }
+
+    manipulations.apply_manipulations(inputs, study_base)
+    study_base.solve_change_state()
+    result = refresh_projection(
+        {'startSupport': 0, 'endSupport': 3, 'view': '3d'}, study_base
+    )
+    coords = result["sectionOutput"]["current"]["coords"]
+    assert "virtual_supports" in coords
+    assert coords["virtual_supports"] is not None
+    assert "virtual_insulators" in coords
+    assert coords["virtual_insulators"] is not None
+    assert coords["virtual_supports_span_indices"] == [0]
+
+
+def _span_manip(span_index: int, altitude: float) -> dict:
+    return {
+        'referenceSupport': 'LEFT',
+        'distanceToRefSupport': 100,
+        'cableManipType': 'with_a_crane',
+        'cableManipMethod': 'clamp',
+        'longitudinalDistance': 100,
+        'lateralDistance': 2,
+        'altitude': altitude,
+        'anchoring': 'with_sling',
+        'chainLength': None,
+        'chainWeight': None,
+        'chainSurface': None,
+        'counterWeight': None,
+        'slingLength': 5,
+        'spanIndex': span_index,
+    }
+
+
+def test_virtual_supports_span_indices_follow_virtual_supports_order(
+    study_base: SectionStudy,
+):
+    study_base.solve_adjustment()
+    inputs = {
+        'cableModifParams': [],
+        "supportManipParams": [],
+        "spanManipParams": [_span_manip(2, 30), _span_manip(0, 30)],
+    }
+
+    manipulations.apply_manipulations(inputs, study_base)
+    study_base.solve_change_state()
+    result = refresh_projection(
+        {'startSupport': 0, 'endSupport': 3, 'view': '3d'}, study_base
+    )
+
+    coords = result["sectionOutput"]["current"]["coords"]
+    assert coords["virtual_supports_span_indices"] == [0, 2]
+    assert len(coords["virtual_supports"]) == 2
+    assert len(coords["virtual_insulators"]) == 2
+
+
+def test_virtual_supports_span_indices_none_without_span_manip(
+    study_base: SectionStudy,
+):
+    study_base.solve_adjustment()
+    result = refresh_projection(
+        {'startSupport': 0, 'endSupport': 3, 'view': '3d'}, study_base
+    )
+
+    coords = result["sectionOutput"]["current"]["coords"]
+    assert coords["virtual_supports_span_indices"] is None

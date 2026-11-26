@@ -12,6 +12,7 @@ tool is organised in four tabs, usually filled in order:
 
 terrain_data
 parameter_calculation
+tangent_aiming
 temperature_calculation
 parameter_15c_without_wind
 ```

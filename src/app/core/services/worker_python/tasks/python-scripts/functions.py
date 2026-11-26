@@ -87,6 +87,7 @@ def init_config():
     mph.options.input_units.cable_array["electric_resistance_20"] = "ohm/km"
     mph.options.data.safety_coefficient_default = 1
     mph.options.data.safety_security_factor = 1.5
+    mph.options.data.rope_lineic_mass_default = 0.01
 
 
 init_config()

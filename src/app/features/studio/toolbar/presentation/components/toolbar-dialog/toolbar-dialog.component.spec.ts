@@ -6,6 +6,7 @@ import { TranslocoTestingModule } from '@jsverse/transloco';
 import { ToolbarDialogComponent } from './toolbar-dialog.component';
 import { ToolbarDialogService } from '../../services/toolbar-dialog.service';
 import { MessageService } from 'primeng/api';
+import { Dialog } from 'primeng/dialog';
 import { SectionService } from '@services/section/section.service';
 import { StudiesService } from '@services/studies/studies.service';
 import { BehaviorSubject } from 'rxjs';
@@ -144,6 +145,14 @@ describe('ToolbarDialogComponent', () => {
 
       const component = toolbarDialogService.getComponent();
       expect(component).toBeDefined();
+    });
+  });
+
+  describe('onShow', () => {
+    it('should notify the service once the dialog finished opening', () => {
+      const notifySpy = vi.spyOn(toolbarDialogService, 'notifyShown');
+      fixture.debugElement.query(By.directive(Dialog)).triggerEventHandler('onShow', {});
+      expect(notifySpy).toHaveBeenCalledOnce();
     });
   });
 

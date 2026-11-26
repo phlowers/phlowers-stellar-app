@@ -14,13 +14,21 @@ import { TRANSIT_BOUNDS, MEASURED_SOLAR_FLUX_BOUNDS } from '@features/studio/fie
 
 const WIND_DIRECTION_OPTIONS = [
   { label: 'North', value: 'North' },
+  { label: 'North-North-East', value: 'North-North-East' },
   { label: 'North-East', value: 'North-East' },
+  { label: 'East-North-East', value: 'East-North-East' },
   { label: 'East', value: 'East' },
+  { label: 'East-South-East', value: 'East-South-East' },
   { label: 'South-East', value: 'South-East' },
+  { label: 'South-South-East', value: 'South-South-East' },
   { label: 'South', value: 'South' },
+  { label: 'South-South-West', value: 'South-South-West' },
   { label: 'South-West', value: 'South-West' },
+  { label: 'West-South-West', value: 'West-South-West' },
   { label: 'West', value: 'West' },
-  { label: 'North-West', value: 'North-West' }
+  { label: 'West-North-West', value: 'West-North-West' },
+  { label: 'North-West', value: 'North-West' },
+  { label: 'North-North-West', value: 'North-North-West' }
 ];
 
 const SKY_COVER_OPTIONS = [

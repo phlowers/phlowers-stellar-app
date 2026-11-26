@@ -1,15 +1,16 @@
+import { FieldMeasure } from '@features/studio/field-measuring/domain/types';
 import { createTestMeasureData } from '@features/studio/field-measuring/presentation/helpers';
 import {
   applyTangentAimingExteriorDefaults,
-  calculateTangentAimingExteriorMock,
   createTangentAimingExteriorForm,
   getDisplayedInputFields,
   isTangentAimingExteriorDataValid,
   resetNonDisplayedExteriorFields,
-  syncDisplayedControls,
-  toTangentAimingExteriorInputs
+  toTangentAimingExteriorInputs,
+  toTangentAimingExteriorTaskInputs
 } from './tangent-aiming-exterior.helpers';
 import { TANGENT_AIMING_EXTERIOR_FIELD_RULES } from './tangent-aiming-exterior.constantes';
+import { syncDisplayedControls } from '../tangent-aiming-common/tangent-aiming-common.helpers';
 
 describe('tangent-aiming-exterior helpers', () => {
   it('should create an invalid form with every control empty', () => {
@@ -18,7 +19,7 @@ describe('tangent-aiming-exterior helpers', () => {
     expect(Object.values(form.getRawValue()).every((value) => value === null)).toBe(true);
   });
 
-  it('should reuse the support rules for both vertical angles', () => {
+  it('should share the same rule for both vertical angles', () => {
     expect(TANGENT_AIMING_EXTERIOR_FIELD_RULES.verticalAccAngleLeft).toBe(
       TANGENT_AIMING_EXTERIOR_FIELD_RULES.verticalAccAngleRight
     );
@@ -39,10 +40,10 @@ describe('tangent-aiming-exterior helpers', () => {
 
   it('should disable the hidden control and re-enable it when displayed again', () => {
     const form = createTangentAimingExteriorForm();
-    syncDisplayedControls(form, 'parametre');
+    syncDisplayedControls(form, getDisplayedInputFields('parametre'));
     expect(form.controls.tangentAngle.disabled).toBe(true);
     expect(form.controls.parameter.enabled).toBe(true);
-    syncDisplayedControls(form, 'tangente');
+    syncDisplayedControls(form, getDisplayedInputFields('tangente'));
     expect(form.controls.parameter.disabled).toBe(true);
     expect(form.controls.tangentAngle.enabled).toBe(true);
   });
@@ -57,7 +58,7 @@ describe('tangent-aiming-exterior helpers', () => {
       verticalAccAngleRight: 6,
       parameter: 1000
     });
-    syncDisplayedControls(form, 'parametre');
+    syncDisplayedControls(form, getDisplayedInputFields('parametre'));
     expect(form.valid).toBe(true);
   });
 
@@ -76,8 +77,25 @@ describe('tangent-aiming-exterior helpers', () => {
         exteriorVerticalAccAngleRight: 0,
         exteriorParameter: 20,
         exteriorTangentAngle: 0,
-        exteriorCalculationType: 'parametre'
+        exteriorCalculationType: 'tangente'
       });
+    });
+
+    it('should keep the chosen calculation type', () => {
+      const data = {
+        ...createTestMeasureData(),
+        exteriorCalculationType: 'parametre' as const,
+        exteriorParameter: 1500
+      };
+      expect(applyTangentAimingExteriorDefaults(data, '0')).toMatchObject({
+        exteriorCalculationType: 'parametre',
+        exteriorParameter: 1500
+      });
+    });
+
+    it('should default the calculation type to tangente when missing', () => {
+      const data = { ...createTestMeasureData(), exteriorCalculationType: undefined } as unknown as FieldMeasure;
+      expect(applyTangentAimingExteriorDefaults(data, '0').exteriorCalculationType).toBe('tangente');
     });
 
     it('should not override an already chosen left support', () => {
@@ -97,17 +115,18 @@ describe('tangent-aiming-exterior helpers', () => {
       const data = applyTangentAimingExteriorDefaults(createTestMeasureData(), '0');
       expect(isTangentAimingExteriorDataValid(data)).toBe(true);
       expect(isTangentAimingExteriorDataValid({ ...data, exteriorLeftSupport: null })).toBe(false);
-      expect(isTangentAimingExteriorDataValid({ ...data, exteriorParameter: null })).toBe(false);
+      expect(isTangentAimingExteriorDataValid({ ...data, exteriorTangentAngle: null })).toBe(false);
+      expect(isTangentAimingExteriorDataValid({ ...data, exteriorTangentAngle: 201 })).toBe(false);
     });
 
     it('should ignore the hidden field for the validity', () => {
       const data = applyTangentAimingExteriorDefaults(createTestMeasureData(), '0');
-      expect(isTangentAimingExteriorDataValid({ ...data, exteriorTangentAngle: null })).toBe(true);
+      expect(isTangentAimingExteriorDataValid({ ...data, exteriorParameter: null })).toBe(true);
       expect(
         isTangentAimingExteriorDataValid({
           ...data,
-          exteriorCalculationType: 'tangente',
-          exteriorParameter: null
+          exteriorCalculationType: 'parametre',
+          exteriorTangentAngle: null
         })
       ).toBe(true);
     });
@@ -115,23 +134,51 @@ describe('tangent-aiming-exterior helpers', () => {
     it('should clear the field hidden by the calculation type', () => {
       const data = applyTangentAimingExteriorDefaults(createTestMeasureData(), '0');
       expect(resetNonDisplayedExteriorFields(data)).toMatchObject({
-        exteriorParameter: 20,
-        exteriorTangentAngle: null
-      });
-      expect(resetNonDisplayedExteriorFields({ ...data, exteriorCalculationType: 'tangente' })).toMatchObject({
         exteriorParameter: null,
         exteriorTangentAngle: 0
       });
+      expect(resetNonDisplayedExteriorFields({ ...data, exteriorCalculationType: 'parametre' })).toMatchObject({
+        exteriorParameter: 20,
+        exteriorTangentAngle: null
+      });
     });
 
-    it('should build the calculation inputs and return the mocked result', async () => {
+    it('should map the measure to the tangent aiming task inputs (device left of the left support)', () => {
+      const inputs = toTangentAimingExteriorInputs({
+        ...createTestMeasureData(),
+        exteriorSpanLength: 400,
+        exteriorHAccDistance: 50,
+        exteriorVerticalAccAngleLeft: 93.6,
+        exteriorVerticalAccAngleRight: 99.3,
+        exteriorTangentAngle: 101.4
+      });
+      expect(toTangentAimingExteriorTaskInputs(inputs)).toEqual({
+        calculationType: 'tangente',
+        angleToCableTangent: 101.4,
+        angleToLeftSupport: 93.6,
+        angleToRightSupport: 99.3,
+        spanLength: 400,
+        inputHeight: 0,
+        distance: -50
+      });
+    });
+
+    it('should send the parameter instead of the tangent angle on the parametre type', () => {
+      const inputs = toTangentAimingExteriorInputs({
+        ...createTestMeasureData(),
+        exteriorCalculationType: 'parametre',
+        exteriorParameter: 1800,
+        exteriorTangentAngle: null
+      });
+      const taskInputs = toTangentAimingExteriorTaskInputs(inputs);
+      expect(taskInputs).toMatchObject({ calculationType: 'parametre', parameter: 1800 });
+      expect(taskInputs).not.toHaveProperty('angleToCableTangent');
+    });
+
+    it('should build the calculation inputs', () => {
       const data = applyTangentAimingExteriorDefaults(createTestMeasureData(), '3');
       const inputs = toTangentAimingExteriorInputs(data);
-      expect(inputs).toMatchObject({ leftSupport: '3', calculationType: 'parametre', parameter: 20 });
-      expect(await calculateTangentAimingExteriorMock(inputs)).toEqual({
-        result: { parameter: 1000, uncertainty: 1.5, criterion: 1, checkValidity: true },
-        error: null
-      });
+      expect(inputs).toMatchObject({ leftSupport: '3', calculationType: 'tangente', tangentAngle: 0 });
     });
   });
 });
