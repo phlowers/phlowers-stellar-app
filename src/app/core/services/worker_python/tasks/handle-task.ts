@@ -80,6 +80,14 @@ const tasks: Record<
     function: 'get_config',
     externalPackages: []
   },
+  [Task.getEngineConfig]: {
+    function: 'get_engine_config',
+    externalPackages: []
+  },
+  [Task.setEngineConfig]: {
+    function: 'set_engine_config',
+    externalPackages: []
+  },
   [Task.addBulkObstacles]: {
     function: 'add_bulk_obstacles',
     externalPackages: []

@@ -38,7 +38,8 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
   [PythonErrorCode.EstimationTargetAboveBoundsWarning]: 'shared.python-errors.estimation-target-above-bounds-warning',
   [PythonErrorCode.EstimationTargetBelowBoundsWarning]: 'shared.python-errors.estimation-target-below-bounds-warning',
   [PythonErrorCode.EstimationWarning]: 'shared.python-errors.estimation-warning',
-  [PythonErrorCode.ConformityInputError]: 'shared.python-errors.conformity-input-error'
+  [PythonErrorCode.ConformityInputError]: 'shared.python-errors.conformity-input-error',
+  [PythonErrorCode.EngineConfigWarning]: 'shared.python-errors.engine-config-warning'
 };
 
 /**

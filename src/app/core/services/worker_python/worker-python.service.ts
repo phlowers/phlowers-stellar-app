@@ -8,9 +8,15 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { TranslocoService } from '@jsverse/transloco';
 import { LoggerService } from '@services/logger/logger.service';
+import { NotificationService } from '@services/notification/notification.service';
 import { PythonDiagnostic } from './tasks/python-diagnostic.interfaces';
 import { Task, TaskError, TaskInputs, TaskOutputs } from './tasks/types';
+import { CONSOLE_API_NAME, ENGINE_CONFIG_STORAGE_KEY } from './engine-config.constantes';
+import { parseEngineConfig } from './engine-config.helpers';
+import { StellarConsoleApi } from './engine-config.interfaces';
+import { formatPythonWarnings } from './tasks/python-error-messages';
 
 /** Log levels accepted from worker `log` messages. */
 export type WorkerLogLevel = 'log' | 'info' | 'warn' | 'error';
@@ -66,6 +72,8 @@ export class TaskTimeoutError extends Error {
 })
 export class WorkerPythonService {
   private readonly logger = inject(LoggerService);
+  private readonly notificationService = inject(NotificationService);
+  private readonly translocoService = inject(TranslocoService);
   private readonly _ready = new BehaviorSubject<boolean>(false);
   /** Observable indicating if Pyodide failed to load */
   readonly pyodideLoadError$ = new BehaviorSubject<boolean>(false);
@@ -124,6 +132,7 @@ export class WorkerPythonService {
     }
 
     this.worker = new Worker(new URL('./worker-python', import.meta.url));
+    this.exposeConsoleApi();
     this.worker.onmessage = ({ data }) => {
       if (data.log) {
         this.handleWorkerLog(data.log as WorkerLogMessage);
@@ -137,6 +146,7 @@ export class WorkerPythonService {
         this._ready.next(true);
         const activateDebugLogs = localStorage.getItem('activateDebugLogs') === 'true';
         this.runTask(Task.setLogLevel, { activateDebugLogs });
+        void this.applyEngineConfig();
       } else if (data.id) {
         const handler = this.handlerMap[data.id];
         if (handler) {
@@ -146,6 +156,38 @@ export class WorkerPythonService {
         }
       }
     };
+  }
+
+  /** Make the hidden options settable/readable from the browser console: `stellarConfig.setEngineConfig({...})`, `stellarConfig.getEngineConfig()`. */
+  private exposeConsoleApi(): void {
+    const api: StellarConsoleApi = {
+      setEngineConfig: (config) => {
+        localStorage.setItem(ENGINE_CONFIG_STORAGE_KEY, JSON.stringify(config));
+        return this.applyEngineConfig();
+      },
+      getEngineConfig: async () => (await this.runTask(Task.getEngineConfig, undefined)).result
+    };
+    (globalThis as unknown as Record<string, StellarConsoleApi>)[CONSOLE_API_NAME] = api;
+  }
+
+  /** Send the stored engine options overload to Python (at startup and on each console change) and show the resulting warnings to the user. */
+  private async applyEngineConfig(): Promise<void> {
+    const config = parseEngineConfig(localStorage.getItem(ENGINE_CONFIG_STORAGE_KEY));
+    if (config === null) {
+      this.logger.warn('Wrong engine configuration loaded, check or reset it');
+    }
+    try {
+      const { error, diagnostics } = await this.runTask(Task.setEngineConfig, config ?? {});
+      if (error) {
+        this.logger.error(`Engine configuration could not be applied (${error})`);
+        return;
+      }
+      for (const message of formatPythonWarnings(diagnostics, this.translocoService)) {
+        this.notificationService.warning(message);
+      }
+    } catch (error: unknown) {
+      this.logger.error('Engine configuration could not be applied', error);
+    }
   }
 
   /**

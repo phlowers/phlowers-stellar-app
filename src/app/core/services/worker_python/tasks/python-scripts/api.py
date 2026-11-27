@@ -9,7 +9,7 @@ import logging
 from stellar_engine.core import cut_strands as cut_strands_module
 from stellar_engine.core import geometry, manipulations, pose_table
 from stellar_engine.core import initialize_study as stellar_initialize_study
-from stellar_engine.core import loads
+from stellar_engine.core import engine_config, loads
 from stellar_engine.core.conformity import forest_trench as forest_trench_simulation
 from stellar_engine.core.conformity import ground as conformity_ground
 from stellar_engine.core.conformity import simulation as conformity_simulation
@@ -444,6 +444,16 @@ def set_resolution(js_inputs):
     resolution = python_inputs["resolution"]
     options.graphics.resolution = resolution
     return {"success": True, "resolution": resolution}
+
+
+@debug_log
+def get_engine_config():
+    return engine_config.get_engine_config()
+
+
+@debug_log
+def set_engine_config(js_inputs):
+    return engine_config.set_engine_config(js_to_python(js_inputs))
 
 
 @debug_log
