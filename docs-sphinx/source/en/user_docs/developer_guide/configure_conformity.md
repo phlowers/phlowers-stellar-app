@@ -267,7 +267,7 @@ singleton row of `catObstacleConformityConfig`, and the tool reads them through
 ```json
 "forest_trenches": {
   "ground_n_slicing_points_choices": [5, 9, 17],
-  "overhang_rules_selected": ["RULE_1"],
+  "overhang_rules_selected": ["RULE_1", "RULE_2"],
   "lateral_rules_selected": ["RULE_1", "RULE_2"],
   "chart": {
     "cable": { "marker": "circle", "line": "solid" },

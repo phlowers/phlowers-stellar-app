@@ -17,6 +17,7 @@
   },
   "include": [
     "../src/types.d.ts",
+    "../src/app/shared/types/file-system-access.d.ts",
     "../src/app/core/services/**/*.ts",
     "../src/app/shared/catalog/services/**/*.ts",
     "../src/app/shared/domain/**/*.ts",

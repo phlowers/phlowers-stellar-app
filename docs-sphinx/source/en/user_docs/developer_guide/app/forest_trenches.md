@@ -17,9 +17,10 @@ from the floor obstacle of the section, see {doc}`obstacles_floors_and_distances
 | Toolbar | `features/studio/core/presentation/components/top-toolbar/top-toolbar.component.ts` | Adds the **Tools** menu entry, which calls `ToolbarDialogService.openTool('forest-trenches')`. |
 | Dialog registry | `features/studio/toolbar/presentation/services/toolbar-dialog.service.ts` | Maps `'forest-trenches'` to `ForestTrenchesComponent`. |
 | Dialog | `features/studio/forest-trenches/presentation/components/forest-trenches/forest-trenches.component.ts` (`.html`, `.scss`) | Form, catalog loading, calculation, results, plot lifecycle (`ResizeObserver`, purge on destroy). |
-| Helpers | `…/forest-trenches/…/forest-trenches.helpers.ts` | `getForestTrenchesConfig()`, `spansInInterval()`, `toSliceGroundInput()`, `fractionLabel()`, `forestTrenchesXTickLabels()`, `buildForestTrenchesRows()`, `createForestTrenchesPlot()` (`Plotly.react`), `resizeForestTrenchesPlot()`, `purgeForestTrenchesPlot()`. |
-| Constants | `…/forest-trenches/…/forest-trenches.constantes.ts` | `FOREST_TRENCHES_PLOT_ID`, axis colour, axis point marker (`x-thin`, size 7). |
-| Interfaces | `…/forest-trenches/…/forest-trenches.interfaces.ts` | `ForestTrenchesConfig`, `ForestTrenchesChart`, `ForestTrenchesTableRow`, `ForestTrenchesPlotOptions`. |
+| Helpers | `…/forest-trenches/…/forest-trenches.helpers.ts` | `getForestTrenchesConfig()`, `spansInInterval()`, `toSliceGroundInput()`, `fractionLabel()`, `forestTrenchesXTickLabels()`, `buildForestTrenchesRows()`, `createForestTrenchesPlot()` (`Plotly.react`), `resizeForestTrenchesPlot()`, `purgeForestTrenchesPlot()`. Trench points export: `trenchPointsHeader()`, `resolveTrenchPointsRules()`, `buildTrenchPointsRows()`, `formatTrenchPointsNumber()`, `buildTrenchPointsCsv()`, `buildTrenchPointsExportFilename()`. |
+| Constants | `…/forest-trenches/…/forest-trenches.constantes.ts` | `FOREST_TRENCHES_PLOT_ID`, axis colour, axis point marker (`x-thin`, size 7), `TRENCH_POINTS_EXPORT_FILENAME_PREFIX`, `TRENCH_POINTS_EXPORT_EXTENSION`, `TRENCH_POINTS_EXPORT_PICKER_TYPES`, `TRENCH_POINTS_NUMBER_FORMAT`. |
+| Interfaces | `…/forest-trenches/…/forest-trenches.interfaces.ts` | `ForestTrenchesConfig`, `ForestTrenchesChart`, `ForestTrenchesTableRow`, `ForestTrenchesPlotOptions`, `TrenchPointsRules`. |
+| File export | `core/services/file-export/file-export.service.ts`, `shared/helpers/csv-export.helpers.ts`, `shared/helpers/filename.helpers.ts` | `FileExportService.save()` ("Save as" picker, else download), `buildCsv()`, `CSV_EXPORT_MIME_TYPE`, `sanitizeFilenamePart()`, `formatGenerationDate()`. |
 | Persisted inputs | `shared/domain/models/forest-trenches.model.ts` | `ForestTrenchesInputs`. |
 | Section | `shared/domain/models/section.model.ts` | `forest_trenches?: ForestTrenchesInputs \| null`. |
 | Catalog import | `shared/catalog/csv-import/configs/obstacles.config.helpers.ts` | `assertForestTrenchesConfig()`, `assertForestTrenchesFloorObstacle()`, `buildConformityConfig()`. |
@@ -72,7 +73,7 @@ The obstacle catalog file `public/data/obstacle_configuration.json` has two bloc
 ```json
 "forest_trenches": {
   "ground_n_slicing_points_choices": [5, 9, 17],
-  "overhang_rules_selected": ["RULE_1"],
+  "overhang_rules_selected": ["RULE_1", "RULE_2"],
   "lateral_rules_selected": ["RULE_1", "RULE_2"],
   "chart": {
     "cable": { "marker": "circle", "line": "solid" },
@@ -282,6 +283,21 @@ The application loads the stellar-engine as a wheel. After changing Python files
   `distanceToLeftSupport`, with labels from `forestTrenchesXTickLabels()`, which reduces fractions with the GCD. The legend
   is shown only when the view is enlarged. A `ResizeObserver` calls `resizeForestTrenchesPlot()`, and `purgeForestTrenchesPlot()`
   runs on destroy.
+- **Trench points export.** The footer (`#footer`, registered with the header through `setTemplates({ header, footer })`) holds
+  the **Export** button, disabled while calculating or exporting. `exportTrenchPoints()` never closes the dialog:
+  - `resolveTrenchPointsRules()` picks the rules by position in `lateral_rules_selected`: the first one is AT, the second one
+    CCG-LA. The overhang lines also need both rules in `overhang_rules_selected`.
+  - `buildTrenchPointsCsv()` writes, for each span of `results()` sorted by `spanIndex`, the header from `trenchPointsHeader()`
+    (`[support]`, `'fraction`, `[support]`, built on `forestTrenchesXTickLabels()`), then the 9 lines from
+    `buildTrenchPointsRows()`: absolute `distanceToLeftSupport`, `groundElevation`, `lateral[AT|CCG].axisDistance` and
+    `.limitAxisDistance`, `overhang[AT].heightAboveGround`, `overhang[AT|CCG].complianceLimitHeightAboveGround`. Numbers
+    are formatted by `TRENCH_POINTS_NUMBER_FORMAT` (`fr-FR`, 2 decimals, no grouping) whatever the UI language, then joined by
+    `buildCsv()` (UTF-8 BOM, `;`, CRLF).
+  - `buildTrenchPointsCsv()` returns `null` when there is no result, fewer than 2 lateral rules, or a missing or non-finite value.
+    The component then logs a warning and shows `studio.forest-trenches.export-invalid-data`.
+  - Otherwise, `FileExportService.save()` opens `showSaveFilePicker`. A cancellation writes nothing. Any other error is
+    logged and the file is downloaded through an `<a download>` link. The name comes from `buildTrenchPointsExportFilename()`:
+    `Export PointsTranchee_<section>_<YYYY-MM-DD>.csv`.
 
 ---
 
@@ -289,6 +305,7 @@ The application loads the stellar-engine as a wheel. After changing Python files
 
 - `features/studio/forest-trenches/…/forest-trenches.component.spec.ts`
 - `features/studio/forest-trenches/…/forest-trenches.helpers.spec.ts`
+- `core/services/file-export/file-export.service.spec.ts`
 - `shared/catalog/csv-import/configs/obstacles.config.spec.ts`
 - `stellar-engine/test/core/conformity/test_forest_trench.py`
 - `stellar-engine/test/core/conformity/test_forest_trench_ground.py`

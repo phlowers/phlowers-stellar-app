@@ -1071,6 +1071,7 @@
     },
     "forest-trenches": {
       "title": "Forest trenches",
+      "export-invalid-data": "Export failed: the forest trenches results are missing or incomplete",
       "missing-configuration": "Forest trenches configuration is missing from the obstacle catalog. Close every other Stellar tab, then reload the application to update the catalogs.",
       "span-information": "Span information",
       "first-support": "First support",

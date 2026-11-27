@@ -165,6 +165,36 @@ does not run by itself: click **Calculate** to show the results.
 
 ---
 
+## Trench points export
+
+The **Export** button, at the bottom right of the window, saves the displayed results in a trench points
+CSV file. The window stays open.
+
+- The browser asks where to save the file. When it cannot, the file is downloaded to the usual download
+  folder. Closing the save window cancels the export.
+- The file is named `Export PointsTranchee_<section name>_<YYYY-MM-DD>.csv`, with the export date.
+- It holds one block per calculated span, in span order. Each block starts with a header line:
+  `[<left support>]`, then the span fraction of each intermediate point, prefixed with an apostrophe (for
+  example `'1/8`), then `[<right support>]`.
+- 9 lines follow, without label or unit. Each one matches a row of the table:
+  1. **Distance to left support**;
+  2. **Ground elevation**;
+  3. **Span axis to cable** for AT;
+  4. **Span axis to lateral limit** for AT;
+  5. **Span axis to cable** for CCG-LA;
+  6. **Span axis to lateral limit** for CCG-LA;
+  7. overhang **Cable height** for AT;
+  8. **Overhang compliance limit height** for AT;
+  9. **Overhang compliance limit height** for CCG-LA.
+- Values are in metres, with a comma and 2 decimals (`2,00`), separated by semicolons, whatever the
+  application language.
+- AT and CCG-LA are the first two lateral rules of the catalog. The export is only possible when both
+  rules were calculated, lateral and overhang: select both of them in **Conformity** before clicking
+  **Calculate**.
+- The results are not saved: after reopening the tool, click **Calculate** again before exporting.
+
+---
+
 ## Typical workflow
 
 1. Open the tool from **Tools** → **Forest trenches**.
@@ -172,6 +202,7 @@ does not run by itself: click **Calculate** to show the results.
 3. Check the electric tension, the **Wind zone**, the temperatures and the rules.
 4. Click **Calculate**.
 5. Browse the spans with the **Span** list, and read the graph and the table.
+6. Click **Export** to save the trench points file.
 
 ---
 
@@ -200,6 +231,7 @@ does not run by itself: click **Calculate** to show the results.
 |---|---|
 | **Forest trenches inputs saved.** | The calculation succeeded and the form values are saved with the section. |
 | **Forest trenches calculation failed: …** | The calculation could not complete. The message gives the cause. Nothing is saved. |
+| **Export failed: the forest trenches results are missing or incomplete** | No calculation was run since the tool was opened, or AT or CCG-LA was not calculated (rule not selected, or catalog without the CCG-LA overhang). No file is created. |
 | *Forest trenches configuration is missing from the obstacle catalog…* | The catalog has no configuration for this tool. Close the other Stellar tabs, then reload the application. |
 
 ---

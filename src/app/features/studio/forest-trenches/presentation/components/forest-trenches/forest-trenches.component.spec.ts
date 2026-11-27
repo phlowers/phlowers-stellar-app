@@ -18,6 +18,8 @@ import { PythonErrorCode, Task, TaskError } from '@services/worker_python/tasks/
 import { NotificationService } from '@services/notification/notification.service';
 import { ToolbarDialogService } from '@features/studio/toolbar/presentation/services/toolbar-dialog.service';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { FileExportService } from '@core/services/file-export/file-export.service';
+import { CSV_BOM, CSV_EXPORT_MIME_TYPE } from '@shared/helpers/csv-export.constantes';
 import { ForestTrenchesComponent } from './forest-trenches.component';
 import { FOREST_TRENCHES_CALCULATION_TIMEOUT_MS } from './forest-trenches.constantes';
 import { createForestTrenchesPlot } from './forest-trenches.helpers';
@@ -41,6 +43,7 @@ describe('ForestTrenchesComponent', () => {
   let sectionService: { createOrUpdateSection: ReturnType<typeof vi.fn> };
   let notificationService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
   let logger: { error: ReturnType<typeof vi.fn>; warn: ReturnType<typeof vi.fn> };
+  let fileExport: { save: ReturnType<typeof vi.fn> };
 
   async function createComponent(
     initialSection = makeSection(),
@@ -51,6 +54,7 @@ describe('ForestTrenchesComponent', () => {
     sectionService = { createOrUpdateSection: vi.fn().mockResolvedValue({ removedGeometryBoundObjects: false }) };
     notificationService = { success: vi.fn(), error: vi.fn() };
     logger = { error: vi.fn(), warn: vi.fn() };
+    fileExport = { save: vi.fn().mockResolvedValue('saved') };
     workerPython = {
       runTask: vi.fn().mockResolvedValue({
         result: { distances: [0, 100], altitudes: [10, 12], length: 100 },
@@ -79,7 +83,8 @@ describe('ForestTrenchesComponent', () => {
         { provide: SectionService, useValue: sectionService },
         { provide: WorkerPythonService, useValue: workerPython },
         { provide: NotificationService, useValue: notificationService },
-        { provide: LoggerService, useValue: logger }
+        { provide: LoggerService, useValue: logger },
+        { provide: FileExportService, useValue: fileExport }
       ]
     }).compileComponents();
 
@@ -113,14 +118,83 @@ describe('ForestTrenchesComponent', () => {
     expect(component.canCalculate()).toBe(true);
   });
 
-  it('renders the header template and registers it in the toolbar dialog', async () => {
+  it('renders the header and footer templates and registers them in the toolbar dialog', async () => {
     await createComponent();
     const toolbarDialog = TestBed.inject(ToolbarDialogService);
 
     expect(component.headerTemplate()).toBeDefined();
     expect(toolbarDialog.templates().header).toBe(component.headerTemplate());
+    expect(toolbarDialog.templates().footer).toBe(component.footerTemplate());
     expect(getByTestId('forest-trenches-missing-configuration')).toBeNull();
     expect(getByTestId('forest-trenches-median-f1')).toBeNull();
+  });
+
+  describe('trench points export', () => {
+    const TRENCH_POINTS_CONFIG = {
+      forest_trenches_overhang_rules: ['RULE_1', 'RULE_2'],
+      forest_trenches_lateral_rules: ['RULE_1', 'RULE_2']
+    };
+
+    function renderFooter(): HTMLElement {
+      const footer = TestBed.inject(ToolbarDialogService).templates().footer;
+      const view = footer!.createEmbeddedView({});
+      view.detectChanges();
+      return view.rootNodes[0] as HTMLElement;
+    }
+
+    it('renders the Export button and disables it while calculating', async () => {
+      await createComponent();
+
+      const button = renderFooter();
+      expect(button.dataset['testid']).toBe('forest-trenches-export-btn');
+      expect(button.hasAttribute('disabled')).toBe(false);
+
+      component.isCalculating.set(true);
+      expect(renderFooter().hasAttribute('disabled')).toBe(true);
+    });
+
+    it('notifies an error and saves nothing when there is no result', async () => {
+      await createComponent(makeSection(), TRENCH_POINTS_CONFIG);
+
+      await component.exportTrenchPoints();
+
+      expect(notificationService.error).toHaveBeenCalledWith('studio.forest-trenches.export-invalid-data');
+      expect(logger.warn).toHaveBeenCalled();
+      expect(fileExport.save).not.toHaveBeenCalled();
+    });
+
+    it('notifies an error when the catalog holds a single lateral rule', async () => {
+      await createComponent();
+      await component.calculate();
+
+      await component.exportTrenchPoints();
+
+      expect(notificationService.error).toHaveBeenCalledWith('studio.forest-trenches.export-invalid-data');
+      expect(fileExport.save).not.toHaveBeenCalled();
+    });
+
+    it('saves the trench points CSV of every span without closing the dialog', async () => {
+      await createComponent({ ...makeSection(), name: 'Canton' } as Section, TRENCH_POINTS_CONFIG);
+      workerPython.runTaskWithTimeout.mockResolvedValue({
+        result: { spans: [makeTrenchPointsSpanOutput(0), makeTrenchPointsSpanOutput(1)] },
+        error: null,
+        diagnostics: []
+      });
+      const closeTool = vi.spyOn(TestBed.inject(ToolbarDialogService), 'closeTool');
+      await component.calculate();
+
+      await component.exportTrenchPoints();
+
+      expect(notificationService.error).not.toHaveBeenCalled();
+      expect(fileExport.save).toHaveBeenCalledTimes(1);
+      const [content, filename, options] = fileExport.save.mock.calls[0];
+      expect(content.startsWith(`${CSV_BOM}[1];[2]\r\n0,00;100,00\r\n`)).toBe(true);
+      expect(content).toContain('\r\n[2];[3]\r\n');
+      expect(filename).toMatch(/^Export PointsTranchee_Canton_\d{4}-\d{2}-\d{2}\.csv$/);
+      expect(options).toMatchObject({ mimeType: CSV_EXPORT_MIME_TYPE });
+      expect(component.isExporting()).toBe(false);
+      expect(closeTool).not.toHaveBeenCalled();
+    });
   });
 
   it('keeps Calculate disabled and warns once when the stored config predates forest trenches fields', async () => {
@@ -630,5 +704,21 @@ function makeForestPoint(distance: number) {
     lateral: { RULE_1: { axisDistance: 5, elevation: 31, limitAxisDistance: 6 } },
     lateralInverse: { RULE_1: { axisDistance: -5, elevation: 31, limitAxisDistance: -6 } },
     overhang: { RULE_1: { elevation: 32, heightAboveGround: 22, complianceLimitHeightAboveGround: 20 } }
+  };
+}
+
+// Span output computed with both trench points rules (RULE_1 as AT, RULE_2 as CCG-LA)
+function makeTrenchPointsSpanOutput(spanIndex: number) {
+  const span = makeSpanOutput(spanIndex);
+  return {
+    ...span,
+    points: span.points.map((point) => ({
+      ...point,
+      lateral: { ...point.lateral, RULE_2: { axisDistance: 7, elevation: 31, limitAxisDistance: 8 } },
+      overhang: {
+        ...point.overhang,
+        RULE_2: { elevation: 30, heightAboveGround: 20, complianceLimitHeightAboveGround: 18 }
+      }
+    }))
   };
 }

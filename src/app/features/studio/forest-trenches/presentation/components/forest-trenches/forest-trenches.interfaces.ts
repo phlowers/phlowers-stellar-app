@@ -62,6 +62,12 @@ export interface ForestTrenchesPlotOptions {
 
 export type ForestTrenchesSpan = ForestTrenchesSpanOutput;
 
+/** Rule types of the two trench points export scenarios: AT (15 °C) and CCG-LA (form temperature). */
+export interface TrenchPointsRules {
+  at: string;
+  ccg: string;
+}
+
 /** Marker and line styles of the cable and limit series, as catalog style names. */
 export interface ForestTrenchesChart {
   cable: ForestTrenchesChartSeriesStyle;

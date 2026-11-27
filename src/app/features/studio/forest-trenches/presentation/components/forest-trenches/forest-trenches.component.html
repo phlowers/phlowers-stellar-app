@@ -5,6 +5,20 @@
   </p>
 </ng-template>
 
+<ng-template #footer>
+  <button
+    app-btn
+    type="button"
+    [btnLoading]="isExporting()"
+    [disabled]="isCalculating() || isExporting()"
+    (click)="exportTrenchPoints()"
+    data-testid="forest-trenches-export-btn"
+  >
+    <app-icon icon="download" aria-hidden="true" />
+    <span>{{ 'common.export' | transloco }}</span>
+  </button>
+</ng-template>
+
 <div class="forest-trenches" [attr.aria-busy]="isCalculating()">
   @if (!isGraphEnlarged()) {
     <form

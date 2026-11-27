@@ -1071,6 +1071,7 @@
     },
     "forest-trenches": {
       "title": "Tranchées forestières",
+      "export-invalid-data": "Export impossible : les résultats des tranchées forestières sont absents ou incomplets",
       "missing-configuration": "La configuration des tranchées forestières est absente du catalogue des obstacles. Fermez les autres onglets Stellar, puis rechargez l'application pour mettre à jour les catalogues.",
       "span-information": "Informations sur les portées",
       "first-support": "Support de départ",

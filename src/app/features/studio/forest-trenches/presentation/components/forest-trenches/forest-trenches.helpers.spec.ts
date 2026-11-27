@@ -15,14 +15,20 @@ import type { ForestTrenchesSpanOutput } from '@services/worker_python/tasks/typ
 import { FOREST_TRENCHES_PLOT_ID } from './forest-trenches.constantes';
 import {
   buildForestTrenchesRows,
+  buildTrenchPointsCsv,
+  buildTrenchPointsExportFilename,
+  buildTrenchPointsRows,
   createForestTrenchesPlot,
+  formatTrenchPointsNumber,
   fractionLabel,
   getForestTrenchesConfig,
   forestTrenchesXTickLabels,
   purgeForestTrenchesPlot,
   resizeForestTrenchesPlot,
+  resolveTrenchPointsRules,
   spansInInterval,
-  toSliceGroundInput
+  toSliceGroundInput,
+  trenchPointsHeader
 } from './forest-trenches.helpers';
 
 vi.mock('plotly.js-dist-min', () => ({
@@ -390,7 +396,133 @@ describe('forest trenches helpers', () => {
       expect(Plotly.purge).toHaveBeenCalledWith(FOREST_TRENCHES_PLOT_ID);
     });
   });
+
+  describe('trench points export', () => {
+    const rules = { at: 'RULE_1', ccg: 'RULE_2' };
+
+    it('should build the header with bracketed supports and simplified fractions', () => {
+      expect(trenchPointsHeader('A', 'B', 5)).toEqual(['[A]', "'1/4", "'1/2", "'3/4", '[B]']);
+      expect(trenchPointsHeader('A', 'B', 9)).toEqual([
+        '[A]',
+        "'1/8",
+        "'1/4",
+        "'3/8",
+        "'1/2",
+        "'5/8",
+        "'3/4",
+        "'7/8",
+        '[B]'
+      ]);
+
+      const header17 = trenchPointsHeader('A', 'B', 17);
+      expect(header17).toHaveLength(17);
+      expect(header17[10]).toBe("'5/8");
+      expect(header17).not.toContain("'10/16");
+      expect(header17[1]).toBe("'1/16");
+    });
+
+    it('should resolve AT and CCG-LA from the first two lateral rules', () => {
+      expect(resolveTrenchPointsRules({ lateralRules: ['AT', 'CCG-LA', 'OTHER'] })).toEqual({
+        at: 'AT',
+        ccg: 'CCG-LA'
+      });
+      expect(resolveTrenchPointsRules({ lateralRules: ['AT'] })).toBeNull();
+      expect(resolveTrenchPointsRules(null)).toBeNull();
+    });
+
+    it('should format numbers with a comma and 2 decimals, without grouping', () => {
+      expect(formatTrenchPointsNumber(2)).toBe('2,00');
+      expect(formatTrenchPointsNumber(1234.567)).toBe('1234,57');
+      expect(formatTrenchPointsNumber(-1.5)).toBe('-1,50');
+      expect(formatTrenchPointsNumber(-0.001)).toBe('0,00');
+    });
+
+    it('should build the 9 rows in the export order', () => {
+      const rows = buildTrenchPointsRows(makeTrenchPointsSpan(1, 2), rules);
+
+      expect(rows?.map((row) => row[0])).toEqual([2, 100, 3, 4, 5, 6, 7, 8, 9]);
+    });
+
+    it('should export the distance to the left support as the first line of the EXP-VEG example', () => {
+      const rows = buildTrenchPointsRows(makeTrenchPointsSpan(1, 9), rules);
+
+      expect(rows?.[0].map(formatTrenchPointsNumber).join(';')).toBe(
+        '2,00;52,00;102,00;152,00;202,00;252,00;302,00;352,00;402,00'
+      );
+    });
+
+    it('should return null when the CCG-LA overhang result is missing', () => {
+      const span = makeTrenchPointsSpan(1, 2);
+      delete span.points[1].overhang['RULE_2'];
+
+      expect(buildTrenchPointsRows(span, rules)).toBeNull();
+    });
+
+    it('should return null when a value is not finite', () => {
+      const span = makeTrenchPointsSpan(1, 2);
+      span.points[0].lateral['RULE_1'].axisDistance = Number.NaN;
+
+      expect(buildTrenchPointsRows(span, rules)).toBeNull();
+    });
+
+    it('should build one block per span, sorted by span index', () => {
+      const label = (index: number) => `S${index}`;
+      const csv = buildTrenchPointsCsv([makeTrenchPointsSpan(2, 2), makeTrenchPointsSpan(1, 2)], rules, label);
+      const lines = csv?.slice(1).split('\r\n');
+
+      expect(csv?.startsWith('\uFEFF[S1];[S2]\r\n')).toBe(true);
+      expect(lines).toHaveLength(21);
+      expect(lines?.[1]).toBe('2,00;52,00');
+      expect(lines?.[10]).toBe('[S2];[S3]');
+      expect(lines?.[20]).toBe('');
+    });
+
+    it('should return null without span, with a single lateral rule or with an invalid span', () => {
+      const invalid = makeTrenchPointsSpan(2, 2);
+      invalid.points[0].groundElevation = Number.POSITIVE_INFINITY;
+
+      expect(buildTrenchPointsCsv([], rules, String)).toBeNull();
+      expect(
+        buildTrenchPointsCsv(
+          [makeTrenchPointsSpan(1, 2)],
+          resolveTrenchPointsRules({ lateralRules: ['RULE_1'] }),
+          String
+        )
+      ).toBeNull();
+      expect(buildTrenchPointsCsv([makeTrenchPointsSpan(1, 2), invalid], rules, String)).toBeNull();
+    });
+
+    it('should build the file name from the section name and the local generation date', () => {
+      expect(buildTrenchPointsExportFilename('Canton/Nord', new Date(2026, 10, 6, 9, 5))).toBe(
+        'Export PointsTranchee_Canton-Nord_2026-11-06.csv'
+      );
+    });
+  });
 });
+
+/** Trench points span whose values identify their row: 3 to 9 for rows 3 to 9, distances 2 + 50·k. */
+function makeTrenchPointsSpan(spanIndex: number, nPoints: number): ForestTrenchesSpanOutput {
+  return {
+    spanIndex,
+    length: 400,
+    medianF1: 1,
+    axis: [],
+    plot: { lateral: {}, lateralInverse: {}, overhang: {} },
+    points: Array.from({ length: nPoints }, (_, k) => ({
+      distanceToLeftSupport: -(2 + 50 * k),
+      groundElevation: 100,
+      lateral: {
+        RULE_1: { axisDistance: 3, elevation: 0, limitAxisDistance: 4 },
+        RULE_2: { axisDistance: 5, elevation: 0, limitAxisDistance: 6 }
+      },
+      lateralInverse: {},
+      overhang: {
+        RULE_1: { elevation: 0, heightAboveGround: 7, complianceLimitHeightAboveGround: 8 },
+        RULE_2: { elevation: 0, heightAboveGround: -1, complianceLimitHeightAboveGround: 9 }
+      }
+    }))
+  };
+}
 
 function ruleDefinition(ruleType: string, ruleName: string): CatalogObstacleRuleDefinitionEntity {
   return {

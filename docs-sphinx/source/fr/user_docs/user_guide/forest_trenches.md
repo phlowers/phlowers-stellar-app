@@ -174,6 +174,38 @@ mais le calcul ne se relance pas tout seul : cliquez sur **Calculer** pour affic
 
 ---
 
+## Export des points de tranchée
+
+Le bouton **Export**, en bas à droite de la fenêtre, enregistre les résultats affichés dans un fichier
+CSV de points de tranchée. La fenêtre reste ouverte.
+
+- Le navigateur demande où enregistrer le fichier. S'il ne le permet pas, le fichier est téléchargé dans
+  le dossier de téléchargement habituel. Fermer la fenêtre de choix annule l'export.
+- Le fichier s'appelle `Export PointsTranchee_<nom du canton>_<AAAA-MM-JJ>.csv`, avec la date de
+  l'export.
+- Il contient un bloc par portée calculée, dans l'ordre des portées. Chaque bloc commence par une ligne
+  d'en-tête : `[<support de gauche>]`, puis la fraction de portée de chaque point intermédiaire, précédée
+  d'une apostrophe (par exemple `'1/8`), puis `[<support de droite>]`.
+- Viennent ensuite 9 lignes, sans libellé ni unité. Chacune reprend une ligne du tableau :
+  1. **Distance au support de gauche** ;
+  2. **Altitude du sol** ;
+  3. **Axe de la portée au câble** pour AT ;
+  4. **Axe de la portée à la limite latérale** pour AT ;
+  5. **Axe de la portée au câble** pour CCG-LA ;
+  6. **Axe de la portée à la limite latérale** pour CCG-LA ;
+  7. **Hauteur du câble** en surplomb pour AT ;
+  8. **Hauteur limite de conformité en surplomb** pour AT ;
+  9. **Hauteur limite de conformité en surplomb** pour CCG-LA.
+- Les valeurs sont en mètres, avec une virgule et 2 décimales (`2,00`), séparées par des
+  points-virgules, quelle que soit la langue de l'application.
+- AT et CCG-LA sont les deux premières règles latérales du catalogue. L'export n'est possible que si
+  ces deux règles ont été calculées, en latéral comme en surplomb : sélectionnez-les toutes les deux dans
+  **Conformité** avant de cliquer sur **Calculer**.
+- Les résultats ne sont pas enregistrés : après avoir rouvert l'outil, cliquez de nouveau sur
+  **Calculer** avant d'exporter.
+
+---
+
 ## Flux type
 
 1. Ouvrez l'outil depuis **Outils** → **Tranchées forestières**.
@@ -182,6 +214,7 @@ mais le calcul ne se relance pas tout seul : cliquez sur **Calculer** pour affic
 3. Vérifiez la tension électrique, la **zone de vent**, les températures et les règles.
 4. Cliquez sur **Calculer**.
 5. Parcourez les portées avec la liste **Portée**, et lisez le graphique et le tableau.
+6. Cliquez sur **Export** pour enregistrer le fichier des points de tranchée.
 
 ---
 
@@ -212,6 +245,7 @@ mais le calcul ne se relance pas tout seul : cliquez sur **Calculer** pour affic
 |---|---|
 | **Les paramètres des tranchées forestières ont été enregistrés.** | Le calcul a réussi et les valeurs du formulaire sont enregistrées avec le canton. |
 | **Échec du calcul des tranchées forestières : …** | Le calcul n'a pas pu aboutir. Le message indique la cause. Rien n'est enregistré. |
+| **Export impossible : les résultats des tranchées forestières sont absents ou incomplets** | Aucun calcul n'a été fait depuis l'ouverture de l'outil, ou AT ou CCG-LA n'a pas été calculée (règle non sélectionnée, ou catalogue sans surplomb CCG-LA). Aucun fichier n'est créé. |
 | *La configuration des tranchées forestières est absente du catalogue des obstacles…* | Le catalogue ne contient pas la configuration de l'outil. Fermez les autres onglets de Stellar, puis rechargez l'application. |
 
 ---

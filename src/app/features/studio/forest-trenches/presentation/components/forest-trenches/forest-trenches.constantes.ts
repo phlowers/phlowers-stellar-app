@@ -14,6 +14,17 @@ export const FOREST_TRENCHES_PLOT_COLORS = {
   axis: '#000000'
 } as const;
 
+// The trench points file name and number format are a contract with a third-party application: never translated
+export const TRENCH_POINTS_EXPORT_FILENAME_PREFIX = 'Export PointsTranchee';
+export const TRENCH_POINTS_EXPORT_EXTENSION = '.csv';
+export const TRENCH_POINTS_EXPORT_PICKER_TYPES = [{ description: 'CSV', accept: { 'text/csv': ['.csv'] } }];
+export const TRENCH_POINTS_NUMBER_FORMAT = new Intl.NumberFormat('fr-FR', {
+  useGrouping: false,
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+  signDisplay: 'negative'
+});
+
 /** Small thin cross drawn on the span axis at every ground slicing point. */
 export const FOREST_TRENCHES_AXIS_POINT_MARKER = {
   symbol: 'x-thin',

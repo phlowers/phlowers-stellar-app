@@ -12,10 +12,15 @@ import { getPlotlyBaseLayout } from '@shared/constants/plotly-base-layout.consta
 import { PlotlyDrawings } from '@shared/constants/plotly-drawings.constantes';
 import { PLOTLY_LINE_DASHES, PLOTLY_MARKER_SYMBOLS } from '@shared/constants/plotly-styles.constantes';
 import type { ForestTrenchesSpanOutput, SliceGroundInput } from '@services/worker_python/tasks/types';
+import { buildCsv } from '@shared/helpers/csv-export.helpers';
+import { formatGenerationDate, sanitizeFilenamePart } from '@shared/helpers/filename.helpers';
 import {
   FOREST_TRENCHES_AXIS_POINT_MARKER,
   FOREST_TRENCHES_PLOT_COLORS,
-  FOREST_TRENCHES_PLOT_ID
+  FOREST_TRENCHES_PLOT_ID,
+  TRENCH_POINTS_EXPORT_EXTENSION,
+  TRENCH_POINTS_EXPORT_FILENAME_PREFIX,
+  TRENCH_POINTS_NUMBER_FORMAT
 } from './forest-trenches.constantes';
 import type {
   CatalogObstacleConformityConfigEntity,
@@ -27,7 +32,8 @@ import type {
   ForestTrenchesPlotOptions,
   ForestTrenchesRowsConfig,
   ForestTrenchesTableRow,
-  ForestTrenchesTranslate
+  ForestTrenchesTranslate,
+  TrenchPointsRules
 } from './forest-trenches.interfaces';
 
 const HOVER_TEMPLATE = '%{x:.2f} m, %{y:.2f} m<extra></extra>';
@@ -260,6 +266,91 @@ function requireRuleValue<T>(value: T | undefined, ruleType: string, category: s
     throw new Error(`Missing ${category} result for rule "${ruleType}".`);
   }
   return value;
+}
+
+/**
+ * Builds the header line of a trench points span block: `[first]`, then `'<simplified fraction>` for each
+ * intermediate point (e.g. `'5/8`), then `[last]`.
+ * @throws When a support name is empty or `nPoints` is lower than 2 (see `forestTrenchesXTickLabels`)
+ */
+export function trenchPointsHeader(firstSupportName: string, lastSupportName: string, nPoints: number): string[] {
+  const labels = forestTrenchesXTickLabels(firstSupportName, lastSupportName, nPoints);
+  return labels.map((label, index) => (index === 0 || index === nPoints - 1 ? `[${label}]` : `'${label}`));
+}
+
+/**
+ * Picks the trench points rules by position in `lateral_rules_selected`: AT first, CCG-LA second.
+ * @returns null when the config is missing or holds fewer than 2 lateral rules
+ */
+export function resolveTrenchPointsRules(
+  config: Pick<ForestTrenchesConfig, 'lateralRules'> | null
+): TrenchPointsRules | null {
+  const [at, ccg] = config?.lateralRules ?? [];
+  return at && ccg ? { at, ccg } : null;
+}
+
+/** Formats a trench points number: 2 decimals, comma separator, no grouping (e.g. `-1234,50`), whatever the UI language. */
+export function formatTrenchPointsNumber(value: number): string {
+  return TRENCH_POINTS_NUMBER_FORMAT.format(value);
+}
+
+/**
+ * Builds the 9 trench points lines of a span, in this order: distance to the left support, ground elevation,
+ * axis-cable distance and lateral limit for AT, then for CCG-LA, cable height above the ground in the AT overhang
+ * state, overhang limit height for AT, then for CCG-LA.
+ * @returns The raw values, or null when a value is missing (rule not computed) or not finite
+ */
+export function buildTrenchPointsRows(span: ForestTrenchesSpanOutput, rules: TrenchPointsRules): number[][] | null {
+  const { points } = span;
+  const rows = [
+    points.map((point) => Math.abs(point.distanceToLeftSupport)),
+    points.map((point) => point.groundElevation),
+    points.map((point) => point.lateral[rules.at]?.axisDistance),
+    points.map((point) => point.lateral[rules.at]?.limitAxisDistance),
+    points.map((point) => point.lateral[rules.ccg]?.axisDistance),
+    points.map((point) => point.lateral[rules.ccg]?.limitAxisDistance),
+    points.map((point) => point.overhang[rules.at]?.heightAboveGround),
+    points.map((point) => point.overhang[rules.at]?.complianceLimitHeightAboveGround),
+    points.map((point) => point.overhang[rules.ccg]?.complianceLimitHeightAboveGround)
+  ];
+  const isValid = (row: (number | undefined)[]): row is number[] =>
+    row.every((value) => typeof value === 'number' && Number.isFinite(value));
+  return rows.every(isValid) ? rows : null;
+}
+
+/**
+ * Builds the trench points CSV: one block per span, sorted by span index, each made of the header line and the
+ * 9 formatted lines of `buildTrenchPointsRows`.
+ * @param supportLabel - Resolves the display name of a support from its index
+ * @returns The CSV content, or null when there is no span, no rules, or a span has invalid data
+ */
+export function buildTrenchPointsCsv(
+  spans: readonly ForestTrenchesSpanOutput[],
+  rules: TrenchPointsRules | null,
+  supportLabel: (supportIndex: number) => string
+): string | null {
+  if (!rules || spans.length === 0) return null;
+  const lines: string[][] = [];
+  for (const span of [...spans].sort((a, b) => a.spanIndex - b.spanIndex)) {
+    const rows = span.points.length >= 2 ? buildTrenchPointsRows(span, rules) : null;
+    if (!rows) return null;
+    lines.push(
+      trenchPointsHeader(supportLabel(span.spanIndex), supportLabel(span.spanIndex + 1), span.points.length),
+      ...rows.map((row) => row.map(formatTrenchPointsNumber))
+    );
+  }
+  return buildCsv(lines);
+}
+
+/** Builds the trench points file name: `Export PointsTranchee_<section name>_<YYYY-MM-DD>.csv`. */
+export function buildTrenchPointsExportFilename(sectionName: string, generationDate: Date = new Date()): string {
+  return (
+    [
+      TRENCH_POINTS_EXPORT_FILENAME_PREFIX,
+      sanitizeFilenamePart(sectionName),
+      formatGenerationDate(generationDate)
+    ].join('_') + TRENCH_POINTS_EXPORT_EXTENSION
+  );
 }
 
 function scenarioTrace(

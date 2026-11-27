@@ -45,6 +45,8 @@ import { PythonDiagnostic } from '@services/worker_python/tasks/python-diagnosti
 import { Task, TaskError, TaskInputs } from '@services/worker_python/tasks/types';
 import { NotificationService } from '@services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { FileExportService } from '@core/services/file-export/file-export.service';
+import { CSV_EXPORT_MIME_TYPE } from '@shared/helpers/csv-export.constantes';
 import { maxDecimalsValidator } from '@shared/helpers/numberValidators';
 import { ButtonComponent } from '@shared/components/atoms/button/button.component';
 import { IconComponent } from '@shared/components/atoms/icon/icon.component';
@@ -57,15 +59,22 @@ import {
 } from '@features/studio/obstacles/presentation/components/conformity/conformity.helpers';
 import {
   buildForestTrenchesRows,
+  buildTrenchPointsCsv,
+  buildTrenchPointsExportFilename,
   createForestTrenchesPlot,
   forestTrenchesXTickLabels,
   getForestTrenchesConfig,
   purgeForestTrenchesPlot,
   resizeForestTrenchesPlot,
+  resolveTrenchPointsRules,
   spansInInterval,
   toSliceGroundInput
 } from './forest-trenches.helpers';
-import { FOREST_TRENCHES_CALCULATION_TIMEOUT_MS, FOREST_TRENCHES_PLOT_ID } from './forest-trenches.constantes';
+import {
+  FOREST_TRENCHES_CALCULATION_TIMEOUT_MS,
+  FOREST_TRENCHES_PLOT_ID,
+  TRENCH_POINTS_EXPORT_PICKER_TYPES
+} from './forest-trenches.constantes';
 import { ForestTrenchesError } from './forest-trenches.errors';
 import type {
   ForestTrenchesCatalogData,
@@ -110,7 +119,9 @@ export class ForestTrenchesComponent implements OnDestroy {
   private readonly injector = inject(Injector);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toolbarDialogService = inject(ToolbarDialogService);
+  private readonly fileExportService = inject(FileExportService);
   readonly headerTemplate = viewChild<TemplateRef<unknown>>('header');
+  readonly footerTemplate = viewChild<TemplateRef<unknown>>('footer');
 
   /** Gates the form's collapse/expand animation so it doesn't fire while the dialog opens. */
   readonly animationsReady = signal(false);
@@ -149,6 +160,7 @@ export class ForestTrenchesComponent implements OnDestroy {
 
   readonly spanControl = new FormControl<number | null>(null);
   readonly isCalculating = signal(false);
+  readonly isExporting = signal(false);
   readonly calculationError = signal<string | null>(null);
   readonly isGraphEnlarged = signal(false);
   private readonly resultsState = signal<ForestTrenchesSpan[]>([]);
@@ -270,10 +282,11 @@ export class ForestTrenchesComponent implements OnDestroy {
     );
   });
 
-  private readonly registerHeader = effect(() => {
+  private readonly registerTemplates = effect(() => {
     const header = this.headerTemplate();
-    if (header) {
-      this.toolbarDialogService.setTemplates({ header });
+    const footer = this.footerTemplate();
+    if (header && footer) {
+      this.toolbarDialogService.setTemplates({ header, footer });
     }
   });
 
@@ -565,6 +578,30 @@ export class ForestTrenchesComponent implements OnDestroy {
   toggleGraphSize(): void {
     this.isGraphEnlarged.update((enlarged) => !enlarged);
     afterNextRender(() => resizeForestTrenchesPlot(this.document), { injector: this.injector });
+  }
+
+  /**
+   * Exports the displayed results of every computed span as a trench points CSV, without closing the dialog.
+   * Notifies an error when the results are missing or incomplete (e.g. CCG-LA overhang not computed).
+   */
+  async exportTrenchPoints(): Promise<void> {
+    const csv = buildTrenchPointsCsv(this.results(), resolveTrenchPointsRules(this.forestConfig()), (index) =>
+      this.supportLabel(index)
+    );
+    if (csv === null) {
+      this.logger.warn('Forest trenches points export aborted: results are missing or incomplete');
+      this.notificationService.error(this.translocoService.translate('studio.forest-trenches.export-invalid-data'));
+      return;
+    }
+    this.isExporting.set(true);
+    try {
+      await this.fileExportService.save(csv, buildTrenchPointsExportFilename(this.spanService.section()?.name ?? ''), {
+        mimeType: CSV_EXPORT_MIME_TYPE,
+        pickerTypes: TRENCH_POINTS_EXPORT_PICKER_TYPES
+      });
+    } finally {
+      this.isExporting.set(false);
+    }
   }
 
   ngOnDestroy(): void {
