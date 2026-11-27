@@ -45,16 +45,18 @@
       data-testid="span-select"
     />
 
-    <label for="obstacleType" class="type-label">{{ 'common.obstacle-type-label' | transloco }}</label>
+    <label for="referenceSupport" class="ref-label">{{ 'common.reference-support-label' | transloco }}</label>
 
     <p-select
-      inputId="obstacleType"
-      [options]="obstacleTypeOptions()"
-      formControlName="type"
+      inputId="referenceSupport"
+      [options]="obstacleFormService.supportsOptions()"
+      formControlName="referenceSupport"
       optionLabel="label"
       optionValue="value"
-      class="type-input"
-      data-testid="obstacle-type"
+      class="ref-input"
+      data-testid="reference-support"
+      [emptyFilterMessage]="'common.support-emptyFilter' | transloco"
+      [emptyMessage]="'common.support-empty' | transloco"
     />
   </div>
 
@@ -71,15 +73,16 @@
       data-testid="obstacle-name"
     />
 
-    <label for="referenceSupport" class="ref-label">{{ 'common.reference-support-label' | transloco }}</label>
+    <label for="obstacleType" class="type-label">{{ 'common.obstacle-type-label' | transloco }}</label>
+
     <p-select
-      inputId="referenceSupport"
-      [options]="obstacleFormService.supportsOptions()"
-      formControlName="referenceSupport"
+      inputId="obstacleType"
+      [options]="obstacleTypeOptions()"
+      formControlName="type"
       optionLabel="label"
       optionValue="value"
-      class="ref-input"
-      data-testid="reference-support"
+      class="type-input"
+      data-testid="obstacle-type"
     />
   </div>
 

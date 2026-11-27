@@ -31,6 +31,8 @@
             formControlName="selectedSupport"
             appendTo="body"
             data-testid="reference-support-select"
+            [emptyFilterMessage]="'common.support-emptyFilter' | transloco"
+            [emptyMessage]="'common.support-empty' | transloco"
           />
         </div>
         <dl class="vtl-guying__support-type">

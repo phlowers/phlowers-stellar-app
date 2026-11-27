@@ -16,7 +16,7 @@ export const PDF_LABEL_KEYS: FieldMeasureReportLabels = {
   pageLabel: 'common.page-label',
   author: 'common.author-label',
   study: 'common.study-label',
-  studyDescription: 'common.description-label',
+  studyDescription: 'common.study-description-label',
   canton: 'common.section-label',
   comment: 'common.comment-label',
   initialCondition: 'common.initial-condition-label',

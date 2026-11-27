@@ -10,7 +10,7 @@ import { ProviderScope } from '@jsverse/transloco';
 export const RTE_CUSTOM_ADAPTER_ID = 'rte_custom';
 
 /** User-facing format name (proper noun, not translated). */
-export const RTE_CUSTOM_FORMAT_LABEL = 'RTE canton (.json)';
+export const RTE_CUSTOM_FORMAT_LABEL = 'Canton Géoliaison (.json)';
 
 /** File extensions handled by the RTE canton adapter. */
 export const RTE_CUSTOM_EXTENSIONS = ['.json'] as const;

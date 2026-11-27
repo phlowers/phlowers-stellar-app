@@ -52,7 +52,7 @@ export const PDF_LABEL_KEYS: CantonReportLabels = {
 
   author: 'common.author-label',
   study: 'common.study-label',
-  studyDescription: 'common.description-label',
+  studyDescription: 'common.study-description-label',
   canton: 'common.section-label',
   comment: 'common.comment-label',
   initialCondition: 'common.initial-condition-label',
@@ -64,7 +64,7 @@ export const PDF_LABEL_KEYS: CantonReportLabels = {
   maintenanceCenter: 'studio.section-report.maintenance-center-label',
   lit: 'common.lit-label',
   supportsCount: 'studio.section-report.supports-count-label',
-  supportsDescription: 'common.description-label',
+  supportsDescription: 'common.supports-list-description-label',
   phaseNumber: 'common.electric-phase-number-label',
   cablesAmount: 'studio.section-report.cables-amount-label',
   maintenanceTeam: 'common.eel-label',

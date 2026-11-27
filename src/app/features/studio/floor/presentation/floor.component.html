@@ -37,6 +37,8 @@
       optionValue="value"
       data-testid="reference-support-select"
       class="reference-support-select"
+      [emptyFilterMessage]="'common.support-emptyFilter' | transloco"
+      [emptyMessage]="'common.support-empty' | transloco"
     />
   </div>
 
@@ -194,7 +196,7 @@
 
         <div class="floor-form__results__grid__item floor-form__results__grid__item--altPoint">
           <dt>
-            {{ 'common.point-alt-label' | transloco }}
+            {{ 'studio.floor.ground-altitude-label' | transloco }}
           </dt>
           <dd data-testid="result-floor-altitude">
             {{

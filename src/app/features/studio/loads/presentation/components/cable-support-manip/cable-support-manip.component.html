@@ -27,7 +27,7 @@
     </button>
   </div>
 
-  <label for="support">{{ 'common.reference-support-label' | transloco }}</label>
+  <label for="support">{{ 'loads.cable-support-manip.manipulated-support-label' | transloco }}</label>
   <p-select
     inputId="support"
     fluid
@@ -38,6 +38,8 @@
     (onChange)="onSupportChange($event.value)"
     data-testid="cable-support-manip-support"
     appendTo="body"
+    [emptyFilterMessage]="'common.support-emptyFilter' | transloco"
+    [emptyMessage]="'common.support-empty' | transloco"
   />
 
   <div class="bypass-anonymous-box">

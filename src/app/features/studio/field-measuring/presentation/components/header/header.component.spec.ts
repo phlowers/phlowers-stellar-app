@@ -45,7 +45,7 @@ describe('HeaderComponent', () => {
           langs: {
             en: {
               'common.altitude-label': 'Altitude',
-              'field-measuring.header.azimuth-label': 'Azimuth (clockwise \u2014 0\u00b0 North/South) ',
+              'common.azimuth-label': 'Azimuth',
               'common.cable-amount-label': 'Cable amount',
               'field-measuring.header.degree-addon': '\u00b0',
               'common.section-type.guard': 'Guard',

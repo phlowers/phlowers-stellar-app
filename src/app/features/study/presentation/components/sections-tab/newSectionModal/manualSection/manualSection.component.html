@@ -98,6 +98,8 @@
                 [filter]="true"
                 filterBy="name"
                 data-testid="cable-name-select"
+                [emptyFilterMessage]="'manual-section.cable-emptyFilter' | transloco"
+                [emptyMessage]="'manual-section.cable-empty' | transloco"
               />
             </div>
 
@@ -175,6 +177,8 @@
                 [filter]="true"
                 filterBy="maintenance_center"
                 data-testid="maintenance-center-select"
+                [emptyFilterMessage]="'manual-section.maintenance-center-emptyFilter' | transloco"
+                [emptyMessage]="'manual-section.maintenance-center-empty' | transloco"
               />
             </div>
 
@@ -193,6 +197,8 @@
                 [filter]="true"
                 filterBy="regional_team"
                 data-testid="regional-team-select"
+                [emptyFilterMessage]="'manual-section.regional-team-emptyFilter' | transloco"
+                [emptyMessage]="'manual-section.regional-team-empty' | transloco"
               />
             </div>
 
@@ -211,6 +217,8 @@
                 [filter]="true"
                 filterBy="maintenance_team"
                 data-testid="maintenance-team-select"
+                [emptyFilterMessage]="'manual-section.line-team-emptyFilter' | transloco"
+                [emptyMessage]="'manual-section.line-team-empty' | transloco"
               />
             </div>
           </div>
@@ -256,6 +264,8 @@
                 [filter]="true"
                 filterBy="voltage_idr"
                 data-testid="voltage-idr-select"
+                [emptyFilterMessage]="'manual-section.voltage-emptyFilter' | transloco"
+                [emptyMessage]="'manual-section.voltage-empty' | transloco"
               >
                 <ng-template pTemplate="item" let-opt>
                   {{ opt.voltage_idr === 'NO VOLTAGE' ? noVoltageLabel : opt.voltage_idr }}
@@ -282,6 +292,8 @@
                 [filter]="true"
                 filterBy="link_idr"
                 data-testid="link-idr-select"
+                [emptyFilterMessage]="'common.link-emptyFilter' | transloco"
+                [emptyMessage]="'common.link-empty' | transloco"
               />
             </div>
             <div class="flex flex-col [grid-area:c]">
@@ -302,6 +314,8 @@
                 [filter]="true"
                 filterBy="link_adr"
                 data-testid="link-adr-select"
+                [emptyFilterMessage]="'common.link-emptyFilter' | transloco"
+                [emptyMessage]="'common.link-empty' | transloco"
               />
             </div>
             <div class="flex flex-col [grid-area:d]">
@@ -321,6 +335,8 @@
                 [filter]="true"
                 filterBy="lit_idr"
                 data-testid="lit-idr-select"
+                [emptyFilterMessage]="'common.lit-emptyFilter' | transloco"
+                [emptyMessage]="'common.lit-empty' | transloco"
               />
             </div>
 
@@ -341,6 +357,8 @@
                 [filter]="true"
                 filterBy="lit_adr"
                 data-testid="lit-adr-select"
+                [emptyFilterMessage]="'common.lit-emptyFilter' | transloco"
+                [emptyMessage]="'common.lit-empty' | transloco"
               />
             </div>
 
@@ -360,6 +378,8 @@
                 [filter]="true"
                 filterBy="branch_idr"
                 data-testid="branch-idr-select"
+                [emptyFilterMessage]="'manual-section.branch-emptyFilter' | transloco"
+                [emptyMessage]="'manual-section.branch-empty' | transloco"
               />
             </div>
           </div>
@@ -407,6 +427,7 @@
             pTextarea
             id="comment"
             [attr.aria-label]="'common.comment-label' | transloco"
+            [attr.placeholder]="'manual-section.placeholder-section-comment' | transloco"
             class="w-full"
             [(ngModel)]="section().comment"
             (ngModelChange)="onSectionChange()"

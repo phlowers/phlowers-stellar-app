@@ -17,6 +17,7 @@ import { CantonReportData, CantonSupportRow } from './section-data-report.interf
 
 const MOCK_TRANSLATIONS: Record<string, string> = {
   'studio.section-report.title': 'Rapport Données du canton',
+  'common.study-description-label': "Description de l'étude",
   'common.page-label': 'Page',
   'common.report-generated-successfully-label': 'Report generated successfully',
   'common.failed-to-generate-report': 'Failed to generate report'
@@ -141,6 +142,7 @@ describe('SectionDataReportService', () => {
     it('should generate and save a PDF and notify success', async () => {
       await service.generateReport(createMockReportData());
       expect(mockNotificationService.success).toHaveBeenCalled();
+      expect(mockTranslocoService.translate).toHaveBeenCalledWith('common.study-description-label');
     });
 
     it('should add landscape pages for the supports tables', async () => {

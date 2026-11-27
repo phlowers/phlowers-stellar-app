@@ -60,7 +60,7 @@ export const PDF_OBSTACLES_TABLE_LABEL_KEYS: ObstaclesTableReportLabels = {
   cartoucheTitle: 'common.study-and-section-label',
   author: 'common.author-label',
   study: 'common.study-label',
-  studyDescription: 'common.description-label',
+  studyDescription: 'common.study-description-label',
   canton: 'common.section-label',
   cantonComment: 'common.comment-label',
   initialCondition: 'common.initial-condition-label',
