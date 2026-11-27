@@ -120,14 +120,17 @@ describe('field-measure-export.helpers', () => {
       }
     );
 
-    itOnParisMachine('should write the entered time on the measure day in Europe/Paris', () => {
-      expect(formatExportMeasureTime(new Date(2026, 0, 1, 16, 46, 15, 869), new Date(2026, 10, 6))).toBe(
-        '2026-11-06T16:46:15.869+01:00[Europe/Paris]'
-      );
-      expect(formatExportMeasureTime(new Date(2026, 0, 1, 16, 46, 15, 869), new Date(2026, 6, 6))).toBe(
-        '2026-07-06T16:46:15.869+02:00[Europe/Paris]'
-      );
-    });
+    itOnParisMachine(
+      'should write the entered time on the measure day in Europe/Paris, milliseconds set to 000',
+      () => {
+        expect(formatExportMeasureTime(new Date(2026, 0, 1, 16, 46, 15, 869), new Date(2026, 10, 6))).toBe(
+          '2026-11-06T16:46:15.000+01:00[Europe/Paris]'
+        );
+        expect(formatExportMeasureTime(new Date(2026, 0, 1, 16, 46, 15, 869), new Date(2026, 6, 6))).toBe(
+          '2026-07-06T16:46:15.000+02:00[Europe/Paris]'
+        );
+      }
+    );
 
     it('should fall back to the day of the time without a valid measure date', () => {
       const time = new Date(2026, 6, 15, 9, 5, 0);
@@ -217,25 +220,24 @@ describe('field-measure-export.helpers', () => {
       });
     });
 
-    it('should export the measure date and time as RFC 9557 date-times with the measure day offset, or null without them', () => {
+    it('should export the measure date and time as one RFC 9557 date, milliseconds set to 000, or null without a time', () => {
       const measure = buildMeasureExport(
-        createTestMeasureData({ date: new Date(2026, 0, 15), time: new Date(2026, 6, 15, 14, 30, 15) }),
+        createTestMeasureData({ date: new Date(2026, 0, 15), time: new Date(2026, 6, 15, 14, 30, 15, 468) }),
         mockTranslocoService
       );
+      expect(measure).not.toHaveProperty('time');
+      expect(measure).not.toHaveProperty('datetime');
       expect(measure.date).toMatch(rfc9557Pattern('+01:00'));
-      expect(measure.time).toMatch(rfc9557Pattern('+01:00'));
-      expect(measure.date).toBe('2026-01-15T00:00:00.000+01:00[Europe/Paris]');
-      expect(measure.time).toBe('2026-01-15T14:30:15.000+01:00[Europe/Paris]');
+      expect(measure.date).toBe('2026-01-15T14:30:15.000+01:00[Europe/Paris]');
 
       const empty = buildMeasureExport(createTestMeasureData({ date: null, time: null }), mockTranslocoService);
       expect(empty.date).toBeNull();
-      expect(empty.time).toBeNull();
     });
 
     it('should return a null time for an invalid time instead of throwing', () => {
       const measureData = createTestMeasureData({ time: new Date('invalid') });
       expect(() => buildMeasureExport(measureData, mockTranslocoService)).not.toThrow();
-      expect(buildMeasureExport(measureData, mockTranslocoService).time).toBeNull();
+      expect(buildMeasureExport(measureData, mockTranslocoService).date).toBeNull();
     });
 
     it('should translate the season through its export key', () => {
@@ -668,12 +670,19 @@ describe('field-measure-export.helpers', () => {
     });
 
     it('should serialize the export contract as a pretty-printed JSON string with a groundMeasurement array', () => {
-      const measureData = createTestMeasureData({ name: 'MT 1' });
+      const measureData = createTestMeasureData({
+        name: 'MT 1',
+        date: new Date(2026, 0, 15),
+        time: new Date(2026, 6, 15, 14, 30, 15)
+      });
       const json = buildFieldMeasureExportJson(measureData, mockSection, mockStudy, mockLitData, mockTranslocoService);
       const parsed = JSON.parse(json);
       expect(Array.isArray(parsed.groundMeasurement)).toBe(true);
       expect(parsed.groundMeasurement).toHaveLength(1);
       expect(parsed.groundMeasurement[0].measure.name).toBe('MT 1');
+      expect(parsed.groundMeasurement[0].measure.date).toBe('2026-01-15T14:30:15.000+01:00[Europe/Paris]');
+      expect(parsed.groundMeasurement[0].measure).not.toHaveProperty('time');
+      expect(parsed.groundMeasurement[0].measure).not.toHaveProperty('datetime');
       expect(json).toContain('\n');
     });
   });
