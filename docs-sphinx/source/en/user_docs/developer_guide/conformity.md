@@ -614,7 +614,7 @@ results are displayed. `calculate()` stores the form and point index it computed
 `exportConformity()` reads that snapshot, not the live form, so the file always matches the displayed results.
 The snapshot is cleared with the results (new obstacle, dialog closed).
 
-The file is built by the pure helpers of `conformity-export.helpers.ts` and saved with
+The file is built by the pure helpers of `conformity-export.helpers.ts` and saved by the shared `FileExportService.save()` with
 `showSaveFilePicker` (the "Browse…" dialog), falling back to a Blob download when the API is missing or fails.
 Cancelling the picker does nothing. `isExporting` is true while the file is being saved: the button shows its
 loading state and a second `exportConformity()` call is ignored, which prevents double exports. Without results, snapshot, point or section, an error is notified

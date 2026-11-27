@@ -619,7 +619,7 @@ utilisés ; `exportConformity()` lit cet instantané et non le formulaire couran
 correspond toujours aux résultats affichés. L’instantané est effacé avec les résultats (nouvel obstacle,
 modale fermée).
 
-Le fichier est construit par les helpers purs de `conformity-export.helpers.ts` et enregistré avec
+Le fichier est construit par les helpers purs de `conformity-export.helpers.ts` et enregistré par le service partagé `FileExportService.save()` avec
 `showSaveFilePicker` (fenêtre « Parcourir… »), avec repli sur un téléchargement Blob si l’API est absente
 ou échoue. Annuler le sélecteur ne fait rien. `isExporting` est vrai pendant l’enregistrement du fichier : le bouton
 affiche son état de chargement et un second appel à `exportConformity()` est ignoré, ce qui évite les

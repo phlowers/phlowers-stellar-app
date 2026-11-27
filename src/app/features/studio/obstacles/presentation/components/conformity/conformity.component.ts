@@ -61,7 +61,7 @@ import {
 } from './helpers/createConformityPlot';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { PlotService } from '@services/plot/plot.service';
-import { LoggerService } from '@core/services/logger/logger.service';
+import { FileExportService } from '@core/services/file-export/file-export.service';
 import { buildConformityExportFilename, buildConformityExportJson } from './conformity-export.helpers';
 import {
   CONFORMITY_EXPORT_FILE_PICKER_TYPES,
@@ -111,7 +111,7 @@ export class ConformityComponent implements OnDestroy {
   private readonly injector = inject(Injector);
   private readonly translocoService = inject(TranslocoService);
   private readonly plotService = inject(PlotService);
-  private readonly logger = inject(LoggerService);
+  private readonly fileExportService = inject(FileExportService);
 
   readonly isOpen = input<boolean>(false);
 
@@ -746,35 +746,13 @@ export class ConformityComponent implements OnDestroy {
     });
     this.isExporting.set(true);
     try {
-      await this.saveExportFile(json, buildConformityExportFilename(obstacle.name, section?.name ?? null));
+      await this.fileExportService.save(json, buildConformityExportFilename(obstacle.name, section?.name ?? null), {
+        mimeType: 'application/json',
+        pickerTypes: CONFORMITY_EXPORT_FILE_PICKER_TYPES
+      });
     } finally {
       this.isExporting.set(false);
     }
-  }
-
-  private async saveExportFile(json: string, filename: string): Promise<void> {
-    if (globalThis.showSaveFilePicker) {
-      try {
-        const handle = await globalThis.showSaveFilePicker({
-          suggestedName: filename,
-          types: CONFORMITY_EXPORT_FILE_PICKER_TYPES
-        });
-        const writable = await handle.createWritable();
-        await writable.write(json);
-        await writable.close();
-        return;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') return;
-        this.logger.error('Failed to save conformity export via showSaveFilePicker', error);
-      }
-    }
-
-    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
-    const a = this.document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
   }
 
   private generateMockResult(isCableTrack: boolean, conformityCompliance: boolean): ConformityRuleResult {

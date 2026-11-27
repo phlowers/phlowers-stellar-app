@@ -58,6 +58,7 @@ import { isNumber, isEqual } from 'lodash';
 import { normalizeFieldMeasureDates } from '@shared/domain/helpers/field-measure.helpers';
 import { MessageService } from 'primeng/api';
 import { LoggerService } from '@core/services/logger/logger.service';
+import { FileExportService } from '@core/services/file-export/file-export.service';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
 
 /** Main field measuring tool component with tabs for terrain data, parameter calculation, temperature, and parameter at 15°C. */
@@ -119,6 +120,7 @@ export class FieldMeasuringComponent implements OnDestroy {
   private readonly logger = inject(LoggerService);
   private readonly translocoService = inject(TranslocoService);
   private readonly fieldMeasureReportService = inject(FieldMeasureReportService);
+  private readonly fileExportService = inject(FileExportService);
   private readonly activeLang = toSignal(this.translocoService.langChanges$, {
     initialValue: this.translocoService.getActiveLang()
   });
@@ -433,35 +435,10 @@ export class FieldMeasuringComponent implements OnDestroy {
     const litData = this.plotService.litData();
     const json = buildFieldMeasureExportJson(measureData, section, study, litData, this.translocoService);
     const filename = buildFieldMeasureExportFilename(measureData, section?.name ?? null);
-    await this.saveExportFile(json, filename);
-  }
-
-  private async saveExportFile(json: string, filename: string): Promise<void> {
-    if (globalThis.showSaveFilePicker) {
-      try {
-        const handle = await globalThis.showSaveFilePicker({
-          suggestedName: `${filename}.json`,
-          types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
-        });
-        const writable = await handle.createWritable();
-        await writable.write(json);
-        await writable.close();
-        return;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-          return;
-        }
-        this.logger.error('Failed to save export file via showSaveFilePicker', error);
-      }
-    }
-
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filename}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    await this.fileExportService.save(json, `${filename}.json`, {
+      mimeType: 'application/json',
+      pickerTypes: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+    });
   }
 
   /**
