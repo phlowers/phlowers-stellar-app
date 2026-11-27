@@ -1,0 +1,23 @@
+<section class="hello-world" data-testid="hello-world-plugin">
+  <p class="hello-world__greeting">{{ i18nPrefix + '.greeting' | transloco }}</p>
+
+  @if (sectionName(); as name) {
+    <dl class="hello-world__details" data-testid="hello-world-section">
+      <dt>{{ i18nPrefix + '.section-name' | transloco }}</dt>
+      <dd data-testid="hello-world-section-name">{{ name }}</dd>
+      <dt>{{ i18nPrefix + '.support-count' | transloco }}</dt>
+      <dd data-testid="hello-world-support-count">{{ supportCount() }}</dd>
+    </dl>
+  } @else {
+    <p role="status" data-testid="hello-world-no-section">{{ i18nPrefix + '.no-section' | transloco }}</p>
+  }
+
+  <div class="hello-world__actions">
+    <button app-btn btnStyle="outlined" type="button" data-testid="hello-world-close-btn" (click)="close()">
+      {{ i18nPrefix + '.close' | transloco }}
+    </button>
+    <button app-btn type="button" data-testid="hello-world-notify-btn" (click)="sendNotification()">
+      {{ i18nPrefix + '.notify' | transloco }}
+    </button>
+  </div>
+</section>

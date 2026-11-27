@@ -27,6 +27,8 @@ User-facing text → **Transloco**, never `$localize` or `i18n` attributes (see
 @features/*       → src/app/features/*
 @shared/*         → src/app/shared/*
 @infrastructure/* → src/app/infrastructure/*
+@adapters/*       → src/adapters/*
+@plugins/*        → src/plugins/*
 ```
 
 ---

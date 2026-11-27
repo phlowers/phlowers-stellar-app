@@ -336,6 +336,9 @@
       "shrink-menu": "Réduire le menu",
       "menu": "Menu"
     },
+    "plugin-dialog": {
+      "load-error": "L'outil n'a pas pu être chargé."
+    },
     "logged-layout": {
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"

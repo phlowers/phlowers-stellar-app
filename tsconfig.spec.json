@@ -42,6 +42,9 @@
       ],
       "@adapters/*": [
         "./src/adapters/*"
+      ],
+      "@plugins/*": [
+        "./src/plugins/*"
       ]
     },
   },

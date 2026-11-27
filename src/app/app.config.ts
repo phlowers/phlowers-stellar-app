@@ -27,6 +27,7 @@ import { TranslocoTitleStrategy } from '@core/strategies/transloco-title.strateg
 import { LoggerService } from '@services/logger/logger.service';
 import { environment } from '@src/environments/environment';
 import { AppConfigService } from '@core/config/app-config.service';
+import { STELLAR_PLUGIN_PROVIDERS } from '@shared/plugin/stellar-plugins.providers';
 import { getAndClearBootstrapErrors } from '../bootstrap-logger';
 import { TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
@@ -121,6 +122,7 @@ export const appConfig: ApplicationConfig = {
     MessageService,
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     { provide: TitleStrategy, useClass: TranslocoTitleStrategy },
+    ...STELLAR_PLUGIN_PROVIDERS,
     provideAppInitializer(initializeApp)
   ]
 };

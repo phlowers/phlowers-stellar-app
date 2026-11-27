@@ -97,7 +97,8 @@ export default defineConfig(() => ({
       '@features': '/src/app/features',
       '@shared': '/src/app/shared',
       '@infrastructure': '/src/app/infrastructure',
-      '@adapters': '/src/adapters'
+      '@adapters': '/src/adapters',
+      '@plugins': '/src/plugins'
     }
   },
   test: {

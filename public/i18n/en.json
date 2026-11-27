@@ -336,6 +336,9 @@
       "shrink-menu": "Shrink menu",
       "menu": "Menu"
     },
+    "plugin-dialog": {
+      "load-error": "The tool could not be loaded."
+    },
     "logged-layout": {
       "version-maj": "Version / MAJ",
       "ver-maj": "Ver.MAJ"

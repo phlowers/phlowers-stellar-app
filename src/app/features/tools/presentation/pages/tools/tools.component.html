@@ -14,6 +14,20 @@
         />
       </li>
     }
+    @for (entry of pluginEntries(); track entry.plugin.id) {
+      <li class="tools__item">
+        <app-card-info
+          class="tools__card"
+          data-testid="plugin-tool-card"
+          [style.--tool-accent]="entry.plugin.accentColor"
+          [title]="entry.title"
+          [text]="entry.description"
+          [linkText]="'common.import.action.open' | transloco"
+          [linkAriaLabel]="'tools.aria-open-tool' | transloco: { tool: entry.title }"
+          (linkClick)="openPlugin(entry)"
+        />
+      </li>
+    }
   </ul>
 </section>
 
@@ -29,3 +43,5 @@
 >
   <p data-testid="tool-dialog-content">{{ 'tools.coming-soon' | transloco }}</p>
 </p-dialog>
+
+<app-plugin-dialog />

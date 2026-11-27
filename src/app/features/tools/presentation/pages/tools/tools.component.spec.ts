@@ -1,11 +1,33 @@
+import { signal, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslocoTestingModule } from '@jsverse/transloco';
+import { vi } from 'vitest';
+import { PluginDialogService } from '@shared/plugin/plugin-dialog.service';
+import { StellarPluginRegistryService } from '@shared/plugin/stellar-plugin-registry.service';
+import { STELLAR_PLUGIN_API_VERSION } from '@shared/plugin/stellar-plugin.constantes';
+import { StellarPluginEntry } from '@shared/plugin/stellar-plugin.interfaces';
 import { ToolsComponent } from './tools.component';
 import { TOOLS } from './tools.constantes';
+
+const PLUGIN_ENTRY: StellarPluginEntry = {
+  plugin: {
+    id: 'fake-plugin',
+    apiVersion: STELLAR_PLUGIN_API_VERSION,
+    placements: ['home'],
+    i18nScope: { scope: 'fake-plugin' },
+    titleKey: 'title',
+    descriptionKey: 'description',
+    accentColor: 'var(--grey-700)',
+    loadComponent: () => new Promise<Type<unknown>>(() => undefined)
+  },
+  title: 'Fake plugin',
+  description: 'Fake plugin description'
+};
 
 describe('ToolsComponent', () => {
   let component: ToolsComponent;
   let fixture: ComponentFixture<ToolsComponent>;
+  let pluginDialogService: PluginDialogService;
 
   const getAllByTestId = (testId: string): HTMLElement[] =>
     Array.from(document.body.querySelectorAll(`[data-testid="${testId}"]`));
@@ -33,9 +55,11 @@ describe('ToolsComponent', () => {
           preloadLangs: true
         }),
         ToolsComponent
-      ]
+      ],
+      providers: [{ provide: StellarPluginRegistryService, useValue: { homeEntries: signal([PLUGIN_ENTRY]) } }]
     }).compileComponents();
 
+    pluginDialogService = TestBed.inject(PluginDialogService);
     fixture = TestBed.createComponent(ToolsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -110,6 +134,34 @@ describe('ToolsComponent', () => {
       component.onVisibleChange(true);
 
       expect(component.selectedTool()).toBe(TOOLS[2]);
+    });
+  });
+
+  describe('HTML rendering - plugins', () => {
+    it('should render one card per home plugin after the built-in tools', () => {
+      const cards = getAllByTestId('plugin-tool-card');
+
+      expect(cards.length).toBe(1);
+      expect(cards[0].textContent).toContain('Fake plugin');
+      expect(cards[0].textContent).toContain('Fake plugin description');
+      expect(cards[0].querySelector('[data-testid="card-info-button"]')?.getAttribute('aria-label')).toBe(
+        'Open tool Fake plugin'
+      );
+    });
+
+    it('should expose the plugin accent color as a CSS custom property', () => {
+      expect(getAllByTestId('plugin-tool-card')[0].style.getPropertyValue('--tool-accent')).toBe('var(--grey-700)');
+    });
+
+    it('should open the plugin dialog when the plugin card is clicked', () => {
+      const openSpy = vi.spyOn(pluginDialogService, 'open');
+
+      getAllByTestId('plugin-tool-card')[0]
+        .querySelector<HTMLButtonElement>('[data-testid="card-info-button"]')
+        ?.click();
+
+      expect(openSpy).toHaveBeenCalledWith(PLUGIN_ENTRY);
+      expect(component.selectedTool()).toBeNull();
     });
   });
 });
