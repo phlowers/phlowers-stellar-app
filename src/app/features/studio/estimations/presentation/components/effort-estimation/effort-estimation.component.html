@@ -160,9 +160,15 @@
   </div>
 </form>
 
-<!-- Always on the page: screen readers only announce results added to a live region that is already there -->
-<output class="effort-estimation__results" data-testid="results">
-  @let effortValue = effort();
+<!-- The live region is always on the page (screen readers only announce text added to an existing one) and only
+     holds a concise sentence: the results frame itself is not announced -->
+@let effortValue = effort();
+<output class="sr-only" aria-live="polite" data-testid="results-announcement">
+  @if (effortValue !== null) {
+    {{ 'studio.estimations.effort-results-announcement' | transloco: { effort: effortValue | number: resultFormat } }}
+  }
+</output>
+<div class="effort-estimation__results" data-testid="results">
   @if (effortValue !== null) {
     <div class="effort-estimation__results-content" animate.enter="anim-expand-height" data-testid="results-frame">
       <h2>{{ 'common.results' | transloco }}</h2>
@@ -186,15 +192,18 @@
             </button>
           </dd>
         </dl>
-        <dl class="effort-estimation__field">
-          <dt>{{ 'studio.estimations.axis-displacement-label' | transloco }}</dt>
-          <dd class="effort-estimation__result">
-            <span data-testid="axis-displacement-value"
-              >{{ axisDisplacement() | number: resultFormat }}&nbsp;{{ 'common.meter' | transloco }}</span
-            >
-          </dd>
-        </dl>
+        @let axisDisplacementValue = axisDisplacement();
+        @if (axisDisplacementValue !== null) {
+          <dl class="effort-estimation__field">
+            <dt>{{ 'studio.estimations.axis-displacement-label' | transloco }}</dt>
+            <dd class="effort-estimation__result">
+              <span data-testid="axis-displacement-value"
+                >{{ axisDisplacementValue | number: resultFormat }}&nbsp;{{ 'common.meter' | transloco }}</span
+              >
+            </dd>
+          </dl>
+        }
       </div>
     </div>
   }
-</output>
+</div>

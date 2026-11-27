@@ -138,6 +138,9 @@ describe('EffortEstimationComponent', () => {
               'common.min-value-error': 'Min. value: {{ min }}',
               'common.max-value-error': 'Max. value: {{ max }}',
               'common.max-decimals-error': 'Max decimals: {{ maxDecimals }}',
+              'shared.python-errors.estimation-target-above-bounds-warning':
+                'The target needs more than {{ upperBound }}',
+              'studio.estimations.effort-results-announcement': 'Effort calculated: {{ effort }} daN.',
               'shared.python-errors.estimation-not-converged-error': 'The target is not reachable.',
               'studio.estimations.target-displacement-label': 'Target displ.',
               'studio.estimations.effort-direction-up': 'Up',
@@ -290,6 +293,24 @@ describe('EffortEstimationComponent', () => {
       selectSpan(0);
       expect(getByTestId('distance-input')?.getAttribute('max')).toBe('399.99');
       expect(component.form.controls.distanceToReferenceSupport.valid).toBe(true);
+    });
+
+    it('is validated again when the section changes the length of the span', () => {
+      selectSpan(0);
+      typeIn('distance-input', '300');
+      typeIn('temperature-input', '15');
+      typeIn('target-displacement-input', '2');
+      expect(component.form.controls.distanceToReferenceSupport.valid).toBe(true);
+      expect(component.canCalculate()).toBe(true);
+
+      const shortened = makeSection();
+      shortened.supports[0] = { ...shortened.supports[0], spanLength: 250 };
+      TestBed.inject(PlotSpanService).section.set(shortened);
+      TestBed.tick();
+      fixture.detectChanges();
+
+      expect(component.form.controls.distanceToReferenceSupport.errors).toHaveProperty('max');
+      expect(component.canCalculate()).toBe(false);
     });
 
     it('is required', () => {
@@ -453,6 +474,51 @@ describe('EffortEstimationComponent', () => {
       expect(textOf('effort-value')).toBe('-121.05 daN');
       expect(textOf('axis-displacement-value')).toBe('0.13 m');
       expect(getByTestId('results-frame')?.querySelector('input')).toBeNull();
+    });
+
+    it('hides the axis displacement when the engine does not return it', async () => {
+      mockEngineResult({ extra: {} });
+
+      await calculate();
+
+      expect(textOf('effort-value')).toBe('-121.05 daN');
+      expect(getByTestId('axis-displacement-value')).toBeNull();
+      expect(getByTestId('results-frame')?.textContent).not.toContain('NaN');
+    });
+
+    it('announces the effort in a polite status region, outside the results frame', async () => {
+      expect(textOf('results-announcement')).toBe('');
+
+      await calculate();
+
+      const announcement = getByTestId('results-announcement');
+      expect(announcement?.getAttribute('aria-live')).toBe('polite');
+      expect(textOf('results-announcement')).toBe('Effort calculated: -121.05 daN.');
+      expect(announcement?.contains(getByTestId('results-frame'))).toBe(false);
+      expect(getByTestId('results')?.closest('[aria-live]')).toBeNull();
+    });
+
+    it('quotes the search bounds of a target out of range in daN', async () => {
+      mockWorkerPythonService.runTask.mockResolvedValue({
+        result: { ...ENGINE_RESULT, converged: false },
+        error: null,
+        diagnostics: [
+          {
+            code: PythonErrorCode.EstimationTargetAboveBoundsWarning,
+            severity: 'warning',
+            origin: 'warning',
+            rawText: 'EstimationTargetAboveBoundsWarning: beyond the bounds'
+          }
+        ]
+      });
+
+      await calculate();
+
+      expect(mockWorkerPythonService.runTask).toHaveBeenCalledWith(
+        Task.estimateLoadRelative,
+        expect.objectContaining({ bounds: [-2000, 0] })
+      );
+      expect(mockNotificationService.warning).toHaveBeenCalledExactlyOnceWith('The target needs more than 0 daN');
     });
 
     it.each([

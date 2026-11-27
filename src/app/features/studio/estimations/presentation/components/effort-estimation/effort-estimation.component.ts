@@ -8,7 +8,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { TranslocoModule } from '@jsverse/transloco';
 import { SelectModule } from 'primeng/select';
 import { SelectButtonModule } from 'primeng/selectbutton';
@@ -48,6 +48,7 @@ import {
 } from '@features/studio/estimations/domain/estimations.interfaces';
 import {
   formatEffortForClipboard,
+  getAxisDisplacement,
   getEffortMaxDistance,
   maxLengthValidator,
   roundEffortResult,
@@ -88,6 +89,7 @@ export class EffortEstimationComponent extends EstimationCalculationBase<
   protected readonly task = Task.estimateLoadRelative;
   protected readonly calculationFailedKey = 'studio.estimations.effort-calculation-failed';
   protected readonly calculationFailedLog = 'Failed to estimate the cable effort';
+  protected override readonly boundsUnitKey = 'common.dan-unit';
 
   readonly limits = EFFORT_INPUT_LIMITS;
   readonly temperatureLimits = CABLE_TEMPERATURE_LIMITS;
@@ -112,10 +114,10 @@ export class EffortEstimationComponent extends EstimationCalculationBase<
     return result ? roundEffortResult(result.effort) : null;
   });
 
-  /** Displacement (m) of the application point along the span axis, rounded as displayed. */
+  /** Displacement (m) of the application point along the span axis, rounded as displayed; null when not returned. */
   readonly axisDisplacement = computed(() => {
     const result = this.result();
-    return result ? roundEffortResult(Math.abs(result.extra['x_shift'])) : null;
+    return result ? getAxisDisplacement(result.extra) : null;
   });
 
   constructor() {
@@ -125,6 +127,11 @@ export class EffortEstimationComponent extends EstimationCalculationBase<
       this.form.controls.referenceSupport.reset({ value: span ? 'LEFT' : null, disabled: span === null });
       this.form.controls.distanceToReferenceSupport.updateValueAndValidity();
     });
+
+    // the maximum distance depends on the span length, read from the section
+    toObservable(this.spanService.section)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.form.controls.distanceToReferenceSupport.updateValueAndValidity());
 
     // the current span is the first displayed span of the studio
     this.form.controls.span.setValue(

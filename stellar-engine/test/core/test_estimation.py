@@ -5,6 +5,8 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
+import warnings
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -32,6 +34,8 @@ from stellar_engine.entities.errors import (
     EstimationLoadPositionError,
     EstimationNotConvergedError,
     EstimationNotConvergedWarning,
+    EstimationTargetAboveBoundsWarning,
+    EstimationTargetBelowBoundsWarning,
     ObstacleNotFoundError,
 )
 
@@ -210,6 +214,77 @@ def test_estimate_load_relative(study: SectionStudy):
     np.testing.assert_array_equal(
         study.balance_engine.span_loads.load_mass, masses_before
     )
+
+
+def test_estimate_load_relative_bounds_are_in_dan(study: SectionStudy):
+    result = estimation.estimate_load_relative(
+        {
+            "spanIndex": SPAN_INDEX,
+            "targetDistance": -1.0,
+            "loadPositionDistance": 100.0,
+            "bounds": [0.0, 1000.0],
+        },
+        study,
+    )
+
+    assert 0.0 < result["value"] <= 1000.0 / 0.981
+    assert 0.0 < result["effort"] <= 1000.0
+
+
+@pytest.mark.parametrize(
+    ("target", "bounds", "warning"),
+    [
+        (-1.0, [0.0, 1.0], EstimationTargetAboveBoundsWarning),
+        (1.0, [-1.0, 0.0], EstimationTargetBelowBoundsWarning),
+    ],
+)
+def test_estimate_load_relative_warns_on_which_side_of_the_bounds(
+    study: SectionStudy, target: float, bounds: list[float], warning: type
+):
+    with pytest.warns(warning, match="Load") as records:
+        result = estimation.estimate_load_relative(
+            {
+                "spanIndex": SPAN_INDEX,
+                "targetDistance": target,
+                "loadPositionDistance": 100.0,
+                "bounds": bounds,
+            },
+            study,
+        )
+
+    assert result["converged"] is False
+    assert str(abs(bounds[0] + bounds[1])) in str(records[0].message)
+
+
+def test_estimate_load_relative_shrunk_bounds_warn_without_a_side(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
+):
+    # the probe shrinks the requested bounds: they are no longer the ones
+    # quoted to the user, so no side is reported
+    monkeypatch.setattr(
+        estimation.RobustEstimation,
+        "solvable_bounds",
+        lambda self, bounds: (0.01, 0.5),
+    )
+
+    with warnings.catch_warnings(record=True) as records:
+        warnings.simplefilter("always")
+        result = estimation.estimate_load_relative(
+            {
+                "spanIndex": SPAN_INDEX,
+                "targetDistance": -1.0,
+                "loadPositionDistance": 100.0,
+                "bounds": [0.0, 1.0],
+            },
+            study,
+        )
+
+    assert result["converged"] is False
+    assert [
+        type(record.message)
+        for record in records
+        if isinstance(record.message, EstimationNotConvergedWarning)
+    ] == [EstimationNotConvergedWarning]
 
 
 def test_estimate_load_relative_traction_moves_the_cable_up(

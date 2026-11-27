@@ -9,9 +9,9 @@ import { computed, Directive, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ObstaclesService } from '@services/obstacles/obstacles.service';
-import { Task, TaskInputs } from '@services/worker_python/tasks/types';
+import { TaskInputs } from '@services/worker_python/tasks/types';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
-import { EstimationFormValue } from '@features/studio/estimations/domain/estimations.interfaces';
+import { EstimationFormValue, EstimationTask } from '@features/studio/estimations/domain/estimations.interfaces';
 import { EstimationCalculationBase } from '@features/studio/estimations/presentation/estimation-calculation.base';
 import {
   getDefaultPointIndex,
@@ -35,7 +35,7 @@ type EstimationObstacleForm<TValueKey extends string> = FormGroup<
  */
 @Directive()
 export abstract class EstimationFormBase<
-  TTask extends Task,
+  TTask extends EstimationTask,
   TValueKey extends string
 > extends EstimationCalculationBase<TTask, EstimationObstacleForm<TValueKey>, EstimationFormValue<TValueKey>> {
   private readonly obstaclesService = inject(ObstaclesService);

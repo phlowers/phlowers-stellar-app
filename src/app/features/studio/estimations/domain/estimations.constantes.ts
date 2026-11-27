@@ -62,11 +62,11 @@ export const EFFORT_TARGET_DISPLACEMENT_DECIMALS = 0;
 export const EFFORT_TARGET_DISPLACEMENT_DEFAULT = 0;
 
 /**
- * Largest load mass (kg) searched per cable of the bundle by the effort estimation. The searched max is this value
+ * Largest load (daN) searched per cable of the bundle by the effort estimation. The searched max is this value
  * × `Section.cables_amount`: the engine searches [0, max] for a weight (cable moved down) and [-max, 0] for a
  * traction (cable moved up).
  */
-export const EFFORT_MAX_LOAD_MASS = 1000;
+export const EFFORT_MAX_LOAD = 1000;
 
 /** Number format of the effort and of its displacement along the span axis: always 2 decimals. */
 export const EFFORT_RESULT_FORMAT = '1.2-2';

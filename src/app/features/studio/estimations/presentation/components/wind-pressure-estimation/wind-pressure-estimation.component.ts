@@ -58,6 +58,7 @@ export class WindPressureEstimationComponent extends EstimationFormBase<
   protected readonly task = Task.estimateMinimumDistanceWind;
   protected readonly calculationFailedKey = 'studio.estimations.wind-pressure-calculation-failed';
   protected readonly calculationFailedLog = 'Failed to estimate the minimum distance wind pressure';
+  protected override readonly boundsUnitKey = 'common.pascal-unit';
 
   readonly limits = CABLE_TEMPERATURE_LIMITS;
   readonly distanceFormat = MINIMUM_OBLIQUE_DISTANCE_FORMAT;

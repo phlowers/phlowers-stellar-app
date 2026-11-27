@@ -688,8 +688,8 @@ export interface EstimateLoadInputs extends EstimationBaseInputs {
 }
 
 /**
- * Inputs for the estimateLoadRelative task (estimated value in kg): no obstacle, the target is the altitude
- * change of the cable at the load position.
+ * Inputs for the estimateLoadRelative task (estimated value in kg, `bounds` in daN): no obstacle, the target is the
+ * altitude change of the cable at the load position.
  *
  * @category Worker Types
  */
@@ -697,6 +697,8 @@ export interface EstimateLoadRelativeInputs extends Omit<
   EstimationBaseInputs,
   'obstaclePoint' | 'obstacleUuid' | 'pointIndex'
 > {
+  // Search interval [lower, upper] of the load in daN (the effort unit): the engine converts it to kg
+  bounds?: [number, number] | null;
   // Signed altitude change of the cable at the load position in meters (usually negative: a load lowers the cable)
   targetDistance: number;
   // Load position from the left support of the span in meters

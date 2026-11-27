@@ -969,6 +969,7 @@
       "effort-label": "Traction (-) / Weight (+)",
       "axis-displacement-label": "Displ. along span axis (x)",
       "copy-effort-aria-label": "Copy the effort",
+      "effort-results-announcement": "Effort calculated: {{ effort }} daN.",
       "effort-calculation-failed": "Failed to estimate the effort"
     },
     "section-plot-card": {

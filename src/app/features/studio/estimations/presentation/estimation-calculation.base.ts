@@ -14,13 +14,13 @@ import { TranslocoService } from '@jsverse/transloco';
 import { PlotSpanService } from '@services/plot/plot-span.service';
 import { LoadFormsService } from '@features/studio/loads/presentation/services/loadForms.service';
 import { WorkerPythonService } from '@services/worker_python/worker-python.service';
-import { EstimationBaseInputs, Task, TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
+import { TaskInputs, TaskOutputs } from '@services/worker_python/tasks/types';
 import { formatPythonError, formatPythonWarnings } from '@services/worker_python/tasks/python-error-messages';
 import { NotificationService } from '@core/services/notification/notification.service';
 import { LoggerService } from '@core/services/logger/logger.service';
 import { getRequiredNumberInputErrorParams } from '@shared/helpers/formErrors.helpers';
 import { NumberInputErrorParams } from '@shared/helpers/formErrors.interfaces';
-import { EstimationOutcome } from '@features/studio/estimations/domain/estimations.interfaces';
+import { EstimationOutcome, EstimationTask } from '@features/studio/estimations/domain/estimations.interfaces';
 import { toBoundsErrorParams } from '@features/studio/estimations/presentation/estimations.helpers';
 
 /**
@@ -28,7 +28,7 @@ import { toBoundsErrorParams } from '@features/studio/estimations/presentation/e
  * its engine task and the mapping of its form value to the task inputs.
  */
 @Directive()
-export abstract class EstimationCalculationBase<TTask extends Task, TForm extends FormGroup, TValue> {
+export abstract class EstimationCalculationBase<TTask extends EstimationTask, TForm extends FormGroup, TValue> {
   protected readonly spanService = inject(PlotSpanService);
   private readonly loadFormsService = inject(LoadFormsService);
   private readonly workerPythonService = inject(WorkerPythonService);
@@ -108,7 +108,7 @@ export abstract class EstimationCalculationBase<TTask extends Task, TForm extend
       const { result, error, diagnostics } = await this.workerPythonService.runTask(this.task, inputs);
       // e.g. BalanceEngineWarning when the study had to be adjusted on the engine side, or a target out of the bounds
       // (the closest value found is then still returned)
-      const boundsParams = toBoundsErrorParams(inputs as EstimationBaseInputs, this.boundsUnit(), this.locale);
+      const boundsParams = toBoundsErrorParams(inputs, this.boundsUnit(), this.locale);
       for (const warning of formatPythonWarnings(diagnostics, this.translocoService, boundsParams)) {
         this.notificationService.warning(warning);
       }

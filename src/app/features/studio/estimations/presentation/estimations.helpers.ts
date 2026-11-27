@@ -17,7 +17,7 @@ import {
   BOUNDS_ERROR_FORMAT,
   CONFORMITY_TEMPERATURE_BOUNDS,
   EFFORT_DISTANCE_DECIMALS,
-  EFFORT_MAX_LOAD_MASS,
+  EFFORT_MAX_LOAD,
   MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS
 } from '@features/studio/estimations/domain/estimations.constantes';
 import {
@@ -122,20 +122,21 @@ export function toBoundsErrorParams(
 }
 
 /**
- * Largest load mass (kg) searched by the effort estimation: `EFFORT_MAX_LOAD_MASS` per cable of the bundle.
+ * Largest load (daN) searched by the effort estimation: `EFFORT_MAX_LOAD` per cable of the bundle.
  * Falls back to a single cable when the cable count is missing or not a positive integer.
  */
-export function getEffortMaxLoadMass(cablesAmount: number | null | undefined): number {
+export function getEffortMaxLoad(cablesAmount: number | null | undefined): number {
   return typeof cablesAmount === 'number' && Number.isInteger(cablesAmount) && cablesAmount >= 1
-    ? cablesAmount * EFFORT_MAX_LOAD_MASS
-    : EFFORT_MAX_LOAD_MASS;
+    ? cablesAmount * EFFORT_MAX_LOAD
+    : EFFORT_MAX_LOAD;
 }
 
 /**
  * Maps the effort estimation form value to the engine inputs, or null while a value or the span length is missing.
  * The engine measures the load position from the left support and the altitude change upward: a traction (negative
- * mass) moves the cable up, a weight (positive mass) moves it down, so the mass search interval follows the direction.
- * The interval is scaled by the number of cables of the bundle (see `getEffortMaxLoadMass`).
+ * load) moves the cable up, a weight (positive load) moves it down, so the load search interval (daN, converted to kg by
+ * the engine) follows the direction.
+ * The interval is scaled by the number of cables of the bundle (see `getEffortMaxLoad`).
  */
 export function toEffortEstimationInputs(
   value: EffortEstimationFormValue,
@@ -154,15 +155,21 @@ export function toEffortEstimationInputs(
     return null;
   }
   const isUp = direction === 'UP';
-  const maxLoadMass = getEffortMaxLoadMass(cablesAmount);
+  const maxLoad = getEffortMaxLoad(cablesAmount);
   return {
     spanIndex: span.index,
     loadPositionDistance:
       referenceSupport === 'LEFT' ? distanceToReferenceSupport : spanLength - distanceToReferenceSupport,
     temperature,
     targetDistance: isUp ? targetDisplacement : -targetDisplacement,
-    bounds: isUp ? [-maxLoadMass, 0] : [0, maxLoadMass]
+    bounds: isUp ? [-maxLoad, 0] : [0, maxLoad]
   };
+}
+
+/** Displacement (m) along the span axis, as displayed: rounded `|x_shift|`; null when the engine did not return it. */
+export function getAxisDisplacement(extra: Record<string, number>): number | null {
+  const shift = extra['x_shift'];
+  return Number.isFinite(shift) ? roundEffortResult(Math.abs(shift)) : null;
 }
 
 /** Rounds a result to the 2 displayed decimals; adding 0 turns a rounded -0 into 0. */

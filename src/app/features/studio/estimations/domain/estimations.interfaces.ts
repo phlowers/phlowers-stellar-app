@@ -7,6 +7,10 @@
 
 import type { FormControl, FormGroup } from '@angular/forms';
 import type { Section } from '@shared/domain';
+import type { Task } from '@services/worker_python/tasks/types';
+
+/** Engine tasks run by the estimation tabs: their inputs hold the optional search `bounds`. */
+export type EstimationTask = Task.estimateTemperature | Task.estimateMinimumDistanceWind | Task.estimateLoadRelative;
 
 /** Tabs of the estimations dialog. */
 export type EstimationTabValue = 'temperature' | 'wind-pressure' | 'vertical-effort';

@@ -49,7 +49,8 @@ Warns (forwarded to the frontend through the captured Python warnings):
         closest value found.
     EstimationTargetAboveBoundsWarning: ``EstimationNotConvergedWarning``
         subclass warned by ``estimate_temperature`` (when ``bounds`` is
-        given) if the search stopped at the upper bound: the target needs a
+        given) and ``estimate_load_relative`` (on unshrunk bounds) if the
+        search stopped at the upper bound: the target needs a
         larger value.
     EstimationTargetBelowBoundsWarning: Same, at the lower bound: the target
         needs a smaller value.
@@ -98,7 +99,8 @@ logger = logging.getLogger("stellar_engine")
 WIND_DIRECTION: Literal["clockwise", "anticlockwise"] = "clockwise"
 # Our default wind pressure search interval for mechaphlowers (Pa)
 DEFAULT_WIND_BOUNDS = (-500.0, 500.0)
-# mechaphlowers default load mass search interval of estimate_load_relative
+# Default load search interval of estimate_load_relative (daN, the effort
+# unit of its ``bounds``)
 DEFAULT_LOAD_RELATIVE_BOUNDS = (0.0, 2000.0)
 # mechaphlowers placeholder mass (kg) for no load: a zero mass drops the load
 # point, so the altitude is then read elsewhere on the span
@@ -205,6 +207,14 @@ def _without_zero_mass(bounds: tuple[float, float]) -> tuple[float, float]:
     return lower, upper
 
 
+def _load_bounds_kg(bounds: tuple[float, float]) -> tuple[float, float]:
+    """Convert load ``bounds`` from daN to kg, without a zero mass bound."""
+    lower, upper = (
+        float(units(bound, "daN").to("kg").magnitude) for bound in bounds
+    )
+    return _without_zero_mass((lower, upper))
+
+
 def _solve(
     variable: str,
     solve: Callable[[dict], EstimationResult],
@@ -217,8 +227,8 @@ def _solve(
     warning: ``EstimationNotConvergedWarning``, or one of its subclasses
     telling on which side of the bounds the target lies, when
     ``report_bound_side`` is set and the search stopped at a bound. Only valid
-    for a distance that varies monotonically with the estimated variable (the
-    temperature).
+    for an objective that varies monotonically with the estimated variable
+    (the temperature, the altitude change of a load).
 
     Raises:
         EstimationNotConvergedError: If the objective is NaN at the bounds
@@ -426,9 +436,12 @@ def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
 
     Specific inputs: ``targetDistance`` (m, signed altitude change of the
     cable at the load position), ``loadPositionDistance`` (m from the left
-    support of the span, strictly between 0 and the span length), optional ``temperature``, ``windPressure`` and
-    ``iceThickness``. Loads on other spans are kept.
+    support of the span, strictly between 0 and the span length), optional
+    ``temperature``, ``windPressure`` and ``iceThickness``. Loads on other
+    spans are kept.
 
+    ``bounds`` (optional ``[lower, upper]``) are in daN, the effort unit
+    shown to the user, and converted to kg with mechaphlowers ``units``.
     ``RobustEstimation`` first reduces the mass ``bounds`` to the masses the
     balance solver can solve, scanning outward from no load: a large mass
     (traction especially) reverses the insulator chains, and the search
@@ -442,6 +455,14 @@ def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
         (m) of the cable abscissa at the load point (initial minus final),
         plus ``effort``: the same load as ``value`` in daN (negative for a
         traction, positive for a weight).
+
+    Warns:
+        EstimationTargetAboveBoundsWarning: If the search stopped at the
+            upper bound and ``RobustEstimation`` did not shrink the
+            requested bounds.
+        EstimationTargetBelowBoundsWarning: Same, at the lower bound.
+        EstimationNotConvergedWarning: Any other non-converged result
+            (including shrunk bounds).
     """
     span_index = _index(inputs, "spanIndex")
     target_distance = _required_float(inputs, "targetDistance")
@@ -483,9 +504,17 @@ def estimate_load_relative(inputs: dict, study: SectionStudy) -> dict:
             **kwargs,
         )
 
+    requested = _load_bounds_kg(
+        _bounds(inputs) or DEFAULT_LOAD_RELATIVE_BOUNDS
+    )
     result = robust_load.run(
-        lambda solvable_bounds: _solve("Load", solve, solvable_bounds),
-        _without_zero_mass(_bounds(inputs) or DEFAULT_LOAD_RELATIVE_BOUNDS),
+        lambda solvable_bounds: _solve(
+            "Load",
+            solve,
+            solvable_bounds,
+            report_bound_side=solvable_bounds == requested,
+        ),
+        requested,
     )
     return {
         **result,

@@ -17,11 +17,12 @@ import {
   getDefaultPointIndex,
   getEstimableObstacles,
   getPreselectedObstacleUuid,
+  getAxisDisplacement,
   getEffortMaxDistance,
   maxLengthValidator,
   roundEffortResult,
   toBoundsErrorParams,
-  getEffortMaxLoadMass,
+  getEffortMaxLoad,
   toEffortEstimationInputs,
   toObstacleOptions,
   toPointOptions,
@@ -213,7 +214,7 @@ describe('estimations helpers', () => {
       });
     });
 
-    it('scales the mass bounds by the bundle cable count', () => {
+    it('scales the load bounds (daN) by the bundle cable count', () => {
       expect(toEffortEstimationInputs(effortFormValue(), 400, 3)?.bounds).toEqual([-3000, 0]);
       expect(toEffortEstimationInputs(effortFormValue({ direction: 'DOWN' }), 400, 3)?.bounds).toEqual([0, 3000]);
     });
@@ -256,7 +257,7 @@ describe('estimations helpers', () => {
     });
   });
 
-  describe('getEffortMaxLoadMass', () => {
+  describe('getEffortMaxLoad', () => {
     it.each([
       [1, 1000],
       [4, 4000],
@@ -267,7 +268,21 @@ describe('estimations helpers', () => {
       [1.5, 1000],
       [NaN, 1000]
     ])('returns the max mass for %s cable(s)', (cablesAmount, expected) => {
-      expect(getEffortMaxLoadMass(cablesAmount)).toBe(expected);
+      expect(getEffortMaxLoad(cablesAmount)).toBe(expected);
+    });
+  });
+
+  describe('getAxisDisplacement', () => {
+    it('rounds the absolute shift as displayed', () => {
+      expect(getAxisDisplacement({ x_shift: -0.126 })).toBe(0.13);
+    });
+
+    it.each([
+      ['missing', {}],
+      ['not a number', { x_shift: NaN }],
+      ['infinite', { x_shift: Infinity }]
+    ])('is null when the shift is %s', (_, extra) => {
+      expect(getAxisDisplacement(extra)).toBeNull();
     });
   });
 
