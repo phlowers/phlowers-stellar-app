@@ -6,7 +6,7 @@
  */
 
 import { formatRfc9557OrNull, parseRfc9557 } from '@shared/helpers/date-time.helpers';
-import { sanitizeFilenamePart } from '@shared/helpers/filename.helpers';
+import { formatGenerationDate, sanitizeFilenamePart } from '@shared/helpers/filename.helpers';
 import { Section, Study } from '@shared/domain';
 import { CONFORMITY_EXPORT_FILENAME_PREFIX, CONFORMITY_EXPORT_UNITS } from './conformity-export.constantes';
 import {
@@ -141,11 +141,6 @@ export const buildConformityExportJson = (params: ConformityExportParams): strin
   return JSON.stringify(file, null, 2);
 };
 
-const formatLocalDate = (date: Date): string => {
-  const pad = (value: number): string => String(value).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-};
-
 /** Builds the download file name: "Export Distances de conformité_<obstacle>_<section>_<YYYY-MM-DD>.json". */
 export const buildConformityExportFilename = (
   obstacleName: string,
@@ -156,5 +151,5 @@ export const buildConformityExportFilename = (
     CONFORMITY_EXPORT_FILENAME_PREFIX,
     sanitizeFilenamePart(obstacleName),
     sanitizeFilenamePart(sectionName ?? ''),
-    formatLocalDate(date)
+    formatGenerationDate(date)
   ].join('_') + '.json';

@@ -12,7 +12,6 @@ import {
   buildFieldMeasureExportFilename,
   buildWindDirectionOptions,
   createTestMeasureData,
-  formatGenerationDate,
   getActiveParameterOutput,
   isManual15CDataValid,
   isPapotoDataValid,
@@ -193,18 +192,6 @@ describe('buildFieldMeasureExportFilename', () => {
     expect(buildFieldMeasureExportFilename(measureData, null, date)).toBe(
       'Export Mesure de terrain_field-measure_field-measure_2026-09-30'
     );
-  });
-});
-
-describe('formatGenerationDate', () => {
-  const date = new Date(2026, 10, 6, 9, 5);
-
-  it('should format the date only by default', () => {
-    expect(formatGenerationDate(date)).toBe('2026-11-06');
-  });
-
-  it('should append the zero-padded hours and minutes with withTime', () => {
-    expect(formatGenerationDate(date, true)).toBe('2026-11-06 09-05');
   });
 });
 

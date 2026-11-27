@@ -4,6 +4,7 @@ import { normalizeAzimuth } from '@shared/domain/helpers/geopositioning.helpers'
 import { FieldMeasure, FieldMeasureOutputs, TangentAimingSupportResult } from '../domain/types';
 import { v4 as uuidv4 } from 'uuid';
 import { findMiddleSpan } from '@shared/helpers/findMiddleSpan';
+import { formatGenerationDate } from '@shared/helpers/filename.helpers';
 import { formatSupportNumber } from '@shared/helpers/formatSupportNumber';
 import { TranslocoService } from '@jsverse/transloco';
 import { isNumber } from 'lodash';
@@ -144,18 +145,6 @@ export const sanitizeFilename = (name: string): string =>
     .trim()
     // eslint-disable-next-line no-control-regex
     .replace(/[\\/:*?"<>|\x00-\x1f]/g, '') || 'field-measure';
-
-/**
- * Formats a date as `YYYY-MM-DD` (or `YYYY-MM-DD HH-mm` with `withTime`) in local time.
- * @param date - The date to format
- * @param withTime - Appends the hours and minutes (`-` separated, usable in a file name)
- * @returns The formatted date segment
- */
-export const formatGenerationDate = (date: Date, withTime = false): string => {
-  const pad = (value: number): string => String(value).padStart(2, '0');
-  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-  return withTime ? `${day} ${pad(date.getHours())}-${pad(date.getMinutes())}` : day;
-};
 
 /**
  * Builds the download filename (without extension) for a field measure JSON export.

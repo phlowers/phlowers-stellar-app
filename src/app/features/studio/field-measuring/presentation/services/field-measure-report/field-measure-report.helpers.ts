@@ -32,12 +32,8 @@ import {
   formatExportTime,
   getSectionTypeKey
 } from '@features/studio/field-measuring/presentation/field-measure-export.helpers';
-import {
-  formatGenerationDate,
-  formatSpanLabel,
-  readNumber,
-  sanitizeFilename
-} from '@features/studio/field-measuring/presentation/helpers';
+import { formatSpanLabel, readNumber, sanitizeFilename } from '@features/studio/field-measuring/presentation/helpers';
+import { formatGenerationDate } from '@shared/helpers/filename.helpers';
 import { GetSectionOutput } from '@services/worker_python/tasks/types';
 import {
   TANGENT_AIMING_CALCULATION_TYPE,
