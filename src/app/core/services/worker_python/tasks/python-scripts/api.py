@@ -58,7 +58,7 @@ def calculate_guying(js_inputs):
 
 @debug_log
 def calculate_cable_adjustment(js_inputs):
-    return cable_adjustment.calculate_cable_adjustment(inputs=js_inputs.to_py())
+    return cable_adjustment.calculate_cable_adjustment(js_to_python(js_inputs))
 
 
 @debug_log

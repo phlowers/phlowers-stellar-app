@@ -4,20 +4,44 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-MOCK_HORIZONTAL_SIGHT_ANGLE = 100.0
-MOCK_VERTICAL_SIGHT_ANGLE = 100.0
+
+from mechaphlowers import units
+from mechaphlowers.core.models.adjustment_angles.adjustment_model import (
+    compute_adjustment_angles,
+)
+
+from stellar_engine.entities.errors import SelectorInputError
+from stellar_engine.entities.inputs import CableAdjustmentInputs
 
 
-def calculate_cable_adjustment(inputs):
+def calculate_cable_adjustment(inputs: dict):
     """Compute the sighting angles (grades) at the mid-span sag for cable adjustment.
-
-    MOCK — returns fixed values until the real formula is available (backlog BL-01).
 
     Expected input keys: spanIndex, spanLength, leftHorizontalAngle, rightHorizontalAngle,
     leftVerticalAngle, rightVerticalAngle, support ('LEFT' | 'RIGHT'),
     tacheometerHorizontalDistance, adjustmentParameter.
+
+    Inputs and output angles are in grad. Converts into rad
     """
+    table_inputs = CableAdjustmentInputs(**inputs)
+    side_map = {'LEFT': 'left', 'RIGHT': 'right'}
+    side = side_map.get(
+        table_inputs.support,
+        SelectorInputError(
+            f"Expected 'LEFT' or 'RIGHT'. Got {table_inputs.support}"
+        ),
+    )
+    horizontal_angle, vertical_angle = compute_adjustment_angles(
+        span_length=table_inputs.spanLength,
+        HL=units(table_inputs.leftHorizontalAngle, "grad").to("rad").m,
+        VL=units(table_inputs.leftVerticalAngle, "grad").to("rad").m,
+        HR=units(table_inputs.rightHorizontalAngle, "grad").to("rad").m,
+        VR=units(table_inputs.rightVerticalAngle, "grad").to("rad").m,
+        dist_support=table_inputs.tacheometerHorizontalDistance,
+        parameter=table_inputs.adjustmentParameter,
+        side=side,
+    )
     return {
-        "horizontalSightAngle": MOCK_HORIZONTAL_SIGHT_ANGLE,
-        "verticalSightAngle": MOCK_VERTICAL_SIGHT_ANGLE,
+        "horizontalSightAngle": units(horizontal_angle, "rad").to("grad").m,
+        "verticalSightAngle": units(vertical_angle, "rad").to("grad").m,
     }

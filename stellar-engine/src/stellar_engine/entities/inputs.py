@@ -268,6 +268,19 @@ class ParameterCalibrationInputs:
 
 
 @dataclass
+class CableAdjustmentInputs:
+    spanIndex: float
+    spanLength: float
+    leftHorizontalAngle: float
+    rightHorizontalAngle: float
+    leftVerticalAngle: float
+    rightVerticalAngle: float
+    support: Literal['LEFT', 'RIGHT']
+    tacheometerHorizontalDistance: float
+    adjustmentParameter: float
+
+
+@dataclass
 class TemperatureCalculationInputs:
     cableName: str
     ambientTemperature: float
