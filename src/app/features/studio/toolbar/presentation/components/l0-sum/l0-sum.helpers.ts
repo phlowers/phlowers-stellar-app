@@ -1,15 +1,10 @@
+import { buildCsv } from '@shared/helpers/csv-export.helpers';
 import { sanitizeFilenamePart } from '@shared/helpers/filename.helpers';
 
 import { L0Row } from './l0-sum.interfaces';
 
 const L0_EXPORT_EXTENSION = '.csv';
 
-// Declaring the charset and prefixing a BOM forces UTF-8, otherwise Excel decodes accented labels as ANSI
-export const L0_EXPORT_MIME_TYPE = 'text/csv;charset=utf-8';
-const CSV_BOM = '\uFEFF';
-
-const CSV_SEPARATOR = ';';
-const CSV_LINE_BREAK = '\r\n';
 const CSV_NUMBER_MAX_DECIMALS = 3;
 
 // Translated column labels, in column order
@@ -47,11 +42,6 @@ export function isL0TableExportable(rows: L0Row[]): boolean {
   );
 }
 
-// Quotes a field when it holds the separator, a quote or a line break
-function escapeCsvField(value: string): string {
-  return /[;"\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
-}
-
 // No thousands grouping, and the decimal separator follows the locale (e.g. "300,5" in French)
 function formatCsvNumber(value: number, locale: string): string {
   return new Intl.NumberFormat(locale, {
@@ -71,7 +61,5 @@ export function buildL0Csv(rows: L0Row[], labels: L0CsvLabels, locale: string): 
     formatCsvNumber(row.l0, locale),
     formatCsvNumber(row.cumulatedL0, locale)
   ]);
-  const lines = [headingRow, ...dataRows].map((fields) => fields.map(escapeCsvField).join(CSV_SEPARATOR));
-
-  return CSV_BOM + lines.join(CSV_LINE_BREAK) + CSV_LINE_BREAK;
+  return buildCsv([headingRow, ...dataRows]);
 }
