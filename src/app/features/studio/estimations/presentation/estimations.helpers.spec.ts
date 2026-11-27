@@ -220,8 +220,11 @@ describe('estimations helpers', () => {
 
     it('converts a distance from the right support', () => {
       expect(
-        toEffortEstimationInputs(effortFormValue({ referenceSupport: 'RIGHT', distanceToReferenceSupport: 100 }), 400, 1)
-          ?.loadPositionDistance
+        toEffortEstimationInputs(
+          effortFormValue({ referenceSupport: 'RIGHT', distanceToReferenceSupport: 100 }),
+          400,
+          1
+        )?.loadPositionDistance
       ).toBe(300);
     });
 
