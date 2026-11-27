@@ -64,6 +64,7 @@ describe('CableSpanManipComponent', () => {
     mockCableSpanManipService = {
       save: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
+      deleteFromCharge: vi.fn().mockResolvedValue(false),
       clearPersistedFormData: vi.fn(),
       reloadSection: vi.fn().mockResolvedValue(undefined),
       selectedSpanUuid: signal<string | null>(null),
@@ -881,6 +882,45 @@ describe('CableSpanManipComponent', () => {
       component.deleteForm();
       expect(component.form.controls.lateralDistance.value).toBe(0);
       expect(component.form.controls.slingLength.value).toBe(5);
+    });
+  });
+
+  describe('deleteForm() with parameters saved with the load case', () => {
+    beforeEach(() => {
+      mockPlotSpanService.section.set({ ...mockSection, cable_span_manipulations: [] } as unknown as Section);
+      component.form.controls.spanUuid.setValue('support-uuid-1', { emitEvent: false });
+    });
+
+    it('should remove a manipulation saved only with the load case, then reload', async () => {
+      mockCableSpanManipService.deleteFromCharge.mockResolvedValue(true);
+
+      await component.deleteForm();
+
+      expect(mockCableSpanManipService.deleteFromCharge).toHaveBeenCalledWith('support-uuid-1', 'charge-uuid-1');
+      expect(mockCableSpanManipService.reloadSection).toHaveBeenCalled();
+    });
+
+    it('should not reload when there was nothing to remove', async () => {
+      await component.deleteForm();
+
+      expect(mockCableSpanManipService.reloadSection).not.toHaveBeenCalled();
+    });
+
+    it('should leave no entry for the span in the parameters to be saved with the load case', async () => {
+      const otherSpan = { uuid: 'other', spanUuid: 'support-uuid-2' };
+      mockPlotService.temporaryLoadData = {
+        spanManipParams: [{ uuid: 'deleted', spanUuid: 'support-uuid-1' }, otherSpan]
+      } as unknown as PlotService['temporaryLoadData'];
+
+      await component.deleteForm();
+
+      expect(mockPlotService.temporaryLoadData?.spanManipParams).toEqual([otherSpan]);
+    });
+
+    it('should recalculate so the manipulation leaves the plot, even with nothing saved', async () => {
+      await component.deleteForm();
+
+      expect(mockLoadFormsService.calculateLoad).toHaveBeenCalled();
     });
   });
 

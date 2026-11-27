@@ -1067,6 +1067,23 @@ describe('CableSupportManipComponent', () => {
       expect(component.isLoading()).toBe(false);
     });
 
+    it('should recalculate without the deleted manipulation', async () => {
+      const otherSupport = { uuid: 'other', supportUuid: 'support-uuid-2' };
+      mockPlotService.temporaryLoadData = {
+        supportManipParams: [{ uuid: 'deleted', supportUuid: 'support-uuid-1' }, otherSupport]
+      } as unknown as PlotService['temporaryLoadData'];
+      // Read at the time of the call: what the calculation would send to the engine
+      let calculatedWith: unknown;
+      mockLoadFormsService.calculateLoad.mockImplementation(async () => {
+        calculatedWith = mockPlotService.temporaryLoadData?.supportManipParams;
+      });
+      component.form.controls.support.setValue('support-uuid-1');
+
+      await component.deleteForm();
+
+      expect(calculatedWith).toEqual([otherSupport]);
+    });
+
     it('should set hasSavedManipulation to false after deletion', async () => {
       component.hasSavedManipulation.set(true);
       await component.deleteForm();
