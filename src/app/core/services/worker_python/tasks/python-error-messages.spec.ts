@@ -45,8 +45,16 @@ describe('formatPythonError', () => {
               'shared.python-errors.estimate-on-split-support-error':
                 'Estimation is not possible on a span split by a virtual support.',
               'shared.python-errors.estimation-input-error': 'The estimation inputs are missing or invalid.',
+              'shared.python-errors.estimation-load-position-error':
+                'The load position must be strictly inside the span, not on a support.',
               'shared.python-errors.estimation-not-converged-error':
+                'The distance to the obstacle cannot be computed within the estimation bounds.',
+              'shared.python-errors.estimation-not-converged-warning':
                 'The target cannot be reached within the estimation bounds.',
+              'shared.python-errors.estimation-target-above-bounds-warning':
+                'The target cannot be reached: it needs more than {{ upperBound }}.',
+              'shared.python-errors.estimation-target-below-bounds-warning':
+                'The target cannot be reached: it needs less than {{ lowerBound }}.',
               'shared.python-errors.estimation-warning': 'The existing load on the estimated span was ignored.',
               'shared.python-errors.conformity-input-error': 'The conformity inputs are missing or invalid.'
             }
@@ -74,12 +82,33 @@ describe('formatPythonError', () => {
   it.each([
     [PythonErrorCode.EstimateOnSplitSupportError, 'Estimation is not possible on a span split by a virtual support.'],
     [PythonErrorCode.EstimationInputError, 'The estimation inputs are missing or invalid.'],
-    [PythonErrorCode.EstimationNotConvergedError, 'The target cannot be reached within the estimation bounds.'],
+    [
+      PythonErrorCode.EstimationLoadPositionError,
+      'The load position must be strictly inside the span, not on a support.'
+    ],
+    [
+      PythonErrorCode.EstimationNotConvergedError,
+      'The distance to the obstacle cannot be computed within the estimation bounds.'
+    ],
+    [PythonErrorCode.EstimationNotConvergedWarning, 'The target cannot be reached within the estimation bounds.'],
     [PythonErrorCode.EstimationWarning, 'The existing load on the estimated span was ignored.'],
     [PythonErrorCode.ObstacleNotFoundError, 'The obstacle is not registered in the calculation engine.'],
     [PythonErrorCode.ConformityInputError, 'The conformity inputs are missing or invalid.']
   ])('should return the localized message for %s', (code, expected) => {
     expect(formatPythonError(code, translocoService)).toBe(expected);
+  });
+
+  it('should interpolate the given params in the message', () => {
+    expect(
+      formatPythonError(PythonErrorCode.EstimationTargetAboveBoundsWarning, translocoService, {
+        upperBound: '250 °C'
+      })
+    ).toBe('The target cannot be reached: it needs more than 250 °C.');
+    expect(
+      formatPythonError(PythonErrorCode.EstimationTargetBelowBoundsWarning, translocoService, {
+        lowerBound: '-50 °C'
+      })
+    ).toBe('The target cannot be reached: it needs less than -50 °C.');
   });
 
   it.each(Object.values(PythonErrorCode))('should format code %s to a non-null, non-empty message', (code) => {

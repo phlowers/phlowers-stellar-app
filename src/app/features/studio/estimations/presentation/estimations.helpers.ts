@@ -5,13 +5,23 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import { formatNumber } from '@angular/common';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Obstacle } from '@shared/domain/models/obstacle.model';
-import { EstimateMinimumDistanceWindInputs, EstimateTemperatureInputs } from '@services/worker_python/tasks/types';
 import {
+  EstimateLoadRelativeInputs,
+  EstimateMinimumDistanceWindInputs,
+  EstimateTemperatureInputs
+} from '@services/worker_python/tasks/types';
+import {
+  BOUNDS_ERROR_FORMAT,
   CONFORMITY_TEMPERATURE_BOUNDS,
+  EFFORT_DISTANCE_DECIMALS,
+  EFFORT_MAX_LOAD,
   MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS
 } from '@features/studio/estimations/domain/estimations.constantes';
 import {
+  EffortEstimationFormValue,
   EstimationObstacleFormValue,
   EstimationObstacleOption,
   EstimationObstaclePointInputs,
@@ -91,4 +101,113 @@ export function toWindPressureEstimationInputs(
     return null;
   }
   return { ...point, temperature: value.temperature, bounds: [...MINIMUM_DISTANCE_WIND_PRESSURE_BOUNDS] };
+}
+
+/**
+ * Interpolation parameters of the "target beyond the search bounds" engine errors: the formatted search bounds,
+ * followed by their unit. `undefined` when the inputs hold no bounds.
+ */
+export function toBoundsErrorParams(
+  inputs: { bounds?: readonly [number, number] | null },
+  unit: string,
+  locale: string
+): { lowerBound: string; upperBound: string } | undefined {
+  if (!inputs.bounds) {
+    return undefined;
+  }
+  const [lowerBound, upperBound] = inputs.bounds.map((bound) =>
+    `${formatNumber(bound, locale, BOUNDS_ERROR_FORMAT)} ${unit}`.trim()
+  );
+  return { lowerBound, upperBound };
+}
+
+/**
+ * Largest load (daN) searched by the effort estimation: `EFFORT_MAX_LOAD` per cable of the bundle.
+ * Falls back to a single cable when the cable count is missing or not a positive integer.
+ */
+export function getEffortMaxLoad(cablesAmount: number | null | undefined): number {
+  return typeof cablesAmount === 'number' && Number.isInteger(cablesAmount) && cablesAmount >= 1
+    ? cablesAmount * EFFORT_MAX_LOAD
+    : EFFORT_MAX_LOAD;
+}
+
+/**
+ * Maps the effort estimation form value to the engine inputs, or null while a value or the span length is missing.
+ * The engine measures the load position from the left support and the altitude change upward: a traction (negative
+ * load) moves the cable up, a weight (positive load) moves it down, so the load search interval (daN, converted to kg by
+ * the engine) follows the direction.
+ * The interval is scaled by the number of cables of the bundle (see `getEffortMaxLoad`).
+ */
+export function toEffortEstimationInputs(
+  value: EffortEstimationFormValue,
+  spanLength: number | null,
+  cablesAmount: number | null | undefined
+): EstimateLoadRelativeInputs | null {
+  const { span, referenceSupport, distanceToReferenceSupport, temperature, direction, targetDisplacement } = value;
+  if (
+    span === null ||
+    spanLength === null ||
+    referenceSupport === null ||
+    distanceToReferenceSupport === null ||
+    temperature === null ||
+    targetDisplacement === null
+  ) {
+    return null;
+  }
+  const isUp = direction === 'UP';
+  const maxLoad = getEffortMaxLoad(cablesAmount);
+  return {
+    spanIndex: span.index,
+    loadPositionDistance:
+      referenceSupport === 'LEFT' ? distanceToReferenceSupport : spanLength - distanceToReferenceSupport,
+    temperature,
+    targetDistance: isUp ? targetDisplacement : -targetDisplacement,
+    bounds: isUp ? [-maxLoad, 0] : [0, maxLoad]
+  };
+}
+
+/** Displacement (m) along the span axis, as displayed: rounded `|x_shift|`; null when the engine did not return it. */
+export function getAxisDisplacement(extra: Record<string, number>): number | null {
+  const shift = extra['x_shift'];
+  return Number.isFinite(shift) ? roundEffortResult(Math.abs(shift)) : null;
+}
+
+/** Rounds a result to the 2 displayed decimals; adding 0 turns a rounded -0 into 0. */
+export function roundEffortResult(value: number): number {
+  return Math.round(value * 100) / 100 + 0;
+}
+
+/** Text copied to the clipboard for a displayed result: the value as shown, without unit nor group separator. */
+export function formatEffortForClipboard(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: false
+  }).format(roundEffortResult(value));
+}
+
+/**
+ * Largest distance to a reference support accepted on a span: the largest value with the displayed decimals strictly
+ * below the span length, as a load on a support is ignored by the engine. Null while the span length is unknown.
+ */
+export function getEffortMaxDistance(spanLength: number | null): number | null {
+  if (spanLength === null) return null;
+  const scale = 10 ** EFFORT_DISTANCE_DECIMALS;
+  // toFixed(6) absorbs the float error of the product before rounding up to the next unit
+  const unitsBelow = Math.ceil(Number((spanLength * scale).toFixed(6))) - 1;
+  return unitsBelow / scale;
+}
+
+/**
+ * Validator rejecting values above a length known from the control itself (e.g. the length of the span chosen in the
+ * same form). It reports the same `max` error as `Validators.max` and does nothing while the length is unknown.
+ */
+export function maxLengthValidator(getLength: (control: AbstractControl) => number | null): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const max = getLength(control);
+    if (max === null || control.value === null || control.value === undefined || control.value === '') {
+      return null;
+    }
+    return control.value > max ? { max: { max, actual: control.value } } : null;
+  };
 }

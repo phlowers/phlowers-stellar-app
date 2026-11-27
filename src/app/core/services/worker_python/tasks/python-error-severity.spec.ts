@@ -26,6 +26,7 @@ describe('PYTHON_ERROR_SEVERITY', () => {
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.RtsDataNotAvailable]).toBe('error');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimateOnSplitSupportError]).toBe('error');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationInputError]).toBe('error');
+    expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationLoadPositionError]).toBe('error');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationNotConvergedError]).toBe('error');
   });
 
@@ -34,6 +35,9 @@ describe('PYTHON_ERROR_SEVERITY', () => {
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.BalanceEngineWarning]).toBe('warning');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.NoIntersectionPlaneWarning]).toBe('warning');
     expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationWarning]).toBe('warning');
+    expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationNotConvergedWarning]).toBe('warning');
+    expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationTargetAboveBoundsWarning]).toBe('warning');
+    expect(PYTHON_ERROR_SEVERITY[PythonErrorCode.EstimationTargetBelowBoundsWarning]).toBe('warning');
   });
 
   it('should have both a severity and a localized message defined for every PythonErrorCode, keeping the two catalogs in sync', () => {

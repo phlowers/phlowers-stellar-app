@@ -53,6 +53,7 @@ export class TemperatureEstimationComponent extends EstimationFormBase<Task.esti
   protected readonly task = Task.estimateTemperature;
   protected readonly calculationFailedKey = 'studio.estimations.calculation-failed';
   protected readonly calculationFailedLog = 'Failed to estimate the conformity temperature';
+  protected override readonly boundsUnitKey = 'common.celsius-unit';
 
   readonly limits = TARGET_DISTANCE_LIMITS;
   readonly temperatureFormat = CONFORMITY_TEMPERATURE_FORMAT;
@@ -76,7 +77,7 @@ export class TemperatureEstimationComponent extends EstimationFormBase<Task.esti
     };
   }
 
-  protected toInputs(value: TemperatureEstimationFormValue, obstacle: Obstacle | null) {
+  protected toObstacleInputs(value: TemperatureEstimationFormValue, obstacle: Obstacle | null) {
     return toTemperatureEstimationInputs(value, obstacle);
   }
 }

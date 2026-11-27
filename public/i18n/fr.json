@@ -36,6 +36,7 @@
     "description-label": "Description",
     "dis-symmetric": "Dissymétrique",
     "distance-label": "Distance",
+    "distance-to-reference-support-label": "Distance au support de référence",
     "duplicate": "Dupliquer",
     "edit": "Modifier",
     "eel-label": "EEL",
@@ -203,6 +204,7 @@
     "copied-to-clipboard": "Copié dans le presse-papier",
     "copy-to-clipboard-failed": "Échec de la copie dans le presse-papier",
     "temperature-label": "Température",
+    "dan-unit": "daN",
     "pascal-unit": "Pa"
   },
   "auth": {
@@ -407,7 +409,11 @@
       "obstacle-not-found-error": "L'obstacle n'est pas enregistré dans le moteur de calcul.",
       "estimate-on-split-support-error": "L'estimation est impossible sur une portée divisée par un support virtuel.",
       "estimation-input-error": "Les données de l'estimation sont manquantes ou invalides.",
-      "estimation-not-converged-error": "La cible ne peut pas être atteinte dans les bornes de l'estimation.",
+      "estimation-load-position-error": "La position de la charge doit être strictement à l'intérieur de la portée, pas sur un support.",
+      "estimation-not-converged-error": "La distance à l'obstacle ne peut pas être calculée dans les bornes de l'estimation.",
+      "estimation-target-above-bounds-warning": "La cible ne peut pas être atteinte : elle nécessite plus de {{ upperBound }}. La valeur la plus proche trouvée est affichée.",
+      "estimation-target-below-bounds-warning": "La cible ne peut pas être atteinte : elle nécessite moins de {{ lowerBound }}. La valeur la plus proche trouvée est affichée.",
+      "estimation-not-converged-warning": "La cible ne peut pas être atteinte dans les bornes de l'estimation. La valeur la plus proche trouvée est affichée.",
       "estimation-warning": "La charge existante sur la portée estimée a été ignorée.",
       "conformity-input-error": "Les données du calcul de conformité sont manquantes ou invalides."
     },
@@ -963,7 +969,15 @@
       "wind-pressure-label": "Pression de vent",
       "minimum-oblique-distance-label": "Distance oblique minimum",
       "copy-wind-pressure-aria-label": "Copier la pression de vent",
-      "wind-pressure-calculation-failed": "Échec de l'estimation de la pression de vent"
+      "wind-pressure-calculation-failed": "Échec de l'estimation de la pression de vent",
+      "target-displacement-label": "Dépl. cible",
+      "effort-direction-up": "Montée",
+      "effort-direction-down": "Descente",
+      "effort-label": "Traction (-) / Poids (+)",
+      "axis-displacement-label": "Déplact selon axe de portée (x)",
+      "copy-effort-aria-label": "Copier l'effort",
+      "effort-results-announcement": "Effort calculé : {{ effort }} daN.",
+      "effort-calculation-failed": "Échec de l'estimation de l'effort"
     },
     "section-plot-card": {
       "expand-details-aria-label": "Développer les détails",
@@ -1290,7 +1304,6 @@
       "layers-detail": "Détail des couches",
       "current-work-load-label": "Taux de travail max actuel",
       "staff-presence-label": "Présence du personnel",
-      "distance-support-ref-label": "Distance au support de référence",
       "add-marking-label": "Ajouter une indication \"brins coupés\"",
       "result-cable-rrts-label": "CRR du câble",
       "result-new-working-load-label": "Nouveau taux de travail max",

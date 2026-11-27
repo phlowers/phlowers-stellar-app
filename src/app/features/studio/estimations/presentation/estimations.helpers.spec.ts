@@ -6,14 +6,24 @@
  */
 
 import { LateralDistanceType, Obstacle, ReferenceSupport } from '@shared/domain/models/obstacle.model';
+import { FormControl } from '@angular/forms';
 import {
+  EffortEstimationFormValue,
   TemperatureEstimationFormValue,
   WindPressureEstimationFormValue
 } from '@features/studio/estimations/domain/estimations.interfaces';
 import {
+  formatEffortForClipboard,
   getDefaultPointIndex,
   getEstimableObstacles,
   getPreselectedObstacleUuid,
+  getAxisDisplacement,
+  getEffortMaxDistance,
+  maxLengthValidator,
+  roundEffortResult,
+  toBoundsErrorParams,
+  getEffortMaxLoad,
+  toEffortEstimationInputs,
   toObstacleOptions,
   toPointOptions,
   toTemperatureEstimationInputs,
@@ -108,6 +118,26 @@ describe('estimations helpers', () => {
     });
   });
 
+  describe('toBoundsErrorParams', () => {
+    it('formats the search bounds with their unit', () => {
+      expect(toBoundsErrorParams({ bounds: [-50, 250] }, '°C', 'en')).toEqual({
+        lowerBound: '-50 °C',
+        upperBound: '250 °C'
+      });
+    });
+
+    it('omits the unit when there is none and keeps at most 2 decimals', () => {
+      expect(toBoundsErrorParams({ bounds: [0.256, 1000] }, '', 'en')).toEqual({
+        lowerBound: '0.26',
+        upperBound: '1,000'
+      });
+    });
+
+    it.each([[undefined], [null]])('returns undefined when the bounds are %s', (bounds) => {
+      expect(toBoundsErrorParams({ bounds }, '°C', 'en')).toBeUndefined();
+    });
+  });
+
   describe('toTemperatureEstimationInputs', () => {
     it('maps the form to the engine inputs on the obstacle span, bounded to [-50; 250] °C', () => {
       expect(toTemperatureEstimationInputs(makeFormValue(), makeObstacle())).toEqual({
@@ -139,13 +169,13 @@ describe('estimations helpers', () => {
       ...overrides
     });
 
-    it('maps the form to the engine inputs on the obstacle span, bounded to [-3000; 3000] Pa', () => {
+    it('maps the form to the engine inputs on the obstacle span, bounded to [-500; 500] Pa', () => {
       expect(toWindPressureEstimationInputs(windFormValue(), makeObstacle())).toEqual({
         spanIndex: 1,
         obstacleUuid: 'obstacle-a',
         pointIndex: 1,
         temperature: -12.5,
-        bounds: [-3000, 3000]
+        bounds: [-500, 500]
       });
     });
 
@@ -160,6 +190,151 @@ describe('estimations helpers', () => {
       ['no temperature', windFormValue({ temperature: null }), makeObstacle()]
     ])('returns null with %s', (_, value, obstacle) => {
       expect(toWindPressureEstimationInputs(value, obstacle)).toBeNull();
+    });
+  });
+
+  describe('toEffortEstimationInputs', () => {
+    const effortFormValue = (overrides: Partial<EffortEstimationFormValue> = {}): EffortEstimationFormValue => ({
+      span: { index: 2, uuid: 'support-c' },
+      referenceSupport: 'LEFT',
+      distanceToReferenceSupport: 120.5,
+      temperature: 15,
+      direction: 'UP',
+      targetDisplacement: 3,
+      ...overrides
+    });
+
+    it('measures the load position from the left support and moves the cable upward with a traction (negative mass)', () => {
+      expect(toEffortEstimationInputs(effortFormValue(), 400, 1)).toEqual({
+        spanIndex: 2,
+        loadPositionDistance: 120.5,
+        temperature: 15,
+        targetDistance: 3,
+        bounds: [-1000, 0]
+      });
+    });
+
+    it('scales the load bounds (daN) by the bundle cable count', () => {
+      expect(toEffortEstimationInputs(effortFormValue(), 400, 3)?.bounds).toEqual([-3000, 0]);
+      expect(toEffortEstimationInputs(effortFormValue({ direction: 'DOWN' }), 400, 3)?.bounds).toEqual([0, 3000]);
+    });
+
+    it('converts a distance from the right support', () => {
+      expect(
+        toEffortEstimationInputs(
+          effortFormValue({ referenceSupport: 'RIGHT', distanceToReferenceSupport: 100 }),
+          400,
+          1
+        )?.loadPositionDistance
+      ).toBe(300);
+    });
+
+    it('moves the cable downward with a negative displacement and a weight (positive mass)', () => {
+      const inputs = toEffortEstimationInputs(effortFormValue({ direction: 'DOWN' }), 400, 1);
+      expect(inputs?.targetDistance).toBe(-3);
+      expect(inputs?.bounds).toEqual([0, 1000]);
+    });
+
+    it('keeps zero values', () => {
+      expect(toEffortEstimationInputs(effortFormValue({ temperature: 0, targetDisplacement: 0 }), 400, 1)).toEqual({
+        spanIndex: 2,
+        loadPositionDistance: 120.5,
+        temperature: 0,
+        targetDistance: 0,
+        bounds: [-1000, 0]
+      });
+    });
+
+    it.each([
+      ['no span', effortFormValue({ span: null }), 400],
+      ['no span length', effortFormValue(), null],
+      ['no reference support', effortFormValue({ referenceSupport: null }), 400],
+      ['no distance', effortFormValue({ distanceToReferenceSupport: null }), 400],
+      ['no temperature', effortFormValue({ temperature: null }), 400],
+      ['no target displacement', effortFormValue({ targetDisplacement: null }), 400]
+    ])('returns null with %s', (_, value, spanLength) => {
+      expect(toEffortEstimationInputs(value, spanLength, 1)).toBeNull();
+    });
+  });
+
+  describe('getEffortMaxLoad', () => {
+    it.each([
+      [1, 1000],
+      [4, 4000],
+      [null, 1000],
+      [undefined, 1000],
+      [0, 1000],
+      [-2, 1000],
+      [1.5, 1000],
+      [NaN, 1000]
+    ])('returns the max mass for %s cable(s)', (cablesAmount, expected) => {
+      expect(getEffortMaxLoad(cablesAmount)).toBe(expected);
+    });
+  });
+
+  describe('getAxisDisplacement', () => {
+    it('rounds the absolute shift as displayed', () => {
+      expect(getAxisDisplacement({ x_shift: -0.126 })).toBe(0.13);
+    });
+
+    it.each([
+      ['missing', {}],
+      ['not a number', { x_shift: NaN }],
+      ['infinite', { x_shift: Infinity }]
+    ])('is null when the shift is %s', (_, extra) => {
+      expect(getAxisDisplacement(extra)).toBeNull();
+    });
+  });
+
+  describe('effort result formatting', () => {
+    it.each([
+      [-12.346, -12.35],
+      [0.004, 0],
+      [-0.004, 0],
+      [4635.8, 4635.8]
+    ])('rounds %s to %s', (value, expected) => {
+      expect(Object.is(roundEffortResult(value), expected)).toBe(true);
+    });
+
+    it('copies the displayed value with the locale decimal separator, without group separator', () => {
+      expect(formatEffortForClipboard(-4635.804, 'en')).toBe('-4635.80');
+      expect(formatEffortForClipboard(4635.806, 'fr')).toBe('4635,81');
+      expect(formatEffortForClipboard(-0.001, 'en')).toBe('0.00');
+    });
+  });
+
+  describe('getEffortMaxDistance', () => {
+    it.each([
+      [400, 399.99],
+      [250.5, 250.49],
+      [250.504, 250.5],
+      [0.3, 0.29],
+      [1000.1, 1000.09]
+    ])('keeps a distance strictly below a span of %s m: %s', (spanLength, expected) => {
+      expect(getEffortMaxDistance(spanLength)).toBeCloseTo(expected, 10);
+    });
+
+    it('is null without span length', () => {
+      expect(getEffortMaxDistance(null)).toBeNull();
+    });
+  });
+
+  describe('maxLengthValidator', () => {
+    const validate = (value: number | string | null, max: number | null) =>
+      maxLengthValidator(() => max)(new FormControl(value));
+
+    it('reports the same error as Validators.max above the length', () => {
+      expect(validate(400.01, 400)).toEqual({ max: { max: 400, actual: 400.01 } });
+    });
+
+    it.each([
+      ['at the length', 400, 400],
+      ['below the length', 0, 400],
+      ['without length', 1000, null],
+      ['without value', null, 400],
+      ['with an empty value', '', 400]
+    ])('accepts a value %s', (_, value, max) => {
+      expect(validate(value, max)).toBeNull();
     });
   });
 });

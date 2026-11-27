@@ -7,12 +7,13 @@
 import logging
 
 from stellar_engine.core import cut_strands as cut_strands_module
-from stellar_engine.core import estimation, geometry, manipulations, pose_table
+from stellar_engine.core import geometry, manipulations, pose_table
 from stellar_engine.core import initialize_study as stellar_initialize_study
 from stellar_engine.core import loads
 from stellar_engine.core.conformity import forest_trench as forest_trench_simulation
 from stellar_engine.core.conformity import ground as conformity_ground
 from stellar_engine.core.conformity import simulation as conformity_simulation
+from stellar_engine.core.estimation import estimation
 from stellar_engine.data import geography
 from stellar_engine.tools import (
     cable_adjustment,
@@ -382,6 +383,12 @@ def estimate_temperature(js_inputs):
 def estimate_load(js_inputs):
     global study
     return estimation.estimate_load(js_to_python(js_inputs), study)
+
+
+@debug_log
+def estimate_load_relative(js_inputs):
+    global study
+    return estimation.estimate_load_relative(js_to_python(js_inputs), study)
 
 
 @debug_log

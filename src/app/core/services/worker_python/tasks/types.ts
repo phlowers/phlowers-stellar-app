@@ -126,6 +126,8 @@ export enum Task {
   estimateTemperature = 'estimateTemperature',
   // Estimate the load mass giving a target distance to an obstacle
   estimateLoad = 'estimateLoad',
+  // Estimate the load mass giving a target altitude change of the cable (no obstacle)
+  estimateLoadRelative = 'estimateLoadRelative',
   // Estimate the wind pressure giving a target distance to an obstacle
   estimateWind = 'estimateWind',
   // Estimate the wind pressure bringing the cable closest to an obstacle
@@ -191,8 +193,16 @@ export enum PythonErrorCode {
   EstimateOnSplitSupportError = 'EstimateOnSplitSupportError',
   // Raised when an estimation input is missing or invalid
   EstimationInputError = 'EstimationInputError',
-  // Raised when an estimation cannot reach its target within the search bounds
+  // Raised when the load position of an estimation is not strictly inside its span
+  EstimationLoadPositionError = 'EstimationLoadPositionError',
+  // Raised when the distance to the obstacle cannot be computed at the estimation search bounds
   EstimationNotConvergedError = 'EstimationNotConvergedError',
+  // Warning raised when an estimation cannot reach its target within the search bounds (closest value returned)
+  EstimationNotConvergedWarning = 'EstimationNotConvergedWarning',
+  // Warning raised when the estimation target needs a value above the upper search bound
+  EstimationTargetAboveBoundsWarning = 'EstimationTargetAboveBoundsWarning',
+  // Warning raised when the estimation target needs a value below the lower search bound
+  EstimationTargetBelowBoundsWarning = 'EstimationTargetBelowBoundsWarning',
   // Warning raised when an existing load on the estimation target span is ignored
   EstimationWarning = 'EstimationWarning',
   // Raised when a conformity input (ground slicing, forest trenches...) is missing or invalid
@@ -600,6 +610,8 @@ export interface TaskInputs {
   [Task.estimateTemperature]: EstimateTemperatureInputs;
   // Inputs for estimateLoad task
   [Task.estimateLoad]: EstimateLoadInputs;
+  // Inputs for estimateLoadRelative task
+  [Task.estimateLoadRelative]: EstimateLoadRelativeInputs;
   // Inputs for estimateWind task
   [Task.estimateWind]: EstimateWindInputs;
   // Inputs for estimateMinimumDistanceWind task
@@ -678,6 +690,28 @@ export interface EstimateLoadInputs extends EstimationBaseInputs {
 }
 
 /**
+ * Inputs for the estimateLoadRelative task (estimated value in kg, `bounds` in daN): no obstacle, the target is the
+ * altitude change of the cable at the load position.
+ *
+ * @category Worker Types
+ */
+export interface EstimateLoadRelativeInputs extends Omit<
+  EstimationBaseInputs,
+  'obstaclePoint' | 'obstacleUuid' | 'pointIndex'
+> {
+  // Search interval [lower, upper] of the load in daN (the effort unit): the engine converts it to kg
+  bounds?: [number, number] | null;
+  // Signed altitude change of the cable at the load position in meters (usually negative: a load lowers the cable)
+  targetDistance: number;
+  // Load position from the left support of the span in meters
+  loadPositionDistance: number;
+  // Fixed cable temperature in °C
+  temperature?: number | null;
+  // Fixed wind pressure in Pa
+  windPressure?: number | null;
+}
+
+/**
  * Inputs for the estimateRope task (estimated value in m).
  *
  * @category Worker Types
@@ -709,6 +743,8 @@ export interface EstimationResult {
   iterations: number;
   // Whether the solver converged within tolerance
   converged: boolean;
+  // Additional named values computed by the estimation (e.g. `x_shift` in m for estimateLoadRelative)
+  extra: Record<string, number>;
 }
 
 /**
@@ -723,6 +759,17 @@ export interface MinimumDistanceWindEstimationResult {
   distance: number;
   // Number of distance evaluations
   iterations: number;
+}
+
+/**
+ * Output of the estimateLoadRelative task: `value` is the load mass in kg (negative for a traction, positive for a
+ * weight), `extra.x_shift` the shift of the cable abscissa at the load point in meters (initial minus final).
+ *
+ * @category Worker Types
+ */
+export interface LoadRelativeEstimationResult extends EstimationResult {
+  // Same load as `value` in daN: negative for a traction, positive for a weight
+  effort: number;
 }
 
 /**
@@ -1179,6 +1226,8 @@ export interface TaskOutputs {
   [Task.estimateTemperature]: EstimationResult;
   // Output from estimateLoad task: load mass in kg
   [Task.estimateLoad]: EstimationResult;
+  // Output from estimateLoadRelative task: load mass in kg and daN, `extra.x_shift` is the cable abscissa shift in m
+  [Task.estimateLoadRelative]: LoadRelativeEstimationResult;
   // Output from estimateWind task: wind pressure in Pa
   [Task.estimateWind]: EstimationResult;
   // Output from estimateMinimumDistanceWind task: wind pressure in Pa with the minimum distance in m

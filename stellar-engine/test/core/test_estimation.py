@@ -4,12 +4,17 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-import math
+
+import warnings
 
 import numpy as np
 import pandas as pd
 import pytest
 from mechaphlowers import CableArray, SectionArray, SectionStudy
+from mechaphlowers.core.models.estimation import (
+    ComputeDistance,
+    DistanceType,
+)
 from mechaphlowers.core.numeric import EstimationResult
 from mechaphlowers.entities.errors import (
     BalanceEngineWarning,
@@ -21,11 +26,16 @@ from mechaphlowers.entities.errors import (
     SuspectedChainReversal,
 )
 
-from stellar_engine.core import estimation
+from stellar_engine.core.estimation import estimation
+from stellar_engine.core.estimation.robust import is_state_solvable
 from stellar_engine.entities.errors import (
     ConformityInputError,
     EstimationInputError,
+    EstimationLoadPositionError,
     EstimationNotConvergedError,
+    EstimationNotConvergedWarning,
+    EstimationTargetAboveBoundsWarning,
+    EstimationTargetBelowBoundsWarning,
     ObstacleNotFoundError,
 )
 
@@ -33,7 +43,7 @@ N_SPANS = 4
 SPAN_LENGTH = 500.0
 SPAN_INDEX = 0
 OBSTACLE = [250.0, 10.0, 20.0]
-RESULT_KEYS = {"value", "residual", "iterations", "converged"}
+RESULT_KEYS = {"value", "residual", "iterations", "converged", "extra"}
 
 
 def build_study(cable_array: CableArray) -> SectionStudy:
@@ -65,12 +75,20 @@ def study(cable_array_AM600: CableArray) -> SectionStudy:
     return section_study
 
 
-def reference_distance(study: SectionStudy, **conditions) -> float:
+def reference_distance(
+    study: SectionStudy,
+    point: list | None = None,
+    distance_type: DistanceType = "distance_3d",
+    span_index: int = SPAN_INDEX,
+    **conditions,
+) -> float:
     reference = study.copy()
     reference.solve_change_state(**conditions)
-    return reference.position_engine.point_distance(
-        SPAN_INDEX, np.array(OBSTACLE)
-    ).distance_3d
+    return ComputeDistance(distance_type).select_distance(
+        reference.position_engine.point_distance(
+            span_index, np.array(OBSTACLE if point is None else point)
+        )
+    )
 
 
 def assert_study_untouched(study: SectionStudy, dxdydz_before: np.ndarray):
@@ -80,7 +98,9 @@ def assert_study_untouched(study: SectionStudy, dxdydz_before: np.ndarray):
 
 
 def test_estimate_temperature(study: SectionStudy):
-    target = reference_distance(study, new_temperature=60.0)
+    target = reference_distance(
+        study, distance_type="vertical", new_temperature=60.0
+    )
     dxdydz_before = study.balance_engine.balance_model.nodes.dxdydz.copy()
 
     result = estimation.estimate_temperature(
@@ -101,7 +121,10 @@ def test_estimate_temperature(study: SectionStudy):
 
 def test_estimate_temperature_with_fixed_ice_in_cm(study: SectionStudy):
     target = reference_distance(
-        study, new_temperature=60.0, ice_thickness=0.01
+        study,
+        distance_type="vertical",
+        new_temperature=60.0,
+        ice_thickness=0.01,
     )
 
     result = estimation.estimate_temperature(
@@ -169,6 +192,176 @@ def test_estimate_load(study: SectionStudy):
     )
 
 
+def test_estimate_load_relative(study: SectionStudy):
+    masses_before = study.balance_engine.span_loads.load_mass.copy()
+
+    result = estimation.estimate_load_relative(
+        {
+            "spanIndex": SPAN_INDEX,
+            "targetDistance": -1.0,
+            "loadPositionDistance": 100.0,
+            "bounds": [0.0, 1000.0],
+        },
+        study,
+    )
+
+    assert set(result) == RESULT_KEYS | {"effort"}
+    assert result["converged"] is True
+    assert result["value"] > 0.0
+    assert result["effort"] == pytest.approx(result["value"] * 0.981)
+    assert set(result["extra"]) == {"x_shift"}
+    assert type(result["extra"]["x_shift"]) is float
+    np.testing.assert_array_equal(
+        study.balance_engine.span_loads.load_mass, masses_before
+    )
+
+
+def test_estimate_load_relative_bounds_are_in_dan(study: SectionStudy):
+    result = estimation.estimate_load_relative(
+        {
+            "spanIndex": SPAN_INDEX,
+            "targetDistance": -1.0,
+            "loadPositionDistance": 100.0,
+            "bounds": [0.0, 1000.0],
+        },
+        study,
+    )
+
+    assert 0.0 < result["value"] <= 1000.0 / 0.981
+    assert 0.0 < result["effort"] <= 1000.0
+
+
+@pytest.mark.parametrize(
+    ("target", "bounds", "warning"),
+    [
+        (-1.0, [0.0, 1.0], EstimationTargetAboveBoundsWarning),
+        (1.0, [-1.0, 0.0], EstimationTargetBelowBoundsWarning),
+    ],
+)
+def test_estimate_load_relative_warns_on_which_side_of_the_bounds(
+    study: SectionStudy, target: float, bounds: list[float], warning: type
+):
+    with pytest.warns(warning, match="Load") as records:
+        result = estimation.estimate_load_relative(
+            {
+                "spanIndex": SPAN_INDEX,
+                "targetDistance": target,
+                "loadPositionDistance": 100.0,
+                "bounds": bounds,
+            },
+            study,
+        )
+
+    assert result["converged"] is False
+    assert str(abs(bounds[0] + bounds[1])) in str(records[0].message)
+
+
+def test_estimate_load_relative_shrunk_bounds_warn_without_a_side(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
+):
+    # the probe shrinks the requested bounds: they are no longer the ones
+    # quoted to the user, so no side is reported
+    monkeypatch.setattr(
+        estimation.RobustEstimation,
+        "solvable_bounds",
+        lambda self, bounds: (0.01, 0.5),
+    )
+
+    with warnings.catch_warnings(record=True) as records:
+        warnings.simplefilter("always")
+        result = estimation.estimate_load_relative(
+            {
+                "spanIndex": SPAN_INDEX,
+                "targetDistance": -1.0,
+                "loadPositionDistance": 100.0,
+                "bounds": [0.0, 1.0],
+            },
+            study,
+        )
+
+    assert result["converged"] is False
+    assert [
+        type(record.message)
+        for record in records
+        if isinstance(record.message, EstimationNotConvergedWarning)
+    ] == [EstimationNotConvergedWarning]
+
+
+def test_estimate_load_relative_traction_moves_the_cable_up(
+    study: SectionStudy,
+):
+    result = estimation.estimate_load_relative(
+        {
+            "spanIndex": SPAN_INDEX,
+            "targetDistance": 1.0,
+            "loadPositionDistance": 100.0,
+            "bounds": [-1000.0, 0.0],
+        },
+        study,
+    )
+
+    assert result["converged"] is True
+    assert result["value"] < 0.0
+    assert result["effort"] < 0.0
+
+
+def test_estimate_load_relative_does_not_need_an_obstacle(
+    study: SectionStudy,
+):
+    with pytest.raises(EstimationInputError, match="targetDistance"):
+        estimation.estimate_load_relative(
+            {"spanIndex": SPAN_INDEX, "loadPositionDistance": 100.0}, study
+        )
+
+
+@pytest.mark.parametrize("position", [0.0, SPAN_LENGTH, SPAN_LENGTH + 1.0])
+def test_estimate_load_relative_rejects_a_position_on_a_support(
+    study: SectionStudy, position: float
+):
+    with pytest.raises(
+        EstimationLoadPositionError, match="loadPositionDistance"
+    ):
+        estimation.estimate_load_relative(
+            {
+                "spanIndex": SPAN_INDEX,
+                "targetDistance": -0.5,
+                "loadPositionDistance": position,
+            },
+            study,
+        )
+
+
+@pytest.mark.parametrize("position", [1.0, SPAN_LENGTH - 1.0])
+def test_estimate_load_relative_accepts_a_position_inside_the_span(
+    study: SectionStudy, position: float
+):
+    result = estimation.estimate_load_relative(
+        {
+            "spanIndex": SPAN_INDEX,
+            "targetDistance": -0.01,
+            "loadPositionDistance": position,
+            "bounds": [0.0, 10.0],
+        },
+        study,
+    )
+
+    assert set(result) == RESULT_KEYS | {"effort"}
+
+
+def test_estimate_load_relative_leaves_an_out_of_range_span_to_mechaphlowers(
+    study: SectionStudy,
+):
+    with pytest.raises(InvalidManipulationIndex):
+        estimation.estimate_load_relative(
+            {
+                "spanIndex": N_SPANS,
+                "targetDistance": -0.5,
+                "loadPositionDistance": 100.0,
+            },
+            study,
+        )
+
+
 def test_estimate_rope(study: SectionStudy):
     support_index = SPAN_INDEX + 1
     reference = study.copy()
@@ -201,7 +394,9 @@ def test_estimate_rope(study: SectionStudy):
 
 
 def test_estimate_without_bounds_uses_engine_defaults(study: SectionStudy):
-    target = reference_distance(study, new_temperature=60.0)
+    target = reference_distance(
+        study, distance_type="vertical", new_temperature=60.0
+    )
 
     result = estimation.estimate_temperature(
         {
@@ -221,7 +416,9 @@ def test_result_values_are_native_python_types(study: SectionStudy):
         {
             "spanIndex": SPAN_INDEX,
             "obstaclePoint": OBSTACLE,
-            "targetDistance": reference_distance(study, new_temperature=60.0),
+            "targetDistance": reference_distance(
+                study, distance_type="vertical", new_temperature=60.0
+            ),
             "bounds": [0.0, 120.0],
         },
         study,
@@ -313,6 +510,66 @@ def test_estimate_load_and_rope_invalid_inputs(
         )
 
 
+@pytest.mark.parametrize(
+    "estimate, engine_method, inputs, default_tol",
+    [
+        (
+            estimation.estimate_temperature,
+            "estimate_temperature",
+            {"targetDistance": 30.0},
+            estimation.TEMPERATURE_SOLVABLE_TOLERANCE,
+        ),
+        (
+            estimation.estimate_wind,
+            "estimate_wind",
+            {"targetDistance": 30.0},
+            estimation.WIND_SOLVABLE_TOLERANCE,
+        ),
+        (
+            estimation.estimate_load,
+            "estimate_load",
+            {"targetDistance": 30.0, "loadPositionDistance": 100.0},
+            estimation.LOAD_SOLVABLE_TOLERANCE,
+        ),
+        (
+            estimation.estimate_load_relative,
+            "estimate_load_relative",
+            {"targetDistance": -0.5, "loadPositionDistance": 100.0},
+            estimation.LOAD_SOLVABLE_TOLERANCE,
+        ),
+        (
+            estimation.estimate_rope,
+            "estimate_rope",
+            {"supportIndex": 1, "targetVerticalDistance": 30.0},
+            estimation.ROPE_SOLVABLE_TOLERANCE,
+        ),
+    ],
+)
+def test_estimate_forwards_the_tolerance(
+    study: SectionStudy,
+    monkeypatch: pytest.MonkeyPatch,
+    estimate,
+    engine_method: str,
+    inputs: dict,
+    default_tol: float,
+):
+    received: list[float] = []
+
+    def record(**kwargs):
+        received.append(kwargs["tol"])
+        return EstimationResult(
+            value=1.0, residual=0.0, iterations=1, converged=True
+        )
+
+    monkeypatch.setattr(study.estimation_engine, engine_method, record)
+
+    estimate(
+        {"spanIndex": SPAN_INDEX, "obstaclePoint": OBSTACLE, **inputs}, study
+    )
+
+    assert received == [default_tol]
+
+
 ZERO_TARGET_CASES = [
     (estimation.estimate_temperature, "estimate_temperature", {}),
     (estimation.estimate_wind, "estimate_wind", {}),
@@ -356,23 +613,19 @@ def test_estimate_zero_target_distance_is_delegated_to_the_engine(
 
 
 @pytest.mark.parametrize(
-    "estimate, inputs, expected_error",
+    "estimate, inputs",
     [
-        (estimation.estimate_temperature, {}, EstimationNotConvergedError),
-        (
-            estimation.estimate_load,
-            {"loadPositionDistance": 100.0},
-            EstimationNotConvergedError,
-        ),
-        # the wind pushes the cable until the chain reverses before reaching 0
-        (estimation.estimate_wind, {}, SolverError),
+        (estimation.estimate_temperature, {}),
+        (estimation.estimate_load, {"loadPositionDistance": 100.0}),
+        # the wind pushes the cable away: the engine returns a non-converged bound
+        (estimation.estimate_wind, {}),
     ],
 )
 def test_estimate_zero_target_distance_is_answered_by_the_engine(
-    study: SectionStudy, estimate, inputs: dict, expected_error
+    study: SectionStudy, estimate, inputs: dict
 ):
-    with pytest.raises(expected_error):
-        estimate(
+    with pytest.warns(EstimationNotConvergedWarning):
+        result = estimate(
             {
                 "spanIndex": SPAN_INDEX,
                 "obstaclePoint": OBSTACLE,
@@ -382,15 +635,17 @@ def test_estimate_zero_target_distance_is_answered_by_the_engine(
             study,
         )
 
+    assert result["converged"] is False
+
 
 def test_estimate_load_on_the_support_does_not_move_the_cable(
     study: SectionStudy,
 ):
     # a zero load position puts the load on the left support of the span
-    with pytest.raises(
-        EstimationNotConvergedError, match="target is not reachable"
+    with pytest.warns(
+        EstimationNotConvergedWarning, match="target is not reachable"
     ):
-        estimation.estimate_load(
+        result = estimation.estimate_load(
             {
                 "spanIndex": SPAN_INDEX,
                 "obstaclePoint": OBSTACLE,
@@ -401,15 +656,17 @@ def test_estimate_load_on_the_support_does_not_move_the_cable(
             study,
         )
 
+    assert result["converged"] is False
 
-def test_estimate_unreachable_target_raises_not_converged(
+
+def test_estimate_unreachable_target_warns_not_converged(
     study: SectionStudy,
 ):
-    with pytest.raises(
-        EstimationNotConvergedError,
+    with pytest.warns(
+        EstimationNotConvergedWarning,
         match="Temperature estimation did not converge",
     ):
-        estimation.estimate_temperature(
+        result = estimation.estimate_temperature(
             {
                 **VALID_TEMPERATURE_INPUTS,
                 "targetDistance": 1000.0,
@@ -417,6 +674,9 @@ def test_estimate_unreachable_target_raises_not_converged(
             },
             study,
         )
+
+    assert result["converged"] is False
+    assert set(result) == RESULT_KEYS
 
 
 def test_estimate_nan_distance_raises_not_converged(
@@ -455,7 +715,9 @@ def test_estimate_temperature_forwards_solver_errors(
 def test_estimate_temperature_on_unadjusted_study_warns(
     cable_array_AM600: CableArray, study: SectionStudy
 ):
-    target = reference_distance(study, new_temperature=60.0)
+    target = reference_distance(
+        study, distance_type="vertical", new_temperature=60.0
+    )
     unadjusted = build_study(cable_array_AM600)
 
     with pytest.warns(BalanceEngineWarning):
@@ -514,12 +776,14 @@ def test_estimate_temperature_maps_span_index_before_manipulation(
 ):
     study.set_virtual_support(VIRTUAL_SUPPORT_ON_FIRST_SPAN)
     obstacle = [750.0, 10.0, 20.0]
-    reference = study.copy()
-    reference.solve_change_state(new_temperature=60.0)
     # Span 1 before manipulation is span 2 once the virtual support is added
-    target = reference.position_engine.point_distance(
-        2, np.array(obstacle)
-    ).distance_3d
+    target = reference_distance(
+        study,
+        point=obstacle,
+        distance_type="vertical",
+        span_index=2,
+        new_temperature=60.0,
+    )
 
     result = estimation.estimate_temperature(
         {
@@ -581,11 +845,12 @@ def test_estimate_temperature_on_study_obstacle_point(
     study_with_obstacle: SectionStudy,
 ):
     point = study_obstacle_point(study_with_obstacle, 1)
-    reference = study_with_obstacle.copy()
-    reference.solve_change_state(new_temperature=60.0)
-    target = reference.position_engine.point_distance(
-        SPAN_INDEX, np.array(point)
-    ).distance_3d
+    target = reference_distance(
+        study_with_obstacle,
+        point=point,
+        distance_type="vertical",
+        new_temperature=60.0,
+    )
 
     by_uuid = estimation.estimate_temperature(
         {
@@ -670,7 +935,7 @@ def test_estimate_out_of_range_study_obstacle_point_raises(
 
 # the cable swings towards this obstacle: closest at about 830 Pa
 SWUNG_OBSTACLE = [250.0, 30.0, 60.0]
-WIND_BOUNDS = [-3000.0, 3000.0]
+WIND_BOUNDS = [-1000.0, 1000.0]
 MINIMUM_DISTANCE_WIND_KEYS = {"value", "distance", "iterations"}
 
 
@@ -689,7 +954,11 @@ def minimum_distance_wind(study: SectionStudy, obstacle: list, **inputs):
 
 def wind_distance(study: SectionStudy, obstacle: list, pressure: float):
     reference = study.copy()
-    reference.solve_change_state(new_temperature=15.0, wind_pressure=pressure)
+    reference.solve_change_state(
+        new_temperature=15.0,
+        wind_pressure=pressure,
+        wind_direction=estimation.WIND_DIRECTION,
+    )
     return reference.position_engine.point_distance(
         SPAN_INDEX, np.array(obstacle)
     ).distance_3d
@@ -698,9 +967,9 @@ def wind_distance(study: SectionStudy, obstacle: list, pressure: float):
 @pytest.mark.parametrize(
     "obstacle, expected_pressure",
     [
-        (SWUNG_OBSTACLE, 831.0),
+        (SWUNG_OBSTACLE, -831.0),
         # mirrored side: the wind blows the other way
-        ([250.0, -10.0, 20.0], -237.0),
+        ([250.0, -10.0, 20.0], 237.0),
         # right under the cable: any wind moves the cable away
         (OBSTACLE, 0.0),
     ],
@@ -722,23 +991,100 @@ def test_estimate_minimum_distance_wind(
     assert_study_untouched(study, dxdydz_before)
 
 
-def test_estimate_minimum_distance_wind_stops_at_the_bound(
+def test_estimate_minimum_distance_wind_on_a_bound_is_not_converged(
     study: SectionStudy,
 ):
-    result = minimum_distance_wind(study, SWUNG_OBSTACLE, bounds=[0.0, 500.0])
+    # the minimum (about -830 Pa) lies beyond the lower bound
+    with pytest.warns(
+        EstimationNotConvergedWarning, match="last value: -500.0"
+    ):
+        result = minimum_distance_wind(
+            study, SWUNG_OBSTACLE, bounds=[-500.0, 0.0]
+        )
 
-    assert result["value"] == 500.0
-    assert result["distance"] == pytest.approx(
-        wind_distance(study, SWUNG_OBSTACLE, 500.0), abs=1e-6
+    assert result["value"] == pytest.approx(-500.0)
+
+
+def test_estimate_minimum_distance_wind_with_chains_reversing_at_a_bound(
+    study: SectionStudy,
+):
+    # the chains reverse well before the bounds, the minimum is still found
+    with pytest.raises(SuspectedChainReversal):
+        study.copy().solve_change_state(
+            new_temperature=15.0, wind_pressure=3000.0
+        )
+
+    result = minimum_distance_wind(
+        study, SWUNG_OBSTACLE, bounds=[-3000.0, 3000.0]
     )
 
+    assert result["value"] == pytest.approx(-831.0, abs=2.0)
 
-def test_estimate_minimum_distance_wind_with_chains_reversing_first(
+
+def test_estimate_minimum_distance_wind_with_a_minimum_beyond_the_solvable_wind(
     study: SectionStudy,
 ):
-    # the distance still decreases when the chains reverse
+    # Chains reverse beyond the wind pressure bringing the cable closest
     with pytest.raises(SuspectedChainReversal):
-        minimum_distance_wind(study, [250.0, 80.0, 70.0])
+        study.copy().solve_change_state(
+            new_temperature=15.0, wind_pressure=1500.0
+        )
+
+    with pytest.warns(
+        EstimationNotConvergedWarning, match=r"last value: -100\d"
+    ):
+        result = minimum_distance_wind(
+            study, [250.0, 30.0, 80.0], bounds=[-3000.0, 0.0]
+        )
+
+    assert result["value"] == pytest.approx(-1000.0, abs=50.0)
+
+
+def test_is_state_solvable_probes_a_copy_of_the_balance_engine(
+    study: SectionStudy,
+):
+    engine = study.balance_engine
+
+    assert not is_state_solvable(
+        study, new_temperature=15.0, wind_pressure=1500.0
+    )
+    assert is_state_solvable(study, new_temperature=15.0, wind_pressure=0.0)
+    assert study.balance_engine is engine
+
+
+def test_estimate_minimum_distance_wind_retries_on_chain_reversal(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
+):
+    searched_bounds = []
+
+    def reverse_once(**kwargs):
+        searched_bounds.append(kwargs["bounds"])
+        if len(searched_bounds) == 1:
+            raise SuspectedChainReversal("chains above horizontal")
+        return EstimationResult(
+            value=10.0, residual=5.0, iterations=3, converged=True
+        )
+
+    monkeypatch.setattr(study.estimation_engine, "estimate_wind", reverse_once)
+
+    result = minimum_distance_wind(study, OBSTACLE, bounds=[-200.0, 400.0])
+
+    assert searched_bounds == [(-200.0, 400.0), (-150.0, 300.0)]
+    assert result == {"value": 10.0, "distance": 5.0, "iterations": 3}
+
+
+def test_estimate_minimum_distance_wind_gives_up_after_the_retries(
+    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
+):
+    def always_reverse(**_kwargs):
+        raise SuspectedChainReversal("chains above horizontal")
+
+    monkeypatch.setattr(
+        study.estimation_engine, "estimate_wind", always_reverse
+    )
+
+    with pytest.raises(SuspectedChainReversal):
+        minimum_distance_wind(study, OBSTACLE, bounds=[-200.0, 400.0])
 
 
 def test_estimate_minimum_distance_wind_requires_temperature(
@@ -748,92 +1094,3 @@ def test_estimate_minimum_distance_wind_requires_temperature(
         EstimationInputError, match="Missing estimation input: temperature"
     ):
         minimum_distance_wind(study, SWUNG_OBSTACLE, temperature=None)
-
-
-def patch_wind_distance(
-    study: SectionStudy, monkeypatch: pytest.MonkeyPatch, distance
-):
-    monkeypatch.setattr(
-        study.estimation_engine,
-        "_build_distance_objective__climatic_case",
-        lambda *_args: distance,
-    )
-
-
-def test_estimate_minimum_distance_wind_nan_distance_raises_not_converged(
-    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
-):
-    patch_wind_distance(study, monkeypatch, lambda _pressure: float("nan"))
-
-    with pytest.raises(
-        EstimationNotConvergedError, match="distance to the obstacle"
-    ):
-        minimum_distance_wind(study, SWUNG_OBSTACLE)
-
-
-def test_estimate_minimum_distance_wind_nan_before_minimum_raises(
-    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
-):
-    patch_wind_distance(
-        study,
-        monkeypatch,
-        lambda pressure: float("nan") if pressure > 500.0 else -pressure,
-    )
-
-    with pytest.raises(
-        EstimationNotConvergedError, match="beyond 500.0, before reaching"
-    ):
-        minimum_distance_wind(study, SWUNG_OBSTACLE)
-
-
-def test_estimate_minimum_distance_wind_keeps_scan_when_refinement_fails(
-    study: SectionStudy, monkeypatch: pytest.MonkeyPatch
-):
-    def distance(pressure: float) -> float:
-        if pressure % estimation.MINIMUM_DISTANCE_WIND_STEP:
-            raise ConvergenceError("trial pressure did not balance")
-        return abs(pressure - 520.0)
-
-    patch_wind_distance(study, monkeypatch, distance)
-
-    result = minimum_distance_wind(study, SWUNG_OBSTACLE)
-
-    assert result["value"] == 500.0
-    assert result["distance"] == 20.0
-
-
-@pytest.mark.parametrize(
-    "bounds, minimum, expected_pressure",
-    [
-        # near an end bound: the interval beside the winning end is refined
-        ([-3000.0, 3000.0], 2950.0, 2950.0),
-        ([-3000.0, 3000.0], -2950.0, -2950.0),
-        # near the starting bound of one-sided searches
-        ([0.0, 3000.0], 20.0, 20.0),
-        ([-3000.0, 0.0], -20.0, -20.0),
-        # true bound minima: the end point stays the result
-        ([-3000.0, 3000.0], 4000.0, 3000.0),
-        ([-3000.0, 3000.0], -4000.0, -3000.0),
-        ([0.0, 3000.0], -300.0, 0.0),
-        ([-3000.0, 0.0], 300.0, 0.0),
-    ],
-)
-def test_estimate_minimum_distance_wind_refines_beside_a_winning_end(
-    study: SectionStudy,
-    monkeypatch: pytest.MonkeyPatch,
-    bounds: list,
-    minimum: float,
-    expected_pressure: float,
-):
-    patch_wind_distance(
-        study,
-        monkeypatch,
-        lambda pressure: math.sqrt(1.0 + ((pressure - minimum) / 100.0) ** 2),
-    )
-
-    result = minimum_distance_wind(study, SWUNG_OBSTACLE, bounds=bounds)
-
-    assert result["value"] == pytest.approx(expected_pressure, abs=1.0)
-    assert result["distance"] == pytest.approx(
-        math.sqrt(1.0 + ((result["value"] - minimum) / 100.0) ** 2)
-    )

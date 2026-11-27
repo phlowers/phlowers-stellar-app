@@ -32,7 +32,11 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
   [PythonErrorCode.ObstacleNotFoundError]: 'shared.python-errors.obstacle-not-found-error',
   [PythonErrorCode.EstimateOnSplitSupportError]: 'shared.python-errors.estimate-on-split-support-error',
   [PythonErrorCode.EstimationInputError]: 'shared.python-errors.estimation-input-error',
+  [PythonErrorCode.EstimationLoadPositionError]: 'shared.python-errors.estimation-load-position-error',
   [PythonErrorCode.EstimationNotConvergedError]: 'shared.python-errors.estimation-not-converged-error',
+  [PythonErrorCode.EstimationNotConvergedWarning]: 'shared.python-errors.estimation-not-converged-warning',
+  [PythonErrorCode.EstimationTargetAboveBoundsWarning]: 'shared.python-errors.estimation-target-above-bounds-warning',
+  [PythonErrorCode.EstimationTargetBelowBoundsWarning]: 'shared.python-errors.estimation-target-below-bounds-warning',
   [PythonErrorCode.EstimationWarning]: 'shared.python-errors.estimation-warning',
   [PythonErrorCode.ConformityInputError]: 'shared.python-errors.conformity-input-error'
 };
@@ -43,14 +47,19 @@ const PYTHON_ERROR_KEYS: Record<PythonErrorCode, string> = {
  *
  * @param code - The Python exception class name, or `null`
  * @param translocoService - The translation service (injected by caller)
+ * @param params - Interpolation parameters of the message (e.g. the search bounds of an estimation)
  * @returns The localized message, or `null` if no mapping exists
  */
-export const formatPythonError = (code: PythonErrorCode | null, translocoService: TranslocoService): string | null => {
+export const formatPythonError = (
+  code: PythonErrorCode | null,
+  translocoService: TranslocoService,
+  params?: Record<string, unknown>
+): string | null => {
   if (code === null) {
     return null;
   }
   const key = PYTHON_ERROR_KEYS[code];
-  return key ? translocoService.translate(key) : null;
+  return key ? translocoService.translate(key, params) : null;
 };
 
 /**
@@ -60,13 +69,18 @@ export const formatPythonError = (code: PythonErrorCode | null, translocoService
  *
  * @param diagnostics - The diagnostics returned by the worker task
  * @param translocoService - The translation service (injected by caller)
+ * @param params - Interpolation parameters of the messages (e.g. the search bounds of an estimation)
  * @returns The localized warning messages, without duplicates nor unmapped codes
  */
-export const formatPythonWarnings = (diagnostics: PythonDiagnostic[], translocoService: TranslocoService): string[] => {
+export const formatPythonWarnings = (
+  diagnostics: PythonDiagnostic[],
+  translocoService: TranslocoService,
+  params?: Record<string, unknown>
+): string[] => {
   const warningCodes = new Set(
     diagnostics.filter((diagnostic) => diagnostic.origin === 'warning').map((diagnostic) => diagnostic.code)
   );
   return [...warningCodes]
-    .map((code) => formatPythonError(code, translocoService))
+    .map((code) => formatPythonError(code, translocoService, params))
     .filter((message): message is string => message !== null);
 };

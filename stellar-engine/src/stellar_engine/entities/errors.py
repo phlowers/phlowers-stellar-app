@@ -68,6 +68,16 @@ class _Errors:
         return f"Estimation input {key} must be {constraint}, got {value}"
 
     @staticmethod
+    def estimation_load_position_out_of_span(
+        key: str, value: float, span_length: float
+    ) -> str:
+        return (
+            f"Estimation input {key} must be strictly between 0 and the span "
+            f"length ({span_length}), got {value}: a load at a support is "
+            f"ignored by the calculation"
+        )
+
+    @staticmethod
     def estimation_invalid_obstacle_point(point: object) -> str:
         return (
             f"Estimation input obstaclePoint must contain 3 finite "
@@ -88,6 +98,16 @@ class _Errors:
         return (
             f"{variable} estimation did not converge within bounds "
             f"{bounds} (last value: {value}): target is not reachable"
+        )
+
+    @staticmethod
+    def estimation_target_beyond_bound(
+        variable: str, side: str, bound: float
+    ) -> str:
+        return (
+            f"{variable} estimation did not converge: the target needs a "
+            f"value {'above' if side == 'upper' else 'below'} the {side} "
+            f"bound {bound}"
         )
 
     @staticmethod
@@ -134,5 +154,27 @@ class EstimationInputError(ValueError):
     """Raised when an estimation input is missing or invalid."""
 
 
+class EstimationLoadPositionError(ValueError):
+    """Raised when the load position of an estimation is not inside its span.
+
+    mechaphlowers ignores a load at a support (position 0 or span length).
+    """
+
+
 class EstimationNotConvergedError(ValueError):
-    """Raised when an estimation cannot reach the target within its bounds."""
+    """Raised when an estimation has no result because the distance to the obstacle cannot be computed at its bounds."""
+
+
+class EstimationNotConvergedWarning(UserWarning):
+    """Warned when an estimation did not reach the target within its bounds.
+
+    The closest value found is still returned.
+    """
+
+
+class EstimationTargetAboveBoundsWarning(EstimationNotConvergedWarning):
+    """Warned when the target needs a value above the upper search bound."""
+
+
+class EstimationTargetBelowBoundsWarning(EstimationNotConvergedWarning):
+    """Warned when the target needs a value below the lower search bound."""

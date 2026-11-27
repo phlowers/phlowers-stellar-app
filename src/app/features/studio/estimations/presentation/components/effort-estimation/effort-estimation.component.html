@@ -1,0 +1,209 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="calculate()"
+  class="effort-estimation"
+  [attr.aria-busy]="isCalculating()"
+  data-testid="effort-estimation-form"
+>
+  <div class="effort-estimation__grid">
+    <div class="effort-estimation__field">
+      <label class="effort-estimation__label" for="effort-estimation-span">{{ 'common.span-label' | transloco }}</label>
+      <p-select
+        inputId="effort-estimation-span"
+        [options]="spanOptions()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="span"
+        [filter]="true"
+        filterBy="label"
+        appendTo="body"
+        fluid
+        data-testid="span-select"
+      />
+    </div>
+
+    <div class="effort-estimation__field">
+      <label class="effort-estimation__label" for="effort-estimation-reference-support">{{
+        'common.reference-support-label' | transloco
+      }}</label>
+      <p-select
+        inputId="effort-estimation-reference-support"
+        [options]="supportOptions()"
+        optionLabel="label"
+        optionValue="value"
+        formControlName="referenceSupport"
+        appendTo="body"
+        fluid
+        data-testid="reference-support-select"
+      />
+    </div>
+
+    @let distanceErr = distanceError();
+    <div class="effort-estimation__field">
+      <label class="effort-estimation__label" for="effort-estimation-distance">{{
+        'common.distance-to-reference-support-label' | transloco
+      }}</label>
+      <p-inputgroup>
+        <input
+          id="effort-estimation-distance"
+          type="number"
+          pInputText
+          formControlName="distanceToReferenceSupport"
+          [attr.min]="limits.distance.min"
+          [attr.max]="maxDistance()"
+          [attr.step]="limits.distance.step"
+          required
+          data-testid="distance-input"
+          [attr.aria-invalid]="distanceErr ? 'true' : null"
+          [attr.aria-errormessage]="distanceErr ? 'effort-estimation-distance-error' : null"
+        />
+        <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (distanceErr) {
+        <p-message id="effort-estimation-distance-error" severity="error" size="small" variant="simple" role="alert">
+          {{ distanceErr.key | transloco: distanceErr.params }}
+        </p-message>
+      }
+    </div>
+
+    @let temperatureErr = temperatureError();
+    <div class="effort-estimation__field">
+      <label class="effort-estimation__label" for="effort-estimation-temperature">{{
+        'common.temperature-label' | transloco
+      }}</label>
+      <p-inputgroup>
+        <input
+          id="effort-estimation-temperature"
+          type="number"
+          pInputText
+          formControlName="temperature"
+          [attr.min]="temperatureLimits.min"
+          [attr.max]="temperatureLimits.max"
+          [attr.step]="temperatureLimits.step"
+          required
+          data-testid="temperature-input"
+          [attr.aria-invalid]="temperatureErr ? 'true' : null"
+          [attr.aria-errormessage]="temperatureErr ? 'effort-estimation-temperature-error' : null"
+        />
+        <p-inputgroup-addon>{{ 'common.celsius-unit' | transloco }}</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (temperatureErr) {
+        <p-message id="effort-estimation-temperature-error" severity="error" size="small" variant="simple" role="alert">
+          {{ temperatureErr.key | transloco: temperatureErr.params }}
+        </p-message>
+      }
+    </div>
+
+    @let displacementErr = targetDisplacementError();
+    <div class="effort-estimation__field">
+      <div class="effort-estimation__label effort-estimation__label--with-switch">
+        <label for="effort-estimation-target-displacement" id="effort-estimation-target-displacement-label">{{
+          'studio.estimations.target-displacement-label' | transloco
+        }}</label>
+        <p-selectbutton
+          [options]="directionOptions"
+          optionValue="value"
+          formControlName="direction"
+          [allowEmpty]="false"
+          size="small"
+          ariaLabelledBy="effort-estimation-target-displacement-label"
+          data-testid="direction-switch"
+        >
+          <ng-template #item let-option>
+            <span [attr.data-testid]="'direction-' + option.value.toLowerCase()">{{
+              option.labelKey | transloco
+            }}</span>
+          </ng-template>
+        </p-selectbutton>
+      </div>
+      <p-inputgroup>
+        <input
+          id="effort-estimation-target-displacement"
+          type="number"
+          pInputText
+          formControlName="targetDisplacement"
+          [attr.min]="limits.targetDisplacement.min"
+          [attr.max]="limits.targetDisplacement.max"
+          [attr.step]="limits.targetDisplacement.step"
+          required
+          data-testid="target-displacement-input"
+          [attr.aria-invalid]="displacementErr ? 'true' : null"
+          [attr.aria-errormessage]="displacementErr ? 'effort-estimation-target-displacement-error' : null"
+        />
+        <p-inputgroup-addon>{{ 'common.meter' | transloco }}</p-inputgroup-addon>
+      </p-inputgroup>
+      @if (displacementErr) {
+        <p-message
+          id="effort-estimation-target-displacement-error"
+          severity="error"
+          size="small"
+          variant="simple"
+          role="alert"
+        >
+          {{ displacementErr.key | transloco: displacementErr.params }}
+        </p-message>
+      }
+    </div>
+  </div>
+
+  <div class="effort-estimation__calculate">
+    <button
+      type="submit"
+      app-btn
+      [disabled]="!canCalculate()"
+      [btnLoading]="isCalculating()"
+      data-testid="calculate-btn"
+    >
+      <app-icon icon="rocket_launch" aria-hidden="true" />
+      {{ 'common.calculate' | transloco }}
+    </button>
+  </div>
+</form>
+
+<!-- The live region is always on the page (screen readers only announce text added to an existing one) and only
+     holds a concise sentence: the results frame itself is not announced -->
+@let effortValue = effort();
+<output class="sr-only" aria-live="polite" data-testid="results-announcement">
+  @if (effortValue !== null) {
+    {{ 'studio.estimations.effort-results-announcement' | transloco: { effort: effortValue | number: resultFormat } }}
+  }
+</output>
+<div class="effort-estimation__results" data-testid="results">
+  @if (effortValue !== null) {
+    <div class="effort-estimation__results-content" animate.enter="anim-expand-height" data-testid="results-frame">
+      <h2>{{ 'common.results' | transloco }}</h2>
+      <div class="effort-estimation__grid">
+        <dl class="effort-estimation__field">
+          <dt>{{ 'studio.estimations.effort-label' | transloco }}</dt>
+          <dd class="effort-estimation__result">
+            <span data-testid="effort-value"
+              >{{ effortValue | number: resultFormat }}&nbsp;{{ 'common.dan-unit' | transloco }}</span
+            >
+            <button
+              type="button"
+              app-btn
+              btnSize="s"
+              btnStyle="text"
+              [attr.aria-label]="'studio.estimations.copy-effort-aria-label' | transloco"
+              (click)="copyEffort()"
+              data-testid="copy-effort-btn"
+            >
+              <app-icon icon="content_copy" aria-hidden="true" />
+            </button>
+          </dd>
+        </dl>
+        @let axisDisplacementValue = axisDisplacement();
+        @if (axisDisplacementValue !== null) {
+          <dl class="effort-estimation__field">
+            <dt>{{ 'studio.estimations.axis-displacement-label' | transloco }}</dt>
+            <dd class="effort-estimation__result">
+              <span data-testid="axis-displacement-value"
+                >{{ axisDisplacementValue | number: resultFormat }}&nbsp;{{ 'common.meter' | transloco }}</span
+              >
+            </dd>
+          </dl>
+        }
+      </div>
+    </div>
+  }
+</div>

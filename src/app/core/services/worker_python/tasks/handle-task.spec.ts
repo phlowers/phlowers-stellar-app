@@ -93,6 +93,7 @@ describe('Task handlers', () => {
       [Task.estimateRope, 'estimate_rope'],
       [Task.estimateTemperature, 'estimate_temperature'],
       [Task.estimateLoad, 'estimate_load'],
+      [Task.estimateLoadRelative, 'estimate_load_relative'],
       [Task.estimateWind, 'estimate_wind'],
       [Task.estimateMinimumDistanceWind, 'estimate_minimum_distance_wind'],
       [Task.sliceGround, 'slice_ground'],
@@ -176,6 +177,11 @@ describe('Task handlers', () => {
       [
         'stellar_engine.entities.errors.EstimationInputError: Missing estimation input: targetDistance',
         'EstimationInputError',
+        'CALCULATION_ERROR'
+      ],
+      [
+        'stellar_engine.entities.errors.EstimationLoadPositionError: Estimation input loadPositionDistance must be strictly between 0 and the span length',
+        'EstimationLoadPositionError',
         'CALCULATION_ERROR'
       ],
       [

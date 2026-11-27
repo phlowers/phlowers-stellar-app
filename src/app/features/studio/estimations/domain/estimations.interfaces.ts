@@ -5,7 +5,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+import type { FormControl, FormGroup } from '@angular/forms';
 import type { Section } from '@shared/domain';
+import type { Task } from '@services/worker_python/tasks/types';
+
+/** Engine tasks run by the estimation tabs: their inputs hold the optional search `bounds`. */
+export type EstimationTask = Task.estimateTemperature | Task.estimateMinimumDistanceWind | Task.estimateLoadRelative;
 
 /** Tabs of the estimations dialog. */
 export type EstimationTabValue = 'temperature' | 'wind-pressure' | 'vertical-effort';
@@ -51,6 +56,47 @@ export interface WindPressureEstimationFormValue extends EstimationObstacleFormV
   /** Cable temperature (°C). */
   temperature: number | null;
 }
+
+/** Span selected in the effort estimation form. */
+export interface EstimationSpan {
+  index: number;
+  uuid: string;
+}
+
+/** Side of the selected span the distance is measured from. */
+export type EstimationSupportSide = 'LEFT' | 'RIGHT';
+
+/** Direction of the targeted vertical displacement of the cable. */
+export type EffortDirection = 'UP' | 'DOWN';
+
+/** Option of the displacement direction switch. */
+export interface EffortDirectionOption {
+  labelKey: string;
+  value: EffortDirection;
+}
+
+/** Raw value of the effort estimation form (disabled controls included). */
+export interface EffortEstimationFormValue {
+  span: EstimationSpan | null;
+  referenceSupport: EstimationSupportSide | null;
+  /** Distance (m) from the reference support to the point where the effort is applied. */
+  distanceToReferenceSupport: number | null;
+  /** Cable temperature (°C). */
+  temperature: number | null;
+  direction: EffortDirection;
+  /** Target vertical displacement (m), in absolute value. */
+  targetDisplacement: number | null;
+}
+
+/** Form of the effort estimation. */
+export type EffortEstimationForm = FormGroup<{
+  span: FormControl<EstimationSpan | null>;
+  referenceSupport: FormControl<EstimationSupportSide | null>;
+  distanceToReferenceSupport: FormControl<number | null>;
+  temperature: FormControl<number | null>;
+  direction: FormControl<EffortDirection>;
+  targetDisplacement: FormControl<number | null>;
+}>;
 
 /** Obstacle point of the engine inputs of an estimation. */
 export interface EstimationObstaclePointInputs {

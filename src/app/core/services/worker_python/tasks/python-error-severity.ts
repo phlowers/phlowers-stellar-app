@@ -39,7 +39,11 @@ export const PYTHON_ERROR_SEVERITY: Record<PythonErrorCode, DiagnosticSeverity> 
   [PythonErrorCode.ObstacleNotFoundError]: 'error',
   [PythonErrorCode.EstimateOnSplitSupportError]: 'error',
   [PythonErrorCode.EstimationInputError]: 'error',
+  [PythonErrorCode.EstimationLoadPositionError]: 'error',
   [PythonErrorCode.EstimationNotConvergedError]: 'error',
+  [PythonErrorCode.EstimationNotConvergedWarning]: 'warning',
+  [PythonErrorCode.EstimationTargetAboveBoundsWarning]: 'warning',
+  [PythonErrorCode.EstimationTargetBelowBoundsWarning]: 'warning',
   [PythonErrorCode.EstimationWarning]: 'warning',
   [PythonErrorCode.ConformityInputError]: 'error'
 };
