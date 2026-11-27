@@ -1564,18 +1564,6 @@ describe('SectionImportService', () => {
       expect(result?.name).toBe('TESTLINE73STB01-PHASE1-1-SET19-3-SET19');
     });
 
-    it('should omit phase number when CANTON_TYPE is GARDE', async () => {
-      const payload = buildValidSectionImportPayload();
-      const general = (payload['cantons'] as Record<string, unknown>[])[0]['general'] as Record<string, unknown>;
-      general['CANTON_TYPE'] = 'GARDE';
-      general['PHASE_ELECTRIQUE_NUMERO'] = null;
-
-      const file = makeJsonFile(payload);
-      const result = await service.processFile(file, neverAccept);
-
-      expect(result?.name).toBe('TESTLINE73STB01-GARDE-1-SET19-3-SET19');
-    });
-
     it('should omit the branch prefix when BRANCHE_IDR is null', async () => {
       const payload = buildValidSectionImportPayload();
       const appartenance = ((payload['cantons'] as Record<string, unknown>[])[0]['general'] as Record<string, unknown>)[

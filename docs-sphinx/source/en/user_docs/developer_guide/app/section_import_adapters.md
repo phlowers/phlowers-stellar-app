@@ -56,7 +56,7 @@ interface SectionImportPayload {
 
 - `source` carries `fileName`, the decoded `text` and the parsed `json` (`undefined` when the text is not valid JSON).
 - `coordinates` holds one `x`/`y` entry per support, in support order.
-  - `LAMBERT93`: easting/northing in meters. The core (`GeopositioningService.applyImportedCoordinates`) reprojects them to GPS and fills `footLatitude`/`footLongitude`, then overwrites `spanAzimut`, `start_azimuth` and the per-support `position_error_meters` with the values rebuilt from the positions (see "Import position checks" in the Geographic system document). The start point is the foot of the first support. Two notices follow the import: a span azimuth check (file vs computed, threshold `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG` = 1°) and a support position check (threshold `POSITION_ERROR_THRESHOLD_METERS` = 1 m). Each is an information notice at or below its threshold and a warning above it; the full error vectors are logged.
+  - `LAMBERT93`: easting/northing in meters. The core (`GeopositioningService.applyImportedCoordinates`) reprojects them to GPS and fills `footLatitude`/`footLongitude`, then overwrites `spanAzimut`, `start_azimuth` and the per-support `position_error_meters` with the values rebuilt from the positions (see "Import position checks" in the Geographic system document). The start point is the foot of the first support. Two notices follow the import: a span azimuth check (file vs computed, threshold `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG` = 1°) and a support position check (threshold `POSITION_ERROR_THRESHOLD_METERS` = 1 m). Each is an information notice at or below its threshold and a warning above it; the full error vectors are logged. Only the position check is skipped for a guard section (`section.type === 'guard'`): a guard file has no line angle, so the check would compare the real line to a straight one. The azimuth check is kept, because the azimuths are recomputed from the positions independently of the line angles.
   - `WGS84`: `x` is the longitude and `y` the latitude, in degrees; applied as-is.
   - Any `null` entry skips the reprojection without blocking the import.
 - `notices.message` must already be localized.
@@ -93,6 +93,24 @@ A lint rule forbids importing `@adapters/*` from `src/app/**` (except the compos
 4. Register it in `section-import-adapters.config.ts`.
 
 `stellar-json/` is the reference implementation.
+
+---
+
+## `rte-custom`: guard cantons
+
+A canton whose `CANTON_TYPE` is `GARDE` (case-insensitive, `isGuardCantonType`) is a guard canton. It has no cable attachment nor chain data, so the adapter maps and validates it differently:
+
+| Aspect | Phase canton | Guard canton |
+|---|---|---|
+| `Section.type` | lowercased `CANTON_TYPE` | `'guard'` (`toSectionType`) |
+| `electric_phase_number` | `PHASE_ELECTRIQUE_NUMERO` | `0` |
+| `attachmentHeight` | `ACCROCHE_CABLE_Z_LAMBERT93` | `ACCROCHE_SET_Z_LAMBERT93` |
+| Chain fields (`chainName`, `chainLength`, `chainWeight`, `chainV`, `chainSurface`) | read from the file | not read: form defaults |
+| `spanAngle`, `counterWeight` | read from the file | read from the file, form defaults when empty |
+| Required attachment fields | `ACCROCHE_CABLE_Z_LAMBERT93`, `ANGLE_LIGNE`, `CHAINE_DRN_LONGUEUR`, `CHAINE_DRN_POIDS`, `HAUTEUR_SOUS_CONSOLE`, `LONGUEUR_BRAS`, `PIED_Z_LAMBERT93` | `ACCROCHE_SET_Z_LAMBERT93`, `HAUTEUR_SOUS_CONSOLE`, `LONGUEUR_BRAS`, `PIED_Z_LAMBERT93` |
+| Azimuth and position notices | yes | skipped by the core |
+
+The section name keeps the `GARDE` label without the phase number.
 
 ---
 

@@ -56,7 +56,7 @@ interface SectionImportPayload {
 
 - `source` contient `fileName`, le `text` décodé et le `json` analysé (`undefined` si le texte n'est pas du JSON valide).
 - `coordinates` contient une entrée `x`/`y` par support, dans l'ordre des supports.
-  - `LAMBERT93` : est/nord en mètres. Le cœur (`GeopositioningService.applyImportedCoordinates`) les reprojette en GPS et renseigne `footLatitude`/`footLongitude`, puis écrase `spanAzimut`, `start_azimuth` et `position_error_meters` par support avec les valeurs reconstruites depuis les positions (voir « Contrôles de position à l'import » dans le document Système géographique). Le point de départ est le pied du premier support. Deux notices suivent l'import : un contrôle d'azimut de travée (fichier vs calculé, seuil `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG` = 1°) et un contrôle de position des supports (seuil `POSITION_ERROR_THRESHOLD_METERS` = 1 m). Chacune est une notice d'information à ou sous son seuil et un avertissement au-delà ; les vecteurs d'erreurs complets sont journalisés.
+  - `LAMBERT93` : est/nord en mètres. Le cœur (`GeopositioningService.applyImportedCoordinates`) les reprojette en GPS et renseigne `footLatitude`/`footLongitude`, puis écrase `spanAzimut`, `start_azimuth` et `position_error_meters` par support avec les valeurs reconstruites depuis les positions (voir « Contrôles de position à l'import » dans le document Système géographique). Le point de départ est le pied du premier support. Deux notices suivent l'import : un contrôle d'azimut de travée (fichier vs calculé, seuil `SPAN_AZIMUTH_ERROR_THRESHOLD_DEG` = 1°) et un contrôle de position des supports (seuil `POSITION_ERROR_THRESHOLD_METERS` = 1 m). Chacune est une notice d'information à ou sous son seuil et un avertissement au-delà ; les vecteurs d'erreurs complets sont journalisés. Seul le contrôle de position est ignoré pour une section de garde (`section.type === 'guard'`) : un fichier de garde n'a pas d'angle de ligne, le contrôle comparerait la ligne réelle à une ligne droite. Le contrôle d'azimut est conservé, car les azimuts sont recalculés depuis les positions, indépendamment des angles de ligne.
   - `WGS84` : `x` est la longitude et `y` la latitude, en degrés ; appliquées telles quelles.
   - Une entrée `null` ignore la reprojection sans bloquer l'import.
 - `notices.message` doit déjà être traduit.
@@ -93,6 +93,24 @@ Une règle de lint interdit d'importer `@adapters/*` depuis `src/app/**` (sauf l
 4. L'enregistrer dans `section-import-adapters.config.ts`.
 
 `stellar-json/` est l'implémentation de référence.
+
+---
+
+## `rte-custom` : cantons de garde
+
+Un canton dont `CANTON_TYPE` vaut `GARDE` (insensible à la casse, `isGuardCantonType`) est un canton de garde. Il n'a ni accroche câble ni données de chaîne ; l'adaptateur le mappe et le valide donc différemment :
+
+| Aspect | Canton de phase | Canton de garde |
+|---|---|---|
+| `Section.type` | `CANTON_TYPE` en minuscules | `'guard'` (`toSectionType`) |
+| `electric_phase_number` | `PHASE_ELECTRIQUE_NUMERO` | `0` |
+| `attachmentHeight` | `ACCROCHE_CABLE_Z_LAMBERT93` | `ACCROCHE_SET_Z_LAMBERT93` |
+| Champs de chaîne (`chainName`, `chainLength`, `chainWeight`, `chainV`, `chainSurface`) | lus dans le fichier | non lus : valeurs par défaut du formulaire |
+| `spanAngle`, `counterWeight` | lus dans le fichier | lus dans le fichier, valeurs par défaut du formulaire si vides |
+| Champs d'accroche obligatoires | `ACCROCHE_CABLE_Z_LAMBERT93`, `ANGLE_LIGNE`, `CHAINE_DRN_LONGUEUR`, `CHAINE_DRN_POIDS`, `HAUTEUR_SOUS_CONSOLE`, `LONGUEUR_BRAS`, `PIED_Z_LAMBERT93` | `ACCROCHE_SET_Z_LAMBERT93`, `HAUTEUR_SOUS_CONSOLE`, `LONGUEUR_BRAS`, `PIED_Z_LAMBERT93` |
+| Notices d'azimut et de position | oui | ignorées par le cœur |
+
+Le nom du canton garde le libellé `GARDE` sans numéro de phase.
 
 ---
 

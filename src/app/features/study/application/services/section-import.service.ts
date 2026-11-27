@@ -70,7 +70,9 @@ import { buildSupportNameEntries } from './catalog-correction/catalog-correction
  * - **CATALOG CORRECTION**: when the adapter asks for it, maintenance, voltage, attachment and chain
  *   values are corrected against the local catalogs, then new support names are added to the catalog.
  * - **MAPPING (coordinates)**: Lambert93 to GPS reprojection when the adapter provides projected coordinates,
- *   then computation of any missing support foot GPS, both delegated to `GeopositioningService`.
+ *   then computation of any missing support foot GPS, both delegated to `GeopositioningService`. The span
+ *   azimuth and support position notices follow, except that a `'guard'` section (no line angle in its file)
+ *   gets no position notice.
  * - **COLLISION_CHECK**: detects whether the UUID already exists in the study.
  * - **PERSISTENCE**: calls `SectionService.createOrUpdateSection`.
  */
@@ -179,8 +181,11 @@ export class SectionImportService implements ImportAdapter<Section> {
     const section = await this.applyCoordinates(corrected, payload.coordinates);
     const azimuthNotice = this.checkSpanAzimuthError(corrected, section);
     if (azimuthNotice) notices.push(azimuthNotice);
-    const positionNotice = this.buildPositionErrorNotice(section);
-    if (positionNotice) notices.push(positionNotice);
+    // A guard file has no line angle: the rebuilt positions would be compared to a straight line.
+    if (section.type !== 'guard') {
+      const positionNotice = this.buildPositionErrorNotice(section);
+      if (positionNotice) notices.push(positionNotice);
+    }
 
     // Stage: COLLISION_CHECK + PERSISTENCE
     return this.persistSection(section, study, collisionResolver, notices);

@@ -34,8 +34,10 @@ import {
   filterMeaningfulSpans,
   findFirstMeaningfulAppartenance,
   hasCantons,
+  isGuardCantonType,
   isRteCantonFormat,
   pickSupportName,
+  toSectionType,
   validateImportedSectionFields
 } from './rte-custom.helpers';
 
@@ -45,6 +47,9 @@ import {
  * Validates the raw file and maps it to a `Section` carrying the catalog lookup keys (designations,
  * voltage, support name, attachment set, chain name) and the Lambert93 support foot coordinates.
  * Catalog correction and reprojection are done by the core (`applyCatalogCorrections: true`).
+ *
+ * Guard cantons (`CANTON_TYPE` = GARDE) are mapped to a `'guard'` section without phase number nor chain
+ * data, and validated with `ACCROCHE_SET_Z_LAMBERT93` instead of the cable attachment fields.
  *
  * This adapter is optional: it is enabled in `section-import-adapters.config.ts`.
  */
@@ -138,7 +143,8 @@ export class RteCustomAdapter implements SectionImportAdapter {
     const firstSpan = sortedSpans[0];
     const appartenance = findFirstMeaningfulAppartenance(general);
 
-    const supports = this.mapSpansToSupports(sortedSpans);
+    const isGuard = isGuardCantonType(general.CANTON_TYPE);
+    const supports = this.mapSpansToSupports(sortedSpans, isGuard);
     const attachments =
       sortedSpans.length === 0
         ? []
@@ -158,9 +164,9 @@ export class RteCustomAdapter implements SectionImportAdapter {
           supports
         ),
         cable_name: general.CABLE_ADR ?? undefined,
-        type: general.CANTON_TYPE?.toLowerCase() ?? '',
+        type: toSectionType(general.CANTON_TYPE),
         cables_amount: parseFloatOrNull(general.FAISCEAU_CABLES_NOMBRE) ?? 1,
-        electric_phase_number: parseFloatOrNull(general.PHASE_ELECTRIQUE_NUMERO) ?? undefined,
+        electric_phase_number: isGuard ? 0 : (parseFloatOrNull(general.PHASE_ELECTRIQUE_NUMERO) ?? undefined),
         lit_adr: appartenance?.LIT_ADR ?? undefined,
         lit_idr: appartenance?.LIT_IDR ?? undefined,
         link_idr: appartenance?.LIAISON_IDR ?? undefined,
@@ -183,41 +189,57 @@ export class RteCustomAdapter implements SectionImportAdapter {
     };
   }
 
-  private mapSpansToSupports(sortedSpans: Span[]): Support[] {
+  private mapSpansToSupports(sortedSpans: Span[], isGuard: boolean): Support[] {
     if (sortedSpans.length === 0) return [];
 
     const supports: Support[] = [];
 
     for (const span of sortedSpans) {
-      supports.push(this.mapAttachmentToSupport(span['accroche depart'], span));
+      supports.push(this.mapAttachmentToSupport(span['accroche depart'], span, isGuard));
     }
 
     // Last support comes from 'accroche arrivee' of the last span
     // spanLength must be null on the last support (no span after it)
     const lastSpan = sortedSpans.at(-1)!;
-    const lastSupport = this.mapAttachmentToSupport(lastSpan['accroche arrivee'], lastSpan);
+    const lastSupport = this.mapAttachmentToSupport(lastSpan['accroche arrivee'], lastSpan, isGuard);
     lastSupport.spanLength = null;
     supports.push(lastSupport);
 
     return supports;
   }
 
-  private mapAttachmentToSupport(attachment: Attachment, span: Span): Support {
+  /**
+   * A guard attachment has no cable nor chain data: its height is the attachment set altitude and its
+   * chain fields are not read (form defaults). The line angle and counterweight are still read from the
+   * file and fall back to the form defaults when empty.
+   */
+  private mapAttachmentToSupport(attachment: Attachment, span: Span, isGuard: boolean): Support {
+    const defaults = createEmptySupport();
+    const chain = isGuard
+      ? {}
+      : {
+          chainName: attachment.CHAINE_DRN_IDR ?? null,
+          chainLength: parseFloatOrNull(attachment.CHAINE_DRN_LONGUEUR),
+          chainWeight: parseFloatOrNull(attachment.CHAINE_DRN_POIDS),
+          chainV: parseBooleanOrNull(attachment.CHAINE_EN_V),
+          chainSurface: parseFloatOrNull(attachment.CHAINE_DRN_SURFACE)
+        };
+    const spanAngle = parseFloatOrNull(attachment.ANGLE_LIGNE);
+    const counterWeight = parseFloatOrNull(attachment.CONTREPOIDS);
+
     return {
-      ...createEmptySupport(),
+      ...defaults,
       spanLength: parseFloatOrNull(span.PORTEE_LONGUEUR),
       spanAzimut: parseFloatOrNull(span.PORTEE_AZIMUT),
-      spanAngle: parseFloatOrNull(attachment.ANGLE_LIGNE),
+      spanAngle: isGuard ? (spanAngle ?? defaults.spanAngle) : spanAngle,
       attachmentSet: parseFloatOrNull(attachment.ACCROCHE_SET),
-      attachmentHeight: parseFloatOrNull(attachment.ACCROCHE_CABLE_Z_LAMBERT93),
+      attachmentHeight: parseFloatOrNull(
+        isGuard ? attachment.ACCROCHE_SET_Z_LAMBERT93 : attachment.ACCROCHE_CABLE_Z_LAMBERT93
+      ),
       heightBelowConsole: parseFloatOrNull(attachment.HAUTEUR_SOUS_CONSOLE),
       armLength: parseFloatOrNull(attachment.LONGUEUR_BRAS),
-      chainName: attachment.CHAINE_DRN_IDR ?? null,
-      chainLength: parseFloatOrNull(attachment.CHAINE_DRN_LONGUEUR),
-      chainWeight: parseFloatOrNull(attachment.CHAINE_DRN_POIDS),
-      chainV: parseBooleanOrNull(attachment.CHAINE_EN_V),
-      counterWeight: parseFloatOrNull(attachment.CONTREPOIDS),
-      chainSurface: parseFloatOrNull(attachment.CHAINE_DRN_SURFACE),
+      ...chain,
+      counterWeight: isGuard ? (counterWeight ?? defaults.counterWeight) : counterWeight,
       supportFootAltitude: parseFloatOrNull(attachment.PIED_Z_LAMBERT93),
       name: pickSupportName(attachment),
       number: attachment.SUPPORT_NUMERO ?? null,

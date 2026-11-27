@@ -1,0 +1,135 @@
+{
+  "cantons": [
+    {
+      "general": {
+        "CANTON_CUR": "FAKE-CANTON-GUARD-0001",
+        "CABLE_ADR": "FAKEGUARDCABLE-000",
+        "CANTON_TYPE": "GARDE",
+        "FAISCEAU_CABLES_NOMBRE": "1.0",
+        "PHASE_ELECTRIQUE_NUMERO": null,
+        "appartenance": [
+          {
+            "LIT_ADR": "LIT 225kV NO FAKE-SITE-A-FAKE-SITE-B",
+            "LIT_IDR": "FAKEBR00LINE",
+            "BRANCHE_IDR": "FAKEBR00LINE04",
+            "TENSION_ELECTRIQUE_IDR": "9",
+            "TENSION_ELECTRIQUE_ADR": "225 KV",
+            "LIAISON_IDR": "FAKEBR00LINE"
+          }
+        ]
+      },
+      "portee unitaire": [
+        {
+          "PORTEE_UNITAIRE_ORDRE": "2.5",
+          "PORTEE_LONGUEUR": "200.00",
+          "PORTEE_AZIMUT": "20.0000",
+          "CM_DESIGNATION": "FAKE-CM-01",
+          "EEL_DESIGNATION": "FAKE-EEL-ZONE",
+          "GMR_DESIGNATION": "FAKE-GMR-ZONE",
+          "PORTEE_UNITAIRE_DESIGNATION": "Position 1 - Garde",
+          "accroche arrivee": {
+            "ACCROCHE_CABLE_X_LAMBERT93": null,
+            "ACCROCHE_CABLE_Y_LAMBERT93": null,
+            "ACCROCHE_CABLE_Z_LAMBERT93": null,
+            "ACCROCHE_SET": "1",
+            "ACCROCHE_SET_Z_LAMBERT93": "45.00",
+            "ANGLE_LIGNE": null,
+            "CHAINE_DRN_IDR": null,
+            "CHAINE_DRN_LONGUEUR": null,
+            "CHAINE_DRN_POIDS": null,
+            "CHAINE_DRN_SURFACE": null,
+            "CHAINE_EN_V": null,
+            "CONTREPOIDS": null,
+            "HAUTEUR_SOUS_CONSOLE": "5.0",
+            "LONGUEUR_BRAS": "1.50",
+            "PIED_X_LAMBERT93": "500.0000",
+            "PIED_Y_LAMBERT93": "600.0",
+            "PIED_Z_LAMBERT93": "32.00",
+            "SUPPORT_ADR": "FAKE-SUP-203",
+            "SUPPORT_IDR": "FAKE-SUP-203",
+            "SUPPORT_NUMERO": "203",
+            "SUPPORT_TOWER": "FAKE-SUP-203.tower"
+          },
+          "accroche depart": {
+            "ACCROCHE_CABLE_X_LAMBERT93": null,
+            "ACCROCHE_CABLE_Y_LAMBERT93": null,
+            "ACCROCHE_CABLE_Z_LAMBERT93": null,
+            "ACCROCHE_SET": "1",
+            "ACCROCHE_SET_Z_LAMBERT93": "43.50",
+            "ANGLE_LIGNE": null,
+            "CHAINE_DRN_IDR": null,
+            "CHAINE_DRN_LONGUEUR": null,
+            "CHAINE_DRN_POIDS": null,
+            "CHAINE_DRN_SURFACE": null,
+            "CHAINE_EN_V": null,
+            "CONTREPOIDS": null,
+            "HAUTEUR_SOUS_CONSOLE": "5.0",
+            "LONGUEUR_BRAS": "1.50",
+            "PIED_X_LAMBERT93": "300.0000",
+            "PIED_Y_LAMBERT93": "400.0",
+            "PIED_Z_LAMBERT93": "31.00",
+            "SUPPORT_ADR": "FAKE-SUP-202",
+            "SUPPORT_IDR": "FAKE-SUP-202",
+            "SUPPORT_NUMERO": "202",
+            "SUPPORT_TOWER": "FAKE-SUP-202.tower"
+          }
+        },
+        {
+          "PORTEE_UNITAIRE_ORDRE": "1.5",
+          "PORTEE_LONGUEUR": "200.00",
+          "PORTEE_AZIMUT": "20.0000",
+          "CM_DESIGNATION": "FAKE-CM-01",
+          "EEL_DESIGNATION": "FAKE-EEL-ZONE",
+          "GMR_DESIGNATION": "FAKE-GMR-ZONE",
+          "PORTEE_UNITAIRE_DESIGNATION": "Position 1 - Garde",
+          "accroche arrivee": {
+            "ACCROCHE_CABLE_X_LAMBERT93": null,
+            "ACCROCHE_CABLE_Y_LAMBERT93": null,
+            "ACCROCHE_CABLE_Z_LAMBERT93": null,
+            "ACCROCHE_SET": "1",
+            "ACCROCHE_SET_Z_LAMBERT93": "43.50",
+            "ANGLE_LIGNE": null,
+            "CHAINE_DRN_IDR": null,
+            "CHAINE_DRN_LONGUEUR": null,
+            "CHAINE_DRN_POIDS": null,
+            "CHAINE_DRN_SURFACE": null,
+            "CHAINE_EN_V": null,
+            "CONTREPOIDS": null,
+            "HAUTEUR_SOUS_CONSOLE": "5.0",
+            "LONGUEUR_BRAS": "1.50",
+            "PIED_X_LAMBERT93": "300.0000",
+            "PIED_Y_LAMBERT93": "400.0",
+            "PIED_Z_LAMBERT93": "31.00",
+            "SUPPORT_ADR": "FAKE-SUP-202",
+            "SUPPORT_IDR": "FAKE-SUP-202",
+            "SUPPORT_NUMERO": "202",
+            "SUPPORT_TOWER": "FAKE-SUP-202.tower"
+          },
+          "accroche depart": {
+            "ACCROCHE_CABLE_X_LAMBERT93": null,
+            "ACCROCHE_CABLE_Y_LAMBERT93": null,
+            "ACCROCHE_CABLE_Z_LAMBERT93": null,
+            "ACCROCHE_SET": "1",
+            "ACCROCHE_SET_Z_LAMBERT93": "42.00",
+            "ANGLE_LIGNE": "5.00",
+            "CHAINE_DRN_IDR": null,
+            "CHAINE_DRN_LONGUEUR": null,
+            "CHAINE_DRN_POIDS": null,
+            "CHAINE_DRN_SURFACE": null,
+            "CHAINE_EN_V": null,
+            "CONTREPOIDS": null,
+            "HAUTEUR_SOUS_CONSOLE": "5.0",
+            "LONGUEUR_BRAS": "1.50",
+            "PIED_X_LAMBERT93": "100.0000",
+            "PIED_Y_LAMBERT93": "200.0",
+            "PIED_Z_LAMBERT93": "30.00",
+            "SUPPORT_ADR": "FAKE-SUP-201",
+            "SUPPORT_IDR": "FAKE-SUP-201",
+            "SUPPORT_NUMERO": "201",
+            "SUPPORT_TOWER": "FAKE-SUP-201.tower"
+          }
+        }
+      ]
+    }
+  ]
+}

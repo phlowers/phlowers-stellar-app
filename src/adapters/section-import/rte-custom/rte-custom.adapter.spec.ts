@@ -7,8 +7,10 @@
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { TranslocoService } from '@jsverse/transloco';
+import { createEmptySupport } from '@shared/domain/helpers/sections.helpers';
 import { buildImportSource } from '@shared/import/section-adapter/section-import-adapter';
 import fakeCanton from './fixtures/fake-canton.json';
+import fakeGuardCanton from './fixtures/fake-canton-guard.json';
 import { RteCustomAdapter } from './rte-custom.adapter';
 
 const sourceOf = (json: unknown) => buildImportSource('canton.json', JSON.stringify(json));
@@ -133,6 +135,50 @@ describe('RteCustomAdapter', () => {
     await expect(adapter.import(sourceOf(invalid))).rejects.toMatchObject({
       code: 'RTE_CUSTOM_REQUIRED_FIELDS',
       message: expect.stringContaining('CABLE_ADR: null')
+    });
+  });
+
+  describe('guard canton', () => {
+    it('should take the attachment height from the attachment set altitude', async () => {
+      const { section } = await adapter.import(sourceOf(fakeGuardCanton));
+
+      expect(section.type).toBe('guard');
+      expect(section.supports.map((s) => s.attachmentHeight)).toEqual([42, 43.5, 45]);
+    });
+
+    it('should leave the electric phase number, line angle, counterweight and chain data to the form defaults', async () => {
+      const { section } = await adapter.import(sourceOf(fakeGuardCanton));
+      const defaults = createEmptySupport();
+
+      expect(section.electric_phase_number).toBe(0);
+      expect(section.supports.map((s) => s.spanAngle)).toEqual([5, defaults.spanAngle, defaults.spanAngle]);
+      for (const support of section.supports) {
+        expect(support).toMatchObject({
+          counterWeight: defaults.counterWeight,
+          chainName: defaults.chainName,
+          chainLength: defaults.chainLength,
+          chainWeight: defaults.chainWeight,
+          chainV: defaults.chainV,
+          chainSurface: defaults.chainSurface
+        });
+      }
+    });
+
+    it('should build the name without phase number and keep the Lambert93 foot coordinates', async () => {
+      const payload = await adapter.import(sourceOf(fakeGuardCanton));
+
+      expect(payload.section.name).toBe('FAKEBR00LINE04-GARDE-201-SET1-203-SET1');
+      expect(payload.coordinates?.x).toEqual([100, 300, 500]);
+    });
+
+    it('should fail when the attachment set altitude is missing', async () => {
+      const invalid = structuredClone(fakeGuardCanton);
+      invalid.cantons[0]['portee unitaire'][0]['accroche depart'].ACCROCHE_SET_Z_LAMBERT93 = null as unknown as string;
+
+      await expect(adapter.import(sourceOf(invalid))).rejects.toMatchObject({
+        code: 'RTE_CUSTOM_REQUIRED_FIELDS',
+        message: expect.stringContaining('ACCROCHE_SET_Z_LAMBERT93: null')
+      });
     });
   });
 });
