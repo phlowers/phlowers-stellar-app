@@ -62,7 +62,7 @@
     "node": "24.22.2"
   },
   "config": {
-    "mechaphlowers": "0.14.1",
+    "mechaphlowers": "0.15.0",
     "thermohl": "1.4.0"
   },
   "dependencies": {

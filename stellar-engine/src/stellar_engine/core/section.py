@@ -22,6 +22,7 @@ def generate_section_array(supports: list[Support]):
     load_mass = []
     load_position = []
     ground_altitude = []
+    v_chain = []
 
     for index, support in enumerate(supports):
         name.append(support.name or f"Support {index}")
@@ -37,6 +38,7 @@ def generate_section_array(supports: list[Support]):
         insulator_mass.append(support.chainWeight or 0)
         load_mass.append(0)
         load_position.append(0)
+        v_chain.append(support.chainV or False)
         ground_altitude.append(support.supportFootAltitude)
 
     section_data = {
@@ -51,5 +53,6 @@ def generate_section_array(supports: list[Support]):
         "span_length": span_length,
         "line_angle": line_angle,
         "ground_altitude": ground_altitude,
+        "v_chain": v_chain,
     }
     return pd.DataFrame(section_data)
